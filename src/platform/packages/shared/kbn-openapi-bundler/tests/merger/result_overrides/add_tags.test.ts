@@ -180,4 +180,62 @@ describe('OpenAPI Bundler - assign a tag', () => {
       { name: 'Global tag', description: 'Global tag description' },
     ]);
   });
+
+  it('dedupes tags when keys are shuffled but the content is equal', async () => {
+    const spec1 = createOASDocument({
+      paths: {
+        '/api/some_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+              },
+            },
+          },
+        },
+      },
+      tags: [
+        {
+          name: 'system',
+          description: 'Get information about the system status.',
+          'x-displayName': 'System',
+        },
+      ],
+    });
+    const spec2 = createOASDocument({
+      paths: {
+        '/api/another_api': {
+          get: {
+            responses: {
+              '200': {
+                description: 'Successful response',
+              },
+            },
+          },
+        },
+      },
+      tags: [
+        {
+          description: 'Get information about the system status.',
+          name: 'system',
+          'x-displayName': 'System',
+        },
+      ],
+    });
+
+    const [mergedSpec] = Object.values(
+      await mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    );
+
+    expect(mergedSpec.tags).toEqual([
+      {
+        name: 'system',
+        description: 'Get information about the system status.',
+        'x-displayName': 'System',
+      },
+    ]);
+  });
 });

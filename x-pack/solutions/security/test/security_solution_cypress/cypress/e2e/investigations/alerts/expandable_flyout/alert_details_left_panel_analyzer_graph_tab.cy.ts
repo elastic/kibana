@@ -15,6 +15,7 @@ import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../ta
 import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { ANALYZER_NODE } from '../../../../screens/alerts';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -27,6 +28,7 @@ describe(
   { tags: ['@ess', '@skipInServerless'] },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(getNewRule());

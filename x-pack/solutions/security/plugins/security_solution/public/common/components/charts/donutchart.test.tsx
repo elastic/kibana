@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import '@emotion/jest';
 import React from 'react';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { LEGACY_LIGHT_THEME, Partition, Settings } from '@elastic/charts';
@@ -14,8 +15,6 @@ import type { DonutChartProps } from './donutchart';
 import { DonutChart } from './donutchart';
 import { DraggableLegend } from './draggable_legend';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { escapeDataProviderId } from '../drag_and_drop/helpers';
-import { v4 as uuidv4 } from 'uuid';
 
 jest.mock('@elastic/charts', () => {
   const actual = jest.requireActual('@elastic/charts');
@@ -73,8 +72,7 @@ describe('DonutChart', () => {
     totalCount: parsedMockAlertsData?.open?.total,
     legendItems: (['critical', 'high', 'medium', 'low'] as Severity[]).map((d) => ({
       color: testColors[d],
-      dataProviderId: escapeDataProviderId(`draggable-legend-item-${uuidv4()}-${d}`),
-      timelineId: undefined,
+      scopeId: undefined,
       field: 'kibana.alert.severity',
       value: d,
     })),
@@ -133,30 +131,26 @@ describe('DonutChart', () => {
     expect((DraggableLegend as unknown as jest.Mock).mock.calls[0][0].legendItems).toEqual([
       {
         color: '#EF6550',
-        dataProviderId: 'draggable-legend-item-test-uuid-critical',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'critical',
       },
       {
         color: '#EE9266',
-        dataProviderId: 'draggable-legend-item-test-uuid-high',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'high',
       },
       {
         color: '#F3B689',
-        dataProviderId: 'draggable-legend-item-test-uuid-medium',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'medium',
       },
       {
         color: '#F8D9B2',
-        dataProviderId: 'draggable-legend-item-test-uuid-low',
         field: 'kibana.alert.severity',
-        timelineId: undefined,
+        scopeId: undefined,
         value: 'low',
       },
     ]);
@@ -175,5 +169,28 @@ describe('DonutChart', () => {
     const { container } = render(<DonutChart {...props} />);
     const tooltip = container.getElementsByClassName('euiToolTipAnchor')[0];
     expect(tooltip.textContent).toBe(props.label);
+  });
+
+  test('should vertically center the center label on the donut when data exists', () => {
+    const { getByTestId } = render(<DonutChart {...props} />);
+    const labelWrapper = getByTestId('donut-chart-label');
+
+    expect(labelWrapper).toHaveStyleRule('top', '50%');
+    expect(labelWrapper).toHaveStyleRule('transform', 'translateY(-50%)');
+  });
+
+  test('should vertically center the center label on the empty donut', () => {
+    const emptyProps = {
+      ...props,
+      data: parsedMockAlertsData?.acknowledged?.severities,
+      label: 'Acknowledged',
+      title: <ChartLabel count={parsedMockAlertsData?.acknowledged?.total} />,
+      totalCount: parsedMockAlertsData?.acknowledged?.total,
+    };
+    const { getByTestId } = render(<DonutChart {...emptyProps} />);
+    const labelWrapper = getByTestId('donut-chart-label');
+
+    expect(labelWrapper).toHaveStyleRule('top', '50%');
+    expect(labelWrapper).toHaveStyleRule('transform', 'translateY(-50%)');
   });
 });

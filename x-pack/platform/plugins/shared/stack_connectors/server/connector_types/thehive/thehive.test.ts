@@ -7,17 +7,17 @@
 
 import { TheHiveConnector } from './thehive';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
-import { THEHIVE_CONNECTOR_ID } from '../../../common/thehive/constants';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import {
+  CONNECTOR_ID,
   TheHiveIncidentResponseSchema,
   TheHiveUpdateIncidentResponseSchema,
   TheHiveAddCommentResponseSchema,
   TheHiveCreateAlertResponseSchema,
   PushToServiceIncidentSchema,
-} from '../../../common/thehive/schema';
-import type { ExecutorSubActionCreateAlertParams, Incident } from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
+import type { ExecutorSubActionCreateAlertParams, Incident } from '@kbn/connector-schemas/thehive';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 const mockTime = new Date('2024-04-03T09:10:30.000');
@@ -28,7 +28,7 @@ describe('TheHiveConnector', () => {
   const connector = new TheHiveConnector(
     {
       configurationUtilities: actionsConfigMock.create(),
-      connector: { id: '1', type: THEHIVE_CONNECTOR_ID },
+      connector: { id: '1', type: CONNECTOR_ID },
       config: { url: 'https://example.com', organisation: null },
       secrets: { apiKey: 'test123' },
       logger,
@@ -133,7 +133,7 @@ describe('TheHiveConnector', () => {
 
     it('TheHive API call is successful with correct parameters', async () => {
       const response = await connector.createIncident(incident, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api/v1/case',
@@ -190,7 +190,7 @@ describe('TheHiveConnector', () => {
         { incidentId: '~172064', incident },
         connectorUsageCollector
       );
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api/v1/case/~172064',
@@ -250,7 +250,7 @@ describe('TheHiveConnector', () => {
         },
         connectorUsageCollector
       );
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api/v1/case/~172064/comment',
@@ -343,7 +343,7 @@ describe('TheHiveConnector', () => {
 
     it('TheHive API call is successful with correct parameters', async () => {
       const response = await connector.getIncident({ id: '~172064' }, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api/v1/case/~172064',
@@ -443,7 +443,7 @@ describe('TheHiveConnector', () => {
 
     it('TheHive API call is successful with correct parameters', async () => {
       await connector.createAlert(alert, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api/v1/alert',

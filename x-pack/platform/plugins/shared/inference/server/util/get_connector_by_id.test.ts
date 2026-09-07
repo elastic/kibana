@@ -5,106 +5,132 @@
  * 2.0.
  */
 
-import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { InferenceConnectorType } from '@kbn/inference-common';
+import { InferenceConnectorType, type InferenceConnector } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
+import { getConnectorList } from './get_connector_list';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+jest.mock('./get_connector_list');
+
+const getConnectorListMock = getConnectorList as jest.MockedFn<typeof getConnectorList>;
 
 describe('getConnectorById', () => {
-  let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
+  const esClient = {} as any;
   const connectorId = 'my-connector-id';
 
-  const createMockConnector = (parts: Partial<ActionConnector> = {}): ActionConnector => {
-    return {
-      id: 'mock',
-      name: 'Mock',
-      actionTypeId: 'action-type',
-      ...parts,
-    } as ActionConnector;
-  };
+  const createMockInferenceConnector = (
+    parts: Partial<InferenceConnector> = {}
+  ): InferenceConnector => ({
+    connectorId: 'mock',
+    name: 'Mock',
+    type: InferenceConnectorType.OpenAI,
+    config: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
+    capabilities: {},
+    ...parts,
+  });
+
+  const logger = loggerMock.create();
 
   beforeEach(() => {
-    actionsClient = actionsClientMock.create();
-    actionsClient.get.mockResolvedValue(createMockConnector());
     actions = actionsMock.createStart();
-    actions.getActionsClientWithRequest = jest.fn().mockResolvedValue(actionsClient);
     request = httpServerMock.createKibanaRequest();
+    getConnectorListMock.mockResolvedValue([]);
   });
 
-  it('calls `actionsClient.get` with the right parameters', async () => {
-    actionsClient.get.mockResolvedValue(
-      createMockConnector({
-        id: 'foo',
-        name: 'Foo',
-        actionTypeId: InferenceConnectorType.OpenAI,
-      })
-    );
-
-    await getConnectorById({ actions, request, connectorId });
-
-    expect(actionsClient.get).toHaveBeenCalledTimes(1);
-    expect(actionsClient.get).toHaveBeenCalledWith({
-      id: connectorId,
-      throwIfSystemAction: true,
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('throws if `actionsClient.get` throws', async () => {
-    actionsClient.get.mockImplementation(() => {
-      throw new Error('Something wrong');
-    });
-
-    await expect(() => getConnectorById({ actions, request, connectorId })).rejects
-      .toThrowErrorMatchingInlineSnapshot(`
-      "No connector found for id 'my-connector-id'
-      Something wrong"
-    `);
-  });
-
-  it('throws the connector type is not compatible', async () => {
-    actionsClient.get.mockResolvedValue(
-      createMockConnector({
-        id: 'tcp-pigeon-3-0',
-        name: 'Tcp Pigeon',
-        actionTypeId: '.tcp-pigeon',
-      })
-    );
-
-    await expect(() =>
-      getConnectorById({ actions, request, connectorId })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Connector 'tcp-pigeon-3-0' of type '.tcp-pigeon' not recognized as a supported connector"`
-    );
-  });
-
-  it('returns the inference connector when successful', async () => {
-    actionsClient.get.mockResolvedValue(
-      createMockConnector({
-        id: 'my-id',
-        name: 'My Name',
-        actionTypeId: InferenceConnectorType.OpenAI,
-        config: {
-          propA: 'foo',
-          propB: 42,
-        },
-      })
-    );
-
-    const connector = await getConnectorById({ actions, request, connectorId });
-
-    expect(connector).toEqual({
-      connectorId: 'my-id',
-      name: 'My Name',
+  it('returns the matching connector from the list', async () => {
+    const expected = createMockInferenceConnector({
+      connectorId,
+      name: 'My Connector',
       type: InferenceConnectorType.OpenAI,
-      config: {
-        propA: 'foo',
-        propB: 42,
-      },
-      capabilities: expect.any(Object),
+      config: { propA: 'foo' },
     });
+    getConnectorListMock.mockResolvedValue([
+      createMockInferenceConnector({ connectorId: 'other' }),
+      expected,
+    ]);
+
+    const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
+
+    expect(result).toEqual(expected);
+    expect(getConnectorListMock).toHaveBeenCalledTimes(1);
+    expect(getConnectorListMock).toHaveBeenCalledWith({ actions, request, esClient, logger });
+  });
+
+  it('returns an inference endpoint from the list', async () => {
+    const expected = createMockInferenceConnector({
+      connectorId: 'my-endpoint',
+      name: 'my-endpoint',
+      type: InferenceConnectorType.Inference,
+      isInferenceEndpoint: true,
+    });
+    getConnectorListMock.mockResolvedValue([expected]);
+
+    const result = await getConnectorById({
+      actions,
+      request,
+      connectorId: 'my-endpoint',
+      esClient,
+      logger,
+    });
+
+    expect(result).toEqual(expected);
+  });
+
+  it('resolves a stack connector ID to its superseding inference endpoint', async () => {
+    const inferenceEndpoint = createMockInferenceConnector({
+      connectorId: 'my-inference-id',
+      name: 'My EIS Endpoint',
+      type: InferenceConnectorType.Inference,
+      isInferenceEndpoint: true,
+    });
+    // The filtered list only contains the endpoint, not the stack connector
+    getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
+
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([
+      {
+        id: connectorId,
+        actionTypeId: InferenceConnectorType.Inference,
+        name: 'My Stack Connector',
+        config: { inferenceId: 'my-inference-id' },
+        isPreconfigured: true,
+      },
+    ]);
+
+    const result = await getConnectorById({ actions, request, connectorId, esClient, logger });
+
+    expect(result).toEqual(inferenceEndpoint);
+  });
+
+  it('throws if no connector matches the id', async () => {
+    getConnectorListMock.mockResolvedValue([
+      createMockInferenceConnector({ connectorId: 'other' }),
+    ]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
+
+    await expect(
+      getConnectorById({ actions, request, connectorId, esClient, logger })
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
+  });
+
+  it('throws if the connector list is empty', async () => {
+    getConnectorListMock.mockResolvedValue([]);
+    const actionsClient = await actions.getActionsClientWithRequest(request);
+    (actionsClient.getAll as jest.Mock).mockResolvedValue([]);
+
+    await expect(
+      getConnectorById({ actions, request, connectorId, esClient, logger })
+    ).rejects.toThrow("No connector or inference endpoint found for ID 'my-connector-id'");
   });
 });

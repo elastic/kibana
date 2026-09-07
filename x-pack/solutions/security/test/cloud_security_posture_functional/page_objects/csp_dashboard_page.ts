@@ -46,6 +46,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
           es.index({
             index: LATEST_FINDINGS_INDEX,
             document: finding,
+            refresh: 'wait_for',
           })
         )
       );
@@ -74,6 +75,15 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     getKubernetesTab: async () => {
       const tabs = await dashboard.getDashboardTabs();
       return await tabs.findByXpath(`//span[text()="${TAB_TYPES.KUBERNETES}"]`);
+    },
+
+    finishTourIfExists: async () => {
+      await retry.tryForTime(10000, async () => {
+        const tourShown = await testSubjects.exists('finishTourButton');
+        if (tourShown) {
+          await testSubjects.click('finishTourButton');
+        }
+      });
     },
 
     clickTab: async (tab: (typeof TAB_TYPES)[keyof typeof TAB_TYPES]) => {
@@ -213,9 +223,23 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     );
   };
 
+  const waitForKspmStatsData = (): Promise<void> =>
+    retry.tryForTime(120000, async () => {
+      log.debug('Polling KSPM stats API for data');
+      const response = await supertest
+        .get('/internal/cloud_security_posture/stats/kspm')
+        .query({ namespace: 'default' })
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
+      expect(response.body.stats.totalFindings).to.be.above(0);
+      log.debug(`KSPM stats API returned totalFindings: ${response.body.stats.totalFindings}`);
+    });
+
   return {
     waitForPluginInitialized,
     navigateToComplianceDashboardPage,
+    waitForKspmStatsData,
     dashboard,
     index,
     TAB_TYPES,

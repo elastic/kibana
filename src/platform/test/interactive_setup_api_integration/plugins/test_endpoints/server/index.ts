@@ -21,13 +21,17 @@ export const plugin: PluginInitializer<void, never> = async (
         {
           path: '/test_endpoints/verification_code',
           security: {
+            authc: {
+              enabled: false,
+              reason:
+                'This route is used during interactive setup testing and does not require authentication.',
+            },
             authz: {
               enabled: false,
               reason: 'This route is opted out from authorization',
             },
           },
           validate: false,
-          options: { authRequired: false },
         },
         async (context, request, response) => {
           // [HACK]: On CI tests are run from the different directories than the built and running Kibana instance. That

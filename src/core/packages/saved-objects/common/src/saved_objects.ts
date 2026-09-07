@@ -79,3 +79,5 @@ export type SavedObjectReference = serverTypes.SavedObjectReference;
  * @deprecated See https://github.com/elastic/kibana/issues/149098. Import this type from @kbn/core/server instead.
  */
 export type SavedObject<T = unknown> = serverTypes.SavedObject<T>;
+
+export type SavedObjectAccessControl = serverTypes.SavedObjectAccessControl;

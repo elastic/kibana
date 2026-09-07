@@ -48,7 +48,8 @@ const PackageListGridWrapper = ({
   excludePackageIdList = [],
 }: WrapperProps) => {
   const { filteredCards: integrationCards, isLoading } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: false,
+    prereleaseIntegrationsEnabled: true,
+    enableCollectionGrouping: true,
   });
   const rewriteUrl = useCardUrlRewrite({ category: flowCategory, search: searchQuery });
 
@@ -99,6 +100,7 @@ export const PackageListSearchForm = React.forwardRef(
     if (errorLoading)
       return (
         <EuiCallOut
+          announceOnMount
           title={i18n.translate('xpack.observability_onboarding.asyncLoadFailureCallout.title', {
             defaultMessage: 'Loading failure',
           })}

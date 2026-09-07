@@ -10,7 +10,7 @@
 import type { CoreSetup } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { NEVER } from 'rxjs';
 import * as makeZodValidationObject from './make_zod_validation_object';
@@ -169,7 +169,7 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
@@ -181,19 +181,44 @@ describe('registerRoutes', () => {
             \\"unexpectedKey\\"
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
         }
       ]"
     `);
     expect(bodyDoesNotAllowExcessKeys).toThrowErrorMatchingInlineSnapshot(`
       "[
         {
-          \\"code\\": \\"unrecognized_keys\\",
-          \\"keys\\": [
-            \\"unexpectedKey\\"
+          \\"code\\": \\"invalid_union\\",
+          \\"errors\\": [
+            [
+              {
+                \\"code\\": \\"unrecognized_keys\\",
+                \\"keys\\": [
+                  \\"unexpectedKey\\"
+                ],
+                \\"path\\": [],
+                \\"message\\": \\"Unrecognized key: \\\\\\"unexpectedKey\\\\\\"\\"
+              }
+            ],
+            [
+              {
+                \\"expected\\": \\"null\\",
+                \\"code\\": \\"invalid_type\\",
+                \\"path\\": [],
+                \\"message\\": \\"Invalid input: expected null, received object\\"
+              }
+            ],
+            [
+              {
+                \\"expected\\": \\"undefined\\",
+                \\"code\\": \\"invalid_type\\",
+                \\"path\\": [],
+                \\"message\\": \\"Invalid input: expected undefined, received object\\"
+              }
+            ]
           ],
           \\"path\\": [],
-          \\"message\\": \\"Unrecognized key(s) in object: 'unexpectedKey'\\"
+          \\"message\\": \\"Invalid input\\"
         }
       ]"
     `);
@@ -212,7 +237,7 @@ describe('registerRoutes', () => {
     const [_, wrappedHandler] = post.mock.calls[0];
     await wrappedHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-    expect(handler).toBeCalledTimes(1);
+    expect(handler).toHaveBeenCalledTimes(1);
     const [args] = handler.mock.calls[0];
     expect(Object.keys(args).sort()).toEqual(
       ['aService', 'request', 'response', 'context', 'params', 'logger'].sort()
@@ -351,7 +376,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({
@@ -423,7 +448,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({

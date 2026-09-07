@@ -7,22 +7,22 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiContextMenuPanel } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { RunTestManuallyContextItem } from './run_test_manually';
 import { EditMonitorContextItem } from './monitor_summary/edit_monitor_link';
 import { RefreshContextItem } from '../common/components/refresh_button';
-import { AddToCaseContextItem } from './add_to_case_action';
-import type { ClientPluginsStart } from '../../../../plugin';
+import { useGetUrlParams } from '../../hooks';
+import { isHeartbeatSyntheticsMonitor } from '../../../../../common/runtime_types';
+import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export function Actions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { remoteName } = useGetUrlParams();
+  const isRemote = Boolean(remoteName);
+  const { monitor } = useSelectedMonitor();
+  // Heartbeat/Agent monitors have no saved object and no `remoteName` URL param,
+  // so they can only be detected from the resolved monitor shape.
+  const isHeartbeat = isHeartbeatSyntheticsMonitor(monitor);
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
-  const {
-    services: { observabilityShared },
-  } = useKibana<ClientPluginsStart>();
-  const isAddToCaseEnabled =
-    observabilityShared.config?.unsafe?.investigativeExperienceEnabled || false;
-
   const closePopover = () => setIsPopoverOpen(false);
   return (
     <EuiPopover
@@ -32,7 +32,7 @@ export function Actions() {
           data-test-subj="monitorDetailsHeaderControlActionsButton"
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSize="s"
           onClick={handleActionsClick}
         >
@@ -43,14 +43,25 @@ export function Actions() {
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
+      panelPaddingSize="none"
+      aria-label={i18n.translate('xpack.synthetics.monitorDetails.actions.popoverAriaLabel', {
+        defaultMessage: 'Monitor actions menu',
+      })}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
-          <EditMonitorContextItem key="edit-monitor" />,
+          <EditMonitorContextItem
+            key="edit-monitor"
+            isRemote={isRemote}
+            isHeartbeat={isHeartbeat}
+          />,
           <RefreshContextItem key="refresh-monitor" />,
-          <RunTestManuallyContextItem key="run-test-manually" />,
-        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem key="add-to-case" />] : [])}
+          <RunTestManuallyContextItem
+            key="run-test-manually"
+            isRemote={isRemote}
+            isHeartbeat={isHeartbeat}
+          />,
+        ]}
       />
     </EuiPopover>
   );

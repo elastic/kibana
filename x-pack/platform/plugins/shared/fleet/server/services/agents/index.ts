@@ -6,6 +6,7 @@
  */
 
 export * from './unenroll';
+export * from './remove_collector';
 export * from './upgrade';
 export * from './status';
 export * from './crud';
@@ -17,9 +18,19 @@ export * from './action_status';
 export * from './request_diagnostics';
 export * from './migrate';
 export * from './change_privilege_level';
-export { getAgentUploads, getAgentUploadFile, deleteAgentUploadFile } from './uploads';
+export * from './rollback';
+export {
+  getAgentUploads,
+  getAgentUploadFile,
+  deleteAgentUploadFile,
+  getAgentIdForUploadFile,
+} from './uploads';
 export { AgentServiceImpl } from './agent_service';
 export type { AgentClient, AgentService } from './agent_service';
 export { BulkActionsResolver } from './bulk_actions_resolver';
-export { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
+export {
+  getAvailableVersions,
+  getLatestAvailableAgentVersion,
+  getLatestAgentAvailableDockerImageVersion,
+} from './versions';
 export { getAutoUpgradeAgentsStatus } from './auto_upgrade_agents_status';

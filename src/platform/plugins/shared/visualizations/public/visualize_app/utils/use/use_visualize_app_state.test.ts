@@ -14,8 +14,8 @@ import { Observable } from 'rxjs';
 import { useVisualizeAppState } from './use_visualize_app_state';
 import type { VisualizeServices, SavedVisInstance } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
-import { VisualizeConstants } from '../../../../common/constants';
 import { createVisualizeServicesMock } from '../mocks';
+import { VisualizeConstants } from '@kbn/visualizations-common';
 
 jest.mock('../utils');
 jest.mock('../create_visualize_app_state');
@@ -103,8 +103,8 @@ describe('useVisualizeAppState', () => {
 
     unmount();
 
-    expect(stopStateSyncMock).toBeCalledTimes(1);
-    expect(stopSyncingAppFiltersMock).toBeCalledTimes(1);
+    expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
   });
 
   it('should be subscribed on dirtyStateChange event from an editor', () => {

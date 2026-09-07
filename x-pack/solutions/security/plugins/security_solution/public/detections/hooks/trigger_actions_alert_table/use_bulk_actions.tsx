@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
-import { useMemo, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
-import type { AlertsTableProps } from '@kbn/response-ops-alerts-table/types';
+import type {
+  AlertsTableProps,
+  BulkActionsPanelConfig,
+  ItemsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
+import { useBulkRunAlertWorkflowPanel } from './use_bulk_run_alert_workflow_panel';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useAddBulkToTimelineAction } from '../../components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
 import { useBulkAlertActionItems } from './use_alert_actions';
@@ -23,7 +31,9 @@ import type { inputsModel } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
 
 // check to see if the query is a known "empty" shape
-export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
+export function isKnownEmptyQuery(
+  query: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>
+) {
   const queries = [
     // the default query used by the job wizards
     { bool: { must: [{ match_all: {} }] } },
@@ -42,7 +52,9 @@ export function isKnownEmptyQuery(query: QueryDslQueryContainer) {
   return false;
 }
 
-function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] {
+function getFiltersForDSLQuery(
+  datafeedQuery: Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>
+): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
     return [];
   }
@@ -63,8 +75,9 @@ function getFiltersForDSLQuery(datafeedQuery: QueryDslQueryContainer): Filter[] 
 export const useBulkActionsByTableType = (
   tableId: TableId,
   query: AlertsTableProps['query'],
-  refresh: () => void
-) => {
+  refresh: () => void,
+  runtimeMappings?: MappingRuntimeFields
+): [ItemsPanelConfig, ...BulkActionsPanelConfig[]] => {
   const { from, to } = useGlobalTime();
   const filters = useMemo(() => {
     return getFiltersForDSLQuery(query);
@@ -82,7 +95,7 @@ export const useBulkActionsByTableType = (
       localFilters: filters,
       from,
       to,
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.alerts,
       tableId,
     };
   }, [filters, from, to, tableId]);
@@ -97,14 +110,15 @@ export const useBulkActionsByTableType = (
 
   const alertActionParams = useMemo(() => {
     return {
-      scopeId: SourcererScopeName.detections,
+      scopeId: PageScope.alerts,
       filters,
       from,
       to,
       tableId,
       refetch,
+      runtimeMappings,
     };
-  }, [from, to, filters, refetch, tableId]);
+  }, [from, to, filters, refetch, tableId, runtimeMappings]);
 
   const bulkAlertTagParams = useMemo(() => {
     return {
@@ -112,16 +126,32 @@ export const useBulkActionsByTableType = (
     };
   }, [refresh]);
 
-  const timelineAction = useAddBulkToTimelineAction(timelineActionParams);
+  const timelineActions = useAddBulkToTimelineAction(timelineActionParams);
 
-  const alertActions = useBulkAlertActionItems(alertActionParams);
+  const { items: alertActions, panels: alertActionsPanels } =
+    useBulkAlertActionItems(alertActionParams);
 
   const { alertTagsItems, alertTagsPanels } = useBulkAlertTagsItems(bulkAlertTagParams);
 
+  const { runWorkflowItems, runWorkflowPanels } = useBulkRunAlertWorkflowPanel();
+
   const items = useMemo(() => {
-    return [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
-  }, [alertActions, alertTagsItems, timelineAction, alertAssigneesItems]);
+    return [
+      ...alertActions,
+      ...runWorkflowItems,
+      ...timelineActions,
+      ...alertTagsItems,
+      ...alertAssigneesItems,
+    ];
+  }, [alertActions, alertTagsItems, timelineActions, alertAssigneesItems, runWorkflowItems]);
+
   return useMemo(() => {
-    return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
-  }, [alertTagsPanels, items, alertAssigneesPanels]);
+    return [
+      { id: 0, items },
+      ...alertActionsPanels,
+      ...runWorkflowPanels,
+      ...alertTagsPanels,
+      ...alertAssigneesPanels,
+    ];
+  }, [alertActionsPanels, alertTagsPanels, items, alertAssigneesPanels, runWorkflowPanels]);
 };

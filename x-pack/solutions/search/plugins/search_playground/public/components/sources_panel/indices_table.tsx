@@ -16,6 +16,9 @@ interface IndicesTableProps {
 
 export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveClick }) => (
   <EuiBasicTable
+    tableCaption={i18n.translate('xpack.searchPlayground.sources.indices.table.caption', {
+      defaultMessage: 'Selected indices list',
+    })}
     items={indices.map((index) => ({ index }))}
     columns={[
       {
@@ -39,7 +42,7 @@ export const IndicesTable: React.FC<IndicesTableProps> = ({ indices, onRemoveCli
                 defaultMessage: 'Remove index',
               }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             onClick: (item: { index: string }) => onRemoveClick(item.index),
             'data-test-subj': `removeIndexButton`,
           },

@@ -32,7 +32,7 @@ import type {
 import {
   ActionsAttachmentPayloadRt,
   AlertAttachmentPayloadRt,
-  AttachmentType,
+  EventAttachmentPayloadRt,
   ExternalReferenceNoSOAttachmentPayloadRt,
   ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
@@ -52,27 +52,35 @@ import {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
+  isUnifiedValueAttachmentRequest,
+  isLegacyAttachmentRequest,
+  isLegacyCommentAttachment,
 } from '../../common/utils/attachments';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import { SEVERITY_EXTERNAL_TO_ESMODEL, STATUS_EXTERNAL_TO_ESMODEL } from '../common/constants';
 import {
   getIDsAndIndicesAsArrays,
   isCommentRequestTypeAlert,
-  isCommentRequestTypeUser,
   isCommentRequestTypeActions,
   assertUnreachable,
+  isCommentRequestTypeEvent,
 } from '../common/utils';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
+import type { UnifiedAttachmentPayload } from '../../common/types/domain/attachment/v2';
+import { parseUnifiedAttachmentWithSchema } from './attachments/validators';
+import type {
+  AttachmentRequest,
+  AttachmentRequestV2,
+  CasesFindRequestSortFields,
+} from '../../common/types/api';
 import type { ICasesCustomField } from '../custom_fields';
 import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
-export const decodeCommentRequest = (
-  comment: AttachmentRequest,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
-  if (isCommentRequestTypeUser(comment)) {
+export const decodeCommentRequest = (comment: AttachmentRequest) => {
+  if (isLegacyCommentAttachment(comment)) {
     decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
     decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
@@ -121,8 +129,10 @@ export const decodeCommentRequest = (
         )} indices: ${JSON.stringify(indices)}`
       );
     }
+  } else if (isCommentRequestTypeEvent(comment)) {
+    decodeWithExcessOrThrow(EventAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeExternalReference(comment)) {
-    decodeExternalReferenceAttachment(comment, externalRefRegistry);
+    decodeExternalReferenceAttachment(comment);
   } else if (isCommentRequestTypePersistableState(comment)) {
     decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
@@ -135,21 +145,58 @@ export const decodeCommentRequest = (
   }
 };
 
-const decodeExternalReferenceAttachment = (
-  attachment: ExternalReferenceAttachmentPayload,
-  externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
-) => {
+const decodeExternalReferenceAttachment = (attachment: ExternalReferenceAttachmentPayload) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
     decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
     decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
   }
+};
 
-  const metadata = attachment.externalReferenceMetadata;
-  if (externalRefRegistry.has(attachment.externalReferenceAttachmentTypeId)) {
-    const attachmentType = externalRefRegistry.get(attachment.externalReferenceAttachmentTypeId);
+/** Validates a unified attachment via the registered `schema`. */
+const decodeUnifiedAttachment = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (!unifiedRegistry.has(attachment.type)) {
+    throw badRequest(
+      `Attachment type ${attachment.type} is not registered in unified attachment type registry.`
+    );
+  }
 
-    attachmentType.schemaValidator?.(metadata);
+  const attachmentType = unifiedRegistry.get(attachment.type);
+
+  if (!attachmentType.schema) {
+    throw badRequest(`Attachment type '${attachment.type}' does not define a schema.`);
+  }
+
+  parseUnifiedAttachmentWithSchema(attachmentType.schema, attachment, attachment.type);
+};
+
+export const decodeUnifiedCommentRequest = (
+  attachment: UnifiedAttachmentPayload,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (
+    isUnifiedValueAttachmentRequest(attachment) ||
+    isUnifiedReferenceAttachmentRequest(attachment)
+  ) {
+    decodeUnifiedAttachment(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
+  }
+};
+
+export const decodeCommentRequestV2 = (
+  attachment: AttachmentRequestV2,
+  unifiedRegistry: UnifiedAttachmentTypeRegistry
+) => {
+  if (isLegacyAttachmentRequest(attachment)) {
+    decodeCommentRequest(attachment);
+  } else if (isUnifiedAttachmentRequest(attachment)) {
+    decodeUnifiedCommentRequest(attachment, unifiedRegistry);
+  } else {
+    assertUnreachable(attachment);
   }
 };
 
@@ -419,6 +466,34 @@ export const buildCustomFieldsFilter = ({
   return nodeBuilder.and([...customFieldsFilter]);
 };
 
+/**
+ * Helper function to remove .attributes from field paths in a KueryNode AST.
+ * This is used when searchType is 'search' to convert find-style filters to search-style filters.
+ */
+export const removeAttributesFromFilter = (node: KueryNode): KueryNode => {
+  // Create a deep copy to avoid mutating the original
+  const modifiedNode = structuredClone(node);
+
+  const traverse = (ast: KueryNode): void => {
+    // Handle literal nodes with string values (field paths)
+    if (ast.type === 'literal' && typeof ast.value === 'string') {
+      ast.value = ast.value.replace(/\.attributes\./g, '.');
+    }
+
+    // Recursively traverse all arguments
+    if (ast.arguments && Array.isArray(ast.arguments)) {
+      ast.arguments.forEach((arg) => {
+        if (arg) {
+          traverse(arg);
+        }
+      });
+    }
+  };
+
+  traverse(modifiedNode);
+  return modifiedNode;
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
@@ -433,8 +508,10 @@ export const constructQueryOptions = ({
   category,
   customFields,
   customFieldsConfiguration,
+  searchType = 'find',
 }: CasesSearchParams & {
   customFieldsConfiguration?: CustomFieldsConfiguration;
+  searchType?: 'find' | 'search';
 }): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
@@ -459,8 +536,14 @@ export const constructQueryOptions = ({
     customFieldsFilter,
   ]);
 
+  const combinedFilter = combineFilterWithAuthorizationFilter(filters, authorizationFilter);
+  const finalFilter =
+    searchType === 'search' && combinedFilter
+      ? removeAttributesFromFilter(combinedFilter)
+      : combinedFilter;
+
   return {
-    filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
+    filter: finalFilter,
     sortField: sortByField,
   };
 };
@@ -535,8 +618,8 @@ export const getCaseToUpdate = (
         if (arraysDifference(value, currentValue)) {
           acc[key] = value;
         }
-      } else if (isPlainObject(currentValue) && isPlainObject(value)) {
-        if (!deepEqual(currentValue, value)) {
+      } else if (isPlainObject(value)) {
+        if (currentValue === undefined || !deepEqual(currentValue, value)) {
           acc[key] = value;
         }
       } else if (currentValue !== undefined && value !== currentValue) {
@@ -693,16 +776,12 @@ export const buildAttachmentRequestFromFileJSON = ({
 }: {
   owner: string;
   fileMetadata: FileJSON;
-}): AttachmentRequest => ({
+}): AttachmentRequestV2 => ({
   owner,
-  type: AttachmentType.externalReference,
-  externalReferenceId: fileMetadata.id,
-  externalReferenceStorage: {
-    type: ExternalReferenceStorageType.savedObject,
+  type: FILE_ATTACHMENT_TYPE,
+  attachmentId: fileMetadata.id,
+  metadata: {
     soType: FILE_SO_TYPE,
-  },
-  externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-  externalReferenceMetadata: {
     files: [
       {
         name: fileMetadata.name,

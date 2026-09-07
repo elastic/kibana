@@ -24,6 +24,7 @@
       "{index}/_refresh"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-refresh",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-indices-refresh",
     "availability": {
       "stack": true,
       "serverless": true

@@ -18,15 +18,14 @@ import {
   AddToTimelineContextMenu,
 } from './add_to_timeline';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
-import { useSecurityContext } from '../../../hooks/use_security_context';
-import type { SecuritySolutionPluginContext } from '../../../types';
 import { useAddToTimelineButton } from '../hooks/use_add_to_timeline_button';
 import { useAddToTimeline } from '../hooks/use_add_to_timeline';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 
 const TEST_ID = 'test';
 const TIMELINE_TEST_ID = 'test-add-to-timeline';
 
-jest.mock('../../../hooks/use_security_context', () => ({ useSecurityContext: jest.fn() }));
+jest.mock('../../../../common/utils/timeline_capabilities');
 jest.mock('../hooks/use_add_to_timeline', () => ({
   useAddToTimeline: jest.fn(() => ({ addToTimelineProps: {} })),
 }));
@@ -38,9 +37,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
       .mocked(useAddToTimelineButton)
       .mockReturnValue(() => <div data-test-subj={TIMELINE_TEST_ID} />);
 
-    jest.mocked(useSecurityContext).mockReturnValue({
-      hasAccessToTimeline: true,
-    } as unknown as SecuritySolutionPluginContext);
+    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -182,9 +179,7 @@ describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
   });
 
   it('should render empty when the user does not have access to timeline', () => {
-    jest.mocked(useSecurityContext).mockReturnValue({
-      hasAccessToTimeline: false,
-    } as unknown as SecuritySolutionPluginContext);
+    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: false });
 
     const mockField: string = 'threat.indicator.ip';
     const mockData: Indicator = generateMockIndicator();

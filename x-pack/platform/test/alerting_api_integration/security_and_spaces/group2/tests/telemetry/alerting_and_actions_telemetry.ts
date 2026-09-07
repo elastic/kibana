@@ -163,6 +163,31 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             apiUrl,
           },
         });
+
+        // AAD rule
+        const ruleWithAadId = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: 'test.always-firing-alert-as-data',
+            schedule: { interval: '1h' },
+            notify_when: 'onActiveAlert',
+            throttle: null,
+            params: {
+              index: 'kibana-alerting-test-data',
+              reference: 'test',
+            },
+            actions: [
+              {
+                id: noopConnectorId,
+                group: 'default',
+                params: {},
+              },
+            ],
+          },
+        });
+
+        rulesWithAAD.push(ruleWithAadId);
+
         await createRule({
           space: space.id,
           ruleOverwrites: {
@@ -290,30 +315,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
           },
         });
-
-        // AAD rule
-        const ruleWithAadId = await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: 'test.always-firing-alert-as-data',
-            schedule: { interval: '1h' },
-            notify_when: 'onActiveAlert',
-            throttle: null,
-            params: {
-              index: 'kibana-alerting-test-data',
-              reference: 'test',
-            },
-            actions: [
-              {
-                id: noopConnectorId,
-                group: 'default',
-                params: {},
-              },
-            ],
-          },
-        });
-
-        rulesWithAAD.push(ruleWithAadId);
 
         // ES query rule
         esQueryRuleId[space.id] = await createRule({
@@ -684,7 +685,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         expect(taskState).not.to.be(undefined);
         actionsTelemetry = JSON.parse(taskState!);
         expect(actionsTelemetry.runs > 0).to.be(true);
-        expect(actionsTelemetry.count_total).to.equal(24);
+        expect(actionsTelemetry.count_total).to.equal(32);
       });
 
       verifyActionsTelemetry(actionsTelemetry);

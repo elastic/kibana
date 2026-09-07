@@ -18,6 +18,7 @@ export interface TraverseItem {
    * Keeps track of visited nodes to be able to detect circular references
    */
   visitedDocumentNodes: Set<DocumentNode>;
+  parent?: TraverseItem;
   parentNode: DocumentNode;
   parentKey: string | number;
   resolvedRef?: ResolvedRef;

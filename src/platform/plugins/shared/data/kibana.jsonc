@@ -28,7 +28,9 @@
       "management"
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "cps",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaUtils",

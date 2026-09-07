@@ -73,7 +73,7 @@ const getSavedObjectsList = async ({
     sort: [{ updated_at: 'asc' }],
     query: {
       bool: {
-        filter,
+        filter: filter as estypes.QueryDslQueryContainer,
       },
     },
     ignore_unavailable: true,

@@ -21,6 +21,7 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -65,7 +66,7 @@ export class ItemsGridPagination extends Component {
       <EuiButtonEmpty
         size="s"
         color="text"
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         iconSide="right"
         onClick={this.onButtonClick}
       >
@@ -103,6 +104,9 @@ export class ItemsGridPagination extends Component {
           <EuiPopover
             data-test-subj="mlItemsGridPaginationPopover"
             id="customizablePagination"
+            aria-label={i18n.translate('xpack.ml.itemsGrid.itemsPerPagePopoverAriaLabel', {
+              defaultMessage: 'Items per page',
+            })}
             button={button}
             isOpen={this.state.isPopoverOpen}
             closePopover={this.closePopover}
@@ -121,6 +125,9 @@ export class ItemsGridPagination extends Component {
             pageCount={pageCount}
             activePage={activePage}
             onPageClick={this.onPageClick}
+            aria-label={i18n.translate('xpack.ml.itemsGrid.pagination.ariaLabel', {
+              defaultMessage: 'Items grid pagination',
+            })}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

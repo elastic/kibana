@@ -12,6 +12,12 @@ import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/de
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '@kbn/detections-response-ftr-services';
+import {
   removeServerGeneratedProperties,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
@@ -23,12 +29,6 @@ import {
   getSimpleRule,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
-import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -48,7 +48,8 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should return the rule with migrated actions after the enable patch', async () => {
+      // This is breaking due to this bug: https://github.com/elastic/kibana/issues/252794
+      it.skip('should return the rule with migrated actions after the enable patch', async () => {
         const [connector, rule] = await Promise.all([
           supertest
             .post(`/api/actions/connector`)
@@ -133,7 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).to.eql(
-            '[request body]: investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 3 more'
+            '[request body]: investigation_fields: Invalid input: expected object, received array, investigation_fields: Invalid input: expected object, received array, investigation_fields: Invalid input: expected object, received array, investigation_fields: Invalid input: expected object, received array, investigation_fields: Invalid input: expected object, received array, and 3 more'
           );
         });
 

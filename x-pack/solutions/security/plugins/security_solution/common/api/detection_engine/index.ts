@@ -7,6 +7,7 @@
 
 export * from './alert_assignees';
 export * from './alert_tags';
+export * from './attacks';
 export * from './fleet_integrations';
 export * from './index_management';
 export * from './model';
@@ -17,3 +18,4 @@ export * from './rule_monitoring';
 export * from './rule_preview';
 export * from './signals';
 export * from './signals_migration';
+export * from './unified_alerts';

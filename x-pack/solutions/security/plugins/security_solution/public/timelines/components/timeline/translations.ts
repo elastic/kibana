@@ -18,21 +18,9 @@ export const DEFAULT_TIMELINE_TITLE = i18n.translate(
 export const DEFAULT_TIMELINE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.timeline.defaultTimelineDescription',
   {
-    defaultMessage: 'Timeline offered by default when creating new timeline.',
+    defaultMessage: 'Timeline offered by default when creating new Timeline.',
   }
 );
-
-export const EVENTS_TABLE_ARIA_LABEL = ({
-  activePage,
-  totalPages,
-}: {
-  activePage: number;
-  totalPages: number;
-}) =>
-  i18n.translate('xpack.securitySolution.timeline.eventsTableAriaLabel', {
-    values: { activePage, totalPages },
-    defaultMessage: 'events; Page {activePage} of {totalPages}',
-  });
 
 export const SEARCH_BOX_TIMELINE_PLACEHOLDER = (timelineType: TimelineType) =>
   i18n.translate('xpack.securitySolution.timeline.searchBoxPlaceholder', {

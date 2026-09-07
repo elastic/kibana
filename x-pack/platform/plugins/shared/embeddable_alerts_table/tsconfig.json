@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,13 +9,14 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/**/*",
     "../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
-    "@kbn/presentation-containers",
+    "@kbn/scout",
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
@@ -33,8 +34,8 @@
     "@kbn/alerting-types",
     "@kbn/es-query",
     "@kbn/kibana-react-plugin",
-    "@kbn/kibana-utils-plugin",
     "@kbn/utility-types",
     "@kbn/presentation-util",
+    "@kbn/react-query"
   ]
 }

@@ -7,9 +7,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { runSynPrivateLocationMonitorsTaskSoon } from '../../../tasks/sync_private_locations_monitors_task';
+import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
   SyntheticsParamRequest,
@@ -18,6 +18,7 @@ import type {
 } from '../../../../common/runtime_types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
 const ParamsObjectSchema = schema.object({
   key: schema.string({
@@ -57,16 +58,38 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         savedObjectsData
       );
 
-      await runSynPrivateLocationMonitorsTaskSoon({
+      const modifiedParamKeys = savedObjectsData.map((obj) => obj.attributes.key);
+
+      await asyncGlobalParamsPropagation({
         server,
+        paramsSpacesToSync: Array.from(
+          new Set(
+            savedObjectsData.reduce(
+              (spacesToSync, obj) => spacesToSync.concat(obj.initialNamespaces || []),
+              [] as string[]
+            )
+          )
+        ),
+        modifiedParamKeys,
       });
 
       if (savedObjectsData.length > 1) {
-        return result.saved_objects.map((savedObject) => {
-          return toClientResponse(savedObject);
-        });
+        const failedResult = result.saved_objects.find(isSavedObjectErrorResult);
+        if (failedResult) {
+          throw Object.assign(new Error(failedResult.error.message), failedResult.error);
+        }
+        return result.saved_objects
+          .filter(
+            (savedObject): savedObject is SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>> =>
+              !isSavedObjectErrorResult(savedObject)
+          )
+          .map((savedObject) => toClientResponse(savedObject));
       } else {
-        return toClientResponse(result.saved_objects[0]);
+        const [savedObject] = result.saved_objects;
+        if (isSavedObjectErrorResult(savedObject)) {
+          throw Object.assign(new Error(savedObject.error.message), savedObject.error);
+        }
+        return toClientResponse(savedObject);
       }
     } catch (error) {
       if (error.output?.statusCode === 404) {

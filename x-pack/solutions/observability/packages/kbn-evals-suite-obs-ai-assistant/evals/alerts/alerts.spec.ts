@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { createEvaluateAlertsDataset } from './evaluate_alerts_dataset';
-import type { EvaluateAlertsDataset } from './evaluate_alerts_dataset';
-import { evaluate as base } from '../../src/evaluate';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import {
   apmTransactionRateAIAssistant,
   customThresholdAIAssistantLogCount,
 } from '../../src/alert_templates/alerts';
+import { evaluate } from '../../src/evaluate';
 
 /**
  * NOTE: This scenario has been migrated from the legacy evaluation framework.
@@ -22,24 +21,7 @@ import {
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
 
-const evaluate = base.extend<{
-  evaluateAlerts: EvaluateAlertsDataset;
-}>({
-  evaluateAlerts: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateAlertsDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
-
-evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
+evaluate.describe('Alerts', { tag: tags.serverless.observability.complete }, () => {
   const ruleIds: string[] = [];
 
   evaluate.beforeAll(async ({ kbnClient, apmSynthtraceEsClient, log }) => {
@@ -116,8 +98,8 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
     await new Promise((resolve) => setTimeout(resolve, 2500));
   });
 
-  evaluate('summary of active alerts', async ({ evaluateAlerts }) => {
-    await evaluateAlerts({
+  evaluate('summary of active alerts', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'alerts: active alerts',
         description: 'Summarizes currently active alerts over the last 4 hours',
@@ -140,8 +122,8 @@ evaluate.describe('Alerts', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('filtered alerts', async ({ evaluateAlerts }) => {
-    await evaluateAlerts({
+  evaluate('filtered alerts', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'alerts: filtered alerts',
         description:

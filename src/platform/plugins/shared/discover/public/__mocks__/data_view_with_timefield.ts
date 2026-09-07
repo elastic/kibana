@@ -11,61 +11,53 @@ import { fieldList } from '@kbn/data-views-plugin/common';
 import type { FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const fields = [
+const fields: FieldSpec[] = [
   {
     name: '_index',
     type: 'string',
     scripted: false,
-    filterable: true,
     searchable: true,
+    aggregatable: false,
   },
   {
     name: 'timestamp',
-    displayName: 'timestamp',
     type: 'date',
     scripted: false,
-    filterable: true,
-    aggregatable: true,
-    sortable: true,
     searchable: true,
+    aggregatable: true,
   },
   {
     name: 'message',
-    displayName: 'message',
     type: 'string',
     scripted: false,
-    filterable: false,
     searchable: true,
+    aggregatable: false,
   },
   {
     name: 'extension',
-    displayName: 'extension',
     type: 'string',
     scripted: false,
-    filterable: true,
-    aggregatable: true,
     searchable: true,
+    aggregatable: true,
   },
   {
     name: 'bytes',
-    displayName: 'bytes',
     type: 'number',
     scripted: false,
-    filterable: true,
-    aggregatable: true,
     searchable: true,
+    aggregatable: true,
   },
   {
     name: 'scripted',
-    displayName: 'scripted',
     type: 'number',
     scripted: true,
-    filterable: false,
+    searchable: false,
+    aggregatable: false,
   },
 ];
 
 export const dataViewWithTimefieldMock = buildDataViewMock({
   name: 'index-pattern-with-timefield',
-  fields: fieldList(fields as unknown as FieldSpec[]),
+  fields: fieldList(fields),
   timeFieldName: 'timestamp',
 });

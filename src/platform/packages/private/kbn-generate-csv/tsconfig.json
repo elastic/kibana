@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -31,7 +31,9 @@
     "@kbn/data-views-plugin",
     "@kbn/search-types",
     "@kbn/task-manager-plugin",
+    "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/safer-lodash-set",
+    "@kbn/datemath",
   ]
 }

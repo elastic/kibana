@@ -13,20 +13,19 @@ import { basicCase, connectorsMock } from '../../containers/mock';
 import { ConnectorsForm } from './connectors_form';
 import type { CaseConnectors } from '../../containers/types';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
-import { choices, resilientIncidentTypes, resilientSeverity } from '../connectors/mock';
+import { choices } from '../connectors/mock';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
-import { useGetSeverity } from '../connectors/resilient/use_get_severity';
+import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { renderWithTestingProviders } from '../../common/mock';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
-jest.mock('../connectors/resilient/use_get_incident_types');
-jest.mock('../connectors/resilient/use_get_severity');
+jest.mock('../connectors/resilient/use_get_fields');
 
 const useGetChoicesMock = useGetChoices as jest.Mock;
-const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
-const useGetSeverityMock = useGetSeverity as jest.Mock;
+const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ConnectorsForm ', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -67,11 +66,7 @@ describe('ConnectorsForm ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useGetChoicesMock.mockReturnValue({ isLoading: false, data: { data: choices } });
-    useGetIncidentTypesMock.mockReturnValue({
-      isLoading: false,
-      data: { data: resilientIncidentTypes },
-    });
-    useGetSeverityMock.mockReturnValue({ isLoading: false, data: { data: resilientSeverity } });
+    useGetFieldsMock.mockReturnValue(useGetFieldsResponse);
   });
 
   it('renders correctly', async () => {
@@ -108,15 +103,16 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector correctly', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
@@ -132,6 +128,7 @@ describe('ConnectorsForm ', () => {
   });
 
   it('submits correctly', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
@@ -139,10 +136,10 @@ describe('ConnectorsForm ', () => {
     });
 
     const severitySelect = screen.getByTestId('severitySelect');
-    await userEvent.selectOptions(screen.getByTestId('severitySelect'), ['2']);
+    await user.selectOptions(screen.getByTestId('severitySelect'), ['2']);
 
     expect(severitySelect).toHaveValue('2');
-    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -163,15 +160,16 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector correctly and its fields correctly', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
@@ -180,9 +178,9 @@ describe('ConnectorsForm ', () => {
     expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
     const severitySelect = screen.getByTestId('severitySelect');
-    await userEvent.selectOptions(severitySelect, ['4']);
+    await user.selectOptions(severitySelect, ['4']);
 
-    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -190,7 +188,7 @@ describe('ConnectorsForm ', () => {
         name: 'My Resilient connector',
         type: '.resilient',
         // severity changed from 5 to 4
-        fields: { incidentTypes: null, severityCode: '4' },
+        fields: { incidentTypes: null, severityCode: '4', additionalFields: null },
       });
     });
   });
@@ -233,14 +231,15 @@ describe('ConnectorsForm ', () => {
   });
 
   it('calls onCancel when clicking the cancel button', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('edit-connectors-cancel'));
-    expect(onCancel).toBeCalled();
+    await user.click(screen.getByTestId('edit-connectors-cancel'));
+    expect(onCancel).toHaveBeenCalled();
   });
 
   it('disables the submit button correctly if the initial connector is the none', async () => {
@@ -254,17 +253,18 @@ describe('ConnectorsForm ', () => {
   });
 
   it('can select the none connector', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getAllByTestId('dropdown-connector-no-connector')[0]);
+    await user.click(screen.getAllByTestId('dropdown-connector-no-connector')[0]);
 
-    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith({
@@ -277,15 +277,16 @@ describe('ConnectorsForm ', () => {
   });
 
   it('changes to a new corrector does not disables the submit button with no changes in the fields', async () => {
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(<ConnectorsForm {...props} />);
 
     await waitFor(() => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
@@ -311,6 +312,7 @@ describe('ConnectorsForm ', () => {
       },
     } as CaseConnectors;
 
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(
       <ConnectorsForm {...props} caseConnectors={caseConnectorsOptional} />
     );
@@ -319,9 +321,9 @@ describe('ConnectorsForm ', () => {
       expect(screen.getByText('My SN connector')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-resilient-2'));
+    await user.click(screen.getByTestId('dropdown-connector-resilient-2'));
 
     await waitFor(() => {
       expect(screen.queryByTestId('connector-fields-sn-itsm')).not.toBeInTheDocument();
@@ -329,13 +331,14 @@ describe('ConnectorsForm ', () => {
 
     expect(screen.getByTestId('connector-fields-resilient')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({
         fields: {
           incidentTypes: null,
           severityCode: null,
+          additionalFields: null,
         },
         id: 'resilient-2',
         name: 'My Resilient connector',
@@ -358,6 +361,7 @@ describe('ConnectorsForm ', () => {
       { ...connectorsMock[0], id: 'servicenow-2', name: 'My SN connector 2' },
     ];
 
+    const user = userEvent.setup({ delay: null });
     renderWithTestingProviders(
       <ConnectorsForm
         {...props}
@@ -368,13 +372,13 @@ describe('ConnectorsForm ', () => {
 
     expect(await screen.findByText('My SN connector')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('dropdown-connectors'));
+    await user.click(screen.getByTestId('dropdown-connectors'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(screen.getByTestId('dropdown-connector-servicenow-2'));
+    await user.click(screen.getByTestId('dropdown-connector-servicenow-2'));
 
     expect(await screen.findByText('My SN connector 2')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('edit-connectors-submit'));
+    await user.click(screen.getByTestId('edit-connectors-submit'));
 
     await waitFor(() =>
       expect(onSubmit).toHaveBeenCalledWith({

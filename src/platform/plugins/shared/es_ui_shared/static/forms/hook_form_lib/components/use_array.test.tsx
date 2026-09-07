@@ -8,18 +8,21 @@
  */
 
 import React, { useEffect } from 'react';
-import { act } from 'react-dom/test-utils';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
-import { registerTestBed } from '../shared_imports';
 import { useForm } from '../hooks/use_form';
 import { useFormData } from '../hooks/use_form_data';
 import { Form } from './form';
 import { UseField } from './use_field';
 import { UseArray } from './use_array';
 
+const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+
 describe('<UseArray />', () => {
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -50,13 +53,10 @@ describe('<UseArray />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      memoryRouter: { wrapComponent: false },
-    });
+    render(<TestComp />);
 
-    const { find } = setup();
-
-    expect(find('arrayItem').length).toBe(1);
+    const items = screen.getAllByTestId('arrayItem');
+    expect(items).toHaveLength(1);
   });
 
   test('it should allow to listen to array item field value change', async () => {
@@ -89,18 +89,10 @@ describe('<UseArray />', () => {
       );
     };
 
-    const setup = registerTestBed(TestComp, {
-      defaultProps: { onData: onFormData },
-      memoryRouter: { wrapComponent: false },
-    });
+    render(<TestComp onData={onFormData} />);
 
-    const {
-      form: { setInputValue },
-    } = setup();
-
-    await act(async () => {
-      setInputValue('users[0]Name', 'John');
-    });
+    const nameField = await screen.findByTestId('users[0]Name');
+    await user.type(nameField, 'John');
 
     const formData = onFormData.mock.calls[onFormData.mock.calls.length - 1][0];
 

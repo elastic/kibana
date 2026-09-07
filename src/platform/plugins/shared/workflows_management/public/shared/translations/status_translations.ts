@@ -14,26 +14,38 @@ export const STATUS_LABELS = {
   [ExecutionStatus.PENDING]: i18n.translate('workflowsManagement.executionStatus.pending', {
     defaultMessage: 'Pending',
   }),
+  [ExecutionStatus.QUEUED]: i18n.translate('workflowsManagement.executionStatus.queued', {
+    defaultMessage: 'Queued',
+  }),
   [ExecutionStatus.WAITING]: i18n.translate('workflowsManagement.executionStatus.waiting', {
     defaultMessage: 'Waiting',
   }),
   [ExecutionStatus.WAITING_FOR_INPUT]: i18n.translate(
     'workflowsManagement.executionStatus.waitingForInput',
     {
-      defaultMessage: 'Waiting for input',
+      defaultMessage: 'Waiting',
+    }
+  ),
+  [ExecutionStatus.WAITING_FOR_CHILD]: i18n.translate(
+    'workflowsManagement.executionStatus.waitingForChild',
+    {
+      defaultMessage: 'Waiting',
     }
   ),
   [ExecutionStatus.RUNNING]: i18n.translate('workflowsManagement.executionStatus.running', {
     defaultMessage: 'Running',
   }),
   [ExecutionStatus.COMPLETED]: i18n.translate('workflowsManagement.executionStatus.completed', {
-    defaultMessage: 'Completed',
+    defaultMessage: 'Success',
   }),
   [ExecutionStatus.FAILED]: i18n.translate('workflowsManagement.executionStatus.failed', {
-    defaultMessage: 'Failed',
+    defaultMessage: 'Error',
   }),
   [ExecutionStatus.CANCELLED]: i18n.translate('workflowsManagement.executionStatus.cancelled', {
-    defaultMessage: 'Cancelled',
+    defaultMessage: 'Canceled',
+  }),
+  [ExecutionStatus.TIMED_OUT]: i18n.translate('workflowsManagement.executionStatus.timedOut', {
+    defaultMessage: 'Timed out',
   }),
   [ExecutionStatus.SKIPPED]: i18n.translate('workflowsManagement.executionStatus.skipped', {
     defaultMessage: 'Skipped',

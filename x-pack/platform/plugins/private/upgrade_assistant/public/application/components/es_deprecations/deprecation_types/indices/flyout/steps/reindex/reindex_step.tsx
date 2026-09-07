@@ -10,7 +10,6 @@ import React, { Fragment } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -19,10 +18,11 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
@@ -103,15 +103,14 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
         {hasRequiredPrivileges === false && (
           <Fragment>
             <EuiSpacer />
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.insufficientPrivilegeCallout.calloutTitle"
                   defaultMessage="You do not have sufficient privileges to reindex this index"
                 />
               }
-              color="danger"
-              iconType="warning"
             />
           </Fragment>
         )}

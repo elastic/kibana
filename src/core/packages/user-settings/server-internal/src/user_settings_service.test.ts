@@ -10,7 +10,7 @@
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
-import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
+import type { UserProfileWithSecurity, UserProfileData } from '@kbn/core-user-profile-common';
 import { UserSettingsService } from './user_settings_service';
 
 describe('#setup', () => {
@@ -26,18 +26,18 @@ describe('#setup', () => {
     };
   });
 
-  const createUserProfile = (darkMode: string | undefined): UserProfileWithSecurity => {
+  const createUserProfile = (
+    userSettings: Partial<NonNullable<UserProfileData['userSettings']>>
+  ): UserProfileWithSecurity => {
     return {
       data: {
-        userSettings: {
-          darkMode,
-        },
+        userSettings,
       },
     } as unknown as UserProfileWithSecurity;
   };
 
   it('fetches userSettings when client is set and returns `true` when `darkMode` is set to `dark`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('dark'));
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile({ darkMode: 'dark' }));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);
@@ -54,7 +54,7 @@ describe('#setup', () => {
   });
 
   it('fetches userSettings when client is set and returns `false` when `darkMode` is set to `light`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('light'));
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile({ darkMode: 'light' }));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);
@@ -71,7 +71,7 @@ describe('#setup', () => {
   });
 
   it('fetches userSettings when client is set and returns `system` when `darkMode` is set to `system`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('system'));
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile({ darkMode: 'system' }));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);
@@ -88,7 +88,7 @@ describe('#setup', () => {
   });
 
   it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `` (the default value)', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile(''));
+    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile({ darkMode: undefined }));
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);
@@ -105,7 +105,9 @@ describe('#setup', () => {
   });
 
   it('fetches userSettings when client is set and returns `undefined` when `darkMode` is set to `space_default`', async () => {
-    startDeps.userProfile.getCurrent.mockResolvedValue(createUserProfile('space_default'));
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ darkMode: 'space_default' })
+    );
 
     const { getUserSettingDarkMode } = service.setup();
     service.start(startDeps);
@@ -114,6 +116,63 @@ describe('#setup', () => {
     const darkMode = await getUserSettingDarkMode(kibanaRequest);
 
     expect(darkMode).toEqual(undefined);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
+  it('fetches userSettings when client is set and returns `true` when `rememberSelectedSpace` is set to `true`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ rememberSelectedSpace: true })
+    );
+
+    const { getUserSettingRememberSelectedSpace } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
+
+    expect(rememberSelectedSpace).toEqual(true);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
+  it('fetches userSettings when client is set and returns `false` when `rememberSelectedSpace` is set to `false`', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ rememberSelectedSpace: false })
+    );
+
+    const { getUserSettingRememberSelectedSpace } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
+
+    expect(rememberSelectedSpace).toEqual(false);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+    expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
+      request: kibanaRequest,
+      dataPath: 'userSettings',
+    });
+  });
+
+  it('fetches userSettings when client is set and returns `true` when `rememberSelectedSpace` is not set', async () => {
+    startDeps.userProfile.getCurrent.mockResolvedValue(
+      createUserProfile({ rememberSelectedSpace: undefined })
+    );
+
+    const { getUserSettingRememberSelectedSpace } = service.setup();
+    service.start(startDeps);
+
+    const kibanaRequest = httpServerMock.createKibanaRequest();
+    const rememberSelectedSpace = await getUserSettingRememberSelectedSpace(kibanaRequest);
+
+    expect(rememberSelectedSpace).toEqual(true);
     expect(startDeps.userProfile.getCurrent).toHaveBeenCalledTimes(1);
     expect(startDeps.userProfile.getCurrent).toHaveBeenCalledWith({
       request: kibanaRequest,

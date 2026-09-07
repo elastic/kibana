@@ -11,6 +11,8 @@ import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { AppearanceSelector } from './appearance_selector';
+import { LanguageSelector } from './language_selector';
+import { SpaceConfigurationSelector } from './space_preference_selector';
 
 export const createUserMenuLinks = async ({
   core,
@@ -45,7 +47,7 @@ export const createUserMenuLinks = async ({
       label: i18n.translate('xpack.cloudLinks.userMenuLinks.billingLinkText', {
         defaultMessage: 'Billing',
       }),
-      iconType: 'visGauge',
+      iconType: 'chartGauge',
       href: billingUrl,
       order: 200,
     });
@@ -72,6 +74,26 @@ export const createUserMenuLinks = async ({
       />
     ),
     order: 400,
+    label: '',
+    iconType: '',
+    href: '',
+  });
+
+  userMenuLinks.push({
+    content: ({ closePopover }) => (
+      <LanguageSelector core={core} security={security} closePopover={closePopover} />
+    ),
+    order: 500,
+    label: '',
+    iconType: '',
+    href: '',
+  });
+
+  userMenuLinks.push({
+    content: ({ closePopover }) => (
+      <SpaceConfigurationSelector core={core} security={security} closePopover={closePopover} />
+    ),
+    order: 600,
     label: '',
     iconType: '',
     href: '',

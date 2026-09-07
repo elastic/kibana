@@ -129,6 +129,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               items={managedItems}
               selectedItemId={managedSelectedItemId}
               recentlyClosedItems={[]}
+              onClearRecentlyClosed={() => {}} // not implemented in this example
               maxItemsCount={25}
               services={services}
               onChanged={(updatedState) =>
@@ -141,6 +142,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
               getPreviewData={() =>
                 TAB_CONTENT_MOCK[Math.floor(Math.random() * TAB_CONTENT_MOCK.length)]
               }
+              onEBTEvent={() => {}}
               renderContent={({ label }) => {
                 return (
                   <EuiFlexGroup direction="column" gutterSize="none">
@@ -220,7 +222,7 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
                         <EuiFlexItem>
                           <EuiPanel hasShadow={false} paddingSize="l" className="eui-fullHeight">
                             <EuiEmptyPrompt
-                              iconType="beaker"
+                              iconType="flask"
                               title={<h3>{PLUGIN_NAME}</h3>}
                               body={<p>Tab: {label}</p>}
                             />

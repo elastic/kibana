@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { ONBOARDING_PANEL } from '../../../screens/privileged_user_monitoring';
-import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
@@ -14,6 +13,18 @@ describe(
   'Privileged User Monitoring - Page',
   {
     tags: ['@ess'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'disable:entityAnalyticsEntityStoreV2',
+            'disable:entityAnalyticsWatchlistEnabled',
+            'disable:entityAnalyticsNewHomePageEnabled',
+          ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
+        ],
+      },
+    },
   },
   () => {
     before(() => {
@@ -22,17 +33,12 @@ describe(
 
     beforeEach(() => {
       login();
-
-      togglePrivilegedUserMonitoring();
     });
 
-    afterEach(() => {
-      togglePrivilegedUserMonitoring();
-    });
+    afterEach(() => {});
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'linux_process' });
-      togglePrivilegedUserMonitoring();
     });
 
     it('renders page as expected', () => {

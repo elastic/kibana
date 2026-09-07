@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { Position } from '@elastic/charts';
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
-import type { LensPublicStart, XYState } from '@kbn/lens-plugin/public';
+import type { LensPublicStart, XYVisualizationState } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -25,12 +25,17 @@ import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
+// The cases plugin auto-registers its own "Add to case" action on the Lens panel
+// menu. Exploratory View already provides its own `expViewAddToCase` action, so we
+// disable the built-in one to avoid a duplicate menu entry (see issue #231475).
+const DISABLED_ACTIONS = ['embeddable_addToExistingCase'];
+
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
   attributes: AllSeries;
-  axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
-  gridlinesVisibilitySettings?: XYState['gridlinesVisibilitySettings'];
+  axisTitlesVisibility?: XYVisualizationState['axisTitlesVisibilitySettings'];
+  gridlinesVisibilitySettings?: XYVisualizationState['gridlinesVisibilitySettings'];
   customHeight?: string;
   customTimeRange?: { from: string; to: string }; // required if rendered with LensAttributes
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
@@ -127,24 +132,24 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
   }
 
   if (typeof axisTitlesVisibility !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).axisTitlesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).axisTitlesVisibilitySettings =
       axisTitlesVisibility;
   }
 
   if (typeof gridlinesVisibilitySettings !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).gridlinesVisibilitySettings =
+    (attributesJSON.state.visualization as XYVisualizationState).gridlinesVisibilitySettings =
       gridlinesVisibilitySettings;
   }
 
   if (typeof legendIsVisible !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.isVisible = legendIsVisible;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.isVisible = legendIsVisible;
   }
   if (typeof legendPosition !== 'undefined') {
-    (attributesJSON.state.visualization as XYState).legend.position = legendPosition;
+    (attributesJSON.state.visualization as XYVisualizationState).legend.position = legendPosition;
   }
 
   if (hideTicks) {
-    (attributesJSON.state.visualization as XYState).tickLabelsVisibilitySettings = {
+    (attributesJSON.state.visualization as XYVisualizationState).tickLabelsVisibilitySettings = {
       x: false,
       yRight: false,
       yLeft: false,
@@ -204,6 +209,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
+        disabledActions={DISABLED_ACTIONS}
         extraActions={actions}
         viewMode={'view'}
         searchSessionId={searchSessionId}

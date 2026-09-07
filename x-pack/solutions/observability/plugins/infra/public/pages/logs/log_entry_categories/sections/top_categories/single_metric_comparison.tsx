@@ -20,21 +20,21 @@ export const SingleMetricComparison: React.FunctionComponent<{
   if (changeFactor < 0) {
     return (
       <NoWrapSpan>
-        <EuiIcon type="sortDown" color="danger" />
+        <EuiIcon type="sortDown" color="danger" aria-hidden={true} />
         <EuiTextColor color="danger">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
-        <EuiIcon type="sortUp" color="success" />
+        <EuiIcon type="sortUp" color="success" aria-hidden={true} />
         <EuiTextColor color="success">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && !Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
-        <EuiIcon type="sortUp" color="success" />
+        <EuiIcon type="sortUp" color="success" aria-hidden={true} />
         <EuiTextColor color="success">{newCategoryTrendLabel}</EuiTextColor>
       </NoWrapSpan>
     );

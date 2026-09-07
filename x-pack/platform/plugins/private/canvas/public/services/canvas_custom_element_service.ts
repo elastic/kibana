@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib';
 import type { CustomElement } from '../../types';
 import { coreServices } from './kibana_services';
@@ -31,14 +32,14 @@ class CanvasCustomElementService {
   }
 
   public async update(id: string, element: Partial<CustomElement>) {
-    await coreServices.http.put(`${this.apiPath}/${id}`, {
+    await coreServices.http.put(buildPath(`${this.apiPath}/{id}`, { id }), {
       body: JSON.stringify(element),
       version: '1',
     });
   }
 
   public async remove(id: string) {
-    await coreServices.http.delete(`${this.apiPath}/${id}`, { version: '1' });
+    await coreServices.http.delete(buildPath(`${this.apiPath}/{id}`, { id }), { version: '1' });
   }
 
   public async find(searchTerm: string): Promise<CustomElementFindResponse> {

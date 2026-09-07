@@ -8,7 +8,7 @@
  */
 
 import { fromFiltersLensApiToLensState, fromFiltersLensStateToAPI } from './filters';
-import type { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { FiltersIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFiltersOperation } from '../../schema/bucket_ops';
 
 describe('Filters Transforms', () => {
@@ -17,8 +17,8 @@ describe('Filters Transforms', () => {
       const input: LensApiFiltersOperation = {
         operation: 'filters',
         filters: [
-          { filter: { language: 'kuery', query: 'status:active' }, label: 'Active' },
-          { filter: { language: 'lucene', query: 'status:inactive' } },
+          { filter: { language: 'kql', expression: 'status:active' }, label: 'Active' },
+          { filter: { language: 'lucene', expression: 'status:inactive' } },
         ],
       };
 
@@ -78,9 +78,12 @@ describe('Filters Transforms', () => {
       expect(result.operation).toBe('filters');
       expect(result.label).toBe('Filters');
       expect(result.filters).toHaveLength(2);
-      expect(result.filters[0].filter).toEqual({ language: 'kuery', query: 'status:active' });
+      expect(result.filters[0].filter).toEqual({ language: 'kql', expression: 'status:active' });
       expect(result.filters[0].label).toBe('Active');
-      expect(result.filters[1].filter).toEqual({ language: 'lucene', query: 'status:inactive' });
+      expect(result.filters[1].filter).toEqual({
+        language: 'lucene',
+        expression: 'status:inactive',
+      });
       expect(result.filters[1].label).toBe('Inactive');
     });
 

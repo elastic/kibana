@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -25,7 +25,6 @@ import {
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useIsOpenState } from '../../../../common/hooks/use_is_open_state';
 import type { SiemMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import { useMigrationDashboardsTableColumns } from '../../hooks/use_migration_dashboards_table_columns';
@@ -39,14 +38,16 @@ import * as i18n from './translations';
 import type { DashboardMigrationStats } from '../../types';
 import { MigrationDashboardsFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { EmptyMigration, SearchField, StartMigrationModal } from '../../../common/components';
+import { EmptyMigration, SearchField, MemoizedBasicTable } from '../../../common/components';
 import type { FilterOptionsBase, MigrationSettingsBase } from '../../../common/types';
 import * as logicI18n from '../../logic/translations';
 import { BulkActions } from './bulk_actions';
 import { useInstallMigrationDashboards } from '../../logic/use_install_migration_dashboards';
 import { useGetMigrationTranslationStats } from '../../logic/use_get_migration_translation_stats';
 import { useMigrationDashboardDetailsFlyout } from '../../hooks/use_migration_dashboard_details_flyout';
+import { useStartDashboardsMigrationModal } from '../../hooks/use_start_dashboard_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
+import { useInstallMigrationDashboard } from '../../logic/use_install_migration_dashboard';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -164,8 +165,24 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       setSearchTerm(value.trim());
     }, []);
 
-    const { mutateAsync: installMigrationDashboards } = useInstallMigrationDashboards(migrationId);
+    const { mutateAsync: installMigrationDashboards } =
+      useInstallMigrationDashboards(migrationStats);
+    const { mutateAsync: installMigrationDashboard } = useInstallMigrationDashboard(migrationId);
+
     const { startMigration, isLoading: isRetryLoading } = useStartMigration(refetchData);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: MigrationSettingsBase) => {
+        startMigration(migrationStats, SiemMigrationRetryFilter.FAILED, settings);
+      },
+      [migrationStats, startMigration]
+    );
+    const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
+      useStartDashboardsMigrationModal({
+        type: 'reprocess',
+        migrationStats,
+        translationStats,
+        onStartMigrationWithSettings,
+      });
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -200,37 +217,15 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       async (migrationDashboard: DashboardMigrationDashboard) => {
         setTableLoading(true);
         try {
-          await installMigrationDashboards({
-            ids: [migrationDashboard.id],
-          });
+          await installMigrationDashboard({ migrationDashboard });
         } catch (error) {
           addError(error, { title: logicI18n.INSTALL_MIGRATION_DASHBOARDS_FAILURE });
         } finally {
           setTableLoading(false);
         }
       },
-      [installMigrationDashboards, addError]
+      [installMigrationDashboard, addError]
     );
-
-    const defaultSettingsForModal = useMemo(
-      () => ({
-        connectorId: migrationStats?.last_execution?.connector_id,
-      }),
-      [migrationStats.last_execution]
-    );
-
-    const reprocessFailedDashboardsWithSettings = useCallback(
-      (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, settings);
-      },
-      [migrationId, startMigration]
-    );
-
-    const {
-      isOpen: isReprocessFailedDashboardsModalVisible,
-      open: showReprocessFailedDashboardsModal,
-      close: closeReprocessFailedDashboardsModal,
-    } = useIsOpenState(false);
 
     const getMigrationDashboardsData = useCallback(
       (dashboardId: string) => {
@@ -245,11 +240,32 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
       [isDataLoading, migrationDashboards]
     );
 
-    const { migrationDashboardDetailsFlyout, openMigrationDashboardDetails } =
-      useMigrationDashboardDetailsFlyout({
-        isLoading: isDataLoading,
-        getMigrationDashboardData: getMigrationDashboardsData,
-      });
+    const {
+      migrationDashboardDetailsFlyout,
+      openMigrationDashboardDetails,
+      openedMigrationDashboardId,
+    } = useMigrationDashboardDetailsFlyout({
+      isLoading: isDataLoading,
+      migrationDashboards,
+      getMigrationDashboardData: getMigrationDashboardsData,
+    });
+
+    const { euiTheme } = useEuiTheme();
+    const rowProps = useCallback(
+      (dashboard: DashboardMigrationDashboard) => ({ 'data-dashboard-id': dashboard.id }),
+      []
+    );
+    const highlightCss = useMemo(
+      () =>
+        openedMigrationDashboardId
+          ? {
+              [`.euiTableRow[data-dashboard-id="${openedMigrationDashboardId}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedMigrationDashboardId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const dashboardsColumns = useMigrationDashboardsTableColumns({
       shouldDisableActions: isDashboardsLoading || isTableLoading,
@@ -259,15 +275,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
 
     return (
       <>
-        {isReprocessFailedDashboardsModalVisible && (
-          <StartMigrationModal
-            title={i18n.REPROCESS_DASHBOARDS_DIALOG_TITLE(translationStats?.dashboards.failed ?? 0)}
-            description={i18n.REPROCESS_DASHBOARDS_DIALOG_DESCRIPTION}
-            defaultSettings={defaultSettingsForModal}
-            onStartMigrationWithSettings={reprocessFailedDashboardsWithSettings}
-            onClose={closeReprocessFailedDashboardsModal}
-          />
-        )}
+        {reprocessMigrationModal}
 
         <EuiSkeletonLoading
           isLoading={isStatsLoading}
@@ -304,7 +312,7 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                       selectedDashboards={selectedMigrationDashboards}
                       installTranslatedDashboards={installTranslatedDashboards}
                       installSelectedDashboards={installSelectedDashboards}
-                      reprocessFailedDashboards={showReprocessFailedDashboardsModal}
+                      reprocessFailedDashboards={showReprocessMigrationModal}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -333,17 +341,21 @@ export const MigrationDashboardsTable: React.FC<MigrationDashboardsTableProps> =
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
-                <EuiBasicTable<DashboardMigrationDashboard>
-                  loading={false}
-                  items={migrationDashboards}
-                  pagination={pagination}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                  selection={tableSelection}
-                  itemId={'id'}
-                  data-test-subj={'dashboards-translation-table'}
-                  columns={dashboardsColumns}
-                />
+                <div css={highlightCss}>
+                  <MemoizedBasicTable<DashboardMigrationDashboard>
+                    tableCaption={i18n.DASHBOARDS_MIGRATION_TABLE_CAPTION}
+                    loading={false}
+                    items={migrationDashboards}
+                    pagination={pagination}
+                    sorting={sorting}
+                    onChange={onTableChange}
+                    selection={tableSelection}
+                    itemId={'id'}
+                    rowProps={rowProps}
+                    data-test-subj={'dashboards-translation-table'}
+                    columns={dashboardsColumns}
+                  />
+                </div>
               </>
             )
           }

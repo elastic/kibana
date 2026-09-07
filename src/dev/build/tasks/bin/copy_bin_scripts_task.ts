@@ -10,9 +10,8 @@
 import Mustache from 'mustache';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import type { Task } from '../../lib';
-import { copyAll } from '../../lib';
 
 export const CopyBinScripts: Task = {
   description: 'Copying bin scripts into platform-specific build directory',
@@ -23,28 +22,32 @@ export const CopyBinScripts: Task = {
       const scriptsDest = build.resolvePathForPlatform(platform, 'bin');
       mkdirSync(scriptsDest, { recursive: true });
 
+      // [rspack-transition] When the legacy optimizer is removed, delete the rspack variable.
+      const templateVars = {
+        darwin: platform.isMac(),
+        linux: platform.isLinux(),
+        serverless: platform.isServerless(),
+        forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
+        rspack: process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1',
+      };
+
       if (platform.isWindows()) {
-        await copyAll(scriptsSrc, scriptsDest, {
-          select: ['*.bat'],
+        globbySync(['*.bat'], { cwd: scriptsSrc }).forEach((script) => {
+          const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
+          const output = Mustache.render(template, templateVars);
+          writeFileSync(join(scriptsDest, script), output);
         });
       } else {
-        globby
-          .sync(['*'], {
-            ignore: ['*.bat'],
-            cwd: scriptsSrc,
-          })
-          .forEach((script) => {
-            const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
-            const output = Mustache.render(template, {
-              darwin: platform.isMac(),
-              linux: platform.isLinux(),
-              serverless: platform.isServerless(),
-              forcePointerCompression: Boolean(process.env.CI_FORCE_NODE_POINTER_COMPRESSION), // for .buildkite/pipeline-resource-definitions/kibana-pointer-compression.yml
-            });
-            writeFileSync(join(scriptsDest, script), output, {
-              mode: '0755',
-            });
+        globbySync(['*'], {
+          ignore: ['*.bat'],
+          cwd: scriptsSrc,
+        }).forEach((script) => {
+          const template = readFileSync(join(scriptsSrc, script), { encoding: 'utf-8' });
+          const output = Mustache.render(template, templateVars);
+          writeFileSync(join(scriptsDest, script), output, {
+            mode: '0755',
           });
+        });
       }
     }
   },

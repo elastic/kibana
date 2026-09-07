@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+
 import React from 'react';
 import type { Reference } from '@kbn/content-management-utils';
 import type { CoreStart } from '@kbn/core/public';
@@ -24,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import type {
@@ -42,7 +44,19 @@ import type {
   StateSetter,
   IndexPatternMap,
   DatasourceDataPanelProps,
-} from '../../types';
+  DateHistogramIndexPatternColumn,
+  GenericIndexPatternColumn,
+  TermsIndexPatternColumn,
+  FormBasedPrivateState,
+  FormBasedPersistedState,
+  Datasource,
+  VisualizeEditorContext,
+  DateRange,
+  LastValueIndexPatternColumn,
+  FormBasedLayer,
+} from '@kbn/lens-common';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import { isColumnOfType } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -62,7 +76,6 @@ import {
   getDatasourceSuggestionsForVisualizeField,
   getDatasourceSuggestionsForVisualizeCharts,
 } from './form_based_suggestions';
-
 import {
   getFiltersInLayer,
   getSearchWarningMessages,
@@ -71,20 +84,18 @@ import {
   cloneLayer,
   getNotifiableFeatures,
   getUnsupportedOperationsWarningMessage,
+  getPrecisionErrorWarningMessages,
 } from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
 import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
-import type {
-  DateHistogramIndexPatternColumn,
-  GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
-} from './operations';
 import {
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
+  deleteColumn,
+  isReferenced,
 } from './operations';
 import {
   copyColumn,
@@ -92,27 +103,18 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import type {
-  FormBasedPrivateState,
-  FormBasedPersistedState,
-  DataViewDragDropOperation,
-} from './types';
+import type { DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
-import type { Datasource, VisualizeEditorContext } from '../../types';
-import { deleteColumn, isReferenced } from './operations';
+import { getColumnParamsForNewBucket } from './include_empty_rows_defaults';
 import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-import { getPrecisionErrorWarningMessages } from './utils';
 import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import type { DateRange } from '../../../common/types';
-import { cleanupFormulaColumns, isColumnOfType } from './operations/definitions/helpers';
+import { cleanupFormulaColumns } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
-import type { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';
-export type { OperationType, GenericIndexPatternColumn } from './operations';
-export { deleteColumn } from './operations';
+export type { OperationType } from './operations';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -194,6 +196,7 @@ export function columnToOperation(
     scale,
     label: uniqueLabel || label,
     isStaticValue: operationType === 'static_value',
+    ...(column.customLabel ? { customLabel: true } : {}),
     sortingHint: getSortingHint(column, dataView),
     hasTimeShift: Boolean(timeShift),
     hasReducedTimeRange: Boolean(reducedTimeRange),
@@ -208,11 +211,8 @@ export function columnToOperation(
 
 export type { FormatColumnArgs, TimeScaleArgs, CounterRateArgs } from '../../../common/expressions';
 
-export {
-  getSuffixFormatter,
-  unitSuffixesLong,
-  suffixFormatterId,
-} from '../../../common/suffix_formatter';
+export { unitSuffixesLong } from '@kbn/lens-common';
+export { getSuffixFormatter, suffixFormatterId } from '../../../common/suffix_formatter';
 
 export function getFormBasedDatasource({
   core,
@@ -220,6 +220,7 @@ export function getFormBasedDatasource({
   data,
   unifiedSearch,
   share,
+  kql,
   dataViews,
   fieldFormats,
   charts,
@@ -230,6 +231,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
@@ -237,9 +239,9 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings, featureFlags } = core;
+  const { uiSettings } = core;
 
-  const DATASOURCE_ID = 'formBased';
+  const DATASOURCE_ID = LENS_DATASOURCE_ID.FORM_BASED;
   const ALIAS_IDS = ['indexpattern'];
 
   // Not stateful. State is persisted to the frame
@@ -359,7 +361,14 @@ export function getFormBasedDatasource({
       state,
       layerId,
       indexPatterns,
-      { columnId, groupId, staticValue, autoTimeField, visualizationGroups }
+      {
+        columnId,
+        groupId,
+        staticValue,
+        autoTimeField,
+        visualizationGroups,
+        activeVisualizationTypeId,
+      }
     ) {
       const indexPattern = indexPatterns[state.layers[layerId]?.indexPatternId];
       let ret = state;
@@ -393,6 +402,7 @@ export function getFormBasedDatasource({
             indexPattern,
             visualizationGroups,
             targetGroup: groupId,
+            columnParams: getColumnParamsForNewBucket('date_histogram', activeVisualizationTypeId),
           }),
         });
       }
@@ -494,7 +504,6 @@ export function getFormBasedDatasource({
         layerId,
         indexPatterns,
         uiSettings,
-        featureFlags,
         dateRange,
         nowInstant,
         searchSessionId,
@@ -567,6 +576,7 @@ export function getFormBasedDatasource({
           http={core.http}
           data={data}
           unifiedSearch={unifiedSearch}
+          kql={kql}
           dataViews={dataViews}
           uniqueLabel={columnLabelMap[props.columnId]}
           notifications={core.notifications}

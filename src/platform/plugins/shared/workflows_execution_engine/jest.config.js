@@ -11,10 +11,15 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/plugins/shared/workflows_execution_engine'],
+  testMatch: [
+    '<rootDir>/src/platform/plugins/shared/workflows_execution_engine/**/*.test.{js,ts,tsx}',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/src/platform/plugins/shared/workflows_execution_engine',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/src/platform/plugins/shared/workflows/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/workflows_execution_engine/{common,public,server}/**/*.{js,ts,tsx}',
+    '<rootDir>/src/platform/plugins/shared/workflows_execution_engine/jest_integ_tests/**/*.{js,ts,tsx}',
+    '!<rootDir>/src/platform/plugins/shared/workflows_execution_engine/jest_integ_tests/mocks/**',
   ],
 };

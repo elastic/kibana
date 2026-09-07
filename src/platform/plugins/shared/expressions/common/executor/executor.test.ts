@@ -211,7 +211,7 @@ describe('Executor', () => {
         parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}'),
         []
       );
-      expect(injectFn).toBeCalledTimes(5);
+      expect(injectFn).toHaveBeenCalledTimes(5);
     });
 
     describe('.extract', () => {
@@ -219,7 +219,7 @@ describe('Executor', () => {
         executor.extract(
           parseExpression('foo bar="baz" | foo bar={foo bar="baz" | foo bar={foo bar="baz"}}')
         );
-        expect(extractFn).toBeCalledTimes(5);
+        expect(extractFn).toHaveBeenCalledTimes(5);
       });
 
       test('extracts references with the proper step key', () => {
@@ -292,7 +292,7 @@ describe('Executor', () => {
           ),
           version: '7.10.0',
         });
-        expect(migrateFn).toBeCalledTimes(5);
+        expect(migrateFn).toHaveBeenCalledTimes(5);
       });
 
       test('migrates expression function to expression function or chain of expression functions', () => {
@@ -336,6 +336,7 @@ describe('Executor', () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
       const entry = functionCache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: true })
@@ -348,6 +349,7 @@ describe('Executor', () => {
       await executor.run('theme size default=12', null, { allowCache: true }).toPromise();
       expect(functionCache.size).toEqual(1);
       const entry = functionCache.keys().next().value;
+      // @ts-expect-error upgrade typescript v5.9.3
       functionCache.set(entry, fakeCacheEntry);
       const result = await executor
         .run('theme size default=12', null, { allowCache: false })

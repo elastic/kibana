@@ -12,15 +12,13 @@ import type {
   ExecuteOptions,
   ExecutionResponse,
 } from '../create_unsecured_execute_function';
-import { asNotificationExecutionSource } from '../lib';
+import { asNotificationExecutionSource, NOTIFICATIONS_REQUESTER_ID } from '../lib';
 import type { RelatedSavedObjects, ActionExecutorContract } from '../lib';
 import type { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
 import type { ConnectorWithExtraFindData } from '../application/connector/types';
 import { getAllUnsecured } from '../application/connector/methods/get_all/get_all';
-
-// requests from the notification service (for system notification)
-const NOTIFICATION_REQUESTER_ID = 'notifications';
+import type { ActionTypeRegistry } from '../action_type_registry';
 
 // requests from background tasks (primarily for EDR)
 const BACKGROUND_TASK_REQUESTER_ID = 'background_task';
@@ -28,7 +26,7 @@ const BACKGROUND_TASK_REQUESTER_ID = 'background_task';
 // allowlist for features wanting access to the unsecured actions client
 // which allows actions to be enqueued for execution without a user request
 const ALLOWED_REQUESTER_IDS = [
-  NOTIFICATION_REQUESTER_ID,
+  NOTIFICATIONS_REQUESTER_ID,
   BACKGROUND_TASK_REQUESTER_ID,
   // For functional testing
   'functional_tester',
@@ -42,6 +40,7 @@ export interface UnsecuredActionsClientOpts {
   internalSavedObjectsRepository: ISavedObjectsRepository;
   kibanaIndices: string[];
   logger: Logger;
+  connectorTypeRegistry: ActionTypeRegistry;
 }
 
 type UnsecuredExecuteOptions = Omit<ExecuteOptions, 'source'> & {
@@ -127,6 +126,7 @@ export class UnsecuredActionsClient {
       logger: this.opts.logger,
       internalSavedObjectsRepository: this.opts.internalSavedObjectsRepository,
       spaceId,
+      connectorTypeRegistry: this.opts.connectorTypeRegistry,
     });
   }
 
@@ -136,7 +136,7 @@ export class UnsecuredActionsClient {
     relatedSavedObjects?: RelatedSavedObjects
   ) {
     switch (requesterId) {
-      case NOTIFICATION_REQUESTER_ID:
+      case NOTIFICATIONS_REQUESTER_ID:
         return {
           source: asNotificationExecutionSource({
             requesterId,

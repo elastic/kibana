@@ -6,6 +6,7 @@
  */
 
 import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -204,6 +205,9 @@ export const ChartsGridContainer: FC<ChartsGridProps> = ({ changePoints: changeP
               pageCount={pagination.pageCount}
               activePage={pagination.activePage}
               onPageClick={pagination.updatePagination}
+              aria-label={i18n.translate('xpack.aiops.changePointDetection.paginationAriaLabel', {
+                defaultMessage: 'Change point detection charts pagination',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

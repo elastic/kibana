@@ -126,8 +126,13 @@ export function useTestQuery(fetch: () => Promise<TestQueryFetchResponse>) {
     }
   }, [fetch]);
 
+  const resetTestQueryResponse = useCallback(() => {
+    setTestQueryResponse(TEST_QUERY_INITIAL_RESPONSE);
+  }, []);
+
   return {
     onTestQuery,
+    resetTestQueryResponse,
     testQueryResult: testQueryResponse.result,
     testQueryError: testQueryResponse.error,
     testQueryWarning: testQueryResponse.warning,

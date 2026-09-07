@@ -55,7 +55,7 @@ const KibanaStyledComponentsThemeProvider = <
  * @deprecated All Kibana components need to migrate to Emotion.
  */
 export const KibanaStyledComponentsThemeProviderDecorator: Decorator = (storyFn, { globals }) => {
-  const darkMode = globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark';
+  const darkMode = globals.euiTheme === 'borealis.dark';
 
   return (
     <KibanaStyledComponentsThemeProvider darkMode={darkMode}>

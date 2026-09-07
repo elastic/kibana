@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { PropertyName, MappingProperty } from 'elasticsearch-8.x/lib/api/types'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import type { PropertyName, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 
 export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   branch: {
@@ -18,8 +18,8 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   job_id: {
     type: 'wildcard',
   },
-  message: {
-    type: 'text',
+  retry_count: {
+    type: 'integer',
   },
   build: {
     type: 'object',
@@ -45,7 +45,7 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
         type: 'text',
       },
       slug: {
-        type: 'wildcard',
+        type: 'keyword',
       },
     },
   },
@@ -90,6 +90,20 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
     fields: {
       text: {
         type: 'match_only_text',
+      },
+    },
+  },
+  triggered_from_build: {
+    type: 'object',
+    properties: {
+      id: {
+        type: 'wildcard',
+      },
+      number: {
+        type: 'integer',
+      },
+      pipeline_slug: {
+        type: 'keyword',
       },
     },
   },
@@ -140,6 +154,26 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   duration: {
     type: 'long',
   },
+  tests: {
+    type: 'object',
+    properties: {
+      passes: {
+        type: 'long',
+      },
+      failures: {
+        type: 'long',
+      },
+      pending: {
+        type: 'long',
+      },
+      flaky: {
+        type: 'long',
+      },
+      total: {
+        type: 'long',
+      },
+    },
+  },
   config: {
     type: 'object',
     properties: {
@@ -148,6 +182,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
         properties: fileInfoProperties,
       },
       category: {
+        type: 'keyword',
+      },
+      namespace: {
         type: 'keyword',
       },
     },
@@ -192,6 +229,18 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
   },
   status: {
     type: 'keyword',
+  },
+  attempt: {
+    type: 'short',
+  },
+  outcome: {
+    type: 'keyword',
+  },
+  attempts: {
+    type: 'short',
+  },
+  console_errors: {
+    type: 'match_only_text',
   },
   step: {
     type: 'object',

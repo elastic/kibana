@@ -20,11 +20,11 @@ import {
   waitFor,
   renderHook as reactRenderHook,
 } from '@testing-library/react';
-import type { Action, Reducer, Store } from 'redux';
-import { QueryClient } from '@tanstack/react-query';
+import type { Action, Reducer, Store } from 'redux-v4';
+import { QueryClient } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { INTEGRATIONS_PLUGIN_ID, PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import type { UseBaseQueryResult } from '@tanstack/react-query';
+import type { UseBaseQueryResult } from '@kbn/react-query';
 import ReactDOM from 'react-dom';
 import type { DeepReadonly } from 'utility-types';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
@@ -39,6 +39,7 @@ import type { MiddlewareActionSpyHelper } from '../../store/test_utils';
 import { createSpyMiddleware } from '../../store/test_utils';
 import type { State } from '../../store';
 import { AppRootProvider } from './app_root_provider';
+import { resetConsoleManagerStateForTesting } from '../../../management/components/console/components/console_manager/console_manager';
 import { managementMiddlewareFactory } from '../../../management/store/middleware';
 import { createStartServicesMock } from '../../lib/kibana/kibana_react.mock';
 import { SUB_PLUGINS_REDUCER, mockGlobalState, createMockStore } from '..';
@@ -252,6 +253,11 @@ const experimentalFeaturesReducer: Reducer<State['app'], UpdateExperimentalFeatu
  * for further customization.
  */
 export const createAppRootMockRenderer = (): AppContextTestRender => {
+  // The console manager keeps its running consoles in a module-level store that intentionally
+  // outlives `<ConsoleManager>` unmounts (so console state survives navigation/flyouts in the app).
+  // Reset it per renderer creation so console state does not leak between test cases.
+  resetConsoleManagerStateForTesting();
+
   const history = createMemoryHistory<never>();
   const coreStart = createCoreStartMock(history);
   const middlewareSpy = createSpyMiddleware();

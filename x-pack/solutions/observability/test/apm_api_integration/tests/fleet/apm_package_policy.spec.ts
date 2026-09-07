@@ -14,7 +14,7 @@ import {
 } from '@kbn/apm-plugin/server/routes/fleet/get_package_policy_decorators';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
+import type { SourceMap } from '@kbn/apm-api-shared';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import {
@@ -29,6 +29,7 @@ import {
   deletePackagePolicy,
   getPackagePolicy,
   setupFleet,
+  updatePackagePolicy,
 } from './helpers';
 import { getBettertest } from '../../common/bettertest';
 import { expectToReject } from '../../common/utils/expect_to_reject';
@@ -41,6 +42,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const es = getService('es');
   const bettertest = getBettertest(supertest);
   const configService = getService('config');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
     return createEsClientForFtrConfig(configService, { auth: { apiKey: { id, api_key: apiKey } } });
@@ -115,6 +117,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     before(async () => {
       await setupFleet(bettertest);
+      await apmSynthtraceEsClient.initializePackage({ skipInstallation: false });
       agentPolicyId = await createAgentPolicy({ bettertest });
       packagePolicyId = await createPackagePolicy({ bettertest, agentPolicyId });
       apmPackagePolicy = await getPackagePolicy(bettertest, packagePolicyId); // make sure to get the latest package policy
@@ -123,6 +126,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     after(async () => {
       await deleteAgentPolicy(bettertest, agentPolicyId);
       await deletePackagePolicy(bettertest, packagePolicyId);
+      await apmSynthtraceEsClient.uninstallPackage();
       expect(await getActiveApiKeysCount(packagePolicyId)).to.eql(0); // make sure all api keys for the policy are invalidated
     });
 
@@ -232,6 +236,39 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
             },
           ]);
         });
+      });
+    });
+
+    describe('APM package policy update - API key preservation', () => {
+      // Simulates a client (e.g. Terraform provider) that only round-trips declared
+      // package vars and drops the runtime-injected api key paths from the config.
+      const keylessInputOverride = {
+        inputs: [
+          { type: 'apm', policy_template: 'apmserver', enabled: true, streams: [], vars: {} },
+        ],
+      };
+
+      it('preserves existing api keys when an update omits them', async () => {
+        const storedAgentKey = get(apmPackagePolicy, AGENT_CONFIG_API_KEY_PATH);
+        const storedSourceMapKey = get(apmPackagePolicy, SOURCE_MAP_API_KEY_PATH);
+
+        expect(storedAgentKey).to.not.be.empty();
+        expect(storedSourceMapKey).to.not.be.empty();
+
+        await updatePackagePolicy(bettertest, packagePolicyId, keylessInputOverride);
+
+        const updatedPolicy = await getPackagePolicy(bettertest, packagePolicyId);
+
+        expect(get(updatedPolicy, AGENT_CONFIG_API_KEY_PATH)).to.eql(storedAgentKey);
+        expect(get(updatedPolicy, SOURCE_MAP_API_KEY_PATH)).to.eql(storedSourceMapKey);
+      });
+
+      it('does not accumulate new api keys when an update omits them', async () => {
+        const activeKeysBefore = await getActiveApiKeysCount(packagePolicyId);
+
+        await updatePackagePolicy(bettertest, packagePolicyId, keylessInputOverride);
+
+        expect(await getActiveApiKeysCount(packagePolicyId)).to.eql(activeKeysBefore);
       });
     });
   });

@@ -9,47 +9,44 @@
 
 import type { AggParamsFilters } from '@kbn/data-plugin/common';
 import { convertToFiltersColumn } from './filters';
-import type { FiltersColumn } from './types';
 
 describe('convertToFiltersColumn', () => {
   const aggId = `some-id`;
   const timeShift = '1h';
-  const filters = [{ input: { language: 'lucene', query: 'some other query' }, label: 'split' }];
+  const filters = [{ input: { query: 'some other query', language: 'lucene' }, label: 'split' }];
   const aggParams: AggParamsFilters = {
     filters,
   };
 
-  test.each<[string, Parameters<typeof convertToFiltersColumn>, Partial<FiltersColumn> | null]>([
-    [
-      'filters column if filters are provided',
-      [aggId, aggParams],
-      {
-        dataType: 'string',
-        isBucketed: true,
-        isSplit: false,
-        timeShift: undefined,
-        meta: { aggId },
-        params: { filters: aggParams.filters! },
-      },
-    ],
-    ['null if filters are not provided', [aggId, {}], null],
-    [
-      'filters column with isSplit and timeShift if specified',
-      [aggId, { ...aggParams, timeShift }, true],
-      {
-        dataType: 'string',
-        isBucketed: true,
-        isSplit: true,
-        timeShift,
-        meta: { aggId },
-        params: { filters: aggParams.filters! },
-      },
-    ],
-  ])('should return %s', (_, input, expected) => {
-    if (expected === null) {
-      expect(convertToFiltersColumn(...input)).toBeNull();
-    } else {
-      expect(convertToFiltersColumn(...input)).toEqual(expect.objectContaining(expected));
-    }
+  it('should return filters column if filters are provided', () => {
+    const expected = {
+      operationType: 'filters',
+      dataType: 'string',
+      isBucketed: true,
+      isSplit: false,
+      timeShift: undefined,
+      meta: { aggId },
+      params: { filters: aggParams.filters },
+    };
+    expect(convertToFiltersColumn(aggId, aggParams)).toEqual(expect.objectContaining(expected));
+  });
+
+  it('should return null if filters are not provided', () => {
+    expect(convertToFiltersColumn(aggId, {})).toBeNull();
+  });
+
+  it('should return filters column with isSplit and timeShift if specified', () => {
+    const expected = {
+      operationType: 'filters',
+      dataType: 'string',
+      isBucketed: true,
+      isSplit: true,
+      timeShift,
+      meta: { aggId },
+      params: { filters: aggParams.filters },
+    };
+    expect(convertToFiltersColumn(aggId, { ...aggParams, timeShift }, true)).toEqual(
+      expect.objectContaining(expected)
+    );
   });
 });

@@ -43,11 +43,11 @@ const PinControlCell: React.FC<PinControlCellProps> = React.memo(({ row, onToggl
         overflow: hidden;
       `}
     >
-      <EuiToolTip content={label} delay="long" disableScreenReaderOutput>
+      <EuiToolTip content={label} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj={`unifiedDocViewer_pinControlButton_${fieldName}`}
           iconSize="m"
-          iconType={isPinned ? 'pinFilled' : 'pin'}
+          iconType={isPinned ? 'pinFill' : 'pin'}
           color="text"
           aria-label={label}
           onClick={() => {

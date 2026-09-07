@@ -8,85 +8,52 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
+  EuiIllustration,
   EuiLink,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
+import { relevanceHandTouch } from '@elastic/eui-illustrations';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React from 'react';
-
+import { useLibraryEnabled } from '@kbn/workflows-ui';
+import { PLUGIN_ID, WORKFLOWS_DOCUMENTATION_URL } from '../../../common';
+import { WorkflowsPageName } from '../../deep_links';
+import { useKibana } from '../../hooks/use_kibana';
+import { PrivilegesFooter } from '../workflows_required_priveleges_footer';
 interface WorkflowsEmptyStateProps {
   onCreateWorkflow?: () => void;
-  canCreateWorkflow?: boolean;
 }
 
-export function WorkflowsEmptyState({
-  onCreateWorkflow,
-  canCreateWorkflow = false,
-}: WorkflowsEmptyStateProps) {
-  const { http } = useKibana().services;
+export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStateProps) {
+  const { application } = useKibana().services;
+  const isLibraryEnabled = useLibraryEnabled();
+
+  const navigateToLibrary = useCallback(
+    () => application.navigateToApp(PLUGIN_ID, { deepLinkId: WorkflowsPageName.library }),
+    [application]
+  );
+
   return (
     <EuiEmptyPrompt
       icon={
-        <EuiImage
-          size="fullWidth"
-          src={http!.basePath.prepend('/plugins/workflowsManagement/assets/empty_state.svg')}
+        <EuiIllustration
+          type={relevanceHandTouch}
           alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
         />
       }
       title={
-        <EuiFlexGroup
-          alignItems="center"
-          justifyContent="center"
-          gutterSize="s"
-          responsive={false}
-          wrap={false}
-        >
-          <EuiFlexItem grow={false}>
-            <h2 style={{ whiteSpace: 'nowrap' }}>
-              <FormattedMessage
-                id="workflows.emptyState.title"
-                defaultMessage="Get Started with Workflows"
-              />
-            </h2>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              title={
-                <FormattedMessage
-                  id="workflows.emptyState.technicalPreviewBadge"
-                  defaultMessage="Technical Preview"
-                />
-              }
-              content={
-                <FormattedMessage
-                  id="workflows.emptyState.technicalPreviewTooltip"
-                  defaultMessage="This functionality is experimental and not supported. It may change or be removed at any time."
-                />
-              }
-            >
-              <EuiBetaBadge
-                label={
-                  <FormattedMessage
-                    id="workflows.emptyState.technicalPreviewBadge"
-                    defaultMessage="Technical Preview"
-                  />
-                }
-                title="Technical Preview"
-                size="s"
-                style={{ alignSelf: 'center', verticalAlign: 'middle' }}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <h2 style={{ whiteSpace: 'nowrap' }}>
+          <FormattedMessage
+            id="workflows.emptyState.title"
+            defaultMessage="Get Started with Workflows"
+          />
+        </h2>
       }
       layout="horizontal"
       color="plain"
@@ -95,34 +62,49 @@ export function WorkflowsEmptyState({
           <p>
             <FormattedMessage
               id="workflows.emptyState.body.firstParagraph"
-              defaultMessage="Workflows let you automate and orchestrate security actions across your environment. Build step-by-step processes to enrich alerts, trigger responses, or streamline investigations—all in one place. Start by creating a workflow to simplify repetitive tasks and improve efficiency."
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment. Create workflows to connect actions, reduce manual effort, and improve operational efficiency."
             />
           </p>
         </>
       }
       actions={
-        canCreateWorkflow && onCreateWorkflow ? (
+        onCreateWorkflow ? (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusInCircle">
+              <EuiButton color="primary" fill onClick={onCreateWorkflow} iconType="plusCircle">
                 <FormattedMessage
                   id="workflows.emptyState.createButton"
-                  defaultMessage="Create a new workflow"
+                  defaultMessage="Create workflow"
                 />
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href="https://github.com/elastic/workflow-examples"
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                <FormattedMessage
-                  id="workflows.emptyState.exampleWorkflowsButton"
-                  defaultMessage="Example workflows"
-                />
-              </EuiButtonEmpty>
+              {isLibraryEnabled ? (
+                <EuiButtonEmpty
+                  onClick={navigateToLibrary}
+                  iconType="chevronSingleRight"
+                  iconSide="right"
+                  aria-label="Explore library"
+                >
+                  <FormattedMessage
+                    id="workflows.emptyState.exploreLibraryButton"
+                    defaultMessage="Explore library"
+                  />
+                </EuiButtonEmpty>
+              ) : (
+                <EuiButtonEmpty
+                  href="https://github.com/elastic/workflows"
+                  target="_blank"
+                  iconType="external"
+                  iconSide="right"
+                  aria-label="Example workflows"
+                >
+                  <FormattedMessage
+                    id="workflows.emptyState.exampleWorkflowsButton"
+                    defaultMessage="Example workflows"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : null
@@ -137,13 +119,57 @@ export function WorkflowsEmptyState({
               />
             </span>
           </EuiTitle>{' '}
-          <EuiLink href="#" target="_blank">
+          <EuiLink href={WORKFLOWS_DOCUMENTATION_URL} target="_blank">
             <FormattedMessage
               id="workflows.emptyState.footer.link"
               defaultMessage="Read documentation"
             />
           </EuiLink>
         </>
+      }
+    />
+  );
+}
+
+export function WorkflowsEmptyStateReadOnly() {
+  return (
+    <EuiEmptyPrompt
+      icon={
+        <EuiIllustration
+          type={relevanceHandTouch}
+          alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
+        />
+      }
+      title={
+        <h2 style={{ whiteSpace: 'nowrap' }}>
+          <FormattedMessage
+            id="workflows.emptyStateReadOnly.title"
+            defaultMessage="Workflows list will be here"
+          />
+        </h2>
+      }
+      layout="horizontal"
+      color="plain"
+      body={
+        <>
+          <p>
+            <FormattedMessage
+              id="workflows.emptyStateReadOnly.body.firstParagraph"
+              defaultMessage="Workflows let you automate repetitive tasks and streamline processes across your environment."
+            />
+          </p>
+        </>
+      }
+      footer={
+        <PrivilegesFooter
+          permissions={[
+            {
+              id: 'platform.plugins.shared.workflows_management.writeWorkflowPermissionText',
+              default: 'Workflows: Write',
+            },
+          ]}
+        />
       }
     />
   );

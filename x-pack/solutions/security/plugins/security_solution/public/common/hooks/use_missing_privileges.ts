@@ -6,9 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import { SECURITY_FEATURE_ID } from '../../../common/constants';
+import { ALERTS_FEATURE_ID, RULES_FEATURE_ID } from '../../../common/constants';
 import type { Privilege } from '../../detections/containers/detection_engine/alerts/types';
-import { useUserData } from '../../detections/components/user_info';
 import { useUserPrivileges } from '../components/user_privileges';
 
 const REQUIRED_INDEX_PRIVILEGES = ['read', 'write', 'view_index_metadata', 'manage'] as const;
@@ -49,18 +48,14 @@ export interface MissingPrivileges {
  * Hook that returns index and feature privileges that are missing for the user.
  */
 export const useMissingPrivileges = (): MissingPrivileges => {
-  const { detectionEnginePrivileges, listPrivileges } = useUserPrivileges();
-  const [{ canUserCRUD }] = useUserData();
+  const { detectionEnginePrivileges, listPrivileges, rulesPrivileges, alertsPrivileges } =
+    useUserPrivileges();
 
   return useMemo<MissingPrivileges>(() => {
     const featurePrivileges: MissingFeaturePrivileges[] = [];
     const indexPrivileges: MissingIndexPrivileges[] = [];
 
-    if (
-      canUserCRUD == null ||
-      listPrivileges.result == null ||
-      detectionEnginePrivileges.result == null
-    ) {
+    if (listPrivileges.result == null || detectionEnginePrivileges.result == null) {
       /**
        * Do not check privileges till we get all the data. That helps to reduce
        * subsequent layout shift while loading and skip unneeded re-renders.
@@ -71,8 +66,12 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (!canUserCRUD) {
-      featurePrivileges.push([SECURITY_FEATURE_ID, ['all']]);
+    if (rulesPrivileges.rules.edit === false) {
+      featurePrivileges.push([RULES_FEATURE_ID, ['all']]);
+    }
+
+    if (alertsPrivileges.alerts.edit === false) {
+      featurePrivileges.push([ALERTS_FEATURE_ID, ['all']]);
     }
 
     const missingItemsPrivileges = getMissingIndexPrivileges(listPrivileges.result.listItems.index);
@@ -96,5 +95,10 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [canUserCRUD, listPrivileges, detectionEnginePrivileges]);
+  }, [
+    listPrivileges.result,
+    detectionEnginePrivileges.result,
+    rulesPrivileges.rules.edit,
+    alertsPrivileges.alerts.edit,
+  ]);
 };

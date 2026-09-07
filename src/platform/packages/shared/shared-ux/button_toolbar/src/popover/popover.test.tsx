@@ -49,12 +49,12 @@ describe('<ToolbarPopover />', () => {
     expect(button.prop('color')).toBe('primary');
   });
 
-  test('if not given an iconType, render arrowDown on the right', () => {
+  test('if not given an iconType, render chevronSingleDown on the right', () => {
     const isOpen = false;
 
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
     const button = component.find('EuiButton');
-    expect(button.prop('iconType')).toBe('arrowDown');
+    expect(button.prop('iconType')).toBe('chevronSingleDown');
     expect(button.prop('iconSide')).toBe('right');
   });
 
@@ -62,10 +62,10 @@ describe('<ToolbarPopover />', () => {
     const isOpen = false;
 
     const component = mountWithIntl(
-      <ToolbarPopover label="test" iconType="plusInCircle" children={() => !isOpen} />
+      <ToolbarPopover label="test" iconType="plusCircle" children={() => !isOpen} />
     );
     const button = component.find('EuiButton');
-    expect(button.prop('iconType')).toBe('plusInCircle');
+    expect(button.prop('iconType')).toBe('plusCircle');
     expect(button.prop('iconSide')).toBe('left');
   });
 });

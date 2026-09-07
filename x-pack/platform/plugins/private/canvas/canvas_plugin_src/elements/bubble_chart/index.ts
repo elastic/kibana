@@ -14,7 +14,7 @@ export const bubbleChart: ElementFactory = () => ({
   help: 'A customizable bubble chart',
   width: 700,
   height: 300,
-  icon: 'heatmap',
+  icon: 'chartHeatmap',
   expression: `kibana
 | selectFilter
 | demodata

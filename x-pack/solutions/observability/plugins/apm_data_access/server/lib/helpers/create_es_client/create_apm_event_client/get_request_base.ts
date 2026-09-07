@@ -6,7 +6,7 @@
  */
 
 import type { ESFilter } from '@kbn/es-types';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { uniq } from 'lodash';
 import { PROCESSOR_EVENT } from '@kbn/apm-types/es_fields';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';

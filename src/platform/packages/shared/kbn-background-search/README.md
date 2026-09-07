@@ -24,12 +24,3 @@ function MyComponent() {
   );
 }
 ```
-
-## Feature flag
-
-The feature flag key used by convention is:
-`search.backgroundSearchEnabled`
-
-```yaml
-feature_flags.overrides.search.backgroundSearchEnabled: true
-```

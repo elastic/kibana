@@ -7,10 +7,9 @@
 
 import React, { memo } from 'react';
 import { EuiAvatar, EuiComment, EuiCommentList, EuiLoadingElastic } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DeleteConfirmModal } from './delete_confirm_modal';
 import { OpenFlyoutButtonIcon } from './open_flyout_button';
 import { OpenTimelineButtonIcon } from './open_timeline_button';
 import { DeleteNoteButtonIcon } from './delete_note_button';
@@ -18,11 +17,7 @@ import { MarkdownRenderer } from '../../common/components/markdown_editor';
 import { ADD_NOTE_LOADING_TEST_ID, NOTE_AVATAR_TEST_ID, NOTES_COMMENT_TEST_ID } from './test_ids';
 import type { State } from '../../common/store';
 import type { Note } from '../../../common/api/timeline';
-import {
-  ReqStatus,
-  selectCreateNoteStatus,
-  selectNotesTablePendingDeleteIds,
-} from '../store/notes.slice';
+import { ReqStatus, selectCreateNoteStatus } from '../store/notes.slice';
 
 export const ADDED_A_NOTE = i18n.translate('xpack.securitySolution.notes.addedANoteLabel', {
   defaultMessage: 'added a note',
@@ -48,6 +43,10 @@ export interface NotesListProps {
      * If true, the flyout icon will be hidden (this is useful for the flyout Notes tab)
      */
     hideFlyoutIcon?: boolean;
+    /**
+     * If true, the delete button will be hidden (used in read-only contexts such as Super Timeline)
+     */
+    hideDeleteIcon?: boolean;
   };
 }
 
@@ -59,10 +58,6 @@ export interface NotesListProps {
  */
 export const NotesList = memo(({ notes, options }: NotesListProps) => {
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
-
-  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
-  const isDeleteModalVisible = pendingDeleteIds.length > 0;
-
   return (
     <>
       <EuiCommentList>
@@ -79,13 +74,13 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
                   <OpenFlyoutButtonIcon
                     eventId={note.eventId}
                     timelineId={note.timelineId}
-                    iconType="arrowRight"
+                    iconType="chevronSingleRight"
                   />
                 )}
                 {note.timelineId && note.timelineId.length > 0 && !options?.hideTimelineIcon && (
                   <OpenTimelineButtonIcon note={note} index={index} />
                 )}
-                <DeleteNoteButtonIcon note={note} index={index} />
+                {!options?.hideDeleteIcon && <DeleteNoteButtonIcon note={note} index={index} />}
               </>
             }
             timelineAvatar={
@@ -103,7 +98,6 @@ export const NotesList = memo(({ notes, options }: NotesListProps) => {
           <EuiLoadingElastic size="xxl" data-test-subj={ADD_NOTE_LOADING_TEST_ID} />
         )}
       </EuiCommentList>
-      {isDeleteModalVisible && <DeleteConfirmModal refetch={false} />}
     </>
   );
 });

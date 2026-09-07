@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { ColumnState } from '../../../../../common/expressions';
+import type {
+  ColumnState,
+  GeneralDatasourceStates,
+  DatatableVisualizationState,
+} from '@kbn/lens-common';
 import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
   convertToRawColorMappings,
   getColumnMetaFn,
   isDeprecatedColorMapping,
 } from '../../../../runtime_state/converters/raw_color_mappings';
-import type { GeneralDatasourceStates } from '../../../../state_management';
-import type { DatatableVisualizationState } from '../../visualization';
 
 /** @deprecated */
 interface DeprecatedColorMappingColumn extends Omit<ColumnState, 'colorMapping'> {
@@ -45,7 +47,7 @@ export const convertToRawColorMappingsFn = (
 
     const convertedColumns = state.columns.map((column) => {
       if (column.colorMapping?.assignments || column.colorMapping?.specialAssignments) {
-        const columnMeta = getColumnMeta?.(state.layerId, column.columnId);
+        const columnMeta = getColumnMeta?.(state.layerId, [column.columnId]);
 
         return {
           ...column,

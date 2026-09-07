@@ -8,7 +8,7 @@
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { Connector } from '@kbn/search-connectors';
 import { ConnectorConfigurationComponent } from '@kbn/search-connectors';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';
@@ -42,7 +42,7 @@ export const ConnectorConfigurationPanels: React.FC<ConnectorConfigurationPanels
         <ConnectorConfigurationComponent
           isDisabled={!canManageConnectors}
           connector={connector}
-          hasPlatinumLicense={false}
+          hasPlatinumLicense={true}
           isLoading={isLoading}
           saveConfig={mutate}
         />

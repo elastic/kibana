@@ -5,10 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormAppend, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import type { AwsCredentialsTypeOptions } from './get_aws_credentials_form_options';
 import type { AwsCredentialsType } from '../types';
+import { TechnicalPreviewText } from '../common';
 
 export const AwsCredentialTypeSelector = ({
   type,
@@ -32,6 +33,13 @@ export const AwsCredentialTypeSelector = ({
       onChange={(optionElem) => {
         onChange(optionElem.target.value as AwsCredentialsType);
       }}
+      append={
+        type === 'cloud_connectors' ? (
+          <EuiFormAppend>
+            <TechnicalPreviewText />
+          </EuiFormAppend>
+        ) : undefined
+      }
       data-test-subj={AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ}
     />
   </EuiFormRow>

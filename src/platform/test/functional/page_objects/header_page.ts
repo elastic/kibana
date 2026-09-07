@@ -31,7 +31,8 @@ export class HeaderPageObject extends FtrService {
     await this.onAppLeaveWarning(ignoreAppLeaveWarning);
     await this.awaitGlobalLoadingIndicatorHidden();
     await this.retry.waitFor('Visualize app to be loaded', async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       return isNavVisible;
     });
   }
@@ -39,7 +40,8 @@ export class HeaderPageObject extends FtrService {
   public async clickDashboard() {
     await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
     await this.retry.waitFor('dashboard app to be loaded', async () => {
-      const isNavVisible = await this.testSubjects.exists('top-nav');
+      const isNavVisible =
+        (await this.testSubjects.exists('top-nav')) || (await this.testSubjects.exists('app-menu'));
       const isLandingPageVisible = await this.testSubjects.exists('dashboardLandingPage');
       return isNavVisible || isLandingPageVisible;
     });
@@ -82,13 +84,11 @@ export class HeaderPageObject extends FtrService {
   }
 
   public async onAppLeaveWarning(ignoreWarning = false) {
-    await this.retry.try(async () => {
-      const warning = await this.testSubjects.exists('confirmModalTitleText');
-      if (warning) {
-        await this.testSubjects.click(
-          ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
-        );
-      }
-    });
+    const warning = await this.testSubjects.exists('confirmModalTitleText');
+    if (warning) {
+      await this.testSubjects.click(
+        ignoreWarning ? 'confirmModalConfirmButton' : 'confirmModalCancelButton'
+      );
+    }
   }
 }

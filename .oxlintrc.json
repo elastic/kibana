@@ -1,0 +1,56 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+
+  "extends": [
+    "./.oxlint/javascript.jsonc",
+    "./.oxlint/typescript.jsonc",
+    "./.oxlint/jest.jsonc",
+    "./.oxlint/react.jsonc"
+  ],
+
+  "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
+
+  "categories": {
+    "correctness": "off"
+  },
+
+  // Oxlint 1.79 drops rule options inherited from JSON configs, so option-bearing rules stay here.
+  // https://github.com/oxc-project/oxc/issues/22230
+  "rules": {
+    "@typescript-eslint/explicit-member-accessibility": [
+      "error",
+      {
+        "accessibility": "off",
+        "overrides": {
+          "accessors": "explicit",
+          "constructors": "no-public",
+          "parameterProperties": "explicit"
+        }
+      }
+    ],
+    "@typescript-eslint/no-restricted-types": [
+      "error",
+      {
+        "types": {
+          "SFC": "Use FC or FunctionComponent instead.",
+          "React.SFC": "Use React.FC instead.",
+          "StatelessComponent": "Use FunctionComponent instead.",
+          "React.StatelessComponent": "Use React.FunctionComponent instead."
+        }
+      }
+    ],
+    "dot-notation": ["error", { "allowKeywords": true }],
+    "react/no-multi-comp": ["error", { "ignoreStateless": true }],
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
+    "react/prefer-es6-class": ["error", "always"]
+  },
+
+  "ignorePatterns": [
+    "**/.storybook/**",
+    "**/cypress/**",
+    "**/ftr_e2e/**",
+    "**/e2e/**",
+    "**/integration_tests/**",
+    "**/json_schemas/**"
+  ]
+}

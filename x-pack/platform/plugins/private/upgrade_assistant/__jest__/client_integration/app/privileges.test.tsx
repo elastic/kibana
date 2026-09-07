@@ -5,49 +5,40 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import '@testing-library/jest-dom';
+import { screen } from '@testing-library/react';
 
-import type { AppDependencies } from '../../../public/types';
-import { setupEnvironment, kibanaVersion, getAppContextMock } from '../helpers';
-import type { AppTestBed } from './app.helpers';
+import { setupEnvironment } from '../helpers/setup_environment';
 import { setupAppPage } from './app.helpers';
 
 describe('Privileges', () => {
-  let testBed: AppTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpSetup = mockEnvironment.httpSetup;
   });
 
   describe('when user is not a Kibana global admin', () => {
     beforeEach(async () => {
-      const appContextMock = getAppContextMock(kibanaVersion) as unknown as AppDependencies;
-      const servicesMock = {
-        ...appContextMock.services,
-        core: {
-          ...appContextMock.services.core,
-          application: {
-            capabilities: {
-              spaces: {
-                manage: false,
+      await setupAppPage(httpSetup, {
+        services: {
+          core: {
+            application: {
+              capabilities: {
+                spaces: {
+                  manage: false,
+                },
               },
             },
           },
         },
-      };
-
-      await act(async () => {
-        testBed = await setupAppPage(httpSetup, { services: servicesMock });
       });
-
-      testBed.component.update();
     });
 
     test('renders not authorized message', () => {
-      const { exists } = testBed;
-      expect(exists('overview')).toBe(false);
-      expect(exists('missingKibanaPrivilegesMessage')).toBe(true);
+      expect(screen.queryByTestId('overviewPageHeader')).toBeNull();
+      expect(screen.getByTestId('missingKibanaPrivilegesMessage')).toBeInTheDocument();
     });
   });
 });

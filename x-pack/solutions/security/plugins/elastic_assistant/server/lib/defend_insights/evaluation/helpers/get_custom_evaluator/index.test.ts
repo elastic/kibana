@@ -14,7 +14,7 @@ import { getDefendInsightsCustomEvaluator } from '.';
 describe('getDefendInsightsCustomEvaluator', () => {
   it('should return customIncompatibleAntivirusEvaluator for incompatible_antivirus', () => {
     const evaluator = getDefendInsightsCustomEvaluator({
-      insightType: DefendInsightType.Enum.incompatible_antivirus,
+      insightType: DefendInsightType.enum.incompatible_antivirus,
     });
 
     expect(evaluator).toBe(customIncompatibleAntivirusEvaluator);
@@ -25,6 +25,6 @@ describe('getDefendInsightsCustomEvaluator', () => {
       getDefendInsightsCustomEvaluator({
         insightType: 'some_unknown_type' as DefendInsightType,
       })
-    ).toThrowError(new InvalidDefendInsightTypeError());
+    ).toThrow(new InvalidDefendInsightTypeError());
   });
 });

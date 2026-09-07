@@ -24,6 +24,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
+  /**
+   * Purpose: Explore data drilldown smoke test
+   *
+   * Migration: Migrate to scout - move to lens scout tests since drilldown is regsitered by in lens plugin
+   */
   describe('Explore underlying data - panel action', function () {
     before(
       'change default index pattern to verify action navigates to correct index pattern',
@@ -37,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after('set back default index pattern and clean-up custom time range on panel', async () => {
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await dashboard.navigateToApp();
-      await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
+      await dashboard.loadDashboardInEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.disableCustomTimeRange();
@@ -74,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('carries over panel time range', async () => {
       await dashboard.navigateToApp();
 
-      await dashboard.gotoDashboardEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
+      await dashboard.loadDashboardInEditMode(drilldowns.DASHBOARD_WITH_PIE_CHART_NAME);
 
       await panelActions.customizePanel();
       await dashboardCustomizePanel.enableCustomTimeRange();

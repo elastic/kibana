@@ -11,7 +11,7 @@ import { renderTemplate } from './render_template';
 
 function mockParams() {
   return {
-    themeTagName: 'v8',
+    themeTagName: 'borealis',
     colorMode: 'light',
     jsDependencyPaths: ['/js-1', '/js-2'],
     styleSheetPaths: ['/style-1', '/style-2'],
@@ -36,5 +36,62 @@ describe('renderTemplate', () => {
       colorMode: 'system',
     });
     expect(content).toMatchSnapshot();
+  });
+
+  test('uses IIFE instead of window.onload when useRspack is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useRspack: true,
+    });
+    expect(content).not.toContain('window.onload = function');
+    expect(content).toContain('(function () {');
+    expect(content).toContain('})();');
+    expect(content).toMatchSnapshot();
+  });
+
+  test('uses window.onload when useRspack is false (default)', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).toContain('window.onload = function');
+    expect(content).not.toContain('(function () {');
+    expect(content).not.toContain('})();');
+  });
+
+  test('includes __REACT_DEVTOOLS_GLOBAL_HOOK__ stub when useHMR is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: true,
+    });
+    expect(content).toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+    expect(content).toContain('supportsFiber: true');
+    expect(content).toContain('inject: function');
+  });
+
+  test('does NOT include __REACT_DEVTOOLS_GLOBAL_HOOK__ stub when useHMR is false', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: false,
+    });
+    expect(content).not.toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+  });
+
+  test('does NOT include __REACT_DEVTOOLS_GLOBAL_HOOK__ stub by default', async () => {
+    const content = await renderTemplate(mockParams());
+    expect(content).not.toContain('__REACT_DEVTOOLS_GLOBAL_HOOK__');
+  });
+
+  test('includes __kbnHmrActive__ = true when useHMR is true', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: true,
+    });
+    expect(content).toContain('__kbnHmrActive__ = true');
+  });
+
+  test('does NOT include __kbnHmrActive__ when useHMR is false', async () => {
+    const content = await renderTemplate({
+      ...mockParams(),
+      useHMR: false,
+    });
+    expect(content).not.toContain('__kbnHmrActive__');
   });
 });

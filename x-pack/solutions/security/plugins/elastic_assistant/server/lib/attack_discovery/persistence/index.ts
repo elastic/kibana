@@ -7,12 +7,14 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import {
-  type AttackDiscoveryAlert,
+  type AttackDiscoveryFindResponse,
+  type AttackDiscoveryApiAlert,
   type CreateAttackDiscoveryAlertsParams,
   type FindAttackDiscoveryAlertsParams,
-  type AttackDiscoveryFindResponse,
   type GetAttackDiscoveryGenerationsResponse,
   type PostAttackDiscoveryGenerationsDismissResponse,
+  type AttackDiscoveryAlertDocument,
+  transformSearchResponseToAlerts,
 } from '@kbn/elastic-assistant-common';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -28,8 +30,6 @@ import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_ge
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
 import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
-import type { AttackDiscoveryAlertDocument } from '../schedules/types';
-import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';
 
@@ -69,82 +69,19 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
   }: {
     authenticatedUser: AuthenticatedUser;
     createAttackDiscoveryAlertsParams: CreateAttackDiscoveryAlertsParams;
-  }): Promise<AttackDiscoveryAlert[]> => {
+  }): Promise<AttackDiscoveryApiAlert[]> => {
     if (this.adhocAttackDiscoveryDataClient === undefined) {
       throw new Error('`adhocAttackDiscoveryDataClient` is required');
     }
+    const esClient = await this.options.elasticsearchClientPromise;
     return createAttackDiscoveryAlerts({
       adhocAttackDiscoveryDataClient: this.adhocAttackDiscoveryDataClient,
       authenticatedUser,
       createAttackDiscoveryAlertsParams,
+      esClient,
       logger: this.options.logger,
       spaceId: this.spaceId,
     });
-  };
-
-  // Runs an aggregation only bound to the (optional) alertIds and date range
-  // to prevent the connector names from being filtered-out as the user applies more filters:
-  public getAlertConnectorNames = async ({
-    alertIds,
-    authenticatedUser,
-    end,
-    esClient,
-    ids,
-    index,
-    logger,
-    page,
-    perPage,
-    sortField,
-    sortOrder,
-    start,
-  }: {
-    alertIds: string[] | undefined;
-    authenticatedUser: AuthenticatedUser;
-    end: string | undefined;
-    esClient: ElasticsearchClient;
-    ids: string[] | undefined;
-    index: string;
-    logger: Logger;
-    page: number;
-    perPage: number;
-    sortField: string;
-    sortOrder: string;
-    start: string | undefined;
-  }): Promise<string[]> => {
-    const aggs = getFindAttackDiscoveryAlertsAggregation();
-
-    // just use the (optional) alertIds and date range to prevent the connector
-    // names from being filtered-out as the user applies more filters:
-    const connectorsAggsFilter = combineFindAttackDiscoveryFilters({
-      alertIds, // optional
-      end,
-      ids,
-      start,
-    });
-
-    const combinedConnectorsAggsFilter = getCombinedFilter({
-      authenticatedUser,
-      filter: connectorsAggsFilter,
-    });
-
-    const aggsResult = await findDocuments<AttackDiscoveryAlertDocument>({
-      aggs,
-      esClient,
-      filter: combinedConnectorsAggsFilter,
-      index,
-      logger,
-      page,
-      perPage,
-      sortField,
-      sortOrder: sortOrder as estypes.SortOrder,
-    });
-
-    const { connectorNames } = transformSearchResponseToAlerts({
-      logger,
-      response: aggsResult.data,
-    });
-
-    return connectorNames;
   };
 
   public findAttackDiscoveryAlerts = async ({
@@ -161,9 +98,12 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     const {
       alertIds,
       connectorNames, // <-- as a filter input
+      enableFieldRendering,
       end,
+      executionUuid,
       includeUniqueAlertIds,
       ids,
+      includeAllAuthors,
       search,
       shared,
       sortField = '@timestamp',
@@ -172,26 +112,46 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       status,
       page = FIRST_PAGE,
       perPage = DEFAULT_PER_PAGE,
+      withReplacements = false,
+      scheduled,
     } = findAttackDiscoveryAlertsParams;
     const aggs = getFindAttackDiscoveryAlertsAggregation(includeUniqueAlertIds);
 
-    const index = this.getScheduledAndAdHocIndexPattern();
+    let index;
+    if (scheduled === undefined) {
+      index = this.getScheduledAndAdHocIndexPattern();
+    } else {
+      index = scheduled
+        ? getScheduledIndexPattern(this.spaceId)
+        : this.getAdHocAlertsIndexPattern();
+    }
+
+    logger.debug(
+      () =>
+        `[FIND] Searching for attack discoveries in index: ${index}, user: ${authenticatedUser.username}`
+    );
 
     const filter = combineFindAttackDiscoveryFilters({
       alertIds,
       connectorNames,
       end,
+      executionUuid,
       ids,
       search,
       start,
       status,
     });
 
+    logger.debug(() => `[FIND] Combined filters: ${JSON.stringify(filter, null, 2)}`);
+
     const combinedFilter = getCombinedFilter({
       authenticatedUser,
       filter,
       shared,
+      includeAllAuthors,
     });
+
+    logger.debug(() => `[FIND] Final filter with auth: ${JSON.stringify(combinedFilter, null, 2)}`);
 
     const result = await findDocuments<AttackDiscoveryAlertDocument>({
       aggs,
@@ -205,29 +165,35 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       sortOrder: sortOrder as estypes.SortOrder,
     });
 
-    const { data, uniqueAlertIdsCount, uniqueAlertIds } = transformSearchResponseToAlerts({
+    logger.debug(
+      () =>
+        `[FIND] Elasticsearch returned ${result.data.hits.hits.length} hits out of ${result.data.hits.total} total`
+    );
+
+    const {
+      connectorNames: alertConnectorNames,
+      data,
+      uniqueAlertIdsCount,
+      uniqueAlertIds,
+    } = transformSearchResponseToAlerts({
       logger,
       response: result.data,
       includeUniqueAlertIds,
+      enableFieldRendering,
+      withReplacements,
     });
 
-    const alertConnectorNames = await this.getAlertConnectorNames({
-      alertIds,
-      authenticatedUser,
-      end,
-      esClient,
-      ids,
-      index,
-      logger,
-      page,
-      perPage,
-      sortField,
-      sortOrder,
-      start,
-    });
+    logger.debug(
+      () =>
+        `[FIND] After transformation: ${
+          data.length
+        } discoveries, connectorNames: [${alertConnectorNames.join(
+          ', '
+        )}], uniqueAlertIdsCount: ${uniqueAlertIdsCount}`
+    );
 
     return {
-      connector_names: alertConnectorNames, // <-- from the separate aggregation
+      connector_names: alertConnectorNames,
       data,
       page: result.page,
       per_page: result.perPage,
@@ -257,20 +223,22 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     authenticatedUser: AuthenticatedUser;
     eventLogIndex: string;
     getAttackDiscoveryGenerationsParams: {
+      end?: string;
+      scheduled?: boolean;
       size: number;
       start?: string;
-      end?: string;
     };
     logger: Logger;
     spaceId: string;
   }): Promise<GetAttackDiscoveryGenerationsResponse> => {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const { size, start, end } = getAttackDiscoveryGenerationsParams;
+    const { end, scheduled, size, start } = getAttackDiscoveryGenerationsParams;
     const generationsQuery = getAttackDiscoveryGenerationsQuery({
       authenticatedUser,
       end,
       eventLogIndex,
+      scheduled,
       size,
       spaceId,
       start,
@@ -289,19 +257,23 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
 
   public bulkUpdateAttackDiscoveryAlerts = async ({
     authenticatedUser,
+    enableFieldRendering,
     esClient,
     ids,
     kibanaAlertWorkflowStatus,
     logger,
     visibility,
+    withReplacements,
   }: {
     authenticatedUser: AuthenticatedUser;
     esClient: ElasticsearchClient;
+    enableFieldRendering: boolean;
     ids: string[];
     kibanaAlertWorkflowStatus?: 'acknowledged' | 'closed' | 'open';
     logger: Logger;
     visibility?: 'not_shared' | 'shared';
-  }): Promise<AttackDiscoveryAlert[]> => {
+    withReplacements: boolean;
+  }): Promise<AttackDiscoveryApiAlert[]> => {
     const PER_PAGE = 1000;
 
     const indexPattern = this.getScheduledAndAdHocIndexPattern();
@@ -360,10 +332,12 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
         authenticatedUser,
         esClient,
         findAttackDiscoveryAlertsParams: {
+          enableFieldRendering,
           ids,
           page: FIRST_PAGE,
           perPage: PER_PAGE,
           sortField: '@timestamp',
+          withReplacements,
         },
         logger,
       });
@@ -379,12 +353,20 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
     authenticatedUser,
     eventLogIndex,
     executionUuid,
+    ignoreDismissed = false,
     logger,
     spaceId,
   }: {
     authenticatedUser: AuthenticatedUser;
     eventLogIndex: string;
     executionUuid: string;
+    /**
+     * When `true`, a dismissed generation resolves to its underlying terminal
+     * status instead of `dismissed`. Callers displaying a single generation's
+     * actual outcome (e.g. the workflow execution details flyout) pass `true`;
+     * the dismiss route relies on the default (`false`) to observe dismissal.
+     */
+    ignoreDismissed?: boolean;
     logger: Logger;
     spaceId: string;
   }): Promise<PostAttackDiscoveryGenerationsDismissResponse> => {
@@ -403,12 +385,15 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       eventLogIndex,
       generationsQuery: generationByIdQuery,
       getAttackDiscoveryGenerationsParams: { size: 1 },
+      ignoreDismissed,
       logger,
       spaceId,
     });
 
     if (result?.generations[0] == null) {
-      throw new Error(`Generation with execution_uuid ${executionUuid} not found`);
+      throw Object.assign(new Error(`Generation with execution_uuid ${executionUuid} not found`), {
+        statusCode: 404,
+      });
     }
 
     return result?.generations[0];

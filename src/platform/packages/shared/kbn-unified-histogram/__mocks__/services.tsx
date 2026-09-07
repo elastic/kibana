@@ -16,13 +16,24 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import type { UnifiedHistogramServices } from '../types';
 import { allSuggestionsMock } from './suggestions';
 
+export const lensSaveModalComponentMock = jest.fn(() => null);
+
 const dataPlugin = dataPluginMock.createStartContract();
 dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
 
 dataPlugin.query.timefilter.timefilter = {
   ...dataPlugin.query.timefilter.timefilter,
   calculateBounds: jest.fn((timeRange) => calculateBounds(timeRange)),
+  getTimeDefaults: jest.fn(() => ({
+    from: 'now-15m',
+    to: 'now',
+  })),
 };
+
+dataPlugin.query.queryString.getDefaultQuery = jest.fn(() => ({
+  query: '',
+  language: 'kuery',
+}));
 
 export const unifiedHistogramServicesMock = {
   data: dataPlugin,
@@ -45,6 +56,7 @@ export const unifiedHistogramServicesMock = {
     EditLensConfigPanelApi: jest
       .fn()
       .mockResolvedValue(() => <span>Lens Config Panel Component</span>),
+    SaveModalComponent: lensSaveModalComponentMock,
   },
   storage: {
     get: jest.fn(),

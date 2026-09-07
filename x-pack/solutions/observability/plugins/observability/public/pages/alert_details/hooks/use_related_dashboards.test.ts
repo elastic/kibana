@@ -40,7 +40,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 }));
 
 const mockUseQuery = jest.fn();
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
 }));
 
@@ -77,6 +77,24 @@ describe('useRelatedDashboards', () => {
     expect(mockUseKibanaReturnValue.services.http.get).toHaveBeenCalledWith(API_ENDPOINT, {
       query: { alertId: TEST_ALERT_ID },
     });
+  });
+
+  it('should be enabled by default when an alertId is provided', () => {
+    renderHook(() => useRelatedDashboards(TEST_ALERT_ID));
+
+    expect(mockUseQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
+  });
+
+  it('should be disabled when enabled is false (e.g. user cannot read the rule)', () => {
+    renderHook(() => useRelatedDashboards(TEST_ALERT_ID, { enabled: false }));
+
+    expect(mockUseQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
+  });
+
+  it('should be disabled when no alertId is provided', () => {
+    renderHook(() => useRelatedDashboards(''));
+
+    expect(mockUseQuery).toHaveBeenCalledWith(expect.objectContaining({ enabled: false }));
   });
 
   it('should return suggested and linked dashboards', () => {

@@ -54,13 +54,6 @@ describe('Security Plugin', () => {
       security: { operator_privileges: { enabled: false, available: false } },
     } as Awaited<ReturnType<Client['xpack']['usage']>>);
 
-    mockCoreSetup.http.getServerInfo.mockReturnValue({
-      hostname: 'localhost',
-      name: 'kibana',
-      port: 80,
-      protocol: 'https',
-    });
-
     mockSetupDependencies = {
       licensing: {
         license$: of({ getUnavailableReason: jest.fn() }),
@@ -71,6 +64,12 @@ describe('Security Plugin', () => {
     } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
+    mockCoreStart.http.getServerInfo.mockReturnValue({
+      hostname: 'localhost',
+      name: 'kibana',
+      port: 80,
+      protocol: 'https',
+    });
 
     mockCoreSetup.getStartServices.mockResolvedValue([
       // @ts-expect-error only mocking the client we use
@@ -102,8 +101,14 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
+              },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
               },
               "api": ApiActions {
                 "prefix": "api:",
@@ -181,6 +186,13 @@ describe('Security Plugin', () => {
 
   describe('start()', () => {
     it('exposes proper contract', async () => {
+      mockCoreSetup.http.getServerInfo.mockReturnValue({
+        hostname: 'localhost',
+        name: 'kibana',
+        port: 80,
+        protocol: 'https',
+      });
+
       await plugin.setup(mockCoreSetup, mockSetupDependencies);
       expect(plugin.start(mockCoreStart, mockStartDependencies)).toMatchInlineSnapshot(`
         Object {
@@ -188,6 +200,7 @@ describe('Security Plugin', () => {
             "apiKeys": Object {
               "areAPIKeysEnabled": [Function],
               "areCrossClusterAPIKeysEnabled": [Function],
+              "cloneAsInternalUser": [Function],
               "create": [Function],
               "grantAsInternalUser": [Function],
               "invalidate": [Function],
@@ -199,8 +212,14 @@ describe('Security Plugin', () => {
           },
           "authz": Object {
             "actions": Actions {
+              "aiIndex": AiIndexActions {
+                "prefix": "ai_index:",
+              },
               "alerting": AlertingActions {
                 "prefix": "alerting:",
+              },
+              "alerts": AlertsActions {
+                "prefix": "alerts:",
               },
               "api": ApiActions {
                 "prefix": "api:",
@@ -232,6 +251,7 @@ describe('Security Plugin', () => {
           "userProfiles": Object {
             "bulkGet": [Function],
             "getCurrent": [Function],
+            "getCurrentProfileId": [Function],
             "suggest": [Function],
           },
         }

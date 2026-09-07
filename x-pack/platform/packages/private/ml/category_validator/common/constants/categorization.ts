@@ -28,11 +28,6 @@ export const CATEGORY_EXAMPLES_ERROR_LIMIT = 0.02;
 export const VALID_TOKEN_COUNT = 3;
 
 /**
- * The limit for the median line length of category examples.
- */
-export const MEDIAN_LINE_LENGTH_LIMIT = 400;
-
-/**
  * The limit for the percentage of null values in category examples.
  */
 export const NULL_COUNT_PERCENT_LIMIT = 0.75;
@@ -54,7 +49,6 @@ export enum VALIDATION_RESULT {
   FAILED_TO_TOKENIZE,
   TOO_MANY_TOKENS,
   TOKEN_COUNT,
-  MEDIAN_LINE_LENGTH,
   NULL_VALUES,
   INSUFFICIENT_PRIVILEGES,
 }
@@ -92,19 +86,6 @@ export const VALIDATION_CHECK_DESCRIPTION = {
       values: {
         percentage: Math.floor(CATEGORY_EXAMPLES_WARNING_LIMIT * 100),
         tokenCount: VALID_TOKEN_COUNT,
-      },
-    }
-  ) as string,
-  /**
-   * The median line length of the loaded examples was less than {medianCharCount} characters.
-   */
-  [VALIDATION_RESULT.MEDIAN_LINE_LENGTH]: i18n.translate(
-    'xpack.ml.models.jobService.categorization.messages.validMedianLineLength',
-    {
-      defaultMessage:
-        'The median line length of the loaded examples was less than {medianCharCount} characters.',
-      values: {
-        medianCharCount: MEDIAN_LINE_LENGTH_LIMIT,
       },
     }
   ) as string,

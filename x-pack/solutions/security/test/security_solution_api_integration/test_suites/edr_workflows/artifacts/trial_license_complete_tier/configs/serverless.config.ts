@@ -14,7 +14,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
   const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [
     'trustedAppsAdvancedMode',
+    'filterProcessDescendantsForTrustedAppsEnabled',
     'trustedDevices',
+    'endpointExceptionsMovedUnderManagement',
+    'customYaraSignaturesEnabled',
   ];
 
   return {

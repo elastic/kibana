@@ -95,6 +95,15 @@ describe('Filter editor utils', () => {
       expect(operator && operator.type).toBe('exists');
       expect(operator && operator.negate).toBe(true);
     });
+
+    it('should return "is" for phrase filter when meta.negate is undefined (e.g. from toStoredFilter)', () => {
+      const filterWithoutNegate = { ...phraseFilter, meta: { ...phraseFilter.meta } };
+      delete (filterWithoutNegate.meta as Record<string, unknown>).negate;
+      const operator = getOperatorFromFilter(filterWithoutNegate);
+      expect(operator).not.toBeUndefined();
+      expect(operator && operator.type).toBe('phrase');
+      expect(operator && operator.negate).toBe(false);
+    });
   });
 
   describe('getFilterableFields', () => {

@@ -13,6 +13,7 @@ import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import type {
   AttackDiscoveryScheduleCreateProps,
   AttackDiscoveryScheduleUpdateProps,
+  BulkActionAttackDiscoverySchedulesResponse,
   CreateAttackDiscoverySchedulesResponse,
   DeleteAttackDiscoverySchedulesResponse,
   DisableAttackDiscoverySchedulesResponse,
@@ -22,11 +23,17 @@ import type {
   UpdateAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import {
+  transformAttackDiscoveryScheduleCreatePropsToApi,
+  transformAttackDiscoveryScheduleUpdatePropsToApi,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 
@@ -43,9 +50,16 @@ export const createAttackDiscoverySchedule = async ({
   body,
   signal,
 }: CreateAttackDiscoveryScheduleParams): Promise<CreateAttackDiscoverySchedulesResponse> => {
+  // Transform from frontend camelCase to API snake_case
+  const requestBody = transformAttackDiscoveryScheduleCreatePropsToApi(body);
+
   return KibanaServices.get().http.post<CreateAttackDiscoverySchedulesResponse>(
     ATTACK_DISCOVERY_SCHEDULES,
-    { body: JSON.stringify(body), version: '1', signal }
+    {
+      body: JSON.stringify(requestBody),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -62,7 +76,10 @@ export const getAttackDiscoverySchedule = async ({
 }: GetAttackDiscoveryScheduleParams): Promise<GetAttackDiscoverySchedulesResponse> => {
   return KibanaServices.get().http.get<GetAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { version: '1', signal }
+    {
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -80,9 +97,16 @@ export const updateAttackDiscoverySchedule = async ({
   body,
   signal,
 }: UpdateAttackDiscoveryScheduleParams): Promise<UpdateAttackDiscoverySchedulesResponse> => {
+  // Transform from frontend camelCase to API snake_case
+  const requestBody = transformAttackDiscoveryScheduleUpdatePropsToApi(body);
+
   return KibanaServices.get().http.put<UpdateAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { body: JSON.stringify(body), version: '1', signal }
+    {
+      body: JSON.stringify(requestBody),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -99,7 +123,10 @@ export const deleteAttackDiscoverySchedule = async ({
 }: DeleteAttackDiscoveryScheduleParams): Promise<DeleteAttackDiscoverySchedulesResponse> => {
   return KibanaServices.get().http.delete<DeleteAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID, { id }),
-    { version: '1', signal }
+    {
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -116,7 +143,10 @@ export const enableAttackDiscoverySchedule = async ({
 }: EnableAttackDiscoveryScheduleParams): Promise<EnableAttackDiscoverySchedulesResponse> => {
   return KibanaServices.get().http.post<EnableAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE, { id }),
-    { version: '1', signal }
+    {
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -133,7 +163,61 @@ export const disableAttackDiscoverySchedule = async ({
 }: DisableAttackDiscoveryScheduleParams): Promise<DisableAttackDiscoverySchedulesResponse> => {
   return KibanaServices.get().http.post<DisableAttackDiscoverySchedulesResponse>(
     replaceParams(ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE, { id }),
-    { version: '1', signal }
+    {
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+export interface BulkActionAttackDiscoveryScheduleParams {
+  /** `ids` of the attack discovery schedules */
+  ids: string[];
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Enables the attack discovery schedules. */
+export const bulkEnableAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
+    {
+      body: JSON.stringify({ ids }),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+/** Disables the attack discovery schedules. */
+export const bulkDisableAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+    {
+      body: JSON.stringify({ ids }),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
+  );
+};
+
+/** Deletes the attack discovery schedules. */
+export const bulkDeleteAttackDiscoverySchedules = async ({
+  ids,
+  signal,
+}: BulkActionAttackDiscoveryScheduleParams): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+  return KibanaServices.get().http.post<BulkActionAttackDiscoverySchedulesResponse>(
+    ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+    {
+      body: JSON.stringify({ ids }),
+      version: API_VERSIONS.public.v1,
+      signal,
+    }
   );
 };
 
@@ -157,9 +241,16 @@ export const findAttackDiscoverySchedule = async ({
   sortDirection,
   signal,
 }: FindAttackDiscoveryScheduleParams): Promise<FindAttackDiscoverySchedulesResponse> => {
+  // public API expects snake_case query params
+  const query = { page, per_page: perPage, sort_field: sortField, sort_direction: sortDirection };
+
   return KibanaServices.get().http.get<FindAttackDiscoverySchedulesResponse>(
     ATTACK_DISCOVERY_SCHEDULES_FIND,
-    { version: '1', query: { page, perPage, sortField, sortDirection }, signal }
+    {
+      version: API_VERSIONS.public.v1,
+      query,
+      signal,
+    }
   );
 };
 

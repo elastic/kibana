@@ -7,7 +7,7 @@
 
 import {
   EuiAccordion,
-  EuiButton,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -24,8 +24,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { TryInConsoleButton } from '@kbn/try-in-console';
 import { docLinks } from '../../../common/doc_links';
 import { getExampleCode, getExistingIndexExampleCode } from './code_examples';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface ConnectToApiFlyoutProps {
   onClose: () => void;
@@ -34,6 +36,8 @@ interface ConnectToApiFlyoutProps {
 
 export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose, rulesetId }) => {
   const flyoutTitleId = useGeneratedHtmlId();
+  const { cloud, application, share, console: consolePlugin } = useKibana().services;
+  const isServerless = Boolean(cloud?.isServerlessEnabled);
 
   return (
     <EuiFlyout onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
@@ -102,43 +106,66 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
             </EuiCodeBlock>
           </EuiThemeProvider>
         </EuiAccordion>
-        <EuiSpacer size="l" />
-        <EuiAccordion
-          id="connectToIndexExistingIndexAccordion"
-          buttonContent={
-            <EuiTitle size="xs">
-              <h3>
-                {i18n.translate(
-                  'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
-                  {
-                    defaultMessage: 'Assigning to an existing index',
-                  }
-                )}
-              </h3>
-            </EuiTitle>
-          }
-          initialIsOpen
-        >
-          <EuiSpacer size="m" />
-          <EuiThemeProvider colorMode="dark">
-            <EuiCodeBlock language="json" isCopyable fontSize="m">
-              {getExistingIndexExampleCode(rulesetId)}
-            </EuiCodeBlock>
-          </EuiThemeProvider>
-        </EuiAccordion>
+        {!isServerless && (
+          <>
+            <EuiSpacer size="l" />
+            <EuiAccordion
+              id="connectToIndexExistingIndexAccordion"
+              buttonContent={
+                <EuiTitle size="xs">
+                  <h3>
+                    {i18n.translate(
+                      'xpack.searchSynonyms.ConnectToApiFlyout.exampleButton.existingIndex',
+                      {
+                        defaultMessage: 'Assigning to an existing index',
+                      }
+                    )}
+                  </h3>
+                </EuiTitle>
+              }
+              initialIsOpen
+            >
+              <EuiSpacer size="m" />
+              <EuiThemeProvider colorMode="dark">
+                <EuiCodeBlock language="json" isCopyable fontSize="m">
+                  {getExistingIndexExampleCode(rulesetId)}
+                </EuiCodeBlock>
+              </EuiThemeProvider>
+            </EuiAccordion>
+          </>
+        )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              data-test-subj="searchSynonymsConnectToApiFlyoutButton"
+            <EuiButtonEmpty
+              iconType="cross"
               onClick={onClose}
+              aria-label={i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.close', {
+                defaultMessage: 'Close',
+              })}
+              data-test-subj="searchSynonymsConnectToApiFlyoutButton"
             >
               {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.close', {
                 defaultMessage: 'Close',
               })}
-            </EuiButton>
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <TryInConsoleButton
+              request={getExampleCode(rulesetId)}
+              onClick={onClose}
+              application={application}
+              sharePlugin={share}
+              consolePlugin={consolePlugin}
+              type="button"
+              showIcon={false}
+              data-test-subj="searchSynonymsConnectToApiFlyoutRunInConsoleButton"
+              buttonProps={{
+                fill: true,
+                size: 'm',
+              }}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

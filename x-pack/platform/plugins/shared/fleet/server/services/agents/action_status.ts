@@ -24,6 +24,7 @@ import {
 } from '../../../common';
 import { appContextService } from '..';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
+import { hasVersionSuffix } from '../../../common/services/version_specific_policies_utils';
 
 /**
  * Return current bulk actions.
@@ -207,30 +208,28 @@ async function getActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
+  const filter: object[] = [];
+
+  if (options.date || options.latest) {
+    filter.push({
+      range: {
+        '@timestamp': {
+          // options.date overrides options.latest
+          gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
+          lte: options.date ? moment(options.date).add(1, 'days').toISOString() : 'now/s',
+        },
+      },
+    });
+  }
+
+  if (options.scheduledOnly) {
+    filter.push({ range: { start_time: { gt: 'now' } } });
+  }
+
   const query = {
     bool: {
-      must_not: [
-        {
-          term: {
-            type: 'CANCEL',
-          },
-        },
-      ],
-      ...(options.date || options.latest
-        ? {
-            filter: [
-              {
-                range: {
-                  '@timestamp': {
-                    // options.date overrides options.latest
-                    gte: options.date ?? `now-${(options.latest ?? 0) / 1000}s/s`,
-                    lte: options.date ? moment(options.date).add(1, 'days').toISOString() : 'now/s',
-                  },
-                },
-              },
-            ],
-          }
-        : {}),
+      must_not: [{ term: { type: 'CANCEL' } }],
+      ...(filter.length > 0 ? { filter } : {}),
     },
   };
   const res = await esClient.search<FleetServerAgentAction>({
@@ -250,6 +249,13 @@ async function getActions(
 
       const source = hit._source!;
 
+      const newPolicyId = source.data?.policy_id as string;
+
+      if (hasVersionSuffix(newPolicyId)) {
+        // skip version specific policy actions
+        return acc;
+      }
+
       if (!acc[source.action_id!]) {
         const isExpired =
           source.expiration && source.type !== 'UPGRADE'
@@ -261,7 +267,7 @@ async function getActions(
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
           startTime: source.start_time,
-          type: source.type as AgentActionType,
+          type: (source.data?.rollback === true ? 'ROLLBACK' : source.type) as AgentActionType,
           nbAgentsActioned: source.total ?? 0,
           status: isExpired
             ? 'EXPIRED'
@@ -269,7 +275,7 @@ async function getActions(
             ? 'ROLLOUT_PASSED'
             : 'IN_PROGRESS',
           expiration: source.expiration,
-          newPolicyId: source.data?.policy_id as string,
+          newPolicyId,
           creationTime: source['@timestamp']!,
           nbAgentsFailed: 0,
           hasRolloutPeriod: !!source.rollout_duration_seconds,
@@ -349,8 +355,9 @@ async function getPolicyChangeActions(
   options: ActionStatusOptions,
   namespace?: string
 ): Promise<ActionStatus[]> {
-  // option.latest is used to fetch recent errors, which policy change actions do not contain
-  if (options.latest) {
+  // Policy change actions never have start_time, so exclude them from scheduledOnly queries.
+  // option.latest is also skipped because policy change actions do not contain recent errors.
+  if (options.latest || options.scheduledOnly) {
     return [];
   }
 
@@ -413,6 +420,10 @@ async function getPolicyChangeActions(
   const agentPolicies: { [key: string]: AgentPolicyRevision } = agentPoliciesRes.hits.hits.reduce(
     (acc, curr) => {
       const hit = curr._source! as any;
+      if (hasVersionSuffix(hit.policy_id)) {
+        // skip version specific policy actions
+        return acc;
+      }
       acc[`${hit.policy_id}:${hit.revision_idx}`] = {
         policyId: hit.policy_id,
         revision: hit.revision_idx,

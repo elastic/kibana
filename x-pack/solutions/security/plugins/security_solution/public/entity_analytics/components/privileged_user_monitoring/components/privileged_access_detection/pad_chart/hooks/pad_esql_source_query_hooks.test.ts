@@ -12,7 +12,7 @@ import {
 
 const trimEsql = (str: string) => str.replace(/[\n]/g, '').replace(/\s\s+/g, ' ').trim();
 
-jest.mock('./pad_heatmap_interval_hooks', () => ({
+jest.mock('../../../../../recent_anomalies/anomaly_heatmap_interval', () => ({
   useIntervalForHeatmap: () => 24,
 }));
 
@@ -28,7 +28,8 @@ describe('the source queries for privileged access detection', () => {
 
       expect(trimEsql(query)).toEqual(
         trimEsql(`
-          FROM .ml-anomalies-shared
+          SET unmapped_fields="nullify";
+          FROM .ml-anomalies-shared*
             | WHERE job_id IN ("jobOne", "jobTwo")
             | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
             | RENAME @timestamp AS event_timestamp
@@ -73,7 +74,8 @@ describe('the source queries for privileged access detection', () => {
 
       expect(trimEsql(query)).toEqual(
         trimEsql(`
-          FROM .ml-anomalies-shared
+          SET unmapped_fields="nullify";
+          FROM .ml-anomalies-shared*
             | WHERE job_id IN ("job")
             | WHERE record_score IS NOT NULL AND user.name IS NOT NULL
             | WHERE record_score < 0 OR record_score >= 25
@@ -101,7 +103,8 @@ describe('the source queries for privileged access detection', () => {
       });
       expect(trimEsql(query ?? fail('Query must not be undefined'))).toEqual(
         trimEsql(`
-          FROM .ml-anomalies-shared
+          SET unmapped_fields="nullify";
+          FROM .ml-anomalies-shared*
             | WHERE job_id IN ("jobOne", "jobTwo")
             | WHERE record_score IS NOT NULL AND user.name IS NOT NULL AND user.name IN ("cloud", "squall", "zidane")
             | RENAME @timestamp AS event_timestamp
@@ -147,7 +150,8 @@ describe('the source queries for privileged access detection', () => {
       });
       expect(trimEsql(query ?? fail('Query must not be undefined'))).toEqual(
         trimEsql(`
-          FROM .ml-anomalies-shared
+          SET unmapped_fields="nullify";
+          FROM .ml-anomalies-shared*
             | WHERE job_id IN ("job")
             | WHERE record_score IS NOT NULL AND user.name IS NOT NULL AND user.name IN ("ramza")
             | WHERE record_score < 0 OR record_score >= 25

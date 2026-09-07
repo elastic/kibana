@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CanDuplicatePanels } from '@kbn/presentation-containers';
-import { apiCanDuplicatePanels } from '@kbn/presentation-containers';
 import type {
+  CanDuplicatePanels,
+  IsDuplicable,
   CanAccessViewMode,
   EmbeddableApiContext,
   HasParentApi,
@@ -23,6 +23,8 @@ import {
   apiHasUniqueId,
   getInheritedViewMode,
   apiHasSerializableState,
+  apiCanDuplicatePanels,
+  apiCanBeDuplicated,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -33,7 +35,8 @@ export type ClonePanelActionApi = CanAccessViewMode &
   HasSerializableState &
   HasUniqueId &
   HasParentApi<CanDuplicatePanels> &
-  Partial<PublishesBlockingError>;
+  Partial<PublishesBlockingError> &
+  IsDuplicable;
 
 const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
   Boolean(
@@ -41,7 +44,8 @@ const isApiCompatible = (api: unknown | null): api is ClonePanelActionApi =>
       apiHasSerializableState(api) &&
       apiCanAccessViewMode(api) &&
       apiHasParentApi(api) &&
-      apiCanDuplicatePanels(api.parentApi)
+      apiCanDuplicatePanels(api.parentApi) &&
+      apiCanBeDuplicated(api)
   );
 
 export class ClonePanelAction implements Action<EmbeddableApiContext> {

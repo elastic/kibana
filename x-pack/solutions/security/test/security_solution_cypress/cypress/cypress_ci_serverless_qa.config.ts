@@ -24,16 +24,15 @@ export default defineCypressConfig({
   },
   execTimeout: 300000,
   pageLoadTimeout: 300000,
-  numTestsKeptInMemory: 0,
   requestTimeout: 300000,
   responseTimeout: 300000,
   retries: {
     runMode: 1,
   },
-  screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotsFolder: '../../../../../target/kibana-security-solution/cypress/screenshots',
   trashAssetsBeforeRuns: false,
   video: false,
-  videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
+  videosFolder: '../../../../../target/kibana-security-solution/cypress/videos',
   viewportHeight: 1200,
   viewportWidth: 1920,
   e2e: {
@@ -43,23 +42,11 @@ export default defineCypressConfig({
     specPattern: './cypress/e2e/**/*.cy.ts',
     setupNodeEvents(on, config) {
       esArchiver(on, config);
-      on('before:browser:launch', (browser, launchOptions) => {
-        if (browser.name === 'chrome' && browser.isHeadless) {
-          launchOptions.args.push('--window-size=1920,1200');
-          return launchOptions;
-        }
-        if (browser.family === 'chromium') {
-          launchOptions.args.push(
-            '--js-flags="--max_old_space_size=4096 --max_semi_space_size=1024"'
-          );
-        }
-        return launchOptions;
-      });
       samlAuthentication(on, config);
       esClient(on, config);
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
+      require('@cypress/grep/plugin').plugin(config);
       return config;
     },
   },

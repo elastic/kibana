@@ -8,12 +8,20 @@
 import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
-import styled from 'styled-components';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiResizeObserver,
+  EuiToolTip,
+} from '@elastic/eui';
+import styled from '@emotion/styled';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useInputSuggestion } from './hooks/use_input_suggestion';
 import { InputDisplay } from './components/input_display';
-import type { ExecuteCommandPayload, ConsoleDataState } from '../console_state/types';
+import type { ConsoleDataState, ExecuteCommandPayload } from '../console_state/types';
 import { useWithInputShowPopover } from '../../hooks/state_selectors/use_with_input_show_popover';
 import { EnteredInput } from './lib/entered_input';
 import type { InputCaptureProps } from './components/input_capture';
@@ -28,19 +36,22 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { detectAndPreProcessPastedCommand } from './lib/utils';
+
 const CommandInputContainer = styled.div`
-  background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  padding: ${({ theme: { eui } }) => eui.euiSizeS};
-  outline: ${({ theme: { eui } }) => eui.euiBorderThin};
+  background-color: ${({ theme }) => theme.euiTheme.components.forms.background};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
+  padding: ${({ theme }) => theme.euiTheme.size.s};
+  outline: ${({ theme }) => theme.euiTheme.border.thin};
+
+  border-bottom: ${({ theme }) => theme.euiTheme.border.thick};
+  border-bottom-color: transparent;
 
   &:focus-within {
-    border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
+    border-bottom-color: ${({ theme }) => theme.euiTheme.colors.primary};
   }
 
   &.error {
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
+    border-bottom-color: ${({ theme }) => theme.euiTheme.colors.danger};
   }
 
   .textEntered {
@@ -59,7 +70,7 @@ const CommandInputContainer = styled.div`
   &.hasFocus {
     // Cursor is defined in '<InputDisplay>' component
     .cursor {
-      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
+      background-color: ${({ theme }) => theme.euiTheme.colors.textParagraph};
       animation: cursor-blink-animation 1s steps(5, start) infinite;
       -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
 
@@ -85,6 +96,7 @@ export interface CommandInputProps extends CommonProps {
 
 export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ...commonProps }) => {
   useInputHints();
+  const isMounted = useIsMounted();
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
@@ -92,6 +104,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
     useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
   const isPopoverOpen = !!useWithInputShowPopover();
+  const { value: suggestionValue } = useInputSuggestion();
 
   const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
   const [commandToExecute, setCommandToExecute] = useState<ExecuteCommandPayload | undefined>(
@@ -140,6 +153,21 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
   const handleTypingAreaClick = useCallback<MouseEventHandler>(
     (ev) => {
+      // We don't want to trigger input area focus if the click was done from a component that
+      // resides OUTSIDE of the typing areas. This can be the case with commands that have an argument
+      // value component (aka: argument selector), where events done from inside those components
+      // all bubble up through the input area - and this includes events from components inside
+      // Portals - like popups - where the HTML element is NOT inside this typing area.
+      const { currentTarget, target } = ev;
+
+      if (currentTarget !== target && target instanceof Node && !currentTarget.contains(target)) {
+        if (isKeyInputBeingCaptured && keyCaptureFocusRef.current) {
+          keyCaptureFocusRef.current.blur();
+        }
+
+        return;
+      }
+
       if (keyCaptureFocusRef.current) {
         keyCaptureFocusRef.current.focus();
       }
@@ -148,17 +176,26 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
       }
     },
-    [dispatch, isPopoverOpen, keyCaptureFocusRef]
+    [dispatch, isKeyInputBeingCaptured, isPopoverOpen, keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
     ({ value, selection, eventDetails }) => {
       const key = eventDetails.code;
 
-      // UP arrow key
+      // UP arrow key - show input history popup
       if (key === 'ArrowUp') {
         dispatch({ type: 'removeFocusFromKeyCapture' });
         dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+
+        return;
+      }
+
+      // ALT + SPACE - show command selctor
+      if (key === 'Space' && eventDetails.altKey) {
+        eventDetails.preventDefault();
+        dispatch({ type: 'removeFocusFromKeyCapture' });
+        dispatch({ type: 'updateInputPopoverState', payload: { show: 'command-selector' } });
 
         return;
       }
@@ -175,6 +212,11 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         }
       }
 
+      // If key is `tab` and we have a suggestionValue, then prevent the default behavior of `tab`ing
+      if (key === 'Tab' && suggestionValue) {
+        eventDetails.preventDefault();
+      }
+
       // Update the store with the updated text that was entered
       dispatch({
         type: 'updateInputTextEnteredState',
@@ -188,7 +230,8 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
             prevLeftOfCursor,
             prevRightOfCursor,
             prevParsedInput,
-            prevEnteredCommand
+            prevEnteredCommand,
+            key
           );
 
           inputText.addValue(processedValue ?? '', selection);
@@ -206,12 +249,30 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             // ENTER = Execute command and blank out the input area
             case 'Enter':
-              setCommandToExecute({
-                input: inputText.getFullText(true),
-                enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
-                parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
-              });
-              inputText.clear();
+              // In order to avoid triggering another state update while this one is being processed,
+              // we defer the setting of the command to execute until this state update is done
+              // This essentially avoids the React warning:
+              //    "Cannot update a component (`name here`) while rendering a different component (`name here`)"
+              {
+                const commandToExecutePayload: ExecuteCommandPayload = {
+                  input: inputText.getFullText(true),
+                  enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                  parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
+                };
+                Promise.resolve().then(() => {
+                  if (isMounted()) {
+                    setCommandToExecute(commandToExecutePayload);
+                  }
+                });
+                inputText.clear();
+              }
+              break;
+
+            // TAB
+            case 'Tab':
+              if (suggestionValue) {
+                inputText.addValue(suggestionValue);
+              }
               break;
 
             // ARROW LEFT
@@ -246,7 +307,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
         },
       });
     },
-    [commands, dispatch]
+    [commands, dispatch, isMounted, suggestionValue]
   );
 
   // Execute the command if one was ENTER'd.
@@ -298,14 +359,16 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   <InputPlaceholder />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    data-test-subj={getTestId('inputTextSubmitButton')}
-                    aria-label="submit-command"
-                    iconType="playFilled"
-                    color="primary"
-                    isDisabled={disableArrowButton}
-                    onClick={handleSubmitButton}
-                  />
+                  <EuiToolTip content="submit-command" disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      data-test-subj={getTestId('inputTextSubmitButton')}
+                      aria-label="submit-command"
+                      iconType="play"
+                      color="primary"
+                      isDisabled={disableArrowButton}
+                      onClick={handleSubmitButton}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </CommandInputContainer>

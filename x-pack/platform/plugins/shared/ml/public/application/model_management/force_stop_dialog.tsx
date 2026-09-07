@@ -7,20 +7,15 @@
 
 import React, { type FC, useState, useMemo, useCallback } from 'react';
 import type { EuiCheckboxGroupOption } from '@elastic/eui';
-import {
-  EuiCallOut,
-  EuiCheckboxGroup,
-  EuiConfirmModal,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiCheckboxGroup, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { NLPModelItem } from '../../../common/types/trained_models';
+import type { NLPModelItem } from '@kbn/ml-common-types/trained_models';
 
 interface ForceStopModelConfirmDialogProps {
   model: NLPModelItem;
@@ -167,15 +162,14 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 
       {pipelineWarning.length > 0 ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.pipelinesWarning"
                 defaultMessage="You won't be able to use these ingest pipelines until you restart the model:"
               />
             }
-            color="warning"
-            iconType="warning"
           >
             <div>
               <ul>
@@ -184,26 +178,26 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
                 })}
               </ul>
             </div>
-          </EuiCallOut>
+          </KbnWarningCallout>
         </>
       ) : null}
 
       {model.hasInferenceServices && inferenceServiceIDs.length === 0 ? (
-        <EuiCallOut
+        <KbnWarningCallout
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.ml.trainedModels.modelsList.forceStopDialog.hasInferenceServicesWarning"
               defaultMessage="The model is used by the _inference API"
             />
           }
-          color="warning"
-          iconType="warning"
         />
       ) : null}
 
       {inferenceServiceIDs.length > 0 ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.inferenceServicesWarning"
@@ -211,8 +205,6 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
                 values={{ inferenceServicesCount: inferenceServiceIDs.length }}
               />
             }
-            color="warning"
-            iconType="warning"
           >
             <div>
               <ul>
@@ -221,7 +213,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
                 })}
               </ul>
             </div>
-          </EuiCallOut>
+          </KbnWarningCallout>
         </>
       ) : null}
     </EuiConfirmModal>

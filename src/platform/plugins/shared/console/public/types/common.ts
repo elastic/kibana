@@ -20,6 +20,8 @@ export interface ESRequest {
 
 export type BaseResponseType =
   | 'application/json'
+  | 'application/ndjson'
+  | 'application/x-ndjson'
   | 'text/csv'
   | 'text/tab-separated-values'
   | 'text/plain'
@@ -34,5 +36,5 @@ export enum RestoreMethod {
 }
 export interface RequestToRestore {
   request: string;
-  restoreMethod: RestoreMethod;
+  restoreMethod?: RestoreMethod;
 }

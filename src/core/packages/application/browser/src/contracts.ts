@@ -82,6 +82,11 @@ export interface ApplicationStart {
    * Navigate to given URL in a SPA friendly way when possible (when the URL will redirect to a valid application
    * within the current basePath).
    *
+   * **Important**: This method always uses `history.push()` and creates a NEW entry in the browser history stack.
+   * This is appropriate for user-initiated navigation (e.g., clicking links or buttons), but NOT for:
+   * - **In-app navigation** within the same React Router instance - use React Router's `history.replace()` instead
+   * - **Conditional redirects** in components - use `navigateToApp(appId, { replace: true })` for cross-app redirects
+   *
    * The method resolves pathnames the same way browsers do when resolving a `<a href>` value. The provided `url` can be:
    * - an absolute URL
    * - an absolute path

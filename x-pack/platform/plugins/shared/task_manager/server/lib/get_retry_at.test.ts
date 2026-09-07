@@ -6,8 +6,9 @@
  */
 
 import sinon from 'sinon';
-import { calculateDelayBasedOnAttempts, getRetryDate } from './get_retry_at';
+import { calculateDelayBasedOnAttempts, getRetryDate, getRetryAt } from './get_retry_at';
 import { createRetryableError } from '../task_running';
+import { taskManagerMock } from '../mocks';
 
 let fakeTimer: sinon.SinonFakeTimers;
 
@@ -85,5 +86,37 @@ describe('getRetryDate', () => {
         attempts: 1,
       })
     ).toBeUndefined();
+  });
+});
+
+describe('getRetryAt', () => {
+  beforeAll(() => {
+    fakeTimer = sinon.useFakeTimers(new Date('2021-01-01T12:00:00.000Z'));
+  });
+
+  afterAll(() => fakeTimer.restore());
+
+  it('calculate retryAt using timeout: 5m if the task timeout is greater than 5m for a recurring task', () => {
+    const task = taskManagerMock.createTask({
+      schedule: { interval: '1m' },
+    });
+    const definition = {
+      type: 'type',
+      cost: 2,
+      createTaskRunner: jest.fn(),
+      timeout: '5m',
+    };
+    expect(getRetryAt(task, definition)).toEqual(new Date('2021-01-01T12:05:00.000Z'));
+  });
+
+  it('calculate retryAt using timeout: 5m if the task timeout is greater than 5m', () => {
+    const task = taskManagerMock.createTask({});
+    const definition = {
+      type: 'type',
+      cost: 2,
+      createTaskRunner: jest.fn(),
+      timeout: '1d',
+    };
+    expect(getRetryAt(task, definition)).toEqual(new Date('2021-01-01T12:05:30.000Z'));
   });
 });

@@ -15,7 +15,7 @@ import type { Subscription } from 'rxjs';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
-import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-common';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 

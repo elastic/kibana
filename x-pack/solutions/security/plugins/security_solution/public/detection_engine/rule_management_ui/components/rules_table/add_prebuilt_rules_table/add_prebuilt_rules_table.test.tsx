@@ -10,11 +10,13 @@ import { AddPrebuiltRulesTable } from './add_prebuilt_rules_table';
 import { AddPrebuiltRulesHeaderButtons } from './add_prebuilt_rules_header_buttons';
 import { AddPrebuiltRulesTableContextProvider } from './add_prebuilt_rules_table_context';
 
-import { useUserData } from '../../../../../detections/components/user_info';
 import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
-import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useSecuritySolutionInitialization } from '../../../../../common/components/initialization/use_security_solution_initialization';
+import { INITIALIZATION_FLOW_INIT_PREBUILT_RULES } from '../../../../../../common/api/initialization';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 // Mock components not needed in this test suite
 jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
@@ -64,12 +66,18 @@ jest.mock(
         },
       },
     }),
+    useInvalidateFetchPrebuiltRulesStatusQuery: jest.fn().mockReturnValue(jest.fn()),
   })
 );
 
-jest.mock('../../../../rule_management/logic/use_upgrade_security_packages', () => ({
-  useIsUpgradingSecurityPackages: jest.fn().mockImplementation(() => false),
-}));
+jest.mock(
+  '../../../../../common/components/initialization/use_security_solution_initialization',
+  () => ({
+    useSecuritySolutionInitialization: jest.fn().mockReturnValue({
+      'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
+    }),
+  })
+);
 
 jest.mock(
   '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',
@@ -96,18 +104,23 @@ jest.mock(
   })
 );
 
-jest.mock('../../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn(),
-}));
+jest.mock('../../../../../common/components/user_privileges');
 
 describe('AddPrebuiltRulesTable', () => {
+  afterEach(() => {
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: false, result: { status: 'ready' } },
+    });
+  });
+
   it('disables `Install all` button if user has no write permissions', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: false,
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
       },
-    ]);
+    });
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -125,14 +138,17 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('disables `Install all` button if prebuilt package is being installed', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: true,
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
       },
-    ]);
+    });
 
-    (useIsUpgradingSecurityPackages as jest.Mock).mockReturnValueOnce(true);
+    (useSecuritySolutionInitialization as jest.Mock).mockReturnValue({
+      [INITIALIZATION_FLOW_INIT_PREBUILT_RULES]: { loading: true },
+    });
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -150,12 +166,13 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('enables Install all` button when user has permissions', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: true,
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
       },
-    ]);
+    });
 
     render(
       <QueryClientProvider client={new QueryClient()}>
@@ -173,17 +190,18 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it.each([
-    ['Security:Read', true],
-    ['Security:Write', false],
+    ['Rule:Read', true],
+    ['Rule:Write', false],
   ])(
     `renders "No rules available for install" when there are no rules to install and user has %s`,
-    async (_permissions, canUserCRUD) => {
-      (useUserData as jest.Mock).mockReturnValue([
-        {
-          loading: false,
-          canUserCRUD,
+    async (_permissions, canEdit) => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        ...initialUserPrivilegesState(),
+        rulesPrivileges: {
+          ...initialUserPrivilegesState().rulesPrivileges,
+          rules: { read: true, edit: canEdit },
         },
-      ]);
+      });
 
       (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
         data: {
@@ -217,12 +235,13 @@ describe('AddPrebuiltRulesTable', () => {
   );
 
   it('does not render `Install rule` on rule rows for users with no write permissions', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: false,
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: false },
       },
-    ]);
+    });
 
     const id = 'rule-1';
     (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({
@@ -267,12 +286,13 @@ describe('AddPrebuiltRulesTable', () => {
   });
 
   it('renders `Install rule` on rule rows for users with write permissions', async () => {
-    (useUserData as jest.Mock).mockReturnValue([
-      {
-        loading: false,
-        canUserCRUD: true,
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      ...initialUserPrivilegesState(),
+      rulesPrivileges: {
+        ...initialUserPrivilegesState().rulesPrivileges,
+        rules: { read: true, edit: true },
       },
-    ]);
+    });
 
     const id = 'rule-1';
     (usePrebuiltRulesInstallReview as jest.Mock).mockReturnValueOnce({

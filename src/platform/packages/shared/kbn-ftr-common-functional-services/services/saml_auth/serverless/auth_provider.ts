@@ -13,7 +13,7 @@ import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { type Config } from '@kbn/test';
 import { isServerlessProjectType, readRolesDescriptorsFromResource } from '@kbn/es/src/utils';
 import { resolve } from 'path';
-import type { Role } from '@kbn/test/src/auth/types';
+import type { Role } from '@kbn/test-saml-auth';
 import {
   getServerlessInternalRequestHeaders,
   COMMON_REQUEST_HEADERS,
@@ -24,7 +24,8 @@ const projectDefaultRoles = new Map<string, Role>([
   ['es', 'developer'],
   ['security', 'editor'],
   ['oblt', 'editor'],
-  ['chat', 'developer'], // TODO: double check if it's really 'developer'
+  ['workplaceai', 'developer'], // TODO: double check if it's really 'developer'
+  ['vectordb', 'developer'],
 ]);
 
 const projectTypesWithCustomRolesEnabled = ['es', 'security', 'oblt'];

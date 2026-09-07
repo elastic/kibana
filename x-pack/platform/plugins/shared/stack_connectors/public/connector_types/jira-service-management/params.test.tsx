@@ -10,31 +10,28 @@ import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import JiraServiceManagementParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import type { JiraServiceManagementActionParams } from '../../../server/connector_types';
-import { JiraServiceManagementSubActions } from '../../../common/jira-service-management/constants';
+import type { Params as JiraServiceManagementActionParams } from '@kbn/connector-schemas/jira-service-management';
+import { SUB_ACTION } from '@kbn/connector-schemas/jira-service-management/constants';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('JiraServiceManagementParamFields', () => {
   const editAction = jest.fn();
   const createAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CreateAlert,
+    subAction: SUB_ACTION.CreateAlert,
     subActionParams: { message: 'hello', alias: '123' },
   };
 
   const closeAlertActionParams: JiraServiceManagementActionParams = {
-    subAction: JiraServiceManagementSubActions.CloseAlert,
+    subAction: SUB_ACTION.CloseAlert,
     subActionParams: { alias: '456' },
   };
 
-  const connector = {
-    secrets: { apiKey: '123' },
-    config: {},
+  const connector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isSystemAction: false as const,
-    isDeprecated: false,
-  };
+    secrets: { apiKey: '123' },
+  });
 
   const defaultCreateAlertProps = {
     actionParams: createAlertActionParams,
@@ -129,7 +126,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     fireEvent.change(screen.getByDisplayValue('hello'), { target: { value: 'a new message' } });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -149,7 +146,7 @@ describe('JiraServiceManagementParamFields', () => {
       target: { value: 'a new description' },
     });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -168,7 +165,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     fireEvent.change(screen.getByDisplayValue('456'), { target: { value: 'a new alias' } });
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -196,7 +193,7 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
 
     rerender(
       <JiraServiceManagementParamFields
@@ -214,7 +211,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
   });
 
   it('calls editAction with only the alias when the component is rerendered with mismatched closeAlert and params', async () => {
@@ -241,7 +238,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -278,7 +275,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('456')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "subActionParams",
@@ -297,7 +294,7 @@ describe('JiraServiceManagementParamFields', () => {
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
 
     rerender(
       // @ts-expect-error upgrade typescript v4.9.5
@@ -317,7 +314,7 @@ describe('JiraServiceManagementParamFields', () => {
 
     expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
-    expect(editAction).toBeCalledTimes(2);
+    expect(editAction).toHaveBeenCalledTimes(2);
 
     expect(editAction.mock.calls[1]).toMatchInlineSnapshot(`
           Array [
@@ -338,7 +335,7 @@ describe('JiraServiceManagementParamFields', () => {
       screen.getByText('Close alert')
     );
 
-    expect(editAction).toBeCalledTimes(1);
+    expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "subAction",

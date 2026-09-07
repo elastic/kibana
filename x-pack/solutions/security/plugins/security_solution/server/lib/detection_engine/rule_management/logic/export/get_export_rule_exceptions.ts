@@ -7,14 +7,14 @@
 
 import { chunk } from 'lodash/fp';
 import type { ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type {
   ExceptionListClient,
   ExportExceptionListAndItemsReturn,
 } from '@kbn/lists-plugin/server';
 
-const NON_EXPORTABLE_LIST_IDS = [ENDPOINT_LIST_ID] as string[];
+const NON_EXPORTABLE_LIST_IDS = [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id] as string[];
 export const EXCEPTIONS_EXPORT_CHUNK_SIZE = 50;
 
 export const getRuleExceptionsForExport = async (

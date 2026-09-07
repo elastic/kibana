@@ -1,0 +1,268 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React, { type ReactNode } from 'react';
+import { distinctUntilChanged, map, shareReplay } from 'rxjs';
+import type { RecentlyAccessedService } from '@kbn/recently-accessed';
+import type {
+  ChromeAppHeaderConfig,
+  ChromeAiButton,
+  ChromeNewsfeedHandler,
+} from '@kbn/core-chrome-browser';
+import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
+import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
+import type { InternalChromeStart } from './types';
+import type { ChromeState } from './state/chrome_state';
+import type { NavLinksService } from './services/nav_links';
+import type { ProjectNavigationService } from './services/project_navigation';
+import type { DocTitleService } from './services/doc_title';
+
+type NavLinksStart = ReturnType<NavLinksService['start']>;
+type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
+type DocTitleStart = ReturnType<DocTitleService['start']>;
+type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
+
+export interface ChromeApiDeps {
+  state: ChromeState;
+  services: {
+    navLinks: NavLinksStart;
+    recentlyAccessed: RecentlyAccessedStart;
+    docTitle: DocTitleStart;
+    projectNavigation: ProjectNavigationStart;
+  };
+  sidebar: SidebarStart;
+  componentDeps: InternalChromeStart['componentDeps'];
+}
+
+export function createChromeApi({
+  state,
+  services,
+  sidebar,
+  componentDeps,
+}: ChromeApiDeps): InternalChromeStart {
+  const { projectNavigation } = services;
+
+  const validateProjectStyle = () => {
+    const style = state.style.chromeStyle.get();
+    if (style !== 'project') {
+      throw new Error(
+        `Invalid ChromeStyle value of "${style}". This method requires ChromeStyle set to "project".`
+      );
+    }
+  };
+
+  const hasHeaderBanner$ = state.headerBanner.$.pipe(
+    map((banner) => Boolean(banner)),
+    distinctUntilChanged(),
+    shareReplay(1)
+  );
+
+  const project: InternalChromeStart['project'] = {
+    setCloudUrls: projectNavigation.setCloudUrls.bind(projectNavigation),
+    setKibanaName: projectNavigation.setKibanaName.bind(projectNavigation),
+    initNavigation: (id, navigationTree$) => {
+      validateProjectStyle();
+      projectNavigation.initNavigation(id, navigationTree$);
+    },
+    getNavigation$: () => projectNavigation.getNavigation$(),
+    setBreadcrumbs: (breadcrumbs, params) =>
+      projectNavigation.setProjectBreadcrumbs(breadcrumbs, params),
+    getBreadcrumbs$: () => projectNavigation.getProjectBreadcrumbs$(),
+    getProjectHome$: () => projectNavigation.getProjectHome$(),
+    setNavigationCustomization: (customization) =>
+      projectNavigation.setNavigationCustomization(customization),
+    getCustomizeNavigationHandler$: () => projectNavigation.getCustomizeNavigationHandler$(),
+    registerCustomizeNavigationHandler: (handler) =>
+      projectNavigation.registerCustomizeNavigationHandler(handler),
+  };
+
+  let appHeaderRegistrationId = 0;
+
+  const controls: InternalChromeStart['controls'] = {
+    aiButton: {
+      get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
+      register: (button: ChromeAiButton) => {
+        state.aiButton.update((prev) => new Set([...prev, button]));
+        return () => {
+          state.aiButton.update((prev) => {
+            const nextButtons = new Set(prev);
+            nextButtons.delete(button);
+            return nextButtons;
+          });
+        };
+      },
+    },
+    globalSearch: {
+      get$: () => state.globalSearch.$,
+      set: (config) => state.globalSearch.set(config),
+    },
+    contextSwitcher: {
+      get$: () => state.contextSwitcher.$,
+      set: state.contextSwitcher.set,
+    },
+    projectPicker: {
+      get$: () => state.projectPicker.$,
+      set: state.projectPicker.set,
+    },
+    userMenu: {
+      get$: () => state.userMenu.$,
+      set: (content) => state.userMenu.set(content),
+    },
+  };
+
+  const help: InternalChromeStart['help'] = {
+    registerFeedbackHandler: (handler: () => void) => {
+      state.feedbackHandler.set(handler);
+      return () => {
+        state.feedbackHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getFeedbackHandler$: () => state.feedbackHandler.$,
+    registerNewsfeedHandler: (handler: ChromeNewsfeedHandler) => {
+      state.newsfeedHandler.set(handler);
+      return () => {
+        state.newsfeedHandler.update((current) => (current === handler ? undefined : current));
+      };
+    },
+    getNewsfeedHandler$: () => state.newsfeedHandler.$,
+  };
+
+  const chromeStart: InternalChromeStart = {
+    componentDeps,
+
+    withProvider: (children: ReactNode) => {
+      return (
+        <ChromeServiceProvider value={{ chrome: chromeStart }}>
+          <SidebarServiceProvider value={{ sidebar }}>{children}</SidebarServiceProvider>
+        </ChromeServiceProvider>
+      );
+    },
+
+    // Sub-services
+    navLinks: services.navLinks,
+    recentlyAccessed: services.recentlyAccessed,
+    docTitle: services.docTitle,
+
+    // Visibility
+    getIsVisible$: () => state.visibility.isVisible$,
+    setIsVisible: state.visibility.setIsVisible,
+
+    // Badge (delegates to breadcrumbs badge pipeline)
+    getBadge$: () => state.breadcrumbs.legacyBadge.$,
+    setBadge: state.breadcrumbs.legacyBadge.set,
+
+    // Footer
+    getGlobalFooter$: () => state.globalFooter.$,
+    setGlobalFooter: state.globalFooter.set,
+
+    // Breadcrumbs
+    getBreadcrumbs$: () => state.breadcrumbs.classic.$,
+    getBreadcrumbs: () => state.breadcrumbs.classic.get(),
+    setBreadcrumbs: (newBreadcrumbs, params = {}) => {
+      state.breadcrumbs.classic.set(newBreadcrumbs);
+      if (params.project) {
+        const { value: projectValue, absolute = false } = params.project;
+        project.setBreadcrumbs(projectValue ?? [], { absolute });
+      }
+    },
+    getBreadcrumbsAppendExtensions$: () => state.breadcrumbs.appendExtensions.$,
+    getBreadcrumbsAppendExtensionsWithBadges$: () => state.breadcrumbs.appendExtensionsWithBadges$,
+    getBreadcrumbsBadges$: () => state.breadcrumbs.badges.$,
+    setBreadcrumbsAppendExtension: (extension) => {
+      state.breadcrumbs.appendExtensions.addSorted(
+        extension,
+        ({ order: orderA = 50 }, { order: orderB = 50 }) => orderA - orderB
+      );
+      return () => {
+        state.breadcrumbs.appendExtensions.remove((ext) => ext === extension);
+      };
+    },
+    setBreadcrumbsBadges: (badges) => state.breadcrumbs.badges.set(badges),
+
+    // App Menu
+    getAppMenu$: () => state.appMenu.$,
+    setAppMenu: state.appMenu.set,
+
+    // Help
+    getHelpExtension$: () => state.help.extension.$,
+    setHelpExtension: state.help.extension.set,
+    getHelpSupportUrl$: () => state.help.supportUrl.$,
+    setHelpSupportUrl: state.help.supportUrl.set,
+    getGlobalHelpExtensionMenuLinks$: () => state.help.globalMenuLinks.$,
+    registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
+    getHelpMenuLinks$: () => state.help.menuLinks.$,
+    setHelpMenuLinks: state.help.menuLinks.set,
+
+    // Custom Nav Link
+    getCustomNavLink$: () => state.customNavLink.$,
+    setCustomNavLink: state.customNavLink.set,
+
+    // Header Banner
+    setHeaderBanner: state.headerBanner.set,
+    getHeaderBanner$: () => state.headerBanner.$,
+    hasHeaderBanner$: () => hasHeaderBanner$,
+    hasHeaderBanner: () => Boolean(state.headerBanner.get()),
+
+    // Chrome Style
+    setChromeStyle: state.style.setChromeStyle,
+    getChromeStyle$: () => state.style.chromeStyle$,
+    getChromeStyle: () => state.style.chromeStyle.get(),
+
+    // Side Nav
+    sideNav: {
+      getIsCollapsed$: () => state.sideNav.collapsed.$,
+      getIsCollapsed: () => state.sideNav.collapsed.get(),
+      setIsCollapsed: state.sideNav.collapsed.set,
+      getWidth$: () => state.sideNav.width.$,
+      getWidth: () => state.sideNav.width.get(),
+      setWidth: state.sideNav.width.set,
+    },
+
+    // Project Navigation
+    getActiveSolutionNavId$: () =>
+      projectNavigation.getActiveSolutionNavId$() as ReturnType<
+        InternalChromeStart['getActiveSolutionNavId$']
+      >,
+    getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
+    project,
+    controls,
+    help,
+    next: {
+      aiButton: controls.aiButton,
+      globalSearch: controls.globalSearch,
+      contextSwitcher: controls.contextSwitcher,
+      projectPicker: controls.projectPicker,
+      userMenu: controls.userMenu,
+      inlineAppHeader: {
+        get$: () => state.inlineAppHeader.$,
+        set: state.inlineAppHeader.set,
+      },
+      appHeader: {
+        get$: () => state.appHeader.$,
+        set: (config: ChromeAppHeaderConfig) => {
+          const registrationId = ++appHeaderRegistrationId;
+          state.appHeader.set(config);
+          return () => {
+            if (registrationId === appHeaderRegistrationId) {
+              state.appHeader.set(undefined);
+            }
+          };
+        },
+      },
+      registerFeedbackHandler: help.registerFeedbackHandler,
+      getFeedbackHandler$: help.getFeedbackHandler$,
+      registerNewsfeedHandler: help.registerNewsfeedHandler,
+      getNewsfeedHandler$: help.getNewsfeedHandler$,
+    },
+    sidebar,
+  };
+
+  return chromeStart;
+}

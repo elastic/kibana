@@ -10,8 +10,22 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
+const ciStatsJestReporter = [
+  '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+  {
+    testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
+  },
+];
+
+const scoutReporter = [
+  '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
+  { name: 'Jest tests (unit)', configCategory: 'unit-test' },
+];
+
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
+  retryTimes: process.env.CI ? 3 : 0,
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
@@ -19,9 +33,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: !!process.env.CODE_COVERAGE
-    ? [['json', { file: 'jest.json' }]]
-    : ['html', 'text'],
+  coverageReporters: ['html', 'text'],
 
   // An array of file extensions your modules use
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],
@@ -37,45 +49,38 @@ module.exports = {
   reporters: [
     'default',
     [
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/slow_test_reporter.js',
+      {
+        warnOnSlowerThan: 300,
+        color: true,
+      },
+    ],
+    [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
         rootDirectory: '.',
       },
     ],
-    ...(process.env.TEST_GROUP_TYPE_UNIT
-      ? [
-          [
-            '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
-            {
-              testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
-            },
-          ],
-        ]
-      : []),
-    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED)
-      ? [
-          [
-            '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
-            { name: 'Jest tests (unit)', configCategory: 'unit-test' },
-          ],
-        ]
-      : []),
+    ...(process.env.TEST_GROUP_TYPE_UNIT ? [ciStatsJestReporter] : []),
+    ...(['1', 'yes', 'true'].includes(process.env.SCOUT_REPORTER_ENABLED) ? [scoutReporter] : []),
   ],
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/src/setup_node_env/polyfill.ts',
+    'core-js/stable',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/polyfills.jsdom.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disallow_code_generation.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/setup_test.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.moment_timezone.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.eui.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/react_testing_library.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.vega.js',
     process.env.CI
       ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
       : [],
@@ -90,6 +95,7 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
+    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme_emotion_serializer.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/emotion.js',
   ],
 
@@ -108,9 +114,9 @@ module.exports = {
 
   // A map from regular expressions to paths to transformers
   transform: {
-    '^.+\\.(js|tsx?)$':
+    '^.+\\.(js|mjs|tsx?)$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/babel/index.js',
-    '^.+\\.(txt|html)?$':
+    '^.+\\.(txt|html|yaml|yml)?$':
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
     '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
     '^.+\\.text?$':
@@ -119,12 +125,12 @@ module.exports = {
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
   transformIgnorePatterns: [
-    // ignore all node_modules except monaco-editor, monaco-yaml which requires babel transforms to handle dynamic import()
+    // ignore all node_modules except monaco-editor, monaco-yaml, monaco-promql which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|exit-hook|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|just-bash|react-monaco-editor|msw|@bundled-es-modules|until-async|rettime|@open-draft/deferred-promise|react-markdown|@ungap/structured-clone|bail|ccount|character-entities[^/\\\\]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|escape-string-regexp|estree-util-[^/\\\\]*|hast-util-[^/\\\\]*|html-url-attributes|html-void-elements|hastscript|inversify|@inversifyjs|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|parse-entities|parse5|property-information|rehype-raw|rehype-sanitize|remark-gfm|remark-parse|remark-rehype|space-separated-tokens|stringify-entities|trim-lines|trough|unified|unist-util-[^/\\\\]*|uuid|vfile[^/\\\\]*|web-namespaces|zwitch|@faker-js|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams))[/\\\\].+\\.m?js$',
     'packages/kbn-pm/dist/index.js',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
@@ -140,12 +146,6 @@ module.exports = {
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
   resolver: '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/resolver.js',
-
-  // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
-  // This happens when we run jest tests with --watch after node20+
-  globals: {
-    structuredClone: {},
-  },
 
   testResultsProcessor:
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/result_processors/logging_result_processor.js',

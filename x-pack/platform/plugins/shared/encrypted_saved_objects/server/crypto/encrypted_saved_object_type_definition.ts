@@ -16,7 +16,7 @@ import type { EncryptedSavedObjectTypeRegistration } from './encrypted_saved_obj
  */
 export class EncryptedSavedObjectAttributesDefinition {
   public readonly attributesToEncrypt: ReadonlySet<string>;
-  private readonly attributesToIncludeInAAD: ReadonlySet<string> | undefined;
+  public readonly attributesToIncludeInAAD: ReadonlySet<string> | undefined;
   private readonly attributesToStrip: ReadonlySet<string>;
   public readonly enforceRandomId: boolean;
 

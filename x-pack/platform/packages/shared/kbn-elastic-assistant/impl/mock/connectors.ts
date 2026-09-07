@@ -19,6 +19,11 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
+    allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
   {
     id: '.bedrock',
@@ -30,6 +35,11 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
+    allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
   {
     id: '.gemini',
@@ -41,6 +51,11 @@ export const mockActionTypes = [
     isSystemActionType: true,
     supportedFeatureIds: ['generativeAI'],
     subFeature: undefined,
+    isDeprecated: false,
+    allowMultipleSystemActions: undefined,
+    description: undefined,
+    isExperimental: undefined,
+    isTestable: false,
   } as ActionType,
 ];
 
@@ -57,6 +72,7 @@ export const mockConnectors: AIConnector[] = [
     config: {
       apiProvider: 'OpenAI',
     },
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
@@ -70,6 +86,7 @@ export const mockConnectors: AIConnector[] = [
     config: {
       apiProvider: 'OpenAI',
     },
+    isConnectorTypeDeprecated: false,
   },
   {
     id: 'c29c28a0-20fe-11ee-9386-a1f4d42ec542',
@@ -82,15 +99,8 @@ export const mockConnectors: AIConnector[] = [
     isSystemAction: false,
     config: {
       apiProvider: 'OpenAI',
+      taskType: 'chat_completion',
     },
-  },
-  {
-    id: 'c29c28a0-20fe-11ee-9396-a1f4d42ec542',
-    name: 'Preconfigured Inference Connector',
-    isMissingSecrets: false,
-    actionTypeId: '.inference',
-    isPreconfigured: true,
-    isDeprecated: false,
-    isSystemAction: false,
+    isConnectorTypeDeprecated: false,
   },
 ];

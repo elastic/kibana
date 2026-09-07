@@ -29,7 +29,7 @@ import type { StructuredToolInterface } from '@langchain/core/tools';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type {
-  AttackDiscoveryPostRequestBody,
+  PostAttackDiscoveryGenerateRequestBody,
   DefendInsightsPostRequestBody,
   AssistantFeatures,
   ExecuteConnectorRequestBody,
@@ -44,18 +44,32 @@ import type {
 import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
-  ActionsClientGeminiChatModel,
   ActionsClientChatBedrockConverse,
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
-import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingServerSetup,
+  AlertingServerStart,
+  RulesClient,
+  PublicFrameworkAlertsService,
+} from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { CheckPrivileges, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type {
+  AttackDiscoveryExecutorOptions,
+  AttackDiscoveryScheduleDataClient,
+} from '@kbn/attack-discovery-schedules-common';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type {
   GetAIAssistantKnowledgeBaseDataClientParams,
   AIAssistantKnowledgeBaseDataClient,
@@ -69,14 +83,20 @@ import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_c
 import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
-import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
 
+export type AttackDiscoveryWorkflowExecutorFactory = (
+  options: AttackDiscoveryExecutorOptions
+) => Promise<{ state: {} }>;
+
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
   actions: ActionsPluginSetup;
+  registerAttackDiscoveryWorkflowExecutor: (
+    factory: AttackDiscoveryWorkflowExecutorFactory
+  ) => void;
 }
 
 /** The plugin start interface */
@@ -130,11 +150,13 @@ export interface ElasticAssistantPluginStart {
 export interface ElasticAssistantPluginSetupDependencies {
   actions: ActionsPluginSetup;
   alerting: AlertingServerSetup;
+  cloud?: CloudSetup;
   eventLog: IEventLogService; // for writing to the event log
   ml: MlPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
@@ -145,12 +167,16 @@ export interface ElasticAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
   security: SecurityPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   auditLogger?: AuditLogger;
+  rulesClient: RulesClient;
+  frameworkAlerts: PublicFrameworkAlertsService;
   eventLogger: IEventLogger;
   eventLogIndex: string;
   getRegisteredFeatures: GetRegisteredFeatures;
@@ -174,9 +200,16 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getCheckpointSaver: () => Promise<BaseCheckpointSaver | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   savedObjectsClient: SavedObjectsClientContract;
+  security: SecurityPluginStart;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  workflowsManagement?: WorkflowsServerPluginSetup['management'];
+  /**
+   * Test purpose only.
+   */
+  updateAnonymizationFields: () => Promise<void>;
   userProfile: UserProfileServiceStart;
 }
 /**
@@ -267,7 +300,6 @@ export interface AssistantTool {
 export type AssistantToolLlm =
   | ActionsClientChatBedrockConverse
   | ActionsClientChatOpenAI
-  | ActionsClientGeminiChatModel
   | ActionsClientChatVertexAI
   | InferenceChatModel;
 
@@ -292,7 +324,9 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | PostAttackDiscoveryGenerateRequestBody
+    | DefendInsightsPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

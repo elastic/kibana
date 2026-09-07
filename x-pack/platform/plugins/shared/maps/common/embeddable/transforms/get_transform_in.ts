@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import type { EnhancementsRegistry } from '@kbn/embeddable-plugin/common/enhancements/registry';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { MapByReferenceState, MapByValueState, MapEmbeddableState } from '../types';
 import type { StoredMapEmbeddableState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../constants';
-import { extractReferences } from '../../migrations/references';
+import { transformMapAttributesIn } from '../../content_management/transform_map_attributes_in';
 
 export const MAP_SAVED_OBJECT_REF_NAME = 'savedObjectRef';
 
-export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['transformIn']) {
+export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: MapEmbeddableState): {
     state: StoredMapEmbeddableState;
     references: Reference[];
   } {
-    const { enhancementsState, enhancementsReferences } = state.enhancements
-      ? transformEnhancementsIn(state.enhancements)
-      : { enhancementsState: undefined, enhancementsReferences: [] };
+    const { state: storedState, references: drilldownReferences } = transformDrilldownsIn(state);
 
     // by ref
-    if ((state as MapByReferenceState).savedObjectId) {
-      const { savedObjectId, ...rest } = state as MapByReferenceState;
+    if ((storedState as MapByReferenceState).savedObjectId) {
+      const { savedObjectId, ...rest } = storedState as MapByReferenceState;
       return {
         state: {
           ...rest,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
         } as StoredMapEmbeddableState,
         references: [
           {
@@ -37,33 +34,31 @@ export function getTransformIn(transformEnhancementsIn: EnhancementsRegistry['tr
             type: MAP_SAVED_OBJECT_TYPE,
             id: savedObjectId!,
           },
-          ...enhancementsReferences,
+          ...drilldownReferences,
         ],
       };
     }
 
     // by value
-    if ((state as MapByValueState).attributes) {
-      const { attributes, references } = extractReferences({
-        attributes: (state as MapByValueState).attributes,
-      });
+    if ((storedState as MapByValueState).attributes) {
+      const { attributes, references } = transformMapAttributesIn(
+        (storedState as MapByValueState).attributes
+      );
 
       return {
         state: {
-          ...state,
-          ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+          ...storedState,
           attributes,
-        } as MapByValueState,
-        references: [...references, ...enhancementsReferences],
+        } as StoredMapEmbeddableState,
+        references: [...references, ...drilldownReferences],
       };
     }
 
     return {
       state: {
-        ...state,
-        ...(enhancementsState ? { enhancements: enhancementsState } : {}),
+        ...storedState,
       } as StoredMapEmbeddableState,
-      references: enhancementsReferences,
+      references: drilldownReferences,
     };
   }
   return transformIn;

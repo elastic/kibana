@@ -6,16 +6,7 @@
  */
 
 import type { Message } from '@kbn/inference-common';
-import type { AnonymizationRecord } from './types';
-
-/**
- * RFC-6901 unescape for a single JSON Pointer token:
- *  - "~1" -> "/"
- *  - "~0" -> "~"
- */
-function unescapePointerToken(token: string): string {
-  return token.replace(/~1/g, '/').replace(/~0/g, '~');
-}
+import { unescapePointerToken, type AnonymizationRecord } from './types';
 
 /**
  * Set a string leaf on an object by JSON Pointer.

@@ -23,7 +23,7 @@ const AddPackButtonComponent: React.FC<AddPackButtonComponentProps> = ({ fill = 
     <EuiButton
       fill={!!fill}
       {...newQueryLinkProps}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       isDisabled={!permissions.writePacks}
       data-test-subj={'add-pack-button'}
     >

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
 import type {
   CoreSetup,
   ElasticsearchClient,
@@ -17,6 +16,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
@@ -40,8 +40,10 @@ import {
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
+import { throwIfAborted } from './utils';
+
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '30m';
@@ -92,14 +94,14 @@ export class AutomaticAgentUpgradeTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -140,7 +142,7 @@ export class AutomaticAgentUpgradeTask {
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
       this.logger.debug(
@@ -171,10 +173,10 @@ export class AutomaticAgentUpgradeTask {
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
     try {
-      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, abortController);
+      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, signal);
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
@@ -191,16 +193,10 @@ export class AutomaticAgentUpgradeTask {
     this.logger.info(`[AutomaticAgentUpgradeTask] runTask() ended${msg ? ': ' + msg : ''}`);
   }
 
-  private throwIfAborted(abortController: AbortController) {
-    if (abortController.signal.aborted) {
-      throw new Error('Task was aborted');
-    }
-  }
-
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     // Fetch custom agent policies with set required_versions in batches.
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -218,13 +214,8 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
-        this.throwIfAborted(abortController);
-        await this.checkAgentPolicyForAutomaticUpgrades(
-          esClient,
-          soClient,
-          agentPolicy,
-          abortController
-        );
+        throwIfAborted(signal);
+        await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy, signal);
       }
     }
   }
@@ -233,7 +224,7 @@ export class AutomaticAgentUpgradeTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Processing agent policy ${
@@ -246,7 +237,9 @@ export class AutomaticAgentUpgradeTask {
     const totalActiveAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+      `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
     );
     if (totalActiveAgents === 0) {
       this.logger.debug(
@@ -269,7 +262,7 @@ export class AutomaticAgentUpgradeTask {
         agentPolicy,
         requiredVersion,
         versionAndCounts,
-        abortController
+        signal
       );
     }
   }
@@ -285,14 +278,16 @@ export class AutomaticAgentUpgradeTask {
         (totalActiveAgents * requiredVersion.percentage) / 100
       );
 
-      // Subtract the total number of agents already or on or updating to target version.
+      // Subtract the total number of agents already on or updating to target version.
+      // Both conditions must be scoped to policy_id to avoid counting upgrading agents
+      // from other policies, which would cause a false "target percentage already reached".
       const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
       const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
         esClient,
         soClient,
-        `((policy_id:${agentPolicy.id} AND agent.version:${
+        `policy_id:"${escapeQuotes(agentPolicy.id)}" AND (agent.version:${
           requiredVersion.version
-        }) OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
+        } OR ${updatingToKuery}) AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`
       );
 
       numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
@@ -367,13 +362,19 @@ export class AutomaticAgentUpgradeTask {
     return res.total;
   }
 
+  private updatingQuery(version: string) {
+    const stuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents without upgrade_details
+    const updateFailedKuery = `(upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED)`;
+    return `(${stuckInUpdatingKuery} OR ${updateFailedKuery})`;
+  }
+
   private async processRequiredVersion(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     requiredVersion: AgentTargetVersion,
     versionAndCounts: UpgradeTargetForVersion[],
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
@@ -395,7 +396,7 @@ export class AutomaticAgentUpgradeTask {
       soClient,
       agentPolicy,
       requiredVersion.version,
-      abortController
+      signal
     );
 
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
@@ -412,10 +413,12 @@ export class AutomaticAgentUpgradeTask {
     //     As an imperfect alternative, sort agents by version. Since versions sort alphabetically, this will not always result in ascending semver sorting.
     const statusKuery =
       '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
-    const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
-    const newStuckInUpdatingKuery = `(upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED)`;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
+      kuery: `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${this.updatingQuery(
+        requiredVersion.version
+      )})`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
@@ -431,7 +434,7 @@ export class AutomaticAgentUpgradeTask {
     let shouldProcessAgents = true;
 
     while (shouldProcessAgents) {
-      this.throwIfAborted(abortController);
+      throwIfAborted(signal);
       numberOfAgentsForUpgrade = await this.findAndUpgradeCandidateAgents(
         esClient,
         soClient,
@@ -462,19 +465,21 @@ export class AutomaticAgentUpgradeTask {
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     version: string,
-    abortController: AbortController
+    signal: AbortSignal
   ) {
     let retriedAgentsCounter = 0;
 
     const retryingAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED AND upgrade_attempts:*`,
+      kuery: `policy_id:"${escapeQuotes(
+        agentPolicy.id
+      )}" AND upgrade_attempts:* AND ${this.updatingQuery(version)}`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
     });
 
     for await (const retryingAgentsPageResults of retryingAgentsFetcher) {
-      this.throwIfAborted(abortController);
+      throwIfAborted(signal);
       // This function will return the total number of agents marked for retry so they're included in the count of agents for upgrade.
       retriedAgentsCounter += retryingAgentsPageResults.length;
 
@@ -491,6 +496,7 @@ export class AutomaticAgentUpgradeTask {
           version,
           spaceIds: agentPolicy.space_ids,
           ...this.getUpgradeDurationSeconds(agentsReadyForRetry.length),
+          force: true, // to restart agents stuck in updating
         });
       }
     }

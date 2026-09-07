@@ -8,6 +8,7 @@
 import type { FocusEventHandler } from 'react';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 export interface ESDataViewSelectProps {
@@ -62,6 +63,9 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
       onCreateOption={(input) => onChange(input || defaultOption.value)}
       compressed
       data-test-subj="canvasDataViewSelect"
+      aria-label={i18n.translate('xpack.canvas.esDataViewSelect.comboBoxAriaLabel', {
+        defaultMessage: 'Data view',
+      })}
     />
   );
 };

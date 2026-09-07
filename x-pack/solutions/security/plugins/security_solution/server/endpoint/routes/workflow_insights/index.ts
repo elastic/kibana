@@ -7,9 +7,16 @@
 
 import { registerUpdateInsightsRoute } from './update_insight';
 import { registerGetInsightsRoute } from './get_insights';
+import { registerCreateInsightsRoute } from './create_insights';
+import { registerGetPendingRoute } from './get_pending';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
 import type { EndpointAppContext } from '../../types';
+
+export const AUTOMATIC_TROUBLESHOOTING_TAG = 'automatic-troubleshooting';
+
+/** Guard against N×M explosion when both insightTypes and endpointIds are large. */
+export const MAX_COMBOS = 20;
 
 export const registerWorkflowInsightsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -18,4 +25,6 @@ export const registerWorkflowInsightsRoutes = (
 ) => {
   registerGetInsightsRoute(router, endpointContext);
   registerUpdateInsightsRoute(router, endpointContext);
+  registerCreateInsightsRoute(router, endpointContext);
+  registerGetPendingRoute(router, endpointContext);
 };

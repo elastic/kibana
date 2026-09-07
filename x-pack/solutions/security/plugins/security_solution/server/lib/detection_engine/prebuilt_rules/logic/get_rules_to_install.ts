@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import type { MlAuthz } from '../../../machine_learning/authz';
 import type { RuleAlertType } from '../../rule_schema';
 import type { PrebuiltRuleAsset } from '../model/rule_assets/prebuilt_rule_asset';
+import { excludeLicenseRestrictedRules } from './utils';
 
-export const getRulesToInstall = (
+export const getRulesToInstall = async (
   latestPrebuiltRules: PrebuiltRuleAsset[],
-  installedRules: Map<string, RuleAlertType>
+  installedRules: Map<string, RuleAlertType>,
+  mlAuthz: MlAuthz
 ) => {
-  return latestPrebuiltRules.filter((rule) => !installedRules.has(rule.rule_id));
+  const uninstalledRules = latestPrebuiltRules.filter((rule) => !installedRules.has(rule.rule_id));
+  return excludeLicenseRestrictedRules(uninstalledRules, mlAuthz);
 };

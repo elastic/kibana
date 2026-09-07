@@ -10,6 +10,7 @@ import { HealthStatus } from '../monitoring';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { calculateHealthStatus } from './calculate_health_status';
 import { cloneDeep } from 'lodash';
+import { ApiKeyType } from '../config';
 
 const now = '2023-05-09T13:00:00.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
@@ -20,10 +21,17 @@ const config = {
     active_nodes_lookback: '30s',
     interval: 10000,
   },
+  execution_control: {
+    poll_interval: 5000,
+  },
   kibanas_per_partition: 2,
   enabled: true,
   index: 'foo',
   max_attempts: 9,
+  invalidate_api_key_task: {
+    interval: '5m',
+    removalDelay: '1h',
+  },
   poll_interval: 3000,
   version_conflict_threshold: 80,
   request_capacity: 1000,
@@ -53,11 +61,13 @@ const config = {
   },
   worker_utilization_running_average_window: 5,
   metrics_reset_interval: 3000,
-  claim_strategy: 'update_by_query',
+  claim_strategy: 'mget',
   request_timeouts: {
     update_by_query: 1000,
   },
   auto_calculate_default_ech_capacity: false,
+  api_key_type: ApiKeyType.ES,
+  grant_uiam_api_keys: false,
 };
 
 const getStatsWithTimestamp = ({
@@ -76,7 +86,7 @@ const getStatsWithTimestamp = ({
         timestamp,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'update_by_query',
+          claim_strategy: 'mget',
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
           monitored_stats_running_average_window: 50,
@@ -88,6 +98,10 @@ const getStatsWithTimestamp = ({
             },
           },
           poll_interval: 3000,
+          execution_control: {
+            paused: false,
+            paused_task_types: [],
+          },
         },
         status: HealthStatus.OK,
       },

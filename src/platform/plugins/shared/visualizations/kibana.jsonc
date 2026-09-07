@@ -22,10 +22,10 @@
       "embeddable",
       "inspector",
       "screenshotMode",
-      "presentationUtil",
       "dataViews",
       "dataViewEditor",
       "unifiedSearch",
+      "kql",
       "usageCollection",
       "savedObjectsFinder",
       "savedObjectsManagement",
@@ -39,14 +39,14 @@
       "savedObjectsTaggingOss",
       "serverless",
       "noDataPage",
-      "embeddableEnhanced"
+      "cps"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "charts",
       "savedObjects",
-      "presentationPanel"
+      "presentationUtil"
     ],
     "extraPublicDirs": [
       "common/constants",

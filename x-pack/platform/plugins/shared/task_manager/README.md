@@ -53,6 +53,41 @@ The task_manager can be configured via `taskManager` config options (e.g. `xpack
 - `monitored_stats_required_freshness` - Dictates the _required freshness_ of critical "Hot" stats. Learn More: [./MONITORING](./MONITORING.MD)
 - `monitored_task_execution_thresholds`- Dictates the threshold of failed task executions. Learn More: [./MONITORING](./MONITORING.MD)
 - `unsafe.exclude_task_types` - A list of task types to exclude from running. Supports wildcard usage, such as `namespace:*`. This configuration is experimental, unsupported, and can only be used for temporary debugging purposes because it causes Kibana to behave in unexpected ways.
+- `execution_control.poll_interval` - How often (ms) each Kibana node polls the runtime task execution control (pause/resume) state. Defaults to 5000ms. See [Pausing task execution at runtime](#pausing-task-execution-at-runtime).
+- `invalidate_api_key_task.interval` - Check [API Key Invalidation](#api-key-invalidation) for details.
+- `invalidate_api_key_task.removalDelay` - Check [API Key Invalidation](#api-key-invalidation) for details.
+
+## Pausing task execution at runtime
+
+During an incident (e.g. background work overwhelming Elasticsearch or the Kibana heap) an operator can stop Task Manager from running tasks at runtime, without a restart, and later resume. This is a supported, access-controlled alternative to the `node.roles: [ui]` / `unsafe.exclude_task_types` levers, and it works the same on self-managed, ECH, and serverless.
+
+The pause state is stored in a single `task-execution-control` saved object in the `.kibana_task_manager` index. Every node polls it on `execution_control.poll_interval` (5s by default), so a change propagates to all nodes within seconds. Because it is persisted, a crash-looping Kibana comes back paused.
+
+Pausing:
+- Stops all task **claiming** (or claiming of specific task types) across every node.
+- Best-effort **cancels tasks already running** (fires each task's `cancel()` / `AbortController`; tasks without a cancel handler run to completion).
+- Does **not** block task CRUD — rules, connectors, reports, and other tasks can still be created, updated, and deleted while execution is paused.
+
+The routes are internal and require the `superuser` privilege:
+
+```
+# Pause all task execution
+POST /internal/task_manager/execution/_pause
+
+# Pause only specific task types
+POST /internal/task_manager/execution/_pause   { "task_types": ["alerting:.es-query"] }
+
+# Resume all task execution (also clears any paused task types)
+POST /internal/task_manager/execution/_resume
+
+# Resume only specific task types
+POST /internal/task_manager/execution/_resume   { "task_types": ["alerting:.es-query"] }
+
+# Read the current state
+GET  /internal/task_manager/execution/_status
+```
+
+While paused, workload/overdue stats grow and the health API may report a degraded status; the current state is exposed at `/api/task_manager/_health` under `stats.configuration.value.execution_control`. Cancelled tasks remain in a `running` state in the index until their `retryAt` and are reclaimed once execution is resumed.
 
 ## Task definitions
 
@@ -82,6 +117,11 @@ export class Plugin {
         // Optional, how many attempts before marking task as failed.
         // This defaults to what is configured at the task manager level.
         maxAttempts: 5,
+
+        // Optional, the claim ordering tier for this task type, named after what the task
+        // is for. Omit it unless the task needs a tier other than the `TaskPriority.Standard`
+        // default. See "Task priority" below.
+        priority: TaskPriority.Deferrable,
 
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
         // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
@@ -128,6 +168,49 @@ export class Plugin {
   public start(core: CoreStart, plugins: { taskManager }) {}
 }
 ```
+
+### Task priority
+
+`priority` is the tier a task type sits in when Task Manager decides what to claim next. Available
+capacity is filled highest priority first, and tasks within a tier are claimed oldest first. The
+members are named after *what the task is for*, so the right tier should be readable from the name
+alone:
+
+| Priority | Value | Use it for |
+|---|---|---|
+| `TaskPriority.UserInteractive` | 100 | Work a user is directly waiting on, or work with a tight latency budget — a delay here is user-visible. Reserve it for exactly that; every one of these tasks displaces `Standard` work. |
+| `TaskPriority.Standard` | 50 | The default, and correct for almost every task. Applied when no priority is set on the task type or the task instance. |
+| `TaskPriority.Deferrable` | 40 | Long-running work that should yield to `Standard` tasks rather than hold the regular pool while it grinds through a large workload. |
+| `TaskPriority.Maintenance` | 1 | Background bookkeeping that may be deferred under load — cleanup, telemetry rollups, backfills. Nothing is waiting on it. |
+
+Two things `priority` is **not**:
+
+- It is not `cost`. `priority` decides claim *order*; `cost` (`TaskCost`) decides how much of the
+  finite capacity pool a running task occupies. A cheap task can be high priority, and an expensive
+  task can be low priority.
+- It is not importance. Raising a task's priority because it matters to your plugin, rather than
+  because something is waiting on it, starves every other plugin's work. `Standard` is the right
+  answer unless the task genuinely needs to preempt or yield.
+
+A task instance may override its task type's priority via the `priority` field on the instance (see
+[Task instances](#task-instances)); the instance value wins when both are set.
+
+Omit `priority` rather than setting it to `Standard` explicitly — they behave identically, and any
+task type that sets the field at all is counted by the `task_priority_check` integration test, which
+will fail until its snapshot is updated. That failure is deliberate: it exists so ResponseOps
+reviews the change.
+
+#### Deprecated priority names
+
+The members used to be named after their position in the claim ordering. The old names remain as
+deprecated aliases with identical numeric values, so claim ordering is unchanged, but new code
+should use the intent-based names:
+
+| Deprecated | Replacement |
+|---|---|
+| `TaskPriority.Low` | `TaskPriority.Maintenance` |
+| `TaskPriority.NormalLongRunning` | `TaskPriority.Deferrable` |
+| `TaskPriority.Normal` | `TaskPriority.Standard` |
 
 When Kibana attempts to claim and run a task instance, it looks its definition up, and executes its createTaskRunner's method, passing it a run context which looks like this:
 
@@ -245,6 +328,11 @@ The data stored for a task instance looks something like this:
   // with days such as '1d', hours '3h', minutes such as `5m`, seconds `10s`.
   schedule: { interval: '5m' },
 
+  // Optional, overrides the claim ordering tier defined by the task type for
+  // this instance only. Defaults to the task type's priority, which itself
+  // defaults to `TaskPriority.Standard`. See "Task priority" above.
+  priority: 50,
+
   // How many times this task has been unsuccesfully attempted,
   // this will be reset to 0 if the task ever succesfully completes.
   // This is incremented if a task fails or times out.
@@ -348,7 +436,7 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: ScheduleOptions) => {
     // ...
   },
-  runSoon: (taskId: string) =>  {
+  runSoon: (taskId: string, force?: boolean) =>  {
     // ...
   },
   bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
@@ -462,9 +550,11 @@ The danger is that in such a situation, a Task with that same `id` might already
 
 To achieve this you should use the `ensureScheduled` api which has the exact same behavior as `schedule`, except it allows the scheduling of a Task with an `id` that's already in assigned to another Task and it will assume that the existing Task is the one you wished to `schedule`, treating this as a successful operation.
 
+The only exception to this is if you use `ensureScheduled` to schedule a task with a recurring schedule interval. In this case, if a task with the same `id` already exists, the API will attempt to update the schedule of the existing task if it has changed.
+
 #### runSoon
 
-Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`.
+Use `runSoon` to instruct TaskManager to run an existing task as soon as possible by updating the next scheduled run date to be `now`. The default behavior is to throw an error if the task is already in the `Running` or `Claiming` phase. Set the `force` flag to `true` to reset a task in the `Running` phase back to `Idle`. We allow this for manual resets of tasks with long timeouts that may get stuck with a `Running` status during Kibana upgrades and restarts but are not actually running. Please use caution when setting this flag! This does not cancel in-progress task runs if they are still running.
 
 ```js
 export class Plugin {
@@ -545,7 +635,7 @@ Use `bulkUpdatesSchedules` to instruct TaskManger to update the schedule interva
 When the interval is updated, new `runAt` will be computed and task will be updated with that value, using the formula
 
 ```
-newRunAt = oldRunAt - oldInterval + newInterval
+newRunAt = scheduledAt + newInterval
 ```
 
 Example:
@@ -817,15 +907,18 @@ Tasks can be scheduled with a user-scope, which allows the task to run with the 
 To schedule a task with a user scope, pass a KibanaRequest object as part of the schedule options:
 
 ```js
-const task = await taskManager.schedule({
-  taskType,
-  runAt,
-  schedule,
-  params,
-  scope: ['my-fanci-app'],
-}, {
-  request
-});
+const task = await taskManager.schedule(
+  {
+    taskType,
+    runAt,
+    schedule,
+    params,
+    scope: ['my-fanci-app'],
+  },
+  {
+    request,
+  }
+);
 ```
 
 Task Manager creates an API key using this request and stores this as an encrypted field on the task document. When the task runs, Task Manager decryptes the API key from the task document and generates a fake KibanaRequest using the decrypted API key in the authorization header. This fake request is then passed into the task runner defined in the task type
@@ -843,4 +936,13 @@ createTaskRunner({ taskInstance, fakeRequest}: RunContext) {
 },
 ```
 
-When the task is deleted, Task Manager automatically invalidates the associated API key.
+### API Key Invalidation
+
+When a task with an API key is deleted, we mark the API key for invalidation. Because the API key could be
+re-used between tasks (as in the case of one task queuing up another task), we do not immediately delete the associated API key. Instead, we use the saved object type `api_key_to_invalidate` to store the API key IDs that are marked for invalidation.
+
+We schedule a recurring background task that queries for the existence of any `api_key_to_invalidate` saved objects and then queries to see whether those API key IDs are used by any other tasks. If no other tasks are referencing the API key, we invalidate it. We use a removal delay in the query to avoid race conditions that may happen if a task is scheduled with a re-used API key while the invalidation task is running.
+
+The default schedule for this task is every `5m`. To change this schedule, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.interval`.
+
+The default removal delay for this task is `1h`. To change this delay, use the `kibana.yml` configuration option `xpack.task_manager.invalidate_api_key_task.removalDelay`.

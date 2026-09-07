@@ -59,7 +59,7 @@ describe('Template serialization', () => {
                 },
               },
             })
-          ).toHaveProperty('indexMode', value ?? STANDARD_INDEX_MODE);
+          ).toHaveProperty('indexMode', value);
         });
       });
 
@@ -78,7 +78,7 @@ describe('Template serialization', () => {
           ).toHaveProperty('indexMode', LOGSDB_INDEX_MODE);
         });
 
-        test('deserializes to standard index mode when logsdb is disabled', () => {
+        test('deserializes index mode to undefined when logsdb is disabled', () => {
           expect(
             deserializeTemplate(
               {
@@ -89,7 +89,7 @@ describe('Template serialization', () => {
               undefined,
               false
             )
-          ).toHaveProperty('indexMode', STANDARD_INDEX_MODE);
+          ).toHaveProperty('indexMode', undefined);
         });
       });
     });
@@ -117,10 +117,125 @@ describe('Template serialization', () => {
           ).toHaveProperty('template.settings.index.mode', value);
         });
       });
+
+      test(`does not create empty index object when indexMode is undefined`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+        });
+        // Should not have settings.index at all when indexMode is undefined and no other index settings exist
+        expect(result.template?.settings?.index).toBeUndefined();
+      });
+
+      test(`does not create empty settings object when no settings are provided`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {},
+        });
+        // Should not have settings at all when there are no settings to include
+        expect(result.template?.settings).toBeUndefined();
+      });
+
+      test(`preserves existing index settings when indexMode is undefined`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            settings: {
+              index: {
+                number_of_shards: 3,
+              },
+            },
+          },
+        });
+        // Should keep existing index settings
+        expect(result.template?.settings?.index).toEqual({
+          number_of_shards: 3,
+        });
+      });
+
+      test(`adds indexMode to existing index settings`, () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: LOGSDB_INDEX_MODE,
+          template: {
+            settings: {
+              index: {
+                number_of_shards: 3,
+              },
+            },
+          },
+        });
+        // Should merge indexMode with existing index settings
+        expect(result.template?.settings?.index).toEqual({
+          number_of_shards: 3,
+          mode: LOGSDB_INDEX_MODE,
+        });
+      });
+
       test(`correctly serializes data_stream_options`, () => {
         expect(
           serializeTemplate(defaultDeserializedTemplate, { failure_store: { enabled: true } })
         ).toHaveProperty('template.data_stream_options', { failure_store: { enabled: true } });
+      });
+
+      test('migrates deprecated mappings._source.mode to index.mapping.source.mode (stored)', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                mode: 'stored',
+                includes: ['foo'],
+                excludes: ['bar'],
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBe('stored');
+        expect(result.template?.mappings?._source).toEqual({
+          includes: ['foo'],
+          excludes: ['bar'],
+        });
+      });
+
+      test('migrates deprecated mappings._source.mode to index.mapping.source.mode (synthetic)', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                mode: 'synthetic',
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBe('synthetic');
+        expect(result.template?.mappings?._source?.mode).toBeUndefined();
+      });
+
+      test('does not migrate enabled _source property - it remains represented via _source.enabled', () => {
+        const result = serializeTemplate({
+          ...defaultDeserializedTemplate,
+          indexMode: undefined,
+          template: {
+            mappings: {
+              _source: {
+                enabled: false,
+              },
+            },
+          },
+        });
+
+        expect(result.template?.settings?.index?.mapping?.source?.mode).toBeUndefined();
+        expect(result.template?.mappings?._source).toEqual({
+          enabled: false,
+        });
       });
     });
   });

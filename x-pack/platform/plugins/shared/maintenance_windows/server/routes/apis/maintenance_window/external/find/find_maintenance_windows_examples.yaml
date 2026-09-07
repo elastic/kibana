@@ -1,0 +1,7 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          findMaintenanceWindowsResponse:
+            $ref: './find_maintenance_windows_response.yaml'

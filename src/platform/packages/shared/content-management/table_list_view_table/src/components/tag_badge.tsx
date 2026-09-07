@@ -11,11 +11,9 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 
 import type { Tag } from '../types';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
 export interface Props {
   tag: Tag;
   onClick: (tag: Tag, withModifierKey: boolean) => void;

@@ -83,6 +83,14 @@ export function getFieldTypeDescription(type?: string) {
       return i18n.translate('fieldUtils.fieldNameDescription.histogramField', {
         defaultMessage: 'Pre-aggregated numerical values in the form of a histogram.',
       });
+    case KNOWN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM:
+      return i18n.translate('fieldUtils.fieldNameDescription.exponentialHistogramField', {
+        defaultMessage: 'Pre-aggregated numerical values in the form of an exponential histogram.',
+      });
+    case KNOWN_FIELD_TYPES.TDIGEST:
+      return i18n.translate('fieldUtils.fieldNameDescription.tdigestField', {
+        defaultMessage: 'Pre-aggregated numerical values for percentile calculations.',
+      });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('fieldUtils.fieldNameDescription.ipAddressField', {
         defaultMessage: 'IPv4 and IPv6 addresses.',
@@ -147,6 +155,10 @@ export function getFieldTypeDescription(type?: string) {
     case KNOWN_FIELD_TYPES.VERSION:
       return i18n.translate('fieldUtils.fieldNameDescription.versionField', {
         defaultMessage: 'Software versions. Supports "Semantic Versioning" precedence rules.',
+      });
+    case KNOWN_FIELD_TYPES.NULL:
+      return i18n.translate('fieldUtils.fieldNameDescription.nullField', {
+        defaultMessage: 'Field with null values.',
       });
     default:
       // If you see a typescript error here, that's a sign that there are missing switch cases ^^

@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
+import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { InMemoryConnector } from '../../../..';
 import type { SavedObjectClientForFind } from '../../../../data/connector/types/params';
 import { connectorWithExtraFindDataSchema } from '../../schemas';
@@ -19,9 +20,9 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
+import { getAuthMode } from '../../lib/get_auth_mode';
 import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
-
 interface GetAllHelperOpts {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
@@ -30,6 +31,7 @@ interface GetAllHelperOpts {
   logger: Logger;
   namespace?: string;
   savedObjectsClient: SavedObjectClientForFind;
+  connectorTypeRegistry: ActionTypeRegistry;
 }
 
 export async function getAll({
@@ -57,6 +59,7 @@ export async function getAll({
     kibanaIndices: context.kibanaIndices,
     logger: context.logger,
     savedObjectsClient: context.unsecuredSavedObjectsClient,
+    connectorTypeRegistry: context.actionTypeRegistry,
   });
 }
 
@@ -67,8 +70,10 @@ export async function getAllUnsecured({
   kibanaIndices,
   logger,
   spaceId,
+  connectorTypeRegistry,
 }: GetAllUnsecuredParams): Promise<ConnectorWithExtraFindData[]> {
-  const namespace = spaceId && spaceId !== 'default' ? spaceId : undefined;
+  const isUnsetOrDefaultSpace = !spaceId || spaceId === 'default';
+  const namespace = isUnsetOrDefaultSpace ? undefined : spaceId;
 
   return await getAllHelper({
     esClient,
@@ -78,6 +83,7 @@ export async function getAllUnsecured({
     logger,
     namespace,
     savedObjectsClient: internalSavedObjectsRepository,
+    connectorTypeRegistry,
   });
 }
 
@@ -89,13 +95,15 @@ async function getAllHelper({
   logger,
   namespace,
   savedObjectsClient,
+  connectorTypeRegistry,
 }: GetAllHelperOpts): Promise<ConnectorWithExtraFindData[]> {
   const savedObjectsActions = (
     await findConnectorsSo({ savedObjectsClient, namespace })
   ).saved_objects.map((rawAction) => {
     const connector = connectorFromSavedObject(
       rawAction,
-      isConnectorDeprecated(rawAction.attributes)
+      isConnectorDeprecated(rawAction.attributes),
+      connectorTypeRegistry.isDeprecated(rawAction.attributes.actionTypeId)
     );
     return omit(connector, 'secrets');
   });
@@ -121,6 +129,8 @@ async function getAllHelper({
         isPreconfigured: connector.isPreconfigured,
         isDeprecated: isConnectorDeprecated(connector),
         isSystemAction: connector.isSystemAction,
+        isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+        authMode: getAuthMode(connector.authMode),
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
     }),
@@ -171,14 +181,20 @@ export async function getAllSystemConnectors({
   );
 
   const transformedSystemConnectors = systemConnectors
-    .map((systemConnector) => ({
-      id: systemConnector.id,
-      actionTypeId: systemConnector.actionTypeId,
-      name: systemConnector.name,
-      isPreconfigured: systemConnector.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(systemConnector),
-      isSystemAction: systemConnector.isSystemAction,
-    }))
+    .map((systemConnector) => {
+      return {
+        id: systemConnector.id,
+        actionTypeId: systemConnector.actionTypeId,
+        name: systemConnector.name,
+        isPreconfigured: systemConnector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(systemConnector),
+        isSystemAction: systemConnector.isSystemAction,
+        isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(
+          systemConnector.actionTypeId
+        ),
+        authMode: getAuthMode(systemConnector.authMode),
+      };
+    })
     .sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({

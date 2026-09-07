@@ -7,7 +7,14 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
-import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import {
+  isEditorFieldSetting,
+  isGlobalSetting,
+} from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
+} from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -33,10 +40,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('renders observability settings', () => {
       for (const settingId of OBSERVABILITY_PROJECT_SETTINGS) {
+        // Global settings render on the Global Settings tab
+        if (isGlobalSetting(settingId)) {
+          continue;
+        }
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
           continue;
         }
+        // This setting is read only for the time being
+        if (
+          settingId === OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS ||
+          settingId === OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS
+        ) {
+          continue;
+        }
+
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
           expect(await testSubjects.exists(fieldTestSubj)).to.be(true);

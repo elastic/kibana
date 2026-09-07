@@ -28,6 +28,13 @@ export function DashboardSelector({
 
   const [selectedDashboard, setSelectedDashboard] = useState<MergedServiceDashboard>();
 
+  const selectDashboardPlaceholder = i18n.translate(
+    'xpack.apm.serviceDashboards.selectDashboard.placeholder',
+    {
+      defaultMessage: 'Select dashboard',
+    }
+  );
+
   useMount(() => {
     if (!currentDashboardId) {
       history.push({
@@ -65,9 +72,8 @@ export function DashboardSelector({
     <EuiComboBox
       compressed
       style={{ minWidth: '200px' }}
-      placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
-        defaultMessage: 'Select dashboard',
-      })}
+      placeholder={selectDashboardPlaceholder}
+      aria-label={selectDashboardPlaceholder}
       prepend={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.prepend', {
         defaultMessage: 'Dashboard',
       })}

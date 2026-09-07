@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { TEST_SUITE_TYPES } from './constants';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 interface TestSuiteResult {
@@ -28,11 +29,19 @@ async function main() {
   // Calculate success metrics
   const jobs = buildkiteBuild.jobs;
   const testSuiteRuns = jobs.filter((step) => {
-    return step.step_key?.includes('ftr-suite') || step.step_key?.includes('cypress-suite');
+    return TEST_SUITE_TYPES.some((testType) => step.step_key?.includes(testType));
   });
   const testSuiteGroups = groupBy('name', testSuiteRuns);
 
-  const success = testSuiteRuns.every((job) => job.state === 'passed');
+  const SETUP_STEP_KEYS = ['build', 'scout_flaky_setup'];
+  const setupFailed = jobs.some(
+    (job) => SETUP_STEP_KEYS.includes(job.step_key ?? '') && job.state !== 'passed'
+  );
+
+  const noTestsRan = testSuiteRuns.length === 0;
+
+  const success =
+    !setupFailed && !noTestsRan && testSuiteRuns.every((job) => job.state === 'passed');
   const testGroupResults = Object.entries(testSuiteGroups).map(([name, group]) => {
     const passingTests = group.filter((job) => job.state === 'passed');
     return {
@@ -52,9 +61,11 @@ async function main() {
     buildkiteBuild.pipeline.slug
   }/builds?branch=${encodeURIComponent(buildkiteBuild.branch)}`;
 
+  const statusLine = getStatusLine({ success, setupFailed, noTestsRan });
+
   const prComment = `
 ## Flaky Test Runner Stats
-### ${success ? '🎉 All tests passed!' : '🟠 Some tests failed.'} - ${buildLink}
+### ${statusLine} - ${buildLink}
 ${testGroupResults.map(formatTestGroupResult).join('\n')}
 
 [see run history](${flakyRunHistoryLink})
@@ -69,6 +80,27 @@ ${testGroupResults.map(formatTestGroupResult).join('\n')}
   });
 
   console.log(`Comment added: ${commentResult.data.html_url}`);
+}
+
+function getStatusLine({
+  success,
+  setupFailed,
+  noTestsRan,
+}: {
+  success: boolean;
+  setupFailed: boolean;
+  noTestsRan: boolean;
+}): string {
+  if (success) {
+    return '🎉 All tests passed!';
+  }
+  if (setupFailed) {
+    return '🔴 Setup failed — tests did not run.';
+  }
+  if (noTestsRan) {
+    return '🔴 No tests ran.';
+  }
+  return '🟠 Some tests failed.';
 }
 
 function formatTestGroupResult(result: TestSuiteResult) {
@@ -108,6 +140,7 @@ main()
     console.log('Flaky runner stats comment added to PR!');
   })
   .catch((e) => {
-    console.error(e);
-    process.exit(1);
+    // Best-effort: never fail the build on a reporting hiccup, and don't use
+    // `soft_fail` (it would mask real failures from earlier steps).
+    console.error('Failed to post flaky runner stats comment (non-fatal):', e);
   });

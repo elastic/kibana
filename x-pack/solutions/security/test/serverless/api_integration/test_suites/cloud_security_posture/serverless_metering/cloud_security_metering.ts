@@ -11,7 +11,7 @@ import {
   CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
 } from '@kbn/cloud-security-posture-common';
 import type * as http from 'http';
-import { createPackagePolicy } from '../helper';
+import { createPackagePolicy } from '@kbn/cloud-security-posture-common/test_helper';
 import { EsIndexDataProvider } from '../utils';
 import { getMockFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
     let roleAuthc: RoleCredentials;
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
     before(async () => {
-      mockUsageApiServer = mockUsageApiApp.listen(8081); // Start the usage api mock server on port 8081
+      mockUsageApiServer = mockUsageApiApp.listen(8089); // Start the usage api mock server on port 8089
     });
 
     beforeEach(async () => {

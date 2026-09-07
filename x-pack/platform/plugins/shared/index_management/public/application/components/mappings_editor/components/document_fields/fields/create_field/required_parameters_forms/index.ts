@@ -32,7 +32,7 @@ export const getRequiredParametersFormForType = (
   if (subType) {
     const typeDefinition = TYPE_DEFINITION[type];
 
-    return typeDefinition.subTypes?.types.includes(subType)
+    return typeDefinition?.subTypes?.types.includes(subType)
       ? typeToParametersFormMap[subType]
       : undefined;
   }

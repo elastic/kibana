@@ -15,7 +15,9 @@ import {
   EuiText,
   EuiCodeBlock,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { msToPretty } from '../../lib';
 import { HighlightDetailsTable } from './highlight_details_table';
@@ -27,6 +29,16 @@ export interface Props {
   indexName: string;
   onClose: () => void;
 }
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    container: css`
+      max-width: ${euiTheme.breakpoint.s}px;
+    `,
+  };
+};
 
 const FlyoutEntry = ({
   title,
@@ -43,13 +55,10 @@ const FlyoutEntry = ({
 
 export const HighlightDetailsFlyout = ({ indexName, operation, shardName, onClose }: Props) => {
   const flyoutTitleId = useGeneratedHtmlId();
+  const styles = useStyles();
 
   return (
-    <EuiFlyout
-      className="prfDevTool__details"
-      onClose={() => onClose()}
-      aria-labelledby={flyoutTitleId}
-    >
+    <EuiFlyout css={styles.container} onClose={() => onClose()} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiText size="s" id={flyoutTitleId}>
           {indexName}

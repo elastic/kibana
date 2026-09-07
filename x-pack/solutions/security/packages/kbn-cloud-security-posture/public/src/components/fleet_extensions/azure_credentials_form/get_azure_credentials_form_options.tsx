@@ -74,13 +74,6 @@ const I18N_CLIENT_ID = i18n.translate(
   }
 );
 
-const I18N_CLOUD_CONNECTOR_ID = i18n.translate(
-  'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorIdLabel',
-  {
-    defaultMessage: 'Cloud Connector ID',
-  }
-);
-
 export const getAgentlessCredentialsType = (
   input: NewPackagePolicyInput,
   showCloudConnectors: boolean
@@ -139,24 +132,18 @@ export const getAzureCloudConnectorsCredentialsFormOptions = (): Pick<
       label: i18n.translate(
         'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsLabel',
         {
-          defaultMessage: 'Cloud Connectors (recommended)',
+          defaultMessage: 'Federated Identity (recommended)',
         }
       ),
       info: (
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.cloudConnectorsInfo"
-            defaultMessage="Cloud Connectors allow you to connect to various cloud services securely."
+            defaultMessage="Federated Identity allows you to connect to various cloud services securely."
           />
         </EuiText>
       ),
-      fields: {
-        ...getAzureClientIdAndTenantIdFields(),
-        azure_credentials_cloud_connector_id: {
-          label: I18N_CLOUD_CONNECTOR_ID,
-          testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLOUD_CONNECTOR_ID,
-        },
-      },
+      fields: {},
     },
     [AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET]: {
       label: i18n.translate(

@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { RulesParams } from '@kbn/observability-plugin/public';
-import { rulesLocatorID } from '@kbn/observability-plugin/public';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
-import { paths } from '../../../../common/locators/paths';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useSpace } from '../../../hooks/use_space';
 import type { BurnRateRuleParams } from '../../../typings';
-import { useKibana } from '../../../hooks/use_kibana';
 import {
-  createRemoteSloAddToCaseUrl,
   createRemoteSloDeleteUrl,
   createRemoteSloDisableUrl,
   createRemoteSloEditUrl,
@@ -52,7 +50,6 @@ export const useSloActions = ({
       remoteResetUrl: undefined,
       remoteEnableUrl: undefined,
       remoteDisableUrl: undefined,
-      remoteAddToCaseUrl: undefined,
       sloDetailsUrl: '',
     };
   }
@@ -63,16 +60,16 @@ export const useSloActions = ({
       setIsEditRuleFlyoutOpen(true);
       setIsActionsPopoverOpen(false);
     } else {
-      const locator = locators.get<RulesParams>(rulesLocatorID);
+      const locator = locators.get<RulesLocatorParams>(rulesLocatorID);
       if (!locator) return undefined;
 
       if (slo.remote && slo.remote.kibanaUrl !== '') {
         const basePath = http.basePath.get(); // "/kibana/s/my-space"
         const url = await locator.getUrl({ params: { sloId: slo.id } }); // "/kibana/s/my-space/app/rules/123"
         // since basePath is already included in the locatorUrl, we need to remove it from the start of url
-        const urlWithoutBasePath = url?.replace(basePath, ''); // "/app/rules/123"
+        const urlWithoutBasePath = url?.replace(basePath, ''); // "/app/rules/rule/123"
         const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
-        const remoteUrl = new URL(path.join(spacePath, urlWithoutBasePath), slo.remote.kibanaUrl); // "kibanaUrl/s/my-space/app/rules/123"
+        const remoteUrl = new URL(path.join(spacePath, urlWithoutBasePath), slo.remote.kibanaUrl); // "kibanaUrl/s/my-space/app/rules/rule/123"
         window.open(remoteUrl, '_blank');
       } else {
         locator.navigate({ params: { sloId: slo.id } }, { replace: false });
@@ -86,7 +83,6 @@ export const useSloActions = ({
   const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
   const remoteEnableUrl = createRemoteSloEnableUrl(slo, spaceId);
   const remoteDisableUrl = createRemoteSloDisableUrl(slo, spaceId);
-  const remoteAddToCaseUrl = createRemoteSloAddToCaseUrl(slo, spaceId);
 
   const sloEditUrl = slo.remote
     ? createRemoteSloEditUrl(slo, spaceId)
@@ -99,7 +95,6 @@ export const useSloActions = ({
     remoteResetUrl,
     remoteEnableUrl,
     remoteDisableUrl,
-    remoteAddToCaseUrl,
     sloDetailsUrl: http.basePath.prepend(detailsUrl),
   };
 };

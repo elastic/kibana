@@ -7,6 +7,7 @@
 
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
 import {
+  httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
   securityServiceMock,
@@ -27,21 +28,22 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { CasesSearchRequest } from '../../common/types/api';
+import { lazyObject } from '@kbn/lazy-object';
+import type { CasesClientSource } from './types';
+import type { CasesFindRequestWithCustomFields, CasesSearchRequest } from '../../common/types/api';
 import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
+import type { TemplatesSubClient } from './templates/client';
+import type { FieldDefinitionsSubClient } from './field_definitions/client';
 import type { UserActionsSubClient } from './user_actions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
-import {
-  createExternalReferenceAttachmentTypeRegistryMock,
-  createPersistableStateAttachmentTypeRegistryMock,
-} from '../attachment_framework/mocks';
+import { createUnifiedAttachmentTypeRegistryMock } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
   connectorMappingsServiceMock,
@@ -52,15 +54,41 @@ import {
   createLicensingServiceMock,
   createUserActionServiceMock,
   createNotificationServiceMock,
+  createTemplatesServiceMock,
+  createFieldDefinitionsServiceMock,
 } from '../services/mocks';
+import { ConfigSchema } from '../config';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_DATA_VIEW_REFRESHER,
+  V2_NOOP_WRITER,
+} from '../cases_analytics_v2';
+import { CasesEventBus } from '../events/event_bus';
+
+export const createCasesEventBusMock = (): CasesEventBus => {
+  return {
+    ...new CasesEventBus(),
+    emitCaseCreated: jest.fn(),
+    emitCaseUpdated: jest.fn(),
+    emitAttachmentsAdded: jest.fn(),
+    emitAlertStatusChanged: jest.fn(),
+    onCaseCreated: jest.fn(),
+    onCaseUpdated: jest.fn(),
+    onAttachmentsAdded: jest.fn(),
+    onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
+  };
+};
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
 const createCasesSubClientMock = (): CasesSubClientMock => {
-  return {
+  return lazyObject({
     create: jest.fn(),
     bulkCreate: jest.fn(),
     search: jest.fn(),
+    find: jest.fn(),
     resolve: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
@@ -76,23 +104,25 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     addObservable: jest.fn(),
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
-  };
+    bulkAddObservables: jest.fn(),
+    getApplicableFields: jest.fn(),
+  });
 };
 
 type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
 
 const createMetricsSubClientMock = (): MetricsSubClientMock => {
-  return {
+  return lazyObject({
     getCaseMetrics: jest.fn(),
     getCasesMetrics: jest.fn(),
     getStatusTotalsByType: jest.fn(),
-  };
+  });
 };
 
 type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
-  return {
+  return lazyObject({
     bulkGet: jest.fn(),
     add: jest.fn(),
     addFile: jest.fn(),
@@ -104,66 +134,98 @@ const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
     getAll: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-    getAllAlertsAttachToCase: jest.fn(),
-  };
+    getAllDocumentsAttachedToCase: jest.fn(),
+  });
 };
 
 type UserActionsSubClientMock = jest.Mocked<UserActionsSubClient>;
 
 const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
-  return {
+  return lazyObject({
     find: jest.fn(),
     getAll: jest.fn(),
     getConnectors: jest.fn(),
     stats: jest.fn(),
     getUsers: jest.fn(),
-  };
+  });
 };
 
 type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
 
 const createConfigureSubClientMock = (): ConfigureSubClientMock => {
-  return {
+  return lazyObject({
     get: jest.fn(),
     getConnectors: jest.fn(),
     update: jest.fn(),
     create: jest.fn(),
-  };
+  });
+};
+
+type TemplatesSubClientMock = jest.Mocked<TemplatesSubClient>;
+
+const createTemplatesSubClientMock = (): TemplatesSubClientMock => {
+  return lazyObject({
+    getAllTemplates: jest.fn(),
+    getTemplate: jest.fn(),
+    createTemplate: jest.fn(),
+    updateTemplate: jest.fn(),
+    deleteTemplate: jest.fn(),
+    validateCreateTemplate: jest.fn(),
+    validateUpdateTemplate: jest.fn(),
+    getTags: jest.fn(),
+    getAuthors: jest.fn(),
+  });
+};
+
+type FieldDefinitionsSubClientMock = jest.Mocked<FieldDefinitionsSubClient>;
+
+const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock => {
+  return lazyObject({
+    getFieldDefinitions: jest.fn(),
+    getFieldDefinition: jest.fn(),
+    createFieldDefinition: jest.fn(),
+    updateFieldDefinition: jest.fn(),
+    deleteFieldDefinition: jest.fn(),
+  });
 };
 
 type InternalConfigureSubClientMock = jest.Mocked<InternalConfigureSubClient>;
 
 const createInternalConfigureSubClientMock = (): InternalConfigureSubClientMock => {
-  return {
+  return lazyObject({
     getMappings: jest.fn(),
     createMappings: jest.fn(),
     updateMappings: jest.fn(),
-  };
+  });
 };
 
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
+  templates: TemplatesSubClientMock;
+  fieldDefinitions: FieldDefinitionsSubClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
-  const client: PublicContract<CasesClient> = {
+  const client: PublicContract<CasesClient> = lazyObject({
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
-  };
+    templates: createTemplatesSubClientMock(),
+    fieldDefinitions: createFieldDefinitionsSubClientMock(),
+  });
   return client as unknown as CasesClientMock;
 };
 
 type CasesClientInternalMock = jest.Mocked<CasesClientInternal>;
 
 export const createCasesClientInternalMock = (): CasesClientInternalMock => {
-  const client: PublicContract<CasesClientInternal> = {
+  const client: PublicContract<CasesClientInternal> = lazyObject({
     configuration: createInternalConfigureSubClientMock(),
-  };
+  });
 
   return client as unknown as CasesClientInternalMock;
 };
@@ -174,6 +236,7 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   const factory: PublicMethodsOf<CasesClientFactory> = {
     initialize: jest.fn(),
     create: jest.fn(),
+    createWorkflowRunAuthorizer: jest.fn(),
   };
 
   return factory as unknown as CasesClientFactoryMock;
@@ -204,6 +267,8 @@ export const createCasesClientMockArgs = () => {
       userActionService: createUserActionServiceMock(),
       licensingService: createLicensingServiceMock(),
       notificationService: createNotificationServiceMock(),
+      templatesService: createTemplatesServiceMock(),
+      fieldDefinitionsService: createFieldDefinitionsServiceMock(),
     },
     authorization: createAuthorizationMock(),
     logger: loggingSystemMock.createLogger(),
@@ -216,8 +281,7 @@ export const createCasesClientMockArgs = () => {
       profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
     },
     spaceId: 'default',
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -228,6 +292,14 @@ export const createCasesClientMockArgs = () => {
     ),
     savedObjectsSerializer: createSavedObjectsSerializerMock(),
     fileService: createFileServiceMock(),
+    // Assignee-identity population is on by default
+    config: {
+      ...ConfigSchema.validate({}),
+      assigneeIdentity: { enabled: true },
+    },
+    casesEventBus: createCasesEventBusMock(),
+    request: httpServerMock.createKibanaRequest(),
+    clientSource: 'rest_api' as CasesClientSource,
   };
 };
 
@@ -251,16 +323,47 @@ export const createCasesClientFactoryMockArgs = () => {
         {}
       )
     ),
-    externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
-    persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    config: ConfigSchema.validate({}),
+    unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
+    casesEventBus: createCasesEventBusMock(),
+    // Tests don't drive analytics v2; the no-op writers keep every hook
+    // invoked through the factory a tight no-op. The data view refresher
+    // gets the same treatment so the templates service is happy without
+    // any wiring.
+    analyticsV2Writer: V2_NOOP_WRITER,
+    analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
+    analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
   };
 };
+
+export const createCasesClientMockFindRequest = (
+  overwrites?: CasesFindRequestWithCustomFields
+): CasesFindRequestWithCustomFields => ({
+  search: '',
+  searchFields: ['title', 'description', 'incremental_id.text'],
+  severity: CaseSeverity.LOW,
+  assignees: [],
+  reporters: [],
+  status: CaseStatuses.open,
+  tags: [],
+  owner: [],
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  customFields: {},
+  ...overwrites,
+});
 
 export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description'],
+  searchFields: [
+    'cases.title',
+    'cases.description',
+    'cases.incremental_id.text',
+    'cases-comments.comment',
+  ],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],

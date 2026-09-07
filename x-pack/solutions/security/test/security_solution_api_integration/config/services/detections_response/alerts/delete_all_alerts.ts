@@ -19,9 +19,12 @@ export const deleteAllAlerts = async (
   supertest: SuperTest.Agent,
   log: ToolingLog,
   es: Client,
-  index: Array<'.alerts-security.alerts-*' | '.preview.alerts-security.alerts-*'> = [
-    '.alerts-security.alerts-*',
-  ]
+  index: Array<
+    | '.alerts-security.alerts-*'
+    | '.preview.alerts-security.alerts-*'
+    | '.alerts-security.attack.discovery.alerts-*'
+    | '.adhoc.alerts-security.attack.discovery.alerts-*'
+  > = ['.alerts-security.alerts-*']
 ): Promise<void> => {
   await countDownTest(
     async () => {

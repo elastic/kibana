@@ -11,7 +11,7 @@ import { readFileSync } from 'fs';
 import type { Duration } from 'moment';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { i18n } from '@kbn/i18n';
-import type { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue, Type } from '@kbn/config-schema';
 import { schema, offeringBasedSchema, type TypeOf } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
@@ -26,7 +26,33 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = 'master';
 
+export const DEFAULT_HEALTH_CHECK_RETRY = 3;
+
 export type ElasticsearchConfigType = TypeOf<typeof configSchema>;
+
+const requestHeadersWhitelistSchemas = [
+  schema.string({
+    // can't use `validate` option on union types, forced to validate each individual subtypes
+    // see https://github.com/elastic/kibana/issues/64906
+    validate: (headersWhitelist) => {
+      const reservedHeaders = getReservedHeaders([headersWhitelist]);
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
+  }),
+  schema.arrayOf(schema.string(), {
+    maxSize: 100,
+    // can't use `validate` option on union types, forced to validate each individual subtypes
+    // see https://github.com/elastic/kibana/issues/64906
+    validate: (headersWhitelist) => {
+      const reservedHeaders = getReservedHeaders(headersWhitelist);
+      if (reservedHeaders.length) {
+        return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
+      }
+    },
+  }),
+] as [Type<string>, Type<string[]>];
 
 /**
  * Validation schema for elasticsearch service config. It can be reused when plugins allow users
@@ -39,9 +65,12 @@ export const configSchema = schema.object({
     defaultValue: false,
   }),
   sniffOnConnectionFault: schema.boolean({ defaultValue: false }),
-  hosts: schema.oneOf([hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1 })], {
-    defaultValue: 'http://localhost:9200',
-  }),
+  hosts: schema.oneOf(
+    [hostURISchema, schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 })],
+    {
+      defaultValue: 'http://localhost:9200',
+    }
+  ),
   maxSockets: schema.number({ defaultValue: 800, min: 1 }),
   maxIdleSockets: schema.number({ defaultValue: 256, min: 1 }),
   maxResponseSize: schema.oneOf([schema.literal(false), schema.byteSize()], {
@@ -75,33 +104,14 @@ export const configSchema = schema.object({
       })
     )
   ),
-  requestHeadersWhitelist: schema.oneOf(
-    [
-      schema.string({
-        // can't use `validate` option on union types, forced to validate each individual subtypes
-        // see https://github.com/elastic/kibana/issues/64906
-        validate: (headersWhitelist) => {
-          const reservedHeaders = getReservedHeaders([headersWhitelist]);
-          if (reservedHeaders.length) {
-            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
-          }
-        },
-      }),
-      schema.arrayOf(schema.string(), {
-        // can't use `validate` option on union types, forced to validate each individual subtypes
-        // see https://github.com/elastic/kibana/issues/64906
-        validate: (headersWhitelist) => {
-          const reservedHeaders = getReservedHeaders(headersWhitelist);
-          if (reservedHeaders.length) {
-            return `cannot use reserved headers: [${reservedHeaders.join(', ')}]`;
-          }
-        },
-      }),
-    ],
-    {
+  requestHeadersWhitelist: offeringBasedSchema({
+    serverless: schema.oneOf(requestHeadersWhitelistSchemas, {
+      defaultValue: ['authorization', 'es-client-authentication', 'x-client-authentication'],
+    }),
+    traditional: schema.oneOf(requestHeadersWhitelistSchemas, {
       defaultValue: ['authorization', 'es-client-authentication'],
-    }
-  ),
+    }),
+  }),
   customHeaders: schema.recordOf(schema.string(), schema.string(), {
     defaultValue: {},
     validate: (customHeaders) => {
@@ -122,7 +132,10 @@ export const configSchema = schema.object({
         { defaultValue: 'full' }
       ),
       certificateAuthorities: schema.maybe(
-        schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
+        ])
       ),
       certificate: schema.maybe(schema.string()),
       key: schema.maybe(schema.string()),
@@ -151,7 +164,9 @@ export const configSchema = schema.object({
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({
     delay: schema.duration({ defaultValue: 2500 }),
+    onFailureDelay: schema.maybe(schema.duration()),
     startupDelay: schema.duration({ defaultValue: 500 }),
+    retry: schema.number({ defaultValue: DEFAULT_HEALTH_CHECK_RETRY, min: 1 }),
   }),
   ignoreVersionMismatch: offeringBasedSchema({
     serverless: schema.boolean({ defaultValue: true }),
@@ -189,7 +204,7 @@ export const configSchema = schema.object({
       path: schema.string(),
       method: schema.maybe(schema.string()),
     }),
-    { defaultValue: [] }
+    { defaultValue: [], maxSize: 100 }
   ),
   dnsCacheTtl: schema.duration({ defaultValue: 0, min: 0 }),
   publicBaseUrl: schema.maybe(hostURISchema),
@@ -284,6 +299,33 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    if (es.pingTimeout !== undefined) {
+      addDeprecation({
+        configPath: `${fromPath}.pingTimeout`,
+        title: i18n.translate('core.deprecations.elasticsearchPingTimeout.title', {
+          defaultMessage: 'Setting "{pingTimeoutSetting}" is deprecated',
+          values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+        }),
+        level: 'warning',
+        message: i18n.translate('core.deprecations.elasticsearchPingTimeout.message', {
+          defaultMessage:
+            'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
+          values: {
+            pingTimeoutSetting: `${fromPath}.pingTimeout`,
+            requestTimeoutSetting: `${fromPath}.requestTimeout`,
+          },
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchPingTimeout.manualSteps1', {
+              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs.',
+              values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+            }),
+          ],
+        },
+      });
+    }
     return;
   },
 ];
@@ -318,6 +360,14 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * The interval between health check requests Kibana sends to the Elasticsearch after the first green signal.
    */
   public readonly healthCheckDelay: Duration;
+  /**
+   * The interval between health check requests Kibana sends to the Elasticsearch during failure.
+   */
+  public readonly healthCheckFailureInterval: Duration | undefined;
+  /**
+   * The number of times to retry the health check request
+   */
+  public readonly healthCheckRetry: number;
   /**
    * Whether to allow kibana to connect to a non-compatible elasticsearch node.
    */
@@ -373,11 +423,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    * will be sent.
    */
   public readonly requestHeadersWhitelist: string[];
-
-  /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  public readonly pingTimeout: Duration;
 
   /**
    * Timeout after which HTTP request will be aborted and retried.
@@ -460,14 +505,15 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
-    this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;
     this.sniffOnStart = rawConfig.sniffOnStart;
     this.sniffOnConnectionFault = rawConfig.sniffOnConnectionFault;
     this.sniffInterval = rawConfig.sniffInterval;
     this.healthCheckDelay = rawConfig.healthCheck.delay;
+    this.healthCheckFailureInterval = rawConfig.healthCheck.onFailureDelay;
     this.healthCheckStartupDelay = rawConfig.healthCheck.startupDelay;
+    this.healthCheckRetry = rawConfig.healthCheck.retry;
     this.username = rawConfig.username;
     this.password = rawConfig.password;
     this.serviceAccountToken = rawConfig.serviceAccountToken;

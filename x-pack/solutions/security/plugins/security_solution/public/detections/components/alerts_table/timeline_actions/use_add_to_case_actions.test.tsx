@@ -39,7 +39,14 @@ const defaultProps = {
     event: {
       kind: ['signal'],
     },
+    host: {
+      name: ['test-host'],
+    },
   },
+  nonEcsData: [
+    { field: 'event.kind', value: ['signal'] },
+    { field: 'host.name', value: ['test-host'] },
+  ],
   refetch,
 };
 
@@ -51,13 +58,14 @@ const renderContextMenu = (items: AlertTableContextMenuItem[]) => {
   const panels = [{ id: 0, items }];
   render(
     <EuiPopover
+      aria-label="Context menu"
       isOpen={true}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
@@ -94,14 +102,14 @@ describe('useAddToCaseActions', () => {
     );
   });
 
-  it('should not render case options when event is not alert ', () => {
+  it('should render case options when event is not alert ', () => {
     const { result } = renderHook(
       () => useAddToCaseActions({ ...defaultProps, ecsData: { _id: '123' } }),
       {
         wrapper: TestProviders,
       }
     );
-    expect(result.current.addToCaseActionItems.length).toEqual(0);
+    expect(result.current.addToCaseActionItems.length).toEqual(2);
   });
 
   it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
@@ -112,7 +120,16 @@ describe('useAddToCaseActions', () => {
       result.current.handleAddToNewCaseClick();
     });
     expect(open).toHaveBeenCalledWith({
-      attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
+      attachments: [
+        {
+          type: 'security.alert',
+          attachmentId: '123',
+          metadata: {
+            index: '',
+            rule: null,
+          },
+        },
+      ],
     });
   });
 

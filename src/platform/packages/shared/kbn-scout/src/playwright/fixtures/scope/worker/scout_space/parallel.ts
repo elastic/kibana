@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { UiSettingValues } from '@kbn/kbn-client';
+import { KbnClientRequesterError } from '@kbn/kbn-client';
 import { formatTime, isValidUTCDate } from '../../../../utils';
 import { coreWorkerFixtures } from '..';
-import type { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
+import type { ImportSavedObjects, ScoutSpaceParallelFixture, SpaceSolutionView } from '.';
 import { measurePerformanceAsync } from '../../../../../common';
 
 export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
@@ -26,7 +27,17 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         disabledFeatures: [],
       };
       await measurePerformanceAsync(log, `spaces.create('${spaceId}')`, async () => {
-        return kbnClient.spaces.create(spacePayload);
+        try {
+          await kbnClient.spaces.create(spacePayload);
+        } catch (error) {
+          // A retried create can 409 when an earlier attempt already created the space (a transient gateway error masked success during a Cloud boot); delete and recreate so the worker starts from a clean, known space.
+          if (error instanceof KbnClientRequesterError && error.status === 409) {
+            await kbnClient.spaces.delete(spaceId);
+            await kbnClient.spaces.create(spacePayload);
+          } else {
+            throw error;
+          }
+        }
       });
 
       // cache saved objects ids in space
@@ -114,6 +125,20 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         );
       };
 
+      const setSolutionView = async (solution: SpaceSolutionView) => {
+        return measurePerformanceAsync(
+          log,
+          `space.setSolutionView({spaceId:'${spaceId}', solution:'${solution}'})`,
+          async () => {
+            await kbnClient.request({
+              method: 'PUT',
+              path: `/internal/spaces/space/${spaceId}/solution`,
+              body: { solution },
+            });
+          }
+        );
+      };
+
       const savedObjects = {
         load,
         cleanStandardList,
@@ -127,7 +152,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       };
 
       log.serviceMessage('scoutSpace', `New Kibana space '${spaceId}' created`);
-      await use({ savedObjects, uiSettings, id: spaceId });
+      await use({ savedObjects, uiSettings, id: spaceId, setSolutionView });
 
       // Cleanup space after tests via API call
       await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {

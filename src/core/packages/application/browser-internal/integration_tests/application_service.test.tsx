@@ -57,6 +57,8 @@ describe('ApplicationService', () => {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
+
+    window.performance.mark = jest.fn();
   });
 
   describe('navigating to apps', () => {

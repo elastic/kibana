@@ -13,24 +13,25 @@ import type {
   PrebootService,
 } from '@kbn/core-preboot-server-internal';
 import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type InternalPrebootServicePrebootMock = jest.Mocked<InternalPrebootServicePreboot>;
 export type PrebootServicePrebootMock = jest.Mocked<PrebootServicePreboot>;
 
 const createInternalPrebootContractMock = () => {
-  const mock: InternalPrebootServicePrebootMock = {
+  const mock: InternalPrebootServicePrebootMock = lazyObject({
     isSetupOnHold: jest.fn(),
     holdSetupUntilResolved: jest.fn(),
     waitUntilCanSetup: jest.fn(),
-  };
+  });
   return mock;
 };
 
 const createPrebootContractMock = () => {
-  const mock: PrebootServicePrebootMock = {
+  const mock: PrebootServicePrebootMock = lazyObject({
     isSetupOnHold: jest.fn(),
     holdSetupUntilResolved: jest.fn(),
-  };
+  });
 
   return mock;
 };
@@ -38,11 +39,11 @@ const createPrebootContractMock = () => {
 type PrebootServiceContract = PublicMethodsOf<PrebootService>;
 
 const createPrebootServiceMock = () => {
-  const mocked: jest.Mocked<PrebootServiceContract> = {
-    preboot: jest.fn(),
+  const mocked: jest.Mocked<PrebootServiceContract> = lazyObject({
+    preboot: jest.fn().mockReturnValue(createInternalPrebootContractMock()),
     stop: jest.fn(),
-  };
-  mocked.preboot.mockReturnValue(createInternalPrebootContractMock());
+  });
+
   return mocked;
 };
 

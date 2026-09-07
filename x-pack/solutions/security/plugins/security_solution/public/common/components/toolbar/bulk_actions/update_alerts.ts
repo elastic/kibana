@@ -6,13 +6,15 @@
  */
 
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
 import {
   updateAlertStatusByIds,
   updateAlertStatusByQuery,
 } from '../../../../detections/containers/detection_engine/alerts/api';
 
-interface UpdatedAlertsResponse {
+export interface UpdatedAlertsResponse {
   updated: number;
   version_conflicts: UpdateByQueryResponse['version_conflicts'];
 }
@@ -22,6 +24,8 @@ interface UpdatedAlertsProps {
   query?: object;
   signalIds?: string[];
   signal?: AbortSignal;
+  reason?: AlertClosingReason;
+  runtimeFields?: Record<string, RuntimeFieldType>;
 }
 
 /**
@@ -34,27 +38,41 @@ interface UpdatedAlertsProps {
  * @param query optional query object to update alerts by query.
  * @param signalIds optional signalIds to update alerts by signalIds.
  * @param signal to cancel request
+ * @param reason to specify the reason of the status update
+ * @param runtimeFields optional map of field name to ES runtime field type.
+ *   The server synthesizes `_source`-reading runtime fields for each entry
+ *   and attaches them to the underlying `_update_by_query` so the close
+ *   filter can match fields not natively mapped on the alerts index.
  *
  * @throws An error if response is not OK
  */
-export const updateAlertStatus = ({
+export const updateAlertStatus = async ({
   status,
   query,
   signalIds,
   signal,
+  reason,
+  runtimeFields,
 }: UpdatedAlertsProps): Promise<UpdatedAlertsResponse> => {
   if (signalIds && signalIds.length > 0) {
-    return updateAlertStatusByIds({ status, signalIds, signal }).then(({ updated }) => ({
+    const { updated } = await updateAlertStatusByIds({ status, signalIds, signal, reason });
+    return {
       updated: updated ?? 0,
       version_conflicts: 0,
-    }));
-  } else if (query) {
-    return updateAlertStatusByQuery({ status, query, signal }).then(
-      ({ updated, version_conflicts: conflicts }) => ({
-        updated: updated ?? 0,
-        version_conflicts: conflicts,
-      })
-    );
+    };
+  }
+  if (query) {
+    const { updated, version_conflicts: conflicts } = await updateAlertStatusByQuery({
+      status,
+      query,
+      signal,
+      reason,
+      runtimeFields,
+    });
+    return {
+      updated: updated ?? 0,
+      version_conflicts: conflicts,
+    };
   }
   throw new Error('Either query or signalIds must be provided');
 };

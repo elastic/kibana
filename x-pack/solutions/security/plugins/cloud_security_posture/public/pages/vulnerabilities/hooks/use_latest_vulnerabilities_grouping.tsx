@@ -25,7 +25,6 @@ import {
   LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
-  CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
   EVENT_ID,
   VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
@@ -112,28 +111,6 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
-};
-
-/**
- * Get runtime mappings for the given group field
- * Some fields require additional runtime mappings to aggregate additional information
- * Fallback to keyword type to support custom fields grouping
- */
-const getRuntimeMappingsByGroupField = (
-  field: string
-): Record<string, { type: 'keyword' }> | undefined => {
-  if (CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS?.[field]) {
-    return CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS[field].reduce(
-      (acc, runtimeField) => ({
-        ...acc,
-        [runtimeField]: {
-          type: 'keyword',
-        },
-      }),
-      {}
-    );
-  }
-  return {};
 };
 
 /**
@@ -257,7 +234,6 @@ export const useLatestVulnerabilitiesGrouping = ({
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
     statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
-    runtimeMappings: getRuntimeMappingsByGroupField(currentSelectedGroup),
     rootAggregations: getRootAggregations(currentSelectedGroup),
     multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
     countByKeyForMultiValueFields: EVENT_ID,

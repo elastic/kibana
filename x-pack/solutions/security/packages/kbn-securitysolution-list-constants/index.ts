@@ -38,7 +38,7 @@ export const INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL = `${INTERNAL_EXCEPTION
  * Exception list spaces
  */
 export const EXCEPTION_LIST_NAMESPACE_AGNOSTIC = 'exception-list-agnostic';
-export const EXCEPTION_LIST_NAMESPACE = 'exception-list';
+export const EXCEPTION_LIST_NAMESPACE_AWARE = 'exception-list';
 
 /**
  * Specific routes for the single global space agnostic endpoint list
@@ -93,6 +93,11 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
     name: 'Endpoint Security Blocklists List',
     description: 'Endpoint Security Blocklists List',
   },
+  customYaraSignatures: {
+    id: 'endpoint_custom_yara_signatures',
+    name: 'Endpoint Security Custom YARA Signatures List',
+    description: 'Endpoint Security Custom YARA Signatures List',
+  },
 } as const);
 
 /**
@@ -101,51 +106,3 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
 export const ENDPOINT_ARTIFACT_LIST_IDS = Object.freeze(
   Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id)
 );
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead.
- *
- * This ID is used for _both_ the Saved Object ID and for the list_id
- * for the single global space agnostic endpoint list
- */
-export const ENDPOINT_LIST_ID = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_TRUSTED_APPS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.trustedApps.name;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_TRUSTED_APPS_LIST_DESCRIPTION =
-  ENDPOINT_ARTIFACT_LISTS.trustedApps.description;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_EVENT_FILTERS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.eventFilters.name;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_EVENT_FILTERS_LIST_DESCRIPTION =
-  ENDPOINT_ARTIFACT_LISTS.eventFilters.description;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID =
-  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME =
-  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.name;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION =
-  ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.description;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_BLOCKLISTS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.blocklists.id;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_BLOCKLISTS_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.blocklists.name;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
-export const ENDPOINT_BLOCKLISTS_LIST_DESCRIPTION = ENDPOINT_ARTIFACT_LISTS.blocklists.description;

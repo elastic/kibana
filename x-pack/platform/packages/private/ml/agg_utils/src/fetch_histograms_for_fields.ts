@@ -189,6 +189,8 @@ interface FetchHistogramsForFieldsParams {
     samplerShardSize: number;
     /** Optional runtime mappings for the query. */
     runtimeMappings?: estypes.MappingRuntimeFields;
+    /** Optional project routing for the query. */
+    projectRouting?: string;
     /** Optional probability for random sampling. */
     randomSamplerProbability?: number;
     /** Optional seed for random sampling. */
@@ -203,7 +205,8 @@ interface FetchHistogramsForFieldsParams {
  * @returns A promise that resolves with the fetched histograms.
  */
 export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsParams) => {
-  const { esClient, abortSignal, arguments: args } = params;
+  const { esClient, abortSignal } = params;
+  const args = params.arguments;
   const {
     indexPattern,
     query,
@@ -212,6 +215,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
     runtimeMappings,
     randomSamplerProbability,
     randomSamplerSeed,
+    projectRouting,
   } = args;
 
   if (
@@ -234,6 +238,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
         runtimeMappings,
         randomSamplerProbability,
         randomSamplerSeed,
+        projectRouting,
       },
     })),
     ...fields.filter(isNumericHistogramFieldWithColumnStats).reduce((p, field) => {
@@ -292,6 +297,7 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
           ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
           : wrap(chartDataAggs),
       ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

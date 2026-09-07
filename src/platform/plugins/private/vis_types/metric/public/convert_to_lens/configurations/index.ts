@@ -10,9 +10,9 @@
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type {
   CollapseFunction,
-  Column,
-  MetricVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
+  MetricVisualizationState as MetricVisConfiguration,
+} from '@kbn/lens-common';
+import type { Column } from '@kbn/visualizations-plugin/common';
 import type { VisParams } from '../../types';
 
 export const getConfiguration = (
@@ -41,10 +41,16 @@ export const getConfiguration = (
         bucketCollapseFn[key as CollapseFunction].includes(breakdownByAccessor)
       ) as CollapseFunction)
     : undefined;
+
   return {
     layerId,
     layerType: 'data',
-    palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
+    ...(params.metric.metricColorMode !== 'None'
+      ? {
+          palette,
+          applyColorTo: params.metric.metricColorMode === 'Background' ? 'background' : 'value',
+        }
+      : {}),
     metricAccessor,
     breakdownByAccessor,
     collapseFn,

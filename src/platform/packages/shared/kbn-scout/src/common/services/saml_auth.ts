@@ -15,8 +15,8 @@ import {
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { HostOptions } from '@kbn/test';
-import { SamlSessionManager } from '@kbn/test';
+import type { HostOptions } from '@kbn/test-saml-auth';
+import { SamlSessionManager } from '@kbn/test-saml-auth';
 import type { ScoutTestConfig } from '../../types';
 import type { Protocol } from '../../playwright/types';
 import type { ScoutLogger } from './logger';
@@ -68,6 +68,13 @@ export const createSamlSessionManager = (
       sourcePath: rolesDefinitionPath,
     },
     cloudUsersFilePath: config.cloudUsersFilePath,
+    serverless: config.projectType
+      ? {
+          uiam: config.uiam,
+          projectType: config.projectType,
+          organizationId: config.organizationId!,
+        }
+      : undefined,
   });
 
   log.serviceLoaded('samlAuth');

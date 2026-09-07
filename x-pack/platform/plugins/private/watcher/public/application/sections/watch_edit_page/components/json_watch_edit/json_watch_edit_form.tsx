@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { XJson } from '../../../../shared_imports';
 import { serializeJsonWatch } from '../../../../../../common/lib/serialization';
 import type { Error as ServerError } from '../../../../components';
 import { ErrableFormRow, SectionError } from '../../../../components';
@@ -32,8 +31,6 @@ import { goToWatchList } from '../../../../lib/navigation';
 import { RequestFlyout } from '../request_flyout';
 import { useAppContext } from '../../../../app_context';
 
-const { useXJsonMode } = XJson;
-
 export const JsonWatchEditForm = () => {
   const {
     links: { putWatchApiUrl },
@@ -41,7 +38,7 @@ export const JsonWatchEditForm = () => {
   } = useAppContext();
 
   const { watch, setWatchProperty } = useContext(WatchContext);
-  const { convertToJson, setXJson, xJson } = useXJsonMode(watch.watchString);
+  const [watchJson, setWatchJson] = useState<string>(watch.watchString);
 
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find((errorKey) => errors[errorKey].length >= 1);
@@ -103,7 +100,6 @@ export const JsonWatchEditForm = () => {
           })}
         >
           <EuiFieldText
-            id="watchName"
             name="name"
             value={watch.name || ''}
             data-test-subj="nameInput"
@@ -129,7 +125,6 @@ export const JsonWatchEditForm = () => {
           errors={errors}
         >
           <EuiFieldText
-            id="id"
             name="id"
             data-test-subj="idInput"
             value={watch.id || ''}
@@ -170,7 +165,7 @@ export const JsonWatchEditForm = () => {
         >
           <CodeEditor
             languageId="json"
-            value={xJson}
+            value={watchJson}
             data-test-subj="jsonEditor"
             height={500}
             options={{
@@ -184,13 +179,13 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Code editor',
               }
             )}
-            onChange={(xjson: string) => {
+            onChange={(value: string) => {
               if (validationError) {
                 setValidationError(null);
               }
-              setXJson(xjson);
+              setWatchJson(value);
               // Keep the watch in sync with the editor content
-              setWatchProperty('watchString', convertToJson(xjson));
+              setWatchProperty('watchString', value);
             }}
           />
         </ErrableFormRow>

@@ -75,7 +75,7 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
       ),
       render: (health: 'red' | 'green' | 'yellow' | 'unavailable') => (
         <span>
-          <EuiIcon type="dot" color={healthColorsMap[health] ?? ''} />
+          <EuiIcon aria-hidden type="dot" color={healthColorsMap[health] ?? ''} />
           &nbsp;{health ?? '-'}
         </span>
       ),
@@ -124,7 +124,18 @@ export const SearchApplicationIndicesFlyout: React.FC = () => {
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
-          <EuiBasicTable items={indices} columns={columns} loading={isSearchApplicationLoading} />
+          <EuiBasicTable
+            tableCaption={i18n.translate(
+              'xpack.enterpriseSearch.searchApplications.list.indicesFlyout.tableCaption',
+              {
+                defaultMessage: 'Indices associated with {searchApplicationName}',
+                values: { searchApplicationName },
+              }
+            )}
+            items={indices}
+            columns={columns}
+            loading={isSearchApplicationLoading}
+          />
         </EuiFlyoutBody>
       </EuiFlyout>
     );

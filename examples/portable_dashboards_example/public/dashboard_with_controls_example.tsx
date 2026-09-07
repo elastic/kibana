@@ -11,9 +11,9 @@ import React, { useEffect, useState } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { controlGroupStateBuilder } from '@kbn/controls-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
@@ -27,7 +27,9 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
         {
           panelType: FILTER_DEBUGGER_EMBEDDABLE_ID,
         },
-        true
+        {
+          displaySuccessMessage: true,
+        }
       )
       .catch(() => {
         // ignore error - its an example
@@ -46,27 +48,38 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const controlGroupState = {};
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-              dataViewId: dataView.id ?? '',
-              title: 'Destintion country',
-              fieldName: 'geo.dest',
-              width: 'medium',
-              grow: false,
-            });
-            await controlGroupStateBuilder.addDataControlFromField(controlGroupState, {
-              dataViewId: dataView.id ?? '',
-              fieldName: 'bytes',
-              width: 'medium',
-              grow: true,
-              title: 'Bytes',
-            });
+            const dataViewId = dataView.id ?? '';
+            // Construct pinned panels in dashboard as-code shape (avoids control-group builder typing).
+            const pinnedPanels = [
+              {
+                id: 'destination-country',
+                type: 'options_list_control',
+                width: 'medium' as const,
+                grow: false,
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'geo.dest',
+                  title: 'Destination country',
+                },
+              },
+              {
+                id: 'bytes',
+                type: 'range_slider_control',
+                width: 'medium' as const,
+                grow: true,
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'bytes',
+                  title: 'Bytes',
+                },
+              },
+            ] as DashboardState['pinned_panels'];
 
             return {
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
+                time_range: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
-                controlGroupState,
+                pinned_panels: pinnedPanels,
               }),
             };
           }}

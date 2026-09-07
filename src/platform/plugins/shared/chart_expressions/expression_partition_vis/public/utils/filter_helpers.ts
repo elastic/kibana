@@ -10,7 +10,7 @@
 import type { LayerValue, SeriesIdentifier, TooltipValue } from '@elastic/charts';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { ValueClickContext } from '@kbn/embeddable-plugin/public';
-import { getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { getFormatByAccessor } from '@kbn/chart-expressions-common';
 import type { FieldFormat, FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { BucketColumns, PartitionVisParams, Dimensions } from '../../common/types';
 
@@ -74,7 +74,8 @@ export const getFilterClickData = (
         return isCurrentLayer;
       }
       const value =
-        splitChartFormatter?.convert(row[splitChartDimension.id]) || row[splitChartDimension.id];
+        splitChartFormatter?.convertToText(row[splitChartDimension.id]) ||
+        row[splitChartDimension.id];
       return isCurrentLayer && value === layer.smAccessorValue;
     })
   );
@@ -176,7 +177,7 @@ export const getFilterPopoverTitle = (
   if (visParams.dimensions.buckets) {
     const accessor = getAccessor(visParams.dimensions.buckets, columnIndex);
     formattedTitle = accessor
-      ? formatter(getFormatByAccessor(accessor, visData.columns)).convert(seriesKey)
+      ? formatter(getFormatByAccessor(accessor, visData.columns)).convertToText(seriesKey)
       : '';
   }
   return formattedTitle || seriesKey;

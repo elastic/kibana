@@ -1,0 +1,176 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
+
+const EMPTY_BODY_SHA256 = 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+/**
+ * Services whose per-resource hostname puts the region *before* the service
+ * code: {resource-id}.{region}.{service}.amazonaws.com. This is the reverse
+ * of the itemName.service.region order used by e.g. S3's virtual-hosted-style
+ * {bucket}.s3.{region}.amazonaws.com. Amazon OpenSearch Service domain
+ * endpoints (`es`) and OpenSearch Serverless collection endpoints (`aoss`)
+ * follow this reversed order — see
+ * https://docs.aws.amazon.com/opensearch-service/latest/developerguide/managedomains-signing-service-requests.html.
+ */
+const REGION_BEFORE_SERVICE_HOSTS = new Set(['es', 'aoss']);
+
+/**
+ * Parse an AWS hostname into service and region.
+ * Supports: {service}.{region}.amazonaws.com
+ */
+export function parseAwsHost(
+  hostname: string
+): { service: string; region: string; itemName?: string } | null {
+  if (!hostname.endsWith('.amazonaws.com')) {
+    return null;
+  }
+  const parts = hostname.replace('.amazonaws.com', '').split('.');
+  if (parts.length < 2) {
+    return null;
+  }
+
+  if (parts.length === 2) {
+    return { service: parts[0], region: parts[1] };
+  }
+
+  if (parts.length === 3 && REGION_BEFORE_SERVICE_HOSTS.has(parts[2])) {
+    return { itemName: parts[0], region: parts[1], service: parts[2] };
+  }
+
+  // Handle item-specific hostnames like {bucket}.s3.{region}.amazonaws.com
+  return { itemName: parts[0], service: parts[1], region: parts[2] };
+}
+
+/**
+ * AWS SigV4 canonicalization requires every byte outside the RFC-3986
+ * unreserved set (A-Z a-z 0-9 - _ . ~) to be percent-encoded, but
+ * `encodeURIComponent` leaves `! ' ( ) *` unescaped since they're valid
+ * within a generic URI. AWS decodes the request it receives on the wire and
+ * re-canonicalizes it using the stricter RFC-3986 rule, so any of these five
+ * characters left unescaped in a signed request/query value causes a
+ * signature mismatch — reported back as a generic access-denied error, not a
+ * helpful encoding error. This fixes up the residual set of characters
+ * without disturbing any `%XX` escapes already present, so it's safe to
+ * apply both to fresh `encodeURIComponent` output and to an already
+ * partially-encoded string like a URL pathname (see `aws_credentials.ts`).
+ */
+export function escapeSigV4ReservedChars(value: string): string {
+  return value.replace(/[!'()*]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+}
+
+/**
+ * Builds the query string used both to compute the SigV4 signature and as
+ * the literal query string sent on the wire. AWS rejects a request whose
+ * live query string differs, byte-for-byte, from the one that was signed —
+ * so signing and the outgoing request must always derive from this single
+ * function rather than two independently-encoded copies (see `signRequest`
+ * callers in aws_credentials.ts, which reuse this to rewrite `config.url`).
+ */
+export function buildCanonicalQueryString(queryParams: Record<string, string>): string {
+  return Object.keys(queryParams)
+    .sort()
+    .map(
+      (key) =>
+        `${escapeSigV4ReservedChars(encodeURIComponent(key))}=${escapeSigV4ReservedChars(
+          encodeURIComponent(queryParams[key])
+        )}`
+    )
+    .join('&');
+}
+
+/**
+ * Sign an AWS request with SigV4.
+ * Automatically collects x-amz-* headers for signing (AWS requires them signed).
+ */
+export async function signRequest(
+  method: string,
+  host: string,
+  path: string,
+  queryParams: Record<string, string>,
+  accessKeyId: string,
+  secretAccessKey: string,
+  region: string,
+  service: string,
+  existingHeaders: Record<string, string>,
+  body?: string
+): Promise<Record<string, string>> {
+  const algorithm = 'AWS4-HMAC-SHA256';
+  const now = new Date();
+  const dateStamp = now.toISOString().split('T')[0].replace(/-/g, '');
+  const amzDate = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
+
+  const canonicalQuerystring = buildCanonicalQueryString(queryParams);
+
+  const hasBody = body !== undefined && body !== '';
+  const payloadHash = hasBody ? await sha256Hash(body) : EMPTY_BODY_SHA256;
+
+  // Build canonical headers: host + content-type (if body) + x-amz-date + any existing x-amz-* headers
+  const headersToSign: Record<string, string> = {
+    host,
+    'x-amz-date': amzDate,
+  };
+
+  if (hasBody) {
+    headersToSign['content-type'] = 'application/json';
+  }
+
+  // Include any x-amz-* headers set by the action handler (AWS requires them signed)
+  for (const [key, value] of Object.entries(existingHeaders)) {
+    const lowerKey = key.toLowerCase();
+    if (lowerKey.startsWith('x-amz-') && lowerKey !== 'x-amz-date') {
+      headersToSign[lowerKey] = value;
+    }
+  }
+
+  const sortedHeaderKeys = Object.keys(headersToSign).sort();
+  const canonicalHeaders = sortedHeaderKeys.map((k) => `${k}:${headersToSign[k]}\n`).join('');
+  const signedHeaders = sortedHeaderKeys.join(';');
+
+  const canonicalRequest = [
+    method,
+    path,
+    canonicalQuerystring,
+    canonicalHeaders,
+    signedHeaders,
+    payloadHash,
+  ].join('\n');
+
+  const canonicalRequestHash = await sha256Hash(canonicalRequest);
+  const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
+  const stringToSign = [algorithm, amzDate, credentialScope, canonicalRequestHash].join('\n');
+
+  const signature = await calculateAWSA4Signature(
+    secretAccessKey,
+    dateStamp,
+    region,
+    service,
+    stringToSign
+  );
+
+  const authorizationHeader = `${algorithm} Credential=${accessKeyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+
+  const result: Record<string, string> = {
+    Host: host,
+    'X-Amz-Date': amzDate,
+    Authorization: authorizationHeader,
+  };
+
+  // if it's an S3 request, we need the "x-amz-content-sha256" header to be set
+  if (service === 's3') {
+    result['x-amz-content-sha256'] = payloadHash;
+  }
+
+  if (hasBody) {
+    result['Content-Type'] = 'application/json';
+  }
+
+  return result;
+}

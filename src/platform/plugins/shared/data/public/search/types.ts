@@ -12,7 +12,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, ISearchMethods } from '@kbn/search-types';
 import type { ISearchStartSearchSource } from '../../common/search';
 import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import type { SearchUsageCollector } from './collectors';
@@ -45,7 +45,7 @@ export interface ISearchSetup {
  * search service
  * @public
  */
-export interface ISearchStart {
+export interface ISearchStart extends ISearchMethods {
   /**
    * agg config sub service
    * {@link AggsStart}
@@ -71,9 +71,11 @@ export interface ISearchStart {
   /**
    * Shows a flyout with a table to manage search sessions.
    */
-  showSearchSessionsFlyout: (attrs?: {
-    appId?: string;
+  showSearchSessionsFlyout: (attrs: {
+    appId: string;
+    trackingProps: { openedFrom: string };
     onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+    onClose?: () => void;
   }) => void;
   /**
    * Feature flag value to make it easier to use in different plugins

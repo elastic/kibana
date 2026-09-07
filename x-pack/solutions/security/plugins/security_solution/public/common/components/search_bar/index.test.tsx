@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -16,6 +16,8 @@ import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import { useKibana } from '../../lib/kibana';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 const mockSetAppFilters = jest.fn();
 const mockFilterManager = new FilterManager(coreMock.createStart().uiSettings);
@@ -26,6 +28,9 @@ const mockUpdateUrlParam = jest.fn();
 jest.mock('../../utils/global_query_string', () => ({
   useUpdateUrlParam: () => mockUpdateUrlParam,
 }));
+
+const dataView: DataView = createStubDataView({ spec: {} });
+const dataViewSpec: DataViewSpec = dataView.toSpec();
 
 const original = mockUseKibana();
 const useKibanaMock = {
@@ -60,7 +65,8 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
-    sourcererDataView: {},
+    dataView,
+    sourcererDataViewSpec: dataViewSpec,
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),
@@ -77,31 +83,10 @@ describe('SearchBarComponent', () => {
     savedQuery: undefined,
   };
 
-  const pollForSignalIndex = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
-  });
-
-  it('calls pollForSignalIndex on Refresh button click', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} pollForSignalIndex={pollForSignalIndex} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).toHaveBeenCalled();
-  });
-
-  it('does not call pollForSignalIndex on Refresh button click if pollForSignalIndex not passed', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} />
-      </TestProviders>
-    );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).not.toHaveBeenCalled();
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {
@@ -296,7 +281,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             global: {
-              linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
+              linkTo: [InputsModelId.timeline],
               timerange: newTimerange,
             },
           })
@@ -332,7 +317,7 @@ describe('SearchBarComponent', () => {
         expect(mockUpdateUrlParam).toHaveBeenCalledWith(
           expect.objectContaining({
             timeline: {
-              linkTo: [InputsModelId.global, InputsModelId.socTrends],
+              linkTo: [InputsModelId.global],
               timerange: newTimerange,
             },
           })
@@ -356,6 +341,10 @@ describe('SearchBarComponent', () => {
           timeline: {
             timerange: mockGlobalState.inputs.timeline.timerange,
             linkTo: mockGlobalState.inputs.timeline.linkTo,
+          },
+          valueReport: {
+            timerange: mockGlobalState.inputs.valueReport.timerange,
+            linkTo: mockGlobalState.inputs.valueReport.linkTo,
           },
         },
       ]);

@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALERT_HISTORY_PREFIX } from '../../../common';
+import { ALERT_HISTORY_PREFIX } from '@kbn/connector-schemas/es_index/constants';
 import mappings from './mappings.json';
 
 export function getAlertHistoryIndexTemplate() {

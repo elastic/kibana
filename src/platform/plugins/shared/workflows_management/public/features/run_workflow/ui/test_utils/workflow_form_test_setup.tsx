@@ -1,0 +1,311 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+
+interface MockQuery {
+  query: string;
+  language: string;
+}
+
+interface MockDateRange {
+  from: string;
+  to: string;
+}
+
+interface MockSearchBarProps {
+  onQueryChange?: (params: { query: MockQuery; dateRange: MockDateRange }) => void;
+  onQuerySubmit?: (params: { query: MockQuery; dateRange: MockDateRange }) => void;
+  query?: MockQuery;
+  dateRangeFrom?: string;
+  dateRangeTo?: string;
+}
+
+interface MockDataViewPickerProps {
+  onChangeDataView?: (dataViewId: string) => void;
+}
+
+/**
+ * Shared mock for SearchBar component used across workflow form tests
+ */
+export const createMockSearchBar = () => {
+  const MockSearchBarComponent = ({
+    onQueryChange,
+    onQuerySubmit,
+    query,
+    dateRangeFrom = 'now-15m',
+    dateRangeTo = 'now',
+  }: MockSearchBarProps) => {
+    const dateRange: MockDateRange = { from: dateRangeFrom, to: dateRangeTo };
+
+    return (
+      <div data-test-subj="search-bar">
+        <input
+          data-test-subj="query-input"
+          value={query?.query || ''}
+          onChange={(e) => {
+            const target = e.target as HTMLInputElement;
+            onQueryChange?.({
+              query: { query: target.value, language: 'kuery' },
+              dateRange,
+            });
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              const target = e.target as HTMLInputElement;
+              onQuerySubmit?.({
+                query: { query: target.value, language: 'kuery' },
+                dateRange,
+              });
+            }
+          }}
+        />
+        <button
+          type="button"
+          data-test-subj="mock-search-bar-submit"
+          onClick={() =>
+            onQuerySubmit?.({
+              query: { query: query?.query ?? '', language: 'kuery' },
+              dateRange,
+            })
+          }
+        >
+          {'Submit search'}
+        </button>
+      </div>
+    );
+  };
+  MockSearchBarComponent.displayName = 'MockSearchBar';
+  return MockSearchBarComponent;
+};
+
+/**
+ * Mock SearchBar at module level for jest.mock
+ */
+export const MockSearchBar = createMockSearchBar();
+
+/**
+ * Mock DataViewPicker for index form tests
+ */
+export const MockDataViewPicker = ({ onChangeDataView }: MockDataViewPickerProps) => (
+  <div data-test-subj="data-view-picker">
+    <button type="button" onClick={() => onChangeDataView?.('test-data-view-id')}>
+      {'Select Data View'}
+    </button>
+  </div>
+);
+
+const createMockDataQueryServices = () => {
+  const { query } = dataPluginMock.createStartContract();
+  return { query };
+};
+
+const createMockSearchHitsResponse = (
+  hits: Array<{ _id: string; _index: string; _source: Record<string, unknown> }>
+) => ({
+  rawResponse: {
+    hits: {
+      total: { value: hits.length, relation: 'eq' as const },
+      hits,
+    },
+  },
+});
+
+export const mockFieldFormatter = {
+  convert: jest.fn((value: unknown) => ({ text: String(value ?? '') })),
+  convertToReact: jest.fn((value: unknown) => String(value ?? '')),
+};
+
+/**
+ * Creates mock Kibana services for event form tests
+ */
+export const createEventFormKibanaMocks = () => {
+  const mockSpaces = {
+    getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+  };
+
+  const mockFormatter = mockFieldFormatter;
+
+  const mockDataView = {
+    id: 'test-data-view',
+    title: '.alerts-*-default',
+    timeFieldName: '@timestamp',
+    refreshFields: jest.fn().mockResolvedValue(undefined),
+    getFormatterForField: jest.fn().mockReturnValue(mockFormatter),
+    getFieldByName: jest.fn((name: string) => ({
+      name,
+      type: name === '@timestamp' ? 'date' : 'string',
+      esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+    })),
+    fields: {
+      replaceAll: jest.fn(),
+      getByName: jest.fn().mockReturnValue(null),
+      getAll: jest.fn().mockReturnValue([]),
+      create: jest.fn(),
+      add: jest.fn(),
+      remove: jest.fn(),
+      update: jest.fn(),
+      filter: jest.fn().mockReturnValue([]),
+    },
+  };
+
+  const mockAlertHits = [
+    {
+      _id: '1',
+      _index: '.alerts-default',
+      _source: {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        'kibana.alert.rule.name': 'Test Rule',
+        'kibana.alert.reason': 'test event created',
+        message: 'Test message',
+      },
+    },
+  ];
+
+  const mockSearchSource = {
+    setField: jest.fn(),
+    fetch$: jest.fn().mockReturnValue({
+      pipe: jest.fn().mockReturnValue({
+        toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockAlertHits)),
+      }),
+    }),
+  };
+
+  const mockData = {
+    ...createMockDataQueryServices(),
+    dataViews: {
+      find: jest.fn().mockResolvedValue([]),
+      create: jest.fn().mockResolvedValue(mockDataView),
+      refreshFields: jest.fn().mockResolvedValue(undefined),
+    },
+    search: {
+      searchSource: {
+        create: jest.fn().mockResolvedValue(mockSearchSource),
+      },
+      search: jest.fn().mockReturnValue({
+        pipe: jest.fn().mockReturnValue({
+          toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockAlertHits)),
+        }),
+      }),
+    },
+    fieldFormats: {
+      getDefaultInstance: jest.fn().mockReturnValue({
+        convertToText: jest.fn((date) => date.toISOString()),
+      }),
+    },
+  };
+
+  return {
+    mockSpaces,
+    mockDataView,
+    mockSearchSource,
+    mockData,
+  };
+};
+
+/**
+ * Creates mock Kibana services for index form tests
+ */
+export const createIndexFormKibanaMocks = () => {
+  const mockFormatter = mockFieldFormatter;
+
+  const createMockDataView = () => ({
+    id: 'test-data-view-id',
+    title: 'logs-*',
+    name: 'logs-*',
+    timeFieldName: '@timestamp',
+    getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+    refreshFields: jest.fn().mockResolvedValue(undefined),
+    getFormatterForField: jest.fn().mockReturnValue(mockFormatter),
+    getFieldByName: jest.fn((name: string) => ({
+      name,
+      type: name === '@timestamp' ? 'date' : 'string',
+      esTypes: name === '@timestamp' ? ['date'] : ['keyword'],
+    })),
+    fields: {
+      replaceAll: jest.fn(),
+      getByName: jest.fn().mockReturnValue(null),
+      getAll: jest.fn().mockReturnValue([]),
+      create: jest.fn((spec: { name: string }) => ({ name: spec.name, type: 'string' })),
+      add: jest.fn(),
+      remove: jest.fn(),
+      update: jest.fn(),
+      length: 0,
+      filter: jest.fn().mockReturnValue([]),
+    },
+  });
+
+  const mockDataViews = {
+    getIdsWithTitle: jest.fn().mockResolvedValue([{ id: 'test-data-view-id', title: 'logs-*' }]),
+    get: jest.fn().mockResolvedValue(createMockDataView()),
+    refreshFields: jest.fn().mockResolvedValue(undefined),
+    clearInstanceCache: jest.fn(),
+  };
+
+  const mockDocumentHits = [
+    {
+      _id: '1',
+      _index: 'logs-*',
+      _source: {
+        '@timestamp': '2024-01-01T00:00:00Z',
+        message: 'Test log message',
+      },
+    },
+  ];
+
+  const mockData = {
+    ...createMockDataQueryServices(),
+    search: {
+      search: jest.fn().mockReturnValue({
+        pipe: jest.fn().mockReturnValue({
+          toPromise: jest.fn().mockResolvedValue(createMockSearchHitsResponse(mockDocumentHits)),
+        }),
+      }),
+    },
+    fieldFormats: {
+      getDefaultInstance: jest.fn().mockReturnValue({
+        convertToText: jest.fn((value: unknown) => {
+          if (value instanceof Date) {
+            return value.toISOString();
+          }
+          return String(value ?? '');
+        }),
+      }),
+    },
+  };
+
+  return {
+    mockDataViews,
+    mockData,
+  };
+};
+
+/**
+ * Creates common mock services structure
+ */
+export const createCommonMockServices = () => {
+  const mockToasts = {
+    addError: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    addInfo: jest.fn(),
+    addDanger: jest.fn(),
+  };
+
+  return {
+    notifications: {
+      toasts: mockToasts,
+    },
+    http: {
+      get: jest.fn(),
+      post: jest.fn(),
+    },
+  };
+};

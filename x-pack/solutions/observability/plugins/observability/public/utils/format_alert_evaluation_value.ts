@@ -5,20 +5,28 @@
  * 2.0.
  */
 
-import { asMillisecondDuration, asPercent } from '../../common/utils/formatters';
+import { i18n } from '@kbn/i18n';
+import { asInteger, asMillisecondDuration, asPercent } from '../../common/utils/formatters';
 import {
   ALERT_EVALUATION_UNIT_TYPE,
   getAlertEvaluationUnitTypeByRuleTypeId,
 } from './get_alert_evaluation_unit_type_by_rule_type_id';
 
 export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?: number) => {
-  if (null == evaluationValue || !ruleTypeId) return '-';
+  if (evaluationValue == null || !ruleTypeId) return '-';
+
   const unitType = getAlertEvaluationUnitTypeByRuleTypeId(ruleTypeId);
+
   switch (unitType) {
     case ALERT_EVALUATION_UNIT_TYPE.DURATION:
       return asMillisecondDuration(evaluationValue);
     case ALERT_EVALUATION_UNIT_TYPE.PERCENT:
       return asPercent(evaluationValue, 100);
+    case ALERT_EVALUATION_UNIT_TYPE.ERROR_COUNT:
+      return i18n.translate('xpack.observability.alertEvaluation.errorCountValue', {
+        defaultMessage: '{formattedValue} {value, plural, one {error} other {errors}}',
+        values: { value: evaluationValue, formattedValue: asInteger(evaluationValue) },
+      });
     default:
       return evaluationValue;
   }

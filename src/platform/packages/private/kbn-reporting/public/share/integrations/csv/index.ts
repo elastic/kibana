@@ -10,17 +10,20 @@
 import type { ExportShare, RegisterShareIntegrationArgs } from '@kbn/share-plugin/public';
 import type { ExportModalShareOpts } from '../../share_context_menu';
 import { checkLicense } from '../../..';
+import type { ReportingCSVSharingData } from '../../../types';
 
 export const reportingCsvExportShareIntegration = ({
   apiClient,
   startServices$,
-}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare> => {
+  csvConfig,
+  isServerless,
+}: ExportModalShareOpts): RegisterShareIntegrationArgs<ExportShare<ReportingCSVSharingData>> => {
   return {
     id: 'csvReports',
     groupId: 'export',
     getShareIntegrationConfig: async (...args) => {
       const { getShareMenuItems } = await import('./csv_export_config');
-      return getShareMenuItems({ apiClient, startServices$ })(...args);
+      return getShareMenuItems({ apiClient, startServices$, csvConfig, isServerless })(...args);
     },
     prerequisiteCheck: ({ license, capabilities }) => {
       if (!license) {

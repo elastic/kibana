@@ -7,32 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { openLazyFlyout } from '@kbn/presentation-util';
-import { i18n } from '@kbn/i18n';
+import type { DataControlState } from '@kbn/controls-schemas';
 
-import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 
-export const openDataControlEditor = <
-  State extends DefaultDataControlState = DefaultDataControlState
->({
-  initialState,
-  controlType,
-  controlId,
-  initialDefaultPanelTitle,
-  onSave,
-  controlGroupApi,
-}: {
+export interface OpenDataControlEditorParams<State extends DataControlState = DataControlState> {
   initialState: Partial<State>;
-  controlType?: string;
+  parentApi: unknown;
+  returnFocus?: () => void;
+  setLastUsedDataViewId?: (dataViewId: string) => void;
+  // these props are only provided when the control already exists and is being edited
   controlId?: string;
+  controlType?: string;
   initialDefaultPanelTitle?: string;
-  onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
-  controlGroupApi: ControlGroupApi;
-}) => {
+  onUpdate?: (newState: Partial<State & SerializedTitles>) => void;
+}
+
+export interface ReopenDataControlEditorOverrides<
+  State extends DataControlState = DataControlState
+> {
+  initialState?: Partial<State>;
+  controlType?: string;
+  initialDefaultPanelTitle?: string;
+}
+
+export const openDataControlEditor = <State extends DataControlState = DataControlState>(
+  params: OpenDataControlEditorParams<State>
+) => {
+  const {
+    initialState,
+    parentApi,
+    returnFocus,
+    setLastUsedDataViewId,
+    controlId,
+    controlType,
+    initialDefaultPanelTitle,
+    onUpdate,
+  } = params;
+
+  // Re-opens the editor with optional state overrides. Used after closing a child ESQL variable
+  // control editor.
+  const reopenEditor = (overrides: ReopenDataControlEditorOverrides<State> = {}) => {
+    openDataControlEditor<State>({
+      ...params,
+      initialState: { ...initialState, ...overrides.initialState },
+      controlType: overrides.controlType ?? controlType,
+      initialDefaultPanelTitle: overrides.initialDefaultPanelTitle ?? initialDefaultPanelTitle,
+    });
+  };
+
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
       closeFlyout();
@@ -65,29 +93,32 @@ export const openDataControlEditor = <
 
   openLazyFlyout({
     core: coreServices,
-    parentApi: controlGroupApi.parentApi,
+    parentApi,
+    returnFocus,
     loadContent: async ({ closeFlyout }) => {
-      const { DataControlEditor } = await import('./data_control_editor');
+      const { DataControlEditor } = await import('./editor/data_control_editor');
       return (
         <DataControlEditor<State>
           ariaLabelledBy="control-editor-title-input"
-          controlGroupApi={controlGroupApi}
+          parentApi={parentApi}
           initialState={initialState}
           controlType={controlType}
           controlId={controlId}
           initialDefaultPanelTitle={initialDefaultPanelTitle}
+          onUpdate={(state) => onUpdate?.(state)}
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
-          onSave={(state, selectedControlType) => {
+          onSave={(dataViewId) => {
             closeFlyout();
-            onSave({ type: selectedControlType, state });
+            if (setLastUsedDataViewId && dataViewId) setLastUsedDataViewId(dataViewId);
           }}
+          reopenEditor={reopenEditor}
         />
       );
     },
     flyoutProps: {
-      triggerId: 'dashboard-controls-menu-button',
+      focusedPanelId: controlId,
     },
   });
 };

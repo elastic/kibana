@@ -47,7 +47,12 @@ export type {
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 export type { Capabilities } from '@kbn/core-capabilities-common';
-export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
+  NotificationsSetup,
+  NotificationsStart,
+  FeedbackStart,
+  ToursStart,
+} from '@kbn/core-notifications-browser';
 export type {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -55,11 +60,7 @@ export type {
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
   ChromeDocTitle,
@@ -67,7 +68,6 @@ export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  ChromeHelpMenuActions,
 } from '@kbn/core-chrome-browser';
 export type {
   Plugin,
@@ -183,6 +183,7 @@ export type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportFailure,
   SavedObjectsImportRetry,
@@ -224,6 +225,7 @@ export type {
   SecurityServiceSetup,
   SecurityServiceStart,
   CoreAuthenticationService,
+  CoreServiceAccountsService,
   CoreSecurityDelegateContract,
 } from '@kbn/core-security-browser';
 
@@ -277,8 +279,6 @@ export type {
 } from '@kbn/core-deprecations-browser';
 
 export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
-
-export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 

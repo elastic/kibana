@@ -1,0 +1,25 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod';
+
+export const serializedTitlesSchema = z
+  .object({
+    description: z.string().optional().meta({ description: 'A short description of the panel.' }),
+    hide_title: z
+      .boolean()
+      .optional()
+      .meta({ description: 'When true, the panel title is hidden. Defaults to false.' }),
+    title: z.string().optional().meta({ description: 'The panel title.' }),
+    hide_border: z
+      .boolean()
+      .optional()
+      .meta({ description: 'When true, the panel border is hidden. Defaults to false.' }),
+  })
+  .strict();

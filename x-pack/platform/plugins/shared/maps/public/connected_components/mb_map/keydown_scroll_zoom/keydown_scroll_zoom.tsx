@@ -10,9 +10,7 @@ import classNames from 'classnames';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap, MapMouseEvent } from '@kbn/mapbox-gl';
-
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
-
+import { isMac } from '@kbn/shared-ux-utility';
 interface Props {
   mbMap: MbMap;
 }

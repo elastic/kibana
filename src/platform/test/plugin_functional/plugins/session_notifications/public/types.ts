@@ -13,6 +13,12 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 export interface AppPluginDependenciesSetup {
   navigation: NavigationPublicPluginSetup;
 }
+
 export interface AppPluginDependenciesStart {
   data: DataPublicPluginStart;
+}
+
+export interface SessionNotificationsGlobalApi {
+  getSessionIds: () => Array<string | undefined>;
+  clearSessionIds: () => void;
 }

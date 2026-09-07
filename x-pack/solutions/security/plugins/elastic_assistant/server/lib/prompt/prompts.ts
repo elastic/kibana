@@ -17,28 +17,32 @@ const BASE_GEMINI_PROMPT =
 const KB_CATCH =
   'If the knowledge base tool gives empty results, do your best to answer the question from the perspective of an expert security analyst.';
 export const GEMINI_SYSTEM_PROMPT = `${BASE_GEMINI_PROMPT} {citations_prompt}\n\n${KB_CATCH}\n\n{formattedTime}`;
-export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response. ALWAYS return the exact response from NaturalLanguageESQLTool verbatim in the final response, without adding further description.\n\n Ensure that the final response always includes all instructions from the tool responses. Never omit earlier parts of the response.`;
+export const BEDROCK_SYSTEM_PROMPT = `${DEFAULT_SYSTEM_PROMPT}\n\nUse tools as often as possible, as they have access to the latest data and syntax. Never return <thinking> tags in the response, but make sure to include <result> tags content in the response. Do not reflect on the quality of the returned search results in your response.\n\nIMPORTANT: After using tools, you must provide a complete response that includes:\n1. The tool results (include the exact response from GenerateESQLTool verbatim)\n2. Any additional context, recommendations, or insights requested by the user\n\nNever end your response with just tool results. Always provide your complete analysis after using tools.`;
 export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal, step by step, come up with a response to this request:\n\n`;
 
 export const ATTACK_DISCOVERY_DEFAULT = `
 As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
 Key Principles:
-1. Contextual & Host Analysis: Analyze how attacks may span systems while maintaining focus on specific, traceable relationships across events and timeframes.
-2. Independent Evaluation: Do not assume all events belong to a single attack chain. Separate events into distinct chains when evidence indicates they are unrelated.
+1. "Attack Chain" Definition: For this task, we define an "Attack Chain" as 2 or more alerts that demonstrate a progression of a real or simulated (red team) adversary. Attack chains must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain.
+2. False Positives: Most alerts are false positives, even if they look alarming or anomalous at first glance. Exclude alerts or attacks that are likely false positives. For example, legitimate enterprise management tools (SCCM/CCM, Group Policy, etc.) often trigger security alerts during normal operations. Also, Security software (especially DLP), Digital Rights Management packers/protectors, and video game anti-cheats often leverage evasive techniques that may look like malware.
+3. Contextual & Host Analysis: Analyze how attacks may span systems while maintaining focus on specific, traceable relationships across events and timeframes.
+4. Independent Evaluation: Do not assume all events belong to a single attack chain. Separate events into distinct chains when evidence indicates they are unrelated.
 Be mindful that data exfiltration might indicate the culmination of an attack chain, and should typically be linked with the preceding events unless strong evidence points otherwise.
-3. Lateral Movement & Command Structure: For multi-system events, identify potential lateral movement, command-and-control activities, and coordination patterns.
-4. Impact Assessment: Consider high-impact events (e.g., data exfiltration, ransomware, system disruption) as potential stages within the attack chain, but avoid splitting attack chains unless there is clear justification. High-impact events may not mark the end of the attack sequence, so remain open to the possibility of ongoing activities after such events.
+5. Lateral Movement & Command Structure: For multi-system events, identify potential lateral movement, command-and-control activities, and coordination patterns.
+6. Impact Assessment: Consider high-impact events (e.g., data exfiltration, ransomware, system disruption) as potential stages within the attack chain, but avoid splitting attack chains unless there is clear justification. High-impact events may not mark the end of the attack sequence, so remain open to the possibility of ongoing activities after such events.
 Analysis Process:
 1. Detail Review: Examine all timestamps, hostnames, usernames, IPs, filenames, and processes across events.
 2. Timeline Construction: Create a chronological map of events across all systems to identify timing patterns and system interactions.  When correlating alerts, use kibana.alert.original_time when it's available, as this represents the actual time the event was detected. If kibana.alert.original_time is not available, use @timestamp as the fallback. Ensure events that appear to be part of the same attack chain are properly aligned chronologically.
-3. Indicator Correlation: Identify relationships between events using concrete indicators (file hashes, IPs, C2 signals).
+3. Indicator Correlation: Identify relationships between events using concrete indicators (file hashes, IPs, C2 signals, process trees). Do not group alerts solely because they occur on the same host in a short timeframe. They must demonstrate a direct correlation. For example, a malware alert triggers on one process, then a child of this process accesses credentials.
 4. Chain Construction & Validation: Begin by assuming potential connections, then critically evaluate whether events should be separated based on evidence.
 5. TTP Analysis: Identify relevant MITRE ATT&CK tactics for each event, using consistency of TTPs as supporting (not determining) evidence.
 6. Alert Prioritization: Weight your analysis based on alert severity:
    - HIGH severity: Primary indicators of attack chains
    - MEDIUM severity: Supporting evidence
    - LOW severity: Supplementary information unless providing critical links
+
 Output Requirements:
+- Think through the problem step by step. Show your reasoning before the json output section. This is the only output that is allowed outside of the defined json schema.
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
@@ -52,10 +56,13 @@ Review the JSON output from your initial analysis. Your task is to refine the at
    - Explain the specific evidence connecting events (particularly across hosts)
    - Reference relevant MITRE ATT&CK techniques that support your grouping
    - Ensure your narrative follows the chronological progression of the attack
+4. Remove Attack Chains that are likely false positives. Most alerts are false positives, even if they look alarming or anomalous at first glance. Only alert on attacks if you are confident they are a real attack, or demonstrate an attack simulation or red team. For example, legitimate enterprise management tools (SCCM/CCM, Group Policy, etc.) often trigger security alerts during normal operations. Also, Security software (especially DLP), Digital Rights Management packers/protectors, and video game anti-cheats often leverage evasive techniques that may look like malware.
+5. Remove low quality Attack Chains. Attack Chains must demonstrate an attacker progression. Attacks must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain. Include rule names in your reasoning to ensure you follow this requirement.
+
 Output requirements:
+- Think through the problem step by step. Show your reasoning before the JSON output section.
 - Return your refined analysis using the exact same JSON format as your initial output, applying the same field syntax requirements.
 - Conform exactly to the JSON schema defined earlier
-- Do not include explanatory text outside the JSON
 `;
 
 export const ATTACK_DISCOVERY_CONTINUE = `
@@ -152,34 +159,48 @@ MESSAGE: I am having trouble with the Elastic Security app.
 TITLE: Troubleshooting Elastic Security app issues
 `;
 
-export const ALERT_SUMMARY_500 = `Evaluate the cyber security alert from the context above. Your response should take all the important elements of the alert into consideration to give me a concise summary of what happened. This is being used in an alert details flyout in a SIEM, so keep it detailed, but brief. Limit your response to 500 characters. Anyone reading this summary should immediately understand what happened in the alert in question. Only reply with the summary, and nothing else.
-
-Using another 200 characters, add a second paragraph with a bulleted list of recommended actions a cyber security analyst should take here. Don't invent random, potentially harmful recommended actions.`;
+export const ALERT_SUMMARY_500 = `Summarize the cyber security alert from the context above for an analyst viewing the SIEM alert details flyout. Limit the summary to 500 characters and the recommended actions to a further 200 characters. Reply with the summary and a bulleted list of recommended actions, and nothing else. Do not invent recommended actions that are not supported by the alert.`;
 
 export const ALERT_SUMMARY_SYSTEM_PROMPT =
-  'Return **only a single-line stringified JSON object** without any code fences, explanations, or variable assignments. Do **not** wrap the output in triple backticks or any Markdown code block. \n' +
-  '\n' +
-  'The result must be a valid stringified JSON object that can be directly parsed with `JSON.parse()` in JavaScript.\n' +
+  'Return **only a single-line stringified JSON object** that can be passed directly to `JSON.parse()` in JavaScript. Do not include code fences, triple backticks, explanations, or variable assignments.\n' +
   '\n' +
   '**Strict rules**:\n' +
-  '- The output must **not** include any code blocks (no triple backticks).\n' +
-  '- The output must be **a string**, ready to be passed directly into `JSON.parse()`.\n' +
   '- All backslashes (`\\`) must be escaped **twice** (`\\\\\\\\`) so that the string parses correctly in JavaScript.\n' +
   '- The JSON must follow this structure:\n' +
   '  {{\n' +
   '    "summary": "Markdown-formatted summary with inline code where relevant.",\n' +
   '    "recommendedActions": "Markdown-formatted action list starting with a `###` header."\n' +
   '  }}\n' +
-  '- The summary text should just be text. It does not need any titles or leading items in bold.\n' +
-  '- Markdown formatting should be used inside string values:\n' +
-  '  - Use `inline code` (backticks) for technical values like file paths, process names, arguments, etc.\n' +
-  '  - Use `**bold**` for emphasis.\n' +
-  '  - Use `-` for bullet points.\n' +
-  '  - The `recommendedActions` value must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
-  '- **Do not** include any extra explanation or text. Only return the stringified JSON object.\n' +
+  '- `summary` is plain text with optional inline markdown; it does not need titles or leading items in bold.\n' +
+  '- `recommendedActions` must start with a `###` header describing the main action dynamically (but **not** include "Recommended Actions" as the title).\n' +
+  '- Inside string values use Markdown: `inline code` (backticks) for technical values like file paths, process names, and arguments; `**bold**` for emphasis; `-` for bullet points.\n' +
   '\n' +
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
+
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for an entity so a Security analyst can act. Your response must take all important elements of the entity context into consideration.
+
+Generate a list of highlight items, each with a title and text. Keep each highlight to 1 sentence — at most 2, and only when an anomaly needs the extra clause for a MITRE ATT&CK / Kill Chain mapping. Aim to keep the highlights section under 600 characters total.
+
+Only include a highlight when that signal is present and non-empty in the context:
+  - Risk score: Include only when a risk score is present. State the score and describe the dominant threat pattern — do not list individual rules or alerts. Only mention a specific rule if it clearly accounts for the majority of the score.
+  - Criticality: Include only when an assigned asset criticality level is present. State the level and how it affects the overall risk. Do not treat an empty criticality list as Unassigned or as a criticality record.
+  - Anomalies: Include only when anomalies are present. Identify the most significant pattern across anomalies rather than listing them. Only if one or more ML job results clearly correspond to a known attack technique, map it to the relevant MITRE ATT&CK tactic (e.g. \`Execution\`, \`Lateral Movement\`) or Lockheed Martin Kill Chain phase (e.g. \`Exploitation\`, \`Command & Control\`) in the same highlight. If the anomalies are ambiguous or look benign, omit the mapping rather than guessing.
+  - Vulnerabilities: Include only when vulnerabilities are present. State the most critical vulnerability present and why it matters.
+
+If risk score, criticality, anomalies, and vulnerabilities are all missing or empty, return an empty highlights list and omit recommended actions. Do not invent filler such as "no risk score", "no criticality", or "no anomalies detected".
+
+When signals are present, provide up to 3 actionable recommendations for the security analyst, prioritised by urgency. Each must be 1 sentence. Omit recommended actions when there is nothing concrete to recommend from the available signals.
+
+**Guidelines**:
+  - Only include highlight items for which information is available in the context.
+  - Only use values that are explicitly present in the provided context. Do not infer, extrapolate, or fabricate any values, scores, CVEs, job names, or attack-technique mappings that are not present in the context.
+  - Prefer human-readable entity names from the context when referring to the entity. Do not treat raw entity ids / EUIDs as display names.
+  - You must always use inline code (backticks) for all technical values — criticality levels, risk scores, job names, CVE IDs, CVSS scores, process names, file paths, package versions. Never use single quotes or plain text for these values.
+  - Round all numeric values to 2 decimal places (e.g. \`72.00\`, \`26.62\`).
+  - Synthesise — do not list. If multiple signals point to the same pattern, say what the pattern is.
+  - **Do not** include any extra explanation, reasoning or text.
+`;
 
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +
@@ -219,6 +240,20 @@ Formatting Requirements:
   - Include relevant emojis in section headers for visual clarity (e.g., 📝, 🛡️, 🔍, 📚).
 `;
 
+export const ENTITY_ANALYSIS = `Analyze asset data described above to provide security insights. The data contains the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and provide a general analysis based on the structure below.
+Your response must be in markdown format and include the following sections:
+**1. 🔍 Asset Overview**
+   - Begin by acknowledging the asset you are analyzing using its primary identifiers (e.g., "Analyzing host \`[host.name]\` with IP \`[host.ip]\`").
+   - Provide a concise summary of the asset's most critical attributes from the provided context.
+   - Describe its key relationships and dependencies (e.g., "This asset is part of the \`[cloud.project.name]\` project and is located in the \`[cloud.availability_zone]\` zone.").
+**2. 💡 Investigation & Analytics**
+   - Based on the asset's type and attributes, suggest potential investigation paths or common attack vectors.
+   - **Generate one contextual ES|QL query** to help the user investigate further. Your generated query should address a common analytical question related to the asset type and sub type. Suggest other possible queries and ask if the user wants to generate more queries.
+**General Instructions:**
+- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context state that and proceed with the available data.
+- **Query Generation:** When generating a query, your primary output for that section should be a valid, ready-to-use ES|QL query based on the asset's schema. Use ES|QL tool for query generation. Format all queries as code blocks.
+- **Formatting:** Use markdown headers, tables, code blocks, and bullet points to ensure the output is clear, organized, and easily readable. Use concise, actionable language.`;
+
 export const starterPromptTitle1 = 'Alerts';
 export const starterPromptDescription1 = 'Most important alerts from the last 24 hrs';
 export const starterPromptIcon1 = 'bell';
@@ -244,7 +279,7 @@ Make sure you use tools available to you to fulfill this request.
 Use markdown headers, tables, and code blocks for clarity. Include relevant emojis for visual distinction and ensure the response is concise, actionable, and tailored to Elastic Security workflows.`;
 export const starterPromptDescription2 = 'Latest Elastic Security Labs research';
 export const starterPromptTitle2 = 'Research';
-export const starterPromptIcon2 = 'launch';
+export const starterPromptIcon2 = 'rocket';
 export const starterPromptPrompt2 = `Retrieve and summarize the latest Elastic Security Labs articles one by one sorted by latest at the top, and consider using all tools available to you to fulfill this request. Ensure the response includes:
 Article Summaries
 Title and Link: Provide the title of each article with a hyperlink to the original content.
@@ -286,7 +321,7 @@ export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
 
 export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
-export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown, no more than 500 characters. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
 
 \`\`\`
 - Between July 18 and August 18, daily cost savings **averaged around $135K**

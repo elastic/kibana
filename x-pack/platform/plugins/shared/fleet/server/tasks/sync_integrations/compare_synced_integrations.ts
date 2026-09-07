@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
+import { isEqual, omit } from 'lodash';
 
 import type {
   ElasticsearchClient,
@@ -45,7 +45,7 @@ export const getFollowerIndexInfo = async (
   logger: Logger
 ): Promise<{ info?: CcrFollowInfoFollowerIndex; error?: string }> => {
   try {
-    const index = await getFollowerIndex(esClient, new AbortController());
+    const index = await getFollowerIndex(esClient, new AbortController().signal);
     if (!index) {
       return { error: `Follower index not found` };
     }
@@ -310,11 +310,15 @@ const fetchAndCompareCustomAssets = async (
   const abortController = new AbortController();
 
   try {
-    const installedPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+    const installedPipelines = await getPipeline(
+      esClient,
+      CUSTOM_ASSETS_PREFIX,
+      abortController.signal
+    );
 
     for (const [_, ccrCustomAsset] of Object.entries(ccrCustomAssets)) {
       if (ccrCustomAsset.type === 'ingest_pipeline' && !ccrCustomAsset.name.includes('@custom')) {
-        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController);
+        const response = await getPipeline(esClient, ccrCustomAsset.name, abortController.signal);
         if (response[ccrCustomAsset.name]) {
           installedPipelines[ccrCustomAsset.name] = response[ccrCustomAsset.name];
         }
@@ -324,7 +328,7 @@ const fetchAndCompareCustomAssets = async (
     const installedComponentTemplates = await getComponentTemplate(
       esClient,
       CUSTOM_ASSETS_PREFIX,
-      abortController
+      abortController.signal
     );
 
     const componentTemplatesByName = (
@@ -392,6 +396,21 @@ const compareCustomAssets = ({
 
   if (ccrCustomAsset.type === 'ingest_pipeline') {
     const installedPipeline = ingestPipelines?.[ccrCustomAsset.name];
+
+    const installedPipelineWithoutTimestamps = omit(installedPipeline, [
+      'created_date',
+      'created_date_millis',
+      'modified_date',
+      'modified_date_millis',
+    ]);
+
+    const ccrCustomPipelineWithoutTimestamps = omit(ccrCustomAsset?.pipeline, [
+      'created_date',
+      'created_date_millis',
+      'modified_date',
+      'modified_date_millis',
+    ]);
+
     if (!installedPipeline) {
       if (ccrCustomAsset.is_deleted === true) {
         return {
@@ -441,7 +460,7 @@ const compareCustomAssets = ({
         ...result,
         sync_status: SyncStatus.SYNCHRONIZING,
       };
-    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
+    } else if (isEqual(installedPipelineWithoutTimestamps, ccrCustomPipelineWithoutTimestamps)) {
       return {
         ...result,
         sync_status: SyncStatus.COMPLETED,
@@ -496,6 +515,16 @@ const compareCustomAssets = ({
         sync_status: SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
+      if (ccrCustomAsset?.template.settings?.index?.lifecycle?.name) {
+        return {
+          ...result,
+          sync_status: SyncStatus.WARNING,
+          warning: {
+            title: `Component template references ILM policy`,
+            message: `${ccrCustomAsset.name} references "${ccrCustomAsset?.template.settings?.index?.lifecycle?.name}" that might not exist on the remote cluster. Please create it manually.`,
+          },
+        };
+      }
       return {
         ...result,
         sync_status: SyncStatus.COMPLETED,

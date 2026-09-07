@@ -8,10 +8,10 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
-import { useUserData } from '../../../../../detections/components/user_info';
 import * as i18n from './translations';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 
 interface UpgradePrebuiltRulesTableButtonsProps {
   selectedRules: RuleUpgradeState[];
@@ -21,18 +21,17 @@ export const UpgradePrebuiltRulesTableButtons = ({
   selectedRules,
 }: UpgradePrebuiltRulesTableButtonsProps) => {
   const {
-    state: { hasRulesToUpgrade, loadingRules, isRefetching, isUpgradingSecurityPackages },
+    state: { hasRulesToUpgrade, loadingRules, isRefetching, isInitializingPrebuiltRulesPackage },
     actions: { upgradeRules, upgradeAllRules },
   } = useUpgradePrebuiltRulesTableContext();
   const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
-  const [{ loading: isUserDataLoading, canUserCRUD }] = useUserData();
-  const canUserEditRules = canUserCRUD && !isUserDataLoading;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const numberOfSelectedRules = selectedRules.length ?? 0;
   const shouldDisplayUpgradeSelectedRulesButton = numberOfSelectedRules > 0;
 
   const isRuleUpgrading = loadingRules.length > 0;
-  const isRequestInProgress = isRuleUpgrading || isRefetching || isUpgradingSecurityPackages;
+  const isRequestInProgress = isRuleUpgrading || isRefetching || isInitializingPrebuiltRulesPackage;
 
   const doAllSelectedRulesHaveConflicts =
     isRulesCustomizationEnabled &&
@@ -41,7 +40,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
     );
 
   const { selectedRulesButtonTooltip, allRulesButtonTooltip } = useBulkUpdateButtonsTooltipContent({
-    canUserEditRules,
+    canUserEditRules: canEditRules,
     doAllSelectedRulesHaveConflicts,
     isPrebuiltRulesCustomizationEnabled: isRulesCustomizationEnabled,
   });
@@ -58,7 +57,7 @@ export const UpgradePrebuiltRulesTableButtons = ({
           <EuiToolTip content={selectedRulesButtonTooltip}>
             <EuiButton
               onClick={upgradeSelectedRules}
-              disabled={!canUserEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
+              disabled={!canEditRules || isRequestInProgress || doAllSelectedRulesHaveConflicts}
               data-test-subj="upgradeSelectedRulesButton"
             >
               <>
@@ -73,9 +72,9 @@ export const UpgradePrebuiltRulesTableButtons = ({
         <EuiToolTip content={allRulesButtonTooltip}>
           <EuiButton
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={upgradeAllRules}
-            disabled={!canUserEditRules || !hasRulesToUpgrade || isRequestInProgress}
+            disabled={!canEditRules || !hasRulesToUpgrade || isRequestInProgress}
             data-test-subj="upgradeAllRulesButton"
           >
             {i18n.UPDATE_ALL}

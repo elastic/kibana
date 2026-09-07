@@ -7,28 +7,47 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import type { DocViewRenderProps } from '../../types';
+import type { DocView, DocViewRenderProps } from '../../types';
+import { useRestorableState } from './restorable_state';
 
 interface Props {
-  id: string;
+  docView: DocView;
   renderProps: DocViewRenderProps;
-  title: string;
-  component: React.ComponentType<DocViewRenderProps>;
 }
+
+type ExtractState<T> = T extends DocView<infer TState> ? TState | undefined : never;
 
 /**
  * Renders the tab content of a doc view.
  * Displays an error message when it encounters exceptions, thanks to
  * Error Boundaries.
  */
-export const DocViewerTab = (props: Props) => {
-  const { component: Component, renderProps, title } = props;
+export const DocViewerTab = ({ docView, renderProps }: Props) => {
+  const [docViewerTabsState, setDocViewerTabsState] = useRestorableState(
+    'docViewerTabsState',
+    undefined
+  );
+  const initialState = docViewerTabsState?.[docView.id] as ExtractState<typeof docView>;
+
+  const onInitialStateChange = useCallback(
+    (state: object) => {
+      setDocViewerTabsState((prevState) => ({
+        ...prevState,
+        [docView.id]: state,
+      }));
+    },
+    [docView.id, setDocViewerTabsState]
+  );
 
   return (
-    <KibanaSectionErrorBoundary sectionName={title}>
-      <Component {...renderProps} />
+    <KibanaSectionErrorBoundary sectionName={docView.title}>
+      {docView.render({
+        ...renderProps,
+        initialState,
+        onInitialStateChange,
+      })}
     </KibanaSectionErrorBoundary>
   );
 };

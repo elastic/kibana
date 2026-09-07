@@ -8,12 +8,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 
-const RunSubActionParamsSchema = schema.object({
-  workflowId: schema.string(),
-  inputs: schema.maybe(schema.any()),
-  alerts: schema.arrayOf(schema.any()),
-  spaceId: schema.string(),
+const AlertStatesSchema = z
+  .object({
+    new: z.boolean().optional(),
+    ongoing: z.boolean().optional(),
+    recovered: z.boolean().optional(),
+  })
+  .strict();
+
+const RunSubActionParamsSchema = z.object({
+  workflowId: z.string(),
+  inputs: z.any().optional(),
+  spaceId: z.string(),
+  summaryMode: z.boolean().optional().default(true),
+  alertStates: AlertStatesSchema.optional(),
 });
 
 // Schema for rule configuration (what the UI saves)
@@ -22,13 +32,23 @@ export const WorkflowsRuleActionParamsSchema = schema.object({
   subActionParams: schema.object({
     workflowId: schema.string(),
     inputs: schema.maybe(schema.any()),
+    summaryMode: schema.maybe(schema.boolean()),
+    alertStates: schema.maybe(
+      schema.object({
+        new: schema.maybe(schema.boolean()),
+        ongoing: schema.maybe(schema.boolean()),
+        recovered: schema.maybe(schema.boolean()),
+      })
+    ),
   }),
 });
 
 // Schema for execution (what the executor receives)
-export const ExecutorParamsSchema = schema.object({
-  subAction: schema.literal('run'),
-  subActionParams: RunSubActionParamsSchema,
-});
+export const ExecutorParamsSchema = z
+  .object({
+    subAction: z.literal('run'),
+    subActionParams: RunSubActionParamsSchema,
+  })
+  .strict();
 
 export const ExecutorSubActionRunParamsSchema = RunSubActionParamsSchema;

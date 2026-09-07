@@ -5,42 +5,19 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Logger } from '@kbn/core/server';
 import type {
-  ExecutorParamsSchema,
-  ExecutorSubActionPushParamsSchema,
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
-} from './schema';
-
-// config
-export type CasesWebhookPublicConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceConfigurationSchema
->;
-// secrets
-export type CasesWebhookSecretConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceSecretConfigurationSchema
->;
-// params
-export type CasesWebhookActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+  ExternalServiceIncidentResponse,
+  Incident,
+  PushToServiceApiParams,
+} from '@kbn/connector-schemas/cases_webhook';
+import type { Logger } from '@kbn/core/server';
 
 export interface ExternalServiceCredentials {
   config: CasesWebhookPublicConfigurationType;
   secrets: CasesWebhookSecretConfigurationType;
 }
-
-export interface ExternalServiceIncidentResponse {
-  id: string;
-  title: string;
-  url: string;
-  pushedDate: string;
-}
-export type Incident = Omit<ExecutorSubActionPushParams['incident'], 'externalId'>;
-
-export type ExecutorParams = TypeOf<typeof ExecutorParamsSchema>;
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
-export type PushToServiceApiParams = ExecutorSubActionPushParams;
 
 // incident service
 export interface ExternalService {
@@ -93,5 +70,3 @@ export interface GetIncidentResponse {
 export interface ExternalServiceApi {
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
 }
-
-export type CasesWebhookExecutorResultData = ExternalServiceIncidentResponse;

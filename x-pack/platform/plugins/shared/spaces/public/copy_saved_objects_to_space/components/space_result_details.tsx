@@ -13,6 +13,7 @@ import {
   EuiSuperSelect,
   EuiSwitch,
   EuiText,
+  EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -59,6 +60,10 @@ export const SpaceCopyResultDetails = (props: Props) => {
   const { destinationMap, onDestinationMapChange, summarizedCopyResult } = props;
   const { objects } = summarizedCopyResult;
   const { euiTheme } = useEuiTheme();
+  const objectIdLabel = i18n.translate(
+    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
+    { defaultMessage: 'Object ID' }
+  );
 
   return (
     <div
@@ -168,9 +173,7 @@ export const SpaceCopyResultDetails = (props: Props) => {
                 `}
               >
                 <EuiText size="s">
-                  <p className="eui-textTruncate" title={name}>
-                    {name}
-                  </p>
+                  <EuiTextTruncate text={name} />
                 </EuiText>
               </EuiFlexItem>
               {switchProps.show && (
@@ -207,11 +210,8 @@ export const SpaceCopyResultDetails = (props: Props) => {
                   options={selectProps.options}
                   valueOfSelected={destinationMap.get(`${type}:${id}`)}
                   onChange={selectProps.onChange}
-                  prepend={i18n.translate(
-                    'xpack.spaces.management.copyToSpace.copyDetail.selectControlLabel',
-                    { defaultMessage: 'Object ID' }
-                  )}
-                  hasDividers
+                  prepend={objectIdLabel}
+                  aria-label={objectIdLabel}
                   fullWidth
                   compressed
                 />

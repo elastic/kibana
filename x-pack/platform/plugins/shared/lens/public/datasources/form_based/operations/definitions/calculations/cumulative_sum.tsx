@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { CUMULATIVE_SUM_ID, CUMULATIVE_SUM_NAME } from '@kbn/lens-formula-docs';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import type { FormBasedLayer } from '../../../types';
+import type { CumulativeSumIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
   checkForDateHistogram,
   getErrorsForDateReference,
@@ -36,11 +32,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type CumulativeSumIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof CUMULATIVE_SUM_ID;
-  };
 
 export const cumulativeSumOperation: OperationDefinition<
   CumulativeSumIndexPatternColumn,
@@ -81,8 +72,8 @@ export const cumulativeSumOperation: OperationDefinition<
       column.timeShift
     );
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum');
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(layer, columnId, 'cumulative_sum', {}, indexPattern);
   },
   buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];

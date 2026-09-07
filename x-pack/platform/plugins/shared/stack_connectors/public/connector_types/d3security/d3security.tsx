@@ -8,16 +8,15 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/d3security/constants';
 import type { D3SecurityActionParams, D3SecurityConnector } from './types';
-import { D3_SECURITY_CONNECTOR_ID } from '../../../common/d3security/constants';
 interface ValidationErrors {
   subAction: string[];
   body: string[];
 }
 export function getConnectorType(): D3SecurityConnector {
   return {
-    id: D3_SECURITY_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.d3security.selectMessageText', {
       defaultMessage: 'Create event or trigger playbook workflow actions in D3 SOAR.',

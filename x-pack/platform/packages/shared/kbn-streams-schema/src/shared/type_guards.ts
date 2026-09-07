@@ -5,41 +5,48 @@
  * 2.0.
  */
 
-import type { ZodSchema, z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
-export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
-  _base: TBaseSchema,
-  narrow: TNarrowSchema
-) {
-  return <TValue extends z.input<TBaseSchema>>(
+/**
+ * Type guard to check if a value is a non-null object (record).
+ * Useful for safely accessing properties on unknown values.
+ */
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+export function createIsNarrowSchema<
+  TBaseSchema extends z.ZodType,
+  TNarrowSchema extends z.ZodType
+>(_base: TBaseSchema, narrow: TNarrowSchema) {
+  return <TValue extends z.output<TBaseSchema>>(
     value: TValue
-  ): value is Extract<TValue, z.input<TNarrowSchema>> => {
+  ): value is Extract<TValue, z.output<TNarrowSchema>> => {
     return isSchema(narrow, value);
   };
 }
 
-export function createAsSchemaOrThrow<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
-  _base: TBaseSchema,
-  narrow: TNarrowSchema
-) {
-  return <TValue extends z.input<TBaseSchema>>(
+export function createAsSchemaOrThrow<
+  TBaseSchema extends z.ZodType,
+  TNarrowSchema extends z.ZodType
+>(_base: TBaseSchema, narrow: TNarrowSchema) {
+  return <TValue extends z.output<TBaseSchema>>(
     value: TValue
-  ): Extract<TValue, z.input<TNarrowSchema>> => {
+  ): Extract<TValue, z.output<TNarrowSchema>> => {
     narrow.parse(value);
-    return value;
+    return value as Extract<TValue, z.output<TNarrowSchema>>;
   };
 }
 
-export function isSchema<TSchema extends z.Schema>(
+export function isSchema<TSchema extends z.ZodType>(
   schema: TSchema,
   value: unknown
-): value is z.input<TSchema> {
+): value is z.output<TSchema> {
   return schema.safeParse(value).success;
 }
 
-export function assertsSchema<TSchema extends ZodSchema>(
+export function assertsSchema<TSchema extends z.ZodType>(
   schema: TSchema,
-  subject: any
-): asserts subject is z.input<TSchema> {
+  subject: unknown
+): asserts subject is z.output<TSchema> {
   schema.parse(subject);
 }

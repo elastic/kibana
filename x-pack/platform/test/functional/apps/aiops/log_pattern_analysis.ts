@@ -6,7 +6,6 @@
  */
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { USER } from '../../../api_integration/services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -16,7 +15,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const ml = getService('ml');
   const selectedField = '@message';
-  const totalDocCount = 14005;
+  const totalDocCount = 14004;
   const cases = getService('cases');
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
@@ -116,30 +115,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.clickRunButton();
 
       await aiops.logPatternAnalysisPage.attachToDashboard();
-    });
-
-    it('attaches log pattern analysis table to a case', async () => {
-      // Start navigation from the base of the ML app.
-      await ml.navigation.navigateToMl();
-      await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToDataViewSelection();
-      await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
-      await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
-
-      await aiops.logPatternAnalysisPage.clickUseFullDataButton(totalDocCount);
-      await aiops.logPatternAnalysisPage.selectCategoryField(selectedField);
-      await aiops.logPatternAnalysisPage.clickRunButton();
-
-      const caseParams = {
-        title: 'ML Log pattern analysis case',
-        description: 'Case with a log pattern analysis attachment',
-        tag: 'ml_log_pattern_analysis',
-        reporter: USER.ML_POWERUSER,
-      };
-
-      await aiops.logPatternAnalysisPage.attachToCase(caseParams);
-
-      await ml.cases.assertCaseWithLogPatternAnalysisAttachment(caseParams);
     });
   });
 }

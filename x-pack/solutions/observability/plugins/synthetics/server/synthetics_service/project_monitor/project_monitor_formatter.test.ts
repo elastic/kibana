@@ -24,6 +24,10 @@ import { mockEncryptedSO } from '../utils/mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
+jest.mock('@kbn/fleet-plugin/server/services/package_policy', () => ({
+  getPackagePolicySavedObjectType: jest.fn().mockResolvedValue('fleet-package-policies'),
+}));
+
 const testMonitors = [
   {
     type: 'browser',
@@ -102,6 +106,9 @@ describe('ProjectMonitorFormatter', () => {
     logger,
     syntheticsEsClient: mockEsClient,
     authSavedObjectsClient: soClient,
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',
@@ -118,6 +125,7 @@ describe('ProjectMonitorFormatter', () => {
     coreStart: {
       savedObjects: savedObjectsServiceMock.createStartContract(),
     },
+    fleet: { runWithCache: async (cb: any) => await cb() },
   } as unknown as SyntheticsServerSetup;
 
   const syntheticsService = new SyntheticsService(serverMock);
@@ -226,6 +234,46 @@ describe('ProjectMonitorFormatter', () => {
     });
   });
 
+  it('returns invalid location error without logging it as a server error', async () => {
+    logger.error.mockClear();
+
+    const invalidLocationMonitor = {
+      ...testMonitors[0],
+      locations: [],
+      privateLocations: ['does not exist'],
+    };
+    const pushMonitorFormatter = new ProjectMonitorFormatter({
+      projectId: 'test-project',
+      spaceId: 'default',
+      routeContext,
+      monitors: [invalidLocationMonitor],
+    });
+
+    pushMonitorFormatter.getProjectMonitorsForProject = jest.fn().mockResolvedValue([]);
+
+    await pushMonitorFormatter.configureAllProjectMonitors();
+
+    expect({
+      createdMonitors: pushMonitorFormatter.createdMonitors,
+      updatedMonitors: pushMonitorFormatter.updatedMonitors,
+      failedMonitors: pushMonitorFormatter.failedMonitors,
+    }).toStrictEqual({
+      createdMonitors: [],
+      updatedMonitors: [],
+      failedMonitors: [
+        {
+          details:
+            "Invalid locations specified. Private Location(s) 'does not exist' not found. Available private locations are 'Test private location'",
+          id: 'check if title is present 10 0',
+          payload: invalidLocationMonitor,
+          reason: "Couldn't save or update monitor because of an invalid configuration.",
+        },
+      ],
+    });
+
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   it('catches errors from bulk edit method', async () => {
     soClient.bulkCreate.mockImplementation(async () => {
       return {
@@ -253,7 +301,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -284,7 +332,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           payload: payloadData,
           reason: 'Failed to create 2 monitors',
         },
@@ -315,7 +363,7 @@ describe('ProjectMonitorFormatter', () => {
       updatedMonitors: [],
       failedMonitors: [
         {
-          details: "Cannot read properties of undefined (reading 'packagePolicyService')",
+          details: "Cannot read properties of undefined (reading 'buildPackagePolicyFromPackage')",
           reason: 'Failed to create 2 monitors',
           payload: payloadData,
         },

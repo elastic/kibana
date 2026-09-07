@@ -10,16 +10,15 @@
 import moment from 'moment';
 import { LegendValue, Position, ScaleType as ECScaleType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type {
-  VisToExpressionAst,
-  DateHistogramParams,
-  HistogramParams,
-} from '@kbn/visualizations-plugin/public';
-import { getVisSchemas, LegendSize } from '@kbn/visualizations-plugin/public';
+import type { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import type { PaletteOutput } from '@kbn/charts-plugin/common/expressions/palette/types';
+import type { DateHistogramParams, HistogramParams } from '@kbn/chart-expressions-common';
+import { LegendSize } from '@kbn/chart-expressions-common';
+import { charsToPixels } from './utils/truncate';
 import type {
   Dimensions,
   Dimension,
@@ -125,7 +124,10 @@ const prepareLayers = (
       'date' in (xAccessor?.params || {}),
       'interval' in (xAccessor?.params || {})
     ),
-    splitAccessors: splitAccessors ? splitAccessors.map(prepareVisDimension) : undefined,
+    splitAccessors:
+      splitAccessors && splitAccessors.length > 0
+        ? splitAccessors.map(prepareVisDimension)
+        : undefined,
     markSizeAccessor:
       markSizeAccessor && !isBar ? prepareVisDimension(markSizeAccessor) : undefined,
     palette: palette ? preparePalette(palette) : undefined,
@@ -148,7 +150,8 @@ const prepareLayers = (
 
 const getLabelArgs = (data: CategoryAxis, isTimeChart?: boolean) => {
   return {
-    truncate: data.labels.truncate,
+    // axis expressions expect pixels, we approximate pixels from character count
+    truncate: charsToPixels(data.labels.truncate),
     labelsOrientation: -(data.labels.rotate ?? (isTimeChart ? 0 : 90)),
     showOverlappingLabels: data.labels.filter === false,
     showDuplicates: data.labels.filter === false,

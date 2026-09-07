@@ -18,16 +18,16 @@ import { useDeleteNote } from './use_delete_note';
 
 const mockDispatch = jest.fn();
 
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,
   };
 });
 
-jest.mock('@tanstack/react-query', () => {
-  const originalModule = jest.requireActual('@tanstack/react-query');
+jest.mock('@kbn/react-query', () => {
+  const originalModule = jest.requireActual('@kbn/react-query');
   return {
     ...originalModule,
     useMutation: jest.fn((...args) => originalModule.useMutation(...args)),

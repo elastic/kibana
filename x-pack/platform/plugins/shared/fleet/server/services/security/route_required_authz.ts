@@ -63,6 +63,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readBlocklist: {
               executePackageAction: true,
             },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -93,6 +102,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
             readBlocklist: {
               executePackageAction: true,
             },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
+              executePackageAction: true,
+            },
           },
         },
       },
@@ -121,6 +139,15 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
               executePackageAction: true,
             },
             readBlocklist: {
+              executePackageAction: true,
+            },
+            readTrustedDevices: {
+              executePackageAction: true,
+            },
+            showEndpointExceptions: {
+              executePackageAction: true,
+            },
+            readCustomYaraSignatures: {
               executePackageAction: true,
             },
           },

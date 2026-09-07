@@ -9,36 +9,30 @@ import { EuiBadge, EuiSkeletonText, EuiTab, EuiTabs } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type { ComponentType, ReactElement, Ref } from 'react';
 import React, { lazy, memo, Suspense, useCallback, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { State } from '../../../../common/store';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import type { RowRenderer, TimelineId } from '../../../../../common/types/timeline';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
-import {
-  useDeepEqualSelector,
-  useShallowEqualSelector,
-} from '../../../../common/hooks/use_selector';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   EqlEventsCountBadge,
   TimelineEventsCountBadge,
 } from '../../../../common/hooks/use_timeline_events_count';
 import { timelineActions } from '../../../store';
 import type { CellValueElementProps } from '../cell_rendering';
-import {
-  getActiveTabSelector,
-  getEventIdToNoteIdsSelector,
-  getNoteIdsSelector,
-  getNotesSelector,
-  getPinnedEventSelector,
-  getShowTimelineSelector,
-} from './selectors';
+import { getActiveTabSelector, getPinnedEventSelector, getShowTimelineSelector } from './selectors';
 import * as i18n from './translations';
 import { initializeTimelineSettings } from '../../../store/actions';
-import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
+import {
+  selectIsSuperTimeline,
+  selectTimelineById,
+  selectTimelineESQLSavedSearchId,
+} from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, makeSelectNotesBySavedObjectId } from '../../../../notes';
+import { makeSelectNotesBySavedObjectIds } from '../../../../notes/store/notes.slice';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { LazyTimelineTabRenderer, TimelineTabFallback } from './lazy_timeline_tab_renderer';
 
@@ -109,9 +103,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
       selectTimelineESQLSavedSearchId(state, timelineId)
     );
+    const isSuperTimeline = useShallowEqualSelector((state: State) =>
+      selectIsSuperTimeline(state, timelineId)
+    );
     const shouldShowESQLTab = useMemo(
-      () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
-      [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+      () => !isSuperTimeline && (isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null),
+      [isSuperTimeline, isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
     );
 
     return (
@@ -147,7 +144,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </LazyTimelineTabRenderer>
-        {timelineType === TimelineTypeEnum.default && (
+        {!isSuperTimeline && timelineType === TimelineTypeEnum.default && (
           <LazyTimelineTabRenderer
             timelineId={timelineId}
             shouldShowTab={TimelineTabs.eql === activeTimelineTab}
@@ -211,54 +208,25 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);
   const getShowTimeline = useMemo(() => getShowTimelineSelector(), []);
   const getNumberOfPinnedEvents = useMemo(() => getPinnedEventSelector(), []);
-  const getAppNotes = useMemo(() => getNotesSelector(), []);
-  const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
-  const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
   const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
 
   const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
     selectTimelineESQLSavedSearchId(state, timelineId)
   );
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
-
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
+  const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
+  const isSuperTimeline = useSelector((state: State) => selectIsSuperTimeline(state, timelineId));
+
   const shouldShowESQLTab = useMemo(
-    () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
-    [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+    () => !isSuperTimeline && (isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null),
+    [isSuperTimeline, isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
   );
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
   );
-  const globalTimelineNoteIds = useDeepEqualSelector((state) =>
-    getTimelineNoteIds(state, timelineId)
-  );
-  const eventIdToNoteIds = useDeepEqualSelector((state) =>
-    getTimelinePinnedEventNotes(state, timelineId)
-  );
-  const appNotes = useDeepEqualSelector((state) => getAppNotes(state));
-
-  // old notes system (through timeline)
-  const allTimelineNoteIds = useMemo(() => {
-    const eventNoteIds = Object.values(eventIdToNoteIds).reduce<string[]>(
-      (acc, v) => [...acc, ...v],
-      []
-    );
-    return [...globalTimelineNoteIds, ...eventNoteIds];
-  }, [globalTimelineNoteIds, eventIdToNoteIds]);
-
-  const numberOfNotesOldSystem = useMemo(
-    () =>
-      appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote.id)).length +
-      (isEmpty(timelineDescription) ? 0 : 1),
-    [appNotes, allTimelineNoteIds, timelineDescription]
-  );
-
-  const timeline = useSelector((state: State) => selectTimelineById(state, timelineId));
   const timelineSavedObjectId = useMemo(() => timeline?.savedObjectId ?? '', [timeline]);
   const isTimelineSaved: boolean = useMemo(
     () => timelineSavedObjectId.length > 0,
@@ -282,18 +250,37 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   }, [fetchNotes, isTimelineSaved]);
 
   const selectNotesBySavedObjectId = useMemo(() => makeSelectNotesBySavedObjectId(), []);
+  const selectNotesBySavedObjectIds = useMemo(() => makeSelectNotesBySavedObjectIds(), []);
+
+  const superTimelineSourceIds = useMemo(
+    () => timeline?.superTimelineSourceIds ?? [],
+    [timeline?.superTimelineSourceIds]
+  );
+
+  // Super Timeline: eagerly fetch notes for all source timelines so the badge is populated
+  // immediately, without waiting for the user to open the Notes tab.
+  const fetchSuperTimelineNotes = useCallback(
+    () => dispatch(fetchNotesBySavedObjectIds({ savedObjectIds: superTimelineSourceIds })),
+    [dispatch, superTimelineSourceIds]
+  );
+  useEffect(() => {
+    if (isSuperTimeline && superTimelineSourceIds.length > 0) {
+      fetchSuperTimelineNotes();
+    }
+  }, [fetchSuperTimelineNotes, isSuperTimeline, superTimelineSourceIds]);
 
   const notesNewSystem = useSelector((state: State) =>
     selectNotesBySavedObjectId(state, timelineSavedObjectId)
   );
-  const numberOfNotesNewSystem = useMemo(
-    () => notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
-    [notesNewSystem, timelineDescription]
+  const superTimelineNotes = useSelector((state: State) =>
+    selectNotesBySavedObjectIds(state, superTimelineSourceIds)
   );
-
-  const numberOfNotes = useMemo(
-    () => (securitySolutionNotesDisabled ? numberOfNotesOldSystem : numberOfNotesNewSystem),
-    [numberOfNotesNewSystem, numberOfNotesOldSystem, securitySolutionNotesDisabled]
+  const numberOfNotesNewSystem = useMemo(
+    () =>
+      isSuperTimeline
+        ? superTimelineNotes.length
+        : notesNewSystem.length + (isEmpty(timelineDescription) ? 0 : 1),
+    [isSuperTimeline, superTimelineNotes, notesNewSystem, timelineDescription]
   );
 
   const setActiveTab = useCallback(
@@ -362,7 +349,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
               <span>{i18n.DISCOVER_ESQL_IN_TIMELINE_TAB}</span>
             </StyledEuiTab>
           )}
-          {timelineType === TimelineTypeEnum.default && (
+          {!isSuperTimeline && timelineType === TimelineTypeEnum.default && (
             <StyledEuiTab
               data-test-subj={`timelineTabs-${TimelineTabs.eql}`}
               onClick={setEqlAsActiveTab}
@@ -382,9 +369,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
-            {showTimeline && numberOfNotes > 0 && timelineType === TimelineTypeEnum.default && (
-              <CountBadge>{numberOfNotes}</CountBadge>
-            )}
+            {showTimeline &&
+              numberOfNotesNewSystem > 0 &&
+              timelineType === TimelineTypeEnum.default && (
+                <CountBadge>{numberOfNotesNewSystem}</CountBadge>
+              )}
           </StyledEuiTab>
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}

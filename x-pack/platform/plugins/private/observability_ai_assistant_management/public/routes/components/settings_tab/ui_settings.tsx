@@ -10,7 +10,6 @@ import {
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
   aiAssistantSearchConnectorIndexPattern,
-  aiAssistantPreferredAIAssistantType,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
@@ -36,7 +35,6 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     aiAnonymizationSettings,
     aiAssistantSimulatedFunctionCalling,
     ...(knowledgeBase.status.value?.enabled ? [aiAssistantSearchConnectorIndexPattern] : []),
-    ...(config.visibilityEnabled ? [aiAssistantPreferredAIAssistantType] : []),
   ];
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =

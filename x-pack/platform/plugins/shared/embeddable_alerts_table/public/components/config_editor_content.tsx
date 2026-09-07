@@ -112,7 +112,7 @@ export const ConfigEditorContent = ({
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
     isError: cannotLoadRuleTypes,
-  } = useGetInternalRuleTypesQuery({ http });
+  } = useGetInternalRuleTypesQuery({ http, includeAlertViewableTypes: true });
   const availableSolutions = useMemo(
     () => (ruleTypes ? getAvailableSolutions(ruleTypes) : undefined),
     [ruleTypes]
@@ -238,6 +238,7 @@ export const ConfigEditorContent = ({
                     <EuiLoadingSpinner size="m" />
                   ) : cannotLoadRuleTypes ? (
                     <EuiCallOut
+                      announceOnMount
                       color="danger"
                       iconType="error"
                       title={CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_TITLE}

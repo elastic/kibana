@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { UIMessageChunk } from 'ai';
 import { readDataStream } from './stream';
 import type { Annotation, Message } from '../types';
 import { MessageRole } from '../types';
@@ -99,40 +100,57 @@ export async function parseDataStream({
   const createdAt = getCurrentDate();
   const prefixMap: PrefixMap = {};
   let messageAnnotations: Annotation[] | undefined;
+  const streamInstanceId = generateId();
+  let messageSequence = 0;
+  const allocateResponseId = (serverAssignedId?: string) => {
+    messageSequence += 1;
+    const baseId = `${streamInstanceId}-${messageSequence}`;
+    return serverAssignedId ? `${baseId}:${serverAssignedId}` : baseId;
+  };
 
-  for await (const { type, value } of readDataStream(reader, {
+  let responseMessageId = allocateResponseId();
+
+  for await (const chunk of readDataStream(reader, {
     isAborted: () => abortControllerRef?.current === null,
   })) {
-    if (type === 'text') {
+    const { type } = chunk;
+
+    if (type === 'text-start') {
+      responseMessageId =
+        'id' in chunk && chunk.id ? allocateResponseId(chunk.id) : allocateResponseId();
+      prefixMap.text = undefined;
+      continue;
+    } else if (type === 'text-delta' && 'delta' in chunk && typeof chunk.delta === 'string') {
       if (prefixMap.text) {
         prefixMap.text = {
           ...prefixMap.text,
-          content: (prefixMap.text.content || '') + value,
+          content: (prefixMap.text.content || '') + chunk.delta,
         };
       } else {
         prefixMap.text = {
-          id: generateId(),
+          id: responseMessageId,
           role: MessageRole.assistant,
-          content: value,
+          content: chunk.delta,
           createdAt,
         };
       }
-    } else if (type === 'error') {
-      handleFailure(value);
+    } else if (type === 'error' && 'errorText' in chunk) {
+      handleFailure(chunk.errorText);
       break;
-    }
-
-    let responseMessage = prefixMap.text;
-
-    if (type === 'message_annotations') {
+    } else if (type === 'data-message_annotations' && 'data' in chunk) {
+      const annotationsChunk = chunk as Extract<
+        UIMessageChunk,
+        { type: `data-${string}`; data: unknown }
+      >;
+      const annotationValues = annotationsChunk.data as Annotation[];
       if (!messageAnnotations) {
-        messageAnnotations = [...(value as unknown as Annotation[])];
+        messageAnnotations = [...annotationValues];
       } else {
-        messageAnnotations.push(...(value as unknown as Annotation[]));
+        messageAnnotations.push(...annotationValues);
       }
-
-      responseMessage = assignAnnotationsToMessage(prefixMap.text, messageAnnotations);
     }
+
+    const responseMessage = prefixMap.text;
 
     if (messageAnnotations?.length) {
       const messagePrefixKeys: Array<keyof PrefixMap> = ['text'];

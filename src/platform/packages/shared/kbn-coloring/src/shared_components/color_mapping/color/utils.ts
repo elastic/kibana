@@ -8,11 +8,16 @@
  */
 
 import type { RawValue } from '@kbn/data-plugin/common';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 
 /**
  * Returns string key given an unknown raw color assignment value
  */
 export function getValueKey(rawValue: RawValue): string {
+  if (rawValue == null) {
+    // if a null value arrives here, that we should intercept it to avoid wrong behaviors
+    return MISSING_TOKEN;
+  }
   const key = String(rawValue);
   return key !== '[object Object]' ? key : JSON.stringify(rawValue);
 }

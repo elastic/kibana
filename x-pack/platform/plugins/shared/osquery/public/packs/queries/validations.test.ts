@@ -5,7 +5,41 @@
  * 2.0.
  */
 
-import { idHookSchemaValidation } from './validations';
+import { idHookSchemaValidation, createFormIdFieldValidations } from './validations';
+
+describe('createFormIdFieldValidations', () => {
+  it('returns no error for a unique valid ID', () => {
+    const existingIds = new Set(['existing-id-1', 'existing-id-2']);
+    const { validate } = createFormIdFieldValidations(existingIds);
+    expect(validate('new-unique-id')).toBeUndefined();
+  });
+
+  it('returns "ID must be unique" for a duplicate ID', () => {
+    const existingIds = new Set(['existing-id-1', 'existing-id-2']);
+    const { validate } = createFormIdFieldValidations(existingIds);
+    expect(validate('existing-id-1')).toBe('ID must be unique');
+  });
+
+  it('returns pattern error for invalid characters', () => {
+    const existingIds = new Set<string>();
+    const { validate } = createFormIdFieldValidations(existingIds);
+    expect(validate('invalid.id')).toBe('Characters must be alphanumeric, _, or -');
+  });
+
+  it('returns pattern error over uniqueness error for invalid duplicate', () => {
+    const existingIds = new Set(['invalid id']);
+    const { validate } = createFormIdFieldValidations(existingIds);
+    // Pattern validation runs first
+    expect(validate('invalid id')).toBe('Characters must be alphanumeric, _, or -');
+  });
+
+  it('has a required validation rule', () => {
+    const existingIds = new Set<string>();
+    const rules = createFormIdFieldValidations(existingIds);
+    expect(rules.required.value).toBe(true);
+    expect(rules.required.message).toBe('ID is required');
+  });
+});
 
 describe('idSchemaValidation', () => {
   it('returns undefined for valid id', () => {

@@ -96,10 +96,10 @@ export const ConnectorDeployment: React.FC = () => {
     return <></>;
   }
 
-  const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey);
+  const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey ?? apiKeyData);
 
   const isWaitingForConnector = !connector.status || connector.status === ConnectorStatus.CREATED;
-  const apiKey = generatedData?.apiKey || apiKeyData || apiKeyMetaData;
+  const apiKey = apiKeyData || generatedData?.apiKey || apiKeyMetaData;
 
   return (
     <EuiFlexGroup>

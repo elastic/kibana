@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import {
@@ -93,7 +94,7 @@ describe('Telemetry config watcher', () => {
 
     telemetryConfigEmitter.next(true);
 
-    expect(mockWatch).toBeCalledTimes(1);
+    expect(mockWatch).toHaveBeenCalledTimes(1);
 
     telemetryWatcher.stop();
     telemetryConfigProvider.stop();
@@ -126,7 +127,7 @@ describe('Telemetry config watcher', () => {
 
     await telemetryWatcher.watch(true); // manual trigger
 
-    expect(packagePolicyServiceMock.list).toBeCalledTimes(3);
+    expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(3);
 
     // Assert: on the first call to packagePolicy.list, we asked for page 1
     expect(packagePolicyServiceMock.list.mock.calls[0][1].page).toBe(1);
@@ -150,7 +151,7 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(true);
 
-      expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(2);
       const expectedParams = {
         page: 1,
         perPage: 100,
@@ -169,7 +170,7 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(true);
 
-      expect(packagePolicyServiceMock.list).toBeCalledTimes(5);
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(5);
       expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockedLogger.error).not.toHaveBeenCalled();
     });
@@ -220,6 +221,32 @@ describe('Telemetry config watcher', () => {
 
       const logMessage = mockedLogger.warn.mock.calls[0][0] as string;
       expect(logMessage).toMatch(/- id: policy-id-1, error:.+error message 1/);
+      expect(logMessage).toMatch(/- id: policy-id-2, error:.+error message 2/);
+    });
+
+    it('does not log the ids of package policies as WARN that are failed due to CONFLICT', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockResolvedValueOnce({
+        updatedPolicies: [],
+        failedPolicies: [
+          {
+            error: { statusCode: 409, message: 'error message 1' } as SavedObjectError,
+            packagePolicy: { id: 'policy-id-1' } as NewPackagePolicyWithId,
+          },
+          {
+            error: { statusCode: 401, message: 'error message 2' } as SavedObjectError,
+            packagePolicy: { id: 'policy-id-2' } as NewPackagePolicyWithId,
+          },
+        ],
+      });
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+
+      const logMessage = mockedLogger.warn.mock.calls[0][0] as string;
       expect(logMessage).toMatch(/- id: policy-id-2, error:.+error message 2/);
     });
   });

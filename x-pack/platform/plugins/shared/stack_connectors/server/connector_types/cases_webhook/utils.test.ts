@@ -64,6 +64,32 @@ describe('cases_webhook/utils', () => {
         headers: new AxiosHeaders({}),
       },
     };
+
+    it('Does not throw when the response status is 204 and there is no data', () => {
+      expect(() =>
+        throwDescriptiveErrorIfResponseIsNotValid({
+          res: {
+            ...res,
+            status: 204,
+            data: undefined,
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it('Throws when the response status is 204 and requiredAttributesToBeInTheResponse is set', () => {
+      expect(() =>
+        throwDescriptiveErrorIfResponseIsNotValid({
+          res: {
+            ...res,
+            status: 204,
+            data: undefined,
+          },
+          requiredAttributesToBeInTheResponse: ['field.simple'],
+        })
+      ).toThrow();
+    });
+
     it('Throws error when missing content-type', () => {
       expect(() =>
         throwDescriptiveErrorIfResponseIsNotValid({

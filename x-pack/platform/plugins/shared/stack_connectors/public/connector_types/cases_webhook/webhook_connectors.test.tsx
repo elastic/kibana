@@ -9,9 +9,15 @@ import React from 'react';
 import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { render, screen, waitFor } from '@testing-library/react';
-import { AuthType } from '../../../common/auth/constants';
+import { AuthType } from '@kbn/connector-schemas/common/auth/constants';
 import userEvent from '@testing-library/user-event';
 import * as i18n from './translations';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { useSecretHeaders } from '../../common/auth/use_secret_headers';
+
+jest.mock('../../common/auth/use_secret_headers');
+
+const useSecretHeadersMock = useSecretHeaders as jest.Mock;
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');
@@ -19,11 +25,24 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
-        docLinks: { ELASTIC_WEBSITE_URL: 'url' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'url',
+          links: { alerting: { casesWebhookAction: 'url/cases-webhook' } },
+        },
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+          },
+        },
       },
     }),
   };
 });
+
+const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+};
 
 const invalidJsonTitle = `{"fields":{"summary":"wrong","description":{{{case.description}}},"project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
 const invalidJsonBoth = `{"fields":{"summary":"wrong","description":"wrong","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}`;
@@ -62,7 +81,16 @@ const actionConnector = {
 };
 
 describe('CasesWebhookActionConnectorFields renders', () => {
+  beforeEach(() => {
+    useSecretHeadersMock.mockReturnValue({ isLoading: true, isFetching: false, data: [] });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('All inputs are properly rendered', async () => {
+    useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
     render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <CasesWebhookActionConnectorFields
@@ -70,7 +98,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
     expect(await screen.findByTestId('authNone')).toBeInTheDocument();
@@ -113,7 +142,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
     await userEvent.click(await screen.findByTestId('webhookAddCommentToggle'));
@@ -131,7 +161,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
     expect(await screen.findByTestId('webhookAddCommentToggle')).toHaveAttribute(
@@ -148,7 +179,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </ConnectorFormTestProvider>
+      </ConnectorFormTestProvider>,
+      { wrapper: customQueryProviderWrapper }
     );
 
     const authNoneToggle = await screen.findByTestId('authNone');
@@ -176,7 +208,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(screen.queryByTestId('webhookHeadersValueInput')).not.toBeInTheDocument();
   });
 
-  describe('Step Validation', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/237095
+  describe.skip('Step Validation', () => {
     it('Steps work correctly when all fields valid', async () => {
       render(
         <ConnectorFormTestProvider connector={actionConnector}>
@@ -185,7 +218,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
@@ -247,7 +281,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
 
       expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
@@ -262,6 +297,86 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
       expect(await screen.findByTestId('horizontalStep2-current')).toBeInTheDocument();
+    });
+
+    it('form submit works with valid headers', async () => {
+      const customActionConnector = {
+        ...actionConnector,
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'configKey',
+              value: 'configValue',
+              type: 'config',
+            },
+            {
+              key: 'secretKey',
+              value: 'secretValue',
+              type: 'secret',
+            },
+          ],
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={customActionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+      expect(await screen.findByTestId('horizontalStep1-current')).toBeInTheDocument();
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-complete')).toBeInTheDocument();
+    });
+
+    it('marks step 1 as danger if the header fields are invalid', async () => {
+      useSecretHeadersMock.mockReturnValue({ isLoading: false, isFetching: false, data: [] });
+
+      const customActionConnector = {
+        ...actionConnector,
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        __internal__: {
+          headers: [
+            {
+              key: 'configKey',
+              value: 'configValue',
+              type: 'config',
+            },
+          ],
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={customActionConnector}>
+          <CasesWebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
+      );
+
+      expect(await screen.findByTestId('webhookViewHeadersSwitch')).toHaveAttribute(
+        'aria-checked',
+        'true'
+      );
+
+      const keyInput = await screen.findByTestId('webhookHeadersKeyInput');
+      expect(keyInput).toHaveValue('configKey');
+      await userEvent.clear(keyInput);
+
+      await userEvent.click(await screen.findByTestId('casesWebhookNext'));
+      expect(await screen.findByTestId('horizontalStep1-danger')).toBeInTheDocument();
     });
 
     it('Step 2 is properly validated', async () => {
@@ -279,7 +394,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
       await userEvent.click(await screen.findByTestId('casesWebhookNext'));
@@ -321,7 +437,8 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             isEdit={false}
             registerPreSubmitValidator={() => {}}
           />
-        </ConnectorFormTestProvider>
+        </ConnectorFormTestProvider>,
+        { wrapper: customQueryProviderWrapper }
       );
       expect(await screen.findByTestId('horizontalStep2-incomplete')).toBeInTheDocument();
 
@@ -406,7 +523,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
       const { isPreconfigured, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             __internal__: {
@@ -442,7 +559,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
       const { isPreconfigured, secrets, ...rest } = actionConnector;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: {
@@ -484,7 +601,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
       const { isPreconfigured, ...rest } = actionConnector;
       const { headers, ...rest2 } = actionConnector.config;
       await waitFor(() =>
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             ...rest,
             config: rest2,

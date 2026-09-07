@@ -7,7 +7,7 @@
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
-import type { MaintenanceWindow } from '@kbn/alerting-plugin/server/application/maintenance_window/types';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import type { MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
@@ -30,6 +30,7 @@ export interface ProcessorFields {
   test_run_id: string;
   run_once: boolean;
   space_id: string;
+  kibanaUrl?: string;
 }
 
 export const formatSyntheticsPolicy = (
@@ -58,10 +59,18 @@ export const formatSyntheticsPolicy = (
     // enable only the input type and data stream that matches the monitor type.
     currentInput.enabled = true;
     dataStream.enabled = true;
-  }
 
-  // / filter out disabled inputs
-  formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
+    if (monitorType === 'browser') {
+      currentInput.streams.forEach((stream) => {
+        if (
+          stream.data_stream.dataset === 'browser.network' ||
+          stream.data_stream.dataset === 'browser.screenshot'
+        ) {
+          stream.enabled = true;
+        }
+      });
+    }
+  }
 
   configKeys.forEach((key) => {
     const configItem = dataStream?.vars?.[key];
@@ -82,6 +91,17 @@ export const formatSyntheticsPolicy = (
       }
     }
   });
+
+  // This field is NOT in the monitor config, but needs to be set in the policy
+  // so Heartbeat knows to decode the base64-encoded script
+  const encodingVar = dataStream?.vars?.['source.inline.encoding'];
+  if (monitorType === 'browser' && encodingVar && config[ConfigKey.SOURCE_INLINE]) {
+    encodingVar.value = 'base64';
+    const inlineScript = dataStream.vars?.[ConfigKey.SOURCE_INLINE];
+    if (inlineScript && typeof inlineScript.value === 'string') {
+      inlineScript.value = Buffer.from(inlineScript.value).toString('base64');
+    }
+  }
 
   const processorItem = dataStream?.vars?.processors;
   if (processorItem) {
@@ -108,6 +128,14 @@ export const formatSyntheticsPolicy = (
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  // Drop disabled inputs so we persist only the single active input. Disabled inputs never
+  // contribute to the compiled agent policy and only bloat the saved object. A guard in Fleet's
+  // `updatePackageInputs` keeps them from being re-added on package upgrade. Only strip once the
+  // active input is resolved, so an unknown monitor type still yields the template.
+  if (currentInput && dataStream) {
+    formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
   }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };

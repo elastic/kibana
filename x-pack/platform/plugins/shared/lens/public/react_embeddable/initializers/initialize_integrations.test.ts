@@ -6,61 +6,55 @@
  */
 
 import { faker } from '@faker-js/faker';
+
+import type { LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+
 import { createEmptyLensState } from '../helper';
-import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
-import type { LensRuntimeState } from '../types';
+import { getLensAttributesMock, getLensRuntimeStateMock } from '../mocks';
+import { getLensBuilder } from '../../lazy_builder';
 import { initializeIntegrations } from './initialize_integrations';
 
-function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>) {
-  const services = makeEmbeddableServices(undefined, undefined, {
-    visOverrides: { id: 'lnsXY' },
-    dataOverrides: { id: 'formBased' },
-  });
+jest.mock('../../lazy_builder', () => ({
+  getLensBuilder: jest.fn(),
+}));
+
+function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>): LensApi {
   const runtimeState = getLensRuntimeStateMock(stateOverrides);
-  const serializeDynamicActions = undefined;
-  const { api } = initializeIntegrations(() => runtimeState, serializeDynamicActions, services);
-  return api;
+  const { api } = initializeIntegrations(() => runtimeState);
+  return api as LensApi;
 }
 
 function createAttributesWithReferences() {
   const attributes = createEmptyLensState().attributes;
-  // inject some references to test later
   attributes.references = [{ type: 'index-pattern', id: '1', name: 'indexpattern-datasource' }];
   return attributes;
 }
 
 describe('Dashboard services API', () => {
   describe('serializeState', () => {
+    beforeEach(() => {
+      (getLensBuilder as jest.Mock).mockReturnValue(null);
+    });
+
     it('should work for a by-value panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({ attributes });
-      const { rawState, references } = api.serializeState();
-      // make sure of 3 things:
-      // * attributes are sent back
-      expect(rawState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
-      // * savedObjectId is cleaned up
-      expect(rawState).not.toHaveProperty('savedObjectId');
-      // * references should be at root level
-      expect(references).toEqual(attributes.references);
+      const serializedState = api.serializeState();
+      expect(serializedState).toEqual(expect.objectContaining({ attributes: expect.any(Object) }));
+      expect((serializedState as { ref_id?: string }).ref_id).toBeUndefined();
     });
+
     it('should serialize state for a by-reference panel', async () => {
       const attributes = createAttributesWithReferences();
       const api = setupIntegrationsApi({
-        savedObjectId: '123',
+        ref_id: '123',
         attributes,
       });
-      const { rawState, references } = api.serializeState();
-      // check the same 3 things as above
-      expect(rawState).not.toEqual(expect.objectContaining({ attributes: expect.anything() }));
-      // * references should be at root level
-      expect(references).toEqual([
-        ...attributes.references,
-        {
-          id: '123',
-          name: 'savedObjectRef',
-          type: 'lens',
-        },
-      ]);
+      const serializedState = api.serializeState();
+      expect(serializedState).not.toEqual(
+        expect.objectContaining({ attributes: expect.anything() })
+      );
     });
 
     it('should remove the searchSessionId from the serializedState', async () => {
@@ -69,8 +63,21 @@ describe('Dashboard services API', () => {
         attributes,
         searchSessionId: faker.string.uuid(),
       });
-      const { rawState } = api.serializeState();
-      expect('searchSessionId' in rawState).toBeFalsy();
+      const serializedState = api.serializeState();
+      expect('searchSessionId' in serializedState).toBeFalsy();
+    });
+
+    it('should flatten by-value serialized state when Lens API format is enabled', () => {
+      (getLensBuilder as jest.Mock).mockReturnValue({
+        isEnabled: true,
+        getType: () => 'lnsXY',
+        isSupported: () => true,
+        toAPIFormat: () => ({ type: 'xy', index: 'my-index' }),
+      });
+      const api = setupIntegrationsApi({ attributes: getLensAttributesMock() });
+      const serializedState = api.serializeState();
+      expect('attributes' in serializedState).toBe(false);
+      expect(serializedState).toMatchObject({ type: 'xy', index: 'my-index' });
     });
   });
 });

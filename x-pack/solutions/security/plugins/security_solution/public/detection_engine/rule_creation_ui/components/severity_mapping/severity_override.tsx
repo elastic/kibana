@@ -176,7 +176,7 @@ function SeverityMappingRow({
 
         <EuiFlexItemComboBoxColumn>
           <AutocompleteFieldMatchComponent
-            autocompleteService={services.unifiedSearch.autocomplete}
+            autocompleteService={services.kql.autocomplete}
             placeholder=""
             selectedField={getFieldTypeByMapping(severityMappingItem, indices)}
             selectedValue={severityMappingItem.value}
@@ -188,7 +188,7 @@ function SeverityMappingRow({
           />
         </EuiFlexItemComboBoxColumn>
         <EuiFlexItemIconColumn>
-          <EuiIcon type="sortRight" />
+          <EuiIcon type="sortRight" aria-hidden={true} />
         </EuiFlexItemIconColumn>
         <EuiFlexItemSeverityColumn>
           {severityOptions.find((o) => o.value === severityMappingItem.severity)?.inputDisplay}

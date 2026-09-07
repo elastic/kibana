@@ -19,7 +19,7 @@ export const DETAILS_HEADER_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.detailsHeaderDescription',
   {
     defaultMessage:
-      'Add a trusted device to improve performance or alleviate compatibility issues.',
+      'Allow a specific external device to connect to your endpoints, even when Device Control is enabled.',
   }
 );
 
@@ -121,57 +121,6 @@ export const CONDITION_FIELD_TITLE: { [K in TrustedDeviceConditionEntryField]: s
   ),
 };
 
-export const CONDITION_FIELD_DESCRIPTION: { [K in TrustedDeviceConditionEntryField]: string } = {
-  [TrustedDeviceConditionEntryField.USERNAME]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.username',
-    {
-      defaultMessage: 'The username of the device user',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.HOST]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.host',
-    {
-      defaultMessage: 'The hostname of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.DEVICE_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceId',
-    {
-      defaultMessage: 'The serial number of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.MANUFACTURER]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturer',
-    {
-      defaultMessage: 'The vendor name of the device manufacturer',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.PRODUCT_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productId',
-    {
-      defaultMessage: 'The product identifier of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.PRODUCT_NAME]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.productName',
-    {
-      defaultMessage: 'The product name of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.DEVICE_TYPE]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.deviceType',
-    {
-      defaultMessage: 'The type of the device',
-    }
-  ),
-  [TrustedDeviceConditionEntryField.MANUFACTURER_ID]: i18n.translate(
-    'xpack.securitySolution.trustedDevices.logicalConditionBuilder.entry.field.description.manufacturerId',
-    {
-      defaultMessage: 'The vendor identifier of the device manufacturer',
-    }
-  ),
-};
-
 export const OPERATOR_TITLES = {
   is: i18n.translate('xpack.securitySolution.trustedDevices.card.operator.is', {
     defaultMessage: 'is',
@@ -185,14 +134,6 @@ export const INPUT_ERRORS = {
   name: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.nameRequired', {
     defaultMessage: 'Trusted device name is required',
   }),
-  entries: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesRequired', {
-    defaultMessage: 'At least one condition is required',
-  }),
-  entriesDuplicateFields: (duplicateFields: string[]) =>
-    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.entriesDuplicateFields', {
-      defaultMessage: 'Duplicate field(s): {duplicateFields}',
-      values: { duplicateFields: duplicateFields.join(', ') },
-    }),
   invalidHash: i18n.translate('xpack.securitySolution.trustedDevices.form.errors.invalidHash', {
     defaultMessage: 'Invalid hash value',
   }),
@@ -221,12 +162,11 @@ export const INPUT_ERRORS = {
       defaultMessage: 'Condition value cannot be empty',
     }
   ),
-  entriesAtLeastOne: i18n.translate(
-    'xpack.securitySolution.trustedDevices.form.errors.entriesAtLeastOne',
-    {
-      defaultMessage: 'At least one condition must be specified',
-    }
-  ),
+  noDuplicateField: (field: TrustedDeviceConditionEntryField) =>
+    i18n.translate('xpack.securitySolution.trustedDevices.form.errors.conditionFieldDuplicated', {
+      defaultMessage: '{field} cannot be added more than once',
+      values: { field: CONDITION_FIELD_TITLE[field] },
+    }),
 };
 
 export const VALIDATION_WARNINGS = {
@@ -237,3 +177,24 @@ export const VALIDATION_WARNINGS = {
     }
   ),
 };
+
+export const AND_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.andButtonLabel',
+  {
+    defaultMessage: 'AND',
+  }
+);
+
+export const REMOVE_ENTRY_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.removeEntryAriaLabel',
+  {
+    defaultMessage: 'Remove entry',
+  }
+);
+
+export const VALUE_INPUT_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.valueInputPlaceholder',
+  {
+    defaultMessage: 'Enter or select value',
+  }
+);

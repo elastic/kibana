@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -18,7 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const config = getService('config');
 
-  describe('lens smokescreen tests', () => {
+  // Flaky on MKI (#kibana-serverless-test-alerts); keep local serverless coverage.
+  // Tracking: https://github.com/elastic/kibana/issues/282284
+  describe('lens smokescreen tests', function () {
+    this.tags(['skipMKI']);
+
     before(async () => {
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
@@ -70,8 +75,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // .echLegendItem__title is the only viable way of getting the xy chart's
       // legend item(s), so we're using a class selector here.
-      // 4th item is the other bucket
-      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
+      // 10th item is the other bucket (9 top values + Other)
+      expect(await find.allByCssSelector('.echLegendItem')).to.have.length(10);
     });
 
     it('should create an xy visualization with filters aggregation', async () => {
@@ -127,7 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('line')).to.eql(false);
 
-      await PageObjects.lens.switchToVisualization('line');
+      await PageObjects.lens.switchToVisualization('line', undefined, 1);
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
@@ -140,9 +145,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+      await PageObjects.lens.assertLayerCount(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
+      await PageObjects.lens.ensureLayerTabIsActive();
       await testSubjects.existOrFail('workspace-drag-drop-prompt');
     });
 
@@ -162,12 +168,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
-      await PageObjects.lens.openVisualOptions();
+
+      await PageObjects.lens.openStyleSettingsFlyout();
 
       await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
@@ -252,8 +261,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await PageObjects.lens.openTextOptions();
+      await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
+      await PageObjects.lens.closeFlyoutWithBackButton();
 
       // check for value labels
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
@@ -262,7 +272,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await PageObjects.lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await PageObjects.lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -275,6 +285,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
@@ -295,7 +307,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.createLayer('data', undefined, 'bar');
-      expect(await PageObjects.lens.getLayerType(1)).to.eql('Bar');
+      expect(await PageObjects.lens.getLayerType()).to.eql('Bar');
 
       await PageObjects.lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -312,9 +324,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(1);
+      await PageObjects.lens.assertLayerCount(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
-        'Top 5 values of geo.dest'
+        'Top 9 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
@@ -401,6 +413,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasChartSwitchWarning('lnsDatatable')).to.eql(false);
       await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      // Switching chart type re-applies the target type's empty-rows default, so
+      // the datatable turns "Include empty rows" back on. Turn it off again to
+      // assert the populated buckets only.
+      await PageObjects.lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger');
+      await testSubjects.setEuiSwitch('indexPattern-include-empty-rows', 'uncheck');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('@timestamp per 3 hours');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
@@ -505,7 +524,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => PageObjects.lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        '-',
+        NULL_LABEL,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',
@@ -657,7 +676,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Last value of bytes'
@@ -741,11 +763,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.switchToVisualization('pie');
 
-      const hasVisualOptionsButton = await PageObjects.lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await PageObjects.lens.openStyleSettingsFlyout();
 
       const donutHole = await PageObjects.lens.getDonutHoleSize();
       expect(donutHole).to.be('None');
+
+      await PageObjects.lens.closeFlyoutWithBackButton();
     });
 
     it('switches donut hole size', async () => {

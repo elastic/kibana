@@ -10,6 +10,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { orderBy, isEqual } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 
+import { i18n } from '@kbn/i18n';
+
 import type { Criteria, EuiTableSortingType } from '@elastic/eui';
 import { useEuiTheme, useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 
@@ -246,6 +248,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     <EuiBasicTable
       data-test-subj="aiopsLogRateAnalysisResultsTable"
       compressed
+      tableCaption={i18n.translate('xpack.aiops.logRateAnalysisResultsTable.tableCaption', {
+        defaultMessage: 'Log rate analysis results',
+      })}
       items={pageOfItems}
       columns={columns}
       pagination={pagination.totalItemCount > pagination.pageSize ? pagination : undefined}

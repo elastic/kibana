@@ -8,6 +8,7 @@
  */
 
 import type { EuiDataGridStyle } from '@elastic/eui';
+export { DataGridDensity } from '@kbn/discover-utils';
 
 export const DEFAULT_CONTROL_COLUMN_WIDTH = 24;
 
@@ -63,8 +64,5 @@ export const toolbarVisibility = {
   },
 };
 
-export enum DataGridDensity {
-  COMPACT = 'compact',
-  NORMAL = 'normal',
-  EXPANDED = 'expanded',
-}
+// EUI does not expose react-window's outerRef, so query its wrapper directly.
+export const VIRTUALIZED_SELECTOR = '.euiDataGrid__virtualized';

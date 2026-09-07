@@ -21,6 +21,7 @@ import type {
   IUiSettingsClient,
   ChromeStart,
   SecurityServiceStart,
+  NotificationsStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
@@ -28,12 +29,13 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { IndexMappingProps } from '@kbn/index-management-shared-types';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { MlPluginStart } from '@kbn/ml-plugin/public';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import type { ConnectorDefinition } from '@kbn/search-connectors';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-shared-ui';
 import type { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { ClientConfigType, ProductFeatures } from '../../../../common/types';
@@ -67,6 +69,7 @@ export interface KibanaLogicProps {
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
+  notifications: NotificationsStart;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   searchNavigation: SearchNavigationPluginStart;
@@ -75,6 +78,7 @@ export interface KibanaLogicProps {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share?: SharePluginStart;
+  spaces?: SpacesPluginStart;
   uiActions: UiActionsStart;
   uiSettings?: IUiSettingsClient;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
@@ -103,6 +107,7 @@ export interface KibanaValues {
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
+  notifications: NotificationsStart;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart | null;
@@ -111,6 +116,7 @@ export interface KibanaValues {
   setChromeIsVisible(isVisible: boolean): void;
   setDocTitle(title: string): void;
   share: SharePluginStart | null;
+  spaces: SpacesPluginStart | null;
   uiActions: UiActionsStart | null;
   uiSettings: IUiSettingsClient | null;
   updateSideNavDefinition: UpdateSideNavDefinitionFn;
@@ -149,6 +155,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
+    notifications: [props.notifications, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     searchNavigation: [props.searchNavigation, {}],
@@ -157,6 +164,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     share: [props.share || null, {}],
+    spaces: [props.spaces || null, {}],
     uiActions: [props.uiActions, {}],
     uiSettings: [props.uiSettings, {}],
     updateSideNavDefinition: [props.updateSideNavDefinition, {}],

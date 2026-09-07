@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -18,8 +17,9 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { useAgentPolicyWithPackagePolicies } from '../../../../../../../../components/agent_enrollment_flyout/hooks';
 
@@ -79,7 +79,7 @@ export const PostInstallCloudFormationModal: React.FunctionComponent<{
         {error && isError && !isLoadingInitialRequest && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <KbnDangerCallout announceOnMount title={error} />
           </>
         )}
       </EuiModalBody>

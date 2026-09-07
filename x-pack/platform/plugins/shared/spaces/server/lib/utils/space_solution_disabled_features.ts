@@ -11,7 +11,9 @@ import type { SolutionView } from '../../../common';
 
 const getFeatureIdsForCategories = (
   features: KibanaFeature[],
-  categories: Array<'observability' | 'enterpriseSearch' | 'securitySolution' | 'chat'>
+  categories: Array<
+    'observability' | 'enterpriseSearch' | 'securitySolution' | 'workplaceai' | 'vectordb'
+  >
 ) => {
   return features
     .filter((feature) =>
@@ -22,7 +24,8 @@ const getFeatureIdsForCategories = (
               | 'observability'
               | 'enterpriseSearch'
               | 'securitySolution'
-              | 'chat'
+              | 'workplaceai'
+              | 'vectordb'
           )
         : false
     )
@@ -37,7 +40,8 @@ const enabledFeaturesPerSolution: Record<SolutionId, string[]> = {
   es: ['observabilityAIAssistant'],
   oblt: [],
   security: [],
-  chat: [],
+  workplaceai: [],
+  vectordb: [],
 };
 
 /**
@@ -65,25 +69,31 @@ export function withSpaceSolutionDisabledFeatures(
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
-      'chat',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.es.includes(featureId));
   } else if (spaceSolution === 'oblt') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'securitySolution',
-      'chat',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.oblt.includes(featureId));
   } else if (spaceSolution === 'security') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'enterpriseSearch',
-      'chat',
+      'workplaceai',
     ]).filter((featureId) => !enabledFeaturesPerSolution.security.includes(featureId));
-  } else if (spaceSolution === 'chat') {
+  } else if (spaceSolution === 'workplaceai') {
     disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
       'observability',
       'securitySolution',
       'enterpriseSearch',
-    ]).filter((featureId) => !enabledFeaturesPerSolution.chat.includes(featureId));
+    ]).filter((featureId) => !enabledFeaturesPerSolution.workplaceai.includes(featureId));
+  } else if (spaceSolution === 'vectordb') {
+    disabledFeatureKeysFromSolution = getFeatureIdsForCategories(features, [
+      'observability',
+      'securitySolution',
+      'workplaceai',
+    ]).filter((featureId) => !enabledFeaturesPerSolution.vectordb.includes(featureId));
   }
 
   return Array.from(new Set([...disabledFeatureKeysFromSolution]));

@@ -6,11 +6,7 @@
  */
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
-  ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export const SEARCHABLE_FIELDS: Readonly<string[]> = [
   `item_id`,
@@ -20,9 +16,9 @@ export const SEARCHABLE_FIELDS: Readonly<string[]> = [
 ];
 
 export const HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_NAME,
+  name: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_DESCRIPTION,
-  list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
+  description: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
   type: ExceptionListTypeEnum.ENDPOINT_HOST_ISOLATION_EXCEPTIONS,
 };

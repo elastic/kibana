@@ -1,0 +1,249 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { UseEuiTheme } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { EDITOR_SCROLLBAR_WIDTH_PX, FOCUSED_STEP_DECORATION_INSET_PX } from './constants';
+
+export const EXECUTION_YAML_SNAPSHOT_CLASS = 'execution-yaml-snapshot';
+
+const editorStyleMap = {
+  actionsMenuPopoverPanel: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minInlineSize: '600px',
+      maxInlineSize: '600px',
+      maxBlockSize: '520px',
+      borderRadius: euiTheme.border.radius.medium,
+    }),
+
+  container: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      position: 'relative',
+      minHeight: 0,
+
+      // Template variable decorations
+      '.template-variable-info, .template-variable-valid': {
+        backgroundColor: transparentize(euiTheme.colors.primary, 0.12),
+        borderRadius: '2px',
+      },
+      '.template-variable-error': {
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
+        color: euiTheme.colors.severity.danger,
+        borderRadius: '2px',
+      },
+      '.template-variable-warning': {
+        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVisWarning1, 0.24),
+        borderRadius: '2px',
+      },
+      '.workflow-name-decoration': {
+        color: euiTheme.colors.textSubdued,
+        fontStyle: 'italic',
+      },
+      '.after-text': {
+        marginLeft: '10px',
+        color: euiTheme.colors.textDisabled,
+      },
+      '.after-text + .after-text': {
+        marginLeft: '0',
+      },
+
+      // Before-decoration badges
+      '.connector-name-badge': {
+        display: 'inline-block',
+        backgroundColor: transparentize(euiTheme.colors.success, 0.1),
+        color: euiTheme.colors.successText,
+        padding: '2px 6px',
+        borderRadius: '4px',
+        marginRight: '8px',
+        fontSize: '12px',
+        fontWeight: 500,
+        lineHeight: '1.4',
+      },
+
+      '.workflow-name-badge': {
+        display: 'inline-block',
+        backgroundColor: transparentize(euiTheme.colors.primary, 0.1),
+        color: euiTheme.colors.primaryText,
+        padding: '2px 6px',
+        borderRadius: '4px',
+        marginRight: '8px',
+        fontSize: '12px',
+        fontWeight: 500,
+        lineHeight: '1.4',
+      },
+
+      // Step highlighting
+      '.step-highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseAccent,
+        borderRadius: '2px',
+      },
+      '.dimmed': {
+        opacity: 0.5,
+      },
+
+      // Alert trigger
+      '.alert-trigger-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.warning,
+          borderRadius: '50%',
+        },
+      },
+
+      // Custom trigger `on.workflowEvents` (ignore / allow-all / avoid-loop)
+      '.workflow-trigger-on-chain-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.warning,
+          borderRadius: '50%',
+        },
+      },
+      '.alert-trigger-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+      },
+
+      // Error highlighting
+      '.duplicate-step-name-error': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.duplicate-step-name-error-margin': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: euiTheme.colors.backgroundLightDanger,
+          zIndex: 1000,
+        },
+        color: 'transparent',
+        textShadow: 'none',
+        fontSize: 0,
+      },
+
+      // Step execution
+      '.elasticsearch-step-glyph': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.vis.euiColorVis1,
+          borderRadius: '50%',
+        },
+      },
+      '.elasticsearch-step-type-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.1)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.elasticsearch-step-block-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.08)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.elasticsearch-step-background': {
+        backgroundColor: 'rgba(0, 120, 212, 0.08)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.workflow-step-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.1)',
+        borderLeft: `3px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+      '.workflow-step-line-highlight': {
+        backgroundColor: 'rgba(0, 120, 212, 0.05)',
+        borderLeft: `2px solid ${euiTheme.colors.vis.euiColorVis1}`,
+      },
+
+      // Diff highlighting
+      '.changed-line-highlight': {
+        backgroundColor: euiTheme.colors.backgroundLightWarning,
+        borderLeft: `2px solid ${euiTheme.colors.warning}`,
+        opacity: 0.7,
+      },
+      '.changed-line-margin': {
+        backgroundColor: euiTheme.colors.warning,
+        width: '2px',
+        opacity: 0.7,
+      },
+    }),
+
+  // paddingRight is intentionally omitted here: the call site adds it conditionally
+  // via `isVisualEditorEnabled && css({ paddingRight: MINIMAP_RESERVE_PX })` so there
+  // is no set-then-unset pattern depending on Emotion's array-compose order.
+  editorContainer: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      flex: '1 1 0',
+      minWidth: 0,
+      overflowY: 'auto',
+      minHeight: 0,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      [`&.${EXECUTION_YAML_SNAPSHOT_CLASS}`]: {
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+    }),
+
+  validationErrorsContainer: css({
+    position: 'relative',
+    flexShrink: 0,
+    overflow: 'hidden',
+    zIndex: 10, // renders above the step minimap (zIndex: 9)
+  }),
+
+  stepActionsContainer: css({
+    position: 'absolute',
+    zIndex: 1002, // above the highlighting and pseudo-element
+    // translateX: twice the decoration inset (outside and inside) plus the slim
+    // scrollbar width so the button cluster stays clear of the scrollbar.
+    transform: `translateY(${FOCUSED_STEP_DECORATION_INSET_PX}px) translateX(-${
+      2 * FOCUSED_STEP_DECORATION_INSET_PX + EDITOR_SCROLLBAR_WIDTH_PX
+    }px)`,
+  }),
+
+  editorAreaWrapper: css({
+    flex: '1 1 0',
+    minHeight: 0,
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+  }),
+
+  // Plain css value (no theme needed): the minimap hides its own scrollbar completely
+  // so it can be scrolled programmatically without a visible track competing with the
+  // viewport indicator.
+  minimapContainer: css({
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    right: 0,
+    zIndex: 9,
+    overflowY: 'auto',
+    overflowX: 'visible',
+    scrollbarWidth: 'none',
+    '&::-webkit-scrollbar': { display: 'none' },
+  }),
+
+  hiddenButtonCss: css({ display: 'none' }),
+};
+
+export const useWorkflowEditorStyles = () => {
+  return useMemoCss(editorStyleMap);
+};

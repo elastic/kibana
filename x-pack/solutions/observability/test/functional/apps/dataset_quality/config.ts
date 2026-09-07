@@ -6,7 +6,7 @@
  */
 
 import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
-import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/synthtrace';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';

@@ -9,9 +9,9 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import { EditLensEmbeddableAction } from './in_app_embeddable_edit_action';
-import type { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
-import { LENS_ITEM_LATEST_VERSION } from '../../../../common/constants';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 describe('inapp editing of Lens embeddable', () => {
   const core = coreMock.createStart();
@@ -26,10 +26,9 @@ describe('inapp editing of Lens embeddable', () => {
       expression: 'definitely a valid expression',
       visualizationType: 'testVis',
       state: {
-        query: { esql: 'from test' },
         filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
         datasourceStates: {
-          testDatasource: 'datasource',
+          textBased: { layers: { layer1: { query: { esql: 'from test' }, columns: [] } } },
         },
         visualization: {},
       },
@@ -95,6 +94,9 @@ describe('inapp editing of Lens embeddable', () => {
         ...attributes,
         state: {
           ...attributes.state,
+          datasourceStates: {
+            formBased: { layers: {} },
+          },
           query: {
             language: 'kuery',
             query: '',

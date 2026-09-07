@@ -5,24 +5,20 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import '@testing-library/jest-dom';
 
-import { setupEnvironment } from '../../helpers';
-import type { OverviewTestBed } from '../overview.helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
 import { setupOverviewPage } from '../overview.helpers';
 import { systemIndicesMigrationErrorStatus } from './mocks';
 
 describe('Overview - Migrate system indices', () => {
-  let testBed: OverviewTestBed;
   let httpRequestsMockHelpers: ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
-  beforeEach(async () => {
+  beforeEach(() => {
     const mockEnvironment = setupEnvironment();
     httpRequestsMockHelpers = mockEnvironment.httpRequestsMockHelpers;
     httpSetup = mockEnvironment.httpSetup;
-
-    testBed = await setupOverviewPage(httpSetup);
-    testBed.component.update();
   });
 
   describe('Error state', () => {
@@ -32,27 +28,22 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
     });
 
     test('Is rendered', () => {
-      const { exists, component } = testBed;
-      component.update();
-
-      expect(exists('systemIndicesStatusErrorCallout')).toBe(true);
+      expect(screen.getByTestId('systemIndicesStatusErrorCallout')).toBeInTheDocument();
     });
 
     test('Lets the user attempt to reload migration status', async () => {
-      const { exists, component, actions } = testBed;
-      component.update();
-
       httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus({
         migration_status: 'NO_MIGRATION_NEEDED',
       });
 
-      await actions.clickRetrySystemIndicesButton();
-
-      expect(exists('noMigrationNeededSection')).toBe(true);
+      fireEvent.click(screen.getByTestId('systemIndicesStatusRetryButton'));
+      await waitFor(() => {
+        expect(screen.getByTestId('noMigrationNeededSection')).toBeInTheDocument();
+      });
     });
   });
 
@@ -61,15 +52,11 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'NO_MIGRATION_NEEDED',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
+    await setupOverviewPage(httpSetup);
 
-    const { exists, component } = testBed;
-
-    component.update();
-
-    expect(exists('noMigrationNeededSection')).toBe(true);
-    expect(exists('startSystemIndicesMigrationButton')).toBe(false);
-    expect(exists('viewSystemIndicesStateButton')).toBe(false);
+    expect(screen.getByTestId('noMigrationNeededSection')).toBeInTheDocument();
+    expect(screen.queryByTestId('startSystemIndicesMigrationButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('viewSystemIndicesStateButton')).not.toBeInTheDocument();
   });
 
   test('Migration in progress', async () => {
@@ -77,17 +64,10 @@ describe('Overview - Migrate system indices', () => {
       migration_status: 'IN_PROGRESS',
     });
 
-    testBed = await setupOverviewPage(httpSetup);
+    await setupOverviewPage(httpSetup);
 
-    const { exists, component, find } = testBed;
-
-    component.update();
-
-    // Start migration is disabled
-    expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-    expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(true);
-    // But we keep view system indices CTA
-    expect(exists('viewSystemIndicesStateButton')).toBe(true);
+    expect(screen.getByTestId('startSystemIndicesMigrationButton')).toBeDisabled();
+    expect(screen.getByTestId('viewSystemIndicesStateButton')).toBeInTheDocument();
   });
 
   describe('Migration needed', () => {
@@ -96,17 +76,10 @@ describe('Overview - Migrate system indices', () => {
         migration_status: 'MIGRATION_NEEDED',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
 
-      const { exists, component, find } = testBed;
-
-      component.update();
-
-      // Start migration should be enabled
-      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
-      // Same for view system indices status
-      expect(exists('viewSystemIndicesStateButton')).toBe(true);
+      expect(screen.getByTestId('startSystemIndicesMigrationButton')).toBeEnabled();
+      expect(screen.getByTestId('viewSystemIndicesStateButton')).toBeInTheDocument();
     });
 
     test('handles confirmModal submission', async () => {
@@ -114,31 +87,16 @@ describe('Overview - Migrate system indices', () => {
         migration_status: 'MIGRATION_NEEDED',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
 
-      const { exists, component, find } = testBed;
+      fireEvent.click(screen.getByTestId('startSystemIndicesMigrationButton'));
+      const modal = await screen.findByTestId('migrationConfirmModal');
+      const confirmButton = within(modal).getByTestId('confirmModalConfirmButton');
+      fireEvent.click(confirmButton);
 
-      component.update();
-
-      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-      await act(async () => {
-        find('startSystemIndicesMigrationButton').simulate('click');
+      await waitFor(() => {
+        expect(screen.queryByTestId('migrationConfirmModal')).not.toBeInTheDocument();
       });
-      component.update();
-
-      expect(exists('migrationConfirmModal')).toBe(true);
-
-      const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
-      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-        '[data-test-subj="confirmModalConfirmButton"]'
-      );
-
-      await act(async () => {
-        confirmButton!.click();
-      });
-      component.update();
-
-      expect(exists('migrationConfirmModal')).toBe(false);
     });
 
     test('Handles errors when migrating', async () => {
@@ -150,31 +108,16 @@ describe('Overview - Migrate system indices', () => {
         message: 'error',
       });
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
 
-      const { exists, component, find } = testBed;
+      fireEvent.click(screen.getByTestId('startSystemIndicesMigrationButton'));
+      const modal = await screen.findByTestId('migrationConfirmModal');
+      fireEvent.click(within(modal).getByTestId('confirmModalConfirmButton'));
 
-      await act(async () => {
-        find('startSystemIndicesMigrationButton').simulate('click');
+      await waitFor(() => {
+        expect(screen.getByTestId('startSystemIndicesMigrationCalloutError')).toBeInTheDocument();
       });
-
-      component.update();
-
-      const modal = document.body.querySelector('[data-test-subj="migrationConfirmModal"]');
-      const confirmButton: HTMLButtonElement | null = modal!.querySelector(
-        '[data-test-subj="confirmModalConfirmButton"]'
-      );
-
-      await act(async () => {
-        confirmButton!.click();
-      });
-      component.update();
-
-      // Error is displayed
-      expect(exists('startSystemIndicesMigrationCalloutError')).toBe(true);
-      // CTA is enabled
-      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
-      expect(find('startSystemIndicesMigrationButton').props().disabled).toBe(false);
+      expect(screen.getByTestId('startSystemIndicesMigrationButton')).toBeEnabled();
     });
 
     test('Shows migration error with details', async () => {
@@ -182,20 +125,15 @@ describe('Overview - Migrate system indices', () => {
         systemIndicesMigrationErrorStatus
       );
 
-      testBed = await setupOverviewPage(httpSetup);
+      await setupOverviewPage(httpSetup);
 
-      const { component, exists, find } = testBed;
-
-      component.update();
-
-      // Error is displayed
-      expect(exists('migrationFailedCallout')).toBe(true);
-      expect(find('migrationFailedCallout').text()).toContain(
+      expect(screen.getByTestId('migrationFailedCallout')).toBeInTheDocument();
+      expect(screen.getByTestId('migrationFailedCallout')).toHaveTextContent(
         'Errors occurred while migrating system indices:kibana: mapper_parsing_exception'
       );
 
       // CTA is enabled
-      expect(exists('startSystemIndicesMigrationButton')).toBe(true);
+      expect(screen.getByTestId('startSystemIndicesMigrationButton')).toBeInTheDocument();
     });
   });
 });

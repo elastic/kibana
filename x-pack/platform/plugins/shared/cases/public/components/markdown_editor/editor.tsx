@@ -13,6 +13,7 @@ import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
 import { type EditorBaseProps, type MarkdownEditorRef } from './types';
 import { scaledMarkdownImages } from '../utils';
+import { useProseCss } from './use_prose_css';
 
 interface MarkdownEditorProps extends EditorBaseProps {
   height?: number;
@@ -33,6 +34,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       value,
       disabledUiPlugins,
       errors,
+      ...props
     },
     ref
   ) => {
@@ -48,6 +50,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
+    const proseCss = useProseCss();
 
     useLensButtonToggle({
       astRef,
@@ -72,8 +75,9 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
 
     return (
       <EuiMarkdownEditor
-        // prevent images from displaying at full scale
-        css={scaledMarkdownImages}
+        // prevent images from displaying at full scale, and hold the preview pane to the same line
+        // measure as the rendered view so toggling preview doesn't reflow the content
+        css={[scaledMarkdownImages, proseCss]}
         ref={editorRef}
         aria-label={ariaLabel}
         editorId={editorId}
@@ -86,6 +90,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         errors={[...markdownErrorMessages, ...(errors ?? [])]}
         data-test-subj={dataTestSubj}
         height={height}
+        {...props} // inherit aria props for accessibility
       />
     );
   }

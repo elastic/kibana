@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
@@ -37,17 +37,17 @@ const TimelineDatePickerLockComponent = () => {
       }
     >
       <EuiButtonIcon
-        data-test-subj={`timeline-date-picker-${isDatePickerLocked ? 'lock' : 'unlock'}-button`}
-        color="primary"
-        size="m"
-        onClick={onToggleLock}
-        iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
-        display={isDatePickerLocked ? 'fill' : 'base'}
         aria-label={
           isDatePickerLocked
             ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
             : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
         }
+        color="primary"
+        data-test-subj={`timeline-date-picker-${isDatePickerLocked ? 'lock' : 'unlock'}-button`}
+        display={isDatePickerLocked ? 'fill' : 'base'}
+        iconType={isDatePickerLocked ? 'lock' : 'lockOpen'}
+        onClick={onToggleLock}
+        size="s"
       />
     </EuiToolTip>
   );

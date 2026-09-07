@@ -26,18 +26,20 @@ import {
   EuiFlyout,
   EuiToolTip,
 } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import {
+  ENDPOINT_ARTIFACT_LIST_IDS,
+  ENDPOINT_ARTIFACT_LISTS,
+} from '@kbn/securitysolution-list-constants';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ToastInput, Toast, ErrorToastOptions } from '@kbn/core-notifications-browser';
 
+import { parseListIdsFromImportedFile } from '../../../common/utils/exception_list_items';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useImportExceptionList } from '../../hooks/use_import_exception_list';
 
 import * as i18n from '../../translations';
@@ -57,7 +59,7 @@ export const ImportExceptionListFlyout = React.memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     setDisplayImportListFlyout: Dispatch<SetStateAction<boolean>>;
   }) => {
-    const filePickerRef = useRef<EuiFilePickerClass | null>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
     const [files, setFiles] = useState<FileList | null>(null);
@@ -65,12 +67,12 @@ export const ImportExceptionListFlyout = React.memo(
     const [asNewList, setAsNewList] = useState(false);
     const [alreadyExistingItem, setAlreadyExistingItem] = useState(false);
     const [endpointListImporting, setEndpointListImporting] = useState(false);
+    const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+      'endpointExceptionsMovedUnderManagement'
+    );
 
     const resetForm = useCallback(() => {
-      if (filePickerRef.current?.fileInput) {
-        filePickerRef.current.fileInput.value = '';
-        filePickerRef.current.handleChange();
-      }
+      filePickerRef.current?.removeFiles();
       setFiles(null);
       setAlreadyExistingItem(false);
       setEndpointListImporting(false);
@@ -80,8 +82,21 @@ export const ImportExceptionListFlyout = React.memo(
     const { start: importExceptionList, ...importExceptionListState } = useImportExceptionList();
     const ctrl = useRef(new AbortController());
 
-    const handleImportExceptionList = useCallback(() => {
+    const handleImportExceptionList = useCallback(async () => {
       if (!importExceptionListState.loading && files) {
+        if (isEndpointExceptionsMovedFFEnabled) {
+          for (const file of Array.from(files)) {
+            const listIds = await parseListIdsFromImportedFile(file);
+
+            if (ENDPOINT_ARTIFACT_LIST_IDS.some((id) => listIds.has(id))) {
+              addError(new Error(i18n.IMPORT_ENDPOINT_ARTIFACTS_ERROR_TEXT), {
+                title: i18n.UPLOAD_ERROR,
+              });
+              return;
+            }
+          }
+        }
+
         ctrl.current = new AbortController();
 
         Array.from(files).forEach((file) =>
@@ -95,7 +110,16 @@ export const ImportExceptionListFlyout = React.memo(
           })
         );
       }
-    }, [asNewList, files, http, importExceptionList, importExceptionListState.loading, overwrite]);
+    }, [
+      importExceptionListState.loading,
+      files,
+      isEndpointExceptionsMovedFFEnabled,
+      addError,
+      importExceptionList,
+      http,
+      overwrite,
+      asNewList,
+    ]);
 
     const handleImportSuccess = useCallback(
       (response: ImportExceptionsResponseSchema) => {
@@ -137,8 +161,9 @@ export const ImportExceptionListFlyout = React.memo(
               if (err.error.message.includes('already exists')) {
                 setAlreadyExistingItem(true);
                 if (
+                  !isEndpointExceptionsMovedFFEnabled &&
                   err.error.message.includes(
-                    `Found that list_id: "${ENDPOINT_LIST_ID}" already exists`
+                    `Found that list_id: "${ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id}" already exists`
                   )
                 ) {
                   setEndpointListImporting(true);
@@ -157,9 +182,21 @@ export const ImportExceptionListFlyout = React.memo(
       importExceptionListState.loading,
       importExceptionListState?.result,
       importExceptionListState?.result?.errors,
+      isEndpointExceptionsMovedFFEnabled,
     ]);
+
     const handleFileChange = useCallback((inputFiles: FileList | null) => {
       setFiles(inputFiles ?? null);
+    }, []);
+
+    const handleNewListCheckboxChange = useCallback(() => {
+      setAsNewList((prev) => !prev);
+      setOverwrite(false);
+    }, []);
+
+    const handleOverwriteCheckboxChange = useCallback((): void => {
+      setOverwrite((prev) => !prev);
+      setAsNewList(false);
     }, []);
 
     const importExceptionListFlyoutTitleId = useGeneratedHtmlId({
@@ -183,11 +220,11 @@ export const ImportExceptionListFlyout = React.memo(
           <EuiFilePicker
             id={filePickerId}
             multiple
-            ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+            ref={filePickerRef}
             initialPromptText={i18n.IMPORT_PROMPT}
             onChange={handleFileChange}
             display={'large'}
-            aria-label="Use aria labels when no actual label is in use"
+            aria-label={i18n.IMPORT_FILE_PICKER_ARIA_LABEL}
           />
 
           {alreadyExistingItem && (
@@ -200,27 +237,31 @@ export const ImportExceptionListFlyout = React.memo(
                 label={i18n.IMPORT_EXCEPTION_LIST_OVERWRITE}
                 checked={overwrite}
                 data-test-subj="importExceptionListOverwriteExistingCheckbox"
-                onChange={(e) => {
-                  setOverwrite(!overwrite);
-                  setAsNewList(false);
-                }}
+                onChange={handleOverwriteCheckboxChange}
               />
-              <EuiToolTip
-                position="bottom"
-                content={endpointListImporting ? i18n.IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING : ''}
-              >
+              {isEndpointExceptionsMovedFFEnabled ? (
                 <EuiCheckbox
                   id={'createNewListCheckbox'}
                   label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
                   data-test-subj="importExceptionListCreateNewCheckbox"
                   checked={asNewList}
-                  disabled={endpointListImporting}
-                  onChange={(e) => {
-                    setAsNewList(!asNewList);
-                    setOverwrite(false);
-                  }}
+                  onChange={handleNewListCheckboxChange}
                 />
-              </EuiToolTip>
+              ) : (
+                <EuiToolTip
+                  position="bottom"
+                  content={endpointListImporting ? i18n.IMPORT_EXCEPTION_ENDPOINT_LIST_WARNING : ''}
+                >
+                  <EuiCheckbox
+                    id={'createNewListCheckbox'}
+                    label={i18n.IMPORT_EXCEPTION_LIST_AS_NEW_LIST}
+                    data-test-subj="importExceptionListCreateNewCheckbox"
+                    checked={asNewList}
+                    disabled={endpointListImporting}
+                    onChange={handleNewListCheckboxChange}
+                  />
+                </EuiToolTip>
+              )}
             </>
           )}
         </EuiFlyoutBody>

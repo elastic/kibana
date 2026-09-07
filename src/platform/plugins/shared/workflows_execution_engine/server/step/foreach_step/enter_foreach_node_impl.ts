@@ -8,44 +8,60 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../node_implementation';
+import type { ForeachStepState } from './types';
+import { isTemplateExpression } from '../../utils';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { StepIoService } from '../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterForeachNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterForeachNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
-    private contextManager: WorkflowContextManager,
-    private workflowLogger: IWorkflowEventLogger
+    private stepExecutionRuntime: StepExecutionRuntime,
+    private workflowLogger: IWorkflowEventLogger,
+    private stepIoService: StepIoService
   ) {}
 
   public async run(): Promise<void> {
-    if (!this.wfExecutionRuntimeManager.getCurrentStepState()) {
+    if (!this.stepExecutionRuntime.getCurrentStepState()) {
       await this.enterForeach();
     } else {
-      await this.advanceIteration();
+      this.advanceIteration();
     }
   }
 
   private async enterForeach(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState();
-    await this.wfExecutionRuntimeManager.startStep();
+    this.stepExecutionRuntime.startStep();
+    const foreachConfig = this.node.configuration.foreach;
+    this.stepExecutionRuntime.setInput({
+      foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
+    });
+    // Pin the loop's source outputs for the lifetime of the loop. The foreach
+    // re-evaluates its source expression synchronously on every iteration
+    // (WorkflowContextManager.buildForeachContext); without pinning, a
+    // concurrent flush can evict the source between an inner step's
+    // prepareForRead and that re-evaluation, blanking the loop item. Unpinned
+    // in ExitForeachNodeImpl.
+    this.stepIoService.pinForeachSource(this.node.stepId, foreachConfig);
+
     const evaluatedItems = this.getItems();
 
     if (evaluatedItems.length === 0) {
+      // No iterations will run — release the pin we just took.
+      this.stepIoService.unpinForeachScope(this.node.stepId);
       this.workflowLogger.logDebug(
         `Foreach step "${this.node.stepId}" has no items to iterate over. Skipping execution.`,
         {
           workflow: { step_id: this.node.stepId },
         }
       );
-      await this.wfExecutionRuntimeManager.setCurrentStepState({
-        items: [],
+      this.stepExecutionRuntime.setCurrentStepState({
         total: 0,
       });
-      await this.wfExecutionRuntimeManager.finishStep();
+      this.stepExecutionRuntime.finishStep();
       this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
       return;
     }
@@ -57,70 +73,86 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       }
     );
 
-    // Initialize foreach state
-    foreachState = {
-      items: evaluatedItems,
-      item: evaluatedItems[0],
+    // Initialize foreach state — only store index and total to avoid
+    // persisting the entire items array on every iteration.
+    const foreachState = {
       index: 0,
       total: evaluatedItems.length,
     };
 
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
+    this.stepExecutionRuntime.setCurrentStepState(foreachState);
     // Enter a new scope for the first iteration
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.enterScope(foreachState.index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private async advanceIteration(): Promise<void> {
-    let foreachState = this.wfExecutionRuntimeManager.getCurrentStepState()!;
-    // Update items and index if they have changed
-    const items = foreachState.items;
-    const index = foreachState.index + 1;
-    const item = items[index];
-    const total = foreachState.total;
-    foreachState = {
-      items,
-      index,
-      item,
-      total,
-    };
+  private advanceIteration(): void {
+    const currentForeachState = this.stepExecutionRuntime.getCurrentStepState() as
+      | ForeachStepState
+      | undefined;
+
+    if (!currentForeachState) {
+      throw new Error(`Foreach state for step ${this.node.stepId} not found`);
+    }
+
+    const currentIndex = currentForeachState.index as number;
+
+    const index = currentIndex + 1;
+    const newForeachState: ForeachStepState = { index, total: currentForeachState.total };
+    // Only persist index and total — no need to store the full items array.
+    this.stepExecutionRuntime.setCurrentStepState(newForeachState);
     // Enter a new scope for the new iteration
-    await this.wfExecutionRuntimeManager.setCurrentStepState(foreachState);
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index!.toString());
+    this.wfExecutionRuntimeManager.enterScope(index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 
-  private getItems(): any[] {
-    let items: any[] = [];
+  private getItems(): unknown[] {
+    const expression = this.node.configuration.foreach;
+    let resolvedValue = this.processForeachConfiguration();
 
-    if (!this.node.configuration.foreach) {
-      throw new Error('Foreach configuration is required');
+    if (typeof resolvedValue === 'string') {
+      try {
+        resolvedValue = JSON.parse(resolvedValue);
+      } catch {
+        throw new Error(`Unable to parse rendered value: ${resolvedValue}`);
+      }
     }
 
-    try {
-      items = JSON.parse(this.node.configuration.foreach);
-    } catch (error) {
-      const { value, pathExists } = this.contextManager.readContextPath(
-        this.node.configuration.foreach
+    if (!Array.isArray(resolvedValue)) {
+      throw new Error(
+        `Foreach expression must evaluate to an array. ` +
+          `Expression "${expression}" resolved to ${typeof resolvedValue}${
+            resolvedValue === null
+              ? ' (null)'
+              : resolvedValue === undefined
+              ? ' (undefined)'
+              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
+                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
+                }`
+          }. `
       );
-
-      if (!pathExists) {
-        throw new Error(
-          `Foreach configuration path "${this.node.configuration.foreach}" does not exist in the workflow context.`
-        );
-      }
-
-      if (Array.isArray(value)) {
-        items = value;
-      } else if (typeof value === 'string') {
-        items = JSON.parse(value);
-      }
     }
 
-    if (!Array.isArray(items)) {
-      throw new Error('Foreach configuration must be an array');
+    return resolvedValue;
+  }
+
+  private processForeachConfiguration(): unknown {
+    const expression = this.node.configuration.foreach;
+
+    if (!expression) {
+      throw new Error(
+        'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
+      );
     }
 
-    return items;
+    if (Array.isArray(expression)) {
+      return expression;
+    }
+
+    if (isTemplateExpression(expression)) {
+      return this.stepExecutionRuntime.contextManager.evaluateExpressionInContext(expression);
+    }
+
+    return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(expression);
   }
 }

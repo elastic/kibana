@@ -15,19 +15,26 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { FileUploadManager } from '@kbn/file-upload';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import type { FileUploadPluginStart, MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { IndexUpdateService } from './index_update_service';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
+import type { IndexUpdateService } from './services/index_update_service';
+import type { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
   canEditIndex: boolean;
+  triggerSource: string;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */
     indexCreatedDuringFlyout: boolean;
+    /** Indicates if new fields have been added to the index */
+    indexHasNewFields: boolean;
   }) => void;
+  onOpenIndexInDiscover?: (indexName: string, esqlQuery: string) => Promise<void>;
 }
 
 export interface EditLookupIndexFlyoutDeps {
@@ -37,12 +44,14 @@ export interface EditLookupIndexFlyoutDeps {
   fieldFormats: FieldFormatsStart;
   share: SharePluginStart;
   fileUpload: FileUploadPluginStart;
+  kql: KqlPluginStart;
 }
 
 export type FlyoutDeps = EditLookupIndexFlyoutDeps & {
   storage: Storage;
   indexUpdateService: IndexUpdateService;
-  fileManager: FileUploadManager;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
+  existingIndexName: string | undefined | null;
 };
 
 /** Extended kibana context */
@@ -57,6 +66,7 @@ export interface KibanaContextExtra {
   /** Custom service for indexing documents */
   indexUpdateService: IndexUpdateService;
   fileUploadManager: FileUploadManager;
+  indexEditorTelemetryService: IndexEditorTelemetryService;
   // Required services
   theme: ThemeServiceStart;
   uiSettings: IUiSettingsClient;
@@ -65,6 +75,7 @@ export interface KibanaContextExtra {
   fileUpload: FileUploadPluginStart;
   messageImporter: MessageImporter;
   storage: Storage;
+  kql: KqlPluginStart;
 }
 
 export interface IndexEditorError {
@@ -79,4 +90,31 @@ export enum IndexEditorErrors {
   FILE_TOO_BIG_ERROR = 'fileTooBigError',
   FILE_UPLOAD_ERROR = 'fileUploadError',
   FILE_ANALYSIS_ERROR = 'fileAnalysisError',
+}
+
+export interface DocUpdate {
+  id: string;
+  value: Record<string, any>;
+  atIndex?: number;
+}
+
+export interface ColumnAddition {
+  name: string;
+  fieldType?: DatatableColumnMeta['esType'];
+}
+
+export interface ColumnUpdate {
+  name: string;
+  previousName?: string;
+  fieldType?: DatatableColumnMeta['esType'];
+}
+
+export interface DeleteDocAction {
+  type: 'delete-doc';
+  payload: { ids: string[] };
+}
+
+export interface AddDocAction {
+  type: 'add-doc';
+  payload: DocUpdate;
 }

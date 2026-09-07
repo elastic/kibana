@@ -223,18 +223,6 @@ const policy = {
           type: 'bool',
           value: false,
         },
-        java_attacher_discovery_rules: {
-          type: 'yaml',
-          value: '',
-        },
-        java_attacher_agent_version: {
-          type: 'text',
-          value: '',
-        },
-        java_attacher_enabled: {
-          type: 'bool',
-          value: false,
-        },
         tls_enabled: {
           type: 'bool',
           value: false,

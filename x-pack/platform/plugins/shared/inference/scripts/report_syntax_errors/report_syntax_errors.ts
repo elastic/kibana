@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
-import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import type { EditorError } from '@elastic/esql/types';
+import type { ESQLMessage } from '@kbn/esql-language';
+import { validateQuery } from '@kbn/esql-language';
 import Fs from 'fs/promises';
 import Path from 'path';
 import type { Argv } from 'yargs';
@@ -79,10 +80,7 @@ const findEsqlSyntaxError = async (doc: FileToWrite): Promise<SyntaxError[]> => 
   return Array.from(doc.content.matchAll(INLINE_ESQL_QUERY_REGEX)).reduce(
     async (listP, [match, query]) => {
       const list = await listP;
-      const { errors, warnings } = await validateQuery(query, {
-        // setting this to true, we don't want to validate the index / fields existence
-        ignoreOnMissingCallbacks: true,
-      });
+      const { errors, warnings } = await validateQuery(query);
 
       const all = [...errors, ...warnings];
       if (all.length) {

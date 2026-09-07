@@ -10,15 +10,17 @@ import { either } from 'fp-ts/Either';
 import * as rt from 'io-ts';
 import type { ANY_DATASET } from '../common';
 import { FetchFieldsMetadataError } from '../errors';
-import type { FieldAttribute, FieldName } from '../types';
-import { fieldAttributeRT, partialFieldMetadataPlainRT } from '../types';
+import type { FieldAttribute, FieldName, FieldSource } from '../types';
+import { fieldAttributeRT, fieldSourceRT, partialFieldMetadataPlainRT } from '../types';
 
 const baseFindFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({
     attributes: arrayToStringRt.pipe(rt.array(fieldAttributeRT)),
     fieldNames: arrayToStringRt.pipe(rt.array(rt.string)),
+    source: rt.union([fieldSourceRT, rt.array(fieldSourceRT)]),
     integration: rt.string,
     dataset: rt.string,
+    streamNames: arrayToStringRt.pipe(rt.array(rt.string)),
   })
 );
 
@@ -45,20 +47,25 @@ export const findFieldsMetadataRequestQueryRT = new rt.Type(
 
 export const findFieldsMetadataResponsePayloadRT = rt.type({
   fields: rt.record(rt.string, partialFieldMetadataPlainRT),
+  streamFields: rt.record(rt.string, rt.record(rt.string, partialFieldMetadataPlainRT)),
 });
 
 export type FindFieldsMetadataRequestQuery =
   | {
       attributes?: FieldAttribute[];
       fieldNames?: FieldName[];
+      source?: FieldSource | FieldSource[];
       integration?: undefined;
       dataset?: undefined;
+      streamNames?: string[];
     }
   | {
       attributes?: FieldAttribute[];
       fieldNames?: FieldName[];
+      source?: FieldSource | FieldSource[];
       integration: string;
       dataset: typeof ANY_DATASET | (string & {});
+      streamNames?: string[];
     };
 
 export type FindFieldsMetadataResponsePayload = rt.TypeOf<

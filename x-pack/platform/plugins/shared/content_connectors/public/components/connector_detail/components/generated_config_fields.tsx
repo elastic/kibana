@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import type { ComponentProps } from 'react';
 
 import {
   EuiButtonIcon,
-  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiCopy,
@@ -20,11 +20,14 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnSuccessCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Connector } from '@kbn/search-connectors';
 
 import type { ApiKey } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -35,9 +38,10 @@ import { EuiLinkTo } from '../../shared/react_router_helpers';
 import { MANAGE_API_KEYS_URL } from '../../../../common/constants';
 
 const ConfirmModal: React.FC<{
+  focusTrapProps?: ComponentProps<typeof EuiConfirmModal>['focusTrapProps'];
   onCancel: () => void;
   onConfirm: () => void;
-}> = ({ onCancel, onConfirm }) => {
+}> = ({ onCancel, onConfirm, focusTrapProps }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
 
   return (
@@ -65,6 +69,7 @@ const ConfirmModal: React.FC<{
         }
       )}
       defaultFocusedButton="confirm"
+      focusTrapProps={focusTrapProps}
     >
       {i18n.translate(
         'xpack.contentConnectors.content.indices.configurationConnector.apiKey.confirmModal.description',
@@ -90,6 +95,11 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   generateApiKey,
   isGenerateLoading,
 }) => {
+  const {
+    services: { http },
+  } = useKibana();
+  const generateButtonRef = useRef<HTMLButtonElement>(null);
+  const refreshButtonRef = useRef<HTMLButtonElement>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const refreshButtonClick = () => {
     setIsModalVisible(true);
@@ -108,13 +118,31 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
 
   return (
     <>
-      {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
+      {isModalVisible && (
+        <ConfirmModal
+          onCancel={onCancel}
+          onConfirm={onConfirm}
+          focusTrapProps={{
+            returnFocus: () => {
+              if (generateButtonRef.current) {
+                generateButtonRef.current.focus();
+                return false;
+              }
+              if (refreshButtonRef.current) {
+                refreshButtonRef.current.focus();
+                return false;
+              }
+              return true;
+            },
+          }}
+        />
+      )}
       <>
         <EuiFlexGrid columns={3} alignItems="center" gutterSize="s">
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="s">
@@ -130,6 +158,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiLinkTo
+              data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorNameLink"
               external
               target="_blank"
               to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -148,6 +177,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             >
               <EuiFlexItem grow={false}>
                 <EuiLinkTo
+                  data-test-subj="contentConnectorsGeneratedConfigFieldsConnectorIdLink"
                   external
                   target="_blank"
                   to={generateEncodedPath(CONNECTOR_DETAIL_PATH, {
@@ -160,16 +190,24 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={connector.id}>
                   {(copy) => (
-                    <EuiButtonIcon
-                      size="xs"
-                      data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                      iconType="copyClipboard"
-                      onClick={copy}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.contentConnectors.connectorDeployment.copyConnectorId',
                         { defaultMessage: 'Copy connector ID' }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        size="xs"
+                        data-test-subj="enterpriseSearchConnectorDeploymentButton"
+                        iconType="copy"
+                        onClick={copy}
+                        aria-label={i18n.translate(
+                          'xpack.contentConnectors.connectorDeployment.copyConnectorId',
+                          { defaultMessage: 'Copy connector ID' }
+                        )}
+                      />
+                    </EuiToolTip>
                   )}
                 </EuiCopy>
               </EuiFlexItem>
@@ -178,7 +216,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="check" />
+                <EuiIcon type="check" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 {i18n.translate(
@@ -199,7 +237,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup responsive={false} gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="check" />
+                    <EuiIcon type="check" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     {i18n.translate(
@@ -213,7 +251,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="enterpriseSearchConnectorDeploymentLink"
-                  href={generateEncodedPath(MANAGE_API_KEYS_URL, {})}
+                  href={http?.basePath.prepend(MANAGE_API_KEYS_URL)}
                   external
                   target="_blank"
                 >
@@ -237,31 +275,48 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                             </EuiFlexItem>
                             {generateApiKey && (
                               <EuiFlexItem grow={false}>
-                                <EuiButtonIcon
-                                  data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                                  size="xs"
-                                  iconType="refresh"
-                                  isLoading={isGenerateLoading}
-                                  onClick={refreshButtonClick}
-                                  disabled={!connector.index_name}
-                                  aria-label={i18n.translate(
+                                <EuiToolTip
+                                  content={i18n.translate(
                                     'xpack.contentConnectors.connectorDeployment.refreshAPIKey',
                                     { defaultMessage: 'Refresh an Elasticsearch API key' }
                                   )}
-                                />
+                                  disableScreenReaderOutput
+                                >
+                                  <EuiButtonIcon
+                                    data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                                    size="xs"
+                                    iconType="refresh"
+                                    buttonRef={refreshButtonRef}
+                                    isLoading={isGenerateLoading}
+                                    onClick={refreshButtonClick}
+                                    disabled={!connector.index_name}
+                                    aria-label={i18n.translate(
+                                      'xpack.contentConnectors.connectorDeployment.refreshAPIKey',
+                                      { defaultMessage: 'Refresh an Elasticsearch API key' }
+                                    )}
+                                  />
+                                </EuiToolTip>
                               </EuiFlexItem>
                             )}
                             <EuiFlexItem grow={false}>
-                              <EuiButtonIcon
-                                size="xs"
-                                data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                                iconType="copyClipboard"
-                                onClick={copy}
-                                aria-label={i18n.translate(
+                              <EuiToolTip
+                                content={i18n.translate(
                                   'xpack.contentConnectors.connectorDeployment.copyIndexName',
                                   { defaultMessage: 'Copy index name' }
                                 )}
-                              />
+                                disableScreenReaderOutput
+                              >
+                                <EuiButtonIcon
+                                  size="xs"
+                                  data-test-subj="enterpriseSearchConnectorDeploymentButton"
+                                  iconType="copy"
+                                  onClick={copy}
+                                  aria-label={i18n.translate(
+                                    'xpack.contentConnectors.connectorDeployment.copyIndexName',
+                                    { defaultMessage: 'Copy index name' }
+                                  )}
+                                />
+                              </EuiToolTip>
                             </EuiFlexItem>
                           </EuiFlexGroup>
                         )}
@@ -270,14 +325,27 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   ) : (
                     generateApiKey && (
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                          size="xs"
-                          iconType="refresh"
-                          isLoading={isGenerateLoading}
-                          onClick={refreshButtonClick}
-                          disabled={!connector.index_name}
-                        />
+                        <EuiToolTip
+                          content={i18n.translate(
+                            'xpack.contentConnectors.connectorDeployment.generateAPIKey',
+                            { defaultMessage: 'Generate an Elasticsearch API key' }
+                          )}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
+                            size="xs"
+                            iconType="refresh"
+                            buttonRef={generateButtonRef}
+                            isLoading={isGenerateLoading}
+                            onClick={refreshButtonClick}
+                            disabled={!connector.index_name}
+                            aria-label={i18n.translate(
+                              'xpack.contentConnectors.connectorDeployment.generateAPIKey',
+                              { defaultMessage: 'Generate an Elasticsearch API key' }
+                            )}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     )
                   )}
@@ -289,8 +357,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
         {showApiKeyBanner && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
-              color="success"
+            <KbnSuccessCallout
+              announceOnMount
               size="s"
               title={i18n.translate(
                 'xpack.contentConnectors.connectorDeployment.generatedConfigCallout',
@@ -298,7 +366,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                   defaultMessage: `You'll only see this API key once, so save it somewhere safe. We don't store your API keys, so if you lose a key you'll need to generate a replacement`,
                 }
               )}
-              iconType="asterisk"
             />
           </>
         )}

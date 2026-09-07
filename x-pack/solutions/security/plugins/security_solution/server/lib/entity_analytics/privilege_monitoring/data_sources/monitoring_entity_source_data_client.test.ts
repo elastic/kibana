@@ -14,6 +14,8 @@ import {
 
 import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { monitoringEntitySourceTypeName } from '../saved_objects';
+import type { MonitoringEntitySourceAttributes } from '../../../../../common/api/entity_analytics';
+import type { PartialMonitoringEntitySource } from '../types';
 
 describe('MonitoringEntitySourceDataClient', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
@@ -29,17 +31,18 @@ describe('MonitoringEntitySourceDataClient', () => {
     kibanaVersion: '8.0.0',
   };
 
-  const testDescriptor = {
-    type: 'test-type',
+  const testSource: MonitoringEntitySourceAttributes = {
+    type: 'index',
     name: 'Test Source',
     indexPattern: 'test-index-pattern',
-    managed: false,
+    enabled: true,
     matchers: [
       {
         fields: ['user.role'],
         values: ['admin'],
       },
     ],
+    matchersModifiedByUser: false,
     filter: {},
   };
 
@@ -49,8 +52,9 @@ describe('MonitoringEntitySourceDataClient', () => {
     dataClient = new MonitoringEntitySourceDataClient(defaultOpts);
   });
 
-  describe('init', () => {
-    it('should initialize Monitoring Entity Source Sync Config Successfully', async () => {
+  describe('create', () => {
+    it('should create a Monitoring Entity Source successfully ', async () => {
+      const testSourceWithManaged = { ...testSource, managed: false };
       defaultOpts.soClient.update.mockImplementation(() => {
         const err = new Error('Not found');
         // Simulate Kibana-style 404 error
@@ -66,24 +70,25 @@ describe('MonitoringEntitySourceDataClient', () => {
       defaultOpts.soClient.create.mockResolvedValue({
         id: 'abcdefg',
         type: monitoringEntitySourceTypeName,
-        attributes: testDescriptor,
+        attributes: testSourceWithManaged,
         references: [],
       });
 
-      const result = await dataClient.init(testDescriptor);
+      const result = await dataClient.create(testSource);
 
       expect(defaultOpts.soClient.create).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,
-        testDescriptor
+        testSourceWithManaged,
+        { refresh: 'wait_for' }
       );
 
-      expect(result).toEqual({ ...testDescriptor, managed: false, id: 'abcdefg' });
+      expect(result).toEqual({ ...testSourceWithManaged, id: 'abcdefg' });
     });
 
     it('should not create Monitoring Entity Source Sync Config when a SO already exist with the same name', async () => {
       const existingSavedObject = {
         id: 'unique-id',
-        attributes: testDescriptor,
+        attributes: testSource,
       } as unknown as SavedObject<unknown>;
 
       defaultOpts.soClient.find.mockResolvedValue({
@@ -91,8 +96,8 @@ describe('MonitoringEntitySourceDataClient', () => {
         saved_objects: [existingSavedObject],
       } as unknown as SavedObjectsFindResponse<unknown>);
 
-      await expect(dataClient.init(testDescriptor)).rejects.toThrow(
-        `A monitoring entity source with the name "${testDescriptor.name}" already exists.`
+      await expect(dataClient.create(testSource)).rejects.toThrow(
+        `A monitoring entity source with the name "${testSource.name}" already exists.`
       );
     });
   });
@@ -101,7 +106,7 @@ describe('MonitoringEntitySourceDataClient', () => {
     it('should get Monitoring Entity Source Sync Config Successfully', async () => {
       const getResponse = {
         type: monitoringEntitySourceTypeName,
-        attributes: testDescriptor,
+        attributes: testSource,
         references: [],
       };
       defaultOpts.soClient.get.mockResolvedValue(getResponse as unknown as SavedObject<unknown>);
@@ -115,13 +120,38 @@ describe('MonitoringEntitySourceDataClient', () => {
   });
 
   describe('update', () => {
-    it('should update Monitoring Entity Source Sync Config Successfully', async () => {
+    const mockGet = (id: string, attributes: MonitoringEntitySourceAttributes) => {
+      defaultOpts.soClient.get.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes,
+        references: [],
+      });
+    };
+
+    const mockUpdate = (id: string, attributes: PartialMonitoringEntitySource) => {
+      defaultOpts.soClient.update.mockResolvedValue({
+        id,
+        type: monitoringEntitySourceTypeName,
+        attributes,
+        references: [],
+      });
+    };
+
+    const expectUpdateCall = (id: string, updateBody: PartialMonitoringEntitySource) => {
+      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
+        monitoringEntitySourceTypeName,
+        id,
+        updateBody,
+        { refresh: 'wait_for' }
+      );
+    };
+    it('should update Monitoring Entity Source Successfully', async () => {
       const id = 'abcdefg';
-      const updateDescriptor = {
-        ...testDescriptor,
-        managed: false,
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        ...testSource,
         name: 'Updated Source',
-        id, // it preserves the id when updating
+        id,
       };
 
       defaultOpts.soClient.find.mockResolvedValue({
@@ -129,27 +159,105 @@ describe('MonitoringEntitySourceDataClient', () => {
         saved_objects: [],
       } as unknown as SavedObjectsFindResponse<unknown>);
 
-      defaultOpts.soClient.update.mockResolvedValue({
-        id,
-        type: monitoringEntitySourceTypeName,
-        attributes: updateDescriptor,
-        references: [],
-      });
+      mockGet(id, testSource);
+      mockUpdate(id, updateDescriptor);
 
       const result = await dataClient.update(updateDescriptor);
-      expect(defaultOpts.soClient.update).toHaveBeenCalledWith(
-        monitoringEntitySourceTypeName,
-        id,
-        updateDescriptor,
-
-        { refresh: 'wait_for' }
-      );
+      expectUpdateCall(id, updateDescriptor);
       expect(result).toEqual(updateDescriptor);
+    });
+
+    it('should not update matchersModifiedByUser when matchers are not provided', async () => {
+      const id = 'no-matchers-update';
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        id,
+        name: 'Updated Source Without Matchers',
+      };
+
+      defaultOpts.soClient.find.mockResolvedValue({
+        total: 0,
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse<unknown>);
+
+      mockUpdate(id, updateDescriptor);
+
+      const result = await dataClient.update(updateDescriptor);
+
+      expect(defaultOpts.soClient.get).not.toHaveBeenCalled();
+      expectUpdateCall(id, {
+        ...updateDescriptor,
+        matchers: undefined,
+      });
+      expect(result).toEqual(updateDescriptor);
+    });
+
+    it('should set matchersModifiedByUser to true for managed index sources with custom matchers', async () => {
+      const id = 'index-source';
+      const existingSource: MonitoringEntitySourceAttributes = {
+        type: 'index',
+        name: 'Index Source',
+        indexPattern: 'entity_analytics.privileged_monitoring.default',
+        managed: true,
+        matchers: [],
+        matchersModifiedByUser: false,
+      };
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        id,
+        matchers: [
+          {
+            fields: ['someWildMatcherHere'],
+            values: [true],
+          },
+        ],
+      };
+
+      mockGet(id, existingSource);
+      mockUpdate(id, { ...existingSource, ...updateDescriptor, matchersModifiedByUser: true });
+
+      await dataClient.update(updateDescriptor);
+
+      expectUpdateCall(id, {
+        ...updateDescriptor,
+        matchers: [
+          {
+            fields: ['someWildMatcherHere'],
+            values: [true],
+          },
+        ],
+        matchersModifiedByUser: true,
+      });
+    });
+
+    it('should set matchersModifiedByUser to false for managed index sources with empty matchers', async () => {
+      const id = 'index-source-empty';
+      const existingSource: MonitoringEntitySourceAttributes = {
+        type: 'index',
+        name: 'Index Source',
+        indexPattern: 'entity_analytics.privileged_monitoring.default',
+        managed: true,
+        matchers: [],
+        matchersModifiedByUser: false,
+      };
+      const updateDescriptor: PartialMonitoringEntitySource = {
+        id,
+        matchers: [],
+      };
+
+      mockGet(id, existingSource);
+      mockUpdate(id, { ...existingSource, ...updateDescriptor, matchersModifiedByUser: false });
+
+      await dataClient.update(updateDescriptor);
+
+      expectUpdateCall(id, {
+        ...updateDescriptor,
+        matchers: [],
+        matchersModifiedByUser: false,
+      });
     });
   });
 
   describe('delete', () => {
-    it('should delete Monitoring Entity Source Sync Config Successfully', async () => {
+    it('should delete Monitoring Entity Source Successfully', async () => {
       await dataClient.delete('abcdefg');
       expect(mockSavedObjectClient.delete).toHaveBeenCalledWith(
         monitoringEntitySourceTypeName,

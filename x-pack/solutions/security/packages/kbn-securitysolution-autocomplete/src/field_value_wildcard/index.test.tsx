@@ -277,6 +277,39 @@ describe('AutocompleteFieldWildcardComponent', () => {
     });
   });
 
+  test('it invokes "onChange" with empty value when user paste-searches to modify an existing value', () => {
+    const mockOnChange = jest.fn();
+    wrapper = mount(
+      <AutocompleteFieldWildcardComponent
+        autocompleteService={autocompleteStartMock}
+        indexPattern={{
+          fields,
+          id: '1234',
+          title: 'logs-endpoint.events.*',
+        }}
+        isClearable={false}
+        isDisabled={false}
+        isLoading={false}
+        onChange={mockOnChange}
+        onError={jest.fn()}
+        onWarning={jest.fn()}
+        placeholder="Placeholder text"
+        selectedField={getField('file.path.text')}
+        selectedValue="/opt/*/app.dmg"
+      />
+    );
+
+    act(() => {
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('/opt/*/app copy.dmg');
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith('');
+  });
+
   test('it does not invoke "onWarning" when no warning exists', () => {
     const mockOnWarning = jest.fn();
     wrapper = mount(

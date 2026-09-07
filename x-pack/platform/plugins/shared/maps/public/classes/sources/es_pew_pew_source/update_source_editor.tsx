@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import type { DataViewField } from '@kbn/data-plugin/common';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import type { AggDescriptor } from '../../../../common/descriptor_types';
@@ -55,7 +55,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
     }
 
     this.setState({
-      fields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      fields: indexPattern.fields.filter((field) => !isNestedField(field)),
     });
   }
 

@@ -13,16 +13,15 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
-import type { QueryClient } from '@tanstack/react-query';
-import { QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@kbn/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
 } from '../../containers/types';
 import type { ReleasePhase } from '../types';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
 import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
@@ -37,8 +36,7 @@ import { casesQueryClient } from './query_client';
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
-  externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   owner: string[];
   permissions: CasesPermissions;
   basePath: string;
@@ -48,13 +46,7 @@ export interface CasesContextValue {
 }
 
 export interface CasesContextProps
-  extends Pick<
-    CasesContextValue,
-    | 'owner'
-    | 'permissions'
-    | 'externalReferenceAttachmentTypeRegistry'
-    | 'persistableStateAttachmentTypeRegistry'
-  > {
+  extends Pick<CasesContextValue, 'owner' | 'permissions' | 'unifiedAttachmentTypeRegistry'> {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
@@ -71,8 +63,7 @@ export const CasesProvider: FC<
 > = ({
   children,
   value: {
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
+    unifiedAttachmentTypeRegistry,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
@@ -86,8 +77,7 @@ export const CasesProvider: FC<
 
   const value: CasesContextValue = useMemo(
     () => ({
-      externalReferenceAttachmentTypeRegistry,
-      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       owner,
       permissions: {
         all: permissions.all,
@@ -101,6 +91,7 @@ export const CasesProvider: FC<
         reopenCase: permissions.reopenCase,
         createComment: permissions.createComment,
         assign: permissions.assign,
+        manageTemplates: permissions.manageTemplates,
       },
       basePath,
       /**
@@ -133,6 +124,10 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      // Interim bug fix until we refactor this code to avoid passing objects in deps
+      // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
+      features.alerts?.all,
+      features.alerts?.read,
     ]
   );
 

@@ -111,6 +111,7 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
       }}
       pagination={true}
       data-test-subj="canvasTemplatesTable"
+      tableCaption={strings.getTableCaption()}
     />
   );
 };
@@ -122,6 +123,10 @@ const strings = {
       values: {
         templateName,
       },
+    }),
+  getTableCaption: () =>
+    i18n.translate('xpack.canvas.workpadTemplates.table.caption', {
+      defaultMessage: 'Workpad templates',
     }),
   getTableDescriptionColumnTitle: () =>
     i18n.translate('xpack.canvas.workpadTemplates.table.descriptionColumnTitle', {

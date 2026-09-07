@@ -18,10 +18,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const solutionNavigation = getPageObject('solutionNavigation');
+  const globalNav = getService('globalNav');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const header = getPageObject('header');
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
+  const common = getPageObject('common');
 
   describe('navigation', function () {
     before(async () => {
@@ -32,211 +34,109 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     after(async () => {
       await esArchiver.unload(archiveEmptyIndex);
     });
-    it('navigate search sidenav & breadcrumbs', async () => {
+
+    it('navigate search sidenav', async () => {
+      // Navigate to the home page to account for the getting started page redirect
+      await svlSearchNavigation.navigateToElasticsearchHome();
       const expectNoPageReload = await svlCommonNavigation.createNoPageReloadCheck();
 
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
-      await svlCommonNavigation.breadcrumbs.expectExists();
       await svlSearchLandingPage.assertSvlSearchSideNavExists();
-      const isV2 = await solutionNavigation.sidenav.isV2();
-
-      await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
-      // Should default to Homepage
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'searchHomepage',
       });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists(
-        isV2 ? { text: 'Elasticsearch' } : { text: 'Home' }
-      );
       await testSubjects.existOrFail(`search-homepage`);
 
       // Check Side Nav Links
       const sideNavCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
-        breadcrumbs: string[];
         pageTestSubject: string;
-      }> = isV2
-        ? [
-            {
-              link: { deepLinkId: 'searchHomepage' },
-              breadcrumbs: ['Elasticsearch'],
-              pageTestSubject: 'search-homepage',
-            },
-            {
-              link: { navId: 'agent_builder' },
-              breadcrumbs: ['Agent Chat'],
-              pageTestSubject: 'onechatPageConversations',
-            },
-            {
-              link: { deepLinkId: 'agent_builder:tools' },
-              breadcrumbs: ['Tools'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
-              link: { deepLinkId: 'agent_builder:agents' },
-              breadcrumbs: ['Agents'],
-              pageTestSubject: 'kbnAppWrapper visibleChrome',
-            },
-            {
-              link: { deepLinkId: 'discover' },
-              breadcrumbs: ['Discover'],
-              pageTestSubject: 'queryInput',
-            },
-            {
-              link: { deepLinkId: 'discover' },
-              breadcrumbs: ['Discover'],
-              pageTestSubject: 'queryInput',
-            },
-            {
-              link: { deepLinkId: 'dashboards' },
-              breadcrumbs: ['Dashboards'],
-              pageTestSubject: 'dashboardLandingPage',
-            },
-            {
-              link: { deepLinkId: 'searchPlayground' },
-              breadcrumbs: ['Build', 'Playground'],
-              pageTestSubject: 'playgroundsListPage',
-            },
-            {
-              link: { deepLinkId: 'dev_tools:console' },
-              breadcrumbs: ['Developer Tools'],
-              pageTestSubject: 'console',
-            },
-          ]
-        : [
-            {
-              link: { deepLinkId: 'searchHomepage' },
-              breadcrumbs: ['Home'],
-              pageTestSubject: 'search-homepage',
-            },
-            {
-              link: { deepLinkId: 'discover' },
-              breadcrumbs: ['Discover'],
-              pageTestSubject: 'queryInput',
-            },
-            {
-              link: { deepLinkId: 'dashboards' },
-              breadcrumbs: ['Dashboards'],
-              pageTestSubject: 'dashboardLandingPage',
-            },
-            {
-              link: { deepLinkId: 'elasticsearchIndexManagement' },
-              breadcrumbs: ['Build', 'Index Management', 'Indices'],
-              pageTestSubject: 'elasticsearchIndexManagement',
-            },
-            {
-              link: { deepLinkId: 'searchPlayground' },
-              breadcrumbs: ['Build', 'Playground'],
-              pageTestSubject: 'playgroundsListPage',
-            },
-            {
-              link: { deepLinkId: 'searchSynonyms' },
-              breadcrumbs: ['Relevance', 'Synonyms'],
-              pageTestSubject: 'searchSynonymsOverviewPage',
-            },
-            {
-              link: { deepLinkId: 'searchQueryRules' },
-              breadcrumbs: ['Relevance', 'Query rules'],
-              pageTestSubject: 'queryRulesBasePage',
-            },
-            {
-              link: { deepLinkId: 'searchInferenceEndpoints' },
-              breadcrumbs: ['Relevance', 'Inference endpoints'],
-              pageTestSubject: 'inferenceEndpointsPage',
-            },
-            {
-              link: { deepLinkId: 'dev_tools:console' },
-              breadcrumbs: ['Developer Tools'],
-              pageTestSubject: 'console',
-            },
-          ];
+      }> = [
+        {
+          link: { deepLinkId: 'searchHomepage' },
+          pageTestSubject: 'search-homepage',
+        },
+        {
+          link: { navId: 'agent_builder' },
+          pageTestSubject: 'agentBuilderWrapper',
+        },
+        {
+          link: { deepLinkId: 'discover' },
+          pageTestSubject: 'queryInput',
+        },
+        {
+          link: { deepLinkId: 'dashboards' },
+          pageTestSubject: 'dashboardLandingPage',
+        },
+        {
+          link: { deepLinkId: 'searchGettingStarted' },
+          pageTestSubject: 'search-getting-started',
+        },
+        {
+          link: { deepLinkId: 'dev_tools:console' },
+          pageTestSubject: 'console',
+        },
+      ];
 
       for (const testCase of sideNavCases) {
         await solutionNavigation.sidenav.clickLink(testCase.link);
         await solutionNavigation.sidenav.expectLinkActive(testCase.link);
-        for (const breadcrumb of testCase.breadcrumbs) {
-          await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: breadcrumb });
-        }
         await testSubjects.existOrFail(testCase.pageTestSubject);
       }
 
-      if (!isV2) {
-        // Open Project Settings
-        await solutionNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
-        // check Project Settings
-        // > Trained Models
-        await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'management:trained_models',
-        });
-        await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'management:trained_models',
-        });
-        // > Management
-        await solutionNavigation.sidenav.clickLink({ navId: 'management' });
-        await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
-        await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
-
-        // navigate back to serverless search overview
-        await svlCommonNavigation.clickLogo();
-        await svlCommonNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'searchHomepage',
-        });
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Home` });
-        await testSubjects.existOrFail(`search-homepage`);
-      }
+      // navigate back to serverless search overview
+      await svlCommonNavigation.clickLogo();
+      await svlCommonNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'searchHomepage',
+      });
+      await testSubjects.existOrFail(`search-homepage`);
 
       await expectNoPageReload();
     });
 
-    it('navigate to playground from side nav', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
-      await header.waitUntilLoadingHasFinished();
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
+    it('navigate admin and settings', async () => {
+      await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
 
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
-      expect(await browser.getCurrentUrl()).contain('/app/search_playground');
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'management:trained_models',
+      });
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:trained_models',
+      });
+
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await retry.try(async () => {
+        expect(await globalNav.getPageTitle()).contain('Tags');
+      });
+
+      await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
+      await retry.try(async () => {
+        expect((await globalNav.getPageTitle()).toLowerCase()).contain('data views');
+      });
     });
 
-    it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      const isV2 = await solutionNavigation.sidenav.isV2();
-      if (!isV2) {
-        await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-          'Build',
-          'Index Management',
-          'Indices',
-        ]);
-      }
-    });
+    it('navigates to data management and query rules', async () => {
+      await svlCommonNavigation.sidenav.openPanel('data_management');
+      await solutionNavigation.sidenav.expectLinkActive({
+        deepLinkId: 'management:index_management',
+      });
+      await testSubjects.existOrFail('indexTable');
 
-    it('navigate management', async () => {
-      const isV2 = await solutionNavigation.sidenav.isV2();
-      if (!isV2) {
-        await svlCommonNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
-        await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-        await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
-
-        await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
-        await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
-        await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
-      }
+      await solutionNavigation.sidenav.clickLink({
+        deepLinkId: 'searchQueryRules',
+      });
+      await testSubjects.existOrFail('queryRulesBasePage');
     });
 
     it('navigate using search', async () => {
       await svlCommonNavigation.search.showSearch();
-      // TODO: test something search project specific instead of generic discover
-      await svlCommonNavigation.search.searchFor('discover');
+      await svlCommonNavigation.search.searchFor('type:application discover');
       await svlCommonNavigation.search.clickOnOption(0);
-      await svlCommonNavigation.search.hideSearch();
 
-      expect(await browser.getCurrentUrl()).contain('/app/discover');
+      await retry.try(async () => {
+        expect(await browser.getCurrentUrl()).contain('/app/discover');
+      });
     });
 
     it('does not show cases in sidebar navigation', async () => {
@@ -245,98 +145,36 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       expect(await testSubjects.missingOrFail('cases'));
     });
 
-    it('does not navigate to cases app', async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-
-      expect(await browser.getCurrentUrl()).not.contain('/app/management/cases');
-      await testSubjects.missingOrFail('cases-all-title');
-    });
-
     it('renders expected side navigation items', async () => {
-      await solutionNavigation.sidenav.openSection(
-        'search_project_nav_footer.project_settings_project_nav'
-      );
-      const isV2 = await solutionNavigation.sidenav.isV2();
-      const isV1 = !isV2;
-
-      // Verify all expected top-level links exist
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
-
-      if (isV1) {
-        // All these items have been moved to sub menus in the footer
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Index Management' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Query rules' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference endpoints' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Trained Models' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Performance' });
-        // v2 ignores sections
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Management' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Build' });
-      }
-
-      if (isV2) {
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Maps' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Visualize library' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
-        await solutionNavigation.sidenav.expectLinkExists({ text: 'Admin and Settings' });
-      }
-
-      if (isV1) {
-        await solutionNavigation.sidenav.openSection(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
-        await solutionNavigation.sidenav.expectSectionOpen(
-          'search_project_nav_footer.project_settings_project_nav'
-        );
-
-        await solutionNavigation.sidenav.expectOnlyDefinedLinks([
-          'search_project_nav',
-          'home',
+      await solutionNavigation.sidenav.expectOnlyDefinedLinks(
+        [
+          // home:
+          'searchHomepage',
+          // main;
+          'agent_builder',
           'discover',
           'dashboards',
-          'build',
-          'elasticsearchIndexManagement',
-          'searchPlayground',
-          'relevance',
-          'searchSynonyms',
-          'searchQueryRules',
-          'searchInferenceEndpoints',
-          'search_project_nav_footer',
+          'machine_learning',
+          // footer:
+          'search_getting_started',
           'dev_tools',
-          'project_settings_project_nav',
-          'management:trained_models',
-          'management',
-          'cloudLinkDeployment',
-        ]);
-      } else {
-        // in v2 we don't have "sections" and order is different because items under "more" are in the end
-        await solutionNavigation.sidenav.expectOnlyDefinedLinks(
-          [
-            // home:
-            'searchHomepage',
-            // main;
-            'agent_builder',
-            'discover',
-            'dashboards',
-            'searchPlayground',
-            'machine_learning',
-            'maps',
-            'visualize',
-            // footer:
-            'dev_tools',
-            'ingest_and_data',
-            'admin_and_settings',
-          ],
-          { checkOrder: false }
-        );
-      }
+          'workflows',
+          'data_management',
+          'admin_and_settings',
+        ],
+        { checkOrder: false }
+      );
+    });
+
+    it('does not show cloud connect in sidebar navigation', async () => {
+      // Cloud Connect should NOT appear in serverless deployments
+      expect(await testSubjects.missingOrFail('cloud_connect'));
+    });
+
+    it('opens panel on legacy management landing page', async () => {
+      await common.navigateToApp('management');
+      await testSubjects.exists('cards-navigation-page');
+      await solutionNavigation.sidenav.expectPanelExists('admin_and_settings');
     });
   });
 }

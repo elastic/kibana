@@ -28,6 +28,7 @@ describe('PdfMaker', () => {
 
   beforeEach(() => {
     layout = createMockLayout();
+    layout.setPdfImageSize({ height: 100, width: 100 });
     logger = loggingSystemMock.createLogger();
     packageInfo = {
       branch: 'screenshot-test',
@@ -77,9 +78,9 @@ describe('PdfMaker', () => {
         protected workerModulePath = path.resolve(__dirname, './buggy_worker.js');
       })(layout, undefined, packageInfo, logger);
 
-      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
-      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
-      await expect(buggyMaker.generate()).rejects.toThrowError(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrow(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrow(new Error('This is a bug'));
+      await expect(buggyMaker.generate()).rejects.toThrow(new Error('This is a bug'));
     });
   });
 

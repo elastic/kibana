@@ -7,14 +7,11 @@
 
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
-  ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
-  ExternalServiceValidation,
-} from './types';
-
+  ServiceNowPublicConfigurationType,
+} from '@kbn/connector-schemas/servicenow';
+import type { ExternalServiceValidation } from './types';
 import * as i18n from './translations';
-import { validateKeysAllowed } from '../validators';
-import { commonIncidentSchemaObjectProperties } from './schema';
 
 export const validateCommonConfig = (
   config: ServiceNowPublicConfigurationType,
@@ -121,12 +118,4 @@ export const validate: ExternalServiceValidation = {
   config: validateCommonConfig,
   secrets: validateCommonSecrets,
   connector: validateCommonConnector,
-};
-
-export const validateOtherFieldsKeys = (key: string): string | undefined => {
-  return validateKeysAllowed({
-    key,
-    disallowList: commonIncidentSchemaObjectProperties,
-    fieldName: 'additional_fields',
-  });
 };

@@ -1,0 +1,22 @@
+---
+id: react/context/env
+slug: /react/context/env
+title: React Context - Environment
+description: This context provider is used to provider core's environment info to React components.
+tags: ['shared-ux', 'react', 'context']
+date: 2025-11-21
+---
+
+> **⚠️ Internal Package** - This package is intended for internal use by `@kbn/react-kibana-context-root` only. Do not use directly in applications. Use `@kbn/react-env` hooks to access Kibana env in react instead.
+
+## CoreEnvContextProvider
+
+Provider component that supplies environment configuration to child components. Typically used at the application root.
+
+```ts
+import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
+
+<CoreEnvContextProvider>
+  <App />
+</CoreEnvContextProvider>
+```

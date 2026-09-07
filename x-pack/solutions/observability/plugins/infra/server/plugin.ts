@@ -8,16 +8,14 @@
 import type { Server } from '@hapi/hapi';
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
-import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import {
   AssetDetailsLocatorDefinition,
   InventoryLocatorDefinition,
   MetricsExplorerLocatorDefinition,
 } from '@kbn/observability-shared-plugin/common';
-import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { getMetricsFeature } from './features';
@@ -36,8 +34,9 @@ import {
 } from './lib/alerting/register_rule_types';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
 import type { InfraBackendLibs, InfraDomainLibs } from './lib/infra_types';
-import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
+import { createIsCpsPlatformGateEnabled } from './lib/log_analysis/common';
 import { InfraSourceStatus } from './lib/source_status';
+import { infraSourceConfigurationSavedObjectType, InfraSources } from './lib/sources';
 import {
   infraCustomDashboardsSavedObjectType,
   inventoryViewSavedObjectType,
@@ -52,17 +51,16 @@ import type {
   InfraPluginRequestHandlerContext,
   InfraPluginSetup,
   InfraPluginStart,
+  ServerlessInfo,
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { registerDataProviders } from './agent_builder/register_data_providers';
+import { getInfraRequestHandlerContext } from './utils/get_infra_request_handler_context';
 
 export interface KbnServer extends Server {
   usage: any;
 }
-
-const logsSampleDataLinkLabel = i18n.translate('xpack.infra.sampleDataLinkLabel', {
-  defaultMessage: 'Logs',
-});
 
 export class InfraServerPlugin
   implements
@@ -81,10 +79,15 @@ export class InfraServerPlugin
   private metricsRules: RulesService;
   private inventoryViews: InventoryViewsService;
   private metricsExplorerViews?: MetricsExplorerViewsService;
+  private serverless: ServerlessInfo;
 
   constructor(context: PluginInitializerContext<InfraConfig>) {
     this.config = context.config.get();
     this.logger = context.logger.get();
+    this.serverless = {
+      isServerless: context.env.packageInfo.buildFlavor === 'serverless',
+      cpsEnabled: false,
+    };
     this.logsRules = new RulesService(
       LOGS_FEATURE_ID,
       LOGS_RULES_ALERT_CONTEXT,
@@ -103,6 +106,7 @@ export class InfraServerPlugin
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
+    this.serverless.cpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
     const framework = new KibanaFramework(core, this.config, plugins);
     const metricsClient = plugins.metricsDataAccess.client;
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
@@ -139,6 +143,7 @@ export class InfraServerPlugin
     core.savedObjects.registerType(inventoryViewSavedObjectType);
     core.savedObjects.registerType(infraCustomDashboardsSavedObjectType);
     if (this.config.featureFlags.metricsExplorerEnabled) {
+      // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove conditional registration; tracked for follow-up PR
       core.savedObjects.registerType(metricsExplorerViewSavedObjectType);
     }
 
@@ -174,9 +179,15 @@ export class InfraServerPlugin
       metricsRules: this.metricsRules.setup(core, plugins),
       getStartServices: () => core.getStartServices(),
       getAlertDetailsConfig: () => plugins.observability.getAlertDetailsConfig(),
+      isCpsPlatformGateEnabled: createIsCpsPlatformGateEnabled({
+        serverless: this.serverless,
+        cps: plugins.cps,
+        getStartServices: () => core.getStartServices(),
+      }),
       logger: this.logger,
       basePath: core.http.basePath,
       plugins: libsPlugins,
+      serverless: this.serverless,
     };
 
     plugins.features.registerKibanaFeature(getMetricsFeature());
@@ -194,15 +205,6 @@ export class InfraServerPlugin
       countLogs: () => UsageCollector.countLogs(),
     });
 
-    plugins.home.sampleData.addAppLinksToSampleDataset('logs', [
-      {
-        sampleObject: null, // indicates that there is no sample object associated with this app link's path
-        getPath: () => `/app/logs`,
-        label: logsSampleDataLinkLabel,
-        icon: 'logsApp',
-      },
-    ]);
-
     registerRuleTypes(plugins.alerting, this.libs, this.config, {
       alertsLocator,
       assetDetailsLocator,
@@ -214,35 +216,14 @@ export class InfraServerPlugin
       'infra',
       async (context, request) => {
         const coreContext = await context.core;
-        const savedObjectsClient = coreContext.savedObjects.client;
-        const uiSettingsClient = coreContext.uiSettings.client;
-
-        const mlSystem = plugins.ml?.mlSystemProvider(request, savedObjectsClient);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
-          request,
-          savedObjectsClient
-        );
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-        const getMetricsIndices = async () => {
-          return metricsClient.getMetricIndices({
-            savedObjectsClient,
-          });
-        };
-
-        return {
-          mlAnomalyDetectors,
-          mlSystem,
-          spaceId,
-          savedObjectsClient,
-          uiSettingsClient,
-          getMetricsIndices,
-        };
+        return getInfraRequestHandlerContext({ coreContext, request, plugins });
       }
     );
 
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
+
+    registerDataProviders({ core, plugins, libs: this.libs, logger: this.logger });
 
     return {
       inventoryViews,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useCallback } from 'react';
-import type { DataViewManagerScopeName } from '../constants';
+import type { PageScope } from '../constants';
 import { selectDataViewAsync } from '../redux/actions';
 
 interface UseSelectDataViewParams {
@@ -23,7 +23,7 @@ interface UseSelectDataViewParams {
   /**
    * Data view selection will be applied to the scopes listed here
    */
-  scope: DataViewManagerScopeName;
+  scope: PageScope;
 }
 
 /**

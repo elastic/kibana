@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import type { ReactWrapper } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import type { CopyModeControlProps } from './copy_mode_control';
 import { CopyModeControl } from './copy_mode_control';
 
-describe('CopyModeControl', () => {
-  const initialValues = { createNewCopies: true, overwrite: true }; // some test cases below make assumptions based on these initial values
-  const updateSelection = jest.fn();
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
-  const getOverwriteRadio = (wrapper: ReactWrapper) =>
-    wrapper.find('EuiRadioGroup[data-test-subj="cts-copyModeControl-overwriteRadioGroup"]');
-  const getOverwriteEnabled = (wrapper: ReactWrapper) =>
-    wrapper.find('input[id="overwriteEnabled"]');
-  const getOverwriteDisabled = (wrapper: ReactWrapper) =>
-    wrapper.find('input[id="overwriteDisabled"]');
-  const getCreateNewCopiesDisabled = (wrapper: ReactWrapper) =>
-    wrapper.find('input[id="createNewCopiesDisabled"]');
-  const getCreateNewCopiesEnabled = (wrapper: ReactWrapper) =>
-    wrapper.find('input[id="createNewCopiesEnabled"]');
+describe('CopyModeControl', () => {
+  const initialValues = { createNewCopies: true, overwrite: true };
+  const updateSelection = jest.fn();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -34,39 +26,39 @@ describe('CopyModeControl', () => {
 
   const props: CopyModeControlProps = { initialValues, updateSelection };
 
-  it('should allow the user to toggle `overwrite`', async () => {
-    const wrapper = mountWithIntl(<CopyModeControl {...props} />);
+  it('should allow the user to toggle overwrite', async () => {
+    renderWithIntl(<CopyModeControl {...props} />);
 
     expect(updateSelection).not.toHaveBeenCalled();
-    // need to disable `createNewCopies` first
-    getCreateNewCopiesDisabled(wrapper).simulate('change');
+
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
     const createNewCopies = false;
 
-    getOverwriteDisabled(wrapper).simulate('change');
+    await userEvent.click(screen.getByLabelText(/request action on conflict/i));
     expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies, overwrite: false });
 
-    getOverwriteEnabled(wrapper).simulate('change');
+    await userEvent.click(screen.getByLabelText(/automatically overwrite conflicts/i));
     expect(updateSelection).toHaveBeenNthCalledWith(3, { createNewCopies, overwrite: true });
   });
 
-  it('should enable the Overwrite switch when `createNewCopies` is disabled', async () => {
-    const wrapper = mountWithIntl(<CopyModeControl {...props} />);
+  it('should enable the Overwrite switch when createNewCopies is disabled', async () => {
+    renderWithIntl(<CopyModeControl {...props} />);
 
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(true);
-    getCreateNewCopiesDisabled(wrapper).simulate('change');
-    expect(getOverwriteRadio(wrapper).prop('disabled')).toBe(false);
+    expect(screen.getByLabelText(/automatically overwrite conflicts/i)).toBeDisabled();
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
+    expect(screen.getByLabelText(/automatically overwrite conflicts/i)).not.toBeDisabled();
   });
 
-  it('should allow the user to toggle `createNewCopies`', async () => {
-    const wrapper = mountWithIntl(<CopyModeControl {...props} />);
+  it('should allow the user to toggle createNewCopies', async () => {
+    renderWithIntl(<CopyModeControl {...props} />);
 
     expect(updateSelection).not.toHaveBeenCalled();
     const { overwrite } = initialValues;
 
-    getCreateNewCopiesDisabled(wrapper).simulate('change');
+    await userEvent.click(screen.getByLabelText(/check for existing objects/i));
     expect(updateSelection).toHaveBeenNthCalledWith(1, { createNewCopies: false, overwrite });
 
-    getCreateNewCopiesEnabled(wrapper).simulate('change');
+    await userEvent.click(screen.getByLabelText(/create new objects with random ids/i));
     expect(updateSelection).toHaveBeenNthCalledWith(2, { createNewCopies: true, overwrite });
   });
 });

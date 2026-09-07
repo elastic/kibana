@@ -33,6 +33,16 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),
   })),
+  getSecurityV4Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getSecurityV5Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
   getCasesFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
@@ -69,6 +79,31 @@ jest.mock('@kbn/security-solution-features/product_features', () => ({
     subFeaturesMap: new Map(),
   })),
   getSiemMigrationsFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getRulesFeature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getRulesV2Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getRulesV3Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getRulesV4Feature: jest.fn(() => ({
+    baseKibanaFeature: {},
+    baseKibanaSubFeatureIds: [],
+    subFeaturesMap: new Map(),
+  })),
+  getAlertsFeature: jest.fn(() => ({
     baseKibanaFeature: {},
     baseKibanaSubFeatureIds: [],
     subFeaturesMap: new Map(),

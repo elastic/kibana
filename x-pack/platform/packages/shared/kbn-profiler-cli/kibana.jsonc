@@ -1,7 +1,7 @@
 {
   "type": "shared-server",
   "id": "@kbn/profiler-cli",
-  "owner": "@elastic/obs-knowledge-team",
+  "owner": "@elastic/observability-ui",
   "group": "platform",
   "visibility": "shared"
 }

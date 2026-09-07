@@ -146,16 +146,44 @@ const RESPONSE_ACTIONS_SUPPORT_MAP: SupportMap = {
   },
   runscript: {
     automated: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+      microsoft_defender_endpoint: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: true,
+      crowdstrike: true,
+      microsoft_defender_endpoint: true,
+    },
+  },
+  cancel: {
+    automated: {
       endpoint: false,
       sentinel_one: false,
       crowdstrike: false,
       microsoft_defender_endpoint: false,
     },
     manual: {
-      endpoint: false,
-      sentinel_one: true,
-      crowdstrike: true,
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
       microsoft_defender_endpoint: true,
+    },
+  },
+  'memory-dump': {
+    automated: {
+      endpoint: false,
+      sentinel_one: false,
+      crowdstrike: false,
+      microsoft_defender_endpoint: false,
+    },
+    manual: {
+      endpoint: true,
+      sentinel_one: false,
+      crowdstrike: false,
+      microsoft_defender_endpoint: false,
     },
   },
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -46,7 +46,6 @@ import type {
   DrawState,
   EMSVectorTileLayerDescriptor,
   EditState,
-  Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
   LayerGroupDescriptor,
@@ -155,12 +154,8 @@ export const getHasLockedTooltips = (state: MapStoreState): boolean => {
   });
 };
 
-export const getMapReady = ({ map }: MapStoreState): boolean => map && map.ready;
-
 export const getMapInitError = ({ map }: MapStoreState): string | null | undefined =>
   map.mapInitError;
-
-export const getGoto = ({ map }: MapStoreState): Goto | null | undefined => map && map.goto;
 
 export const getSelectedLayerId = ({ map }: MapStoreState): string | null => {
   return !map.selectedLayerId || !map.layerList ? null : map.selectedLayerId;
@@ -176,8 +171,7 @@ export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => m
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
 
-export const getMapZoom = ({ map }: MapStoreState): number =>
-  map.mapState.zoom ? map.mapState.zoom : 0;
+export const getMapZoom = ({ map }: MapStoreState): number => map.mapState.zoom ?? 1;
 
 export const getMapCenter = ({ map }: MapStoreState): MapCenter =>
   map.mapState.center ? map.mapState.center : { lat: 0, lon: 0 };
@@ -205,6 +199,8 @@ export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =
 
 export const getSearchSessionMapBuffer = ({ map }: MapStoreState): MapExtent | undefined =>
   map.mapState.searchSessionMapBuffer;
+
+export const getProjectRouting = ({ map }: MapStoreState) => map.mapState.projectRouting;
 
 export const isUsingSearch = (state: MapStoreState): boolean => {
   const filters = getFilters(state).filter((filter) => !filter.meta.disabled);
@@ -248,6 +244,7 @@ export const getDataFilters = createSelector(
   getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getProjectRouting,
   getIsReadOnly,
   getExecutionContext,
   (
@@ -261,6 +258,7 @@ export const getDataFilters = createSelector(
     embeddableSearchContext,
     searchSessionId,
     searchSessionMapBuffer,
+    projectRouting,
     isReadOnly,
     executionContext
   ) => {
@@ -274,6 +272,7 @@ export const getDataFilters = createSelector(
       filters,
       embeddableSearchContext,
       searchSessionId,
+      projectRouting,
       isReadOnly,
       executionContext,
     };

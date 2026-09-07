@@ -7,7 +7,6 @@
 
 import type { ChangeEvent, MouseEvent, KeyboardEvent, FunctionComponent } from 'react';
 import React, { useCallback, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import type { EuiSelectOption, EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiRange, EuiSelect, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
@@ -140,11 +139,6 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
       )}
     </>
   );
-};
-
-ExtendedTemplate.propTypes = {
-  onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]).isRequired,
 };
 
 ExtendedTemplate.displayName = 'PartitionLabelsExtendedArg';

@@ -18,6 +18,14 @@ const assistantTelemetry = {
   reportAssistantStarterPrompt: () => {},
   reportAssistantSettingToggled: () => {},
 };
+// workaround because of JSDOM not supporting :focus-visible
+// https://github.com/jsdom/jsdom/issues/3426
+const matchesOriginal = HTMLElement.prototype.matches;
+HTMLElement.prototype.matches = function (this: HTMLElement, query: string) {
+  if (query === ':focus-visible') return false;
+  return matchesOriginal.call(this, query);
+} as typeof HTMLElement.prototype.matches;
+
 describe('AssistantOverlay', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -104,6 +112,7 @@ describe('AssistantOverlay', () => {
     expect(reportAssistantInvoked).toHaveBeenCalledWith({ invokedBy: 'url' });
 
     // Restore original location
+    // @ts-expect-error upgrade typescript v5.9.3
     window.location = originalLocation;
   });
 });

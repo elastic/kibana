@@ -7,8 +7,8 @@
 
 import { encode } from '@kbn/rison';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import path from 'path';
-import { paths } from '../../../common/locators/paths';
 import { transformSloToCloneState } from '../../pages/slo_edit/helpers/transform_slo_to_clone_state';
 
 function createBaseRemoteSloDetailsUrl(
@@ -73,19 +73,6 @@ export function createRemoteSloDisableUrl(
   }
 
   remoteUrl.searchParams.append('disable', 'true');
-  return remoteUrl.toString();
-}
-
-export function createRemoteSloAddToCaseUrl(
-  slo: SLOWithSummaryResponse,
-  spaceId: string = 'default'
-) {
-  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
-  if (!remoteUrl) {
-    return undefined;
-  }
-
-  remoteUrl.searchParams.append('addToCase', 'true');
   return remoteUrl.toString();
 }
 

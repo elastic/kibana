@@ -32,7 +32,12 @@ export function RangedStyleLegendRow({
       <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" title={propertyLabel} content={fieldLabel}>
-            <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: '180px' }}>
+            <EuiText
+              tabIndex={0}
+              className="eui-textTruncate"
+              size="xs"
+              style={{ maxWidth: '180px' }}
+            >
               <small>
                 <strong>{fieldLabel}</strong>
               </small>

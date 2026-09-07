@@ -13,10 +13,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIconTip,
   EuiHealth,
+  EuiIconTip,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -27,6 +28,7 @@ import type {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
 import { omit } from 'lodash';
 import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -45,6 +47,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -62,6 +65,7 @@ import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { ExpressionChart } from './expression_chart';
 import { MetricExpression } from './metrics_expression';
 import { ExpressionDropDown } from './expression_dropdown';
+import { SupportedDataTooltipLink } from '../../../components/supported_data_tooltip_link';
 
 export interface AlertContextMeta {
   accountId?: string;
@@ -289,7 +293,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
         </h4>
       </EuiText>
       <div css={StyledExpressionCss}>
-        <EuiFlexGroup css={StyledExpressionRowCss}>
+        <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="s">
           <div css={NonCollapsibleExpressionCss}>
             <ExpressionDropDown
               options={nodeTypeOptions}
@@ -316,15 +320,16 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
               )}
             />
           </div>
+          <SupportedDataTooltipLink nodeType={ruleParams.nodeType} isAlertUI />
         </EuiFlexGroup>
       </div>
       {ruleParams.nodeType === 'host' && (
         <div css={StyledExpressionCss}>
-          <EuiFlexGroup css={StyledExpressionRowCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? 'ecs'}
+                value={ruleParams.schema ?? DEFAULT_SCHEMA}
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
@@ -399,7 +404,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -629,26 +634,33 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
     <>
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={toggle}
-            aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraExpressionRowButton"
+              iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              onClick={toggle}
+              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
+                defaultMessage: 'Expand row.',
+              })}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiFlexGroup css={StyledExpressionRowCss}>
+          <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
             <div css={StyledExpressionCss}>
               <MetricExpression
                 metric={{
                   value: metric!,
-                  text: ofFields.find((v) => v?.value === metric)?.text || '',
+                  text: ofFields?.find((v) => v?.value === metric)?.text || '',
                 }}
                 metrics={
-                  ofFields.filter((m) => m !== undefined && m.value !== undefined) as Array<{
+                  ofFields?.filter((m) => m !== undefined && m.value !== undefined) as Array<{
                     value: SnapshotMetricType;
                     text: string;
                   }>
@@ -664,7 +676,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
           </EuiFlexGroup>
           {displayWarningThreshold && (
             <>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {criticalThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="danger">
                   <FormattedMessage
@@ -673,7 +685,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   />
                 </EuiHealth>
               </EuiFlexGroup>
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} alignItems="center" gutterSize="xs">
                 {warningThresholdExpression}
                 <EuiHealth css={StyledHealthCss} color="warning">
                   <FormattedMessage
@@ -681,19 +693,29 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                     defaultMessage="Warning"
                   />
                 </EuiHealth>
-                <EuiButtonIcon
-                  data-test-subj="infraExpressionRowButton"
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
                     {
                       defaultMessage: 'Remove warningThreshold',
                     }
                   )}
-                  iconSize="s"
-                  color="text"
-                  iconType="minusInCircleFilled"
-                  onClick={toggleWarningThreshold}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="infraExpressionRowButton"
+                    aria-label={i18n.translate(
+                      'xpack.infra.metrics.alertFlyout.removeWarningThreshold',
+                      {
+                        defaultMessage: 'Remove warningThreshold',
+                      }
+                    )}
+                    iconSize="s"
+                    color="text"
+                    iconType="minusCircle"
+                    onClick={toggleWarningThreshold}
+                  />
+                </EuiToolTip>
               </EuiFlexGroup>
             </>
           )}
@@ -701,7 +723,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
             <>
               {' '}
               <EuiSpacer size="xs" />
-              <EuiFlexGroup css={StyledExpressionRowCss}>
+              <EuiFlexGroup css={StyledExpressionRowCss} gutterSize="xs">
                 <EuiButtonEmpty
                   aria-label={i18n.translate(
                     'xpack.infra.expressionRow.addwarningthresholdButton.ariaLabel',
@@ -711,7 +733,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   color="primary"
                   flush="left"
                   size="xs"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={toggleWarningThreshold}
                 >
                   <FormattedMessage
@@ -725,15 +747,22 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         </EuiFlexItem>
         {canDelete && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="infraExpressionRowButton"
-              aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+            <EuiToolTip
+              content={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
                 defaultMessage: 'Remove condition',
               })}
-              color="danger"
-              iconType="trash"
-              onClick={() => remove(expressionId)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="infraExpressionRowButton"
+                aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.removeCondition', {
+                  defaultMessage: 'Remove condition',
+                })}
+                color="danger"
+                iconType="trash"
+                onClick={() => remove(expressionId)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -763,6 +792,7 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={convertToBuiltInComparators(comparator) || COMPARATORS.GREATER_THAN}
           threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}

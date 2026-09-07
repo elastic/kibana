@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { UseQueryOptions } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { transformInput } from '../../../common/transforms';
 import { fetchRuleById } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const FIND_ONE_RULE_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL];
 
@@ -25,6 +26,8 @@ const FIND_ONE_RULE_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL];
  * @returns useQuery result
  */
 export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<RuleResponse>) => {
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
+
   return useQuery<RuleResponse>(
     [...FIND_ONE_RULE_QUERY_KEY, id],
     async ({ signal }) => {
@@ -38,7 +41,7 @@ export const useFetchRuleByIdQuery = (id: string, options?: UseQueryOptions<Rule
       // Mark this query as immediately stale helps to avoid problems related to filtering.
       // e.g. enabled and disabled state filter require data update which happens at the backend side
       staleTime: 0,
-      enabled: !!id,
+      enabled: !!id && canReadRules,
     }
   );
 };

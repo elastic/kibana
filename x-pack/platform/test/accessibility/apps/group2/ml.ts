@@ -68,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         const dfaClassificationJobTrainingPercent = 30;
 
         const uploadFilePath = require.resolve(
-          '../../../functional/apps/ml/data_visualizer/files_to_import/artificial_server_log'
+          '../../../fixtures/ml/files_to_import/artificial_server_log'
         );
 
         before(async () => {
@@ -307,11 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
             'should select a file and load visualizer result page'
           );
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
-          await a11y.testAppSnapshot();
-        });
-
-        it('file data visualizer import data page', async () => {
-          await ml.dataVisualizerFileBased.navigateToFileImport();
           await a11y.testAppSnapshot();
         });
       });

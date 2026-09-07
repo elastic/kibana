@@ -13,7 +13,7 @@ import {
 } from '../../../common/content_management/v1/transforms';
 import {
   lensCMGetResultSchema,
-  lensItemAttributesSchema,
+  lensItemAttributesSchemaV1,
   lensCMCreateOptionsSchema,
   lensCMCreateResultSchema,
   lensCMSearchOptionsSchema,
@@ -40,7 +40,7 @@ export const serviceDefinition = {
   create: {
     in: {
       data: {
-        schema: lensItemAttributesSchema,
+        schema: lensItemAttributesSchemaV1,
         up: (attributes: LensAttributes) => {
           return transformToV1LensItemAttributes(attributes);
         },
@@ -58,7 +58,7 @@ export const serviceDefinition = {
   update: {
     in: {
       data: {
-        schema: lensItemAttributesSchema,
+        schema: lensItemAttributesSchemaV1,
         up: (attributes: LensAttributes) => {
           return transformToV1LensItemAttributes(attributes);
         },

@@ -7,34 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { enhancementsPersistableState } from '../../common/bwc/enhancements/enhancements_persistable_state';
 import type { EmbeddableStateWithType } from './types';
 import { telemetryBaseEmbeddableInput } from './migrate_base_input';
 
 export const getTelemetryFunction = (
-  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>,
-  getEnhancement: (enhancementId: string) => PersistableState
+  getEmbeddableFactory: (embeddableFactoryId: string) => PersistableState<EmbeddableStateWithType>
 ) => {
   return (
     state: EmbeddableStateWithType,
     telemetryData: Record<string, string | number | boolean> = {}
   ) => {
-    const enhancements = state.enhancements || {};
     const factory = getEmbeddableFactory(state.type);
 
     let outputTelemetryData = telemetryBaseEmbeddableInput(state, telemetryData);
     if (factory) {
       outputTelemetryData = factory.telemetry(state, outputTelemetryData);
     }
-    Object.keys(enhancements).map((key) => {
-      if (!enhancements[key]) return;
-      outputTelemetryData = getEnhancement(key).telemetry(
-        enhancements[key] as Record<string, SerializableRecord>,
-        outputTelemetryData
-      );
-    });
 
-    return outputTelemetryData;
+    return state.enhancements?.dynamicActions
+      ? enhancementsPersistableState.telemetry(state, telemetryData)
+      : outputTelemetryData;
   };
 };

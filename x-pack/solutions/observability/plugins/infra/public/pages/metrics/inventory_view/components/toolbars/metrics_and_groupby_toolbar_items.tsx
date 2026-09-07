@@ -11,6 +11,7 @@ import type { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common'
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
@@ -18,6 +19,7 @@ import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
 import { WaffleSortControls } from '../waffle/waffle_sort_controls';
 import type { ToolbarProps } from './types';
+import { SupportedDataTooltipLink } from '../../../../../components/supported_data_tooltip_link';
 
 interface Props extends ToolbarProps {
   groupByFields: string[];
@@ -55,7 +57,7 @@ export const MetricsAndGroupByToolbarItems = ({
   ]);
 
   const { value: aggregations } = useAsync(
-    () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? 'ecs' }),
+    () => inventoryModel.metrics.getAggregations({ schema: preferredSchema ?? DEFAULT_SCHEMA }),
     [inventoryModel.metrics, preferredSchema]
   );
 
@@ -103,13 +105,16 @@ export const MetricsAndGroupByToolbarItems = ({
       {allowSchemaSelection && (
         <EuiFlexItem grow={false}>
           <SchemaSelector
-            value={preferredSchema ?? 'semconv'}
+            value={preferredSchema ?? DEFAULT_SCHEMA}
             schemas={schemas}
             isLoading={loading}
             onChange={changePreferredSchema}
           />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={false}>
+        <SupportedDataTooltipLink nodeType={props.nodeType} />
+      </EuiFlexItem>
     </>
   );
 };

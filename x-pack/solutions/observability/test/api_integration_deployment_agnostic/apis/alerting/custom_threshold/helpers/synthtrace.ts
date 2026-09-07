@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
+import { apm, timerange } from '@kbn/synthtrace-client';
 
 export const dataConfig = {
   rate: 10,

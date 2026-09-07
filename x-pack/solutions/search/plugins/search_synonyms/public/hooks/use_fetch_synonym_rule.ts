@@ -6,7 +6,7 @@
  */
 
 import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { SYNONYMS_RULE_FETCH_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
@@ -19,7 +19,9 @@ export const useFetchSynonymRule = (synonymsSetId: string, ruleId: string) => {
     queryKey: [SYNONYMS_RULE_FETCH_QUERY_KEY, synonymsSetId, ruleId],
     queryFn: async () => {
       return await http.get<SynonymsSynonymRule>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}/${ruleId}`
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(
+          synonymsSetId
+        )}/${encodeURIComponent(ruleId)}`
       );
     },
     enabled: !!synonymsSetId && !!ruleId,

@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        resumeExecutionRequestExample:
+          description: 'Example request to resume a paused workflow execution'
+          value:
+            input:
+              approved: true
+              comment: Approved by analyst
+responses:
+  200:
+    description: 'Indicates a successful response'
+    content:
+      application/json:
+        examples:
+          resumeExecutionResponseExample:
+            description: 'Example response confirming the resume was scheduled'
+            value:
+              success: true
+              executionId: exec-a1b2c3d4-e5f6-7890
+              message: Workflow resume scheduled
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/workflows/executions/{executionId}/resume" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "input": {
+            "approved": true,
+            "comment": "Approved by analyst"
+          }
+        }'
+  - lang: Console
+    source: |
+      POST kbn://api/workflows/executions/{executionId}/resume
+      {
+        "input": {
+          "approved": true,
+          "comment": "Approved by analyst"
+        }
+      }

@@ -62,39 +62,31 @@ describe('validateParams()', () => {
   test('should validate and throw error when params is invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [undefined]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected string, received undefined
+        → at message"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: [message]: expected value of type [string] but got [number]"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: ✖ Invalid input: expected string, received number
+        → at message"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 2 }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
+        → at level"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 'x', level: 'foo' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-"error validating action params: [level]: types that failed validation:
-- [level.0]: expected value to equal [trace]
-- [level.1]: expected value to equal [debug]
-- [level.2]: expected value to equal [info]
-- [level.3]: expected value to equal [warn]
-- [level.4]: expected value to equal [error]
-- [level.5]: expected value to equal [fatal]"
-`);
+      "error validating action params: ✖ Invalid option: expected one of \\"trace\\"|\\"debug\\"|\\"info\\"|\\"warn\\"|\\"error\\"|\\"fatal\\"
+        → at level"
+    `);
   });
 });
 

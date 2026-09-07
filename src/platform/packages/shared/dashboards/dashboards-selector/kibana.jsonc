@@ -1,7 +1,7 @@
 {
   "type": "shared-browser",
   "id": "@kbn/dashboards-selector",
-  "owner": "@elastic/obs-ux-management-team",
+  "owner": "@elastic/actionable-obs-team",
   "group": "platform",
   "visibility": "shared"
 }

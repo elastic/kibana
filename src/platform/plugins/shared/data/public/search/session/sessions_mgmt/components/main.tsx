@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
-import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
-import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 import type { SearchUsageCollector } from '../../../collectors';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
+import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 interface Props {
-  documentation: AsyncSearchIntroDocumentation;
   core: CoreStart;
   api: SearchSessionsMgmtAPI;
   http: HttpStart;
@@ -30,81 +28,60 @@ interface Props {
   kibanaVersion: string;
   share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
+  searchSessionEBTManager: ISearchSessionEBTManager;
 }
 
-export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
-  const hasBackgroundSearchEnabled = tableProps.core.featureFlags.getBooleanValue(
-    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-    false
+const pageTitle = i18n.translate('data.mgmt.searchSessions.main.backgroundSearchSectionTitle', {
+  defaultMessage: 'Background Search',
+});
+
+const pageDescription = i18n.translate(
+  'data.mgmt.searchSessions.main.backgroundSearchSectionDescription',
+  { defaultMessage: 'Manage your background searches.' }
+);
+
+const refreshButtonLabel = i18n.translate('data.mgmt.searchSessions.search.tools.refresh', {
+  defaultMessage: 'Refresh',
+});
+
+export function SearchSessionsMgmtMain({ share, ...tableProps }: Props) {
+  const refreshRef = useRef<() => void>(() => undefined);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefreshReady = useCallback((refresh: () => void) => {
+    refreshRef.current = refresh;
+  }, []);
+
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'refresh',
+        label: refreshButtonLabel,
+        iconType: 'refresh',
+        testId: 'sessionManagementRefreshBtn',
+        run: () => {
+          refreshRef.current();
+        },
+        isLoading: isRefreshing,
+        disableButton: isRefreshing,
+      },
+    }),
+    [isRefreshing]
   );
-
-  if (hasBackgroundSearchEnabled) {
-    return (
-      <>
-        <EuiPageHeader
-          pageTitle={
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
-              defaultMessage="Background Search"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
-              defaultMessage="Manage your background searches."
-            />
-          }
-          bottomBorder
-        />
-
-        <EuiSpacer size="l" />
-        <SearchSessionsMgmtTable
-          data-test-subj="search-sessions-mgmt-table"
-          locators={share.url.locators}
-          {...tableProps}
-        />
-      </>
-    );
-  }
 
   return (
     <>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="data.mgmt.searchSessions.main.sectionTitle"
-            defaultMessage="Search Sessions"
-          />
-        }
-        description={
-          <FormattedMessage
-            id="data.mgmt.searchSessions.main.sectionDescription"
-            defaultMessage="Manage your saved search sessions."
-          />
-        }
-        bottomBorder
-        rightSideItems={[
-          <EuiButtonEmpty
-            href={documentation.getElasticsearchDocLink()}
-            target="_blank"
-            iconType="question"
-          >
-            <FormattedMessage
-              id="data.mgmt.searchSessions.main.backgroundSessionsDocsLinkText"
-              defaultMessage="Documentation"
-            />
-          </EuiButtonEmpty>,
-        ]}
-      />
-
-      <EuiSpacer size="l" />
-      <SearchSessionsDeprecatedWarning />
+      <AppHeader title={pageTitle} description={pageDescription} menu={menu} spacing="bleed" />
 
       <EuiSpacer size="l" />
       <SearchSessionsMgmtTable
         data-test-subj="search-sessions-mgmt-table"
         locators={share.url.locators}
+        trackingProps={{ renderedIn: 'management', openedFrom: 'management' }}
         {...tableProps}
+        hideRefreshButton
+        onRefreshReady={onRefreshReady}
+        onRefreshLoadingChange={setIsRefreshing}
       />
     </>
   );

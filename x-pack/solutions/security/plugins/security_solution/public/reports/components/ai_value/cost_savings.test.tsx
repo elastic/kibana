@@ -30,6 +30,7 @@ const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof 
 const mockFormatDollars = formatDollars as jest.MockedFunction<typeof formatDollars>;
 
 const defaultProps = {
+  isSample: false as const,
   minutesPerAlert: 10,
   analystHourlyRate: 50,
   from: '2023-01-01T00:00:00.000Z',
@@ -66,7 +67,7 @@ describe('CostSavings', () => {
         currentCount: defaultProps.costSavings,
         previousCount: defaultProps.costSavingsCompare,
         stat: '$4,000',
-        statType: 'time saved in hours',
+        statType: 'cost saved in dollars',
         timeRange: '30',
       }),
       {}

@@ -12,7 +12,7 @@ import {
   RuleExecutionStatusWarningReasons,
 } from '@kbn/alerting-plugin/common';
 import type { RuleStatus } from '../../types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../../common/lib/kibana';
 import type { IToasts } from '@kbn/core-notifications-browser';
 
@@ -295,8 +295,8 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.initialLoad).toBeFalsy();
     expect(result.current.hasData).toBeTruthy();
 
-    expect(onPage).toBeCalledTimes(0);
-    expect(loadRulesWithKueryFilter).toBeCalledWith(
+    expect(onPage).toHaveBeenCalledTimes(0);
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         page: {
           index: 0,
@@ -343,7 +343,7 @@ describe('useLoadRules', () => {
 
     rerender();
     await waitFor(() =>
-      expect(loadRulesWithKueryFilter).toBeCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           page: {
             index: 0,
@@ -430,7 +430,7 @@ describe('useLoadRules', () => {
     renderHook(() => useLoadRules(params), { wrapper });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled()
     );
   });
 

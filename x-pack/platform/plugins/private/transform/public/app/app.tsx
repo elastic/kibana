@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import type { ScopedHistory } from '@kbn/core/public';
@@ -25,22 +25,27 @@ import {
   ExperimentalFeaturesContextProvider,
   type TransformEnabledFeatures,
 } from './serverless_context';
+import { useTransformCpsPickerAccess } from './hooks/use_transform_cps_picker_access';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
-  <Router history={history}>
-    <Routes>
-      <Route
-        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-        component={CloneTransformSection}
-      />
-      <Route
-        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-        component={CreateTransformSection}
-      />
-      <Route path={`/`} component={TransformManagementSection} />
-    </Routes>
-  </Router>
-);
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
+  useTransformCpsPickerAccess();
+
+  return (
+    <Router history={history}>
+      <Routes>
+        <Route
+          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+          component={CloneTransformSection}
+        />
+        <Route
+          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId?`}
+          component={CreateTransformSection}
+        />
+        <Route path={`/`} component={TransformManagementSection} />
+      </Routes>
+    </Router>
+  );
+};
 
 export const renderApp = (
   element: HTMLElement,

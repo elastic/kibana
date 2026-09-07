@@ -21,9 +21,9 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
-  EuiCallOut,
   EuiComboBox,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiSelectableOption } from '@elastic/eui';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../common/constants';
@@ -43,7 +43,12 @@ import { DataStreamsAndIndicesListHelpText } from './data_streams_and_indices_li
 
 import { SystemIndicesOverwrittenCallOut } from './system_indices_overwritten_callout';
 
+const styles = {
+  indicesFieldWrapper: indicesFieldWrapperStyle,
+};
+
 import { FeatureStatesFormField } from '../../../feature_states_form_field';
+import { indicesFieldWrapperStyle } from '../../../styles';
 
 export type FeaturesOption = EuiComboBoxOptionOption<string>;
 
@@ -103,6 +108,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       dataStreams: snapshotDataStreams.map(
         (dataStream): EuiSelectableOption => ({
           label: dataStream,
+          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+          // list item, which screen readers announce in addition to the accessible name.
+          title: '',
           append: <DataStreamBadge />,
           checked:
             isAllIndicesAndDataStreams ||
@@ -117,6 +125,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
       indices: snapshotIndices.map(
         (index): EuiSelectableOption => ({
           label: index,
+          // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+          // list item, which screen readers announce in addition to the accessible name.
+          title: '',
           checked:
             isAllIndicesAndDataStreams ||
             // If indices is a string, we default to custom input mode, so we mark individual indices
@@ -172,10 +183,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
   };
 
   return (
-    <div
-      data-test-subj="snapshotRestoreStepLogistics"
-      className="snapshotRestore__restoreForm__stepLogistics"
-    >
+    <div data-test-subj="snapshotRestoreStepLogistics">
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -265,7 +273,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               <Fragment>
                 <EuiSpacer size="m" />
                 <EuiFormRow
-                  className="snapshotRestore__restoreForm__stepLogistics__indicesFieldWrapper"
+                  css={styles.indicesFieldWrapper}
                   label={
                     selectIndicesMode === 'list' ? (
                       <EuiFlexGroup justifyContent="spaceBetween">
@@ -381,6 +389,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                     </EuiSelectable>
                   ) : (
                     <EuiComboBox
+                      data-test-subj="restoreIndexPatternsComboBox"
                       options={comboBoxOptions}
                       renderOption={({ value }) => {
                         return value?.isDataStream ? (
@@ -702,10 +711,9 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
         {snapshotIncludeFeatureStates?.length === 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount
               size="s"
-              iconType="question"
-              color="warning"
               data-test-subj="noFeatureStatesCallout"
               title={i18n.translate(
                 'xpack.snapshotRestore.restoreForm.stepLogistics.noFeatureStates',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { ROUTES } from '../../../common/constants';
 import { Pipeline } from '../../models/pipeline';
 
@@ -32,7 +33,7 @@ export class PipelineService {
 
   deletePipeline(id) {
     return this.http
-      .delete(`${ROUTES.API_ROOT}/pipeline/${id}`)
+      .delete(buildPath(`${ROUTES.API_ROOT}/pipeline/{id}`, { id }))
       .then(() => this.pipelinesService.addToRecentlyDeleted(id))
       .catch((e) => {
         throw e.message;

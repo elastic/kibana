@@ -45,8 +45,9 @@ export const validateTree = {
     // We use collapsing in our Elasticsearch queries for the tree api
     nodes: schema.arrayOf(schema.oneOf([schema.string({ minLength: 1 }), schema.number()]), {
       minSize: 1,
+      maxSize: 65536,
     }),
-    indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
+    indexPatterns: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 }),
     includeHits: schema.boolean({ defaultValue: false }),
   }),
 };
@@ -67,7 +68,7 @@ export const validateEvents = {
         to: schema.string(),
       })
     ),
-    indexPatterns: schema.arrayOf(schema.string()),
+    indexPatterns: schema.arrayOf(schema.string(), { maxSize: 100 }),
     filter: schema.maybe(schema.string()),
     entityType: schema.maybe(schema.string()),
     eventID: schema.maybe(schema.string()),
@@ -87,6 +88,6 @@ export const validateEntities = {
     /**
      * Indices to search in.
      */
-    indices: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    indices: schema.oneOf([schema.arrayOf(schema.string(), { maxSize: 100 }), schema.string()]),
   }),
 };

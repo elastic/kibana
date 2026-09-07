@@ -74,7 +74,7 @@ export abstract class SiemMigrationsTaskClient<
       { refresh: true }
     );
 
-    const { items } = await this.data.items.getStats(migrationId);
+    const { items, vendor } = await this.data.items.getStats(migrationId);
     if (items.total === 0) {
       return { exists: false, started: false };
     }
@@ -86,6 +86,7 @@ export abstract class SiemMigrationsTaskClient<
     const abortController = new AbortController();
     const migrationTaskRunner = new this.TaskRunnerClass(
       migrationId,
+      vendor,
       this.request,
       this.currentUser,
       abortController,
@@ -142,6 +143,13 @@ export abstract class SiemMigrationsTaskClient<
     migrationId: string,
     filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
+    this.logger.warn(
+      `Updating migration ID:${migrationId} to retry with filter: ${JSON.stringify(
+        filter,
+        null,
+        2
+      )}`
+    );
     if (this.migrationsRunning.has(migrationId)) {
       // not update migrations that are currently running
       return { updated: false };

@@ -20,11 +20,11 @@ import { Manifest } from './manifest';
 export const getMockArtifacts = async () => {
   return Promise.all([
     // Exceptions items
-    ...ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
-      async (os) => {
-        return getInternalArtifactMock(os, 'v1');
-      }
-    ),
+    ...ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      return getInternalArtifactMock(os, 'v1');
+    }),
     // Trusted Apps items
     ...ArtifactConstants.SUPPORTED_TRUSTED_APPS_OPERATING_SYSTEMS.map<
       Promise<InternalArtifactCompleteSchema>
@@ -42,24 +42,24 @@ export const getMockArtifacts = async () => {
 
 export const getMockArtifactsWithDiff = async () => {
   return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
-      async (os) => {
-        if (os === 'macos') {
-          return getInternalArtifactMockWithDiffs(os, 'v1');
-        }
-        return getInternalArtifactMock(os, 'v1');
+    ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      if (os === 'macos') {
+        return getInternalArtifactMockWithDiffs(os, 'v1');
       }
-    )
+      return getInternalArtifactMock(os, 'v1');
+    })
   );
 };
 
 export const getEmptyMockArtifacts = async () => {
   return Promise.all(
-    ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS.map<Promise<InternalArtifactCompleteSchema>>(
-      async (os) => {
-        return getEmptyInternalArtifactMock(os, 'v1');
-      }
-    )
+    ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      return getEmptyInternalArtifactMock(os, 'v1');
+    })
   );
 };
 

@@ -88,7 +88,7 @@ describe('createResetGroupByFieldAction', () => {
   });
 
   test('should return an icon', () => {
-    expect(action.getIconType(context)).toEqual('editorRedo');
+    expect(action.getIconType(context)).toEqual('redo');
   });
 
   test('should return icon type', () => {

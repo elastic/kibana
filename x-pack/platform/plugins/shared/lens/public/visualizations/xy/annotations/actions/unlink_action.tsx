@@ -7,11 +7,11 @@
 
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import type { LayerAction, StateSetter } from '../../../../types';
+import type { LayerAction, StateSetter } from '@kbn/lens-common';
 import type {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '../../types';
 import { getAnnotationLayerTitle } from '../../visualization_helpers';
 
@@ -21,9 +21,9 @@ export const getUnlinkLayerAction = ({
   setState,
   toasts,
 }: {
-  state: XYState;
+  state: XYVisualizationState;
   layer: XYByReferenceAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
+  setState: StateSetter<XYVisualizationState, unknown>;
   toasts: ToastsStart;
 }): LayerAction => {
   return {
@@ -57,7 +57,7 @@ export const getUnlinkLayerAction = ({
       defaultMessage: 'Unlink from library',
     }),
     isCompatible: true,
-    icon: 'unlink',
+    icon: 'linkSlash',
     'data-test-subj': 'lnsXY_annotationLayer_unlinkFromLibrary',
     order: 300,
   };

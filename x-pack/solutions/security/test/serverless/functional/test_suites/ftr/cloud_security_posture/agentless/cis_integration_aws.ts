@@ -12,9 +12,7 @@ import {
   AWS_INPUT_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([
     'settings',
     'common',
@@ -33,19 +31,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let mockApiServer: http.Server;
 
     before(async () => {
+      const { setupMockServer } = await import('./mock_agentless_api');
+      const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationAws = pageObjects.cisAddIntegration.cisAws;
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      mockApiServer.close();
+      try {
+        await supertest
+          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
+          .set('kbn-xsrf', 'xxxx')
+          .query({ force: true })
+          .expect(200);
+      } finally {
+        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
+      }
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {

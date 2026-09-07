@@ -9,38 +9,22 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import type {
   BaseIndexPatternColumn,
-  FieldBasedOperationErrorMessage,
-  OperationDefinition,
-} from '..';
-import type { ReferenceBasedIndexPatternColumn } from '../column_types';
-import type { IndexPattern } from '../../../../../types';
+  FormulaIndexPatternColumn,
+  IndexPattern,
+} from '@kbn/lens-common';
+import type { FieldBasedOperationErrorMessage, OperationDefinition } from '..';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
-import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
+import { generateMissingFieldMessage, getFilter } from '../helpers';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
 });
-
-export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
-  operationType: 'formula';
-  params: {
-    formula?: string;
-    isFormulaBroken?: boolean;
-    // last value on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
-  };
-}
 
 export function isFormulaIndexPatternColumn(
   column: BaseIndexPatternColumn
@@ -196,8 +180,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
       let format = {};
-      if (previousColumn && isColumnFormatted(previousColumn)) {
-        format = { format: previousColumn.params?.format };
+      if (previousColumn?.params?.format) {
+        format = { format: previousColumn.params.format };
       }
 
       if (columnParams?.format) {

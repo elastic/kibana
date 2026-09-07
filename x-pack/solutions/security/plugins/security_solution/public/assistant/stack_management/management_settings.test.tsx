@@ -13,7 +13,7 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import { useKibana } from '../../common/lib/kibana';
 import { useConversation } from '@kbn/elastic-assistant/impl/assistant/use_conversation';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 // Mock the necessary hooks and components
 jest.mock('@kbn/elastic-assistant', () => ({

@@ -10,4 +10,6 @@
 import type { PluginInitializer } from '@kbn/core/public';
 import { SessionNotificationsPlugin } from './plugin';
 
+export type { SessionNotificationsGlobalApi } from './types';
+
 export const plugin: PluginInitializer<void, void> = () => new SessionNotificationsPlugin();

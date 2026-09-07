@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { MigrationTranslationResult } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import type { RuleMigrationRuleData } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createMigrationRules,
   defaultElasticRule,
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const migrationRulesRoutes = ruleMigrationRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless @serverlessQA Get Prebuilt Rules API', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI Get Prebuilt Rules API', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);

@@ -1,0 +1,66 @@
+{
+  "id": "security_azure_activitylogs",
+  "title": "Security: Azure Activity Logs",
+  "description": "Detect suspicious activity recorded in Azure Activity Logs.",
+  "type": "Azure Activity Logs data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "logs-*,filebeat-*",
+  "query": {
+    "bool": {
+      "filter": [{ "term": { "event.dataset": "azure.activitylogs" } }],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_city_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_city_ea.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_country_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_country_ea.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_for_a_user_email_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_user_email_ea.json"
+    },
+    {
+      "id": "azure_activitylogs_high_distinct_count_event_action_fail_ea",
+      "file": "azure_activitylogs_high_distinct_count_event_action_fail_ea.json"
+    },
+    {
+      "id": "azure_activitylogs_rare_event_action_on_failure_ea",
+      "file": "azure_activitylogs_rare_event_action_on_failure_ea.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_city_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_city_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_city_ea"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_country_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_country_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_country_ea"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_user_email_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_user_email_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_user_email_ea"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_high_distinct_count_event_action_fail_ea",
+      "file": "datafeed_azure_activitylogs_high_distinct_count_event_action_fail_ea.json",
+      "job_id": "azure_activitylogs_high_distinct_count_event_action_fail_ea"
+    },
+    {
+      "id": "datafeed-azure_activitylogs_rare_event_action_on_failure_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_on_failure_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_on_failure_ea"
+    }
+  ],
+  "tags": [
+    "security"
+  ]
+}

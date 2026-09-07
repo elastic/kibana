@@ -8,8 +8,8 @@
 import type { api } from '@elastic/opentelemetry-node/sdk';
 import { tracing } from '@elastic/opentelemetry-node/sdk';
 import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { isInInferenceContext } from './is_in_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
+import { isInferenceSpan } from './is_inference_span';
 
 export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcessor {
   private delegate: tracing.SpanProcessor;
@@ -23,11 +23,7 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
   abstract processInferenceSpan(span: tracing.ReadableSpan): tracing.ReadableSpan;
 
   onStart(span: tracing.Span, parentContext: api.Context): void {
-    const shouldTrack =
-      (isInInferenceContext(parentContext) || span.instrumentationScope.name === 'inference') &&
-      span.instrumentationScope.name !== '@elastic/transport';
-
-    if (shouldTrack) {
+    if (isInferenceSpan(span, parentContext)) {
       span.setAttribute('_should_track', true);
       this.delegate.onStart(span, parentContext);
     }
@@ -35,10 +31,8 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
 
   onEnd(span: tracing.ReadableSpan): void {
     if (span.attributes._should_track) {
-      delete span.attributes._should_track;
-
       // if this is the "root" inference span, but has a parent,
-      // drop the parent context and Langfuse only shows root spans
+      // drop the parent context as Phoenix only shows root spans
       if (span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME] && span.parentSpanContext) {
         span = {
           ...span,
@@ -46,11 +40,21 @@ export abstract class BaseInferenceSpanProcessor implements tracing.SpanProcesso
           parentSpanContext: undefined,
         };
       }
-
       delete span.attributes[IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME];
 
       span = this.processInferenceSpan(span);
-      this.delegate.onEnd(span);
+
+      // Phoenix does not show resource attributes, so we move them under `attributes.resource.*`
+      Object.entries(span.resource.attributes).forEach(([name, value]) => {
+        span.attributes[`resource.${name}`] = value;
+      });
+
+      const { _should_track, ...attributesToCapture } = span.attributes;
+      this.delegate.onEnd({
+        ...span,
+        spanContext: span.spanContext.bind(span),
+        attributes: attributesToCapture,
+      });
     }
   }
 

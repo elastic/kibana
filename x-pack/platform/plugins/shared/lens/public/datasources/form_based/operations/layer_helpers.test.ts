@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { OperationMetadata } from '../../../types';
 import {
   copyColumn,
   insertNewColumn,
@@ -19,28 +18,30 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import type { OperationType } from '.';
-import { operationDefinitionMap } from '.';
-import type { TermsIndexPatternColumn } from './definitions/terms';
-import type { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
-import type { AvgIndexPatternColumn } from './definitions/metrics';
-import type { FormBasedLayer, FormBasedPrivateState } from '../types';
-import { documentField } from '../document_field';
-import { getFieldByNameFactory } from '../pure_helpers';
-import { generateId } from '../../../id_generator';
-import { createMockedFullReference, createMockedManagedReference } from './mocks';
 import type {
+  AvgIndexPatternColumn,
   CounterRateIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
   GenericIndexPatternColumn,
   MathIndexPatternColumn,
   MaxIndexPatternColumn,
   MovingAverageIndexPatternColumn,
-  OperationDefinition,
-} from './definitions';
+  OperationType,
+  TermsIndexPatternColumn,
+  FormBasedLayer,
+  OperationMetadata,
+  FormBasedPrivateState,
+  IndexPattern,
+} from '@kbn/lens-common';
+import { operationDefinitionMap } from '.';
+import { documentField } from '../document_field';
+import { getFieldByNameFactory } from '../pure_helpers';
+import { generateId } from '../../../id_generator';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import type { OperationDefinition } from './definitions';
 import type { TinymathAST } from '@kbn/tinymath';
-import type { IndexPattern } from '../../../types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 
@@ -112,7 +113,7 @@ const indexPattern = {
   hasRestrictions: false,
   fields: indexPatternFields,
   getFieldByName: getFieldByNameFactory([...indexPatternFields, documentField]),
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   isPersisted: true,
   spec: {},
 };
@@ -802,7 +803,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top 3 values of bytes',
+          label: 'Top 9 values of bytes',
         })
       );
     });
@@ -1147,7 +1148,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top 3 values of source',
+            label: 'Top 9 values of source',
           })
         );
       });
@@ -2891,7 +2892,7 @@ describe('state_helpers', () => {
       title: '',
       hasRestrictions: true,
       getFieldByName: getFieldByNameFactory(fields),
-      getFormatterForField: () => ({ convert: (v: unknown) => v }),
+      getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
       fields,
       isPersisted: true,
       spec: {},

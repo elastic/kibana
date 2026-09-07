@@ -5,18 +5,13 @@
 
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
-// The current implementation excluded all the variables matching the regexp.
-// We should remove it as soon as multiple underscores are supported by the linter.
-// https://github.com/typescript-eslint/typescript-eslint/issues/1712
-// Due to the same reason we have to duplicate the "filter" option for "default" and other "selectors".
-const allowedNameRegexp = '^(UNSAFE_|_{1,3})|_{1,3}$';
 module.exports = {
   overrides: [
     {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      plugins: ['@typescript-eslint', 'ban', 'import', 'eslint-comments'],
+      plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {
         es6: true,
@@ -87,43 +82,45 @@ module.exports = {
             {
               selector: 'default',
               format: ['camelCase', 'PascalCase', 'UPPER_CASE', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'classMethod',
               filter: {
-                regex: allowedNameRegexp,
-                match: false,
+                regex: '^UNSAFE_',
+                match: true,
               },
+              prefix: ['UNSAFE_'],
+              format: ['camelCase'],
             },
             {
               selector: 'variable',
               format: [
                 'camelCase',
-                'UPPER_CASE', // const SOMETHING = ...
-                'PascalCase', // React.FunctionComponent =
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
+            },
+            {
+              selector: 'variable',
+              modifiers: ['destructured'],
+              format: [
+                'camelCase',
+                'snake_case', // e.g. properties from ES response objects
+                'UPPER_CASE', // e.g. const SOMETHING = ...
+                'PascalCase', // e.g. React.FunctionComponent =
+              ],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'parameter',
-              format: ['camelCase', 'PascalCase'],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
-            },
-            {
-              selector: 'memberLike',
-              format: [
-                'camelCase',
-                'PascalCase',
-                'snake_case', // keys in elasticsearch requests / responses
-                'UPPER_CASE',
-              ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              format: ['camelCase', 'PascalCase', 'snake_case'],
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'function',
@@ -131,10 +128,8 @@ module.exports = {
                 'camelCase',
                 'PascalCase', // React.FunctionComponent =
               ],
-              filter: {
-                regex: allowedNameRegexp,
-                match: false,
-              },
+              leadingUnderscore: 'allowSingleOrDouble',
+              trailingUnderscore: 'allowSingleOrDouble',
             },
             {
               selector: 'typeLike',
@@ -189,7 +184,6 @@ module.exports = {
           '@typescript-eslint/no-namespace': 'error',
           '@typescript-eslint/no-shadow': 'error',
           // rely on typescript
-          '@typescript-eslint/no-undef': 'off',
           'no-undef': 'off',
 
           '@typescript-eslint/triple-slash-reference': [
@@ -256,8 +250,8 @@ module.exports = {
           ],
           'import/no-default-export': 'error',
 
-          'eslint-comments/no-unused-disable': 'error',
-          'eslint-comments/no-unused-enable': 'error',
+          '@eslint-community/eslint-comments/no-unused-disable': 'error',
+          '@eslint-community/eslint-comments/no-unused-enable': 'error',
           'no-restricted-syntax': [
             'error',
             {

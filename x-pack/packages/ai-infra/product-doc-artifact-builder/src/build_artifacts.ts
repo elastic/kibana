@@ -30,16 +30,25 @@ import type { TaskConfig } from './types';
 import { getSemanticTextMapping } from './tasks/create_index';
 
 const getSourceClient = (config: TaskConfig) => {
+  const auth = config.sourceClusterApiKey
+    ? { apiKey: config.sourceClusterApiKey }
+    : config.sourceClusterUsername && config.sourceClusterPassword
+    ? {
+        username: config.sourceClusterUsername,
+        password: config.sourceClusterPassword,
+      }
+    : undefined;
+
   return new ElasticsearchClient8({
     compression: true,
     nodes: [config.sourceClusterUrl],
     sniffOnStart: false,
-    auth: {
-      username: config.sourceClusterUsername,
-      password: config.sourceClusterPassword,
-    },
+    ...(auth ? { auth } : {}),
     Connection: Elasticsearch8HttpConnection,
     requestTimeout: 30_000,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -54,6 +63,9 @@ const getEmbeddingClient = (config: TaskConfig) => {
     // generating embeddings takes time
     requestTimeout: 10 * 60 * 1000,
     Connection: HttpConnection,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -84,6 +96,7 @@ export const buildArtifacts = async (config: TaskConfig) => {
       buildFolder: config.buildFolder,
       targetFolder: config.targetFolder,
       sourceClient,
+      sourceClusterIndex: config.sourceClusterIndex,
       embeddingClient,
       log,
       inferenceId: config.inferenceId ?? defaultInferenceEndpoints.ELSER,
@@ -102,6 +115,7 @@ const buildArtifact = async ({
   sourceClient,
   log,
   inferenceId,
+  sourceClusterIndex = 'connector-prod-s3-doc-content-v1',
 }: {
   productName: ProductName;
   stackVersion: string;
@@ -111,6 +125,7 @@ const buildArtifact = async ({
   embeddingClient: Client;
   log: ToolingLog;
   inferenceId: string;
+  sourceClusterIndex?: string;
 }) => {
   log.info(
     `Starting building artifact for product [${productName}] and version [${stackVersion}] with inference id [${inferenceId}]`
@@ -139,7 +154,7 @@ const buildArtifact = async ({
 
   let documents = await extractDocumentation({
     client: sourceClient,
-    index: 'search-docs-1',
+    index: sourceClusterIndex ?? 'connector-prod-s3-doc-content-v1',
     log,
     productName,
     stackVersion,

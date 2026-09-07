@@ -42,6 +42,7 @@ export class ConsoleUIPlugin
 {
   private readonly autocompleteInfo = new AutocompleteInfo();
   private _embeddableConsole: EmbeddableConsoleInfo;
+  private defaultEditorContent?: string;
 
   constructor(private ctx: PluginInitializerContext) {
     const storage = createStorage({
@@ -96,7 +97,7 @@ export class ConsoleUIPlugin
             application,
             ...startServices
           } = core;
-          const { dataViews, data, licensing } = deps;
+          const { data, licensing } = deps;
 
           const { renderApp } = await import('./application');
 
@@ -106,7 +107,6 @@ export class ConsoleUIPlugin
             docLinkVersion: DOC_LINK_VERSION,
             docLinks: links,
             application,
-            dataViews,
             data,
             licensing,
             notifications,
@@ -115,6 +115,7 @@ export class ConsoleUIPlugin
             history,
             autocompleteInfo: this.autocompleteInfo,
             isDevMode: this.ctx.env.mode.dev,
+            defaultEditorContent: this.defaultEditorContent,
           });
         },
       });
@@ -130,7 +131,12 @@ export class ConsoleUIPlugin
         },
       });
 
-      return { locator };
+      return {
+        locator,
+        setDefaultEditorContent: (content: string) => {
+          this.defaultEditorContent = content;
+        },
+      };
     }
 
     return {};
@@ -156,7 +162,6 @@ export class ConsoleUIPlugin
       consoleStart.EmbeddableConsole = (_props: {}) => {
         return EmbeddableConsole({
           core,
-          dataViews: deps.dataViews,
           data: deps.data,
           licensing: deps.licensing,
           usageCollection: deps.usageCollection,

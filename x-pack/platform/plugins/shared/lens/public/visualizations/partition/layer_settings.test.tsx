@@ -6,26 +6,29 @@
  */
 
 import React from 'react';
-import type { PieLayerState, PieVisualizationState } from '../..';
 import { LayerSettings } from './layer_settings';
-import type { FramePublicAPI, VisualizationLayerSettingsProps } from '../../types';
-import { render, screen, cleanup } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import type {
+  FramePublicAPI,
+  VisualizationLayerSettingsProps,
+  LensPartitionLayerState,
+  LensPartitionVisualizationState,
+} from '@kbn/lens-common';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 
 describe('layer settings', () => {
   describe('multiple metrics switch', () => {
-    const getState = (allowMultipleMetrics: boolean): PieVisualizationState => ({
+    const getState = (allowMultipleMetrics: boolean): LensPartitionVisualizationState => ({
       shape: 'pie',
       layers: [
         {
           layerId,
           allowMultipleMetrics,
-        } as PieLayerState,
+        } as LensPartitionLayerState,
       ],
     });
 
     const layerId = 'layer-id';
-    const props: VisualizationLayerSettingsProps<PieVisualizationState> & {
+    const props: VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
       section: 'data' | 'appearance';
     } = {
       setState: jest.fn(),
@@ -38,17 +41,17 @@ describe('layer settings', () => {
 
     const renderLayerSettings = (
       propsOverrides?: Partial<
-        VisualizationLayerSettingsProps<PieVisualizationState> & {
+        VisualizationLayerSettingsProps<LensPartitionVisualizationState> & {
           section: 'data' | 'appearance';
         }
       >
     ) => render(<LayerSettings {...props} {...propsOverrides} />);
 
-    it('toggles multiple metrics', async () => {
+    it('toggles multiple metrics', () => {
       renderLayerSettings();
       expect(props.setState).not.toHaveBeenCalled();
       const toggle = screen.getByRole('switch');
-      await userEvent.click(toggle);
+      fireEvent.click(toggle);
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [
@@ -61,7 +64,7 @@ describe('layer settings', () => {
       cleanup();
 
       renderLayerSettings({ state: getState(true) });
-      await userEvent.click(screen.getByRole('switch'));
+      fireEvent.click(screen.getByRole('switch'));
       expect(props.setState).toHaveBeenLastCalledWith({
         ...props.state,
         layers: [

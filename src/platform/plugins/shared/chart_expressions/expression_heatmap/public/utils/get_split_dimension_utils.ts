@@ -10,8 +10,8 @@
 import type { AccessorFn } from '@elastic/charts';
 import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
+import { getColumnByAccessor } from '@kbn/chart-expressions-common';
 
 export const getSplitDimensionAccessor = (
   columns: DatatableColumn[],
@@ -28,7 +28,7 @@ export const getSplitDimensionAccessor = (
       return;
     }
 
-    const f = formatter.convert(v);
+    const f = formatter.convertToText(v);
     return f;
   };
 
@@ -46,7 +46,7 @@ export function createSplitPoint(
 
   const formatter = formatFactory(splitChartColumn.meta?.params);
   const splitPointRowIndex = table.rows.findIndex((row) => {
-    return formatter.convert(row[accessor]) === value;
+    return formatter.convertToText(row[accessor]) === value;
   });
   if (splitPointRowIndex !== -1) {
     return {

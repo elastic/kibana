@@ -53,11 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
         generation: 1,
         health: 'green',
         ilmPolicyName: 'kibana-reporting',
-        maxTimeStamp: 0,
+        maxTimeStamp: expect.any(Number),
         privileges: {
           delete_index: true,
           manage_data_stream_lifecycle: true,
           read_failure_store: true,
+          manage: true,
         },
         hidden: true,
         lifecycle: { enabled: true },
@@ -65,7 +66,12 @@ export default function ({ getService }: FtrProviderContext) {
         storageSize: expect.any(String),
         storageSizeBytes: expect.any(Number),
         failureStoreEnabled: false,
+        matchesFailureStoreClusterPattern: false,
         indexMode: 'standard',
+        failureStoreRetention: {
+          defaultRetentionPeriod: '30d',
+          retentionDisabled: false,
+        },
       });
     });
   });

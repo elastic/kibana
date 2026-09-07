@@ -5,95 +5,95 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
-import type { SetupResult } from './processor.helpers';
-import { setup, getProcessorValue, setupEnvironment } from './processor.helpers';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { getProcessorValue, renderProcessorEditor, setupEnvironment } from './processor.helpers';
 
 const COMMUNITY_ID_TYPE = 'community_id';
 
 describe('Processor: Community id', () => {
   let onUpdate: jest.Mock;
-  let testBed: SetupResult;
-  const { httpSetup } = setupEnvironment();
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
+  let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    ({ httpSetup } = setupEnvironment());
     onUpdate = jest.fn();
 
-    await act(async () => {
-      testBed = await setup(httpSetup, {
-        value: {
-          processors: [],
-        },
-        onFlyoutOpen: jest.fn(),
-        onUpdate,
-      });
+    renderProcessorEditor(httpSetup, {
+      value: {
+        processors: [],
+      },
+      onFlyoutOpen: jest.fn(),
+      onUpdate,
     });
 
-    testBed.component.update();
+    fireEvent.click(screen.getByTestId('addProcessorButton'));
+    fireEvent.change(within(screen.getByTestId('processorTypeSelector')).getByTestId('input'), {
+      target: { value: COMMUNITY_ID_TYPE },
+    });
 
-    // Open flyout to add new processor
-    testBed.actions.addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await testBed.actions.addProcessorType(COMMUNITY_ID_TYPE);
+    await screen.findByTestId('addProcessorForm');
   });
 
   test('can submit if no fields are filled', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
     // Click submit button with no fields filled
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
 
     // Expect no form errors
-    expect(form.getErrorsMessages()).toHaveLength(0);
+    await waitFor(() => expect(screen.queryAllByText(/is required\./)).toHaveLength(0));
   });
 
   test('allows to set either iana_number or transport', async () => {
-    const { find, form } = testBed;
+    const ianaField = await screen.findByTestId('ianaField');
+    const transportField = screen.getByTestId('transportField');
 
-    expect(find('ianaField.input').exists()).toBe(true);
-    expect(find('transportField.input').exists()).toBe(true);
+    const ianaInput = within(ianaField).getByTestId('input');
+    const transportInput = within(transportField).getByTestId('input');
 
-    form.setInputValue('ianaField.input', 'iana_number');
-    expect(find('transportField.input').props().disabled).toBe(true);
+    fireEvent.change(ianaInput, { target: { value: 'iana_number' } });
+    await waitFor(() => expect(transportInput).toBeDisabled());
 
-    form.setInputValue('ianaField.input', '');
-    form.setInputValue('transportField.input', 'transport');
-    expect(find('ianaField.input').props().disabled).toBe(true);
+    fireEvent.change(ianaInput, { target: { value: '' } });
+    fireEvent.change(transportInput, { target: { value: 'transport' } });
+    await waitFor(() => expect(ianaInput).toBeDisabled());
   });
 
   test('allows optional parameters to be set', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    form.toggleEuiSwitch('ignoreMissingSwitch.input');
-    form.toggleEuiSwitch('ignoreFailureSwitch.input');
-    form.setInputValue('sourceIpField.input', 'source.ip');
-    form.setInputValue('sourcePortField.input', 'source.port');
-    form.setInputValue('targetField.input', 'target_field');
-    form.setInputValue('destinationIpField.input', 'destination.ip');
-    form.setInputValue('destinationPortField.input', 'destination.port');
-    form.setInputValue('icmpTypeField.input', 'icmp_type');
-    form.setInputValue('icmpCodeField.input', 'icmp_code');
-    form.setInputValue('ianaField.input', 'iana');
-    form.setInputValue('seedField.input', '10');
+    fireEvent.click(within(screen.getByTestId('ignoreMissingSwitch')).getByTestId('input'));
+    fireEvent.click(within(screen.getByTestId('ignoreFailureSwitch')).getByTestId('input'));
+    fireEvent.change(within(screen.getByTestId('sourceIpField')).getByTestId('input'), {
+      target: { value: 'source.ip' },
+    });
+    fireEvent.change(within(screen.getByTestId('sourcePortField')).getByTestId('input'), {
+      target: { value: 'source.port' },
+    });
+    fireEvent.change(within(screen.getByTestId('targetField')).getByTestId('input'), {
+      target: { value: 'target_field' },
+    });
+    fireEvent.change(within(screen.getByTestId('destinationIpField')).getByTestId('input'), {
+      target: { value: 'destination.ip' },
+    });
+    fireEvent.change(within(screen.getByTestId('destinationPortField')).getByTestId('input'), {
+      target: { value: 'destination.port' },
+    });
+    fireEvent.change(within(screen.getByTestId('icmpTypeField')).getByTestId('input'), {
+      target: { value: 'icmp_type' },
+    });
+    fireEvent.change(within(screen.getByTestId('icmpCodeField')).getByTestId('input'), {
+      target: { value: 'icmp_code' },
+    });
+    fireEvent.change(within(screen.getByTestId('ianaField')).getByTestId('input'), {
+      target: { value: 'iana' },
+    });
+    fireEvent.change(within(screen.getByTestId('seedField')).getByTestId('input'), {
+      target: { value: '10' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
     expect(processors[0][COMMUNITY_ID_TYPE]).toEqual({
       ignore_failure: true,
       ignore_missing: false,
@@ -110,49 +110,43 @@ describe('Processor: Community id', () => {
   });
 
   test('should not add a processor if the seedField is smaller than min_value', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    form.setInputValue('seedField.input', '-1');
+    fireEvent.change(within(screen.getByTestId('seedField')).getByTestId('input'), {
+      target: { value: '-1' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });
 
   test('should not add a processor if the seedField is bigger than max_value', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    form.setInputValue('seedField.input', '65536');
+    fireEvent.change(within(screen.getByTestId('seedField')).getByTestId('input'), {
+      target: { value: '65536' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });
 
   test('should not add a processor if the seedField is not an integer', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    form.setInputValue('seedField.input', '10.2');
+    fireEvent.change(within(screen.getByTestId('seedField')).getByTestId('input'), {
+      target: { value: '10.2' },
+    });
 
     // Save the field with new changes
-    await saveNewProcessor();
+    fireEvent.click(within(screen.getByTestId('addProcessorForm')).getByTestId('submitButton'));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
 
-    const processors = getProcessorValue(onUpdate, COMMUNITY_ID_TYPE);
+    const processors = getProcessorValue(onUpdate);
 
     expect(processors).toHaveLength(0);
   });

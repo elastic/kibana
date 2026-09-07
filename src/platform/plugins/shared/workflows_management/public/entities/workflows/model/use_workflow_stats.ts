@@ -7,27 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useQuery } from '@tanstack/react-query';
-import type { WorkflowStatsDto } from '@kbn/workflows/types/v1';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { useQuery } from '@kbn/react-query';
+import type { WorkflowsSearchParams, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import { useWorkflowsApi } from '@kbn/workflows-ui';
 
 export function useWorkflowStats() {
-  const { http } = useKibana().services;
+  const api = useWorkflowsApi();
 
   return useQuery<WorkflowStatsDto>({
     networkMode: 'always',
     queryKey: ['workflows', 'stats'],
-    queryFn: () => http!.get(`/api/workflows/stats`),
+    queryFn: () => api.getStats(),
   });
 }
 
-export function useWorkflowFiltersOptions(fields: string[]) {
-  const { http } = useKibana().services;
+export function useWorkflowFiltersOptions(
+  fields: string[],
+  managed?: WorkflowsSearchParams['managed']
+) {
+  const api = useWorkflowsApi();
 
   return useQuery<Record<string, Array<EuiSelectableOption>>>({
     networkMode: 'always',
-    queryKey: ['workflows', 'aggs', fields],
-    queryFn: () => http!.get(`/api/workflows/aggs`, { query: { fields } }),
+    queryKey: ['workflows', 'aggs', fields, managed],
+    queryFn: () => api.getAggs({ fields, managed }),
   });
 }

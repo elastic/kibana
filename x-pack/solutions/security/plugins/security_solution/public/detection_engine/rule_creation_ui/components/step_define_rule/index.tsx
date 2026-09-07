@@ -364,7 +364,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             defaultMessage: 'Index Patterns',
           }
         ),
-        iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkInCircleFilled' : 'empty',
+        iconType: dataSourceType === DataSourceType.IndexPatterns ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.IndexPatterns}`,
       },
       {
@@ -372,7 +372,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         label: i18nCore.translate('xpack.securitySolution.ruleDefine.indexTypeSelect.dataView', {
           defaultMessage: 'Data View',
         }),
-        iconType: dataSourceType === DataSourceType.DataView ? 'checkInCircleFilled' : 'empty',
+        iconType: dataSourceType === DataSourceType.DataView ? 'checkCircleFill' : 'empty',
         'data-test-subj': `rule-index-toggle-${DataSourceType.DataView}`,
       },
     ],
@@ -393,14 +393,16 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 id="xpack.securitySolution.dataViewSelectorText1"
                 defaultMessage="Use Kibana "
               />
-              <DocLink guidePath="kibana" docPath="data-views.html" linkText="Data Views" />
+              <DocLink
+                docPath="explore-analyze/find-and-organize/data-views"
+                linkText="Data Views"
+              />
               <FormattedMessage
                 id="xpack.securitySolution.dataViewSelectorText2"
                 defaultMessage=" or specify individual "
               />
               <DocLink
-                guidePath="kibana"
-                docPath="index-patterns-api-create.html"
+                docPath="api/doc/kibana/group/endpoint-data-views"
                 linkText="index patterns"
               />
               <FormattedMessage

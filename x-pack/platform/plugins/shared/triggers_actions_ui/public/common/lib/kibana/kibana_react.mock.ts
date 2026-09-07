@@ -20,13 +20,21 @@ import type { RuleTypeRegistryContract, ActionTypeRegistryContract } from '../..
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
   const licensingPluginMock = licensingMock.createStart();
   return {
     ...core,
-    actions: { validateEmailAddresses: jest.fn(), enabledEmailServices: ['*'] },
+    actions: {
+      validateEmailAddresses: jest.fn(),
+      enabledEmailServices: ['*'],
+      isEarsEnabled: false,
+      isEarsExperimentalEnabled: false,
+      isInboundEventsEnabled: false,
+    },
     ruleTypeRegistry: {
       has: jest.fn(),
       register: jest.fn(),
@@ -48,6 +56,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     dataViewEditor: {
       openEditor: jest.fn(),
     } as unknown as DataViewEditorStart,
+    uiActions: uiActionsPluginMock.createStartContract(),
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     actionTypeRegistry: {
       has: jest.fn(),
@@ -68,6 +77,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     lens: lensPluginMock.createStartContract(),
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+    security: { ...core.security, ...securityMock.createStart() },
   } as TriggersAndActionsUiServices;
 };
 

@@ -9,5 +9,6 @@
 
 export * from './status';
 export * from './types';
+export * from './ebt_utils';
 
 export const SEARCH_SESSIONS_TABLE_ID = 'searchSessionsMgmtUiTable';

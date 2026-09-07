@@ -33,8 +33,8 @@ const defaultConfig: ConfigSchema = {
     alertDetails: {
       uptime: { enabled: false },
     },
-    managedOtlpServiceUrl: '',
   },
+  managedOtlpServiceUrl: '',
 };
 describe('isAlertDetailsEnabled', () => {
   describe('Logs alert', () => {
@@ -68,8 +68,8 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: false },
           },
-          managedOtlpServiceUrl: '',
         },
+        managedOtlpServiceUrl: '',
       };
       expect(isAlertDetailsEnabledPerApp(logsAlert, updatedConfig)).toBeTruthy();
     });
@@ -99,8 +99,8 @@ describe('isAlertDetailsEnabled', () => {
       start: 1630587249674,
       lastUpdated: 1630588131750,
     } as unknown as TopAlert;
-    it('returns FALSE when the rule type IS NOT apm.transaction_duration', () => {
-      expect(isAlertDetailsEnabledPerApp(APMAlert, defaultConfig)).toBeFalsy();
+    it('returns TRUE when the rule type is apm.transaction_error_rate', () => {
+      expect(isAlertDetailsEnabledPerApp(APMAlert, defaultConfig)).toBeTruthy();
     });
 
     it('returns TRUE when rule type is apm.transaction_duration', () => {
@@ -109,8 +109,8 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: false },
           },
-          managedOtlpServiceUrl: '',
         },
+        managedOtlpServiceUrl: '',
       };
       const apmTransactionDurationAlert = {
         ...APMAlert,
@@ -184,8 +184,8 @@ describe('isAlertDetailsEnabled', () => {
             metrics: { enabled: false },
             uptime: { enabled: true },
           },
-          managedOtlpServiceUrl: '',
         },
+        managedOtlpServiceUrl: '',
       } as ConfigSchema;
       expect(isAlertDetailsEnabledPerApp(uptimeAlert, updatedConfig)).toBeTruthy();
     });
@@ -225,8 +225,8 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: true },
           },
-          managedOtlpServiceUrl: '',
         },
+        managedOtlpServiceUrl: '',
       };
       expect(isAlertDetailsEnabledPerApp(null, updatedConfig)).toBeFalsy();
     });
@@ -236,8 +236,8 @@ describe('isAlertDetailsEnabled', () => {
           alertDetails: {
             uptime: { enabled: true },
           },
-          managedOtlpServiceUrl: '',
         },
+        managedOtlpServiceUrl: '',
       };
       const noneListedRuleType = {
         reason: 'reason message',

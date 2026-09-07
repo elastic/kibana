@@ -11,7 +11,7 @@ import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { generateData, config } from './generate_data';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

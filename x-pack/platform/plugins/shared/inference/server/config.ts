@@ -14,6 +14,7 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       minThreads: schema.number({ defaultValue: 0, min: 0 }),
       maxThreads: schema.number({ defaultValue: 3, min: 1 }),
+      maxQueue: schema.number({ defaultValue: 20, min: 1 }),
       idleTimeout: schema.duration({ defaultValue: '30s' }),
       taskTimeout: schema.duration({ defaultValue: '15s' }),
     }),

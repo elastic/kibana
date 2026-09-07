@@ -7,9 +7,12 @@
 
 import { EuiBasicTable } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { i18n as kibanaI18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 
+import { useSelector } from 'react-redux-v7';
+import { DeleteConfirmModal } from '../../../../notes/components/delete_confirm_modal';
 import * as i18n from '../translations';
 import type {
   ActionTimelineToShow,
@@ -26,13 +29,14 @@ import type {
 import { getActionsColumns } from './actions_columns';
 import { getCommonColumns } from './common_columns';
 import { getExtendedColumns } from './extended_columns';
-import { getIconHeaderColumns } from './icon_header_columns';
+import { getIconHeaderColumns, getSuperTimelineQueryTypeColumn } from './icon_header_columns';
 import {
   TimelineStatusEnum,
   type TimelineType,
   TimelineTypeEnum,
 } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { selectNotesTablePendingDeleteIds } from '../../../../notes';
 
 /**
  * Returns the column definitions (passed as the `columns` prop to
@@ -78,7 +82,8 @@ export const getTimelinesTableColumns = ({
     }),
     ...getExtendedColumns(showExtendedColumns),
     ...getIconHeaderColumns({ timelineType }),
-    ...(actionTimelineToShow.length
+    ...(timelineType !== TimelineTypeEnum.template ? [getSuperTimelineQueryTypeColumn()] : []),
+    ...(actionTimelineToShow.some((a) => a !== 'selectable')
       ? getActionsColumns({
           onCreateRule,
           onCreateRuleFromEql,
@@ -147,6 +152,8 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
     timelineType,
     totalSearchResultsCount,
   }) => {
+    const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
+
     const pagination = useMemo(() => {
       return {
         showPerPageOptions: showExtendedColumns,
@@ -223,29 +230,35 @@ export const TimelinesTable = React.memo<TimelinesTableProps>(
         : i18n.ZERO_TIMELINES_MATCH;
 
     return (
-      <EuiBasicTable
-        columns={columns}
-        data-test-subj="timelines-table"
-        itemId="savedObjectId"
-        itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
-        items={searchResults ?? []}
-        loading={isLoading}
-        noItemsMessage={noItemsMessage}
-        onChange={onTableChange}
-        pagination={pagination}
-        selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
-        sorting={sorting}
-        css={css`
-          .euiTableCellContent {
-            animation: none; /* Prevents applying max-height from animation */
-          }
+      <>
+        {pendingDeleteIds.length > 0 && <DeleteConfirmModal />}
+        <EuiBasicTable
+          tableCaption={kibanaI18n.translate('xpack.securitySolution.timeline.timelinesCaption', {
+            defaultMessage: 'Timelines',
+          })}
+          columns={columns}
+          data-test-subj="timelines-table"
+          itemId="savedObjectId"
+          itemIdToExpandedRowMap={itemIdToExpandedNotesRowMap}
+          items={searchResults ?? []}
+          loading={isLoading}
+          noItemsMessage={noItemsMessage}
+          onChange={onTableChange}
+          pagination={pagination}
+          selection={actionTimelineToShow.includes('selectable') ? selection : undefined}
+          sorting={sorting}
+          css={css`
+            .euiTableCellContent {
+              animation: none; /* Prevents applying max-height from animation */
+            }
 
-          .euiTableRow-isExpandedRow .euiTableCellContent__text {
-            width: 100%; /* Fixes collapsing nested flex content in IE11 */
-          }
-        `}
-        ref={tableRef}
-      />
+            .euiTableRow-isExpandedRow .euiTableCellContent__text {
+              width: 100%; /* Fixes collapsing nested flex content in IE11 */
+            }
+          `}
+          ref={tableRef}
+        />
+      </>
     );
   }
 );

@@ -20,10 +20,12 @@ import {
   EuiFlexGroup,
   EuiPopover,
   EuiSelect,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import { ML_DETECTOR_RULE_FILTER_TYPE } from '@kbn/ml-anomaly-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { filterTypeToText } from './utils';
 
@@ -70,12 +72,12 @@ export class ScopeExpression extends Component {
     updateScope(fieldName, filterId, filterType, event.target.checked);
   };
 
-  renderFilterListPopover() {
+  renderFilterListPopover(titleId) {
     const { filterId, filterType, filterListIds } = this.props;
 
     return (
       <div>
-        <EuiPopoverTitle>
+        <EuiPopoverTitle id={titleId}>
           <FormattedMessage
             id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
             defaultMessage="Is"
@@ -98,6 +100,12 @@ export class ScopeExpression extends Component {
                     text: filterTypeToText(ML_DETECTOR_RULE_FILTER_TYPE.EXCLUDE),
                   },
                 ]}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterTypeSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter type',
+                  }
+                )}
               />
             </EuiFlexItem>
 
@@ -107,6 +115,12 @@ export class ScopeExpression extends Component {
                 onChange={this.onChangeFilterId}
                 data-test-subj="mlScopeFilterIdSelect"
                 options={getFilterListOptions(filterListIds)}
+                aria-label={i18n.translate(
+                  'xpack.ml.ruleEditor.scopeExpression.filterListSelectAriaLabel',
+                  {
+                    defaultMessage: 'Filter list',
+                  }
+                )}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -117,12 +131,14 @@ export class ScopeExpression extends Component {
 
   render() {
     const { fieldName, filterId, filterType, enabled, filterListIds } = this.props;
+    const filterTypeTitleId = htmlIdGenerator()('filterTypeTitle');
 
     return (
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={`scope_cb_${fieldName}`}
+            data-test-subj={`mlScopeCheckbox_${fieldName}`}
             checked={enabled}
             onChange={this.onEnableChange}
           />
@@ -148,6 +164,7 @@ export class ScopeExpression extends Component {
           <EuiFlexItem grow={false}>
             <EuiPopover
               id="operatorValuePopover"
+              aria-labelledby={filterTypeTitleId}
               button={
                 <EuiExpression
                   description={
@@ -169,7 +186,7 @@ export class ScopeExpression extends Component {
               ownFocus
               anchorPosition="downLeft"
             >
-              {this.renderFilterListPopover()}
+              {this.renderFilterListPopover(filterTypeTitleId)}
             </EuiPopover>
           </EuiFlexItem>
         )}

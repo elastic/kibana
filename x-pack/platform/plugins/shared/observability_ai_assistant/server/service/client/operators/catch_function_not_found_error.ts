@@ -7,16 +7,16 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { catchError, filter, of, share, throwError } from 'rxjs';
+import { v4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
+import { isToolNotFoundError } from '@kbn/inference-common';
 import { MessageRole } from '../../../../common';
 import type {
   ChatCompletionChunkEvent,
+  MessageAddEvent,
   MessageOrChatEvent,
 } from '../../../../common/conversation_complete';
-import {
-  isFunctionNotFoundError,
-  StreamingChatResponseEventType,
-} from '../../../../common/conversation_complete';
+import { StreamingChatResponseEventType } from '../../../../common/conversation_complete';
 import { emitWithConcatenatedMessage } from '../../../../common/utils/emit_with_concatenated_message';
 
 function appendFunctionLimitExceededErrorMessageToAssistantResponse(): OperatorFunction<
@@ -75,13 +75,30 @@ export function catchFunctionNotFoundError(
 
     return shared$.pipe(
       catchError((error) => {
-        if (isFunctionNotFoundError(error)) {
+        if (isToolNotFoundError(error)) {
           if (functionLimitExceeded) {
             return chunksWithoutErrors$.pipe(
               appendFunctionLimitExceededErrorMessageToAssistantResponse()
             );
           }
-          return chunksWithoutErrors$.pipe(emitWithConcatenatedMessage());
+          // Instead of throwing error, return a message with the function name, to be handled by the function client
+          const simpleMessage: MessageAddEvent = {
+            type: StreamingChatResponseEventType.MessageAdd as const,
+            id: v4(),
+            message: {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                content: '',
+                role: MessageRole.Assistant,
+                function_call: {
+                  name: error.meta.name,
+                  arguments: '',
+                  trigger: MessageRole.Assistant,
+                },
+              },
+            },
+          };
+          return of(simpleMessage);
         }
         return throwError(() => error);
       })

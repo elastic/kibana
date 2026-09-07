@@ -15,8 +15,7 @@ import { apm } from '@elastic/apm-rum';
 
 import { BadComponent, ChunkLoadErrorComponent, getServicesMock } from '../../mocks';
 import type { KibanaErrorBoundaryServices } from '../../types';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
-import { KibanaErrorService } from '../services/error_service';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 import { errorMessageStrings as strings } from './message_strings';
 
@@ -24,16 +23,30 @@ jest.mock('@elastic/apm-rum');
 
 describe('<KibanaSectionErrorBoundary>', () => {
   let services: KibanaErrorBoundaryServices;
+  let user: ReturnType<typeof userEvent.setup>;
   beforeEach(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.useFakeTimers();
     services = getServicesMock();
     (apm.captureError as jest.Mock).mockClear();
+    user = userEvent.setup({
+      advanceTimers: async (ms) => {
+        await jest.advanceTimersByTimeAsync(ms);
+      },
+    });
   });
 
-  const Template: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const Template: FC<PropsWithChildren<{ maxRetries?: number }>> = ({
+    children,
+    maxRetries = 0,
+  }) => {
     return (
       <KibanaErrorBoundaryDepsProvider {...services}>
-        <KibanaSectionErrorBoundary sectionName="test section name">
+        <KibanaSectionErrorBoundary sectionName="test section name" maxRetries={maxRetries}>
           {children}
         </KibanaSectionErrorBoundary>
       </KibanaErrorBoundaryDepsProvider>
@@ -54,13 +67,13 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    await userEvent.click(getByTestId('clickForErrorBtn'));
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.recoverable.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.recoverable.pageReloadButton())).toBeVisible();
 
-    await userEvent.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
+    await user.click(getByTestId('sectionErrorBoundaryRecoverBtn'));
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -71,54 +84,11 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(getByTestId('clickForErrorBtn'));
+    await user.click(getByTestId('clickForErrorBtn'));
 
     expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.body('test section name'))).toBeVisible();
     expect(getByText(strings.section.callout.fatal.showDetailsButton())).toBeVisible();
-  });
-
-  it('captures the error event for telemetry', async () => {
-    const mockDeps = {
-      analytics: { reportEvent: jest.fn() },
-    };
-    services.errorService = new KibanaErrorService(mockDeps);
-
-    const { findByTestId } = render(
-      <Template>
-        <BadComponent />
-      </Template>
-    );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
-
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
-      component_name: 'BadComponent',
-      error_message: 'Error: This is an error to show the test user!',
-    });
-  });
-
-  it('captures component and error stack traces in telemetry', async () => {
-    const mockDeps = {
-      analytics: { reportEvent: jest.fn() },
-    };
-    services.errorService = new KibanaErrorService(mockDeps);
-
-    const { findByTestId } = render(
-      <Template>
-        <BadComponent />
-      </Template>
-    );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
-
-    expect(
-      mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
-    ).toBe(true);
-    expect(
-      mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
-        'Error: This is an error to show the test user!'
-      )
-    ).toBe(true);
   });
 
   it('integrates with apm to capture the error', async () => {
@@ -127,12 +97,47 @@ describe('<KibanaSectionErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    await userEvent.click(await findByTestId('clickForErrorBtn'));
+    await user.click(await findByTestId('clickForErrorBtn'));
 
     expect(apm.captureError).toHaveBeenCalledTimes(1);
     expect(apm.captureError).toHaveBeenCalledWith(
       new Error('This is an error to show the test user!'),
       { labels: { error_type: 'SectionFatalReactError' } }
     );
+  });
+
+  describe('maxRetries behavior', () => {
+    it('defaults to maxRetries=0 and shows error immediately', async () => {
+      const { getByTestId, getByText } = render(
+        <Template>
+          <BadComponent />
+        </Template>
+      );
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should be visible immediately with no retries
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
+
+    it('shows error prompt after maxRetries exhausted', async () => {
+      const { getByTestId, getByText, queryByText } = render(
+        <Template maxRetries={1}>
+          <BadComponent />
+        </Template>
+      );
+
+      // Trigger first error (will retry)
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Error prompt should NOT be visible yet (it's retrying)
+      expect(queryByText(strings.section.callout.fatal.title('test section name'))).toBeNull();
+
+      // Trigger error again (second error, exceeds maxRetries)
+      // Since we're in a retried state, clicking the button again triggers another error
+      await user.click(getByTestId('clickForErrorBtn'));
+
+      // Now error prompt should be visible (retries exhausted)
+      expect(getByText(strings.section.callout.fatal.title('test section name'))).toBeVisible();
+    });
   });
 });

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  validateCommonConfig,
-  validateCommonSecrets,
-  validateCommonConnector,
-  validateOtherFieldsKeys,
-} from './validators';
+import { validateCommonConfig, validateCommonSecrets, validateCommonConnector } from './validators';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 
 const configurationUtilities = actionsConfigMock.create();
@@ -432,14 +427,6 @@ describe('validateCommonConnector', () => {
         )
       ).toEqual(
         `clientId, clientSecret, userIdentifierValue, jwtKeyId and privateKey should not be provided with isOAuth = false`
-      );
-    });
-  });
-
-  describe('validateOtherFieldsKeys', () => {
-    it('returns an error if the keys are not allowed', () => {
-      expect(validateOtherFieldsKeys('short_description')).toEqual(
-        'The following properties cannot be defined inside additional_fields: short_description.'
       );
     });
   });

@@ -10,7 +10,7 @@ import { subj } from '@kbn/test-subj-selector';
 
 export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/promotion_tracking_dashboard'],
-  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce'],
+  esArchives: ['x-pack/performance/es_archives/sample_data_ecommerce_many_fields'],
   scalabilitySetup: {
     warmup: [
       {
@@ -45,8 +45,21 @@ export const journey = new Journey({
   })
 
   .step('Change time range', async ({ page }) => {
-    await page.click(subj('superDatePickerToggleQuickMenuButton'));
-    await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
+    // Either picker variant may be present depending on the feature flag state.
+    const control = page
+      .locator(
+        `[data-test-subj="dateRangePickerControlButton"], [data-test-subj="superDatePickerToggleQuickMenuButton"]`
+      )
+      .first();
+    await control.waitFor({ timeout: 10000 });
+    const testSubj = await control.getAttribute('data-test-subj');
+    if (testSubj === 'dateRangePickerControlButton') {
+      await control.click();
+      await page.click(subj('dateRangePickerPresetItem-Last_30_days'));
+    } else {
+      await control.click();
+      await page.click(subj('superDatePickerCommonlyUsed_Last_30 days'));
+    }
   })
 
   .step('Wait for visualization animations to finish', async ({ kibanaPage }) => {

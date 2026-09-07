@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
-
 import { EuiFormFieldset } from '@elastic/eui';
+import type { Meta, StoryFn } from '@storybook/react';
 import { Template } from '../../mocks/src/storybook_template';
 import { BadComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
-import { KibanaErrorBoundary } from './error_boundary';
-import { KibanaSectionErrorBoundary } from './section_error_boundary';
 
 import mdx from '../../README.mdx';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
+import { KibanaErrorBoundary } from './error_boundary';
+import { KibanaSectionErrorBoundary } from './section_error_boundary';
 
 const storybookMock = new KibanaErrorBoundaryStorybookMock();
 

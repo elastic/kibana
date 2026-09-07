@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -19,8 +18,9 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
 import {
@@ -97,7 +97,7 @@ export const PostInstallGoogleCloudShellModal: React.FunctionComponent<{
         {error && isError && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <KbnDangerCallout announceOnMount title={error} />
           </>
         )}
       </EuiModalBody>

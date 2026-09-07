@@ -64,7 +64,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"I\'m multiline\n*&%$#@"');
+    expect(result.formattedString).toBe('"I\'m multiline\n*&%$\\#|@"');
     expect(result.withFormula).toBe(false);
   });
 
@@ -569,6 +569,33 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe(
       '{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}'
     );
+  });
+
+  it('should copy the _source column as the rendered nested document in JSON mode', () => {
+    const params = {
+      rows: dataTableContextComplexRowsMock,
+      dataView: dataTableContextComplexMock.dataView,
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: '_source',
+      rowIndex: 0,
+      columnsMeta: undefined,
+      options: { compatibleWithCSV: true },
+    };
+
+    const flattened = convertValueToString(params).formattedString;
+    const nested = convertValueToString({
+      ...params,
+      documentsDisplayMode: 'json',
+      shouldShowFieldHandler: () => true,
+    }).formattedString;
+
+    // Summary/default copies the flattened source (dotted keys); JSON mode copies the nested
+    // document as the tree viewer renders it (dotted keys become nested objects).
+    expect(flattened).toContain('"object_user.first"');
+
+    const parsedNested = JSON.parse(nested);
+    expect(parsedNested).toHaveProperty('object_user.first'); // the dotted path resolves
+    expect(parsedNested).not.toHaveProperty(['object_user.first']); // no literal dotted key
   });
 
   it('should escape formula', () => {

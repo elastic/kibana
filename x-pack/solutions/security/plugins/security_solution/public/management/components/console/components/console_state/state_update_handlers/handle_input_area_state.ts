@@ -49,7 +49,8 @@ type InputAreaStateAction = ConsoleDataAction & {
     | 'updateInputTextEnteredState'
     | 'updateInputPlaceholderState'
     | 'setInputState'
-    | 'updateInputCommandArgState';
+    | 'updateInputCommandArgState'
+    | 'updateInputSuggestionState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -153,7 +154,6 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
                 argsWithValueSelectors[argName] = argDef;
 
                 // Clear selector argument values for clean commands (e.g., from history)
-                // This ensures specific selectors start fresh instead of showing old values - when command argument contains selectorShowTextValue set to true
                 // BUT: Don't clear if we already have values from preprocessing (paste, history, etc.)
                 if (
                   parsedInput.hasArg(argName) &&
@@ -204,6 +204,15 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         };
       }
       break;
+
+    case 'updateInputSuggestionState':
+      return {
+        ...state,
+        input: {
+          ...state.input,
+          suggestion: payload.suggestion,
+        },
+      };
 
     case 'setInputState':
       if (state.input.visibleState !== payload.value) {

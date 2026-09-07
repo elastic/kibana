@@ -13,6 +13,8 @@ export const SCHEDULED_REPORTING_EXECUTE_TYPE = 'report:execute-scheduled';
 
 export const TIME_BETWEEN_ATTEMPTS = 10 * 1000; // 10 seconds
 
+export const FORCE_TIMEOUT_GRACE_PERIOD = 30 * 1000; // 30 seconds
+
 export { RunSingleReportTask } from './run_single_report';
 export { RunScheduledReportTask } from './run_scheduled_report';
 
@@ -25,6 +27,7 @@ export interface ReportTaskParams<JobPayloadType = BasePayload> {
   jobtype: ReportSource['jobtype'];
   attempts: ReportSource['attempts'];
   meta: ReportSource['meta'];
+  useInternalUser?: boolean;
 }
 
 export interface ScheduledReportTaskParams {

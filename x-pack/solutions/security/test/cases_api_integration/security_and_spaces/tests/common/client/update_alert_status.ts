@@ -43,6 +43,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 
@@ -62,6 +63,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseReq,
         settings: {
           syncAlerts: false,
+          extractObservables: false,
         },
       });
 
@@ -142,7 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: updatedIndWithStatus.map((caseInfo) => ({
             id: caseInfo.id,
             version: caseInfo.version,
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
           })),
         })
         .expect(200);

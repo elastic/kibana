@@ -6,13 +6,12 @@
  */
 
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsState, IndexPattern } from '@kbn/lens-common';
 import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
 } from '../datasources/form_based/mocks';
-import type { DataViewsState } from '../state_management';
-import type { IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';
 
 /**
@@ -48,7 +47,7 @@ const indexPattern1 = {
   hasRestrictions: false,
   isPersisted: () => true,
   toSpec: () => ({}),
-  getFormatterForField: () => ({ convert: (v: unknown) => v }),
+  getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   fields: [
     {
       name: 'timestamp',
@@ -231,5 +230,9 @@ export function mockDataViewsService() {
       ];
     }),
     create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+    clearInstanceCache: jest.fn(),
+  } as unknown as Pick<
+    DataViewsContract,
+    'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+  >;
 }

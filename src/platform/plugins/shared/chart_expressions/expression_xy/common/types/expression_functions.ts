@@ -18,15 +18,16 @@ import type {
   ExecutionContext,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
-import type {
-  LegendSize,
-  XYLegendValue,
-  LegendLayout,
-  ExpressionValueVisDimension,
-} from '@kbn/visualizations-plugin/common';
 import type { EventAnnotationOutput } from '@kbn/event-annotation-plugin/common';
 
-import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
+import type {
+  MakeOverridesSerializable,
+  Simplify,
+  ExpressionValueVisDimension,
+  LegendLayout,
+  LegendSize,
+  XYLegendValue,
+} from '@kbn/chart-expressions-common';
 import type {
   AxisExtentModes,
   FillStyles,
@@ -58,6 +59,7 @@ import type {
   EXTENDED_ANNOTATION_LAYER,
   EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
   PointVisibilityOptions,
+  AreaFillOptions,
 } from '../constants';
 import type { XYRender } from './expression_renderers';
 
@@ -76,6 +78,7 @@ export type AxisExtentMode = $Values<typeof AxisExtentModes>;
 export type FittingFunction = $Values<typeof FittingFunctions>;
 export type AvailableReferenceLineIcon = $Values<typeof AvailableReferenceLineIcons>;
 export type PointVisibility = $Values<typeof PointVisibilityOptions>;
+export type AreaFillOption = $Values<typeof AreaFillOptions>;
 
 export interface AxesSettingsConfig {
   yLeft: boolean;
@@ -243,6 +246,7 @@ export interface XYArgs extends DataLayerArgs {
   referenceLines: ReferenceLineConfigResult[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -293,6 +297,7 @@ export interface LayeredXYArgs {
   annotations?: ExpressionAnnotationResult;
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];
@@ -318,6 +323,7 @@ export interface XYProps {
   layers: CommonXYLayerConfig[];
   fittingFunction?: FittingFunction;
   fillOpacity?: number;
+  areaFill?: AreaFillOption;
   hideEndzones?: boolean;
   ariaLabel?: string;
   yAxisConfigs?: YAxisConfigResult[];

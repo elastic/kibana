@@ -14,6 +14,7 @@ import type {
   TaskManagerStartContract,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
@@ -78,7 +79,7 @@ export const registerRiskScoringTask = ({
   }
 
   const getRiskScoreService: GetRiskScoreService = (namespace) =>
-    getStartServices().then(([coreStart, _]) => {
+    getStartServices().then(([coreStart, pluginsStart]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
 
@@ -111,6 +112,8 @@ export const registerRiskScoringTask = ({
         auditLogger,
       });
 
+      const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
       return riskScoreServiceFactory({
         assetCriticalityService,
         esClient,
@@ -119,6 +122,8 @@ export const registerRiskScoringTask = ({
         riskScoreDataClient,
         spaceId: namespace,
         experimentalFeatures,
+        uiSettingsClient,
+        crudClient: pluginsStart.entityStore?.createCRUDClient(esClient, namespace),
       });
     });
 
@@ -240,12 +245,12 @@ export const runTask = async ({
     const taskStartTime = moment().utc().toISOString();
     log('running task');
 
-    let scoresWritten = 0;
+    let totalScoresWritten = 0;
     const updatedState = {
       lastExecutionTimestamp: taskStartTime,
       namespace: state.namespace,
       runs: state.runs + 1,
-      scoresWritten,
+      scoresWritten: totalScoresWritten,
     };
 
     if (taskId !== getTaskId(state.namespace)) {
@@ -280,6 +285,7 @@ export const runTask = async ({
       excludeAlertStatuses,
       excludeAlertTags,
       alertSampleSizePerShard,
+      enableResetToZero,
     } = configuration;
     if (!enabled) {
       log('risk engine is not enabled, exiting task');
@@ -298,12 +304,14 @@ export const runTask = async ({
     const runs: Array<{
       identifierType: EntityType;
       scoresWritten: number;
+      resetScoresWritten: number;
       tookMs: number;
     }> = [];
 
     await asyncForEach(identifierTypes, async (identifierType) => {
       let isWorkComplete = isCancelled();
       let afterKeys: AfterKeys = {};
+
       while (!isWorkComplete) {
         const now = Date.now();
         const result = await riskScoreService.calculateAndPersistScores({
@@ -319,26 +327,50 @@ export const runTask = async ({
           excludeAlertStatuses,
           excludeAlertTags,
         });
-        const tookMs = Date.now() - now;
 
+        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
+        const isFirstRunForEntityType = !runs.some((r) => r.identifierType === identifierType);
+
+        /* Tricky boolean logic
+         * Always run resetToZero on first run of an entity type
+         * For any subsequent run, if work is complete we skip resetToZero
+         *
+         * The last run is always an "extra" run, with empty afterKeys and entities list, used to detect work completion
+         * Running reset to zero on an empty list will result in ALL scores being reset to zero, hence skipping it
+         **/
+        let resetScoresWritten = 0;
+        if (
+          (isFirstRunForEntityType || !isWorkComplete) &&
+          experimentalFeatures.enableRiskScoreResetToZero &&
+          enableResetToZero
+        ) {
+          log(`Resetting to zero all ${identifierType} risk scores without recent risk input data`);
+          const resetResult = await riskScoreService.resetToZero({
+            entityType: identifierType,
+            refresh: 'wait_for',
+            excludedEntities: result.entities[identifierType],
+          });
+          resetScoresWritten = resetResult.scoresWritten;
+        }
+
+        const tookMs = Date.now() - now;
         runs.push({
           identifierType,
           scoresWritten: result.scores_written,
+          resetScoresWritten,
           tookMs,
         });
-
-        isWorkComplete = isRiskScoreCalculationComplete(result) || isCancelled();
         afterKeys = result.after_keys;
-        scoresWritten += result.scores_written;
+        totalScoresWritten += result.scores_written + resetScoresWritten;
       }
     });
 
-    updatedState.scoresWritten = scoresWritten;
+    updatedState.scoresWritten = totalScoresWritten;
 
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
     const telemetryEvent = {
-      scoresWritten,
+      scoresWritten: totalScoresWritten,
       taskDurationInSeconds,
       interval: taskInstance?.schedule?.interval,
       alertSampleSizePerShard,
@@ -350,7 +382,7 @@ export const runTask = async ({
       telemetry.reportEvent(RISK_SCORE_EXECUTION_CANCELLATION_EVENT.eventType, telemetryEvent);
     }
 
-    if (scoresWritten > 0) {
+    if (totalScoresWritten > 0) {
       log('refreshing risk score index and scheduling transform');
       await riskScoreService.refreshRiskScoreIndex();
       await riskScoreService.scheduleLatestTransformNow();
@@ -367,6 +399,15 @@ export const runTask = async ({
     throw e;
   }
 };
+
+class RiskEngineAlreadyRunningError extends Error {
+  statusCode = 409;
+
+  constructor() {
+    super('The risk engine is already running');
+  }
+}
+
 export const scheduleNow = async ({
   logger,
   namespace,
@@ -384,6 +425,9 @@ export const scheduleNow = async ({
     await taskManager.runSoon(taskId);
   } catch (e) {
     logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
+    if (e instanceof TaskAlreadyRunningError) {
+      throw new RiskEngineAlreadyRunningError();
+    }
     throw e;
   }
 };

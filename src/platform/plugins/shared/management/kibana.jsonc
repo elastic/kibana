@@ -15,7 +15,12 @@
     ],
     "optionalPlugins": [
       "home",
-      "serverless"
+      "serverless",
+      "cloud",
+      "cps"
+    ],
+    "runtimePluginDependencies": [
+      "fleet"
     ],
     "requiredBundles": [
       "kibanaReact",

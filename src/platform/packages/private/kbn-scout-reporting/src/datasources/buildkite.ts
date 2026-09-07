@@ -14,6 +14,7 @@ export interface BuildkiteMetadata {
   branch?: string;
   commit?: string;
   job_id?: string;
+  retry_count?: number;
   message?: string;
   build: {
     id?: string;
@@ -39,7 +40,17 @@ export interface BuildkiteMetadata {
     label?: string;
   };
   command?: string;
+  triggered_from_build: {
+    id?: string;
+    number?: string;
+    pipeline_slug?: string;
+  };
 }
+
+const parseRetryCount = (value: string | undefined): number => {
+  const parsed = Number.parseInt(value ?? '', 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+};
 
 /**
  * Buildkite information extracted from environment variables
@@ -52,7 +63,7 @@ export const buildkite: BuildkiteMetadata =
         branch: process.env.BUILDKITE_BRANCH,
         commit: process.env.BUILDKITE_COMMIT,
         job_id: process.env.BUILDKITE_JOB_ID,
-        message: process.env.BUILDKITE_MESSAGE,
+        retry_count: parseRetryCount(process.env.BUILDKITE_RETRY_COUNT),
         build: {
           id: process.env.BUILDKITE_BUILD_ID,
           number: process.env.BUILDKITE_BUILD_NUMBER,
@@ -77,6 +88,11 @@ export const buildkite: BuildkiteMetadata =
           label: process.env.BUILDKITE_LABEL,
         },
         command: process.env.BUILDKITE_COMMAND,
+        triggered_from_build: {
+          id: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_ID,
+          number: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_NUMBER,
+          pipeline_slug: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG,
+        },
       }
     : {
         build: {},
@@ -84,4 +100,5 @@ export const buildkite: BuildkiteMetadata =
         agent: {},
         group: {},
         step: {},
+        triggered_from_build: {},
       };

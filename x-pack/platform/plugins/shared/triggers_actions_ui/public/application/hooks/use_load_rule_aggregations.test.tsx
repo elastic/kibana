@@ -11,7 +11,7 @@ import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_l
 import type { RuleStatus } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({
@@ -86,7 +86,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: '',
           actionTypesFilter: [],
@@ -126,7 +126,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: 'test',
           actionTypesFilter: ['action1', 'action2'],
@@ -162,7 +162,7 @@ describe('useLoadRuleAggregations', () => {
     renderHook(() => useLoadRuleAggregations(params), { wrapper });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled()
     );
   });
 });

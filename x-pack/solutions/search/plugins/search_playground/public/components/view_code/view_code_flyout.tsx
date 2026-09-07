@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -128,12 +129,18 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
                     ]}
                     onChange={handleLanguageChange}
                     value={selectedLanguage}
+                    aria-label={i18n.translate(
+                      'xpack.searchPlayground.viewCode.languageSelect.ariaLabel',
+                      {
+                        defaultMessage: 'Code language',
+                      }
+                    )}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="primary"
-                    iconType="popout"
+                    iconType="external"
                     href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
                     data-test-subj="viewCodeManageApiKeys"
                     target="_blank"

@@ -19,7 +19,7 @@ export function CreateCustomLinkButton({ onClick }: { onClick: () => void }) {
       <EuiButton
         color="primary"
         fill
-        iconType="plusInCircle"
+        iconType="plusCircle"
         onClick={onClick}
         isDisabled={!canSave}
         data-test-subj="createButton"

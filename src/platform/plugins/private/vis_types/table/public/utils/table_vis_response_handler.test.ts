@@ -12,7 +12,7 @@ const mockConverter = jest.fn((name) => `By ${name}`);
 jest.mock('../services', () => ({
   getFormatService: jest.fn(() => ({
     deserialize: jest.fn(() => ({
-      convert: mockConverter,
+      convertToText: mockConverter,
     })),
   })),
 }));
@@ -32,7 +32,7 @@ jest.mock('./add_percentage_column', () => ({
 }));
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import { AggTypes } from '../../common';
 import type { TableGroup, TableVisConfig } from '../types';
 import { addPercentageColumn } from './add_percentage_column';

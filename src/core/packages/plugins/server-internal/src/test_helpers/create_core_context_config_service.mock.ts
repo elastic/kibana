@@ -22,7 +22,6 @@ export const createCoreContextConfigServiceMock = (): IConfigService => {
         return {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
-          pingTimeout: duration(30, 's'),
           someOtherProps: 'unused',
         };
       case 'path':

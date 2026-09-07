@@ -16,6 +16,8 @@ import {
 } from './mock';
 import {
   fetchQueryAlerts,
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
@@ -24,10 +26,12 @@ import {
   updateAlertStatusByIds,
 } from './api';
 import { coreMock } from '@kbn/core/public/mocks';
+import { searchAttacks } from '../../../../common/containers/attacks/api';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/containers/attacks/api');
 
 const coreStartMock = coreMock.createStart({ basePath: '/mock' });
 mockKibanaServices.mockReturnValue(coreStartMock);
@@ -58,6 +62,56 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(signalsResp).toEqual(alertsMock);
+    });
+  });
+
+  describe('fetchQueryUnifiedAlerts', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(alertsMock);
+    });
+
+    test('check parameter url, body', async () => {
+      await fetchQueryUnifiedAlerts({ query: mockAlertsQuery, signal: abortCtrl.signal });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/unified_alerts/search',
+        expect.objectContaining({
+          body: '{"aggs":{"alertsByGrouping":{"terms":{"field":"signal.rule.risk_score","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}',
+          method: 'POST',
+          signal: abortCtrl.signal,
+        })
+      );
+    });
+
+    test('happy path', async () => {
+      const signalsResp = await fetchQueryUnifiedAlerts({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+      });
+      expect(signalsResp).toEqual(alertsMock);
+    });
+  });
+
+  describe('fetchQueryAttacks', () => {
+    beforeEach(() => {
+      (searchAttacks as jest.Mock).mockClear();
+      (searchAttacks as jest.Mock).mockResolvedValue(alertsMock);
+    });
+
+    test('calls searchAttacks with query and signal', async () => {
+      await fetchQueryAttacks({ query: mockAlertsQuery, signal: abortCtrl.signal });
+      expect(searchAttacks).toHaveBeenCalledWith({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('happy path', async () => {
+      const attacksResp = await fetchQueryAttacks({
+        query: mockAlertsQuery,
+        signal: abortCtrl.signal,
+      });
+      expect(attacksResp).toEqual(alertsMock);
     });
   });
 

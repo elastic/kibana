@@ -424,7 +424,7 @@ export class ReportExportsTable extends Component<ListingPropsInternal, State> {
             ),
             available: (job) => job.canLinkToKibanaApp,
             type: 'icon',
-            icon: 'popout',
+            icon: 'external',
             onClick: (job) => {
               const href = this.props.apiClient.getKibanaAppHref(job);
               window.open(href, '_blank');

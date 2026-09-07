@@ -12,11 +12,11 @@
  */
 import expect from '@kbn/expect';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { Instance } from '@kbn/apm-synthtrace-client';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { Instance } from '@kbn/synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import type { InstancesSortField } from '@kbn/apm-plugin/common/instances';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace/src/lib/apm/client/apm_synthtrace_es_client';
 import { sum } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';

@@ -28,12 +28,11 @@ export const PageTemplate: React.FC<React.PropsWithChildren<TemplateProps>> = ({
       `}
     >
       {!!customHeader ? customHeader : <Header />}
-      <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
+      <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
         {children}
       </EuiPageTemplate.Section>
       <EuiSpacer size="xl" />
       <EuiPageTemplate.Section
-        contentProps={{ css: { paddingBlock: 0 } }}
         css={css`
           padding-inline: 0px;
           border-top: ${euiTheme.border.thin};

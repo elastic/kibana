@@ -10,6 +10,7 @@ import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { QUICK_PROMPT_BADGE, USER_PROMPT } from '../../screens/ai_assistant';
 import { createRule } from '../../tasks/api_calls/rules';
 import {
+  assertConnectorSelected,
   assertEmptySystemPrompt,
   assertErrorResponse,
   assertMessageSent,
@@ -36,7 +37,9 @@ import {
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
+import { getMockConversation } from '../../objects/assistant';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -75,9 +78,15 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
     deleteConversations();
     deletePrompts();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
-    createAzureConnector();
-    waitForConversation(mockConvo1);
-    waitForConversation(mockConvo2);
+    setPreferredChatExperienceToClassic();
+    createAzureConnector().then(({ body: connector }) => {
+      const apiConfig = {
+        ...getMockConversation().apiConfig,
+        connectorId: connector.id,
+      };
+      waitForConversation({ ...mockConvo1, apiConfig });
+      waitForConversation({ ...mockConvo2, apiConfig });
+    });
   });
 
   describe('System Prompts', () => {
@@ -97,6 +106,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       openAssistant();
       selectSystemPrompt(customPrompt2.name);
       clearSystemPrompt();
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertMessageSent('hello');
       // ensure response before clearing convo
@@ -105,6 +116,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       assertEmptySystemPrompt();
       typeAndSendMessage('hello');
       assertMessageSent('hello');
+      assertErrorResponse();
     });
 
     it('Last selected system prompt persists in conversation', () => {
@@ -116,6 +128,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       typeAndSendMessage('hello');
       assertSystemPromptSent(customPrompt2.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
       resetConversation();
       assertSystemPromptSelected(customPrompt2.name);
       selectConversation(mockConvo2.title);
@@ -131,9 +144,12 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       // we did not set a default conversation, so the prompt should not be set
       assertEmptySystemPrompt();
       selectSystemPrompt(testPrompt.name);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
       assertSystemPromptSent(testPrompt.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
     });
 
     // due to the missing profile_uid when creating conversations from the API
@@ -148,6 +164,8 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       // current conversation is 'Lovely title'
       createSystemPrompt(testPrompt.name, testPrompt.content, ['Lucky title', 'Lovely title']);
       assertSystemPromptSelected(testPrompt.name);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       typeAndSendMessage('hello');
 
       assertSystemPromptSent(testPrompt.content);
@@ -160,6 +178,7 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
 
       assertSystemPromptSent(testPrompt.content);
       assertMessageSent('hello', true);
+      assertErrorResponse();
     });
   });
   describe('Quick Prompts', () => {
@@ -167,8 +186,11 @@ describe('AI Assistant Prompts', { tags: ['@ess', '@serverless'] }, () => {
       visitGetStartedPage();
       openAssistant();
       createQuickPrompt(testPrompt.name, testPrompt.content);
+      selectConnector(azureConnectorAPIPayload.name);
+      assertConnectorSelected(azureConnectorAPIPayload.name);
       sendQuickPrompt(testPrompt.name);
       assertMessageSent(testPrompt.content);
+      assertErrorResponse();
     });
     it('Add a quick prompt with context and it is only available in the selected context', () => {
       visitGetStartedPage();

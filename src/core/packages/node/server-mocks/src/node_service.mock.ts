@@ -13,15 +13,16 @@ import type {
   InternalNodeServicePreboot,
   InternalNodeServiceStart,
 } from '@kbn/core-node-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createInternalPrebootContractMock = () => {
-  const prebootContract: jest.Mocked<InternalNodeServicePreboot> = {
+  const prebootContract: jest.Mocked<InternalNodeServicePreboot> = lazyObject({
     roles: {
       backgroundTasks: true,
       ui: true,
       migrator: false,
     },
-  };
+  });
   return prebootContract;
 };
 
@@ -36,25 +37,24 @@ const createInternalStartContractMock = (
     migrator: boolean;
   } = { ui: true, backgroundTasks: true, migrator: false }
 ) => {
-  const startContract: jest.Mocked<InternalNodeServiceStart> = {
+  const startContract: jest.Mocked<InternalNodeServiceStart> = lazyObject({
     roles: {
       backgroundTasks,
       ui,
       migrator,
     },
-  };
+  });
   return startContract;
 };
 
 type NodeServiceContract = PublicMethodsOf<NodeService>;
 const createMock = () => {
-  const mocked: jest.Mocked<NodeServiceContract> = {
-    preboot: jest.fn(),
-    start: jest.fn(),
+  const mocked: jest.Mocked<NodeServiceContract> = lazyObject({
+    preboot: jest.fn().mockResolvedValue(createInternalPrebootContractMock()),
+    start: jest.fn().mockReturnValue(createInternalStartContractMock()),
     stop: jest.fn(),
-  };
-  mocked.preboot.mockResolvedValue(createInternalPrebootContractMock());
-  mocked.start.mockReturnValue(createInternalStartContractMock());
+  });
+
   return mocked;
 };
 

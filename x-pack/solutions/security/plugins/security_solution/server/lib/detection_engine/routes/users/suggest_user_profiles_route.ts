@@ -8,7 +8,8 @@
 import type { IKibanaResponse, StartServicesAccessor } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { USERS_API_READ } from '@kbn/security-solution-features/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
@@ -25,7 +26,7 @@ export const suggestUserProfilesRoute = (
       access: 'internal',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [USERS_API_READ],
         },
       },
     })

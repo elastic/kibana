@@ -17,6 +17,7 @@ import type {
   SavedObjectsImportFailure,
   SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
+  SavedObjectsImportUnexpectedAccessControlMetadataError,
 } from '@kbn/core/public';
 
 export interface FailedImport {
@@ -26,7 +27,8 @@ export interface FailedImport {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportUnexpectedAccessControlMetadataError;
 }
 
 interface UnmatchedReference {

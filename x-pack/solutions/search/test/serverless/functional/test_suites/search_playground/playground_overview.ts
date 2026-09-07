@@ -23,8 +23,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchPlayground',
     'embeddedConsole',
     'solutionNavigation',
-    'svlSearchElasticsearchStartPage',
-    'svlSearchCreateIndexPage',
+    'indexManagement',
   ]);
   const svlSearchNavigation = getService('svlSearchNavigation');
   const svlCommonApi = getService('svlCommonApi');
@@ -48,7 +47,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let removeOpenAIConnector: () => Promise<void>;
     let createOpenaiConnector: () => Promise<void>;
     let proxy: LlmProxy;
-    const openaiConnectorName = 'test-openai-connector';
     const indexName = 'my-test-index';
 
     before(async () => {
@@ -104,30 +102,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('without existing LLM connectors', () => {
-        after(async () => {
-          await svlSearchNavigation.navigateToLandingPage();
-          await pageObjects.svlCommonNavigation.sidenav.openSection(
-            'search_project_nav_footer.project_settings_project_nav'
-          );
-
-          await pageObjects.solutionNavigation.sidenav.clickLink({ navId: 'management' });
-          await pageObjects.solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
-          await pageObjects.svlCommonNavigation.sidenav.clickPanelLink(
-            'management:triggersActionsConnectors'
-          );
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.deleteConnector(
-            openaiConnectorName
-          );
-
-          await browser.refresh();
-        });
-        it('should be able to set up connectors from flyout', async () => {
+        it('deprecated LLM connector types are hidden in the create flyout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
           await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.createOpenAiConnector(
-            openaiConnectorName
-          );
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectShowSuccessLLMText();
+          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
         });
       });
 
@@ -195,11 +173,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should be able to create index from UI', async () => {
             await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
             await pageObjects.searchPlayground.PlaygroundStartChatPage.clickCreateIndex();
-            await pageObjects.svlSearchCreateIndexPage.expectToBeOnCreateIndexPage();
-            await pageObjects.svlSearchElasticsearchStartPage.setIndexNameValue(indexName);
-            await pageObjects.svlSearchElasticsearchStartPage.expectCreateIndexButtonToBeEnabled();
-            await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
-            await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
+            await pageObjects.indexManagement.expectToBeOnIndexManagement();
+            await pageObjects.indexManagement.clickCreateIndexButton();
+            await pageObjects.indexManagement.setCreateIndexName(indexName);
+            await pageObjects.indexManagement.clickCreateIndexSaveButton();
 
             // add mapping
             await es.indices.putMapping({
@@ -360,10 +337,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('connectors enabled on serverless search', () => {
-      it('has all LLM connectors', async () => {
+      it('does not show deprecated LLM connectors', async () => {
         await pageObjects.searchPlayground.PlaygroundStartChatPage.clickConnectLLMButton();
         await pageObjects.searchPlayground.PlaygroundStartChatPage.createConnectorFlyoutIsVisible();
-        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectPlaygroundLLMConnectorOptionsExists();
+        await pageObjects.searchPlayground.PlaygroundStartChatPage.expectDeprecatedLLMConnectorCardsMissing();
       });
     });
   });

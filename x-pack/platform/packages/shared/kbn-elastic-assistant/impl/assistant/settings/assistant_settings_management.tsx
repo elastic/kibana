@@ -16,9 +16,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
@@ -56,6 +56,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
       navigateToApp,
       assistantAvailability: { isAssistantManagementEnabled, hasConnectorsAllPrivilege },
+      settings,
     } = useAssistantContext();
 
     useEffect(() => {
@@ -68,8 +69,13 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: connectors } = useLoadConnectors({
       http,
+      featureId: 'elastic_assistant',
+      settings,
     });
-    const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+    const defaultConnector = useMemo(
+      () => getDefaultConnector(connectors, settings),
+      [connectors, settings]
+    );
 
     const { euiTheme } = useEuiTheme();
     const headerIconShadow = useEuiShadow('s');
@@ -149,7 +155,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
                   <EuiButtonEmpty
                     iconType="gear"
                     size="m"
-                    onClick={() => navigateToApp('management', { path: 'ai/genAiSettings' })}
+                    onClick={() =>
+                      navigateToApp('management', { path: 'modelManagement/model_settings' })
+                    }
                     data-test-subj="genAiSettingsButton"
                   >
                     {i18n.GEN_AI_SETTINGS_BUTTON}

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
@@ -14,7 +12,6 @@ import type {
 } from '@kbn/core/server';
 
 import { ConnectorTypes } from '../../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import type { SanitizedCaseOwner } from '..';
 import { addOwnerToSO } from '..';
 import { removeRuleInformation } from './alerts';
@@ -24,13 +21,7 @@ import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
 import { addAssigneesToCreateUserAction } from './assignees';
 
-export interface UserActionsMigrationsDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
-export const createUserActionsMigrations = (
-  deps: UserActionsMigrationsDeps
-): SavedObjectMigrationMap => {
+export const createUserActionsMigrations = (): SavedObjectMigrationMap => {
   const userActionsMigrations = {
     '7.10.0': (
       doc: SavedObjectUnsanitizedDoc<UserActions>

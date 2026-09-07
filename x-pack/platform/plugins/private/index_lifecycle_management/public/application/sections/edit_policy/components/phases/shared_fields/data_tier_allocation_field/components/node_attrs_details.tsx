@@ -17,10 +17,9 @@ import {
   EuiSpacer,
   EuiPortal,
   EuiSkeletonText,
-  EuiCallOut,
-  EuiButton,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { useLoadNodeDetails } from '../../../../../../../services/api';
 
@@ -39,25 +38,32 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
   } else if (error) {
     const { statusCode, message } = error;
     content = (
-      <EuiCallOut
+      <KbnDangerCallout
+        announceOnMount
         title={
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsLoadingFailedTitle"
             defaultMessage="Unable to load node attribute details"
           />
         }
-        color="danger"
-      >
-        <p>
-          {message} ({statusCode})
-        </p>
-        <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
-          <FormattedMessage
-            id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
-            defaultMessage="Try again"
-          />
-        </EuiButton>
-      </EuiCallOut>
+        text={
+          <p>
+            {message} ({statusCode})
+          </p>
+        }
+        actionProps={{
+          primary: {
+            onClick: resendRequest,
+            iconType: 'refresh',
+            children: (
+              <FormattedMessage
+                id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
+                defaultMessage="Try again"
+              />
+            ),
+          },
+        }}
+      />
     );
   } else {
     content = (
@@ -85,6 +91,10 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         ]}
         pagination={true}
         sorting={true}
+        tableCaption={i18n.translate('xpack.indexLifecycleMgmt.nodeAttrDetails.tableCaption', {
+          defaultMessage: 'Nodes that contain the attribute {selectedNodeAttrs}',
+          values: { selectedNodeAttrs },
+        })}
       />
     );
   }

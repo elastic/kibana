@@ -6,7 +6,7 @@
  */
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import * as api from './api';
 import { KibanaServices } from '../../common/lib/kibana';
 import { TimelineTypeEnum, TimelineStatusEnum } from '../../../common/api/timeline';
@@ -345,7 +345,7 @@ describe('exportSelectedTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(fetchMock).toBeCalledWith('/api/timeline/_export', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/timeline/_export', {
       body: JSON.stringify({ ids }),
       method: 'POST',
       query: { file_name: 'timelines_export.ndjson' },
@@ -372,7 +372,7 @@ describe('getDraftTimeline', () => {
   });
 
   test('should pass correct args to KibanaServices', () => {
-    expect(getMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(getMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       query: timelineType,
       version: '2023-10-31',
     });
@@ -398,7 +398,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });
@@ -413,7 +413,7 @@ describe('cleanDraftTimeline', () => {
 
     api.cleanDraftTimeline(args);
 
-    expect(postMock).toBeCalledWith('/api/timeline/_draft', {
+    expect(postMock).toHaveBeenCalledWith('/api/timeline/_draft', {
       body: JSON.stringify(args),
       version: '2023-10-31',
     });
@@ -439,7 +439,7 @@ describe('copyTimeline', () => {
 
   const dataViewMock = buildDataViewMock({
     name: 'first-data-view',
-    fields: shallowMockedFields,
+    fields: deepMockedFields,
   });
 
   const mockSavedSearch = {

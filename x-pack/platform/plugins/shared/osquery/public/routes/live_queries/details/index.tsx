@@ -5,71 +5,65 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useLayoutEffect, useMemo, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { WithHeaderLayout } from '../../../components/layouts';
+import { fullWidthContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
+import { SavedQueryFlyout } from '../../../saved_queries';
+import { useSaveQueryFromDetails } from './use_save_query_from_details';
 
 const tableWrapperCss = {
-  paddingLeft: '10px',
+  paddingLeft: 0,
 };
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
-  useBreadcrumbs('live_query_details', { liveQueryId: actionId });
-  const liveQueryListProps = useRouterNavigate('live_queries');
+  useBreadcrumbs('history_details', { liveQueryId: actionId });
   const [isLive, setIsLive] = useState(false);
   const { data } = useLiveQueryDetails({ actionId, isLive });
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...liveQueryListProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.liveQueryDetails.viewLiveQueriesHistoryTitle"
-              defaultMessage="View live queries history"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.pageTitle"
-                defaultMessage="Live query details"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [liveQueryListProps]
-  );
+  const {
+    canSave,
+    showSavedQueryFlyout,
+    handleShowSaveQueryFlyout,
+    handleCloseSaveQueryFlyout,
+    savedQueryDefaultValue,
+  } = useSaveQueryFromDetails({ data });
 
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
   }, [data?.status]);
 
+  const onSaveQuery = canSave ? handleShowSaveQueryFlyout : undefined;
+
+  const savedQueryFlyout = showSavedQueryFlyout ? (
+    <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
+  ) : null;
+
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      <EuiFlexItem css={tableWrapperCss}>
-        <PackQueriesStatusTable
-          actionId={actionId}
-          data={data?.queries}
-          startDate={data?.['@timestamp']}
-          expirationDate={data?.expiration}
-          agentIds={data?.agents}
-          showResultsHeader
-        />
-      </EuiFlexItem>
-    </WithHeaderLayout>
+    <>
+      <WithoutHeaderLayout restrictWidth={false}>
+        <div css={fullWidthContentCss}>
+          <div css={tableWrapperCss}>
+            <PackQueriesStatusTable
+              actionId={actionId}
+              data={data?.queries}
+              startDate={data?.['@timestamp']}
+              expirationDate={data?.expiration}
+              agentIds={data?.agents}
+              showResultsHeader
+              hideResultsTitle
+              tags={data?.tags}
+              onSaveQuery={onSaveQuery}
+            />
+          </div>
+        </div>
+      </WithoutHeaderLayout>
+      {savedQueryFlyout}
+    </>
   );
 };
 

@@ -4,9 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import * as t from 'io-ts';
-
-export const offsetRt = t.partial({
-  offset: t.string,
-});
+export { offsetSchema } from '@kbn/apm-api-shared';

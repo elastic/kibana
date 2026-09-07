@@ -234,6 +234,7 @@ export type {
   SearchSessionRequestInfo,
   SearchSessionRequestStatus,
   SearchSessionStatusResponse,
+  SearchSessionStatusesResponse,
   SearchSessionsFindResponse,
   EqlRequestParams,
   EqlSearchStrategyRequest,
@@ -509,6 +510,7 @@ export {
   isAbortResponse,
   isRunningResponse,
   getUserTimeZone,
+  strategyToString,
   SearchSessionStatus,
   SearchStatus,
   SEARCH_SESSION_TYPE,
@@ -523,7 +525,12 @@ export {
   ESQL_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   ESQL_TABLE_TYPE,
+  getQueryLanguage,
+  getQueryString,
+  getQueryStringCharCount,
+  getQueryStringLineCount,
 } from './search';
+export { convertIntervalToEsInterval } from './search/aggs/buckets/lib/time_buckets/calc_es_interval';
 export type {
   TimeRangeBounds,
   TimeRange,

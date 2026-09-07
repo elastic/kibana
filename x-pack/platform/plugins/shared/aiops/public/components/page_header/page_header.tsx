@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiPageHeader } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useUrlState } from '@kbn/ml-url-state';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -23,19 +23,23 @@ import {
 
 import moment from 'moment';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   AIOPS_FROZEN_TIER_PREFERENCE,
   type AiOpsKey,
   type AiOpsStorageMapped,
 } from '../../types/storage';
+import { AiopsDataSourcePicker } from '../data_source_picker';
 
-const dataViewTitleHeader = css({
-  minWidth: '300px',
-});
+const maxInlineSizeStyles = css`
+  max-inline-size: 100%;
+  min-inline-size: 0;
+`;
 
 export const PageHeader: FC = () => {
   const [, setGlobalState] = useUrlState('_g');
   const { dataView } = useDataSource();
+  const { cps } = useAiopsAppContext();
 
   const [frozenDataPreference, setFrozenDataPreference] = useStorage<
     AiOpsKey,
@@ -69,30 +73,44 @@ export const PageHeader: FC = () => {
   );
 
   return (
-    <EuiPageHeader
-      pageTitle={<div css={dataViewTitleHeader}>{dataView.getName()}</div>}
-      rightSideGroupProps={{
-        gutterSize: 's',
-        'data-test-subj': 'aiopsTimeRangeSelectorSection',
-      }}
-      rightSideItems={[
-        <DatePickerWrapper
-          isAutoRefreshOnly={!hasValidTimeField}
-          showRefresh={!hasValidTimeField}
-          width="full"
-        />,
-        hasValidTimeField && (
-          <FullTimeRangeSelector
-            frozenDataPreference={frozenDataPreference}
-            setFrozenDataPreference={setFrozenDataPreference}
-            dataView={dataView}
-            query={undefined}
-            disabled={false}
-            timefilter={timefilter}
-            callback={updateTimeState}
-          />
-        ),
-      ].filter(Boolean)}
-    />
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s" wrap={true}>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup responsive={false} wrap alignItems="center" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <AiopsDataSourcePicker currentDataView={dataView} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+        <EuiFlexGroup
+          css={maxInlineSizeStyles}
+          alignItems="center"
+          gutterSize="s"
+          data-test-subj="aiopsTimeRangeSelectorSection"
+        >
+          {hasValidTimeField && (
+            <EuiFlexItem grow={false}>
+              <FullTimeRangeSelector
+                frozenDataPreference={frozenDataPreference}
+                setFrozenDataPreference={setFrozenDataPreference}
+                dataView={dataView}
+                query={undefined}
+                disabled={false}
+                timefilter={timefilter}
+                callback={updateTimeState}
+                projectRouting={cps?.cpsManager?.getProjectRouting()}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
+            <DatePickerWrapper
+              isAutoRefreshOnly={!hasValidTimeField}
+              showRefresh={!hasValidTimeField}
+              width="full"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

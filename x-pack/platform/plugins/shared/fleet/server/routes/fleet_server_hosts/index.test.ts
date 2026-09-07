@@ -26,7 +26,7 @@ jest.mock('../../services', () => ({
     getCloud: jest.fn().mockReturnValue({ isServerlessEnabled: false } as any),
   },
   agentPolicyService: {
-    bumpAllAgentPolicies: jest.fn().mockResolvedValue({}),
+    bumpAllAgentPoliciesForFleetServerHosts: jest.fn().mockResolvedValue({}),
   },
   fleetServerHostService: {
     list: jest.fn(),

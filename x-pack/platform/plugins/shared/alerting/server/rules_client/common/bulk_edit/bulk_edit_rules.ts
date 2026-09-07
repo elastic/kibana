@@ -5,27 +5,19 @@
  * 2.0.
  */
 
-import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import type { KueryNode } from '@kbn/es-query';
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, type KueryNode } from '@kbn/es-query';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { RuleParams } from '../../../application/rule/types';
-import type { RuleBulkOperationAggregation, RulesClientContext } from '../../types';
+import type { RulesClientContext } from '../../types';
 import { ruleAuditEvent, type RuleAuditAction } from '../audit_events';
-import {
-  AlertingAuthorizationEntity,
-  type ReadOperations,
-  type WriteOperations,
-} from '../../../authorization';
+import { ReadOperations, type WriteOperations } from '../../../authorization';
 import type { RawRule, SanitizedRule } from '../../../types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { buildKueryNodeFilter } from '../build_kuery_node_filter';
+import { checkAuthorizationAndGetTotal } from '../../lib/check_authorization_and_get_total';
+import { getAuthorizationFilter } from '../../lib/get_authorization_filter';
 import { convertRuleIdsToKueryNode } from '../../../lib';
-import {
-  MAX_RULES_NUMBER_FOR_BULK_OPERATION,
-  RULE_TYPE_CHECKS_CONCURRENCY,
-  alertingAuthorizationFilterOpts,
-} from '../constants';
-import { findRulesSo } from '../../../data/rule';
 import { retryIfBulkEditConflicts } from './retry_if_bulk_edit_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleDomainSchema } from '../../../application/rule/schemas';
@@ -41,6 +33,10 @@ import type {
   ShouldIncrementRevision,
   UpdateOperationOpts,
 } from './types';
+import {
+  combineFiltersWithInternalRuleTypeFilter,
+  constructIgnoreInternalRuleTypesFilter,
+} from '../construct_ignore_internal_rule_type_filters';
 
 export interface BulkEditOptions<Params extends RuleParams> {
   filter?: string | KueryNode;
@@ -53,6 +49,8 @@ export interface BulkEditOptions<Params extends RuleParams> {
   requiredAuthOperation: ReadOperations | WriteOperations;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  ignoreInternalRuleTypes?: boolean;
+  changeTracking?: RuleChangeTracking;
 }
 
 export async function bulkEditRules<Params extends RuleParams>(
@@ -61,6 +59,8 @@ export async function bulkEditRules<Params extends RuleParams>(
 ): Promise<BulkEditResult<Params>> {
   const queryFilter = options.filter;
   const ids = options.ids;
+  const ignoreInternalRuleTypes = options.ignoreInternalRuleTypes ?? true;
+
   const actionsClient = await context.getActionsClient();
 
   if (ids && queryFilter) {
@@ -70,73 +70,36 @@ export async function bulkEditRules<Params extends RuleParams>(
   }
 
   const qNodeQueryFilter = buildKueryNodeFilter(queryFilter);
-
   const qNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : qNodeQueryFilter;
-  let authorizationTuple;
-  try {
-    authorizationTuple = await context.authorization.getFindAuthorizationFilter({
-      authorizationEntity: AlertingAuthorizationEntity.Rule,
-      filterOpts: alertingAuthorizationFilterOpts,
-    });
-  } catch (error) {
-    context.auditLogger?.log(ruleAuditEvent({ action: options.auditAction, error }));
-    throw error;
-  }
-  const { filter: authorizationFilter } = authorizationTuple;
+  const internalRuleTypeFilter = constructIgnoreInternalRuleTypesFilter({
+    ruleTypes: context.ruleTypeRegistry.list(),
+  });
+
+  const bulkEditAction: 'BULK_EDIT' | 'BULK_EDIT_PARAMS' =
+    options.requiredAuthOperation === ReadOperations.BulkEditParams
+      ? 'BULK_EDIT_PARAMS'
+      : 'BULK_EDIT';
+
+  const authorizationFilter = await getAuthorizationFilter(context, {
+    action: bulkEditAction,
+  });
+
   const qNodeFilterWithAuth =
     authorizationFilter && qNodeFilter
       ? nodeBuilder.and([qNodeFilter, authorizationFilter as KueryNode])
       : qNodeFilter;
 
-  const { aggregations, total } = await findRulesSo<RuleBulkOperationAggregation>({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    savedObjectsFindOptions: {
-      filter: qNodeFilterWithAuth,
-      page: 1,
-      perPage: 0,
-      aggs: {
-        alertTypeId: {
-          multi_terms: {
-            terms: [
-              { field: 'alert.attributes.alertTypeId' },
-              { field: 'alert.attributes.consumer' },
-            ],
-          },
-        },
-      },
-    },
+  const finalFilter = ignoreInternalRuleTypes
+    ? combineFiltersWithInternalRuleTypeFilter({
+        filter: qNodeFilterWithAuth,
+        internalRuleTypeFilter,
+      })
+    : qNodeFilterWithAuth;
+
+  const { total } = await checkAuthorizationAndGetTotal(context, {
+    filter: finalFilter,
+    action: bulkEditAction,
   });
-
-  if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
-    throw Boom.badRequest(
-      `More than ${MAX_RULES_NUMBER_FOR_BULK_OPERATION} rules matched for bulk edit`
-    );
-  }
-  const buckets = aggregations?.alertTypeId.buckets;
-
-  if (buckets === undefined) {
-    throw Error('No rules found for bulk edit');
-  }
-
-  await pMap(
-    buckets,
-    async ({ key: [ruleType, consumer] }) => {
-      context.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-
-      try {
-        await context.authorization.ensureAuthorized({
-          ruleTypeId: ruleType,
-          consumer,
-          operation: options.requiredAuthOperation,
-          entity: AlertingAuthorizationEntity.Rule,
-        });
-      } catch (error) {
-        context.auditLogger?.log(ruleAuditEvent({ action: options.auditAction, error }));
-        throw error;
-      }
-    },
-    { concurrency: RULE_TYPE_CHECKS_CONCURRENCY }
-  );
 
   const { apiKeysToInvalidate, results, errors, skipped } = await retryIfBulkEditConflicts(
     context.logger,
@@ -149,9 +112,22 @@ export async function bulkEditRules<Params extends RuleParams>(
         updateFn: options.updateFn,
         paramsModifier: options.paramsModifier,
         shouldIncrementRevision: options.shouldIncrementRevision,
+        changeTracking: {
+          ...options.changeTracking,
+          metadata: { bulkCount: total, ...options.changeTracking?.metadata },
+        },
       }),
-    qNodeFilterWithAuth
+    finalFilter
   );
+
+  for (const { id, attributes } of results) {
+    context.auditLogger?.log(
+      ruleAuditEvent({
+        action: options.auditAction,
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id, name: attributes.name },
+      })
+    );
+  }
 
   if (apiKeysToInvalidate.length > 0) {
     await bulkMarkApiKeysForInvalidation(
@@ -173,7 +149,6 @@ export async function bulkEditRules<Params extends RuleParams>(
         logger: context.logger,
         ruleType,
         references,
-        omitGeneratedValues: false,
       },
       (connectorId: string) => actionsClient.isSystemAction(connectorId)
     );

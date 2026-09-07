@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export interface ContentPackIncludeAll {
   objects: { all: {} };
@@ -15,7 +15,7 @@ export type ContentPackIncludedObjects =
   | ContentPackIncludeAll
   | {
       objects: {
-        queries: Array<{ id: string }>;
+        mappings: boolean;
         routing: Array<{ destination: string } & ContentPackIncludedObjects>;
       };
     };
@@ -28,20 +28,22 @@ export const isIncludeAll = (value: ContentPackIncludedObjects): value is Conten
   return includeAllSchema.safeParse(value).success;
 };
 
-export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
-  z.union([
-    includeAllSchema,
-    z.object({
-      objects: z.object({
-        queries: z.array(z.object({ id: z.string() })),
-        routing: z.array(
-          contentPackIncludedObjectsSchema.and(
-            z.object({
-              destination: z.string(),
-            })
-          )
-        ),
+export const contentPackIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z
+  .lazy(() =>
+    z.union([
+      includeAllSchema,
+      z.object({
+        objects: z.strictObject({
+          mappings: z.boolean(),
+          routing: z.array(
+            contentPackIncludedObjectsSchema.and(
+              z.object({
+                destination: z.string(),
+              })
+            )
+          ),
+        }),
       }),
-    }),
-  ])
-);
+    ])
+  )
+  .meta({ id: 'ContentPackIncludedObjects' });

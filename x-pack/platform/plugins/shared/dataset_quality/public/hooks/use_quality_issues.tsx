@@ -146,7 +146,9 @@ export function useQualityIssues() {
 
   const degradedFieldValues = useSelector(service, (state) =>
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.ignoredValues.done')
-      ? state.context.degradedFieldValues
+      ? 'degradedFieldValues' in state.context
+        ? state.context.degradedFieldValues
+        : undefined
       : undefined
   );
 
@@ -163,7 +165,9 @@ export function useQualityIssues() {
     ) ||
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.mitigation.success') ||
     state.matches('initializing.qualityIssueFlyout.open.degradedFieldFlyout.mitigation.error')
-      ? state.context.degradedFieldAnalysis
+      ? 'degradedFieldAnalysis' in state.context
+        ? state.context.degradedFieldAnalysis
+        : undefined
       : undefined
   );
 
@@ -175,6 +179,7 @@ export function useQualityIssues() {
     // 1st check if it's a field limit issue
     if (degradedFieldAnalysis.isFieldLimitIssue) {
       return {
+        isFieldLimitIssue: true,
         potentialCause: degradedFieldCauseFieldLimitExceeded,
         tooltipContent: degradedFieldCauseFieldLimitExceededTooltip,
         shouldDisplayIgnoredValuesAndLimit: false,
@@ -187,10 +192,11 @@ export function useQualityIssues() {
 
     if (fieldMapping && fieldMapping?.type === 'keyword' && fieldMapping?.ignore_above) {
       const isAnyValueExceedingIgnoreAbove = degradedFieldValues?.values.some(
-        (value) => value.length > fieldMapping.ignore_above!
+        (value: string) => value.length > fieldMapping.ignore_above!
       );
       if (isAnyValueExceedingIgnoreAbove) {
         return {
+          isFieldCharacterLimitIssue: true,
           potentialCause: degradedFieldCauseFieldIgnored,
           tooltipContent: degradedFieldCauseFieldIgnoredTooltip,
           shouldDisplayIgnoredValuesAndLimit: true,
@@ -201,6 +207,7 @@ export function useQualityIssues() {
 
     // 3rd check if its a ignore_malformed issue. There is no check, at the moment.
     return {
+      isFieldMalformedIssue: true,
       potentialCause: degradedFieldCauseFieldMalformed,
       tooltipContent: degradedFieldCauseFieldMalformedTooltip,
       shouldDisplayIgnoredValuesAndLimit: false,
@@ -259,7 +266,7 @@ export function useQualityIssues() {
   );
 
   const triggerRollover = useCallback(() => {
-    service.send('ROLLOVER_DATA_STREAM');
+    service.send({ type: 'ROLLOVER_DATA_STREAM' });
   }, [service]);
 
   const failedDocsErrorsColumns = useMemo(() => getFailedDocsErrorsColumns(), []);

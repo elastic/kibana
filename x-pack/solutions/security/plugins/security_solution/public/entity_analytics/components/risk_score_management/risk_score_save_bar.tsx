@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiBottomBar, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiBottomBar } from '@elastic/eui';
 import * as i18n from '../../translations';
+import { RISK_SCORE_DISCARD_BUTTON_TEST_ID } from '../../test_ids';
 
 export const RiskScoreSaveBar: React.FC<{
   resetSelectedSettings: () => void;
@@ -18,7 +19,14 @@ export const RiskScoreSaveBar: React.FC<{
     <EuiBottomBar paddingSize="s" position="fixed">
       <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={resetSelectedSettings}>
+          <EuiButtonEmpty
+            color="text"
+            size="s"
+            iconType="cross"
+            onClick={resetSelectedSettings}
+            aria-label={i18n.DISCARD_CHANGES}
+            data-test-subj={RISK_SCORE_DISCARD_BUTTON_TEST_ID}
+          >
             {i18n.DISCARD_CHANGES}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -27,7 +35,7 @@ export const RiskScoreSaveBar: React.FC<{
             color="primary"
             fill
             size="s"
-            iconType="check"
+            iconType="save"
             onClick={saveSelectedSettings}
             isLoading={isLoading}
             data-test-subj="riskScoreSaveButton"

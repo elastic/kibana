@@ -7,7 +7,7 @@
 
 import { CrowdStrikeSessionManager } from './rtr_session_manager';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { CrowdstrikeInitRTRResponseSchema } from '../../../common/crowdstrike/schema';
+import { CrowdstrikeInitRTRResponseSchema } from '@kbn/connector-schemas/crowdstrike';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 jest.useFakeTimers();

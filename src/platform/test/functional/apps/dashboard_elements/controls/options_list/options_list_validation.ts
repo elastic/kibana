@@ -29,12 +29,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  /**
+   * Purpose: Validation smoke test
+   *
+   * Migration: migrate to scout
+   */
   describe('Dashboard options list validation', () => {
     const controlId = 'cd881630-fd28-4e9c-aec5-ae9711d48369';
 
     before(async () => {
-      await dashboard.loadSavedDashboard('Test Options List Validation');
-      await dashboard.ensureDashboardIsInEditMode();
+      await dashboard.loadDashboardInEditMode('Test Options List Validation');
     });
 
     describe('Options List dashboard validation', () => {
@@ -93,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Options List dashboard no validation', () => {
       before(async () => {
-        await dashboardControls.updateValidationSetting(false);
+        await dashboardControls.updateValidationSetting(controlId, false);
       });
 
       after(async () => {

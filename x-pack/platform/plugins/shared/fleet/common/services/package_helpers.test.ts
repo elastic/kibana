@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
 import type { RegistryPolicyTemplate } from '../types';
 
 import {
@@ -14,6 +15,7 @@ import {
   isRootPrivilegesRequired,
   checkIntegrationFipsLooseCompatibility,
   getNonFipsIntegrations,
+  isRootPrivilegeRequired,
 } from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
@@ -44,6 +46,35 @@ describe('isRootPrivilegesRequired', () => {
     const res = isRootPrivilegesRequired({
       data_streams: [],
     } as any);
+    expect(res).toBe(false);
+  });
+});
+
+describe('isRootPrivilegeRequired', () => {
+  it('should return true if any package policy requires root', () => {
+    const res = isRootPrivilegeRequired([
+      {
+        package: {
+          requires_root: true,
+        },
+      } as any,
+    ]);
+    expect(res).toBe(true);
+  });
+
+  it('should return false if no package policy requires root', () => {
+    const res = isRootPrivilegeRequired([
+      {
+        package: {
+          requires_root: false,
+        },
+      } as any,
+    ]);
+    expect(res).toBe(false);
+  });
+
+  it('should return false if no package policies', () => {
+    const res = isRootPrivilegeRequired([]);
     expect(res).toBe(false);
   });
 });
@@ -185,6 +216,7 @@ describe('checkIntegrationFipsLooseCompatibility', () => {
       },
     ] as RegistryPolicyTemplate[],
   };
+
   it('should return true if an integration has no packageInfo', () => {
     const res = checkIntegrationFipsLooseCompatibility('test-package-1');
     expect(res).toBe(true);
@@ -210,9 +242,68 @@ describe('checkIntegrationFipsLooseCompatibility', () => {
     expect(res).toBe(true);
   });
 
-  it('should return true if an integration has policy_templates  marked as fips_compatible=false', () => {
+  it('should return false if an integration has policy_templates  marked as fips_compatible=false', () => {
     const res = checkIntegrationFipsLooseCompatibility('test-package-3', packageInfo);
     expect(res).toBe(false);
+  });
+
+  const otelPackageInfo = {
+    policy_templates: [
+      {
+        name: 'test-package-otel-1',
+        title: 'Template OTel 1',
+        description: '',
+        input: OTEL_COLLECTOR_INPUT_TYPE,
+      },
+      {
+        name: 'test-package-otel-2',
+        title: 'Template OTel 2',
+        description: '',
+        input: OTEL_COLLECTOR_INPUT_TYPE,
+        fips_compatible: true,
+      },
+      {
+        name: 'test-package-otel-3',
+        title: 'Template OTel 3',
+        description: '',
+        inputs: [
+          {
+            type: OTEL_COLLECTOR_INPUT_TYPE,
+          },
+        ],
+      },
+      {
+        name: 'test-package-otel-4',
+        title: 'Template OTel 4',
+        description: '',
+        inputs: [
+          {
+            type: OTEL_COLLECTOR_INPUT_TYPE,
+          },
+        ],
+        fips_compatible: true,
+      },
+    ] as RegistryPolicyTemplate[],
+  };
+
+  it('should return false if an OTel input is not explicitly marked as fips compatible', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-otel-1', otelPackageInfo);
+    expect(res).toBe(false);
+  });
+
+  it('should return true if an OTel input is marked as fips compatible', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-otel-2', otelPackageInfo);
+    expect(res).toBe(true);
+  });
+
+  it('should return false if an OTel integration is not explicitly marked as fips compatible', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-otel-3', otelPackageInfo);
+    expect(res).toBe(false);
+  });
+
+  it('should return true if an OTel integration is marked as fips compatible', () => {
+    const res = checkIntegrationFipsLooseCompatibility('test-package-otel-4', otelPackageInfo);
+    expect(res).toBe(true);
   });
 });
 
