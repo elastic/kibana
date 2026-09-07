@@ -72,14 +72,14 @@ describe('BackfillTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.cluster.health).toBeCalledWith({
+    expect(esClient.cluster.health).toHaveBeenCalledWith({
       index: destIndex,
       wait_for_status: 'green',
       timeout: '30s',
     });
-    expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
-    expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
-    expect(esClient.reindex).toBeCalledWith({
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: destIndex });
+    expect(esClient.getScript).toHaveBeenCalledWith({ id: painlessScriptId });
+    expect(esClient.reindex).toHaveBeenCalledWith({
       source: {
         index: sourceIndex,
         query: sourceQuery,
@@ -116,13 +116,13 @@ describe('BackfillTaskRunner', () => {
         expect(isRetryableError(e)).toBe(true);
       }
 
-      expect(esClient.cluster.health).toBeCalledWith({
+      expect(esClient.cluster.health).toHaveBeenCalledWith({
         index: destIndex,
         wait_for_status: 'green',
         timeout: '30s',
       });
 
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         '[.dest-index] Backfill reindex failed. Error: My retryable error',
         { tags: ['cai-backfill', 'cai-backfill-error', '.dest-index'] }
       );
@@ -147,7 +147,7 @@ describe('BackfillTaskRunner', () => {
         expect(isRetryableError(e)).toBe(null);
       }
 
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         '[.dest-index] Backfill reindex failed. Error: My unrecoverable error',
         { tags: ['cai-backfill', 'cai-backfill-error', '.dest-index'] }
       );
@@ -174,8 +174,8 @@ describe('BackfillTaskRunner', () => {
 
       await taskRunner.run();
 
-      expect(esClient.cluster.health).not.toBeCalled();
-      expect(esClient.reindex).not.toBeCalled();
+      expect(esClient.cluster.health).not.toHaveBeenCalled();
+      expect(esClient.reindex).not.toHaveBeenCalled();
     });
   });
 });

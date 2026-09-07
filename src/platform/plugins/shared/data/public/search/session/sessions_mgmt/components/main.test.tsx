@@ -9,8 +9,12 @@
 
 import moment from 'moment';
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { LocaleWrapper } from '../__mocks__';
@@ -18,13 +22,14 @@ import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
 import { getSearchSessionEBTManagerMock } from '../../mocks';
+
 const setup = async () => {
   const mockCoreSetup = coreMock.createSetup();
   mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
     return key === 'dateFormat:tz' ? 'UTC' : null;
   });
 
-  const mockCoreStart = coreMock.createStart();
+  const mockCoreStart = coreMock.createStart() as unknown as CoreStart;
 
   const mockShareStart = sharePluginMock.createStartContract();
   const mockSearchUsageCollector = createSearchUsageCollectorMock();
@@ -38,7 +43,13 @@ const setup = async () => {
     },
   } as any;
 
-  const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
+  const sessionsClient = new SessionsClient({
+    http: mockCoreSetup.http,
+  }) as jest.Mocked<SessionsClient>;
+  sessionsClient.find = jest.fn().mockResolvedValue({
+    saved_objects: [],
+    statuses: {},
+  });
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
@@ -49,17 +60,19 @@ const setup = async () => {
   await act(async () => {
     render(
       <LocaleWrapper>
-        <SearchSessionsMgmtMain
-          core={mockCoreStart}
-          api={api}
-          http={mockCoreSetup.http}
-          timezone="UTC"
-          config={mockConfig}
-          kibanaVersion={'8.0.0'}
-          searchUsageCollector={mockSearchUsageCollector}
-          share={mockShareStart}
-          searchSessionEBTManager={getSearchSessionEBTManagerMock()}
-        />
+        <MockAppHeaderProvider>
+          <SearchSessionsMgmtMain
+            core={mockCoreStart}
+            api={api}
+            http={mockCoreSetup.http}
+            timezone="UTC"
+            config={mockConfig}
+            kibanaVersion={'8.0.0'}
+            searchUsageCollector={mockSearchUsageCollector}
+            share={mockShareStart}
+            searchSessionEBTManager={getSearchSessionEBTManagerMock()}
+          />
+        </MockAppHeaderProvider>
       </LocaleWrapper>
     );
   });
@@ -69,6 +82,7 @@ const setup = async () => {
     mockCoreStart,
     mockCoreSetup,
     mockSearchUsageCollector,
+    sessionsClient,
   };
 };
 
@@ -78,7 +92,7 @@ describe('<SearchSessionsMgmtMain />', () => {
     ({ expectedName }) => {
       it('should render the page title', async () => {
         await setup();
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(expectedName);
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(expectedName);
       });
 
       it('should render the table', async () => {
@@ -89,6 +103,34 @@ describe('<SearchSessionsMgmtMain />', () => {
       });
     }
   );
+
+  it('renders Refresh as the AppHeader primary action', async () => {
+    await setup();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Manage your background searches.'
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sessionManagementRefreshBtn')).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByTestId('sessionManagementRefreshBtn')).toHaveLength(1);
+  });
+
+  it('refreshes sessions when the AppHeader primary action is clicked', async () => {
+    const user = userEvent.setup();
+    const { sessionsClient } = await setup();
+
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(screen.getByTestId('sessionManagementRefreshBtn')).toBeEnabled();
+    });
+
+    await user.click(screen.getByTestId('sessionManagementRefreshBtn'));
+
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(2));
+  });
 
   describe('when background search is true', () => {
     it('should NOT render the documentation link', async () => {

@@ -697,6 +697,12 @@ export const QueryBarTopRow = React.memo(
     // only the auto-refresh play/pause button operable.
     const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
 
+    const dateFormatSetting: string | undefined = uiSettings.get('dateFormat');
+    const inputDateFormats = useMemo(
+      () => (dateFormatSetting ? [dateFormatSetting] : undefined),
+      [dateFormatSetting]
+    );
+
     const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
       () =>
         propsOnRefreshChange
@@ -949,7 +955,7 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
-              dateFormat={uiSettings.get('dateFormat')}
+              inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={

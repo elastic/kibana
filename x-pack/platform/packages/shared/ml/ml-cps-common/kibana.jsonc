@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-cps-common",
+  "owner": "@elastic/search-ml-ux",
+  "group": "platform",
+  "visibility": "shared"
+}
