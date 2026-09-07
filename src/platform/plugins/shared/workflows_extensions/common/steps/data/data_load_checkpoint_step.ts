@@ -14,12 +14,22 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataLoadCheckpointStepTypeId = 'data.loadCheckpoint' as const;
 
-export const InputSchema = z.object({
-  index: z.string().min(1),
-  source: z.string().min(1),
-  entity_type: z.string().min(1),
-  org: z.string().min(1),
-});
+// Checkpoint ids are workflow-defined: some are scoped per org, others per
+// project number, repo name, team slug or channel id, so a fixed triple cannot
+// address them. `id` targets such a checkpoint directly; the
+// source/entity_type/org triple stays supported for workflows using it.
+export const InputSchema = z.union([
+  z.object({
+    index: z.string().min(1),
+    id: z.string().min(1),
+  }),
+  z.object({
+    index: z.string().min(1),
+    source: z.string().min(1),
+    entity_type: z.string().min(1),
+    org: z.string().min(1),
+  }),
+]);
 
 export const OutputSchema = z.record(z.string(), z.unknown());
 export const ConfigSchema = z.object({});
@@ -44,7 +54,7 @@ export const dataLoadCheckpointStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: `Loads one checkpoint document and exposes its source fields directly to downstream steps.
 
-The stable checkpoint id is \`<source>:<entity_type>:<org>\`. A missing checkpoint is a valid
+Pass \`id\` to address a checkpoint directly, or the \`source\`/\`entity_type\`/\`org\` triple to derive \`<source>:<entity_type>:<org>\`. A missing checkpoint is a valid
 first-run state and returns an empty object. Malformed non-object checkpoint sources fail the step.
 
 \`\`\`yaml
