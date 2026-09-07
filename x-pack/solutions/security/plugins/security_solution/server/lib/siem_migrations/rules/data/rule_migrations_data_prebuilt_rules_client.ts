@@ -11,7 +11,6 @@ import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebui
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
-import { ElserPopulateError } from '../../common/data/elser_populate_error';
 import type { RuleMigrationPrebuiltRule, RuleMigrationsSemanticIndexOptions } from '../types';
 import type {
   SiemMigrationsClientDependencies,
@@ -108,11 +107,9 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
         )
         .then((response) => {
           if (response.errors) {
-            // use the first error to throw, preserving the ES error type for classification.
-            // Bulk item errors carry `type` + `reason` but no HTTP status; classification
-            // keys on the stable `type`.
-            const itemError = response.items.find((item) => item.index?.error)?.index?.error;
-            throw new ElserPopulateError(itemError?.reason ?? 'Unknown error', itemError?.type);
+            // use the first error to throw
+            const reason = response.items.find((item) => item.index?.error)?.index?.error?.reason;
+            throw new Error(reason ?? 'Unknown error');
           }
         })
         .catch((error) => {

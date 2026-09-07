@@ -12,7 +12,6 @@ import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { errors } from '@elastic/elasticsearch';
 import { getPrebuiltRuleMock } from '../../../detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.mock';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
-import { ElserPopulateError } from '../../common/data/elser_populate_error';
 import {
   RuleMigrationsDataPrebuiltRulesClient,
   type PrebuildRuleVersionsMap,
@@ -106,7 +105,7 @@ describe('RuleMigrationsDataPrebuiltRulesClient', () => {
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves bulk index error classification', async () => {
+  it('throws the first bulk index error reason', async () => {
     esClient.bulk.mockResolvedValueOnce({
       errors: true,
       took: 1,
@@ -120,9 +119,7 @@ describe('RuleMigrationsDataPrebuiltRulesClient', () => {
         },
       ],
     });
-    await expect(client.populate(versions)).rejects.toEqual(
-      new ElserPopulateError('Busy', 'es_rejected_execution_exception')
-    );
+    await expect(client.populate(versions)).rejects.toEqual(new Error('Busy'));
   });
 
   it('returns empty search results when the lookup index is absent', async () => {
