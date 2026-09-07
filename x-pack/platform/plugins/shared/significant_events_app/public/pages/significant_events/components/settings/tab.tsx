@@ -52,6 +52,7 @@ import {
 import {
   NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
@@ -89,7 +90,9 @@ export function SettingsTab() {
   const canManageContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
   const canManageDetection =
     nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true;
-  const canManage = canManageContext || canManageDetection;
+  const canManageInvestigation =
+    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManage = canManageContext || canManageDetection || canManageInvestigation;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditContextSettings = canManageContext && canSaveAdvancedSettings;
   const canEditDetectionSettings = canManageDetection && canSaveAdvancedSettings;

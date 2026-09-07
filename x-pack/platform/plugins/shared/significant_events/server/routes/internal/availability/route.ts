@@ -6,10 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
 import { getSignificantEventsAvailability } from '../../utils/assert_significant_events_access';
@@ -26,10 +23,7 @@ const availabilityRoute = createServerRoute({
     authz: {
       requiredPrivileges: [
         {
-          anyRequired: [
-            NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.read,
-            NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read,
-          ],
+          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES],
         },
       ],
     },

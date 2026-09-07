@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES } from '@kbn/nightshift-shared';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
@@ -57,10 +54,7 @@ describe('cleanup workflow bootstrap route', () => {
     expect(route.security.authz).toEqual({
       requiredPrivileges: [
         {
-          anyRequired: [
-            NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-            NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
-          ],
+          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
         },
       ],
     });

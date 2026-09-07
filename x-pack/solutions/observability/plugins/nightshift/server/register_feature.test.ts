@@ -18,6 +18,9 @@ import {
   NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
   NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import { registerNightshiftFeature } from './register_feature';
 
@@ -30,7 +33,7 @@ const getSubFeaturePrivilege = (
     .find((privilege) => privilege.id === id);
 
 describe('registerNightshiftFeature', () => {
-  it('registers a Nightshift parent with empty ui/api and both engine sub-features', () => {
+  it('registers a Nightshift parent with empty ui/api and all engine sub-features', () => {
     const features = featuresPluginMock.createSetup();
 
     registerNightshiftFeature(features);
@@ -75,6 +78,14 @@ describe('registerNightshiftFeature', () => {
       feature,
       NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.read
     );
+    const investigationAll = getSubFeaturePrivilege(
+      feature,
+      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all
+    );
+    const investigationRead = getSubFeaturePrivilege(
+      feature,
+      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read
+    );
 
     expect(contextAll).toMatchObject({
       includeIn: 'all',
@@ -114,7 +125,27 @@ describe('registerNightshiftFeature', () => {
       api: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
       ui: [NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show],
     });
+    expect(investigationAll).toMatchObject({
+      includeIn: 'all',
+      app: [NIGHTSHIFT_APP_ID],
+      api: [
+        NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read,
+        NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
+      ],
+      ui: [
+        NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.show,
+        NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage,
+      ],
+    });
+    expect(investigationRead).toMatchObject({
+      includeIn: 'read',
+      app: [NIGHTSHIFT_APP_ID],
+      api: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
+      ui: [NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.show],
+    });
     expect(detectionAll?.aiIndex).toBeUndefined();
     expect(detectionRead?.aiIndex).toBeUndefined();
+    expect(investigationAll?.aiIndex).toBeUndefined();
+    expect(investigationRead?.aiIndex).toBeUndefined();
   });
 });

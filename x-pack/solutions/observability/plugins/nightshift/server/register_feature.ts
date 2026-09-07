@@ -18,11 +18,14 @@ import {
   NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
   NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 
 /**
- * Registers the Nightshift parent Kibana feature and its Context Engine /
- * Detection Engine sub-features.
+ * Registers the Nightshift parent Kibana feature and its Context Engine,
+ * Detection Engine, and Investigation Engine sub-features.
  */
 export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
@@ -120,6 +123,42 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
                 app: [SIGNIFICANT_EVENTS_APP_ID],
                 api: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
                 ui: [NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show],
+                savedObject: { all: [], read: [] },
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.nightshift.featureRegistry.investigationEngineSubFeatureName', {
+          defaultMessage: 'Investigation Engine',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                id: NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
+                name: 'All',
+                includeIn: 'all',
+                app: [NIGHTSHIFT_APP_ID],
+                api: [
+                  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read,
+                  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
+                ],
+                ui: [
+                  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.show,
+                  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage,
+                ],
+                savedObject: { all: [], read: [] },
+              },
+              {
+                id: NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
+                name: 'Read',
+                includeIn: 'read',
+                app: [NIGHTSHIFT_APP_ID],
+                api: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
+                ui: [NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.show],
                 savedObject: { all: [], read: [] },
               },
             ],

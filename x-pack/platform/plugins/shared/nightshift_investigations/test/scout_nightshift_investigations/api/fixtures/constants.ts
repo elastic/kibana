@@ -14,18 +14,30 @@ export const COMMON_HEADERS = {
 
 // The role API requires at least one of `base` or `feature` to be non-empty.
 // Grant an unrelated privilege so this user can authenticate but still lacks
-// agentBuilder:read (viewer includes it, which is why we cannot use that).
-export const NO_AGENT_BUILDER_ROLE: KibanaRole = {
+// Investigation Engine.
+export const NO_INVESTIGATION_ENGINE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { advancedSettings: ['read'] }, spaces: ['*'] }],
 };
 
 export const INVESTIGATIONS_READ_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agentBuilder: ['read'] }, spaces: ['*'] }],
+  kibana: [
+    {
+      base: [],
+      feature: { nightshift: ['minimal_all', 'investigation_engine_read'] },
+      spaces: ['*'],
+    },
+  ],
 };
 
 export const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
+  kibana: [
+    {
+      base: [],
+      feature: { nightshift: ['minimal_all', 'investigation_engine_all'] },
+      spaces: ['*'],
+    },
+  ],
 };

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import {
   NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
@@ -79,7 +80,9 @@ export function SignificantEventsPage() {
   const canManageContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
   const canManageDetection =
     nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true;
-  const canManage = canManageContext || canManageDetection;
+  const canManageInvestigation =
+    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManage = canManageContext || canManageDetection || canManageInvestigation;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {

@@ -22,6 +22,7 @@ import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/d
 import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { useKibana } from '../../utils/kibana_react';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
@@ -119,7 +120,8 @@ export function AlertActions(
   const [isInvestigating, setIsInvestigating] = useState(false);
   const alertId = observabilityAlert.fields[ALERT_UUID];
   const hasInvestigationActionPrerequisites = Boolean(
-    application.capabilities.agentBuilder?.write === true && alertId
+    application.capabilities.nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] ===
+      true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
     enabled: hasInvestigationActionPrerequisites,

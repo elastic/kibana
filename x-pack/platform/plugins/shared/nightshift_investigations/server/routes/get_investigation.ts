@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -18,13 +19,8 @@ export const getInvestigationRoute = createNightshiftInvestigationsServerRoute({
     description: 'Retrieves the current state of an investigation by ID.',
   },
   security: {
-    // agentBuilder:read is used as a proxy for "this user has AI feature access." Investigation
-    // results are fetched by workflow execution ID (not through the AB conversation list), so
-    // this is not a strict AB permission requirement. It is consistent with the write requirement
-    // on the start route: read ensures baseline AI feature visibility for polling. See
-    // start_investigation.ts for fuller reasoning.
     authz: {
-      requiredPrivileges: ['agentBuilder:read'],
+      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
     },
   },
   params: z.object({

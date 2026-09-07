@@ -498,6 +498,8 @@ export default function ({ getService }: FtrProviderContext) {
         'context_engine_read',
         'detection_engine_all',
         'detection_engine_read',
+        'investigation_engine_all',
+        'investigation_engine_read',
       ],
       alerting_v2_rules: ['all', 'read', 'minimal_all', 'minimal_read'],
       alerting_v2_alerts: ['all', 'read', 'minimal_all', 'minimal_read'],

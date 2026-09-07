@@ -34,6 +34,7 @@ import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-
 import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
 import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
@@ -104,7 +105,9 @@ export function HeaderActions({
   } = services;
   const alertId = alert?.fields[ALERT_UUID];
   const hasInvestigationActionPrerequisites = Boolean(
-    services.application?.capabilities?.agentBuilder?.write === true && alertId
+    services.application?.capabilities?.nightshift?.[
+      NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage
+    ] === true && alertId
   );
   const isInvestigationAvailable = useInvestigationAvailability({
     enabled: hasInvestigationActionPrerequisites,

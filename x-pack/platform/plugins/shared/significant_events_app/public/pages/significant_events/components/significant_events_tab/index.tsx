@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   getSeverityLabel,
   severitySchema,
@@ -53,6 +54,7 @@ import { FilterPopover } from './filter_popover';
 import { getSignificantEventStatusColor } from '../shared/status_display';
 import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
@@ -86,8 +88,22 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 );
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const canManageInvestigation =
+    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
+
+  if (!canManageInvestigation) {
+    return null;
+  }
+
   return (
     <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon

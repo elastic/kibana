@@ -54,7 +54,7 @@
     },
     {
       "id": "be403b2cfad0312-b1ea6b020216604",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 403 for a user without agentBuilder:write",
+      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 403 for a user without Investigation Engine manage",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -86,7 +86,7 @@
     },
     {
       "id": "845f48aff61ef26-ebf586b12e631ac",
-      "title": "GET /internal/nightshift/investigations/{id}/follow returns 403 for a user without agentBuilder:read",
+      "title": "GET /internal/nightshift/investigations/{id}/follow returns 403 for a user without Investigation Engine read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -134,7 +134,7 @@
     },
     {
       "id": "5429c7862b7908f-2b2e5757f4e17da",
-      "title": "GET /internal/nightshift/investigations/{id} returns 403 for a user without agentBuilder:read",
+      "title": "GET /internal/nightshift/investigations/{id} returns 403 for a user without Investigation Engine read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -358,7 +358,7 @@
     },
     {
       "id": "66985a39c31728f-7ae8c85f53ffb6b",
-      "title": "GET /internal/nightshift/investigations returns 403 for a user without agentBuilder:read",
+      "title": "GET /internal/nightshift/investigations returns 403 for a user without Investigation Engine read",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -614,7 +614,7 @@
     },
     {
       "id": "12c7e027c9e78de-18ba0269d41c907",
-      "title": "POST /internal/nightshift/investigations returns 403 for a user without agentBuilder:write",
+      "title": "POST /internal/nightshift/investigations returns 403 for a user without Investigation Engine manage",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -758,7 +758,7 @@
     },
     {
       "id": "b635a01a89e1578-ce28db429e3c97f",
-      "title": "PATCH /internal/nightshift/investigations/{id} returns 403 for a user without agentBuilder:write",
+      "title": "PATCH /internal/nightshift/investigations/{id} returns 403 for a user without Investigation Engine manage",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

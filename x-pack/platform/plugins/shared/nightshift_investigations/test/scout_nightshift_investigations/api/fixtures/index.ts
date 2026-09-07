@@ -10,7 +10,7 @@ export {
   COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
   INVESTIGATIONS_WRITE_ROLE,
-  NO_AGENT_BUILDER_ROLE,
+  NO_INVESTIGATION_ENGINE_ROLE,
 } from './constants';
 export {
   seedInvestigation,

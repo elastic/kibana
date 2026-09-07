@@ -95,6 +95,17 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
       elasticsearch: adminElasticsearch,
     },
 
+    investigationEngineAll: {
+      kibana: [
+        {
+          base: [],
+          feature: { nightshift: ['minimal_all', 'investigation_engine_all'] },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
+    },
+
     streamsOnly: {
       kibana: [
         {

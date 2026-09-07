@@ -7,6 +7,7 @@
 
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
@@ -22,8 +23,11 @@ export const useFetchInvestigationStatuses = (
   workflowExecutionIds: string[]
 ): UseQueryResult<Record<string, InvestigationRunStatus>, Error> => {
   const {
+    application: { capabilities },
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
+  const canShowInvestigation =
+    capabilities.nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.show] === true;
 
   const ids = useMemo(
     () =>
@@ -35,7 +39,7 @@ export const useFetchInvestigationStatuses = (
 
   return useQuery<Record<string, InvestigationRunStatus>, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATION_STATUSES_QUERY_KEY, ids],
-    enabled: ids.length > 0,
+    enabled: canShowInvestigation && ids.length > 0,
     queryFn: async ({ signal }) => {
       const { statuses } = await significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/investigations/_status',

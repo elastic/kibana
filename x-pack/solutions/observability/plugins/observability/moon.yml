@@ -170,6 +170,7 @@ dependsOn:
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/global-search-plugin'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/zod'
 tags:
   - plugin

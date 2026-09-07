@@ -34,7 +34,12 @@ jest.mock('../../../../hooks/use_kibana', () => ({
         clearFocusedEvent: jest.fn(),
       },
     },
-    core: { notifications: { toasts: { addSuccess: jest.fn() } } },
+    core: {
+      notifications: { toasts: { addSuccess: jest.fn() } },
+      application: {
+        capabilities: { nightshift: { investigation_engine_manage: true } },
+      },
+    },
     dependencies: {
       start: {
         share: {

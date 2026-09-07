@@ -7,13 +7,7 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import type { KibanaRole } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS } from '../fixtures';
-
-const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
-  kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
-};
+import { apiTest, COMMON_HEADERS, INVESTIGATIONS_WRITE_ROLE } from '../fixtures';
 
 const START_PATH = 'internal/nightshift/investigations';
 
@@ -175,7 +169,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 for a user without agentBuilder:write',
+      'returns 403 for a user without Investigation Engine manage',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
         const response = await apiClient.post(START_PATH, {

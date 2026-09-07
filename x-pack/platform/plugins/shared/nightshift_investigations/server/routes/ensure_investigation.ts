@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -23,7 +24,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
   },
   security: {
     authz: {
-      requiredPrivileges: ['agentBuilder:write'],
+      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

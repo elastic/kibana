@@ -75,7 +75,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'returns 403 for a user without agentBuilder:write',
+      'returns 403 for a user without Investigation Engine manage',
       async ({ apiClient, samlAuth }) => {
         const unauthorized = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
         const response = await ensureInvestigation(apiClient, unauthorized.cookieHeader, 'any-id');

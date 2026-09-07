@@ -23,7 +23,10 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import {
   attachInvestigationToEvent,
   type SignificantEventTriggerFeedback,
@@ -238,7 +241,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -278,7 +281,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -404,7 +407,7 @@ const investigationStatusesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
     },
   },
   params: z.object({
