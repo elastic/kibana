@@ -72,8 +72,33 @@ describe('resolveWorkflowAnonymizationOptions', () => {
         provider,
         logger,
       })
-    ).toEqual({ provider, failureMode: 'allow_unsafe', preLLMTimeoutMs: 3000 });
+    ).toEqual({
+      provider,
+      failureMode: 'allow_unsafe',
+      preLLMTimeoutMs: 3000,
+      encryptionKey: undefined,
+    });
     expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('passes encryptionKey through to the returned options', () => {
+    const logger = { error: jest.fn() };
+
+    expect(
+      resolveWorkflowAnonymizationOptions({
+        enabled: true,
+        failureMode: 'block',
+        preLLMTimeoutMs: 5000,
+        encryptionKey: 'my-hmac-key',
+        provider,
+        logger,
+      })
+    ).toEqual({
+      provider,
+      failureMode: 'block',
+      preLLMTimeoutMs: 5000,
+      encryptionKey: 'my-hmac-key',
+    });
   });
 
   it('logs once and retains legacy behavior when the provider is unavailable', () => {
