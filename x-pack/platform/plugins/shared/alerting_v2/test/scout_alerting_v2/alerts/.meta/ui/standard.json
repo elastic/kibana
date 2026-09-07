@@ -1,5 +1,5 @@
 {
-  "sha1": "100db2d4413a59a5b823be1209875e69f1aff8d9",
+  "sha1": "a164c91fc1bc28b80560826f05465679e14ed1bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,8 +96,8 @@
       }
     },
     {
-      "id": "0d4530450053d38-fa08c7c1ae41791",
-      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
+      "id": "0d4530450053d38-7dea9b4fe985f9a",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (YAML-only): removing all tags in the editor persists",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -109,6 +109,19 @@
       }
     },
     {
+      "id": "0d4530450053d38-fa08c7c1ae41791",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 467,
+        "column": 26
+      }
+    },
+    {
       "id": "0d4530450053d38-1c2cb2f0c214184",
       "title": "ComposeDiscoverFlyout — create and edit flows create flow: signal (standalone) kind can select timestamp and create",
       "expectedStatus": "passed",
@@ -117,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 463,
+        "line": 517,
         "column": 26
       }
     },
@@ -130,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 500,
+        "line": 554,
         "column": 26
       }
     },
@@ -143,8 +156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 556,
-        "column": 26
+        "line": 612,
+        "column": 24
       }
     },
     {
@@ -156,8 +169,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 583,
-        "column": 26
+        "line": 637,
+        "column": 9
       }
     },
     {
@@ -169,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 601,
-        "column": 13
+        "line": 655,
+        "column": 15
       }
     },
     {
@@ -182,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 624,
-        "column": 7
+        "line": 678,
+        "column": 26
       }
     },
     {

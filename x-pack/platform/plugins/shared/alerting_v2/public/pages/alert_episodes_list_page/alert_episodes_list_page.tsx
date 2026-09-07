@@ -15,6 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
@@ -50,16 +51,23 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
+import { experimentalBadge } from '../../components/experimental_badge';
+import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary_flyout_container';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { paths } from '../../constants';
+import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import * as i18n from './translations';
 import { EpisodesFilterBar } from './components/episodes_filter_bar';
 import { EpisodesKpis } from './components/episodes_kpis';
 import { EpisodesHistogram } from './components/episodes_histogram';
@@ -71,9 +79,6 @@ import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
 import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
-import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
-import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import * as i18n from './translations';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
@@ -92,10 +97,18 @@ const getEpisodesListMenu = ({ manageRulesHref }: { manageRulesHref: string }): 
   },
 });
 
+// Neither tag column is in the episodes query's `ALLOWLISTED_SORT_FIELDS`, so a sort on them
+// falls back to `@timestamp` and only looks like it works.
 const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
   tags: ({ column }: { column: EuiDataGridColumn }): EuiDataGridColumn => ({
     ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_TAGS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_ALERT_TAGS,
+    isSortable: false,
+  }),
+  rule_tags: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_RULE_TAGS,
+    isSortable: false,
   }),
   assignees: ({ column }) => ({
     ...column,
@@ -200,6 +213,28 @@ const AlertEpisodesListPageContent = () => {
   } = useEpisodesTableConfig(services.storage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const closeFlyout = useCallback(() => setExpandedDoc(undefined), []);
+  const [ruleIdToView, setRuleIdToView] = useState<string | null>(null);
+  const closeRuleFlyout = useCallback(() => setRuleIdToView(null), []);
+  const {
+    flyout: composeFlyout,
+    confirmationModal,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
+
+  // The rule and the episode flyout occupy the same edge of the screen, so only one of them
+  // can be open at a time.
+  const openRuleFlyout = useCallback((ruleId: string) => {
+    setExpandedDoc(undefined);
+    setRuleIdToView(ruleId);
+  }, []);
+
+  const expandDoc = useCallback((doc?: DataTableRecord) => {
+    if (doc) {
+      setRuleIdToView(null);
+    }
+    setExpandedDoc(doc);
+  }, []);
 
   const {
     data: episodesData,
@@ -213,13 +248,8 @@ const AlertEpisodesListPageContent = () => {
     timeRange,
   });
 
-  const { data: kpis } = useEpisodesKpisQuery({
-    services,
-    filterState,
-    timeRange,
-  });
-
-  const alertEpisodesCount = kpis?.alertsCount ?? 0;
+  const loadedEpisodesCount = episodesData?.length ?? 0;
+  const isEpisodeListCapped = loadedEpisodesCount >= ALERT_EPISODES_LIST_PAGE_SIZE;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -294,9 +324,21 @@ const AlertEpisodesListPageContent = () => {
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                {i18n.EPISODES_LIST_ITEM_COUNT(alertEpisodesCount)}
-              </EuiText>
+              {isEpisodeListCapped ? (
+                <EuiToolTip
+                  content={i18n.EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(
+                    ALERT_EPISODES_LIST_PAGE_SIZE
+                  )}
+                >
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                    {i18n.EPISODES_LIST_ITEM_COUNT_CAPPED(ALERT_EPISODES_LIST_PAGE_SIZE)}
+                  </EuiText>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                  {i18n.EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+                </EuiText>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
@@ -318,7 +360,13 @@ const AlertEpisodesListPageContent = () => {
           </EuiFlexGroup>
         ),
       }),
-    [euiTheme.size.s, alertEpisodesCount, handleClearFilters, hasActiveFilters]
+    [
+      euiTheme.size.s,
+      handleClearFilters,
+      hasActiveFilters,
+      isEpisodeListCapped,
+      loadedEpisodesCount,
+    ]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
@@ -440,6 +488,9 @@ const AlertEpisodesListPageContent = () => {
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
+      rule_tags: (props) => (
+        <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
+      ),
       'rule.id': (props) => (
         <EpisodeRuleCell
           {...props}
@@ -447,6 +498,7 @@ const AlertEpisodesListPageContent = () => {
           isLoadingRules={isLoadingRules}
           rowHeight={rowHeight}
           getRuleDetailsHref={getRuleDetailsHref}
+          onRuleNameClick={openRuleFlyout}
           sourceDataViewsByRule={sourceDataViewsByRule}
         />
       ),
@@ -462,6 +514,7 @@ const AlertEpisodesListPageContent = () => {
       isLoadingRules,
       rowHeight,
       getRuleDetailsHref,
+      openRuleFlyout,
       services.userProfile,
       sourceDataViewsByRule,
     ]
@@ -591,7 +644,7 @@ const AlertEpisodesListPageContent = () => {
                     enableComparisonMode={false}
                     services={services}
                     expandedDoc={expandedDoc}
-                    setExpandedDoc={setExpandedDoc}
+                    setExpandedDoc={expandDoc}
                     renderDocumentView={renderDocumentView}
                     renderCustomToolbar={renderCustomToolbar}
                   />
@@ -601,6 +654,23 @@ const AlertEpisodesListPageContent = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {ruleIdToView ? (
+        <RuleSummaryFlyoutContainer
+          ruleId={ruleIdToView}
+          type="overlay"
+          onClose={closeRuleFlyout}
+          onEdit={(rule) => {
+            setRuleIdToView(null);
+            openEditFlyout(rule);
+          }}
+          onClone={(rule) => {
+            setRuleIdToView(null);
+            openCloneFlyout(rule);
+          }}
+        />
+      ) : null}
+      {composeFlyout}
+      {confirmationModal}
     </div>
   );
 };
