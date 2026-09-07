@@ -76,8 +76,6 @@ import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { DEFAULT_EPISODES_LIST_FILTER } from './utils/episodes_list_url_state';
-import { experimentalBadge } from '../../components/experimental_badge';
-import { paths } from '../../constants';
 import { CLASSIC_EPISODES_DATA_SOURCE } from '../../episode_sources';
 import { ClassicAlertDetailsFlyout } from './components/classic_alert_details_flyout';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
