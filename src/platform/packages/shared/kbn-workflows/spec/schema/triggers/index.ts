@@ -51,7 +51,6 @@ export type CustomTriggerOn = z.infer<typeof CustomTriggerOnObjectSchema>;
 
 const CONNECTOR_ID_REQUIRED_ERROR = 'connector-id is required and must not be empty';
 
-/** Concrete connector instance id, or `ALL_CONNECTOR_IDS` (`*`) for every instance of the trigger type. */
 const connectorIdSchema = z
   .string()
   .min(1, CONNECTOR_ID_REQUIRED_ERROR)
