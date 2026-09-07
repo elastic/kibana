@@ -45,6 +45,7 @@ export interface GetStatusSuccessResult {
   engines: Array<EngineDescriptor | (EngineDescriptor & { components: EngineComponentStatus[] })>;
   historySnapshot: HistorySnapshotState;
   logsExtractionConfig: LogExtractionConfig;
+  excludedUserNames: string[];
 }
 
 export interface GetStatusNotInstalledResult {

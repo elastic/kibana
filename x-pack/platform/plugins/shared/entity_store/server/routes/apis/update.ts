@@ -19,7 +19,7 @@ import { enforceEntityStorePrivileges } from './utils/check_entity_store_privile
 import { MAX_EXCLUDED_USER_NAMES } from '../../domain/saved_objects';
 
 const bodySchema = z.object({
-  logExtraction: LogExtractionUpdadeSchema,
+  logExtraction: LogExtractionUpdadeSchema.optional(),
   excludedUserNames: z.array(z.string()).max(MAX_EXCLUDED_USER_NAMES).optional(),
 });
 

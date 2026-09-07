@@ -213,7 +213,7 @@ export class LogsExtractionClient {
   }
 
   public async updateConfig(
-    params: LogExtractionInstallParams,
+    params: LogExtractionInstallParams | undefined,
     excludedUserNames?: string[]
   ): Promise<LogExtractionConfig> {
     const state = await this.globalStateClient.update({

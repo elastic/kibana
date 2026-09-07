@@ -105,6 +105,7 @@ export function buildLogsExtractionEsqlQuery({
     const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
     const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
       withTypeId: false,
+      definition: entityDefinition,
     });
     parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
