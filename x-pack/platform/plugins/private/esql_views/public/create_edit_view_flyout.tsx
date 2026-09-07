@@ -25,6 +25,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, NotificationsStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -37,12 +38,9 @@ import { finalizeViewName, sanitizeViewNameInput } from './services/name_utils';
 import { fetchView, upsertView } from './services/views_client';
 import { setLocalViewMetadata } from './services/local_metadata';
 import { runMockQueryPreview, type MockQueryPreviewResult } from './services/mock_query_preview';
+import { MAIN_FLYOUT_TEST_SUBJ, mainFlyoutSizeStyles } from './flyout_size_styles';
 
 const DEFAULT_QUERY = 'FROM kibana_sample_data_ecommerce | WHERE KQL("term")';
-
-// Match V2/V3: named EUI sizes resolve to viewport-relative percentages, so pin a
-// literal pixel width instead. 992px matches `size="l"`'s max-width.
-const MAIN_FLYOUT_WIDTH = 992;
 
 export interface CreateEditEsqlViewFlyoutProps {
   mode: 'create' | 'edit';
@@ -232,13 +230,15 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
   }, [description, esqlText, http, initialView, mode, name, notifications, onClose, onSaved]);
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size={MAIN_FLYOUT_WIDTH}
-      ownFocus
-      aria-labelledby={flyoutTitleId}
-      data-test-subj="esqlViewsCreateEditFlyout"
-    >
+    <>
+      <Global styles={mainFlyoutSizeStyles} />
+      <EuiFlyout
+        onClose={onClose}
+        size="m"
+        ownFocus
+        aria-labelledby={flyoutTitleId}
+        data-test-subj={MAIN_FLYOUT_TEST_SUBJ}
+      >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>
@@ -436,5 +436,6 @@ export const CreateEditEsqlViewFlyout: React.FunctionComponent<CreateEditEsqlVie
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
+    </>
   );
 };

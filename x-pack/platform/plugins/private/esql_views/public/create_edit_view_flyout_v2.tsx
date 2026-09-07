@@ -34,31 +34,19 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLQueryVariables, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
+import type { CreateEditEsqlViewFlyoutProps } from './create_edit_view_flyout';
+import { MAIN_FLYOUT_TEST_SUBJ, mainFlyoutSizeStyles } from './flyout_size_styles';
 import { finalizeViewName, sanitizeViewNameInput } from './services/name_utils';
 import { fetchView, upsertView } from './services/views_client';
 import { setLocalViewMetadata } from './services/local_metadata';
 import { runMockQueryPreview, type MockQueryPreviewResult } from './services/mock_query_preview';
-import type { CreateEditEsqlViewFlyoutProps } from './create_edit_view_flyout';
 
 const DEFAULT_QUERY = 'FROM kibana_sample_data_ecommerce | WHERE KQL("term")';
 
-const MAIN_FLYOUT_TEST_SUBJ = 'esqlViewsCreateEditFlyout';
 // Set deep inside `RowViewer` -> `UnifiedDocViewerFlyout` (see `esql_datagrid`/`unified_doc_viewer`
 // packages); we don't own that markup, we just target it from the outside.
 const DETAILS_FLYOUT_TEST_SUBJ = 'esqlRowDetailsFlyout';
-// Doubled attribute selector bumps specificity so this reliably wins over the doc viewer
-// flyout's own (also `!important`) styles, regardless of stylesheet insertion order.
 const detailsFlyoutSelector = `[data-test-subj="${DETAILS_FLYOUT_TEST_SUBJ}"][data-test-subj="${DETAILS_FLYOUT_TEST_SUBJ}"]`;
-
-// EUI's real managed child flyouts dock flush against the main flyout's *left* edge by
-// setting their own `right` offset to the main flyout's rendered width. Named sizes like
-// `size="m"` render as a *viewport-relative percentage* (clamped between a min/max), so
-// its actual pixel width can't be known upfront -- measuring it at runtime is exactly
-// what caused the mismatch here (a resize/layout timing gap made the measured width read
-// closer to what an 's'-sized flyout would render). Instead, pin the main flyout to this
-// literal pixel width so both flyouts always agree on the same number, no measuring
-// needed. 992px matches `size="l"`'s `max-width` (`euiTheme.breakpoint.l`).
-const MAIN_FLYOUT_WIDTH = 992;
 
 /**
  * V2 prototype only: makes the "ES|QL Query Results" details flyout *look* like a child
@@ -70,6 +58,10 @@ const MAIN_FLYOUT_WIDTH = 992;
  * `unified_doc_viewer` packages to expose a way to opt into `session="inherit"`, which
  * is out of scope for this UX-review prototype. See chat history for the full rationale.
  *
+ * Widths follow EUI named sizes (`m` = 50%, `s` = 25%) so both flyouts stay in the
+ * viewport. EUI's own min/max clamps would make v1 and v2 diverge and would sum past
+ * 768px, so both drop those clamps and the child's `right` stays at 50% without measuring.
+ *
  * Important: we keep the results grid's `flyoutType="overlay"` (not `"push"`) -- `push`
  * pads `document.body` directly and reflows the *entire app page* behind everything,
  * which is not what we want. We stay on `overlay` and instead hide just the *second*
@@ -79,13 +71,17 @@ const MAIN_FLYOUT_WIDTH = 992;
  * flyout's).
  */
 const childFlyoutMockStyles = css`
+  ${mainFlyoutSizeStyles}
+
   body > .euiOverlayMask ~ .euiOverlayMask {
     display: none !important;
   }
 
   ${detailsFlyoutSelector} {
-    right: ${MAIN_FLYOUT_WIDTH}px !important;
-    max-width: 460px !important;
+    right: 50% !important;
+    min-width: 0 !important;
+    width: 25% !important;
+    max-width: 25% !important;
     box-shadow: -6px 0 24px rgba(0, 0, 0, 0.24), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
   }
 `;
@@ -291,7 +287,7 @@ export const CreateEditEsqlViewFlyoutV2: React.FunctionComponent<CreateEditEsqlV
       <Global styles={childFlyoutMockStyles} />
       <EuiFlyout
         onClose={onClose}
-        size={MAIN_FLYOUT_WIDTH}
+        size="m"
         ownFocus
         aria-labelledby={flyoutTitleId}
         data-test-subj={MAIN_FLYOUT_TEST_SUBJ}
