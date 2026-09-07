@@ -31,6 +31,7 @@ import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
 import { ApprovalModal } from '../../components/modals/approval_modal';
 import { ConversationDetailsFlyout } from '../../components/details';
+import { PendingProposalsPanel } from '../../components/pending_proposals';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -204,6 +205,12 @@ export const ConversationsPage: React.FC = () => {
             surfaceFilter={surfaceFilter}
             onSurfaceFilterChange={setSurfaceFilter}
           />
+        </EuiFlexItem>
+
+        {/* Durable proposals from the conversation proposals API. Hidden when
+            empty so the queue below is unaffected when nothing is pending. */}
+        <EuiFlexItem grow={false}>
+          <PendingProposalsPanel hideWhenEmpty />
         </EuiFlexItem>
 
         {isLoading ? (

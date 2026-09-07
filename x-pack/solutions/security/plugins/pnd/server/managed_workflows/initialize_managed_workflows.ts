@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
+import {
+  ALERT_ZERO_ACTION_WORKFLOW_IDS,
+  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
+  PND_RULE_WORKFLOW_IDS,
+} from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -26,14 +30,22 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  const ruleWorkflowInstalls = await Promise.allSettled(
-    PND_RULE_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+  // AlertZero action catalog entries and the temporary PoC worker install
+  // alongside the rule workflows: both are global and static.
+  const globalWorkflowIds = [
+    ...PND_RULE_WORKFLOW_IDS,
+    ...ALERT_ZERO_ACTION_WORKFLOW_IDS,
+    ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
+  ] as const;
+
+  const globalWorkflowInstalls = await Promise.allSettled(
+    globalWorkflowIds.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
   );
-  for (const [index, result] of ruleWorkflowInstalls.entries()) {
+  for (const [index, result] of globalWorkflowInstalls.entries()) {
     if (result.status === 'rejected') {
       canReconcile = false;
       logger.error(
-        `Failed to install managed PND rule workflow "${PND_RULE_WORKFLOW_IDS[index]}": ${
+        `Failed to install managed PND workflow "${globalWorkflowIds[index]}": ${
           result.reason instanceof Error ? result.reason.message : String(result.reason)
         }`
       );

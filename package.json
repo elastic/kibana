@@ -382,6 +382,7 @@
     "@kbn/controls-plugin": "link:src/platform/plugins/shared/controls",
     "@kbn/controls-renderer": "link:src/platform/packages/private/kbn-controls-renderer",
     "@kbn/controls-schemas": "link:src/platform/packages/shared/controls/controls-schemas",
+    "@kbn/conversation-proposals-plugin": "link:x-pack/platform/plugins/shared/conversation_proposals",
     "@kbn/core": "link:src/core",
     "@kbn/core-analytics-browser": "link:src/core/packages/analytics/browser",
     "@kbn/core-analytics-browser-internal": "link:src/core/packages/analytics/browser-internal",

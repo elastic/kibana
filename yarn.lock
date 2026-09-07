@@ -5034,6 +5034,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/conversation-proposals-plugin@link:x-pack/platform/plugins/shared/conversation_proposals":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-analytics-browser-internal@link:src/core/packages/analytics/browser-internal":
   version "0.0.0"
   uid ""

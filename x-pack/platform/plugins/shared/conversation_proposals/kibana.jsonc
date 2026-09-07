@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/conversation-proposals-plugin",
+  "owner": ["@elastic/security-solution", "@elastic/obs-sig-events-team"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Solution-agnostic storage, API and workflow steps for conversation proposals: recommendations surfaced to a human, optionally carrying an executable action.",
+  "plugin": {
+    "id": "conversationProposals",
+    "configPath": ["xpack", "conversationProposals"],
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["features", "workflowsExtensions", "workflowsManagement"],
+    "optionalPlugins": ["spaces"],
+    "extraPublicDirs": ["common"]
+  }
+}
