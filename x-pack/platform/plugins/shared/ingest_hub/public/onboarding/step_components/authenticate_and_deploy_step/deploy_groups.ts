@@ -206,7 +206,13 @@ export async function deployGroup(
     ...(vars ? { vars } : {}),
     inputs,
     ...(connectorId
-      ? { cloud_connector: { enabled: true, cloud_connector_id: connectorId, target_csp: 'aws' as const } }
+      ? {
+          cloud_connector: {
+            enabled: true,
+            cloud_connector_id: connectorId,
+            target_csp: 'aws' as const,
+          },
+        }
       : {}),
   });
 
