@@ -11,6 +11,7 @@ import type { WebDriver } from 'selenium-webdriver';
 import {
   InvalidArgumentError,
   NoSuchAlertError,
+  NoSuchSessionError,
   UnexpectedAlertOpenError,
 } from 'selenium-webdriver/lib/error';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -41,6 +42,14 @@ describe('dismissOpenDialog', () => {
 
   it('is silent when there is no open dialog', async () => {
     const accept = jest.fn().mockRejectedValue(new NoSuchAlertError('no such alert'));
+
+    await dismissOpenDialog(makeDriver(accept), log);
+
+    expect(warning).not.toHaveBeenCalled();
+  });
+
+  it('is silent when the session is already gone', async () => {
+    const accept = jest.fn().mockRejectedValue(new NoSuchSessionError('invalid session id'));
 
     await dismissOpenDialog(makeDriver(accept), log);
 

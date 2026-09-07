@@ -91,9 +91,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       return;
     }
     // a `beforeunload` dialog leaked by the previous suite blocks `getRect` below (#289092)
-    await tryWebDriverCall(async () => {
-      await dismissOpenDialog(driver, log);
-    });
+    await dismissOpenDialog(driver, log);
     windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 

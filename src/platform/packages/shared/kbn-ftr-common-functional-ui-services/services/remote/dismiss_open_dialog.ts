@@ -8,7 +8,12 @@
  */
 
 import type { WebDriver } from 'selenium-webdriver';
-import { NoSuchAlertError, UnexpectedAlertOpenError } from 'selenium-webdriver/lib/error';
+import {
+  NoSuchAlertError,
+  NoSuchSessionError,
+  NoSuchWindowError,
+  UnexpectedAlertOpenError,
+} from 'selenium-webdriver/lib/error';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 const UNEXPECTED_BEFOREUNLOAD_DIALOG = 'Unexpected dialog type beforeunload';
@@ -23,9 +28,15 @@ const UNEXPECTED_BEFOREUNLOAD_DIALOG = 'Unexpected dialog type beforeunload';
 export async function dismissOpenDialog(driver: WebDriver, log: ToolingLog): Promise<void> {
   try {
     await driver.switchTo().alert().accept();
-    log.warning('[webdriver] accepted an open browser dialog left behind by a previous spec');
+    log.warning('[webdriver] accepted an open browser dialog');
   } catch (error) {
-    if (!(error instanceof NoSuchAlertError)) {
+    if (
+      !(
+        error instanceof NoSuchAlertError ||
+        error instanceof NoSuchSessionError ||
+        error instanceof NoSuchWindowError
+      )
+    ) {
       log.warning(`[webdriver] failed to accept an open browser dialog: ${error.message}`);
     }
   }

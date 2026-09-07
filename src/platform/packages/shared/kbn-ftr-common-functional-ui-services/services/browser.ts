@@ -35,7 +35,7 @@ export interface InterceptResponseFactory {
     responseOptions: Omit<Protocol.Fetch.FulfillRequestRequest, 'requestId'>
   ) => ['Fetch.fulfillRequest', Protocol.Fetch.FulfillRequestRequest];
 }
-class BrowserService extends FtrService {
+export class BrowserService extends FtrService {
   /**
    * Keyboard events
    */
