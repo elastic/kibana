@@ -288,7 +288,10 @@ export default ({ getService }: FtrProviderContext) => {
                   // Reads process.executable from _source — equivalent to what ES
                   // does internally for a scriptless runtime field with that name.
                   script: {
-                    source: "def v = params._source['process.executable']; if (v != null) emit(v);",
+                    // params._source is a nested Map — dotted field names must be
+                    // traversed as nested keys, not a literal dotted key at the top level.
+                    source:
+                      "def p = params._source['process']; if (p != null) { def v = p['executable']; if (v != null) emit(v); }",
                   },
                 },
               },
