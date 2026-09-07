@@ -10,18 +10,7 @@ import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-
-/*
- * Converts a focused item into an `AttachmentInput` ready for staging.
- * The returned attachment id should be deterministic and entity-scoped
- * (e.g. `episode:{episodeId}`) so persisted attachments remain uniquely
- * identifiable. When the focused item changes, `registerAutoAttach`
- * removes the previous staged attachment before adding the new one.
- */
-export interface AttachmentConverter<FocusedItem> {
-  toAttachment: (item: FocusedItem) => AttachmentInput;
-  getOrigin: (item: FocusedItem) => string;
-}
+import type { AttachmentConverter } from '../../types/attachment_converter';
 
 /*
  * Auto-stage the focused item when the AI Agent sidebar is bound.

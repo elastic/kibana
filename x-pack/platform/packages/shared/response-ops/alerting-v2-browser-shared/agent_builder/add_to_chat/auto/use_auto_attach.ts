@@ -10,7 +10,8 @@ import { BehaviorSubject } from 'rxjs';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
+import { registerAutoAttach } from './auto_attach';
+import type { AttachmentConverter } from '../../types/attachment_converter';
 
 export const useAutoAttach = <FocusedItem>(
   item: FocusedItem | undefined,

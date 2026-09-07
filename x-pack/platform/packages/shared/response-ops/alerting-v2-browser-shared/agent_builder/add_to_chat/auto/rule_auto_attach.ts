@@ -11,9 +11,10 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
+import { registerAutoAttach } from './auto_attach';
+import type { AttachmentConverter } from '../../types/attachment_converter';
 
-export type PendingRuleAttachment = AttachmentInput<
+type PendingRuleAttachment = AttachmentInput<
   typeof RULE_ATTACHMENT_TYPE,
   RuleAttachmentData
 >;

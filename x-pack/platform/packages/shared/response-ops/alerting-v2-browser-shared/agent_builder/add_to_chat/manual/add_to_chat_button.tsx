@@ -8,7 +8,7 @@
 import React from 'react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentConverter } from './attachment_converter';
+import type { AttachmentConverter } from '../../types/attachment_converter';
 import { useManualAddToChat } from './use_manual_add_to_chat';
 
 const ADD_TO_CHAT_BUTTON_LABEL = i18n.translate(

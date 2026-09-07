@@ -21,7 +21,7 @@ import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule'
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
-import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared/auto_attach/use_episode_auto_attach';
+import { useEpisodeAutoAttach } from '@kbn/alerting-v2-browser-shared/agent_builder/add_to_chat/auto/use_episode_auto_attach';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';

@@ -17,7 +17,7 @@ import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
 import { paths } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
-import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared/auto_attach/use_rule_auto_attach';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared/agent_builder/add_to_chat/auto/use_rule_auto_attach';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({

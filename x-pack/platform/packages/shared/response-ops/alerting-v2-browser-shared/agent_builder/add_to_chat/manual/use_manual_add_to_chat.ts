@@ -10,7 +10,7 @@ import { PluginStart } from '@kbn/core-di';
 import { useService } from '@kbn/core-di-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { AttachmentConverter } from './attachment_converter';
+import type { AttachmentConverter } from '../../types/attachment_converter';
 import { addItemsToChat } from './add_items_to_chat';
 import {
   shouldRestageOnConversationChange,

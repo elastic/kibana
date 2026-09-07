@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AddToChatButton } from './add_to_chat_button';
 import { useManualAddToChat } from './use_manual_add_to_chat';
-import type { AttachmentConverter } from './attachment_converter';
+import type { AttachmentConverter } from '../../types/attachment_converter';
 
 jest.mock('./use_manual_add_to_chat');
 

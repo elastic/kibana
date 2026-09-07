@@ -7,7 +7,8 @@
 
 import { useMemo } from 'react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
-import { episodeAttachmentConverter, type FocusedEpisode } from './episode_auto_attach';
+import { episodeAttachmentConverter } from '../../types/episode_attachment_converter';
+import type { FocusedEpisode } from '../../types/focused_episode';
 import { useAutoAttach } from './use_auto_attach';
 
 export const useEpisodeAutoAttach = (

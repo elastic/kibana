@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 
-export interface AttachmentConverter<FocusedItem> {
-  toAttachment: (item: FocusedItem) => AttachmentInput;
-  getOrigin: (item: FocusedItem) => string;
+export interface FocusedEpisode {
+  episode: AlertEpisode;
+  ruleName?: string;
+  groupingFields?: readonly string[];
 }
