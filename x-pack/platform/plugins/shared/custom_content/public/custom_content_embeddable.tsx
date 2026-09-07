@@ -54,6 +54,10 @@ import {
   readEsqlQuery,
   toEsqlQueryState,
 } from '@kbn/custom-content-common';
+import {
+  CustomContentComponent,
+  type CustomContentRendererServices,
+} from '@kbn/custom-content-renderer';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getServices } from './services';
@@ -63,7 +67,6 @@ import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
-import { CustomContentComponent } from './components/custom_content_component';
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -79,6 +82,12 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const { core, search, dataViews, agentBuilder } = getServices();
+    const rendererServices: CustomContentRendererServices = {
+      http: core.http,
+      uiSettings: core.uiSettings,
+      search,
+    };
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
@@ -159,7 +168,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           defaultMessage: 'Custom panel',
         }),
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
-        const { core } = getServices();
         getTelemetry().trackEditFlyoutOpened({
           isNewPanel,
           hasTemplate: Boolean(template$.getValue()),
@@ -192,7 +200,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               draftTemplate: string,
               draftEsqlQuery: string | undefined
             ) => {
-              const { agentBuilder } = getServices();
               if (!agentBuilder) return;
               hasSaved = true;
               closeFlyout();
@@ -288,7 +295,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         distinctUntilChanged(([q1, r1], [q2, r2]) => q1 === q2 && r1 === r2),
         switchMap(([esqlQueryValue, routingValue]) => {
           if (!esqlQueryValue) return of(undefined);
-          const { core, dataViews } = getServices();
           return from(
             getESQLAdHocDataview({
               dataViewsService: dataViews,
@@ -365,7 +371,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         useEffect(() => {
-          const { agentBuilder } = getServices();
           if (!agentBuilder) return;
 
           const sub = agentBuilder.events.ui.activeConversation$
@@ -415,7 +420,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleGenerateWithChat = useCallback(() => {
-          const { agentBuilder } = getServices();
           if (!agentBuilder) return;
           getTelemetry().trackGenerateWithChatClicked({
             triggerSource: 'empty_panel',
@@ -433,6 +437,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
         return (
           <CustomContentComponent
+            services={rendererServices}
             embeddableId={uuid}
             esqlQuery={esqlQuery}
             timeRange={timeRange}
@@ -444,6 +449,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             filters={filters}
             esqlVariables={esqlVariables}
             previewHtml={previewHtml}
+            isAiAvailable={Boolean(agentBuilder)}
             onLoadingChange={handleLoadingChange}
             onGenerateWithChat={handleGenerateWithChat}
           />
