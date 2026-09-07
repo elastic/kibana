@@ -12,6 +12,7 @@ export type {
   InvestigationPatch,
   InvestigationRecord,
   InvestigationRepository,
+  ProjectedInvestigationRecord,
 } from './types';
 export { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 export { SavedObjectInvestigationRepository } from './saved_object_investigation_repository';

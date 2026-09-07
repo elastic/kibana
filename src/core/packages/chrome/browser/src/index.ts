@@ -48,8 +48,8 @@ export type {
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
