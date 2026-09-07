@@ -149,9 +149,8 @@ export async function createAndIntegrateCloudConnector(params: {
 
       logger.info(`Successfully reused cloud connector: ${existingCloudConnectorId}`);
 
-      // Inject the connector's stored credential vars into the policy so the agent can
-      // authenticate with the cloud provider. Callers that reuse an existing connector
-      // (e.g. ingest_hub) do not supply credentials in stream vars — the connector holds them.
+      // Backfill credential vars from the connector into the policy for onboarding flows
+      // that reuse a connector by ID without supplying credentials in the request.
       updatedPackagePolicy = injectConnectorVarsIntoPolicy(
         updatedPackagePolicy,
         existingConnector.vars,
