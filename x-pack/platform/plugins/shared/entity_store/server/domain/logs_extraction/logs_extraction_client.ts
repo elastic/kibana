@@ -22,6 +22,7 @@ import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schem
 import {
   getEntityDefinition,
   supportsNonPrioritySampling,
+  type EntityDefinitionOptions,
 } from '../../../common/domain/definitions/registry';
 import { resolveSamplingRate } from './sampling';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
@@ -264,9 +265,13 @@ export class LogsExtractionClient {
         type
       );
       ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
-      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode, {
-        excludedUserNames,
-      });
+      const entityDefinitionOptions: EntityDefinitionOptions = { excludedUserNames };
+      const entityDefinition = getEntityDefinition(
+        type,
+        this.namespace,
+        this.extractionMode,
+        entityDefinitionOptions
+      );
       const {
         count,
         pages,
@@ -287,6 +292,7 @@ export class LogsExtractionClient {
         onCheckpointPersisted: (ts) => {
           lastPersistedCheckpointISO = ts;
         },
+        entityDefinitionOptions,
       });
 
       const operationResult = {
@@ -382,6 +388,7 @@ export class LogsExtractionClient {
     entityDefinition,
     onRemoteResolved,
     onCheckpointPersisted,
+    entityDefinitionOptions,
   }: {
     type: EntityType;
     config: MergedLogExtractionConfig;
@@ -393,6 +400,7 @@ export class LogsExtractionClient {
     onRemoteResolved?: (isRemote: boolean) => void;
     // Called after each checkpoint write so the caller tracks partial progress for lag reporting.
     onCheckpointPersisted?: (ts: string) => void;
+    entityDefinitionOptions?: EntityDefinitionOptions;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -424,6 +432,7 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
+      entityDefinitionOptions,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: allIndexPatterns,
       metricAttributes: this.getExtractionAttributes(type, isRemote),
@@ -452,6 +461,7 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
+    entityDefinitionOptions,
     indexPatterns,
     latestIndex,
     metricAttributes,
@@ -462,6 +472,7 @@ export class LogsExtractionClient {
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    entityDefinitionOptions?: EntityDefinitionOptions;
     indexPatterns: string[];
     latestIndex: string;
     metricAttributes: ExtractionAttributes;
@@ -498,6 +509,7 @@ export class LogsExtractionClient {
         samplingRateOverride,
         metricAttributes,
         onCheckpointPersisted,
+        entityDefinitionOptions,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -586,6 +598,7 @@ export class LogsExtractionClient {
         samplingRateOverride,
         metricAttributes,
         onCheckpointPersisted,
+        entityDefinitionOptions,
       });
 
       totalCount += subResult.count;
@@ -700,6 +713,7 @@ export class LogsExtractionClient {
     samplingRateOverride,
     metricAttributes,
     onCheckpointPersisted,
+    entityDefinitionOptions,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -719,6 +733,7 @@ export class LogsExtractionClient {
     samplingRateOverride?: number | null;
     metricAttributes: ExtractionAttributes;
     onCheckpointPersisted?: (ts: string) => void;
+    entityDefinitionOptions?: EntityDefinitionOptions;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -864,6 +879,7 @@ export class LogsExtractionClient {
             indexPatterns,
             latestIndex,
             entityDefinition,
+            entityDefinitionOptions,
             docsLimit: effectiveDocsLimit,
             fromDateISO,
             toDateISO,
@@ -992,6 +1008,7 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     entityDefinition,
+    entityDefinitionOptions,
     docsLimit,
     fromDateISO,
     toDateISO,
@@ -1008,6 +1025,7 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
+    entityDefinitionOptions?: EntityDefinitionOptions;
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
@@ -1034,6 +1052,7 @@ export class LogsExtractionClient {
         indexPatterns,
         latestIndex,
         entityDefinition,
+        entityDefinitionOptions,
         docsLimit,
         fromDateISO,
         toDateISO,
