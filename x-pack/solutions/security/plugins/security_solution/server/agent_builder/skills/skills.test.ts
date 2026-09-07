@@ -16,6 +16,7 @@ import {
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
 } from './siem_migration';
 
 const ALL_SKILLS = [
@@ -27,6 +28,7 @@ const ALL_SKILLS = [
   automaticMigrationRulesStopMigrationSkill,
   automaticMigrationRulesUpdateMigrationSkill,
   automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesInstallRulesSkill,
 ];
 
 describe('Security Skills', () => {
@@ -258,6 +260,39 @@ describe('Security Skills', () => {
       expect(automaticMigrationRulesStartMigrationSkill.description).not.toContain(
         'SIEM migration'
       );
+    });
+  });
+
+  describe('automatic-migration-rules-install-rules skill', () => {
+    it('validates and registers the complete install workflow tool set', async () => {
+      await expect(
+        validateSkillDefinition(automaticMigrationRulesInstallRulesSkill)
+      ).resolves.toBeDefined();
+
+      expect(automaticMigrationRulesInstallRulesSkill.getRegistryTools!()).toEqual([
+        'security.siem_migration.get_all_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_stats',
+        'security.siem_migration.get_rule_migration_translation_stats',
+        'security.siem_migration.get_migration_rules',
+        'security.siem_migration.group_rules_by_integrations',
+        'platform.fleet.get_integration_details',
+        'security.build_redirect_url',
+        'security.siem_migration.install_migration_rules',
+      ]);
+    });
+
+    it('documents readiness gates, result semantics, linked sample, and follow-up choices', () => {
+      const { content } = automaticMigrationRulesInstallRulesSkill;
+
+      expect(content).toContain('Rules: All');
+      expect(content).toContain('is_installed');
+      expect(content).toContain('is_enabled');
+      expect(content).toContain('recommend disabled');
+      expect(content).toContain('processed N rules');
+      expect(content).toContain('Sample of processed custom rules');
+      expect(content).toContain('maximum 3');
+      expect(content).toContain('/app/security/rules/id/');
+      expect(content).toContain('Review missing or disabled integrations');
     });
   });
 
