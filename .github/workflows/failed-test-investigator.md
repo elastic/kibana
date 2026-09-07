@@ -180,6 +180,8 @@ Before classifying a UI failure as test-side, read the application code that ren
 
 When the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, the doctor names **exactly one** action. State it before Classify. The comment's Proposed fix **is that action** — not an investigator Cypress wait.
 
+Do **not** write `#### Root cause & evidence` or `#### Additional context` in the issue comment. The `<details>` block contains only `#### Proposed fix` (and `#### Data collection issues` only if a screenshot fetch failed).
+
 | Doctor action | Comment's Proposed fix | `failure:ai-fixable` / `ai:fix-flaky` |
 | --- | --- | --- |
 | `migrate`, or any action that requires writing a **new** Scout spec or page object | Migrate. Point at `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/` (plus `scout-ui-testing` / `scout-api-testing` as needed). | Neither. The fixer will not open that PR. |
@@ -270,7 +272,7 @@ Do **not** add the label when the recurring failure is **unrelated** to what the
 
 Add `failure:insufficient-data` (in addition to the other label(s)) when you could **not** reach a strong, confident conclusion because the data needed to diagnose the failure was missing — server logs, a Playwright trace, the failure screenshot, or build logs were absent, expired, or never uploaded. Missing data on its own is not enough to warrant the label: add it only when that data would have changed the conclusion or substantially raised the confidence of the analysis.
 
-When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
+When you set it, the comment's `#### Additional context` → "Open questions" bullet (or the `#### Data collection issues` section, if a fetch failed) must name exactly what was missing and how to obtain it. For Security Cypress there is no Additional context section — put that in `#### Data collection issues` if a fetch failed, otherwise in Proposed fix. When the gap is **logs** specifically, be concrete and actionable instead of asking for "more logs":
 
 - **Name the logs you needed:** the logger/context, level, and the event or time window (e.g. `plugins.security.authentication` at `debug` around the failure), and why they would be decisive.
 - **Propose how to capture them on the next run:** the specific logger to raise and where. Aim for a plan precise enough that a single re-run would produce the evidence needed to firm up the classification.
@@ -372,7 +374,7 @@ Example: `### Test needs an update — the case is too long for a 60s budget`. *
 
 ### 2. Collapsible investigation (required)
 
-Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order:
+Wrap **everything after the summary** in a single `<details>` block so the issue page stays scannable. The sections below live inside the block, in this order. For Security Cypress (doctor path), omit `#### Root cause & evidence` and `#### Additional context` — the block is only Proposed fix:
 
 ```
 <details>
@@ -384,20 +386,20 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Root cause & evidence
 
-{content — see guidance below}
+{content — see guidance below; omit this heading and section for Security Cypress}
 
 #### Additional context
 
-{content — optional, omit the whole section if there is nothing high-signal to add}
+{content — optional, omit the whole section if there is nothing high-signal to add; omit this heading and section for Security Cypress}
 
 </details>
 ```
 
 #### Proposed fix (required)
 
-For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action).
+For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action). Do not add Root cause & evidence or Additional context after it.
 
-State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
+State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here. For Security Cypress there is no Root cause & evidence section; keep Proposed fix to the action only.
 
 **Recommend one fix.** Pick the best option and commit to it — don't lay out competing options, and never use a table of alternatives (a table makes them look equally good). If a genuine alternative is worth noting, add it as a single sentence _after_ the recommendation, clearly subordinate to it.
 
@@ -425,6 +427,8 @@ Only link a section that genuinely matches; if none fits, omit the link rather t
 
 #### Root cause & evidence (required)
 
+Omit this entire section (heading and body) for Security Cypress. See [Security Cypress: doctor action](#security-cypress-doctor-action).
+
 Explain _why_ it failed in a few tight sentences or bullets, each anchored to a specific piece of evidence (inline link to a code line, commit, or log; you can mention screenshot contents if helpful). Lead with the decisive evidence.
 
 - State the single root cause; don't re-walk the investigation or list every call in the test.
@@ -433,6 +437,8 @@ Explain _why_ it failed in a few tight sentences or bullets, each anchored to a 
 - Per **Relevant history**, when strongly supported, name the PR or small set of PRs needed to explain how the flake became possible or observable, with inline links and merge dates. State each PR's precise causal role; do not force a single "introducing PR" when the history is multi-causal, and omit PR history when the evidence is ambiguous.
 
 #### Additional context (optional)
+
+Omit this entire section (heading and body) for Security Cypress. See [Security Cypress: doctor action](#security-cypress-doctor-action).
 
 Omit this section unless it changes what the reader does next. When present, keep it to a couple of one-line bullets:
 
