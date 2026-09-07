@@ -143,22 +143,9 @@ const formatLatestRun = (
   return latestRun ? `${latestRun.status}\n${formatAge(latestRun.timestamp, now)}` : '-';
 };
 
-const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
-  const groups = new Map<string, FlakyTestEntry[]>();
-  for (const entry of entries) {
-    groups.set(entry.filePath, [...(groups.get(entry.filePath) ?? []), entry]);
-  }
-  return groups;
-};
-
-/**
- * Renders the top-ranked tests one per row. File, framework and owners are per-file, so their
- * cells span the rows of that file's tests (in order of first appearance) and whole-suite
- * failures stand out.
- */
+/** Renders the top-ranked tests one self-contained row per test, in rank order. */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
-  all: readonly FlakyTestEntry[],
   minBuilds: number,
   now: Date
 ): CliTable3.Table => {
@@ -167,47 +154,21 @@ const buildTopFlakyTable = (
     colWidths: [null, null, OWNERS_COL_WIDTH, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
     wordWrap: true,
   });
-  const qualifyingPerFile = groupByFile(all);
 
-  let rank = 0;
-  for (const [filePath, entries] of groupByFile(top)) {
-    const [{ framework, owners }] = entries;
-    const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const rowSpan = entries.length;
-    // cli-table3 lays later rows out around the spanning cells, so only the first row carries them
-    const frameworkAndOwnersCells: CliTable3.Cell[] = [
-      { rowSpan, content: framework },
-      {
-        rowSpan,
-        content:
-          owners.map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH))).join('\n') ||
-          '-',
-      },
-    ];
-    const fileCell: CliTable3.Cell = {
-      rowSpan,
-      content: [
-        wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
-        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    };
-
-    entries.forEach((entry, index) => {
-      rank += 1;
-      const flakiest = flakiestBranch(entry.byBranch, minBuilds);
-      table.push([
-        rank,
-        ...(index === 0 ? frameworkAndOwnersCells : []),
-        `${entry.failedBuilds}/${entry.builds}`,
-        formatFlakiestBranch(flakiest),
-        formatLatestRun(entry, flakiest, now),
-        entry.title,
-        ...(index === 0 ? [fileCell] : []),
-      ]);
-    });
-  }
+  top.forEach((entry, index) => {
+    const flakiest = flakiestBranch(entry.byBranch, minBuilds);
+    table.push([
+      index + 1,
+      entry.framework,
+      entry.owners.map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH))).join('\n') ||
+        '-',
+      `${entry.failedBuilds}/${entry.builds}`,
+      formatFlakiestBranch(flakiest),
+      formatLatestRun(entry, flakiest, now),
+      entry.title,
+      wrapOn(entry.filePath, '/', contentWidth(FILE_COL_WIDTH)),
+    ]);
+  });
 
   return table;
 };
@@ -253,7 +214,6 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
     panel.push([
       `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
         top,
-        flaky,
         report.thresholds.minBuilds,
         report.generatedAt
       ).toString()}`,
