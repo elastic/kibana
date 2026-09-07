@@ -29,7 +29,7 @@ Authentication
 
 ## Receive Datadog webhook events [datadog-inbound-events]
 
-When `xpack.actions.inboundEvents.enabled` is `true`, the connector provides an ingest URL for Datadog webhooks. Each accepted request emits a `datadog.received` workflow event. The event contains the raw JSON payload in `event.body`.
+The connector provides an ingest URL for Datadog webhooks. Each accepted request emits a `datadog.received` workflow event. The event contains the raw JSON payload in `event.body`.
 
 Use this JSON payload in the Datadog webhook configuration. Do not enable form encoding:
 
