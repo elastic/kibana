@@ -78,11 +78,6 @@ export const loadDiscoverSession = async ({
     title: i18n.translate('discover.sessionLoadWarnings.title', {
       defaultMessage: 'Some session content could not be loaded',
     }),
-    text: i18n.translate('discover.sessionLoadWarnings.text', {
-      defaultMessage:
-        '{warningCount, plural, one {One part of this session was omitted.} other {# parts of this session were omitted.}} Saving this session will keep only the content currently shown.',
-      values: { warningCount: warnings.length },
-    }),
     actionProps: {
       primary: {
         onClick: openModal,

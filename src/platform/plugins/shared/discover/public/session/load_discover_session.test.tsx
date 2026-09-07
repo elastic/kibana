@@ -105,7 +105,6 @@ describe('loadDiscoverSession', () => {
 
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
       title: 'Some session content could not be loaded',
-      text: '2 parts of this session were omitted. Saving this session will keep only the content currently shown.',
       actionProps: {
         primary: {
           children: 'Learn more',
