@@ -99662,6 +99662,8 @@ components:
             template:
               maxLength: 510000
               type: string
+            time_range:
+              $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
               description: The panel title.
               type: string
@@ -99678,7 +99680,7 @@ components:
         - type
         - grid
         - config
-      title: Custom content
+      title: Custom panel
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session:
       additionalProperties: false
