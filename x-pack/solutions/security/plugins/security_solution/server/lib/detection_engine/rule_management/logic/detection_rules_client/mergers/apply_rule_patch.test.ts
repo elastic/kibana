@@ -162,6 +162,28 @@ describe('applyRulePatch', () => {
     );
   });
 
+  test('should accept a threat match patch with a valid threat_mapping', async () => {
+    const threatMapping = [
+      {
+        entries: [
+          {
+            field: 'user.name',
+            value: 'threat.indicator.user.name',
+            type: 'mapping',
+            negate: false,
+          },
+        ],
+      },
+    ];
+    const existingRule = getThreatMatchingSchemaMock();
+    const patchedRule = await applyRulePatch({
+      rulePatch: { threat_mapping: threatMapping },
+      existingRule,
+      prebuiltRuleAssetClient,
+    });
+    expect(patchedRule).toEqual(expect.objectContaining({ threat_mapping: threatMapping }));
+  });
+
   // The semantic threat_mapping checks below run on parsed values only, so a malformed value
   // has to come back as a schema error rather than blowing up while walking the entries.
   test('should reject a threat_mapping that is not an array', async () => {

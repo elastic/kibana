@@ -243,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(400);
 
           expect(body.message).toEqual(
-            '[request body]: max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, max_signals: Too small: expected number to be >=1, and 3 more'
+            '[request body]: max_signals: Too small: expected number to be >=1'
           );
         });
       });
