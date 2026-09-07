@@ -469,7 +469,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             logger,
             retry,
             entitiesIndex: '.entities.v2.latest.*',
-            expectedCount: 49,
+            expectedCount: 51,
           });
         });
 
@@ -481,7 +481,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
         runEnrichmentTests();
 
-        describe('EUID ranking arms (Okta)', () => {
+        describe('EUID ranking arms - user identifiers (Okta)', () => {
           // Okta is the interesting integration for namespace handling. The Entity Store derives
           // the `okta` namespace from two sources (`event.module` exactly, `data_stream.dataset`
           // by its first chunk) across two accepted values (`okta`, `entityanalytics_okta`), and
@@ -576,6 +576,114 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               0,
               `user.name: alice@example.com AND ${NAMESPACE} AND NOT user.email: exists AND NOT user.id: exists AND NOT user.domain: exists`
             );
+          });
+        });
+
+        describe('EUID ranking arms - host identifiers (GCP)', () => {
+          // The host EUID ranking is host.id -> host.name -> host.hostname, and unlike `user` it
+          // composes no namespace, so these filters carry no namespace clause at all.
+          //
+          // The expanded graph derives its own range from the origin document's timestamp
+          // (`timestamp ||-30m` to `||+30m`, see graph_visualization.tsx) and ignores the
+          // `timerange` URL param, so these four fixtures are timestamped within ten minutes of
+          // each other — otherwise a filter added in the graph cannot reach the sibling documents.
+          //
+          // Four documents (see es_archives/logs_gcp_audit, ids euid-host-arm-1..4), all with the
+          // same actor `service:deploy-pipeline`:
+          //   doc 1  host.target.id web-1 + host.target.name web-1  -> host:web-1  (ranking pos 0)
+          //   doc 2  host.id web-1 (ACTOR) -> service:metrics-collector
+          //   doc 3  host.target.name web-1, no id                  -> host:web-1  (ranking pos 1)
+          //   doc 4  host.target.id web-2 + host.target.name web-1  -> host:web-2  (ranking pos 0)
+          //
+          // Docs 1 and 3 are the same entity reached through different arms: identical literal
+          // value AND identical composed EUID, differing only in which field carried it. Doc 1
+          // satisfies the bare `host.target.name: web-1` clause, so doc 3's filter is correct only
+          // because of its `NOT host.target.id: exists` guard — that guard is what this suite
+          // exercises. Doc 4 shares doc 1 and 3's `host.target.name` but resolves at position 0 via
+          // its own id, so it is separated by value rather than by any guard.
+          const SERVICE_ACTOR = 'service:deploy-pipeline';
+
+          it('guards the arm it fell through, so a look-alike carrying host.target.id is excluded', async () => {
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('euid-host-arm-3')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.showSearchBar();
+
+            // Doc 3's target has no host.target.id, so it resolves at ranking position 1 and the
+            // filter guards the position it skipped. No namespace clause: the host EUID composes
+            // none, so `event.module`/`data_stream.dataset` never reach the filter even though the
+            // node's sourceFields carry them.
+            await expandedFlyoutGraph.showActionsOnEntity('host:web-1');
+            await expandedFlyoutGraph.expectFilterTextEquals(
+              0,
+              'host.target.name: web-1 AND NOT host.target.id: exists'
+            );
+
+            // Only doc 3 matches. Doc 1 carries the same host.target.name and composes the same
+            // `host:web-1` EUID, and is kept out by the guard alone.
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            await expandedFlyoutGraph.assertGraphNodesNumber(3);
+            await expandedFlyoutGraph.assertNodeExists(SERVICE_ACTOR);
+            await expandedFlyoutGraph.assertNodeExists('host:web-1');
+          });
+
+          it('filters on the id arm when the document carries one, and ORs across popover actions', async () => {
+            await networkEventsPage.navigateToNetworkEventsPage(
+              `${networkEventsPage.getAbsoluteTimerangeFilter(
+                '2024-09-01T00:00:00.000Z',
+                '2024-09-02T00:00:00.000Z'
+              )}&${networkEventsPage.getFlyoutFilter('euid-host-arm-4')}`
+            );
+            await networkEventsPage.waitForListToHaveEvents();
+
+            await networkEventsPage.flyout.expandVisualizations();
+            await networkEventsPage.flyout.assertGraphPreviewVisible();
+
+            await expandedFlyoutGraph.expandGraph();
+            await expandedFlyoutGraph.waitGraphIsLoaded();
+            await expandedFlyoutGraph.showSearchBar();
+            await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+            // web-2 has no entity store record, so the target renders unenriched — the node id is
+            // still the composed EUID, which is what the filter is built from.
+            await expandedFlyoutGraph.assertNodeExists('host:web-2');
+
+            // Position 0, so no guards. Doc 4 shares `host.target.name: web-1` with docs 1 and 3
+            // but its own id puts it on a different entity, and the value alone separates them.
+            await expandedFlyoutGraph.showActionsOnEntity('host:web-2');
+            await expandedFlyoutGraph.expectFilterTextEquals(0, 'host.target.id: web-2');
+
+            // The filter matches only the already-visible doc 4, so the graph is unchanged.
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+            // Adding the actor's own filter must OR with the target filter, not AND. The service is
+            // the actor of docs 1, 3 and 4, so this pulls in docs 1 and 3 — which group into a
+            // single label node, since they share an action and a resolved target.
+            await expandedFlyoutGraph.showActionsByEntity(SERVICE_ACTOR);
+            await expandedFlyoutGraph.expectFilterTextEquals(
+              0,
+              'host.target.id: web-2 OR service.name: deploy-pipeline'
+            );
+
+            await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+            // - 1 service actor node
+            // - 1 label node for doc 4, with its unenriched host:web-2 target
+            // - 1 label node grouping docs 1 and 3 (same action, both resolving to host:web-1)
+            // - host:web-2 and host:web-1 target nodes
+            await expandedFlyoutGraph.assertGraphNodesNumber(5);
+            await expandedFlyoutGraph.assertNodeExists('host:web-1');
+            await expandedFlyoutGraph.assertNodeExists('host:web-2');
           });
         });
 

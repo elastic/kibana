@@ -2043,6 +2043,80 @@
 {
   "type": "doc",
   "value": {
+    "id": "euid-host-arm-web-1",
+    "index": ".entities.v2.latest.default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T15:00:00.000Z",
+      "cloud": {
+        "provider": "gcp"
+      },
+      "data_stream": {
+        "dataset": "gcp.audit"
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host",
+          "UntypedId": "web-1"
+        },
+        "id": "host:web-1",
+        "lifecycle": {
+          "first_seen": "2024-09-01T14:00:00.000Z",
+          "last_seen": "2024-09-01T15:00:00.000Z"
+        },
+        "name": "web-1",
+        "source": "gcp",
+        "type": "Host"
+      },
+      "event": {
+        "dataset": "gcp.audit",
+        "module": "gcp"
+      },
+      "host": {
+        "id": "web-1",
+        "name": "web-1"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "euid-host-arm-deploy-pipeline",
+    "index": ".entities.v2.latest.default-00001",
+    "source": {
+      "@timestamp": "2024-09-01T17:00:00.000Z",
+      "data_stream": {
+        "dataset": "gcp.audit"
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "service",
+          "UntypedId": "deploy-pipeline"
+        },
+        "id": "service:deploy-pipeline",
+        "lifecycle": {
+          "first_seen": "2024-09-01T14:00:00.000Z",
+          "last_seen": "2024-09-01T17:00:00.000Z"
+        },
+        "name": "deploy-pipeline",
+        "source": "gcp",
+        "type": "Service"
+      },
+      "event": {
+        "dataset": "gcp.audit",
+        "module": "gcp"
+      },
+      "service": {
+        "name": "deploy-pipeline"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
     "id": "euid-okta-alice",
     "index": ".entities.v2.latest.default-00001",
     "source": {

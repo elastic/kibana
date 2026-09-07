@@ -125,7 +125,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           logger,
           retry,
           entitiesIndex: getEntitiesLatestIndexName(),
-          expectedCount: 49,
+          expectedCount: 51,
         });
       });
 
