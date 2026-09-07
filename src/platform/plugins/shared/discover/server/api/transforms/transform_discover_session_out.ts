@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import type { DiscoverSessionTab } from '../../embeddable';
+import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
 import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
@@ -26,7 +30,12 @@ export const transformDiscoverSessionOut = (
     description: attributes.description,
     tags,
     tabs: attributes.tabs.map((tab) => {
-      const apiTab = fromStoredTab(tab.attributes, references);
+      const transformedTab = fromStoredTab(tab.attributes, references);
+      const inlineDataViewId = getStoredInlineDataViewId(
+        transformedTab,
+        tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+      );
+      const apiTab = omitInlineDataViewIdFromFilters(transformedTab, inlineDataViewId);
       const visContext = transformVisContextOut(tab.attributes.visContext);
       const { panels: controlPanels, warnings: controlPanelWarnings } = transformControlPanelsOut(
         tab.attributes.controlGroupJson,
@@ -68,4 +77,45 @@ export const transformDiscoverSessionOut = (
   };
 
   return { sessionState, warnings };
+};
+
+/** Returns the stored ID only when the API tab contains an inline data view. */
+const getStoredInlineDataViewId = (
+  tab: DiscoverSessionTab,
+  searchSourceJSON: string
+): string | undefined => {
+  if (tab.data_source.type !== AS_CODE_DATA_VIEW_SPEC_TYPE) {
+    return undefined;
+  }
+
+  const { index } = parseSearchSourceJSON(searchSourceJSON);
+  if (!index || typeof index === 'string') {
+    return undefined;
+  }
+
+  return index.id;
+};
+
+/**
+ * Removes the tab's inline Data View ID from filters that use it.
+ * IDs pointing to other Data Views are preserved.
+ */
+const omitInlineDataViewIdFromFilters = (
+  tab: DiscoverSessionTab,
+  inlineDataViewId: string | undefined
+): DiscoverSessionTab => {
+  if (inlineDataViewId === undefined || isDiscoverSessionEsqlTab(tab)) {
+    return tab;
+  }
+
+  const filters = tab.filters.map((filter) => {
+    if (filter.data_view_id !== inlineDataViewId) {
+      return filter;
+    }
+
+    const { data_view_id: _inlineDataViewId, ...filterWithoutDataViewId } = filter;
+    return filterWithoutDataViewId;
+  });
+
+  return { ...tab, filters } satisfies typeof tab;
 };

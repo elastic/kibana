@@ -16,14 +16,27 @@ import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
   discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
-  MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_SESSION_DESCRIPTION_LENGTH,
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
 } from './schema';
+
+// Keep these values independent from the schema constants so contract changes require an explicit
+// test update.
+const CURRENT_API_LIMITS = {
+  titleLength: 256,
+  descriptionLength: 1000,
+  tabLabelLength: 120,
+  tabs: 25,
+  breakdownFieldLength: 1000,
+  visContextAttributeKeyLength: 256,
+  columnOrder: 100,
+  sort: 100,
+  filters: 100,
+  rowsPerPage: { min: 1, max: 10_000 },
+  sampleSize: { min: 10, max: 10_000 },
+  headerRowHeight: { min: 1, max: 5 },
+  rowHeight: { min: 1, max: 20 },
+} as const;
 
 const classicTab = {
   id: 'tab-classic',
@@ -116,6 +129,7 @@ describe('discoverSessionApiDataSchema', () => {
 
     const tab = validated.tabs[0] as DiscoverSessionApiClassicTab;
 
+    expect(validated.description).toBe('');
     expect(tab.hide_chart).toBe(false);
     expect(tab.hide_table).toBe(false);
     expect(tab.sort).toEqual([]);
@@ -446,7 +460,7 @@ describe('discoverSessionApiDataSchema', () => {
     it('rejects a title that exceeds the max length', () => {
       expect(() =>
         discoverSessionApiDataSchema.parse({
-          title: repeat('a', MAX_SESSION_TITLE_LENGTH + 1),
+          title: repeat('a', CURRENT_API_LIMITS.titleLength + 1),
           tabs: [classicTab],
         })
       ).toThrow();
@@ -454,18 +468,18 @@ describe('discoverSessionApiDataSchema', () => {
 
     it('accepts a title at the max length', () => {
       const validated = discoverSessionApiDataSchema.parse({
-        title: repeat('a', MAX_SESSION_TITLE_LENGTH),
+        title: repeat('a', CURRENT_API_LIMITS.titleLength),
         tabs: [classicTab],
       });
 
-      expect(validated.title).toHaveLength(MAX_SESSION_TITLE_LENGTH);
+      expect(validated.title).toHaveLength(CURRENT_API_LIMITS.titleLength);
     });
 
     it('rejects a description that exceeds the max length', () => {
       expect(() =>
         discoverSessionApiDataSchema.parse({
           title: 'Valid title',
-          description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH + 1),
+          description: repeat('a', CURRENT_API_LIMITS.descriptionLength + 1),
           tabs: [classicTab],
         })
       ).toThrow();
@@ -474,11 +488,11 @@ describe('discoverSessionApiDataSchema', () => {
     it('accepts a description at the max length', () => {
       const validated = discoverSessionApiDataSchema.parse({
         title: 'Valid title',
-        description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH),
+        description: repeat('a', CURRENT_API_LIMITS.descriptionLength),
         tabs: [classicTab],
       });
 
-      expect(validated.description).toHaveLength(MAX_SESSION_DESCRIPTION_LENGTH);
+      expect(validated.description).toHaveLength(CURRENT_API_LIMITS.descriptionLength);
     });
 
     it('rejects a tab label that exceeds the max length', () => {
@@ -488,9 +502,113 @@ describe('discoverSessionApiDataSchema', () => {
           tabs: [
             {
               ...classicTab,
-              label: repeat('a', MAX_TAB_LABEL_LENGTH + 1),
+              label: repeat('a', CURRENT_API_LIMITS.tabLabelLength + 1),
             },
           ],
+        })
+      ).toThrow();
+    });
+
+    it('accepts a tab label at the max length', () => {
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            label: repeat('a', CURRENT_API_LIMITS.tabLabelLength),
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].label).toHaveLength(CURRENT_API_LIMITS.tabLabelLength);
+    });
+
+    it.each([
+      ['rows_per_page', CURRENT_API_LIMITS.rowsPerPage],
+      ['sample_size', CURRENT_API_LIMITS.sampleSize],
+      ['header_row_height', CURRENT_API_LIMITS.headerRowHeight],
+      ['row_height', CURRENT_API_LIMITS.rowHeight],
+    ] as const)('pins the current %s range', (field, { min, max }) => {
+      for (const value of [min, max]) {
+        expect(() =>
+          discoverSessionApiDataSchema.parse({
+            title: 'Valid title',
+            tabs: [{ ...classicTab, [field]: value }],
+          })
+        ).not.toThrow();
+      }
+
+      for (const value of [min - 1, max + 1]) {
+        expect(() =>
+          discoverSessionApiDataSchema.parse({
+            title: 'Valid title',
+            tabs: [{ ...classicTab, [field]: value }],
+          })
+        ).toThrow();
+      }
+    });
+
+    it.each([
+      {
+        field: 'column_order',
+        max: CURRENT_API_LIMITS.columnOrder,
+        buildValue: (size: number) => Array.from({ length: size }, (_, index) => `field-${index}`),
+      },
+      {
+        field: 'sort',
+        max: CURRENT_API_LIMITS.sort,
+        buildValue: (size: number) =>
+          Array.from({ length: size }, (_, index) => ({
+            name: `field-${index}`,
+            direction: 'asc',
+          })),
+      },
+      {
+        field: 'filters',
+        max: CURRENT_API_LIMITS.filters,
+        buildValue: (size: number) =>
+          Array.from({ length: size }, (_, index) => ({
+            type: 'condition',
+            condition: {
+              field: `field-${index}`,
+              operator: 'exists',
+            },
+          })),
+      },
+    ])('pins the current $field size limit', ({ field, max, buildValue }) => {
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: [{ ...classicTab, [field]: buildValue(max) }],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: [{ ...classicTab, [field]: buildValue(max + 1) }],
+        })
+      ).toThrow();
+    });
+
+    it('pins the current session tab limit', () => {
+      const buildTabs = (size: number) =>
+        Array.from({ length: size }, (_, index) => ({
+          ...classicTab,
+          id: `tab-${index}`,
+        }));
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: buildTabs(CURRENT_API_LIMITS.tabs),
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: buildTabs(CURRENT_API_LIMITS.tabs + 1),
         })
       ).toThrow();
     });
@@ -532,11 +650,27 @@ describe('discoverSessionApiDataSchema', () => {
           tabs: [
             {
               ...classicTab,
-              breakdown_field: repeat('a', MAX_BREAKDOWN_FIELD_LENGTH + 1),
+              breakdown_field: repeat('a', CURRENT_API_LIMITS.breakdownFieldLength + 1),
             },
           ],
         })
       ).toThrow();
+    });
+
+    it('accepts a breakdown_field at the max length', () => {
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            breakdown_field: repeat('a', CURRENT_API_LIMITS.breakdownFieldLength),
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].breakdown_field).toHaveLength(
+        CURRENT_API_LIMITS.breakdownFieldLength
+      );
     });
 
     it('rejects a vis_context attribute key that exceeds the max length', () => {
@@ -549,7 +683,7 @@ describe('discoverSessionApiDataSchema', () => {
               vis_context: {
                 suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
                 attributes: {
-                  [repeat('a', MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH + 1)]: {
+                  [repeat('a', CURRENT_API_LIMITS.visContextAttributeKeyLength + 1)]: {
                     foo: 'bar',
                   },
                 },
@@ -558,6 +692,24 @@ describe('discoverSessionApiDataSchema', () => {
           ],
         })
       ).toThrow();
+    });
+
+    it('accepts a vis_context attribute key at the max length', () => {
+      const key = repeat('a', CURRENT_API_LIMITS.visContextAttributeKeyLength);
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+              attributes: { [key]: { foo: 'bar' } },
+            },
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].vis_context?.attributes).toHaveProperty(key);
     });
   });
 });

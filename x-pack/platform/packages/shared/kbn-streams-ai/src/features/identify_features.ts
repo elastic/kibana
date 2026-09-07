@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { compact, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type {
   BoundInferenceClient,
   ChatCompletionTokenCount,
@@ -24,7 +23,7 @@ import { withSpan } from '@kbn/apm-utils';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { conditionSchema, isConditionComplete, type Condition } from '@kbn/streamlang';
 import { createIdentifyFeaturesPrompt } from './prompt';
-import { formatRawDocument } from './utils/format_raw_document';
+import type { InferenceDocument } from './utils/format_raw_document';
 import { sumTokens } from '../helpers/sum_tokens';
 
 /**
@@ -33,6 +32,7 @@ import { sumTokens } from '../helpers/sum_tokens';
  * validation, which would retry the whole generation and then drop the batch.
  */
 const MAX_EVIDENCE_ITEMS = 5;
+export const MAX_IDENTIFIED_FEATURES_PER_ITERATION = 100;
 
 export interface PreviouslyIdentifiedFeature {
   id: string;
@@ -80,7 +80,7 @@ export interface SimilarFeatureHit {
 
 export interface IdentifyFeaturesOptions {
   streamName: string;
-  sampleDocuments: Array<SearchHit<Record<string, unknown>>>;
+  sampleDocuments: InferenceDocument[];
   excludedFeatures?: ExcludedFeatureSummary[];
   inferenceClient: BoundInferenceClient;
   systemPrompt: string;
@@ -88,7 +88,6 @@ export interface IdentifyFeaturesOptions {
   signal: AbortSignal;
   previouslyIdentifiedFeatures?: PreviouslyIdentifiedFeature[];
   knownFeatureIds?: string;
-  searchSimilarFeatures?: (args: SearchSimilarFeaturesArguments) => Promise<SimilarFeatureHit[]>;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -103,7 +102,6 @@ export async function identifyFeatures({
   signal,
   previouslyIdentifiedFeatures = [],
   knownFeatureIds = '',
-  searchSimilarFeatures,
   additionalTools,
   additionalToolCallbacks,
 }: IdentifyFeaturesOptions): Promise<{
@@ -111,24 +109,13 @@ export async function identifyFeatures({
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const formattedDocuments = compact(
-    sampleDocuments.map((hit) =>
-      formatRawDocument({
-        hit,
-        shouldNotTruncate(key: string) {
-          return key.includes('tags');
-        },
-      })
-    )
-  );
-
   const previousFeaturesContext =
     previouslyIdentifiedFeatures.length > 0 ? JSON.stringify(previouslyIdentifiedFeatures) : '';
 
   const response = await withSpan('invoke_prompt', () =>
     executeAsReasoningAgent({
       input: {
-        sample_documents: JSON.stringify(formattedDocuments),
+        sample_documents: JSON.stringify(sampleDocuments),
         previously_identified_features: previousFeaturesContext,
         known_feature_ids: knownFeatureIds,
         excluded_features: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : '',
@@ -138,37 +125,6 @@ export async function identifyFeatures({
       maxSteps: additionalToolCallbacks ? 6 : 4,
       toolCallbacks: {
         ...(additionalToolCallbacks ?? {}),
-        search_similar_features: async (toolCall) => {
-          if (!searchSimilarFeatures) {
-            return {
-              response: {
-                features: [],
-                count: 0,
-                error: 'Semantic feature search is unavailable.',
-              },
-            };
-          }
-
-          try {
-            const features = await searchSimilarFeatures(toolCall.function.arguments);
-            return {
-              response: {
-                features,
-                count: features.length,
-              },
-            };
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            logger.warn(`Failed to search similar features: ${errorMessage}`);
-            return {
-              response: {
-                features: [],
-                count: 0,
-                error: errorMessage,
-              },
-            };
-          }
-        },
         finalize_features: async () => ({ response: { finalized: true } }),
       },
       finalToolChoice: {
@@ -216,7 +172,10 @@ export async function identifyFeatures({
   }
 
   return {
-    features: uniqBy(finalizedFeatures, (feature) => feature.id),
+    features: uniqBy(finalizedFeatures, (feature) => feature.id).slice(
+      0,
+      MAX_IDENTIFIED_FEATURES_PER_ITERATION
+    ),
     ignoredFeatures,
     tokensUsed: sumTokens({ added: response.tokens }),
   };
