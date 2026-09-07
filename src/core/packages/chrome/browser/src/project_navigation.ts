@@ -318,16 +318,14 @@ export interface ProjectNavigationLinkList {
   items$: Observable<readonly ProjectNavigationLinkItem[]>;
 }
 
-/** Everything one feature contributes to an existing deep link's hover popover. One per target. */
+/**
+ * Everything one feature contributes to an existing deep link's hover popover. One per target.
+ * Chrome attaches this to primary and footer hover only, not More.
+ */
 export interface ProjectNavigationLinks {
   id: string;
   target: AppDeepLinkId;
   lists: readonly ProjectNavigationLinkList[];
-  /** Footer row. Label defaults to "View all". Shown only when at least one list has items. */
-  viewAll?: {
-    href: string;
-    label?: string;
-  };
 }
 
 /**

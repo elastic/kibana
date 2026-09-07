@@ -15,7 +15,6 @@ import type {
   ProjectNavigationLinkList,
   ProjectNavigationLinks,
 } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import type { MenuItem, SecondaryMenuItem } from '@kbn/ui-side-navigation/types';
 import { catchError, combineLatest, map, of, startWith, type Observable } from 'rxjs';
 import type { NavigationItems } from './to_navigation_items';
@@ -29,10 +28,6 @@ export interface ResolvedLinkList {
 export interface ResolvedLinksPlacement {
   nodeId: string;
   lists: ResolvedLinkList[];
-  viewAll?: {
-    href: string;
-    label?: string;
-  };
 }
 
 const toSecondaryMenuItem = (
@@ -44,19 +39,6 @@ const toSecondaryMenuItem = (
   label: item.label,
   badgeType: item.badgeType,
   isExternal: item.isExternal,
-});
-
-const toViewAllItem = (
-  nodeId: string,
-  viewAll: { href: string; label?: string }
-): SecondaryMenuItem => ({
-  id: `${nodeId}-viewAll`,
-  href: viewAll.href,
-  label:
-    viewAll.label ??
-    i18n.translate('core.ui.chrome.sideNavigation.viewAllLinkText', {
-      defaultMessage: 'View all',
-    }),
 });
 
 const walkNodes = (
@@ -95,14 +77,13 @@ const resolvePlacement = (
   nodeId: string
 ): Observable<ResolvedLinksPlacement> => {
   if (registration.lists.length === 0) {
-    return of({ nodeId, lists: [], viewAll: registration.viewAll });
+    return of({ nodeId, lists: [] });
   }
 
   return combineLatest(registration.lists.map(resolveList)).pipe(
     map((lists) => ({
       nodeId,
       lists: lists.filter((list) => list.items.length > 0),
-      viewAll: registration.viewAll,
     }))
   );
 };
@@ -142,25 +123,17 @@ export const attachPopoverSections = (
 
   const attach = (item: MenuItem): MenuItem => {
     const placement = byNodeId.get(item.id);
+    // v1 skips nodes that already have `sections`. Intended later: tree children, then lists, then footer.
     if (!placement || (item.sections?.length ?? 0) > 0) {
       return item;
     }
-    const listSections = placement.lists.map((list) => ({
-      id: list.id,
-      label: list.title,
-      items: list.items,
-    }));
-    const viewAllSection = placement.viewAll
-      ? [
-          {
-            id: `${item.id}-viewAll`,
-            items: [toViewAllItem(item.id, placement.viewAll)],
-          },
-        ]
-      : [];
     return {
       ...item,
-      popoverSections: [...listSections, ...viewAllSection],
+      popoverSections: placement.lists.map((list) => ({
+        id: list.id,
+        label: list.title,
+        items: list.items,
+      })),
     };
   };
 
@@ -168,7 +141,8 @@ export const attachPopoverSections = (
     ...navigationItems,
     navItems: {
       primaryItems: navigationItems.navItems.primaryItems.map(attach),
-      overflowItems: navigationItems.navItems.overflowItems?.map(attach),
+      // More stays a flat link. popoverSections would turn the parent into a submenu.
+      overflowItems: navigationItems.navItems.overflowItems,
       footerItems: navigationItems.navItems.footerItems.map(attach),
     },
   };

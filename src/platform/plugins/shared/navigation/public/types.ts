@@ -72,6 +72,7 @@ export interface NavigationPublicStart {
   /**
    * Attach hover lists to an existing project-nav deep link.
    * Plugins provide data; chrome renders it. One registration per target.
+   * Primary and footer hover only; not attached in More.
    */
   registerNavigationLinks: (links: ProjectNavigationLinks) => void;
 }

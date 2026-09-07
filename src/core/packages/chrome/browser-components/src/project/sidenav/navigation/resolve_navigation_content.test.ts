@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  NavigationTreeDefinitionUI,
-  ProjectNavigationLinks,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinitionUI, ProjectNavigationLinks } from '@kbn/core-chrome-browser';
 import { filter, firstValueFrom, of, throwError } from 'rxjs';
 import type { MenuItem } from '@kbn/ui-side-navigation/types';
 import { attachPopoverSections, resolveLinksContent } from './resolve_navigation_content';
@@ -40,7 +37,6 @@ const createRegistration = (
       items$: of([{ id: 'dash-1', href: '/app/dashboards#/dash-1', label: 'One' }]),
     },
   ],
-  viewAll: { href: '/app/dashboards#/list' },
   ...overrides,
 });
 
@@ -56,7 +52,7 @@ const createNavigationItems = (item: MenuItem): NavigationItems => ({
   navItems: {
     primaryItems: [item],
     overflowItems: [item],
-    footerItems: [],
+    footerItems: [item],
   },
 });
 
@@ -96,13 +92,13 @@ const resolveNonEmpty = async (registration: ProjectNavigationLinks) => {
 };
 
 describe('attachPopoverSections', () => {
-  it('attaches recents and View all to the primary and More items', async () => {
+  it('attaches lists to primary and footer hover, not More', async () => {
     const resolved = await resolveNonEmpty(createRegistration());
     const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
       resolved,
     ]);
 
-    expect(attached.navItems.primaryItems[0].popoverSections).toEqual([
+    const recents = [
       {
         id: 'recentlyViewed',
         label: 'Recently viewed',
@@ -114,23 +110,14 @@ describe('attachPopoverSections', () => {
           },
         ],
       },
-      {
-        id: 'dashboards-viewAll',
-        items: [
-          {
-            id: 'dashboards-viewAll',
-            href: '/app/dashboards#/list',
-            label: 'View all',
-          },
-        ],
-      },
-    ]);
-    expect(attached.navItems.overflowItems?.[0].popoverSections).toEqual(
-      attached.navItems.primaryItems[0].popoverSections
-    );
+    ];
+
+    expect(attached.navItems.primaryItems[0].popoverSections).toEqual(recents);
+    expect(attached.navItems.footerItems[0].popoverSections).toEqual(recents);
+    expect(attached.navItems.overflowItems?.[0].popoverSections).toBeUndefined();
   });
 
-  it('attaches multiple lists and the registration View all', () => {
+  it('attaches multiple lists in registration order', () => {
     const attached = attachPopoverSections(createNavigationItems(createMenuItem('dashboards')), [
       {
         nodeId: 'dashboards',
@@ -146,7 +133,6 @@ describe('attachPopoverSections', () => {
             items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
           },
         ],
-        viewAll: { href: '/app/dashboards#/list', label: 'Overview' },
       },
     ]);
 
@@ -161,20 +147,10 @@ describe('attachPopoverSections', () => {
         label: 'Favorites',
         items: [{ id: 'dash-2', href: '/app/dashboards#/dash-2', label: 'Two' }],
       },
-      {
-        id: 'dashboards-viewAll',
-        items: [
-          {
-            id: 'dashboards-viewAll',
-            href: '/app/dashboards#/list',
-            label: 'Overview',
-          },
-        ],
-      },
     ]);
   });
 
-  it('does not attach onto a node that already has panel sections', async () => {
+  it('v1 skips a node that already has sections', async () => {
     const resolved = await resolveNonEmpty(createRegistration());
     const existing = [{ id: 'static', items: [{ id: 'child', label: 'Child', href: '/child' }] }];
     const attached = attachPopoverSections(

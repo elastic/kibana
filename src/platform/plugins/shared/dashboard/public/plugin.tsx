@@ -363,11 +363,6 @@ export class DashboardPlugin
             ),
         },
       ],
-      viewAll: {
-        href: core.application.getUrlForApp(DASHBOARD_APP_ID, {
-          path: `#${LANDING_PAGE_PATH}`,
-        }),
-      },
     });
 
     plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {

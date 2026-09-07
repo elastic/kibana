@@ -150,6 +150,7 @@ export interface InternalChromeStart extends ChromeStart {
     /**
      * Attach hover lists to an existing project-nav deep link.
      * Does not require project chrome style; unused until project nav renders.
+     * Primary and footer hover only; not attached in More.
      */
     registerNavigationLinks(links: ProjectNavigationLinks): void;
 
