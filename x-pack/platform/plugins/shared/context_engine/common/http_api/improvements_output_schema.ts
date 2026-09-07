@@ -16,15 +16,6 @@ import { kiFieldsSchema, kiPartialFieldsSchema } from '../step_types/ki';
 import type { ImprovementAction } from './improvement_actions';
 import { IMPROVEMENT_ACTIONS } from './improvement_actions';
 
-/**
- * What an analysis run may say about one proposed change.
- *
- * Everything the store owns is absent by construction: `improvement_id` is a fingerprint the
- * server derives, `status` is always `suggested` on a write, and `provenance` is assembled from
- * the selection the run was handed. A run that could name its own `improvement_id` could collapse
- * two unrelated proposals onto one lineage, or fork one problem across many, and idempotency would
- * stop being a property of the store.
- */
 const proposedImprovementShape = {
   title: z
     .string()
@@ -115,16 +106,8 @@ const summaryField = z
   );
 
 /**
- * The run's structured output, narrowed to the actions this AI index permits.
- *
- * Narrowing here rather than only in the prompt is the point: an instruction not to propose an
- * action is a request, and the write route rejects what slips through anyway. Narrowing the schema
- * means the model cannot express the out-of-policy action in the first place, so the common case
- * costs a rejection nobody has to review.
- *
- * An empty allow-list is observe-only, and the schema drops the `improvements` array entirely
- * rather than presenting one the run may not fill — `enum: []` is not a valid JSON Schema, and an
- * array the agent is told never to use is an invitation to try.
+ * The run's structured output, narrowed to the actions this AI index permits; an empty allow-list
+ * is observe-only and drops the `improvements` array entirely.
  */
 export const buildImprovementsOutputSchema = (allowedActions: readonly ImprovementAction[]) => {
   if (allowedActions.length === 0) {
@@ -147,12 +130,7 @@ export const buildImprovementsOutputSchema = (allowedActions: readonly Improveme
   });
 };
 
-/**
- * The same schema as JSON Schema, for the `ai.agent` step's `with.schema`.
- *
- * Derived rather than hand-written so the shape the agent is asked for and the shape the write
- * route accepts cannot drift apart. `io: 'input'` because this describes what the model produces.
- */
+/** The same schema as JSON Schema, for the `ai.agent` step's `with.schema`. */
 export const buildImprovementsJsonSchema = (
   allowedActions: readonly ImprovementAction[]
 ): Record<string, unknown> =>

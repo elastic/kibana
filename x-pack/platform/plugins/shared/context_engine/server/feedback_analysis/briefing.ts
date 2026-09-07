@@ -23,7 +23,6 @@ export interface BriefingInput {
   allowedActions: ImprovementAction[];
 }
 
-/** Keeps a quoted query or error from running away with the briefing's budget. */
 const MAX_EXAMPLE_LENGTH = 500;
 
 /** How many prior improvements to spell out individually before summarising the rest by status. */
@@ -169,12 +168,7 @@ const renderTask = (allowedActions: ImprovementAction[]): string => {
   ].join('\n');
 };
 
-/**
- * Renders the prompt for one analysis run.
- *
- * Built here rather than in the workflow template so both callers — the schedule and the
- * interactive button — send the agent the same thing, and so the wording can be tested.
- */
+/** Renders the prompt for one analysis run. */
 export const renderBriefing = ({
   aiIndex,
   run,

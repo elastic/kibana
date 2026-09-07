@@ -14,10 +14,6 @@ import { aiIndexIdSchema } from './ki';
 
 export const RECORD_IMPROVEMENTS_STEP_ID = 'context-engine.recordImprovements' as const;
 
-/**
- * Bound on the proposals one step may carry, not the policy. The policy cap is applied per
- * proposal by the handler, which reports a reason per proposal rather than failing the step.
- */
 const MAX_IMPROVEMENTS_PER_REQUEST = 200;
 
 export const recordImprovementsInputSchema = z.object({
@@ -35,8 +31,6 @@ export const recordImprovementsInputSchema = z.object({
     .max(1000)
     .default([])
     .describe('The spaces the signals came from, echoed from the context step'),
-  // Validated per item against the agent output contract by the handler, which reports a reason
-  // per proposal. Bounded here only so the step input cannot grow without limit.
   improvements: z
     .array(z.unknown())
     .max(MAX_IMPROVEMENTS_PER_REQUEST)

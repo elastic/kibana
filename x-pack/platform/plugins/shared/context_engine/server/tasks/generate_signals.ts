@@ -102,8 +102,6 @@ export const generateSignals = async ({
   ]);
   const convAgent = buildConvAgentMap(agentRows);
 
-  // The watermark covers the batch that was read, including the rounds dropped below, so a
-  // self-analysis round is not re-read on every subsequent run.
   let windowMax = '';
   for (const row of toolRows) {
     if (row['@timestamp'] > windowMax) {
@@ -111,9 +109,6 @@ export const generateSignals = async ({
     }
   }
 
-  // A round that loaded the analysis skill is the loop diagnosing an AI index: it reads the
-  // very index under analysis, which the target-index filter in `build` cannot recognize as
-  // self-referential, so the whole round is dropped here instead.
   const analyzableRows = toolRows.filter((row) => !selfAnalysisTraceIds.has(row.trace_id));
   if (selfAnalysisTraceIds.size > 0) {
     logger.debug(

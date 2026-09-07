@@ -10,14 +10,7 @@ import { DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM } from '../../common/c
 import type { AiIndexSignalTimeRange } from '../../common/http_api/ai_indices';
 import { InvalidSignalWindowError } from './errors';
 
-/**
- * Resolves the configured signal window to two concrete timestamps.
- *
- * Date math is evaluated once, here, rather than handed to Elasticsearch as `now-30d`. The
- * selection issues more than one query and the result is recorded as an improvement's provenance,
- * so a window that drifted between those uses would make the recorded evidence not quite match the
- * evidence actually read.
- */
+/** Resolves the configured signal window to two concrete timestamps. */
 export const resolveSignalWindow = (
   range: AiIndexSignalTimeRange | undefined,
   now: Date = new Date()

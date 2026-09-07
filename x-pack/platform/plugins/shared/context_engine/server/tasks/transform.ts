@@ -184,10 +184,6 @@ const groupByRound = (toolRows: ExecuteToolSpan[]): Map<string, ExecuteToolSpan[
  * that don't resolve to an esql query (`query_kind === 'other'`) are skipped —
  * they carry no `target_index`/`query` and aren't actionable as signals. Round
  * context is still computed over the whole round.
- *
- * Reads of the feedback loop's own indices are dropped before any round context is
- * computed, so an analysis round neither emits signals nor inflates the loop/fallback
- * counters of the round it shares a trace with.
  */
 export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[] => {
   const signals: EsqlToolCallSignal[] = [];

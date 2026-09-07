@@ -13,11 +13,7 @@ import { getDeleteKiStepDefinition } from './delete_ki';
 import { getFeedbackContextStepDefinition } from './feedback_context';
 import { getRecordImprovementsStepDefinition } from './record_improvements';
 
-/**
- * Registers the KI and feedback analysis workflow steps. Registration is
- * global; the space-scoped Context Engine setting is enforced per request in
- * each handler.
- */
+/** Registers the KI and feedback analysis workflow steps. */
 export const registerStepDefinitions = ({
   workflowsExtensions,
   feedbackAnalysis,

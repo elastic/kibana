@@ -39,7 +39,6 @@ describe('recordImprovements', () => {
 
   beforeEach(() => {
     improvementsService = {
-      // The store echoes back what it accepted, so the default mock accepts everything.
       write: jest.fn(async (inputs) => inputs.map((input) => ({ ...input } as never))),
     };
   });
@@ -166,8 +165,6 @@ describe('recordImprovements', () => {
   });
 
   it('spends the cap on what it accepts, not on where a proposal sat in the input', async () => {
-    // The first proposals are all rejected, so none of them consume the run's budget: every valid
-    // one behind them still fits.
     const result = await run({
       proposals: [
         ...Array.from({ length: MAX_IMPROVEMENTS_PER_RUN }, () => 'not an improvement'),

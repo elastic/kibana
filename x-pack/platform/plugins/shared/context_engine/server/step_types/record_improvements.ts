@@ -15,14 +15,7 @@ import { improvementAuditEvent } from '../routes/audit_events';
 import type { FeedbackAnalysisStepDependencies } from './helpers';
 import { assertContextEngineEnabled, assertFeedbackLoopEnabled } from './helpers';
 
-/**
- * Records what an analysis run proposed.
- *
- * A step rather than an HTTP route because the write is not a plain index operation — each
- * proposal's identity is derived here, and appending a revision means retiring the lineage's
- * current head under optimistic concurrency control. That contract belongs to the improvements
- * service, and a step is how a workflow reaches it without going back out over HTTP.
- */
+/** Records what an analysis run proposed. */
 export const getRecordImprovementsStepDefinition = ({
   getAiIndexService,
   getImprovementsService,
@@ -58,8 +51,6 @@ export const getRecordImprovementsStepDefinition = ({
       const auditLogger = await getAuditLogger(request);
 
       try {
-        // Read back rather than taken from the step input: the policy is a property of the index,
-        // and a run briefed before it changed must not be able to write under the old one.
         const { feedback_analysis: feedbackAnalysis } = await getAiIndexService().get(aiIndexId);
         const allowedActions = feedbackAnalysis?.allowed_actions ?? [...IMPROVEMENT_ACTIONS];
 

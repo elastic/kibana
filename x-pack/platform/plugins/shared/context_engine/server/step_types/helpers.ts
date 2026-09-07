@@ -33,7 +33,6 @@ export interface KiStepDependencies {
 /** Dependencies injected into the feedback analysis step definition factories. */
 export interface FeedbackAnalysisStepDependencies {
   getAiIndexService: () => AiIndexService;
-  /** Request-scoped: the store is user-owned, so a run reads and writes as the workflow owner. */
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getAuditLogger: (request: KibanaRequest) => Promise<AuditLogger | undefined>;
   isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;

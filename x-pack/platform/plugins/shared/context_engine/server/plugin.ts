@@ -123,8 +123,6 @@ export class ContextEnginePlugin
       logger: this.logger.get('signal_generator'),
     });
 
-    // Makes this plugin the owner of the feedback-analysis workflow definition. Registration alone
-    // installs nothing — instances are installed per AI index when analysis is turned on.
     setupDeps.workflowsExtensions.registerManagedWorkflowOwner(CONTEXT_ENGINE_WORKFLOW_OWNER);
 
     const getAiIndexService = () => {
@@ -194,8 +192,6 @@ export class ContextEnginePlugin
       getAiIndexService,
       isContextEngineEnabled,
       checkWritePrivilege,
-      // The two steps an analysis run is built from. Steps rather than HTTP routes: the workflow
-      // is the only caller, and both need plugin services a request could not reach any other way.
       feedbackAnalysis: {
         getAiIndexService,
         getImprovementsService,

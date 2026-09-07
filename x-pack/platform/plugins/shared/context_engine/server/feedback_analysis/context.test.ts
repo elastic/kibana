@@ -88,8 +88,6 @@ describe('buildFeedbackContext', () => {
   it('carries the index, its KI summary and its signal patterns in the briefing rather than beside it', async () => {
     const context = await build();
 
-    // The run reads the briefing, not a parallel copy of the same facts. Returning both would push
-    // the same content through the workflow engine twice.
     expect(context).not.toHaveProperty('groups');
     expect(context).not.toHaveProperty('signals');
     expect(context).not.toHaveProperty('ki_summary');
@@ -156,8 +154,6 @@ describe('buildFeedbackContext', () => {
   });
 
   it('reports no signals when nothing was classified as a problem, so no LLM call is made', async () => {
-    // Retrievals ran — the run still records how many it looked at — but none were tagged, so the
-    // aggregation produced no pattern and there is nothing for an agent to work from.
     selectSignalsMock.mockResolvedValue({
       patterns: [],
       spaces: ['default'],

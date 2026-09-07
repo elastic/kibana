@@ -8,31 +8,16 @@
 import type { ImprovementAction } from './improvement_actions';
 import type { KiFields, KiPartialFields } from '../step_types/ki';
 
-/**
- * The single global Context Engine improvements index.
- *
- * Global rather than per-space (unlike signals): an improvement targets an AI index's KI
- * pipeline, and the AI index registry has no space dimension. One index also means a single
- * `deleteByAiIndex` cleans up completely when an AI index goes away.
- */
+/** The single global Context Engine improvements index. */
 export const IMPROVEMENTS_INDEX = 'context-engine-improvements';
 
-/**
- * Where an improvement stands with its reviewer.
- *
- * - `suggested` — proposed by an analysis run, waiting for review. The only status a write reaches.
- * - `applied` — approved, and the change was written to the AI index.
- * - `rejected` — dismissed by a reviewer; nothing was written. `resolution.reason` says why.
- * - `failed` — approved, but the apply step errored, so nothing was written. Deliberately a status
- *   rather than an error return: the improvement stays visible in the review UI and remains
- *   actionable for a retry once the cause is fixed, and `resolution.error` carries the reason.
- */
+/** Where an improvement stands with its reviewer. */
 export type ImprovementStatus = 'suggested' | 'applied' | 'rejected' | 'failed';
 
-/** The `add_*` actions create their target, so they carry no {@link ImprovementTarget}. */
+/** True for the `add_*` actions, which create their target. */
 export const isAddAction = (action: ImprovementAction): boolean => action.startsWith('add_');
 
-/** What the action operates on. The `add_*` actions create their target and carry a `subject` instead. */
+/** What the action operates on. */
 export interface ImprovementTarget {
   /** ES `_id` of the KI document in the AI index dest. */
   ki_id?: string;
@@ -41,23 +26,13 @@ export interface ImprovementTarget {
   /** The existing source, for `edit_source` / `remove_source`. */
   source_value?: string;
   /**
-   * What an `add_*` action is about — typically the index or source whose missing coverage the
-   * addition would close. An `add_*` action has no existing target to identify it, and its payload
-   * is agent-authored prose, so without this the change fingerprint would either collapse every
-   * addition into one improvement or churn a new one on every run.
+   * What an `add_*` action is about, typically the index or source whose missing coverage the
+   * addition would close.
    */
   subject?: string;
 }
 
-/**
- * The body the action writes. Kept in `_source`, not indexed — see the storage schema.
- *
- * The KI fields are the step contracts rather than a local shape, so a proposal cannot describe a
- * document the apply step would reject. Hand-rolling them had already drifted: `type` and `title`
- * are required by `createKi` but were optional here, so an improvement could typecheck and then
- * fail on apply. Note that both step schemas strip unknown top-level keys, so custom fields belong
- * under `attributes`.
- */
+/** The body the action writes. Kept in `_source`, not indexed. */
 export interface ImprovementPayload {
   /** For `add_ki` — the document exactly as `context-engine.createKi` takes it. */
   ki?: KiFields;
@@ -71,15 +46,11 @@ export interface ImprovementPayload {
 export interface ImprovementResolution {
   /** Username who approved / rejected. */
   by?: string;
-  /**
-   * Why a reviewer dismissed the improvement, in their words. Distinct from `error`: this is a
-   * judgement, not a fault. The run briefing reads it back, so the analysis knows a fix was
-   * considered and turned down rather than re-proposing it on the next pass.
-   */
+  /** Why a reviewer dismissed the improvement, in their words. */
   reason?: string;
   /** Why the apply step errored, when status is `failed`. Nothing was written. */
   error?: string;
-  /** The KI / workflow the apply step created or touched, so the UI can link to it. */
+  /** The KI / workflow the apply step created or touched. */
   applied_target_id?: string;
 }
 
@@ -88,7 +59,7 @@ export interface ImprovementProvenance {
   agent_run_id: string;
   /** Signals it was derived from. */
   signal_ids: string[];
-  /** Spaces those signals came from; the analysis reads across all of them. */
+  /** Spaces those signals came from. */
   signal_spaces: string[];
   signal_window: { from: string; to: string };
   signal_count: number;
@@ -103,7 +74,7 @@ export interface Improvement {
   revision_id: string;
   /** Append-log lineage: the revision this one superseded. */
   previous_revision_id?: string;
-  /** True on the newest revision of this `improvement_id`; `list`/`get` filter on it. */
+  /** True on the newest revision of this `improvement_id`. */
   latest: boolean;
   ai_index_id: string;
   /** Revision time. */
@@ -121,11 +92,7 @@ export interface Improvement {
   provenance: ImprovementProvenance;
 }
 
-/**
- * What a caller supplies to {@link ImprovementsServiceApi.write}. The service owns the append-log
- * fields (`revision_id`, `previous_revision_id`, `latest`, `@timestamp`) so a caller cannot
- * construct a lineage that breaks the single-head invariant.
- */
+/** What a caller supplies to {@link ImprovementsServiceApi.write}. */
 export type ImprovementRevisionInput = Omit<
   Improvement,
   'revision_id' | 'previous_revision_id' | 'latest' | '@timestamp' | 'suggested_at'
@@ -134,7 +101,7 @@ export type ImprovementRevisionInput = Omit<
   suggested_at?: string;
 };
 
-/** The statuses a caller may transition an improvement to; `suggested` is only reached by a write. */
+/** The statuses a caller may transition an improvement to. */
 export type ImprovementTransition = Extract<ImprovementStatus, 'applied' | 'rejected' | 'failed'>;
 
 /** Response shape of a paginated improvements list: one entry per `improvement_id` (its head). */
@@ -143,16 +110,10 @@ export interface ListImprovementsResponse {
   total: number;
 }
 
-/**
- * What an analysis run posts when it finishes.
- *
- * The window and spaces are echoed from the selection the run was handed rather than recomputed
- * here, because relative date math (`now-30d`) resolves differently between the two calls and
- * provenance should record the window the signals were actually read from.
- */
+/** What an analysis run posts when it finishes. */
 export interface RecordImprovementsRequest {
   ai_index_id: string;
-  /** The workflow execution that produced these, so a reviewer can open the run. */
+  /** The workflow execution that produced these. */
   agent_run_id: string;
   signal_window: { from: string; to: string };
   signal_spaces: string[];
@@ -170,7 +131,7 @@ export type SkippedImprovementReason =
 export interface RecordImprovementsResponse {
   /** Lineages that gained a revision, in the order they were proposed. */
   recorded: Array<{ improvement_id: string; action: ImprovementAction; title: string }>;
-  /** Proposals that were dropped, each with the reason — what the run should surface. */
+  /** Proposals that were dropped, each with the reason. */
   skipped: Array<{
     action?: string;
     title?: string;

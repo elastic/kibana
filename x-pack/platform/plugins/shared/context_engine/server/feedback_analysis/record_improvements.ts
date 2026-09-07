@@ -22,7 +22,7 @@ export interface RecordImprovementsOptions {
   agentRunId: string;
   signalWindow: { from: string; to: string };
   signalSpaces: string[];
-  /** The AI index's policy. An empty list is observe-only and rejects everything. */
+  /** The actions the AI index permits; an empty list is observe-only. */
   allowedActions: ImprovementAction[];
   /** Straight off the agent, unvalidated. */
   proposals: unknown[];
@@ -47,18 +47,7 @@ const describe = (proposal: unknown): { action?: string; title?: string } => {
   };
 };
 
-/**
- * Turns what an analysis run proposed into revisions of the improvements store.
- *
- * The run is not trusted with any of it. The action is checked against the index's policy, the
- * shape against the step contracts, and the identity is derived here — a run that could name its
- * own `improvement_id` could merge two unrelated proposals or fork one problem across many, and
- * the store's idempotency would stop meaning anything.
- *
- * Nothing here throws for a bad proposal. A run is unattended, and failing the whole batch because
- * one of eight proposals named a missing `ki_id` would throw away seven good ones and give the run
- * nothing to report. Every rejection comes back as a `skipped` entry with a reason instead.
- */
+/** Turns what an analysis run proposed into revisions of the improvements store. */
 export const recordImprovements = async ({
   aiIndexId,
   agentRunId,
@@ -75,8 +64,6 @@ export const recordImprovements = async ({
   const allowed = new Set<ImprovementAction>(allowedActions);
 
   for (const raw of proposals) {
-    // Bounded by what has been accepted, not by position in the input: a run that proposed thirty
-    // things of which the first ten were malformed still has room for twenty good ones.
     if (candidates.length >= MAX_IMPROVEMENTS_PER_RUN) {
       skipped.push({
         ...describe(raw),
@@ -100,9 +87,6 @@ export const recordImprovements = async ({
 
     const proposal = parsed.data;
 
-    // Checked here as well as in the schema the agent was given. The schema stops a compliant
-    // model from expressing the action at all; this stops everything else, including a run whose
-    // policy changed between being briefed and answering.
     if (!allowed.has(proposal.action)) {
       skipped.push({
         action: proposal.action,
@@ -136,8 +120,6 @@ export const recordImprovements = async ({
       continue;
     }
 
-    // Two proposals that fingerprint the same are the same fix described twice. The store would
-    // keep only one anyway; saying so is more useful to the run than silently dropping it.
     if (seen.has(improvementId)) {
       skipped.push({
         action: proposal.action,
@@ -167,8 +149,6 @@ export const recordImprovements = async ({
           signal_ids: proposal.signal_ids,
           signal_spaces: signalSpaces,
           signal_window: signalWindow,
-          // The signals the proposal cites, not the size of the group behind it: the run is handed
-          // a capped sample of ids per group, so this is the evidence that can actually be opened.
           signal_count: proposal.signal_ids.length,
           ...(proposal.signal_tags ? { tags: proposal.signal_tags } : {}),
         },

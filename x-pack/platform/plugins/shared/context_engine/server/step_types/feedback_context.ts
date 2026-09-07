@@ -14,13 +14,7 @@ import { InvalidSignalWindowError } from '../feedback_analysis/errors';
 import type { FeedbackAnalysisStepDependencies } from './helpers';
 import { assertContextEngineEnabled, assertFeedbackLoopEnabled } from './helpers';
 
-/**
- * Assembles everything one analysis run reads.
- *
- * A step rather than an HTTP route because the workflow is the only caller, and because a step
- * runs the same selection code the interactive hand-off would: keeping it in one tested place is
- * the point, not the transport.
- */
+/** Assembles everything one analysis run reads. */
 export const getFeedbackContextStepDefinition = ({
   getAiIndexService,
   getImprovementsService,

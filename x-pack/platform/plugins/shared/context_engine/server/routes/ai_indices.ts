@@ -317,15 +317,6 @@ export const registerAiIndexRoutes = ({
   getSpaceId: (request: KibanaRequest) => string;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
-  /**
-   * Brings the AI index's schedule in line with the configuration that was just written.
-   *
-   * Best-effort and after the fact: the configuration is the record of intent and is already
-   * stored, so failing the write because Task Manager could not be told would leave the caller
-   * retrying a change that has in fact been made. A failure here means the schedule lags its
-   * configuration until the next write, which is visible and recoverable; losing the configuration
-   * is not.
-   */
   const reconcileSchedule = async (aiIndexId: string, request: KibanaRequest) => {
     try {
       const aiIndex = await getAiIndexService().get(aiIndexId);
@@ -666,8 +657,6 @@ export const registerAiIndexRoutes = ({
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
-          // Left scheduled, this would keep firing against an index that no longer exists and fail
-          // on its first request every interval. Best-effort for the same reason as below.
           await getScheduleService()
             .remove({ aiIndexId, spaceId: getSpaceId(request) })
             .catch((error) => {

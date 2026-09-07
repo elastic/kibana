@@ -64,8 +64,6 @@ describe('buildImprovementsOutputSchema', () => {
     const result = schema.safeParse({ summary: 'Looks healthy.', improvements: [] });
 
     expect(result.success).toBe(true);
-    // `z.object` strips what it does not declare, so an observe-only run cannot smuggle proposals
-    // through by ignoring the schema it was given.
     expect(result.success && 'improvements' in result.data).toBe(false);
   });
 
@@ -130,9 +128,6 @@ describe('buildImprovementsJsonSchema', () => {
       };
     };
 
-    // `type` and `title` are required by `createKi`. Deriving the JSON Schema from the same zod
-    // object is what keeps the shape the agent is asked for and the shape the apply step accepts
-    // from drifting apart.
     expect(schema.properties.improvements.items.properties.payload.properties.ki.required).toEqual(
       expect.arrayContaining(['type', 'title'])
     );

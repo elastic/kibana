@@ -39,7 +39,6 @@ const buildSignal = (overrides: {
     },
   } as unknown as Signal);
 
-/** One (tag, target, tool) combination, shaped as the nested terms aggregation returns it. */
 const patternBucket = (tag: string, target: string, tool: string, count: number) => ({
   key: tag,
   doc_count: count,
@@ -102,7 +101,6 @@ describe('selectSignals', () => {
   const requestFor = (call: number): SearchRequest =>
     (esClient.search as unknown as jest.Mock).mock.calls[call][0] as SearchRequest;
 
-  /** Call 0 resolves the co-occurrence conversations; call 1 is the selection itself. */
   const MAIN = 1;
 
   beforeEach(() => {
@@ -250,8 +248,6 @@ describe('selectSignals', () => {
 
     await run();
 
-    // `tags` is multi-valued, so a terms bucket over it fans a signal out across each of its tags
-    // and produces nothing at all for a signal carrying none — the healthy-retrieval case.
     expect(requestFor(MAIN).aggs).toMatchObject({
       patterns: {
         terms: { field: 'tags' },
@@ -263,15 +259,12 @@ describe('selectSignals', () => {
         },
       },
     });
-    // No `missing` placeholder: a signal without these fields should form no pattern rather than
-    // one keyed on values it never had.
     expect(JSON.stringify(requestFor(MAIN).aggs)).not.toContain('missing');
   });
 
   it('counts patterns from the aggregation rather than from the documents it read', async () => {
     esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
       mainResponse({
-        // One sampled document, but the window holds 4,200 signals in this pattern.
         patterns: [patternBucket('coverage_gap', 'logs-app-1', 'execute_esql', 4200)],
         signals: [
           buildSignal({

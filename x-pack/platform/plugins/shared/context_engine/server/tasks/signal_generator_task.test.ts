@@ -140,16 +140,12 @@ const toolRow = (overrides: Partial<EsqlRow> = {}): EsqlRow => ({
   ...overrides,
 });
 
-// The mock is watermark-aware for execute_tool (`>=` filter on the param) and
-// trace_id-aware for invoke_agent and load_skill (returns only rows for requested trace_ids),
-// so idempotency/boundary, management-round and self-analysis behavior are actually exercised.
 const createEsClient = (
   toolRows: EsqlRow[],
   agentRows: EsqlRow[],
   loadSkillRows: EsqlRow[] = []
 ): ElasticsearchClient => {
   const query = jest.fn(async ({ query: q, params }: EsqlQueryArgs) => {
-    // Checked before execute_tool: load_skill spans share that operation name.
     if (q.includes('"load_skill"')) {
       const requested = new Set((params ?? []).map((param) => String(param)));
       return esqlResponse(
@@ -460,7 +456,6 @@ describe('signal generator task run()', () => {
       state: { watermark: '2026-01-01T00:00:00.000Z' },
     });
 
-    // Holding the watermark here would re-read the same excluded batch on every run.
     expect(writes.flatMap((w) => w.signals)).toHaveLength(0);
     expect(result.state).toEqual({ watermark: '2026-07-08T12:11:00.000Z' });
   });

@@ -24,20 +24,13 @@ import { rankPatterns } from './group_signals';
 import { selectSignals } from './select_signals';
 
 export interface BuildFeedbackContextDeps {
-  /** Request-scoped: every read here is authorized against the caller, not against Kibana. */
+  /** Request-scoped client, authorized against the caller. */
   esClient: ElasticsearchClient;
   aiIndexService: AiIndexService;
   improvementsService: ImprovementsServiceApi;
 }
 
-/**
- * Assembles everything one analysis run reads, in one place.
- *
- * Server-side rather than as ES|QL steps in the workflow template, because signal attribution has
- * real branches worth testing, and because the interactive "Analyze & improve" hand-off should
- * eventually select and group the same way — which only stays true if there is one implementation
- * of what a run looks at.
- */
+/** Assembles everything one analysis run reads. */
 export const buildFeedbackContext = async (
   aiIndexId: string,
   { esClient, aiIndexService, improvementsService }: BuildFeedbackContextDeps,
@@ -46,8 +39,6 @@ export const buildFeedbackContext = async (
   const aiIndex = await aiIndexService.get(aiIndexId);
   const feedbackAnalysis = aiIndex.feedback_analysis;
 
-  // An index with no analysis block is not misconfigured — it has simply never been scheduled, and
-  // the button still works on it. Fall back to the same defaults the settings route would apply.
   const allowedActions: ImprovementAction[] = feedbackAnalysis?.allowed_actions ?? [
     ...IMPROVEMENT_ACTIONS,
   ];
@@ -85,8 +76,6 @@ export const buildFeedbackContext = async (
       allowedActions,
     }),
     output_schema: buildImprovementsJsonSchema(allowedActions),
-    // Groups rather than raw signals: a window full of healthy retrievals has signals but nothing
-    // to analyze, and spending an LLM call to be told so is the run's most common failure mode.
     has_signals: groups.length > 0,
   };
 };

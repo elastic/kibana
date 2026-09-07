@@ -29,10 +29,6 @@ const TRACES_INDEX_PATTERN = `${TRACES_INDEX_PREFIX}*`;
  */
 const EXECUTE_ESQL_TOOL_NAME = 'platform.core.execute_esql';
 
-/**
- * The tool an agent calls to load a skill. Its arguments name the requested skill, which is
- * what marks a round as the feedback loop analyzing an AI index.
- */
 const LOAD_SKILL_TOOL_NAME = 'load_skill';
 
 const BACKING_INDEX_PREFIX = '.ds-';
@@ -123,11 +119,6 @@ FROM ${TRACES_INDEX_PATTERN}
   return response ? esqlRowsToObjects<InvokeAgentSpanRow>(response) : [];
 };
 
-/**
- * True when a `load_skill` call named the feedback loop's analysis skill. The tool accepts the
- * skill name, its folder path, or its `SKILL.md` path, and the id appears verbatim in all three,
- * so the resolved argument is matched by substring rather than by an exact shape.
- */
 const referencesAnalysisSkill = (args: string | undefined | null): boolean => {
   if (!args) {
     return false;
@@ -142,13 +133,7 @@ const referencesAnalysisSkill = (args: string | undefined | null): boolean => {
   return typeof skill === 'string' && skill.toLowerCase().includes(ANALYZE_AND_IMPROVE_SKILL_ID);
 };
 
-/**
- * Reads the rounds that loaded the feedback loop's own analysis skill.
- *
- * Scoped by `trace_id` rather than by the watermark on purpose: a round whose `load_skill` span
- * fell in an earlier batch than the queries it went on to run must still be recognized, otherwise
- * the loop's own reads leak into signals across a batch boundary.
- */
+/** Reads the rounds that loaded the feedback loop's own analysis skill. */
 export const querySelfAnalysisTraceIds = async (
   esClient: ElasticsearchClient,
   traceIds: string[],

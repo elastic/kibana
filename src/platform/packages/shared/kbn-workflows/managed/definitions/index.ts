@@ -138,8 +138,6 @@ export const managedWorkflowDefinitions = [
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW,
   EXAMPLE_MANAGED_WORKFLOW,
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
-  // Registry membership only makes the definition discoverable by id; nothing is installed until
-  // a user turns feedback analysis on for a specific AI index.
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,

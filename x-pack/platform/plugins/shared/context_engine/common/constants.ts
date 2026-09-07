@@ -41,11 +41,7 @@ export const MAX_SIGNALS_PAGE_SIZE = 100;
 export const DEFAULT_IMPROVEMENTS_PAGE_SIZE = 25;
 export const MAX_IMPROVEMENTS_PAGE_SIZE = 100;
 
-/**
- * Cap on the improvement history handed to an analysis run's briefing. The runner needs to see
- * what was already rejected so it does not re-propose it, but the briefing shares the run's
- * context window.
- */
+/** Cap on the improvement history handed to an analysis run's briefing. */
 export const MAX_IMPROVEMENTS_HISTORY_SIZE = 200;
 
 /**
@@ -87,36 +83,23 @@ export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
 export const MAX_FEEDBACK_ANALYSIS_SIGNAL_FILTER_LENGTH = 4096;
 
-/**
- * Floor on the feedback-analysis schedule interval. Every run is an LLM
- * analysis over a window of signals, so the interval is a cost control rather
- * than only a scheduling detail.
- */
+/** Floor on the feedback-analysis schedule interval. */
 export const MIN_FEEDBACK_ANALYSIS_INTERVAL_MINUTES = 15;
 
 /** Applied when a feedback-analysis block omits the corresponding field. */
 export const DEFAULT_FEEDBACK_ANALYSIS_INTERVAL = '24h';
 export const DEFAULT_FEEDBACK_ANALYSIS_SIGNAL_TIME_RANGE_FROM = 'now-30d';
 
-/**
- * Cap on the signal documents a single analysis run reads.
- *
- * Only the example query and the provenance ids attached to each pattern come from these, so the
- * cap bounds evidence rather than the analysis: pattern counts, the spaces list and the run's
- * signal total are aggregated over the whole window and do not depend on it.
- */
+/** Cap on the signal documents a single analysis run reads. */
 export const MAX_ANALYSIS_SIGNALS = 500;
 
 /** Cap on the ranked pattern groups handed to a run. */
 export const MAX_ANALYSIS_SIGNAL_GROUPS = 25;
 
-/**
- * Cap on the signal ids recorded per group. Provenance needs enough ids to follow a proposal back
- * to its evidence, not every id behind it — a busy group can carry thousands.
- */
+/** Cap on the signal ids recorded per group. */
 export const MAX_GROUP_SIGNAL_IDS = 20;
 
-/** Cap on the proposals one run may record, so a runaway run cannot flood the review queue. */
+/** Cap on the proposals one run may record. */
 export const MAX_IMPROVEMENTS_PER_RUN = 25;
 
 /** Bounds on the free text a run may attach to a proposal. */
@@ -134,12 +117,7 @@ export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 /** Agent id whose tool calls are left untagged. */
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
 
-/**
- * Skill id of the feedback loop's own analysis skill. A round that loads it is the loop
- * diagnosing an AI index, so the whole round is excluded from signal generation: its reads
- * target the index under analysis and are otherwise indistinguishable from an agent
- * genuinely retrieving from it.
- */
+/** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 
 /**

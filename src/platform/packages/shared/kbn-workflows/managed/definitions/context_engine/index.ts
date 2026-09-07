@@ -15,31 +15,18 @@ export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID =
 
 export interface ContextEngineFeedbackAnalysisWorkflowTemplateValues
   extends ManagedWorkflowTemplateValues {
-  /** The AI index this instance analyzes. One installed workflow per index. */
+  /** The AI index this instance analyzes. */
   aiIndexId: string;
-  /** How often it runs. A scheduled trigger's interval is fixed at install time. */
+  /** How often the workflow runs. */
   intervalMinutes: number;
 }
 
-/**
- * `dynamic` because there is one instance per AI index, installed when analysis is turned on and
- * uninstalled when it is turned off.
- *
- * `enforced` because whether the analysis runs is already stored on the AI index, as
- * `feedback_analysis.enabled`. Making the workflow document's own flag independently settable
- * would create a second answer to the same question, and the two would drift the first time
- * someone paused the workflow instead of the index. Pausing is a change to the index's
- * configuration, which uninstalls the instance.
- */
 const CONTEXT_ENGINE_WORKFLOW_MANAGEMENT = {
   lifecycle: 'dynamic',
   versionStrategy: 'auto',
   enablement: 'enforced',
 } as const;
 
-// Exact-token replacement, because both values are needed before the workflow runs: a scheduled
-// trigger's interval and a concurrency key are read at install time and are not reachable by the
-// engine's own `${{ }}` / `{{ }}` runtime templating.
 const renderTemplate = (template: string, values: Record<string, string | number>): string =>
   Object.entries(values).reduce(
     (yaml, [token, value]) => yaml.split(token).join(String(value)),

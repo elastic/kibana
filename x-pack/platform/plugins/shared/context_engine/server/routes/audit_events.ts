@@ -50,18 +50,12 @@ export enum ImprovementAuditAction {
 
 export interface ImprovementAuditEventParams {
   aiIndexId: string;
-  /** How many proposals the run actually recorded; absent on a failed attempt. */
+  /** How many proposals the run recorded; absent on a failed attempt. */
   recorded?: number;
   error?: Error;
 }
 
-/**
- * Audits an analysis run recording what it proposed.
- *
- * Separate from {@link aiIndexAuditEvent} because the object is different: this writes to the
- * improvements store on behalf of a scheduled run, and the record a reviewer needs is which index
- * the run was for and how much it added, not which AI index document changed.
- */
+/** Audits an analysis run recording what it proposed. */
 export const improvementAuditEvent = ({
   aiIndexId,
   recorded,
