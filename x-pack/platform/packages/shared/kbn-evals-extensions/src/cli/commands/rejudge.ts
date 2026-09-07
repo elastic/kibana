@@ -25,6 +25,11 @@ import { planReplay, summarizePlan, type ReplayCell } from '../../matrix/replay_
 import { fetchScoreDocs } from '../../matrix/fetch_score_docs';
 import { anonymizeCell, buildAliasMap } from '../../matrix/anonymize_cell';
 import { runRejudge, type CellJudge, type RejudgeScore } from '../../matrix/run_rejudge';
+import {
+  collectExamples,
+  selectAdapter,
+  REFERENCE_ADAPTERS,
+} from '../../matrix/reference_adapters';
 
 const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
 
@@ -36,33 +41,45 @@ const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
  * replay without it grades every answer against an empty reference and
  * manufactures uniform inaccuracy verdicts.
  */
-async function loadReferences(datasetPath: string): Promise<Map<string, string>> {
+async function loadReferences(
+  datasetPath: string,
+  log?: { info: (msg: string) => void }
+): Promise<Map<string, string>> {
   const resolved = Path.resolve(process.cwd(), datasetPath);
   if (!Fs.existsSync(resolved)) {
     throw createFlagError(`--dataset path does not exist: ${resolved}`);
   }
 
   const mod = await import(resolved);
-  const examples =
-    mod.personaMatrixDataset ?? mod.PERSONA_MATRIX_EXAMPLES ?? mod.default ?? mod.dataset;
+  const examples = collectExamples(mod as Record<string, unknown>);
 
-  if (!Array.isArray(examples)) {
+  if (examples.length === 0) {
     throw createFlagError(
       `--dataset module ${resolved} does not export an examples array ` +
-        `(looked for personaMatrixDataset, PERSONA_MATRIX_EXAMPLES, default, dataset)`
+        `(looked for ${[...new Set(REFERENCE_ADAPTERS.flatMap((a) => a.exportNames))].join(', ')})`
     );
   }
 
-  const references = new Map<string, string>();
-  for (const example of examples) {
-    const reference = example?.output?.reference ?? example?.reference;
-    if (example?.id && typeof reference === 'string' && reference) {
-      references.set(example.id, reference);
-    }
+  // Each suite states ground truth in its own shape; pick the adapter whose
+  // contract these examples actually satisfy rather than assuming a reference
+  // string exists.
+  const adapter = selectAdapter(examples);
+  if (!adapter) {
+    throw createFlagError(
+      `--dataset module ${resolved} matches no reference adapter ` +
+        `(tried: ${REFERENCE_ADAPTERS.map((a) => a.name).join(', ')}). ` +
+        `Add an adapter in matrix/reference_adapters.ts for this suite.`
+    );
   }
 
+  const references = adapter.build(examples);
+  log?.info(`Reference adapter "${adapter.name}" resolved ${references.size} example(s)`);
+
   if (references.size === 0) {
-    throw createFlagError(`--dataset module ${resolved} yielded no example references`);
+    throw createFlagError(
+      `--dataset module ${resolved} yielded no example references via the ` +
+        `"${adapter.name}" adapter`
+    );
   }
 
   return references;
@@ -144,7 +161,7 @@ export const rejudgeCmd: Command<any> = {
     );
 
     const config = configPath ? loadMatrixConfig(configPath) : undefined;
-    const references = await loadReferences(datasetPath);
+    const references = await loadReferences(datasetPath, log);
     log.info(`Loaded ${references.size} dataset reference(s) from ${datasetPath}`);
 
     // Only consult the profile when one was asked for: envFromDatasetsProfile
