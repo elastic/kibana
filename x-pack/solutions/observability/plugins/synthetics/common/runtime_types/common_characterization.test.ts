@@ -6,97 +6,175 @@
  */
 
 /**
- * Characterization tests pinning the current io-ts behavior of the synthetics
- * custom scalar codecs before the zod migration. These codecs are hand-written
- * `t.Type`s whose validation lives in the *decode* function (their `.is()`
- * guard only checks `typeof === 'string'`), so the migration must reproduce the
- * decode-side rules — not just the wire type. The suites run through the
- * codec-agnostic `decode` helper so the same expectations can be pointed at the
- * zod twins unchanged once they exist.
+ * Characterization tests for the synthetics custom scalar codecs, run against
+ * both the io-ts originals and their zod twins.
+ *
+ * These codecs are hand-written `t.Type`s whose validation lives in the
+ * *decode* function (their `.is()` guard only checks `typeof === 'string'`), so
+ * the zod twins have to reproduce the decode-side rules, not just the wire
+ * type. Each codec gets two layers of checking:
+ *
+ *  1. both flavors run against the same explicit accept/reject expectations
+ *  2. a parity test asserts the two agree — verdict *and* decoded value — over
+ *     the combined corpus, which catches differences the explicit lists miss
  */
 
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import type { z } from '@kbn/zod';
 import type * as t from 'io-ts';
 import { decode, type DecodeOutcome } from './test_helpers/codec_agnostic';
+import { expectSameOutcome } from './test_helpers/parity';
 import {
   getNonEmptyStringCodec,
   InlineScriptString,
   NameSpaceString,
   TimeoutString,
 } from './common';
+import * as zodCommon from './zod/common';
 
 interface CodecUnderTest<A> {
   flavor: 'io-ts' | 'zod';
   decode: (input: unknown) => DecodeOutcome<A>;
 }
 
-// Only the io-ts flavor exists today; the migration PR appends `zodCodec(...Zod)`
-// to each `describe.each` array so the identical expectations run against both.
 const ioTsCodec = <A, O>(codec: t.Type<A, O, unknown>): CodecUnderTest<A> => ({
   flavor: 'io-ts',
   decode: (input) => decode(codec, input),
 });
 
-describe.each([ioTsCodec(NameSpaceString)])('NameSpaceString ($flavor)', (codec) => {
-  it.each(['default', 'testnamespace'])('accepts valid namespace %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
-
-  // Enforces Fleet namespace rules (via `isValidNamespace`), not just `typeof string`.
-  it.each(['With Space And Upper', 'a'.repeat(300), 42, null, undefined, {}])(
-    'rejects invalid namespace %p',
-    (input) => {
-      expect(codec.decode(input).success).toBe(false);
-    }
-  );
+const zodCodec = <S extends z.ZodType>(schema: S): CodecUnderTest<z.output<S>> => ({
+  flavor: 'zod',
+  decode: (input) => decode(schema, input),
 });
 
-describe.each([ioTsCodec(TimeoutString)])('TimeoutString ($flavor)', (codec) => {
-  it.each(['16', '1.5', '0'])('accepts numeric string %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
+const namespaceCorpus = {
+  valid: ['default', 'testnamespace'],
+  invalid: ['With Space And Upper', 'a'.repeat(300), 42, null, undefined, {}],
+};
 
-  it.each(['', '   ', 'abc', 16, null, undefined])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
-  });
-});
-
-describe.each([ioTsCodec(getNonEmptyStringCodec('host'))])(
-  'getNonEmptyStringCodec ($flavor)',
+describe.each([ioTsCodec(NameSpaceString), zodCodec(zodCommon.NameSpaceString)])(
+  'NameSpaceString ($flavor)',
   (codec) => {
-    it.each(['localhost', 'a'])('accepts non-empty string %p', (input) => {
+    it.each(namespaceCorpus.valid)('accepts valid namespace %p', (input) => {
       expect(codec.decode(input).success).toBe(true);
     });
 
-    // Whitespace-only is rejected because the codec trims — `z.string().min(1)`
-    // would not be equivalent here.
-    it.each(['', '   ', 42, null])('rejects %p', (input) => {
+    // Enforces Fleet namespace rules (via `isValidNamespace`), not just `typeof string`.
+    it.each(namespaceCorpus.invalid)('rejects invalid namespace %p', (input) => {
       expect(codec.decode(input).success).toBe(false);
     });
   }
 );
 
-describe.each([ioTsCodec(InlineScriptString)])('InlineScriptString ($flavor)', (codec) => {
-  it.each(['step("a step", async () => {})', ''])('accepts %p', (input) => {
+const timeoutCorpus = {
+  valid: ['16', '1.5', '0'],
+  invalid: ['', '   ', 'abc', 16, null, undefined],
+};
+
+describe.each([ioTsCodec(TimeoutString), zodCodec(zodCommon.TimeoutString)])(
+  'TimeoutString ($flavor)',
+  (codec) => {
+    it.each(timeoutCorpus.valid)('accepts numeric string %p', (input) => {
+      expect(codec.decode(input).success).toBe(true);
+    });
+
+    // `'   '` must be rejected by the trim check before the numeric check,
+    // since `Number('   ')` is 0 rather than NaN.
+    it.each(timeoutCorpus.invalid)('rejects %p', (input) => {
+      expect(codec.decode(input).success).toBe(false);
+    });
+  }
+);
+
+const nonEmptyFieldCorpus = { valid: ['localhost', 'a'], invalid: ['', '   ', 42, null] };
+
+describe.each([
+  ioTsCodec(getNonEmptyStringCodec('host')),
+  zodCodec(zodCommon.getNonEmptyStringCodec('host')),
+])('getNonEmptyStringCodec ($flavor)', (codec) => {
+  it.each(nonEmptyFieldCorpus.valid)('accepts non-empty string %p', (input) => {
     expect(codec.decode(input).success).toBe(true);
   });
 
-  it.each([
-    'journey("a journey", () => {})', // full journey scripts are rejected
-    'console.log("no step here")', // must contain at least one step definition
-    42,
-    null,
-  ])('rejects %p', (input) => {
+  // Whitespace-only is rejected because the codec trims — `z.string().min(1)`
+  // would not be equivalent here.
+  it.each(nonEmptyFieldCorpus.invalid)('rejects %p', (input) => {
     expect(codec.decode(input).success).toBe(false);
   });
 });
 
-describe.each([ioTsCodec(NonEmptyString)])('NonEmptyString ($flavor)', (codec) => {
-  it.each(['x', 'value'])('accepts %p', (input) => {
-    expect(codec.decode(input).success).toBe(true);
-  });
+const inlineScriptCorpus = {
+  // A blank script is accepted: it means "not configured yet".
+  valid: ['step("a step", async () => {})', '', '   '],
+  invalid: [
+    'journey("a journey", () => {})', // full journey scripts are rejected
+    'console.log("no step here")', // must contain at least one step definition
+    42,
+    null,
+  ],
+};
 
-  it.each(['', '   ', 42, null, undefined])('rejects %p', (input) => {
-    expect(codec.decode(input).success).toBe(false);
+describe.each([ioTsCodec(InlineScriptString), zodCodec(zodCommon.InlineScriptString)])(
+  'InlineScriptString ($flavor)',
+  (codec) => {
+    it.each(inlineScriptCorpus.valid)('accepts %p', (input) => {
+      expect(codec.decode(input).success).toBe(true);
+    });
+
+    it.each(inlineScriptCorpus.invalid)('rejects %p', (input) => {
+      expect(codec.decode(input).success).toBe(false);
+    });
+  }
+);
+
+const nonEmptyStringCorpus = { valid: ['x', 'value'], invalid: ['', '   ', 42, null, undefined] };
+
+describe.each([ioTsCodec(NonEmptyString), zodCodec(zodCommon.NonEmptyString)])(
+  'NonEmptyString ($flavor)',
+  (codec) => {
+    it.each(nonEmptyStringCorpus.valid)('accepts %p', (input) => {
+      expect(codec.decode(input).success).toBe(true);
+    });
+
+    it.each(nonEmptyStringCorpus.invalid)('rejects %p', (input) => {
+      expect(codec.decode(input).success).toBe(false);
+    });
+  }
+);
+
+describe.each([
+  {
+    label: 'NameSpaceString',
+    ioTs: NameSpaceString,
+    zod: zodCommon.NameSpaceString,
+    corpus: namespaceCorpus,
+  },
+  {
+    label: 'TimeoutString',
+    ioTs: TimeoutString,
+    zod: zodCommon.TimeoutString,
+    corpus: timeoutCorpus,
+  },
+  {
+    label: 'getNonEmptyStringCodec',
+    ioTs: getNonEmptyStringCodec('host'),
+    zod: zodCommon.getNonEmptyStringCodec('host'),
+    corpus: nonEmptyFieldCorpus,
+  },
+  {
+    label: 'InlineScriptString',
+    ioTs: InlineScriptString,
+    zod: zodCommon.InlineScriptString,
+    corpus: inlineScriptCorpus,
+  },
+  {
+    label: 'NonEmptyString',
+    ioTs: NonEmptyString,
+    zod: zodCommon.NonEmptyString,
+    corpus: nonEmptyStringCorpus,
+  },
+])('$label io-ts/zod parity', ({ ioTs, zod, corpus }) => {
+  it.each([...corpus.valid, ...corpus.invalid])('agrees on %p', (input) => {
+    expectSameOutcome(ioTs, zod, input);
   });
 });
