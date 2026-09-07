@@ -23,6 +23,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 interface CachedEisConnectors {
   connectors: Record<string, object>;
@@ -33,7 +34,7 @@ const CACHE_DIR = path.join(os.homedir(), '.elastic');
 const CACHE_PATH = path.join(CACHE_DIR, 'eis-connectors-cache.json');
 const TTL_MS = 168 * 60 * 60 * 1000; // 7 days
 
-export const readCachedEisConnectors = (): Record<string, object> | undefined => {
+export const readCachedEisConnectors = (log?: ToolingLog): Record<string, object> | undefined => {
   try {
     if (!fs.existsSync(CACHE_PATH)) {
       return undefined;
@@ -48,6 +49,16 @@ export const readCachedEisConnectors = (): Record<string, object> | undefined =>
 
     const age = Date.now() - cached.fetched_at_ms;
     if (age > TTL_MS) {
+      // Surface the expiry: callers treat `undefined` as "no cache" and fall through
+      // to a full Vault + EIS re-discovery, which is slow and prompts for auth. Without
+      // this an expired cache is indistinguishable from a missing one, so the re-auth
+      // prompt reads as an unexplained hang mid-run.
+      const days = (ms: number) => Math.floor(ms / (24 * 60 * 60 * 1000));
+      log?.warning(
+        `EIS connector cache expired (${days(age)}d old, TTL ${days(
+          TTL_MS
+        )}d) - re-discovering from EIS.`
+      );
       return undefined;
     }
 
