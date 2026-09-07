@@ -371,7 +371,7 @@
       "name": "Security Watch Escalation Chain (Floor \u2192 Dark \u2192 Deep \u2192 Detection)",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain/playwright.config.ts",
-      "serverConfigSet": "evals_tracing",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
       "tags": [
         "security",
         "watch",
@@ -386,7 +386,7 @@
       "name": "Security Forensics Watch",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch/playwright.config.ts",
-      "serverConfigSet": "evals_tracing",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
       "tags": [
         "security",
         "forensics-watch",
@@ -401,7 +401,7 @@
       "name": "Security Forensics Watch Raw Log Corroboration",
       "slackChannel": "#security-generative-ai-evals",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-forensics-watch-raw-log-corroboration/playwright.config.ts",
-      "serverConfigSet": "evals_tracing",
+      "serverConfigSet": "evals_detection_watch_rule_creation",
       "tags": [
         "security",
         "forensics-watch",
