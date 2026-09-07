@@ -59,8 +59,6 @@ describe('MobileServiceOverviewServiceMapSection', () => {
     expect(mockContextualServiceMapSection.mock.calls[0][0].flyoutOptions).toEqual({
       transactionType: 'mobile',
       latencyAggregationType: LatencyAggregationType.p95,
-      comparisonEnabled: true,
-      offset: '1d',
     });
   });
 

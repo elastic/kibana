@@ -89,8 +89,6 @@ describe('ContextualServiceMapSection', () => {
     const flyoutOptions = {
       transactionType: 'request',
       latencyAggregationType: LatencyAggregationType.p95,
-      comparisonEnabled: true,
-      offset: '1d',
     };
     renderSection({ flyoutOptions });
 
