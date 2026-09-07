@@ -116,7 +116,7 @@ export const getMonitorSummary = ({
   params,
   failedStepInfo = '',
 }: MonitorSummaryData): MonitorSummaryStatusRule => {
-  const { downThreshold } = getConditionType(params?.condition);
+  const { downThreshold, pendingThreshold } = getConditionType(params?.condition);
   const monitorName = monitorInfo?.monitor?.name ?? monitorInfo?.monitor?.id;
   const locationName = monitorInfo?.observer?.geo?.name ?? UNNAMED_LOCATION;
   const formattedLocationName = Array.isArray(locationName)
@@ -179,6 +179,7 @@ export const getMonitorSummary = ({
     }),
     checks,
     downThreshold,
+    pendingThreshold,
     timestamp,
     monitorTags: monitorInfo.tags,
     failedStepInfo,

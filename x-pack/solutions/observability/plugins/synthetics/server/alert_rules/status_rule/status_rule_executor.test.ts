@@ -374,6 +374,7 @@ describe('StatusRuleExecutor', () => {
           monitorType: 'browser',
           monitorUrl: 'https://www.google.com',
           monitorUrlLabel: 'URL',
+          pendingThreshold: 2,
           reason:
             'Monitor "test monitor" from Test location is down. Monitor is down 1 time within the last 1 checks. Alert when 1 out of the last 1 checks are down from at least 1 location.',
           serviceName: undefined,
@@ -533,6 +534,7 @@ describe('StatusRuleExecutor', () => {
           monitorType: 'browser',
           monitorUrl: 'https://www.google.com',
           monitorUrlLabel: 'URL',
+          pendingThreshold: 2,
           reason:
             'Monitor "test monitor" is down 1 time from Test location and 1 time from Test location. Alert when down 1 time out of the last 1 checks from at least 1 location.',
           serviceName: undefined,
@@ -1187,6 +1189,7 @@ describe('StatusRuleExecutor', () => {
           monitorSummary: {
             configId: MOCK_FIRST_MONITOR.id,
             downThreshold: 1,
+            pendingThreshold: 2,
             locationId: MOCK_FIRST_LOCATION.id,
             locationName: MOCK_FIRST_LOCATION.name,
             locationNames: MOCK_FIRST_LOCATION.name,
@@ -1219,6 +1222,7 @@ describe('StatusRuleExecutor', () => {
           monitorSummary: {
             configId: MOCK_SECOND_MONITOR.id,
             downThreshold: 1,
+            pendingThreshold: 2,
             locationId: MOCK_SECOND_LOCATION.id,
             locationName: MOCK_SECOND_LOCATION.name,
             locationNames: MOCK_SECOND_LOCATION.name,
@@ -1289,6 +1293,7 @@ describe('StatusRuleExecutor', () => {
           monitorSummary: {
             configId: MOCK_FIRST_MONITOR.id,
             downThreshold: 1,
+            pendingThreshold: 2,
             locationId: MOCK_FIRST_LOCATION.id,
             locationName: MOCK_FIRST_LOCATION.name,
             locationNames: MOCK_FIRST_LOCATION.name,
@@ -1321,6 +1326,7 @@ describe('StatusRuleExecutor', () => {
           monitorSummary: {
             configId: MOCK_SECOND_MONITOR.id,
             downThreshold: 1,
+            pendingThreshold: 2,
             locationId: MOCK_SECOND_LOCATION.id,
             locationName: MOCK_SECOND_LOCATION.name,
             locationNames: MOCK_SECOND_LOCATION.name,

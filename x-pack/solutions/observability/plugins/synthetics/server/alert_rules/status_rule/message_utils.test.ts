@@ -81,6 +81,7 @@ describe('message_utils', () => {
         timestamp,
         checkedAt: moment(timestamp).tz(tz).format(dateFormat),
         downThreshold: 3,
+        pendingThreshold: 2,
         reason:
           'Monitor "Test Monitor" from Test Location is down. Alert when 3 checks are down within the last 10 minutes from at least 2 locations.',
         locationNames: locationName,
@@ -135,6 +136,7 @@ describe('message_utils', () => {
         locationName,
         status: 'pending',
         downThreshold: 1,
+        pendingThreshold: 2,
         locationNames: locationName,
         monitorUrlLabel: 'URL',
         reason: 'Monitor "Test Monitor" from Test Location is pending.',

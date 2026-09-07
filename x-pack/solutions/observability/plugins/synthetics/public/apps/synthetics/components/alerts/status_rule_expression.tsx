@@ -272,13 +272,13 @@ const PendingThresholdExpression = ({
       })}
       value={i18n.translate('xpack.synthetics.rules.status.pendingThresholdValueLabel', {
         defaultMessage:
-          '{threshold} {threshold, plural, one {consecutive check} other {consecutive checks}}',
+          '{threshold} {threshold, plural, one {consecutive evaluation} other {consecutive evaluations}}',
         values: { threshold: value },
       })}
     >
       <EuiPopoverTitle>
         {i18n.translate('xpack.synthetics.statusRule.pendingThreshold.popoverTitleLabel', {
-          defaultMessage: 'Consecutive checks',
+          defaultMessage: 'Consecutive evaluations',
         })}
       </EuiPopoverTitle>
       <EuiFieldNumber
