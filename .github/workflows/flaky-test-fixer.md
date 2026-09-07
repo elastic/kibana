@@ -494,7 +494,7 @@ Follow this format:
   ```markdown
   ### ⏭️ No fix PR was opened
 
-  The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`, plus `scout-ui-testing` / `scout-api-testing` as needed. Do not patch the Cypress spec. cc @<requester-github-handle-here-if-not-a-bot>
+  The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`, plus `scout-ui-testing` / `scout-api-testing` skills as needed. Do not patch the Cypress spec. cc @<requester-github-handle-here-if-not-a-bot>
   ```
 - **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
   ```markdown
