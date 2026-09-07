@@ -230,6 +230,14 @@
       "prUrl": "https://github.com/elastic/kibana/pull/287255"
     },
     {
+      "path": "/api/agent_builder/conversations",
+      "method": "post",
+      "reason": "agent_id maxLength validation added to route, it was already done in the request.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/286654"
+    },
+    {
       "path": "/api/detection_engine/rules",
       "method": "delete",
       "reason": "Nested rule response-action fields now have documented maxLength/maxItems bounds on the shared generated schema. oasdiff reports oneOf composition changes on Detection Engine rule request and response bodies; practical in-limit payloads remain valid. Detection Engineering review remains required for the Rules API contract.",

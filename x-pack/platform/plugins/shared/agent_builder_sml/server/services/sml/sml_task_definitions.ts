@@ -81,7 +81,7 @@ export const registerSmlCrawlerTaskDefinition = ({
       title: 'Agent Builder SML Crawler',
       timeout: '10m',
       maxAttempts: 3,
-      priority: TaskPriority.Low,
+      priority: TaskPriority.Maintenance,
       createTaskRunner: (context) => {
         const { taskInstance, signal } = context;
         const { attachmentType } = (taskInstance.params ?? {}) as Partial<SmlCrawlerTaskParams>;
