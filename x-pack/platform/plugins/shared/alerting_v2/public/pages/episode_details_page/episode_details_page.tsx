@@ -138,15 +138,19 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEpisodeAutoAttach(episode, {
-    ruleName: episodeRuleName,
-    groupingFields,
-  }, {
-    chrome: useService(CoreStart('chrome')),
-    agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
-      | AgentBuilderPluginStart
-      | undefined,
-  });
+  useEpisodeAutoAttach(
+    episode,
+    {
+      ruleName: episodeRuleName,
+      groupingFields,
+    },
+    {
+      chrome: useService(CoreStart('chrome')),
+      agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+        | AgentBuilderPluginStart
+        | undefined,
+    }
+  );
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

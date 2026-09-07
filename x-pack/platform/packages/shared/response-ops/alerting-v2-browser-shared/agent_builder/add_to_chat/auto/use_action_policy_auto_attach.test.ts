@@ -147,9 +147,7 @@ describe('useActionPolicyAutoAttach', () => {
 
   it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    renderHook(() =>
-      useActionPolicyAutoAttach(policy, { ...services, agentBuilder: undefined })
-    );
+    renderHook(() => useActionPolicyAutoAttach(policy, { ...services, agentBuilder: undefined }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
