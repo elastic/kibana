@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { InMemoryConnector } from '@kbn/actions-plugin/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ActionsClient,
+  InMemoryConnector,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/actions-plugin/common';
 import type { SeedConnector } from './connector_env';
 
-/** Returns a (request-scoped) list of connectors to seed. Part 2 widens the implementation. */
+/** Returns a (request-scoped) list of connectors to seed. */
 export type ConnectorSource = (request: KibanaRequest) => Promise<SeedConnector[]>;
 
 /**
@@ -67,4 +69,51 @@ export const preconfiguredConnectorSource =
         config: (config ?? {}) as Record<string, unknown>,
         secrets: (secrets ?? {}) as Record<string, unknown>,
       }));
+  };
+
+/**
+ * Connector source that yields all connectors the request user can read, including
+ * saved-object-backed (UI-created) connectors. Requires ActionsClient.getWithSecrets()
+ * from the actions plugin (added in the follow-up PR).
+ *
+ * Supersedes preconfiguredConnectorSource — getWithSecrets handles in-memory connectors
+ * too, so this is a strict superset.
+ *
+ * Security notes:
+ * - getWithSecrets() deliberately moves secrets outside the encrypted-SO boundary; it is
+ *   gated by ensureAuthorized({ operation: 'get' }) and should only be called server-side.
+ * - ensureInitialized() memoizes on conversationId alone, so the first request's principal
+ *   determines what is seeded for the conversation's lifetime. This must be addressed before
+ *   enabling this source in production (key the cache on (conversationId, principalId), or
+ *   enforce that conversations are single-principal).
+ */
+export const allConnectorsSource =
+  (
+    getActionsClient: (req: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>,
+    logger: Logger
+  ): ConnectorSource =>
+  async (request) => {
+    const actionsClient = await getActionsClient(request);
+    const connectors = await actionsClient.getAll({ includeSystemActions: false });
+
+    const results = await Promise.allSettled(
+      connectors.map((c) => actionsClient.getWithSecrets({ id: c.id }))
+    );
+
+    return results.flatMap((r, i) => {
+      if (r.status === 'rejected') {
+        logger.warn(`Skipping connector ${connectors[i].id} during seeding: ${r.reason}`);
+        return [];
+      }
+      const c = r.value;
+      return [
+        {
+          id: c.id,
+          name: c.name,
+          actionTypeId: c.actionTypeId,
+          config: (c.config ?? {}) as Record<string, unknown>,
+          secrets: (c.secrets ?? {}) as Record<string, unknown>,
+        },
+      ];
+    });
   };

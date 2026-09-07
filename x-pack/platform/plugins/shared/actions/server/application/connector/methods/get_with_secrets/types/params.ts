@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export type { Connector, ConnectorWithExtraFindData, ConnectorWithSecrets } from './connector';
-export type { ConnectorType } from './connector_type';
+import type { ActionsClientContext } from '../../../../../actions_client';
+
+export interface GetWithSecretsParams {
+  context: ActionsClientContext;
+  id: string;
+}

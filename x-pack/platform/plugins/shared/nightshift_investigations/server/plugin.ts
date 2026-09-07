@@ -37,7 +37,7 @@ import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
-import { preconfiguredConnectorSource } from './tools/sandbox_bash/connector_sources';
+import { allConnectorsSource } from './tools/sandbox_bash/connector_sources';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -107,12 +107,14 @@ export class NightshiftInvestigationsPlugin
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: this.logger.get('sandbox_bash_tool'),
-          // this.actionsStart is set in start(); the source is invoked at seed time, so the
-          // reference is populated before any tool handler fires.
-          // Returns [] when the actions plugin is absent — seedSandbox no-ops on an empty list.
-          getConnectors: preconfiguredConnectorSource(
-            () => this.actionsStart,
-            (req) => this.actionsStart!.getActionsClientWithRequest(req)
+          // this.actionsStart is set in start(); the source is invoked at seed time (during a
+          // request handler), so the reference is populated before any tool handler fires.
+          getConnectors: allConnectorsSource(
+            (req) =>
+              this.actionsStart
+                ? this.actionsStart.getActionsClientWithRequest(req)
+                : Promise.reject(new Error('Actions plugin not available for sandbox seeding')),
+            this.logger.get('sandbox_bash_tool', 'seeding')
           ),
         });
         this.sandboxConnectionManager = connectionManager;
