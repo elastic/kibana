@@ -34,7 +34,8 @@ const SYNTHETICS_TIMESTAMP = '2023-11-20T15:00:30.000Z';
 const findStat = (stats: DataStreamStat[], name: string): DataStreamStat | undefined =>
   stats.find((stat) => stat.name === name);
 
-apiTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/288960
+apiTest.describe.skip(
   'Dataset quality - data stream stats across data stream types',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

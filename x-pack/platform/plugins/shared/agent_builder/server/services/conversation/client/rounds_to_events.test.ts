@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationRound } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import {
   ConversationOriginType,
   ConversationRoundStatus,
+  ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
 } from '@kbn/agent-builder-common';
-import { isRoundDerivedEventId, roundsToEvents } from './rounds_to_events';
+import {
+  executionStartedEvent,
+  isRoundDerivedEventId,
+  roundsToEvents,
+  userMessageEvent,
+} from './rounds_to_events';
 
 const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -159,19 +169,125 @@ describe('roundsToEvents', () => {
       'round-2::execution_terminated',
     ]);
   });
+
+  it('emits one execution_step per round.steps entry, indexed by sequence, between start and terminated', () => {
+    const steps: ConversationRoundStep[] = [
+      {
+        type: ConversationRoundStepType.reasoning,
+        reasoning: 'thinking',
+      } as ConversationRoundStep,
+      {
+        type: ConversationRoundStepType.toolCall,
+        tool_call_id: 'tc-1',
+        tool_id: 'platform.core.search',
+        params: { q: 'foo' },
+        results: [],
+      } as ConversationRoundStep,
+    ];
+
+    const events = roundsToEvents(baseConversation([baseRound({ steps })]));
+
+    // Boundary events sandwich two step events in `sequence` order.
+    expect(events.map((event) => event.type)).toEqual([
+      TimelineEventType.userMessage,
+      TimelineEventType.executionStarted,
+      TimelineEventType.executionStep,
+      TimelineEventType.executionStep,
+      TimelineEventType.executionTerminated,
+    ]);
+    expect(events.map((event) => event.id)).toEqual([
+      'round-1::user_message',
+      'round-1::execution_started',
+      'round-1::step::0',
+      'round-1::step::1',
+      'round-1::execution_terminated',
+    ]);
+
+    // Step events carry the exact step payload from round.steps + a matching sequence.
+    expect(events[2]).toMatchObject({
+      type: TimelineEventType.executionStep,
+      created_at: '2026-01-01T00:00:00.000Z',
+      execution_id: 'round-1::execution',
+      trigger_event_id: 'round-1::user_message',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      data: { step: steps[0], sequence: 0 },
+    });
+    expect(events[3]).toMatchObject({
+      type: TimelineEventType.executionStep,
+      data: { step: steps[1], sequence: 1 },
+    });
+
+    expect(events[4]).toMatchObject({ type: TimelineEventType.executionTerminated });
+    const terminatedData = events[4].data as { steps?: unknown };
+    expect(terminatedData.steps).toBeUndefined();
+  });
+});
+
+describe('userMessageEvent (split builder)', () => {
+  it('produces exactly one user_message event with the round input and actor', () => {
+    const round = baseRound();
+    const conversation = baseConversation([round]);
+    const event = userMessageEvent(round, conversation);
+
+    expect(event).toMatchObject({
+      id: 'round-1::user_message',
+      type: TimelineEventType.userMessage,
+      created_at: round.started_at,
+      actor: { type: EventActorType.user, id: 'user-1', username: 'alice' },
+      data: { message: 'hello' },
+    });
+    // No `execution_id` / `trigger_event_id` fields belong on the user_message.
+    expect(event).not.toHaveProperty('execution_id');
+    expect(event).not.toHaveProperty('trigger_event_id');
+  });
+});
+
+describe('executionStartedEvent (split builder)', () => {
+  it('produces exactly one execution_started event that references the round input event', () => {
+    const round = baseRound();
+    const conversation = baseConversation([round]);
+    const event = executionStartedEvent(round, conversation);
+
+    expect(event).toMatchObject({
+      id: 'round-1::execution_started',
+      type: TimelineEventType.executionStarted,
+      created_at: round.started_at,
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+      execution_id: 'round-1::execution',
+      trigger_event_id: 'round-1::user_message',
+    });
+  });
 });
 
 describe('isRoundDerivedEventId', () => {
-  it.each(roundsToEvents(baseConversation([baseRound()])).map((event) => event.id as string))(
-    'recognizes round-derived id %p',
-    (id) => {
-      expect(isRoundDerivedEventId(id)).toBe(true);
-    }
-  );
+  it.each(
+    roundsToEvents(
+      baseConversation([
+        baseRound({
+          steps: [
+            { type: ConversationRoundStepType.reasoning, reasoning: 'r' } as ConversationRoundStep,
+          ],
+        }),
+      ])
+    ).map((event) => event.id as string)
+  )('recognizes round-derived id %p', (id) => {
+    expect(isRoundDerivedEventId(id)).toBe(true);
+  });
+
+  it('recognizes step ids at arbitrary sequences (the `::step::N` marker is a prefix, not a suffix)', () => {
+    expect(isRoundDerivedEventId('round-1::step::0')).toBe(true);
+    expect(isRoundDerivedEventId('round-42::step::12')).toBe(true);
+  });
 
   it('rejects ids that are not round-derived', () => {
     expect(isRoundDerivedEventId('some-additive-error')).toBe(false);
     expect(isRoundDerivedEventId('::user_message::follow-up')).toBe(false);
     expect(isRoundDerivedEventId('')).toBe(false);
+  });
+
+  it('rejects additive ids that merely contain the step marker (check is anchored to ::step::N$)', () => {
+    expect(isRoundDerivedEventId('my-error::step::context')).toBe(false);
+    expect(isRoundDerivedEventId('round-1::step::0::retry')).toBe(false);
+    expect(isRoundDerivedEventId('round-1::step::')).toBe(false);
   });
 });
