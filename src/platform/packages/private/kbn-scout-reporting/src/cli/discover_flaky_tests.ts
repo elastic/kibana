@@ -321,6 +321,7 @@ export const discoverFlakyTests: Command<void> = {
     `,
   },
   run: async ({ flagsReader, log }) => {
+    const startedAt = performance.now();
     const esURL = flagsReader.requiredString('esURL');
     const esAPIKey = flagsReader.requiredString('esAPIKey');
     const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('outputPath'));
@@ -373,6 +374,6 @@ export const discoverFlakyTests: Command<void> = {
       displaySummary(report, 10, log);
     }
 
-    log.success(`Finished in ${(performance.now() / 1000).toFixed(2)}s`);
+    log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
   },
 };
