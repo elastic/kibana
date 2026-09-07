@@ -330,7 +330,12 @@ describe('cloud connector integration helpers', () => {
           role_arn: { type: 'text' as const, value: undefined },
           supports_cloud_connectors: { type: 'bool' as const, value: false },
         });
-        const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+        const result = injectConnectorVarsIntoPolicy(
+          policy,
+          awsConnectorVars,
+          'aws',
+          mockPackageInfo
+        );
         expect(result.inputs[0].streams[0].vars?.supports_cloud_connectors?.value).toBe(true);
       });
 
@@ -339,7 +344,12 @@ describe('cloud connector integration helpers', () => {
           role_arn: { type: 'text' as const, value: undefined },
           supports_identity_federation: { type: 'bool' as const, value: false },
         });
-        const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+        const result = injectConnectorVarsIntoPolicy(
+          policy,
+          awsConnectorVars,
+          'aws',
+          mockPackageInfo
+        );
         expect(result.inputs[0].streams[0].vars?.supports_identity_federation?.value).toBe(true);
       });
 
@@ -349,16 +359,28 @@ describe('cloud connector integration helpers', () => {
           supports_cloud_connectors: { type: 'bool' as const, value: false },
           supports_identity_federation: { type: 'bool' as const, value: false },
         });
-        const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+        const result = injectConnectorVarsIntoPolicy(
+          policy,
+          awsConnectorVars,
+          'aws',
+          mockPackageInfo
+        );
         expect(result.inputs[0].streams[0].vars?.supports_cloud_connectors?.value).toBe(true);
         expect(result.inputs[0].streams[0].vars?.supports_identity_federation?.value).toBe(true);
       });
 
       it('does not add a flag var that the package did not declare', () => {
         const policy = makeInputPolicy({ role_arn: { type: 'text' as const, value: undefined } });
-        const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+        const result = injectConnectorVarsIntoPolicy(
+          policy,
+          awsConnectorVars,
+          'aws',
+          mockPackageInfo
+        );
         expect('supports_cloud_connectors' in (result.inputs[0].streams[0].vars ?? {})).toBe(false);
-        expect('supports_identity_federation' in (result.inputs[0].streams[0].vars ?? {})).toBe(false);
+        expect('supports_identity_federation' in (result.inputs[0].streams[0].vars ?? {})).toBe(
+          false
+        );
       });
 
       it('sets the flag for non-AWS providers too', () => {
@@ -374,7 +396,12 @@ describe('cloud connector integration helpers', () => {
         const policy = makeInputPolicy({
           supports_cloud_connectors: { type: 'bool' as const, value: false },
         });
-        const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+        const result = injectConnectorVarsIntoPolicy(
+          policy,
+          awsConnectorVars,
+          'aws',
+          mockPackageInfo
+        );
         expect(result.inputs[0].streams[0].vars?.supports_cloud_connectors?.value).toBe(true);
       });
     });

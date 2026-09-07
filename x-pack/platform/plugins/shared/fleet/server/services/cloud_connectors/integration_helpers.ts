@@ -246,7 +246,10 @@ export function injectConnectorVarsIntoPolicy(
   // Set the identity-federation flag so the beats AWS input uses the federated auth path
   // rather than the container's default execution role. Packages use one of two var names
   // (renamed in elastic/integrations#19828); set both if present.
-  for (const flagName of [SUPPORTS_CLOUD_CONNECTORS_VAR_NAME, SUPPORTS_IDENTITY_FEDERATION_VAR_NAME]) {
+  for (const flagName of [
+    SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+    SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
+  ]) {
     if (flagName in updatedVars) {
       updatedVars[flagName] = { ...updatedVars[flagName], value: true };
     }
