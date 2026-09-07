@@ -12,10 +12,10 @@ import type {
 } from '../../../../../../../../common/api/detection_engine';
 import type { RuleLifecycleTelemetryData } from '../../rule_lifecycle_telemetry';
 
-export type ImportRuleSuccess = {
+export interface ImportRuleSuccess {
   rule_id: string;
   telemetry: RuleLifecycleTelemetryData;
-};
+}
 
 export interface ImportRulesResult {
   successes: ImportRuleSuccess[];
