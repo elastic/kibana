@@ -60,4 +60,23 @@ describe('buildCustomContentContextAttachment', () => {
 
     expect(attachment.data).not.toHaveProperty('time_range');
   });
+
+  it('carries the panel height so the preview starts at the size the user saw', () => {
+    const attachment = buildCustomContentContextAttachment(
+      '<div>hi</div>',
+      'FROM logs',
+      'panel-1',
+      'My panel',
+      { from: 'now-7d', to: 'now' },
+      480
+    );
+
+    expect(attachment.data?.panel_height).toBe(480);
+  });
+
+  it('omits panel_height when the panel could not be measured', () => {
+    const attachment = buildCustomContentContextAttachment('<div>hi</div>', 'FROM logs', 'panel-1');
+
+    expect(attachment.data).not.toHaveProperty('panel_height');
+  });
 });

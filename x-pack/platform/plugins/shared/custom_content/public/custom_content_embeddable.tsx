@@ -60,6 +60,7 @@ import {
 } from '@kbn/custom-content-renderer';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { css } from '@emotion/react';
 import { getServices } from './services';
 import { getTelemetry } from './telemetry';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
@@ -67,6 +68,13 @@ import { buildCustomContentContextAttachment } from './utils/chat_integration';
 import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
+
+const panelMeasureCss = css({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: '1 1 100%',
+  minHeight: 0,
+});
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -87,6 +95,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       http: core.http,
       uiSettings: core.uiSettings,
       search,
+    };
+    // The panel's own container is outside the sandboxed iframe, so its height is readable.
+    // Captured when the panel is sent to chat so the preview there starts at the size the
+    // user was actually looking at.
+    const panelElement: { current: HTMLDivElement | null } = { current: null };
+    const measurePanelHeight = () => {
+      const measured = panelElement.current?.getBoundingClientRect().height;
+      return measured ? Math.round(measured) : undefined;
     };
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -211,7 +227,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     draftEsqlQuery,
                     uuid,
                     titleManager.api.title$.getValue() ?? undefined,
-                    effectiveTimeRange$.getValue()
+                    effectiveTimeRange$.getValue(),
+                    measurePanelHeight()
                   ),
                 ],
               });
@@ -436,30 +453,40 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 undefined,
                 uuid,
                 panelTitle ?? undefined,
-                effectiveTimeRange$.getValue()
+                effectiveTimeRange$.getValue(),
+                measurePanelHeight()
               ),
             ],
           });
         }, [panelTitle]);
 
         return (
-          <CustomContentComponent
-            services={rendererServices}
-            embeddableId={uuid}
-            esqlQuery={esqlQuery}
-            timeRange={timeRange}
-            generationVersion={generationVersion}
-            savedTemplate={savedTemplate}
-            isApproximate={isApproximate}
-            projectRouting={projectRouting}
-            query={query}
-            filters={filters}
-            esqlVariables={esqlVariables}
-            previewHtml={previewHtml}
-            isAiAvailable={Boolean(agentBuilder)}
-            onLoadingChange={handleLoadingChange}
-            onGenerateWithChat={handleGenerateWithChat}
-          />
+          <div
+            ref={(element) => {
+              panelElement.current = element;
+            }}
+            // Mirrors the flex properties the panel root expects from its parent, so
+            // inserting this measuring element does not change the height chain.
+            css={panelMeasureCss}
+          >
+            <CustomContentComponent
+              services={rendererServices}
+              embeddableId={uuid}
+              esqlQuery={esqlQuery}
+              timeRange={timeRange}
+              generationVersion={generationVersion}
+              savedTemplate={savedTemplate}
+              isApproximate={isApproximate}
+              projectRouting={projectRouting}
+              query={query}
+              filters={filters}
+              esqlVariables={esqlVariables}
+              previewHtml={previewHtml}
+              isAiAvailable={Boolean(agentBuilder)}
+              onLoadingChange={handleLoadingChange}
+              onGenerateWithChat={handleGenerateWithChat}
+            />
+          </div>
         );
       },
     };

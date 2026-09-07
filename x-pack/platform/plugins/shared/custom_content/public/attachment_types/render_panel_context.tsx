@@ -11,22 +11,36 @@ import {
   CustomContentComponent,
   type CustomContentRendererServices,
 } from '@kbn/custom-content-renderer';
-import { CUSTOM_CONTENT_DEFAULT_HEIGHT } from '@kbn/custom-content-common';
 import type { CustomContentContextAttachmentData } from '../../common/panel_context_attachment';
 import { getServices } from '../services';
+
+/** Used when the attachment predates the captured height, or the panel was never measured. */
+const FALLBACK_HEIGHT = 320;
+/** Matches the renderer's own iframe-container floor; above it, a chat card stops being a preview. */
+const MIN_HEIGHT = 200;
+const MAX_HEIGHT = 1200;
+
+/**
+ * The height the chat preview renders at, from the panel's measured height when the
+ * attachment carries one. The chat card is narrower than a dashboard panel, so the content
+ * reflows and this is a starting point rather than an exact fit.
+ */
+export const resolvePreviewHeight = (panelHeight?: number): number =>
+  Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, panelHeight ?? FALLBACK_HEIGHT));
 
 /**
  * Flex column with a definite height: the panel's own root is `flex: 1 1 100%`
  * and its iframe container `flex: 1 1 0%`, so a plain block parent collapses both
  * to the container's min-height regardless of the height set on the wrapper.
  */
-const containerCss = css({
-  display: 'flex',
-  flexDirection: 'column',
-  height: CUSTOM_CONTENT_DEFAULT_HEIGHT,
-  minHeight: 0,
-  width: '100%',
-});
+const containerCss = (height: number) =>
+  css({
+    display: 'flex',
+    flexDirection: 'column',
+    height,
+    minHeight: 0,
+    width: '100%',
+  });
 
 /**
  * Renders a panel-context attachment inline in the conversation.
@@ -48,8 +62,10 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
   // The conversation has no render-completion contract to satisfy.
   const onLoadingChange = useCallback(() => {}, []);
 
+  const height = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, data.panel_height ?? FALLBACK_HEIGHT));
+
   return (
-    <div css={containerCss}>
+    <div css={containerCss(height)}>
       <CustomContentComponent
         services={services}
         embeddableId={data.embeddable_id}

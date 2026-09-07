@@ -320,5 +320,22 @@ describe('createUpdateCustomContentTool handler', () => {
         expect.anything()
       );
     });
+
+    it('carries the captured panel height through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          embeddable_id: 'panel-1',
+          panel_height: 480,
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ panel_height: 480 }) },
+        expect.anything()
+      );
+    });
   });
 });

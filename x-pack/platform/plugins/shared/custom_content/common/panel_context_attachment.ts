@@ -29,6 +29,12 @@ export const customContentContextAttachmentDataSchema = z.object({
       to: z.string().max(256),
     })
     .optional(),
+  /**
+   * The panel's rendered height in pixels when it was sent to chat. Measured from the
+   * panel's own container, which is outside the sandboxed iframe and therefore readable —
+   * unlike the content inside it. Bounded because it is written by the browser.
+   */
+  panel_height: z.number().int().min(1).max(4000).optional(),
 });
 
 export type CustomContentContextAttachmentData = z.infer<

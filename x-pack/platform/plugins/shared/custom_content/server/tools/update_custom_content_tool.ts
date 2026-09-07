@@ -141,6 +141,7 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       // Carried over so a refined version still previews against the range the panel was
       // sent with, rather than silently reverting to the default.
       ...(currentData?.time_range ? { time_range: currentData.time_range } : {}),
+      ...(currentData?.panel_height ? { panel_height: currentData.panel_height } : {}),
     };
 
     const updated = await attachments.update(
