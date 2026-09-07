@@ -185,6 +185,7 @@ export {
   type InferenceEndpointDefinition,
 } from './src/utils/inference_endpoint_definition';
 export {
+  getConnectorActionTypeId,
   isInferenceEndpointDefinition,
   toStackConnectorDefinition,
   type EvalConnector,

@@ -24,12 +24,12 @@
 
 import { tags } from '@kbn/scout';
 import {
-  isInferenceEndpointDefinition,
+  getConnectorActionTypeId,
   selectEvaluators,
+  type EvalConnector,
   type EvaluationDataset,
   type EvalsExecutorClient,
   type Example,
-  type StackConnectorDefinition,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
@@ -92,7 +92,7 @@ function createEvaluateEaseSummary({
   log,
 }: {
   fetch: HttpHandler;
-  connector: StackConnectorDefinition;
+  connector: EvalConnector;
   executorClient: EvalsExecutorClient;
   log: ToolingLog;
 }) {
@@ -116,7 +116,7 @@ function createEvaluateEaseSummary({
           return callEaseSummary({
             fetch,
             connectorId: connector.id,
-            actionTypeId: connector.actionTypeId,
+            actionTypeId: getConnectorActionTypeId(connector),
             alertContext: (input as EaseSummaryExample['input']).alertContext,
             log,
           });
@@ -134,12 +134,6 @@ type EvaluateEaseSummary = ReturnType<typeof createEvaluateEaseSummary>;
 const evaluate = base.extend<{ evaluateEaseSummary: EvaluateEaseSummary }, {}>({
   evaluateEaseSummary: [
     ({ fetch, connector, executorClient, log }, use) => {
-      if (isInferenceEndpointDefinition(connector)) {
-        throw new Error(
-          `The EASE alert summary eval calls the actions/connector execute route, which requires a ` +
-            `stack connector. [${connector.id}] is an inference endpoint; select a stack connector instead.`
-        );
-      }
       use(createEvaluateEaseSummary({ fetch, connector, executorClient, log }));
     },
     { scope: 'test' },

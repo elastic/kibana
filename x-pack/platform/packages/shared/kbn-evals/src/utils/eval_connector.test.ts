@@ -9,6 +9,7 @@ import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 import {
+  getConnectorActionTypeId,
   isInferenceEndpointDefinition,
   loadStackConnectors,
   toStackConnectorDefinition,
@@ -130,5 +131,35 @@ describe('isInferenceEndpointDefinition', () => {
       secrets: {},
     };
     expect(isInferenceEndpointDefinition(connector)).toBe(false);
+  });
+});
+
+describe('getConnectorActionTypeId', () => {
+  it('returns .inference for an inference endpoint definition', () => {
+    expect(getConnectorActionTypeId(endpoint)).toBe('.inference');
+  });
+
+  it('returns the actionTypeId of a stack connector unchanged', () => {
+    const connector: StackConnectorDefinition = {
+      type: 'stack_connector',
+      id: 'my-connector',
+      name: 'My Connector',
+      actionTypeId: '.gen-ai',
+      config: {},
+      secrets: {},
+    };
+    expect(getConnectorActionTypeId(connector)).toBe('.gen-ai');
+  });
+
+  it('returns .inference for a .inference stack connector', () => {
+    const connector: StackConnectorDefinition = {
+      type: 'stack_connector',
+      id: 'local-inference',
+      name: 'Local Inference',
+      actionTypeId: '.inference',
+      config: { provider: 'openai', taskType: 'chat_completion' },
+      secrets: {},
+    };
+    expect(getConnectorActionTypeId(connector)).toBe('.inference');
   });
 });

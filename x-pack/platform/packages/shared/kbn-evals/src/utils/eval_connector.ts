@@ -37,3 +37,7 @@ export const loadStackConnectors = (): StackConnectorDefinition[] => {
 export const isInferenceEndpointDefinition = (
   connector: EvalConnector
 ): connector is InferenceEndpointDefinition => connector.type === 'inference_endpoint';
+
+/** Actions `actionTypeId` to report for a connector; inference endpoints surface as `.inference`. */
+export const getConnectorActionTypeId = (connector: EvalConnector): string =>
+  isInferenceEndpointDefinition(connector) ? '.inference' : connector.actionTypeId;
