@@ -161,7 +161,7 @@
     "@elastic/elasticsearch": "9.5.0",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.23.0",
-    "@elastic/eui": "file:./eui_120.0.0_calm_down_components_1_001.tgz",
+    "@elastic/eui": "file:./eui_120.0.0_calm_down_components_2_001.tgz",
     "@elastic/eui-illustrations": "1.0.2",
     "@elastic/eui-theme-borealis": "file:./eui_theme_borealis_8.0.0_calm_down_components_1_001.tgz",
     "@elastic/eui-theme-common": "file:./eui_theme_common_10.0.0_calm_down_components_1_001.tgz",

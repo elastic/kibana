@@ -2014,9 +2014,9 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./eui_120.0.0_calm_down_components_1_001.tgz":
+"@elastic/eui@file:./eui_120.0.0_calm_down_components_2_001.tgz":
   version "120.0.0"
-  resolved "file:./eui_120.0.0_calm_down_components_1_001.tgz#3211d4efbdd91bcb2081f616fc1edc70ae7d647f"
+  resolved "file:./eui_120.0.0_calm_down_components_2_001.tgz#897a8bc19985f22bf719d19b86eeebf6f1bd04d7"
   dependencies:
     "@elastic/prismjs-esql" "^4.13.0"
     "@hello-pangea/dnd" "^16.6.0"
