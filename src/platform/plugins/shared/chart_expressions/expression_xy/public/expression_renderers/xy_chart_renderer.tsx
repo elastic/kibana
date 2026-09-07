@@ -220,10 +220,12 @@ export const getXyChartRenderer = ({
     const deps = await getStartDeps();
 
     // Lazy loaded parts
-    const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
-      import('../components/xy_chart'),
-      import('../helpers'),
-    ]);
+    const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }, { XYChartWithPoints }] =
+      await Promise.all([
+        import('../components/xy_chart'),
+        import('../helpers'),
+        import('./xy_chart_with_points'),
+      ]);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
     const onClickValue = (data: FilterEvent['data']) => {
@@ -284,8 +286,9 @@ export const getXyChartRenderer = ({
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
-          <XYChartReportable
+          <XYChartWithPoints
             {...config}
+            XYChartReportable={XYChartReportable}
             data={deps.data}
             formatFactory={deps.formatFactory}
             chartsActiveCursorService={deps.activeCursor}

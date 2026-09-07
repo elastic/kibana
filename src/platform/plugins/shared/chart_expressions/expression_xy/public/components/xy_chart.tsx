@@ -28,6 +28,8 @@ import {
   Chart,
   Settings,
   Axis,
+  BubbleSeries,
+  PointShape,
   Position,
   VerticalAlignment,
   HorizontalAlignment,
@@ -39,7 +41,7 @@ import {
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { type IconType } from '@elastic/eui';
+import { type IconType, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -127,6 +129,7 @@ import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './leg
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 import { getComputedColumnWarning } from './tooltip/computed_column_warning';
 import { GlobalXYChartStyles } from './xy_chart.styles';
+import type { PointData } from '../helpers/points';
 
 declare global {
   interface Window {
@@ -164,6 +167,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
+  pointsData?: Record<string, PointData[]>;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -227,6 +231,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  pointsData,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -248,6 +253,7 @@ export function XYChart({
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
+  const { euiTheme } = useEuiTheme();
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
@@ -1142,6 +1148,30 @@ export function XYChart({
                 }
               />
             ) : null}
+            {pointsData &&
+              Object.entries(pointsData).map(
+                ([layerId, layerPoints]) =>
+                  layerPoints.length > 0 && (
+                    <BubbleSeries
+                      key={layerId}
+                      id={`xy-points-overlay-${layerId}`}
+                      xAccessor="x"
+                      yAccessors={['y']}
+                      data={layerPoints}
+                      color={darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark}
+                      bubbleSeriesStyle={{
+                        point: {
+                          shape: PointShape.Diamond,
+                          strokeWidth: 1,
+                          stroke: darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight,
+                          radius: 6,
+                        },
+                      }}
+                      xScaleType="time"
+                      yScaleType="linear"
+                    />
+                  )
+              )}
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
       </div>
