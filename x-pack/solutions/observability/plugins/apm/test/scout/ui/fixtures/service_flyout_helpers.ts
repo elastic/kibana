@@ -12,6 +12,13 @@ export async function assertFlyoutChartsRendered(
   serviceFlyoutPage: ServiceFlyoutPage,
   ids: string[]
 ): Promise<void> {
+  // Classic APM services (non-OTel, non-Discover) render APM chart components.
+  // OTel and document-based (Discover) hosts render Lens charts instead.
+  const apmChartsCount = await serviceFlyoutPage.apmCharts.count();
+  if (apmChartsCount > 0) {
+    await expect(serviceFlyoutPage.apmCharts).toBeVisible();
+    return;
+  }
   for (const id of ids) {
     const chart = serviceFlyoutPage.getChartLocator(id);
     await expect(chart).toBeVisible();
