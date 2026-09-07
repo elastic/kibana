@@ -244,6 +244,7 @@ function getLensTopNavConfig(options: {
       tooltipContent: actions.getUnderlyingDataUrl.tooltip,
       target: '_blank',
       href: actions.getUnderlyingDataUrl.getLink?.(),
+      overflow: true,
       order: 2,
       // AppMenu getLinkProps preventDefault on left-click; run must open the tab.
       run: wrapTopNavRun(() => {
@@ -265,8 +266,7 @@ function getLensTopNavConfig(options: {
       testId: 'lnsApp_exportButton',
       disableButton: !actions.export.enabled,
       tooltipContent: actions.export.tooltip,
-      // Keep Export ahead of Inspect so it stays in the inline AppMenu slots
-      // (APP_MENU_ITEM_LIMIT is 3; overflow kicks in above that).
+      overflow: true,
       order: 3,
     };
 
@@ -299,7 +299,6 @@ function getLensTopNavConfig(options: {
     iconType: 'inspect',
     testId: 'lnsApp_inspectButton',
     disableButton: false,
-    // Prefer Export / Open in Discover in the limited inline slots.
     overflow: true,
     order: 5,
     run: wrapTopNavRun(actions.inspect.execute),
