@@ -199,7 +199,7 @@ const buildTopFlakyTable = (
       const flakiest = flakiestBranch(entry.byBranch, minBuilds);
       table.push([
         rank,
-        `${entry.failedBuilds}/${entry.builds}\n${formatRate(entry.buildFailRate)}`,
+        `${entry.failedBuilds}/${entry.builds}`,
         formatFlakiestBranch(flakiest),
         formatLatestRun(entry, flakiest, now),
         entry.title,
