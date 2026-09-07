@@ -6,11 +6,15 @@
  */
 
 import { randomUUID } from 'crypto';
+import type { Client } from '@elastic/elasticsearch';
 import { tags } from '@kbn/scout';
 import type { ApiClientFixture, KbnClient, KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { SmlSearchHttpResponse } from '@kbn/agent-builder-sml-plugin/common/http_api/sml';
 import { AGENT_BUILDER_SML_FEATURE_ID } from '@kbn/agent-builder-sml-plugin/common/features';
+import type { SmlDocument } from '@kbn/agent-builder-sml-plugin/server';
+import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
 import { COMMON_HEADERS, INTERNAL_AGENT_BUILDER_SML } from '../fixtures/constants';
 
@@ -25,6 +29,10 @@ const SML_TEST_PUBLIC_KI_TYPE = 'sml_test_public';
 const SML_TEST_GATED_KI_TYPE = 'sml_test_gated';
 const SML_TEST_GATED_FEATURE_ID = 'smlTestGatedType';
 const SML_TEST_SEARCH_TOKEN = 'smltestfixturetoken';
+const SML_TEST_SPACE_ID = 'default';
+
+const SML_TEST_MALFORMED_KI_TYPE = 'sml_test_malformed';
+const MALFORMED_ENTRY_ID = `sml-test-malformed-${randomUUID().slice(0, 8)}`;
 
 const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 const CRAWL_POLL_TIMEOUT_MS = 90_000;
@@ -85,6 +93,35 @@ const runSmlCrawlerSoon = async (kbnClient: KbnClient, typeId: string): Promise<
   }
 };
 
+// Writes the fixture entry directly into the SML index at a chosen `count`, overwriting the same
+// id. Names the gated action so the gated role is a real holder; the indexer never emits `count: 0`
+// with names, so that combination is only reachable by writing it by hand.
+const indexEntryWithCount = async (sysEsClient: Client, count: number): Promise<void> => {
+  const document: SmlDocument = {
+    id: MALFORMED_ENTRY_ID,
+    type: SML_TEST_MALFORMED_KI_TYPE,
+    title: `${SML_TEST_SEARCH_TOKEN} ${SML_TEST_MALFORMED_KI_TYPE}`,
+    origin: { uri: `${SML_TEST_MALFORMED_KI_TYPE}://${MALFORMED_ENTRY_ID}` },
+    content: `${SML_TEST_SEARCH_TOKEN} malformed permission element fixture`,
+    created_at: '2024-01-01T00:00:00.000Z',
+    updated_at: '2024-01-01T00:00:00.000Z',
+    permissions: {
+      kibana: {
+        privileges: [
+          { space: SML_TEST_SPACE_ID, name: [`ai_index:${SML_TEST_GATED_KI_TYPE}/read`], count },
+        ],
+      },
+    },
+    ingestion_method: 'crawled',
+  };
+  await sysEsClient.index({
+    index: smlIndexName,
+    id: MALFORMED_ENTRY_ID,
+    refresh: 'wait_for',
+    document,
+  });
+};
+
 /*
  * Guards the `SmlTypeDefinition.getPermissions` contract: a type that omits the hook produces
  * entries readable by any caller *in the spaces they were indexed for*, and a type that implements
@@ -98,6 +135,7 @@ apiTest.describe(
   () => {
     let smlReadOnlyCredentials: RoleApiCredentials;
     let gatedTypeCredentials: RoleApiCredentials;
+    let sysEsClient: Client;
 
     const searchSml = async (
       apiClient: ApiClientFixture,
@@ -117,11 +155,13 @@ apiTest.describe(
       return (response.body as SmlSearchHttpResponse).results.map((hit) => hit.type);
     };
 
-    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, kbnClient, apiClient, esClient, config }) => {
       // Scout's default test timeout is 60s and a beforeAll hook is billed against it, so the
       // readiness poll below cannot outlive its own budget: without this the hook is killed at 60s
       // and reports "Received: false" rather than whatever the crawl was actually doing.
       apiTest.setTimeout(CRAWL_POLL_TIMEOUT_MS + 30_000);
+
+      sysEsClient = await createSystemIndicesEsClient(esClient, config);
 
       await kbnClient.spaces.create({
         id: OTHER_SPACE_ID,
@@ -153,7 +193,14 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ kbnClient }) => {
-      await kbnClient.spaces.delete(OTHER_SPACE_ID);
+      try {
+        await sysEsClient.delete(
+          { index: smlIndexName, id: MALFORMED_ENTRY_ID, refresh: true },
+          { ignore: [404] }
+        );
+      } finally {
+        await kbnClient.spaces.delete(OTHER_SPACE_ID);
+      }
     });
 
     apiTest(
@@ -184,6 +231,26 @@ apiTest.describe(
         const types = await searchSml(apiClient, gatedTypeCredentials, { spaceId: OTHER_SPACE_ID });
         expect(types).not.toContain(SML_TEST_PUBLIC_KI_TYPE);
         expect(types).not.toContain(SML_TEST_GATED_KI_TYPE);
+      }
+    );
+
+    apiTest(
+      'a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder',
+      async ({ apiClient }) => {
+        // Positive control: at count 1 the holder must see it, proving it is a reachable candidate.
+        await indexEntryWithCount(sysEsClient, 1);
+        const holderAtCountOne = await searchSml(apiClient, gatedTypeCredentials);
+        expect(holderAtCountOne).toContain(SML_TEST_MALFORMED_KI_TYPE);
+
+        // Same id at malformed count 0 must flip closed for holder and non-holder alike.
+        await indexEntryWithCount(sysEsClient, 0);
+        const holderAtCountZero = await searchSml(apiClient, gatedTypeCredentials);
+        expect(holderAtCountZero).not.toContain(SML_TEST_MALFORMED_KI_TYPE);
+        const readOnlyAtCountZero = await searchSml(apiClient, smlReadOnlyCredentials);
+        expect(readOnlyAtCountZero).not.toContain(SML_TEST_MALFORMED_KI_TYPE);
+
+        // A genuinely public entry still shows, so the guard has not swallowed legitimate docs.
+        expect(readOnlyAtCountZero).toContain(SML_TEST_PUBLIC_KI_TYPE);
       }
     );
   }

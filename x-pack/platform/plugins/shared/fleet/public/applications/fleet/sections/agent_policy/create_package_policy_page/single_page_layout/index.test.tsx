@@ -13,6 +13,7 @@ import { sendCreateAgentlessPolicy } from '../../../../../../hooks/use_request/a
 
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../mock';
+import { ExperimentalFeaturesService } from '../../../../../../services';
 import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
@@ -801,7 +802,26 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      test('should render documentation callout when packageInfo has a readme', async () => {
+      test('should not render documentation callout when enableIntegrationTileClickToAdd is disabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: false } as any);
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
+          ...getMockPackageInfo(),
+          data: {
+            item: { ...getMockPackageInfo().data!.item, readme: '/package/nginx-1.3.0/README.md' },
+          },
+        });
+
+        await act(async () => {
+          render();
+        });
+
+        await waitFor(() => {
+          expect(renderResult.queryByTestId('packageDocumentationCallout')).not.toBeInTheDocument();
+        });
+      });
+
+      test('should render documentation callout when packageInfo has a readme and enableIntegrationTileClickToAdd is enabled', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
           ...getMockPackageInfo(),
           data: {
@@ -819,6 +839,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should open documentation modal when View documentation button is clicked', async () => {
+        ExperimentalFeaturesService.init({ enableIntegrationTileClickToAdd: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
           ...getMockPackageInfo(),
           data: {

@@ -9,21 +9,72 @@
 
 import type { Logger } from '@kbn/core/server';
 import { evaluateKql } from '@kbn/eval-kql';
-import type { WorkflowDetailDto } from '@kbn/workflows';
+import type { CustomTrigger, WorkflowDetailDto } from '@kbn/workflows';
 
 /**
  * Why a subscribed workflow did or did not match an emitted trigger event (for funnel telemetry).
  */
-export type WorkflowTriggerMatchOutcome = 'matched' | 'disabled' | 'kql_false' | 'kql_error';
+export type WorkflowTriggerMatchOutcome =
+  | 'matched'
+  | 'disabled'
+  | 'kql_false'
+  | 'kql_error'
+  | 'connector_id_mismatch';
+
+export interface ClassifyWorkflowTriggerMatchOptions {
+  /** When true, YAML `connector-id` must equal payload `connectorId` before KQL. */
+  requiresConnectorId?: boolean;
+}
+
+const readTrimmedString = (value: unknown): string =>
+  typeof value === 'string' ? value.trim() : '';
+
+const isCustomTrigger = (trigger: unknown): trigger is CustomTrigger =>
+  trigger != null &&
+  typeof trigger === 'object' &&
+  'type' in trigger &&
+  typeof trigger.type === 'string';
+
+const getYamlConnectorId = (trigger: CustomTrigger): string =>
+  readTrimmedString(trigger['connector-id']);
 
 /**
- * Classifies a workflow for a given trigger id and event payload (enabled gate, trigger block, KQL).
+ * Picks the YAML trigger block to evaluate for this emit.
+ * When `requiresConnectorId`, scans every same-type block and returns the one whose
+ * `connector-id` equals `payload.connectorId`. Otherwise the first block of that type.
+ */
+export const findMatchingWorkflowTrigger = (
+  triggers: readonly unknown[] | undefined,
+  triggerId: string,
+  payload: Record<string, unknown>,
+  requiresConnectorId?: boolean
+): CustomTrigger | undefined => {
+  const ofType = (triggers ?? []).filter(
+    (trigger): trigger is CustomTrigger => isCustomTrigger(trigger) && trigger.type === triggerId
+  );
+  if (ofType.length === 0) {
+    return undefined;
+  }
+  if (!requiresConnectorId) {
+    return ofType[0];
+  }
+  const eventConnectorId = readTrimmedString(payload.connectorId);
+  if (eventConnectorId === '') {
+    return undefined;
+  }
+  return ofType.find((trigger) => getYamlConnectorId(trigger) === eventConnectorId);
+};
+
+/**
+ * Classifies a workflow for a given trigger id and event payload
+ * (enabled gate, connector-id gate, trigger block, KQL).
  */
 export function classifyWorkflowTriggerMatch(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: Logger,
+  options?: ClassifyWorkflowTriggerMatchOptions
 ): WorkflowTriggerMatchOutcome {
   if (!workflow.enabled) {
     return 'disabled';
@@ -34,12 +85,21 @@ export function classifyWorkflowTriggerMatch(
     return 'kql_false';
   }
 
-  const matchingTrigger = triggers.find((t) => t && t.type === triggerId);
+  const requiresConnectorId = options?.requiresConnectorId === true;
+  const matchingTrigger = findMatchingWorkflowTrigger(
+    triggers,
+    triggerId,
+    payload,
+    requiresConnectorId
+  );
   if (!matchingTrigger) {
-    return 'kql_false';
+    const hasType = triggers.some(
+      (trigger) => isCustomTrigger(trigger) && trigger.type === triggerId
+    );
+    return requiresConnectorId && hasType ? 'connector_id_mismatch' : 'kql_false';
   }
 
-  const onBlock = matchingTrigger && 'on' in matchingTrigger ? matchingTrigger.on : undefined;
+  const onBlock = matchingTrigger.on;
   const condition =
     onBlock && typeof onBlock === 'object' && onBlock !== null && 'condition' in onBlock
       ? onBlock.condition
@@ -77,7 +137,8 @@ export function workflowMatchesTriggerCondition(
   workflow: WorkflowDetailDto,
   triggerId: string,
   payload: Record<string, unknown>,
-  logger?: Logger
+  logger?: Logger,
+  options?: ClassifyWorkflowTriggerMatchOptions
 ): boolean {
-  return classifyWorkflowTriggerMatch(workflow, triggerId, payload, logger) === 'matched';
+  return classifyWorkflowTriggerMatch(workflow, triggerId, payload, logger, options) === 'matched';
 }

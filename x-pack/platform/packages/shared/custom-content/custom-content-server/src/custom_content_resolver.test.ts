@@ -174,4 +174,25 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
       '<div>ok</div>'
     );
   });
+
+  it('binds ?_tstart and ?_tend when sampling a time-picker query', async () => {
+    await resolve({
+      prompt: 'Show revenue',
+      esqlQuery: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend',
+    });
+
+    expect(mockEsqlQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: [{ _tstart: expect.any(String) }, { _tend: expect.any(String) }],
+      })
+    );
+  });
+
+  it('sends no params for a query without time parameters', async () => {
+    await resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' });
+
+    expect(mockEsqlQuery).toHaveBeenCalledWith(
+      expect.not.objectContaining({ params: expect.anything() })
+    );
+  });
 });
