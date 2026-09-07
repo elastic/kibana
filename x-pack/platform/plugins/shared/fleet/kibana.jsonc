@@ -42,8 +42,7 @@
       "automaticImport",
       "alerting",
       "sloShared",
-      "reporting",
-      "agentBuilder"
+      "reporting"
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -275,7 +275,6 @@ describe('Security Skills', () => {
         'security.siem_migration.get_rule_migration_translation_stats',
         'security.siem_migration.get_migration_rules',
         'security.siem_migration.group_rules_by_integrations',
-        'platform.fleet.get_integration_details',
         'security.build_redirect_url',
         'security.siem_migration.install_migration_rules',
       ]);

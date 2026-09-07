@@ -46,7 +46,6 @@ export type {
 } from './services/package_policy_service';
 
 export { relativeDownloadUrlFromArtifact } from './services/artifacts/mappings';
-export { PLATFORM_FLEET_GET_INTEGRATION_DETAILS_TOOL_ID } from './agent_builder/tools/tool_ids';
 
 export type {
   FleetFromHostFileClientInterface,

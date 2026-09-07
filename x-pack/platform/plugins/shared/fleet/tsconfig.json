@@ -148,8 +148,6 @@
     "@kbn/human-readable-id",
     "@kbn/elastic-agent-condition-language",
     "@kbn/app-header",
-    "@kbn/core-http-browser",
-    "@kbn/agent-builder-common",
-    "@kbn/agent-builder-server"
+    "@kbn/core-http-browser"
   ]
 }

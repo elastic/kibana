@@ -6,7 +6,6 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { PLATFORM_FLEET_GET_INTEGRATION_DETAILS_TOOL_ID } from '@kbn/fleet-plugin/server';
 import {
   SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
@@ -54,7 +53,7 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 - \`security.siem_migration.get_rule_migration_translation_stats\` — authoritative installable and missing-index counts.
 - \`security.siem_migration.get_migration_rules\` — resolve titles to internal item ids and retain up to 3 custom rules for the result sample.
 - \`security.siem_migration.group_rules_by_integrations\` — migration-scoped integration groups with installed/not-installed rule counts. A multi-integration rule appears in every matching group.
-- \`platform.fleet.get_integration_details\` — live package installation and integration enablement. It requires Fleet Integrations: Read and Agent Policies: Read.
+- \`execute_api\` (Kibana target) — call Fleet APIs directly to check integration readiness (see step 5).
 - \`security.build_redirect_url\` — build space/base-path-safe Detection Rule links.
 - \`security.siem_migration.install_migration_rules\` — install the selected or all installable rules.
 
@@ -83,9 +82,20 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    Use ✅ when \`is_installed\` / \`is_enabled\` is true, ❌ when false. Add a row for
    "No integration" using \`without_integrations\` counts; leave Installed and Enabled blank for
    that row.
-5. Call \`platform.fleet.get_integration_details\` once with the distinct integration ids from the
-   groups. If the Fleet privilege check fails, explain that readiness could not be verified and
-   recommend installing rules disabled. Do not invent readiness.
+
+5. Check integration readiness using Fleet APIs:
+
+   - Call the Fleet "list installed packages" API. Each item returns \`{ name, status, dataStreams[] }\`.
+     A package is installed when its \`name\` appears in the response. If the call returns a 403,
+     report readiness as unknown and skip to step 6.
+   - Call the Fleet "list package policies" API. An integration is enabled when at least one
+     policy's \`inputs\` entry has \`enabled: true\` and its \`policy_template\` (or \`type\`)
+     matches the integration name. For single-template packages, any enabled input counts. On 403,
+     mark all \`is_enabled\` values as unknown.
+
+   Use the combined results to populate the Installed and Enabled columns in the step 4 table.
+   Only mark ✅ when the API confirms it — never invent readiness.
+
 6. Present this pre-install checklist:
    - Migration and exact installable count resolved.
    - Install scope confirmed.
@@ -157,7 +167,6 @@ never be requested from or displayed to the user.
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     SIEM_MIGRATION_GROUP_RULES_BY_INTEGRATIONS_TOOL_ID,
-    PLATFORM_FLEET_GET_INTEGRATION_DETAILS_TOOL_ID,
     SECURITY_BUILD_REDIRECT_URL_TOOL_ID,
     SIEM_MIGRATION_INSTALL_RULE_MIGRATION_TOOL_ID,
   ],

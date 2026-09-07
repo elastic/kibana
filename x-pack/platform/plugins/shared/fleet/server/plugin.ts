@@ -51,8 +51,6 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
@@ -181,10 +179,9 @@ import {
 } from './services/agentless/agentless_policies';
 import { registerReassignAgentsToVersionSpecificPoliciesTask } from './services/agent_policies/reassign_agents_to_version_specific_policies_task';
 import { VersionSpecificPolicyAssignmentTask } from './tasks/version_specific_policy_assignment_task';
-import { registerFleetAgentBuilder } from './agent_builder/register';
+
 
 export interface FleetSetupDeps {
-  agentBuilder?: AgentBuilderPluginSetup;
   security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -397,14 +394,6 @@ export class FleetPlugin
       config.experimentalFeatures || {}
     );
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
-
-    registerFleetAgentBuilder({
-      agentBuilder: deps.agentBuilder,
-      getPackageService: () => this.packageService,
-      getPackagePolicyService: () => this.setupPackagePolicyService(),
-      getAuthz: getAuthzFromRequest,
-      logger: this.getLogger().get('agent_builder'),
-    });
 
     registerSavedObjects(core.savedObjects, {
       useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
