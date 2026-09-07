@@ -24,6 +24,13 @@ import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../../config';
 import { isSameColor } from '../../color/color_math';
 
+export function getPaletteSwatchesPerRow(colorCount: number): number {
+  if (colorCount <= 6) {
+    return colorCount;
+  }
+  return Math.ceil(colorCount / 2);
+}
+
 export function PaletteColors({
   palette,
   palettes,
@@ -39,6 +46,7 @@ export function PaletteColors({
   const colors = Array.from({ length: palette.colorCount }, (d, i) => {
     return palette.getColor(i);
   });
+  const swatchesPerRow = getPaletteSwatchesPerRow(colors.length);
   const neutralPalette = palettes.get(KbnPalette.Neutral);
   const neutralColors = Array.from({ length: neutralPalette.colorCount }, (d, i) => {
     return neutralPalette.getColor(i);
@@ -66,26 +74,25 @@ export function PaletteColors({
             </h6>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiFlexGroup
-            direction="row"
-            gutterSize="s"
-            wrap={true}
-            alignItems="center"
-            justifyContent="flexStart"
+          <div
+            css={{
+              display: 'grid',
+              gridTemplateColumns: `repeat(${swatchesPerRow}, auto)`,
+              gap: euiTheme.size.s,
+            }}
           >
             {colors.map((c, index) => (
-              <EuiFlexItem key={c} grow={0}>
-                <EuiColorPickerSwatch
-                  data-test-subj={`lns-colorMapping-colorPicker-staticColor-${index}`}
-                  css={isSameColor(c, originalColor) ? selectedColorSwatchStyle : undefined}
-                  color={c}
-                  onClick={() =>
-                    selectColor({ type: 'categorical', paletteId: palette.id, colorIndex: index })
-                  }
-                />
-              </EuiFlexItem>
+              <EuiColorPickerSwatch
+                key={`${c}-${index}`}
+                data-test-subj={`lns-colorMapping-colorPicker-staticColor-${index}`}
+                css={isSameColor(c, originalColor) ? selectedColorSwatchStyle : undefined}
+                color={c}
+                onClick={() =>
+                  selectColor({ type: 'categorical', paletteId: palette.id, colorIndex: index })
+                }
+              />
             ))}
-          </EuiFlexGroup>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
