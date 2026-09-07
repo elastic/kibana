@@ -26,11 +26,13 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
         .union([z.enum(INVESTIGATION_STATUSES), z.array(z.enum(INVESTIGATION_STATUSES)).max(5)])
         .transform((v) => (Array.isArray(v) ? v : [v]))
         .optional(),
+      created_after: z.string().max(100).datetime({ offset: true }).optional(),
+      created_before: z.string().max(100).datetime({ offset: true }).optional(),
       started_after: z.string().max(100).datetime({ offset: true }).optional(),
       started_before: z.string().max(100).datetime({ offset: true }).optional(),
-      finished_after: z.string().max(100).datetime({ offset: true }).optional(),
-      finished_before: z.string().max(100).datetime({ offset: true }).optional(),
-      sort_field: z.enum(['created_at', 'finished_at']).optional(),
+      completed_after: z.string().max(100).datetime({ offset: true }).optional(),
+      completed_before: z.string().max(100).datetime({ offset: true }).optional(),
+      sort_field: z.enum(['created_at', 'completed_at']).optional(),
       sort_order: z.enum(['asc', 'desc']).optional(),
       page: z.coerce.number().int().min(1).max(100).optional(),
       size: z.coerce.number().int().min(1).max(100).optional(),
