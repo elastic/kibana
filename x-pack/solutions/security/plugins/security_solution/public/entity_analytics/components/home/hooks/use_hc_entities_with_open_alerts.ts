@@ -52,7 +52,7 @@ export const useEntitiesWithAlertsCount = ({
 
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
-    return buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName);
+    return buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName, spaceId);
   }, [euidApi, resolvedIndex?.indexName]);
 
   const {

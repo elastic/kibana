@@ -8,7 +8,7 @@
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 import { buildAlertEuidPipeline } from './alert_euid_pipeline';
 
-export const ALERTS_INDEX = '.alerts-security.alerts-default';
+const alertsIndex = (spaceId: string) => `.alerts-security.alerts-${spaceId}`;
 
 /**
  * Builds a single ES|QL query that counts distinct H/C-risk entities with at
@@ -21,12 +21,13 @@ export const ALERTS_INDEX = '.alerts-security.alerts-default';
  */
 export const buildEntitiesWithAlertsCountQuery = (
   euid: EntityStoreEuid,
-  entitiesIndexName: string
+  entitiesIndexName: string,
+  spaceId: string
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${ALERTS_INDEX}`);
+  parts.push(`FROM ${alertsIndex(spaceId)}`);
   parts.push(`| WHERE @timestamp >= NOW() - 24h`);
   parts.push(...buildAlertEuidPipeline(euid));
 
