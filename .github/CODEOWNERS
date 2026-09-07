@@ -2659,6 +2659,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/w
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/okta/** @elastic/workflows-eng
@@ -3377,12 +3378,15 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/utils/bulk_rule_action* @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
