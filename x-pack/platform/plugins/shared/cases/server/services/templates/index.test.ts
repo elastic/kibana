@@ -2200,6 +2200,40 @@ describe('TemplatesService', () => {
       );
     });
 
+    it('adds the given number of cases to usageCount', async () => {
+      const service = createService();
+
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue({
+          id: 'so-1',
+          attributes: {
+            templateId: 'template-1',
+            name: 'Template',
+            usageCount: 5,
+          },
+        } as SavedObject<Template>);
+
+      await service.incrementUsageStats('template-1', 3);
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: 'so-1',
+            type: CASE_TEMPLATE_SAVED_OBJECT,
+            attributes: {
+              usageCount: 8,
+              lastUsedAt: expect.any(String),
+            },
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
     it('sets usageCount to 1 when usageCount is undefined', async () => {
       const service = createService();
 
