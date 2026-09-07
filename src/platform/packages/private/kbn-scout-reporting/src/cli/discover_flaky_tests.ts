@@ -73,15 +73,16 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-// #, failed builds, flakiest branch, latest run on that branch, test title
-const TEST_COL_WIDTHS = [5, 15, 18, 10, 60] as const;
-/** Content width of a cell spanning every column: widths plus inner borders minus padding. */
-const FILE_ROW_WIDTH =
-  TEST_COL_WIDTHS.reduce<number>((sum, width) => sum + width, 0) + TEST_COL_WIDTHS.length - 1 - 3;
+const TITLE_COL_WIDTH = 50;
+const FILE_COL_WIDTH = 46;
+const OWNERS_COL_WIDTH = 34;
+
+// cell padding takes 2 columns and a broken line ends in the separator
+const contentWidth = (colWidth: number): number => colWidth - 3;
 
 /**
- * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
- * ourselves, keeping the separator at the end of the broken line.
+ * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/` and
+ * owner handles on `-` ourselves, keeping the separator at the end of the broken line.
  */
 const wrapOn = (text: string, separator: string, width: number): string => {
   const lines: string[] = [];
@@ -144,9 +145,9 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests one per row, grouped under a full-width header row per test file
- * (in order of first appearance) carrying the path, framework and owners, so whole-suite failures
- * stand out and the path is never repeated.
+ * Renders the top-ranked tests one per row. File, framework and owners are per-file, so their
+ * cells span the rows of that file's tests (in order of first appearance) and whole-suite
+ * failures stand out.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
@@ -155,8 +156,17 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Flakiest branch', 'Latest', 'Test'],
-    colWidths: [...TEST_COL_WIDTHS],
+    head: [
+      '#',
+      'Failed builds',
+      'Flakiest branch',
+      'Latest',
+      'Test',
+      'File',
+      'Framework',
+      'Owners',
+    ],
+    colWidths: [null, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -165,16 +175,27 @@ const buildTopFlakyTable = (
   for (const [filePath, entries] of groupByFile(top)) {
     const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const fileHeader = [
-      chalk.yellow(wrapOn(filePath, '/', FILE_ROW_WIDTH)),
-      notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      `${framework} · ${owners.join(', ') || 'no owners'}`,
-    ]
-      .filter(Boolean)
-      .join('\n');
-    table.push([{ colSpan: TEST_COL_WIDTHS.length, content: fileHeader }]);
+    const rowSpan = entries.length;
+    const fileCells: CliTable3.Cell[] = [
+      {
+        rowSpan,
+        content: [
+          chalk.yellow(wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH))),
+          notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+      { rowSpan, content: framework },
+      {
+        rowSpan,
+        content:
+          owners.map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH))).join('\n') ||
+          '-',
+      },
+    ];
 
-    for (const entry of entries) {
+    entries.forEach((entry, index) => {
       rank += 1;
       const flakiest = flakiestBranch(entry.byBranch, minBuilds);
       table.push([
@@ -183,8 +204,9 @@ const buildTopFlakyTable = (
         formatFlakiestBranch(flakiest),
         formatLatestRun(entry, flakiest, now),
         entry.title,
+        ...(index === 0 ? fileCells : []),
       ]);
-    }
+    });
   }
 
   return table;
