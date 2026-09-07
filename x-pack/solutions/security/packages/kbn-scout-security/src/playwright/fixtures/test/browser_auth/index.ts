@@ -50,18 +50,38 @@ export const securityBrowserAuthFixture = mergeTests(
       return browserAuth.loginAs(samlAuth.customRoleName);
     };
 
+    const loginWithServerlessRoleDescriptor = async (roleName: string) => {
+      const roleDescriptor = roleDescriptors.serverless?.get(
+        roleName
+      ) as ElasticsearchRoleDescriptor;
+      if (!roleDescriptor) {
+        throw new Error(`No role descriptors found for ${roleName}`);
+      }
+      log.debug(`Using "${roleName}" role to execute the test`);
+      return loginWithCustomRole(roleDescriptor);
+    };
+
+    const isCloudUserMissing = (error: unknown): boolean =>
+      error instanceof Error && /^User with '.+' role is not defined$/.test(error.message);
+
     const loginAsSecurityRole = async (roleName: string) => {
       if (!config.serverless) {
-        const roleDescriptor = roleDescriptors.serverless?.get(
-          roleName
-        ) as ElasticsearchRoleDescriptor;
-        if (!roleDescriptor) {
-          throw new Error(`No role descriptors found for ${roleName}`);
+        return loginWithServerlessRoleDescriptor(roleName);
+      }
+
+      try {
+        return await browserAuth.loginAs(roleName);
+      } catch (error) {
+        // Cloud SAML only has users listed in .ftr/role_users.json. Appex QA
+        // typically provisions admin/editor/viewer plus custom_role_worker_N,
+        // not every Security reserved role (e.g. endpoint_policy_manager).
+        if (!(config.isCloud && isCloudUserMissing(error))) {
+          throw error;
         }
-        log.debug(`Using "${roleName}" role to execute the test`);
-        return loginWithCustomRole(roleDescriptor);
-      } else {
-        return browserAuth.loginAs(roleName);
+        log.debug(
+          `No Cloud user for "${roleName}"; applying the serverless role descriptor as a custom role`
+        );
+        return loginWithServerlessRoleDescriptor(roleName);
       }
     };
 
