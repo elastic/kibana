@@ -5,12 +5,28 @@
  * 2.0.
  */
 
+/* eslint-disable no-bitwise, max-classes-per-file */
+// Protobuf encoding/decoding uses intentional bitwise operations throughout.
+// Two classes (SandboxApiClient + SandboxConnectionManager) are co-located by design.
+
 import { promisify } from 'util';
 import * as grpc from '@grpc/grpc-js';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
-import { seedSandbox } from './seed_sandbox';
-import type { ConnectorSource } from './connector_sources';
+import type { SandboxCallContext } from './tool_utils';
+
+export interface ConnectorCallbackRequest {
+  request_id: string;
+  connector_id: string;
+  sub_action: string;
+  sub_action_params: Buffer;
+}
+
+export interface ConnectorCallbackResult {
+  status: 'ok' | 'error';
+  data?: Buffer;
+  error_message?: string;
+}
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -169,6 +185,95 @@ function deserializeRunCommandResponse(buf: Buffer): RunCommandResult {
     }
   }
   return result;
+}
+
+// ConnectorCallbackResponse (field layout: 1=request_id str, 2=status str, 3=data bytes, 4=error_message str)
+function serializeConnectorCallbackResponse(
+  resp: ConnectorCallbackResult & { request_id: string }
+): Buffer {
+  return Buffer.concat([
+    encodeStringField(1, resp.request_id),
+    encodeStringField(2, resp.status),
+    resp.data ? encodeBytesField(3, resp.data) : Buffer.alloc(0),
+    encodeStringField(4, resp.error_message ?? ''),
+  ]);
+}
+
+// ConnectorCallbackRequest (field layout: 1=request_id str, 2=connector_id str, 3=sub_action str, 4=sub_action_params bytes)
+function deserializeConnectorCallbackRequest(buf: Buffer): ConnectorCallbackRequest {
+  const r: ConnectorCallbackRequest = {
+    request_id: '',
+    connector_id: '',
+    sub_action: '',
+    sub_action_params: Buffer.alloc(0),
+  };
+  let offset = 0;
+  while (offset < buf.length) {
+    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
+    offset += tb;
+    const field = tag >>> 3;
+    const wireType = tag & 0x7;
+    if (wireType === 2) {
+      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
+      offset += lb;
+      const payload = buf.slice(offset, offset + len);
+      offset += len;
+      if (field === 1) r.request_id = payload.toString('utf8');
+      else if (field === 2) r.connector_id = payload.toString('utf8');
+      else if (field === 3) r.sub_action = payload.toString('utf8');
+      else if (field === 4) r.sub_action_params = Buffer.from(payload);
+    } else if (wireType === 0) {
+      const { bytesRead: vb } = decodeVarint(buf, offset);
+      offset += vb;
+    } else if (wireType === 1) {
+      offset += 8;
+    } else if (wireType === 5) {
+      offset += 4;
+    }
+  }
+  return r;
+}
+
+// RunCommandClientMessage: oneof { RunCommandRequest command=1; ConnectorCallbackResponse callback_response=2; }
+// Takes already-serialized payload and wraps it in the outer oneof field
+function serializeRunCommandClientMessageCommand(commandPayload: Buffer): Buffer {
+  return encodeNestedMessage(1, commandPayload);
+}
+
+function serializeRunCommandClientMessageCallback(callbackPayload: Buffer): Buffer {
+  return encodeNestedMessage(2, callbackPayload);
+}
+
+type RunCommandServerMessageDecoded =
+  | { type: 'callback_request'; value: ConnectorCallbackRequest }
+  | { type: 'result'; value: RunCommandResult };
+
+// RunCommandServerMessage: oneof { ConnectorCallbackRequest callback_request=1; RunCommandResponse result=2; }
+function deserializeRunCommandServerMessage(buf: Buffer): RunCommandServerMessageDecoded {
+  let offset = 0;
+  while (offset < buf.length) {
+    const { value: tag, bytesRead: tb } = decodeVarint(buf, offset);
+    offset += tb;
+    const field = tag >>> 3;
+    const wireType = tag & 0x7;
+    if (wireType === 2) {
+      const { value: len, bytesRead: lb } = decodeVarint(buf, offset);
+      offset += lb;
+      const payload = buf.slice(offset, offset + len);
+      offset += len;
+      if (field === 1)
+        return { type: 'callback_request', value: deserializeConnectorCallbackRequest(payload) };
+      if (field === 2) return { type: 'result', value: deserializeRunCommandResponse(payload) };
+    } else if (wireType === 0) {
+      const { bytesRead: vb } = decodeVarint(buf, offset);
+      offset += vb;
+    } else if (wireType === 1) {
+      offset += 8;
+    } else if (wireType === 5) {
+      offset += 4;
+    }
+  }
+  throw new Error('RunCommandServerMessage: no recognized field found');
 }
 
 // ---------------------------------------------------------------------------
@@ -493,6 +598,16 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
     responseSerialize: (res: Buffer) => res,
     responseDeserialize: (buf: Buffer) => deserializeStateOperationResponse(buf),
   },
+  runCommandBidi: {
+    path: '/sandbox.SandboxService/RunCommandBidi',
+    requestStream: true,
+    responseStream: true,
+    // We write pre-serialized Buffers and read raw Buffers
+    requestSerialize: (req: Buffer): Buffer => req,
+    requestDeserialize: (buf: Buffer): Buffer => buf,
+    responseSerialize: (res: Buffer): Buffer => res,
+    responseDeserialize: (buf: Buffer): Buffer => buf,
+  },
 };
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
@@ -544,6 +659,81 @@ export class SandboxApiClient {
       },
       this.metadata(conversationId)
     );
+  }
+
+  runCommandBidi(
+    conversationId: string,
+    params: RunCommandParams,
+    onConnectorCallback: (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>
+  ): Promise<RunCommandResult> {
+    return new Promise((resolve, reject) => {
+      const stream: grpc.ClientDuplexStream<Buffer, Buffer> = (this.client as any).runCommandBidi(
+        this.metadata(conversationId)
+      );
+      let settled = false;
+
+      const settle = (fn: () => void): void => {
+        if (settled) return;
+        settled = true;
+        fn();
+      };
+
+      stream.on('data', (rawBuf: Buffer) => {
+        let msg: ReturnType<typeof deserializeRunCommandServerMessage>;
+        try {
+          msg = deserializeRunCommandServerMessage(rawBuf);
+        } catch (err) {
+          settle(() => reject(err));
+          stream.destroy();
+          return;
+        }
+
+        if (msg.type === 'result') {
+          settle(() => resolve(msg.value));
+          stream.end();
+          return;
+        }
+
+        // msg.type === 'callback_request'
+        const cb = msg.value;
+        void (async () => {
+          let callbackResult: ConnectorCallbackResult;
+          try {
+            callbackResult = await onConnectorCallback(cb);
+          } catch (err) {
+            callbackResult = { status: 'error', error_message: String(err) };
+          }
+          const responsePayload = serializeConnectorCallbackResponse({
+            request_id: cb.request_id,
+            ...callbackResult,
+          });
+          if (!stream.destroyed) {
+            stream.write(serializeRunCommandClientMessageCallback(responsePayload));
+          }
+        })().catch((err) => {
+          settle(() => reject(err));
+          stream.destroy();
+        });
+      });
+
+      stream.on('error', (err: grpc.ServiceError) => {
+        settle(() => reject(err));
+      });
+
+      stream.on('end', () => {
+        settle(() => reject(new Error('RunCommandBidi stream ended without a result')));
+      });
+
+      // Send the command first
+      const commandPayload = serializeRunCommandRequest({
+        command: params.command,
+        directory: params.directory ?? '',
+        env: params.env ?? {},
+        timeout_seconds: params.timeout_seconds ?? 0,
+        task_group_id: '',
+      });
+      stream.write(serializeRunCommandClientMessageCommand(commandPayload));
+    });
   }
 
   async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {
@@ -640,24 +830,37 @@ type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
 
 export class SandboxConnectionManager {
   private readonly logger: Logger;
-  private readonly apiClient: SandboxApiClient;
-  private readonly getConnectors?: ConnectorSource;
-  /** Tracks conversations that have been initialized (restore + seed). */
+  readonly apiClient: SandboxApiClient;
+  private readonly writeManifest?: (
+    conversationId: string,
+    callContext: SandboxCallContext
+  ) => Promise<void>;
+  private readonly createCallbackHandler?: (
+    callContext: SandboxCallContext
+  ) => (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>;
+  /** Tracks conversations that have been initialized (restore + manifest write). */
   private readonly initialized = new Map<string, Promise<void>>();
-  /** Called once per conversation so workspace can be restored before seeding. */
+  /** conversationId → JSON.stringify(allowedConnectorIds) for manifest refresh detection. */
+  private readonly lastAllowedIds = new Map<string, string>();
+  /** Called once per conversation so workspace can be restored before manifest write. */
   private restoreCallback?: (conversationId: string) => Promise<void>;
 
   constructor({
     config,
     logger,
-    getConnectors,
+    writeManifest,
+    createCallbackHandler,
   }: {
     config: SandboxConfig;
     logger: Logger;
-    getConnectors?: ConnectorSource;
+    writeManifest?: (conversationId: string, callContext: SandboxCallContext) => Promise<void>;
+    createCallbackHandler?: (
+      callContext: SandboxCallContext
+    ) => (req: ConnectorCallbackRequest) => Promise<ConnectorCallbackResult>;
   }) {
     this.logger = logger;
-    this.getConnectors = getConnectors;
+    this.writeManifest = writeManifest;
+    this.createCallbackHandler = createCallbackHandler;
     this.apiClient = new SandboxApiClient({
       host: config.sandbox_api_host,
       port: config.sandbox_api_port,
@@ -671,20 +874,28 @@ export class SandboxConnectionManager {
   async runCommand(
     conversationId: string,
     params: RunCommandParams,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<RunCommandResult> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
+    await this.maybeRefreshManifest(conversationId, callContext);
+    const handler =
+      this.createCallbackHandler?.(callContext) ??
+      (() =>
+        Promise.resolve({
+          status: 'error' as const,
+          error_message: 'Connector callbacks not configured',
+        }));
     return this.withUnavailableReset(conversationId, () =>
-      this.apiClient.runCommand(conversationId, params)
+      this.apiClient.runCommandBidi(conversationId, params, handler)
     );
   }
 
   async statFiles(
     conversationId: string,
     paths: string[],
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<FileMetadata[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.statFiles(conversationId, paths)
     );
@@ -693,9 +904,9 @@ export class SandboxConnectionManager {
   async readFiles(
     conversationId: string,
     requests: Array<{ path: string; maxReadBytes?: number }>,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<ReadFileResult[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.readFiles(conversationId, requests)
     );
@@ -704,9 +915,9 @@ export class SandboxConnectionManager {
   async writeFiles(
     conversationId: string,
     requests: Array<{ path: string; content: Buffer }>,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<WriteFileResult[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.writeFiles(conversationId, requests)
     );
@@ -715,9 +926,9 @@ export class SandboxConnectionManager {
   async mkdirs(
     conversationId: string,
     paths: string[],
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<boolean[]> {
-    await this.ensureInitialized(conversationId, request);
+    await this.ensureInitialized(conversationId, callContext);
     return this.withUnavailableReset(conversationId, () =>
       this.apiClient.mkdirs(conversationId, paths)
     );
@@ -744,7 +955,7 @@ export class SandboxConnectionManager {
   }
 
   /** If the sandbox returns UNAVAILABLE (pod self-exited), clear initialized so the
-   *  next call triggers a fresh restore + seed before re-allocating via sandbox-api. */
+   *  next call triggers a fresh restore + manifest write before re-allocating via sandbox-api. */
   private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
     try {
       return await fn();
@@ -752,6 +963,7 @@ export class SandboxConnectionManager {
       const code: number | undefined = err?.code;
       if (code === 14 /* UNAVAILABLE */) {
         this.initialized.delete(conversationId);
+        this.lastAllowedIds.delete(conversationId);
         this.logger.warn(
           `Sandbox UNAVAILABLE for conversation ${conversationId} — cleared init state for re-initialization on next call`
         );
@@ -760,11 +972,30 @@ export class SandboxConnectionManager {
     }
   }
 
-  private ensureInitialized(conversationId: string, request: KibanaRequest): Promise<void> {
+  private async maybeRefreshManifest(
+    conversationId: string,
+    callContext: SandboxCallContext
+  ): Promise<void> {
+    if (!this.writeManifest) return;
+    const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
+    const lastKey = this.lastAllowedIds.get(conversationId);
+    if (lastKey === currentKey) return;
+    this.lastAllowedIds.set(conversationId, currentKey);
+    await this.writeManifest(conversationId, callContext).catch((err) => {
+      this.logger.warn(
+        `Connector manifest refresh failed for conversation ${conversationId}: ${err.message}`
+      );
+    });
+  }
+
+  private ensureInitialized(
+    conversationId: string,
+    callContext: SandboxCallContext
+  ): Promise<void> {
     const existing = this.initialized.get(conversationId);
     if (existing) return existing;
 
-    const promise = this.initializeConversation(conversationId, request).catch((err) => {
+    const promise = this.initializeConversation(conversationId, callContext).catch((err) => {
       this.initialized.delete(conversationId);
       throw err;
     });
@@ -774,7 +1005,7 @@ export class SandboxConnectionManager {
 
   private async initializeConversation(
     conversationId: string,
-    request: KibanaRequest
+    callContext: SandboxCallContext
   ): Promise<void> {
     this.logger.debug(`Initializing sandbox for conversation ${conversationId}`);
 
@@ -784,15 +1015,13 @@ export class SandboxConnectionManager {
       });
     }
 
-    if (this.getConnectors) {
-      await seedSandbox({
-        conversationId,
-        apiClient: this.apiClient,
-        request,
-        getConnectors: this.getConnectors,
-        logger: this.logger,
-      }).catch((err) => {
-        this.logger.warn(`Sandbox seeding failed: ${err.message}`);
+    if (this.writeManifest) {
+      const currentKey = JSON.stringify([...callContext.allowedConnectorIds].sort());
+      this.lastAllowedIds.set(conversationId, currentKey);
+      await this.writeManifest(conversationId, callContext).catch((err) => {
+        this.logger.warn(
+          `Connector manifest write failed for conversation ${conversationId}: ${err.message}`
+        );
       });
     }
   }
@@ -800,5 +1029,6 @@ export class SandboxConnectionManager {
   close(): void {
     this.apiClient.close();
     this.initialized.clear();
+    this.lastAllowedIds.clear();
   }
 }

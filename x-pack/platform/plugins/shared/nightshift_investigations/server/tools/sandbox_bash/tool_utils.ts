@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest, IScopedClusterClient } from '@kbn/core/server';
+import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 
 export const getConversationId = (context: {
@@ -23,3 +25,19 @@ export const resolveAbsolutePath = (filePath: string): string => {
   if (filePath.startsWith('/') || filePath.startsWith('~')) return filePath;
   return `/workspace/${filePath}`;
 };
+
+export interface SandboxCallContext {
+  request: KibanaRequest;
+  allowedConnectorIds: readonly string[];
+  esClient: IScopedClusterClient;
+}
+
+export const getSandboxCallContext = (context: {
+  request: KibanaRequest;
+  agentConfiguration?: AgentConfiguration;
+  esClient: IScopedClusterClient;
+}): SandboxCallContext => ({
+  request: context.request,
+  allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
+  esClient: context.esClient,
+});

@@ -12,6 +12,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -37,7 +38,8 @@ import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
-import { getConversationId } from './tools/sandbox_bash/tool_utils';
+import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
+import { createConnectorCallbackHandler } from './tools/sandbox_bash/connector_callbacks';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -67,6 +69,7 @@ export class NightshiftInvestigationsPlugin
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
+  private actionsStart?: ActionsPluginStart;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -106,6 +109,23 @@ export class NightshiftInvestigationsPlugin
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: this.logger.get('sandbox_bash_tool'),
+          writeManifest: (conversationId, callContext) =>
+            writeConnectorManifest({
+              conversationId,
+              apiClient: connectionManager.apiClient,
+              callContext,
+              getActionsClient: this.actionsStart
+                ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
+                : undefined,
+              logger: this.logger.get('sandbox_bash_tool'),
+            }),
+          createCallbackHandler: (callContext) => (cb) =>
+            createConnectorCallbackHandler({
+              getActionsClient: this.actionsStart
+                ? (req) => this.actionsStart!.getActionsClientWithRequest(req)
+                : undefined,
+              logger: this.logger.get('sandbox_bash_tool'),
+            })(callContext, cb),
         });
         this.sandboxConnectionManager = connectionManager;
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
@@ -133,20 +153,13 @@ export class NightshiftInvestigationsPlugin
           createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
         );
 
-        const writeToolIds = new Set([
-          'nightshift_sandbox_bash',
-          'nightshift_sandbox_str_replace',
-          'nightshift_sandbox_write_file',
-        ]);
-
         plugins.agentBuilder.hooks.register({
           id: 'nightshift-sandbox-workspace-backup',
           hooks: {
-            [HookLifecycle.afterToolCall]: {
+            [HookLifecycle.afterAgent]: {
               mode: HookExecutionMode.nonBlocking,
               handler: (context) => {
-                if (!writeToolIds.has(context.toolId)) return;
-                const conversationId = getConversationId(context.toolHandlerContext);
+                const conversationId = context.conversationId;
                 if (!conversationId) return;
                 workspaceManager.backupWorkspace(conversationId).catch((err) => {
                   sandboxLogger
@@ -197,6 +210,7 @@ export class NightshiftInvestigationsPlugin
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
     this.savedObjects = coreStart.savedObjects;
+    this.actionsStart = plugins.actions;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

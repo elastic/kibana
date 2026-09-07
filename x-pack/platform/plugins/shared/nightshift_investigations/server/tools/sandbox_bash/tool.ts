@@ -8,9 +8,10 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition, RunContextStackEntry } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
+import { getConversationId, getSandboxCallContext } from './tool_utils';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -42,7 +43,7 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace.',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. Use /workspace/connectors.md to discover available connectors. Call connectors via `sandbox-cb --connector-id <id> --sub-action <name> --sub-action-params \'{"key":"val"}\'`.',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -55,12 +56,7 @@ export const createSandboxBashTool = ({
   handler: async (params, context) => {
     const { command, working_directory, env, timeout_seconds } = params;
 
-    // Resolve the conversation ID from the agent stack entry so each conversation
-    // gets its own isolated sandbox via the connection manager.
-    const conversationId = (context.runContext.stack as RunContextStackEntry[])
-      .filter((e) => e.type === 'agent')
-      .map((e) => (e as Extract<RunContextStackEntry, { type: 'agent' }>).conversationId)
-      .find(Boolean);
+    const conversationId = getConversationId(context);
 
     if (!conversationId) {
       return {
@@ -82,21 +78,15 @@ export const createSandboxBashTool = ({
         ...env,
       };
 
-      // Source connector credentials before every command. The sandbox gRPC server does not
-      // propagate arbitrary env vars to the shell process, so BASH_ENV doesn't work; prepending
-      // the source is the reliable alternative. 2>/dev/null suppresses errors on a new sandbox
-      // where .env hasn't been written yet.
-      const prefixedCommand = `source /workspace/.env 2>/dev/null || true; ${command}`;
-
       const result = await connectionManager.runCommand(
         conversationId,
         {
-          command: prefixedCommand,
+          command,
           directory: working_directory,
           env: mergedEnv,
           timeout_seconds,
         },
-        context.request
+        getSandboxCallContext(context)
       );
 
       const { stdout, stderr, exit_code, timed_out } = result;

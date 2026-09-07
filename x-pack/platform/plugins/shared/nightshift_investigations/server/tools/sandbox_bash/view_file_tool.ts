@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
-import { getConversationId, resolveAbsolutePath } from './tool_utils';
+import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
 export const SANDBOX_VIEW_FILE_TOOL_ID = 'nightshift_sandbox_view_file';
 
@@ -76,7 +76,11 @@ export const createSandboxViewFileTool = ({
     );
 
     try {
-      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath], context.request);
+      const [stat] = await connectionManager.statFiles(
+        conversationId,
+        [resolvedPath],
+        getSandboxCallContext(context)
+      );
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -105,7 +109,7 @@ export const createSandboxViewFileTool = ({
       const [readResult] = await connectionManager.readFiles(
         conversationId,
         [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
-        context.request
+        getSandboxCallContext(context)
       );
       if (!readResult.success) {
         return {

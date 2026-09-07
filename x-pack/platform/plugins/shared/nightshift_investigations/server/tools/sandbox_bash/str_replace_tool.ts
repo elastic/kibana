@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { SandboxConnectionManager } from './grpc_client';
-import { getConversationId, resolveAbsolutePath } from './tool_utils';
+import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
 
 export const SANDBOX_STR_REPLACE_TOOL_ID = 'nightshift_sandbox_str_replace';
 
@@ -71,7 +71,11 @@ export const createSandboxStrReplaceTool = ({
     logger.debug(`sandbox_str_replace: ${resolvedPath}`);
 
     try {
-      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath], context.request);
+      const [stat] = await connectionManager.statFiles(
+        conversationId,
+        [resolvedPath],
+        getSandboxCallContext(context)
+      );
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -100,7 +104,7 @@ export const createSandboxStrReplaceTool = ({
       const [readResult] = await connectionManager.readFiles(
         conversationId,
         [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
-        context.request
+        getSandboxCallContext(context)
       );
       if (!readResult.success) {
         return {
@@ -192,7 +196,7 @@ export const createSandboxStrReplaceTool = ({
       const writeResult = await connectionManager.writeFiles(
         conversationId,
         [{ path: resolvedPath, content: Buffer.from(updated, 'utf8') }],
-        context.request
+        getSandboxCallContext(context)
       );
       if (!writeResult[0]?.success) {
         return {
