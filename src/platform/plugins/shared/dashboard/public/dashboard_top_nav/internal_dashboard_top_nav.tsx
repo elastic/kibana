@@ -383,7 +383,7 @@ export function InternalDashboardTopNav({
       return false;
     }
     const disabled =
-      (allDataViews?.length ?? 0) > 0 && !allDataViews!.some((dv) => dv.isTimeBased());
+      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
