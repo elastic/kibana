@@ -43,11 +43,11 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 
 $$$kibana-275716$$$
 ::::{dropdown} Detection Engine rule response-action payloads now enforce nested size limits
-**Details**<br> Create, update, patch, preview, and import for Detection Engine rules now validate nested `response_actions` fields through one shared generated schema. The bounds include Osquery SQL and Endpoint comments at 30,000 characters, Osquery and run-script IDs at 256 characters, run-script input at 8,192 characters, process and ECS mapping fields at 2,000 characters, ECS mapping values at 30,000 characters, and Osquery query / ECS value arrays at 1,000 items. The top-level `response_actions` array is not capped. The same schema is used for stored rule reads and execution conversion.
+**Details**<br> Create, update, patch, preview, and import for Detection Engine rules now validate nested `response_actions` fields through one shared generated schema. New bounds include Osquery SQL and ECS mapping values at 30,000 characters, Osquery and run-script IDs at 256 characters, Osquery query metadata at 256 characters, run-script input at 8,192 characters, ECS mapping fields at 2,000 characters, and Endpoint action comments at 30,000 characters. The top-level `response_actions` array is not capped.
 
-**Impact**<br> Requests that exceed these nested limits are rejected. Pre-existing stored rules whose response-action values already exceed the new limits can fail shared read or execution conversion because those paths use the same bounded schema.
+**Impact**<br> Requests that exceed these nested string limits are rejected. Stored-rule execution and validated response reads use the same bounded schema, so stored values over these limits can fail those conversions. Legacy Detection Engine find and export helpers that bypass response-action parsing are not covered by this validation.
 
-**Action**<br> Keep rule response-action payloads within the documented limits before create, update, patch, preview, or import. If a stored rule already exceeds a limit, reduce the stored values so read and execution conversion can succeed.
+**Action**<br> Keep rule response-action string values within the documented limits before create, update, patch, preview, or import. If a stored rule exceeds a limit, reduce the stored values before using paths that validate response actions.
 
 View [#275716]({{kib-pull}}275716).
 ::::

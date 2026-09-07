@@ -28,7 +28,7 @@ export const EcsMapping = lazySchema(() =>
   z.object({}).catchall(
     z.object({
       field: z.string().max(2000).optional(),
-      value: z.union([z.string().max(30000), z.array(z.string().max(30000)).max(1000)]).optional(),
+      value: z.union([z.string().max(30000), z.array(z.string().max(30000))]).optional(),
     })
   )
 );
@@ -63,7 +63,7 @@ export const OsqueryParams = lazySchema(() =>
      */
     query: z.string().max(30000).optional(),
     ecs_mapping: EcsMapping.optional(),
-    queries: z.array(OsqueryQuery).max(1000).optional(),
+    queries: z.array(OsqueryQuery).optional(),
     /**
      * To specify a query pack, use the packId field. Example: "packId": "processes_elastic"
      */
@@ -84,7 +84,7 @@ export const OsqueryParamsCamelCase = lazySchema(() =>
   z.object({
     query: z.string().max(30000).optional(),
     ecsMapping: EcsMapping.optional(),
-    queries: z.array(OsqueryQuery).max(1000).optional(),
+    queries: z.array(OsqueryQuery).optional(),
     packId: z.string().max(256).optional(),
     savedQueryId: z.string().max(256).optional(),
     timeout: z.number().optional(),

@@ -26,7 +26,6 @@ components:
               - type: string
                 maxLength: 30000
               - type: array
-                maxItems: 1000
                 items:
                   type: string
                   maxLength: 30000
@@ -70,7 +69,6 @@ components:
           $ref: '#/components/schemas/EcsMapping'
         queries:
           type: array
-          maxItems: 1000
           items:
             $ref: '#/components/schemas/OsqueryQuery'
         pack_id:
@@ -95,7 +93,6 @@ components:
           $ref: '#/components/schemas/EcsMapping'
         queries:
           type: array
-          maxItems: 1000
           items:
             $ref: '#/components/schemas/OsqueryQuery'
         packId:

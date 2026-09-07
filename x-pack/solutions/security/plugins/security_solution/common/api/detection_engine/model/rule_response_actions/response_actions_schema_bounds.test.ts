@@ -21,7 +21,6 @@ import { getRulesSchemaMock } from '../rule_schema/rule_response_schema.mock';
 import { ResponseAction, RuleResponseAction } from './response_actions.gen';
 
 const OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH = 30_000;
-const OSQUERY_RESPONSE_ACTION_QUERIES_MAX_ITEMS = 1_000;
 const ENDPOINT_RESPONSE_ACTION_COMMENT_MAX_LENGTH = 30_000;
 const PROCESS_CONFIG_FIELD_MAX_LENGTH = 2_000;
 const RUN_SCRIPT_ID_MAX_LENGTH = 256;
@@ -29,7 +28,6 @@ const RUN_SCRIPT_INPUT_MAX_LENGTH = 8_192;
 const OSQUERY_ID_LIKE_MAX_LENGTH = 256;
 const ECS_MAPPING_FIELD_MAX_LENGTH = 2_000;
 const ECS_MAPPING_VALUE_MAX_LENGTH = 30_000;
-const ECS_MAPPING_VALUE_MAX_ITEMS = 1_000;
 const OSQUERY_QUERY_OVER_LIMIT_FIELD_PATH = 'response_actions.0.params.query';
 
 const exactLengthString = (length: number): string => 'a'.repeat(length);
@@ -92,17 +90,19 @@ describe('response action schema bounds', () => {
         query: exactLengthString(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH),
         pack_id: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
         saved_query_id: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
-        queries: Array.from({ length: OSQUERY_RESPONSE_ACTION_QUERIES_MAX_ITEMS }, (_, index) => ({
-          id: `q-${index}`,
-          query: 'select 1;',
-        })),
+        queries: [
+          {
+            id: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
+            query: exactLengthString(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH),
+          },
+        ],
         ecs_mapping: {
           'process.pid': {
             field: exactLengthString(ECS_MAPPING_FIELD_MAX_LENGTH),
             value: exactLengthString(ECS_MAPPING_VALUE_MAX_LENGTH),
           },
           'process.args': {
-            value: Array.from({ length: ECS_MAPPING_VALUE_MAX_ITEMS }, () => 'v'),
+            value: [exactLengthString(ECS_MAPPING_VALUE_MAX_LENGTH)],
           },
         },
       },
@@ -136,10 +136,12 @@ describe('response action schema bounds', () => {
         query: exactLengthString(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH),
         packId: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
         savedQueryId: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
-        queries: Array.from({ length: OSQUERY_RESPONSE_ACTION_QUERIES_MAX_ITEMS }, (_, index) => ({
-          id: `q-${index}`,
-          query: 'select 1;',
-        })),
+        queries: [
+          {
+            id: exactLengthString(OSQUERY_ID_LIKE_MAX_LENGTH),
+            query: exactLengthString(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH),
+          },
+        ],
       },
     };
 
@@ -166,19 +168,6 @@ describe('response action schema bounds', () => {
           params: { query: exactLengthString(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH + 1) },
         },
         limitText: String(OSQUERY_RESPONSE_ACTION_QUERY_MAX_LENGTH),
-      },
-      {
-        schema: ResponseAction,
-        value: {
-          action_type_id: '.osquery',
-          params: {
-            queries: Array.from(
-              { length: OSQUERY_RESPONSE_ACTION_QUERIES_MAX_ITEMS + 1 },
-              (_, index) => ({ id: `q-${index}`, query: 'select 1;' })
-            ),
-          },
-        },
-        limitText: String(OSQUERY_RESPONSE_ACTION_QUERIES_MAX_ITEMS),
       },
       {
         schema: ResponseAction,
@@ -223,20 +212,6 @@ describe('response action schema bounds', () => {
           },
         },
         limitText: String(ECS_MAPPING_VALUE_MAX_LENGTH),
-      },
-      {
-        schema: ResponseAction,
-        value: {
-          action_type_id: '.osquery',
-          params: {
-            ecs_mapping: {
-              'process.args': {
-                value: Array.from({ length: ECS_MAPPING_VALUE_MAX_ITEMS + 1 }, () => 'v'),
-              },
-            },
-          },
-        },
-        limitText: String(ECS_MAPPING_VALUE_MAX_ITEMS),
       },
       {
         schema: ResponseAction,

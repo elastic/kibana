@@ -131584,7 +131584,6 @@ components:
               - items:
                   maxLength: 30000
                   type: string
-                maxItems: 1000
                 type: array
       description: 'Map Osquery results columns or static values to Elastic Common Schema (ECS) fields. Example: "ecs_mapping": {"process.pid": {"field": "pid"}}'
       type: object
@@ -133910,7 +133909,6 @@ components:
         queries:
           items:
             $ref: '#/components/schemas/Security_Detections_API_OsqueryQuery'
-          maxItems: 1000
           type: array
         query:
           description: 'To run a single query, use the query field and enter a SQL query. Example: "query": "SELECT * FROM processes;"'
