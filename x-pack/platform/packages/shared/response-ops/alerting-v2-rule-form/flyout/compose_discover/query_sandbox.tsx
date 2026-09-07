@@ -42,6 +42,7 @@ import { CpsPicker } from './cps_picker';
 import { useResolveTimeField } from './use_resolve_time_field';
 import { extractFromSourceQuery } from './extract_from_source_query';
 import { MIN_EDITOR_HEIGHT, MAX_EDITOR_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
+import { addPrettifyAction } from './esql_prettify_action';
 import { useQuerySandboxStyles } from './query_sandbox.styles';
 import { useEditorHeightResize } from './use_editor_height_resize';
 
@@ -296,6 +297,16 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     [rows]
   );
 
+  const handleSingleEditorMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (!isReadOnly) {
+        addPrettifyAction(editor);
+      }
+      onSingleEditorMount?.(editor);
+    },
+    [isReadOnly, onSingleEditorMount]
+  );
+
   const editorContent =
     tabProps && hasTabs ? (
       <ComposeDiscoverTabs
@@ -325,7 +336,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           readOnly: isReadOnly,
           domReadOnly: isReadOnly,
         }}
-        editorDidMount={onSingleEditorMount}
+        editorDidMount={handleSingleEditorMount}
       />
     );
 

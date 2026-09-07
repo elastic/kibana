@@ -13,6 +13,7 @@ import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { RuleQuery } from '../../form/types';
 import type { QueryTab } from './types';
 import { MIN_EDITOR_HEIGHT, ESQL_EDITOR_LINE_HEIGHT, ESQL_CODE_EDITOR_OPTIONS } from './constants';
+import { addPrettifyAction } from './esql_prettify_action';
 
 type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 
@@ -127,6 +128,16 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
     [lineNumberOffset, readOnly, flushTop]
   );
 
+  const handleEditorMount = useCallback(
+    (editor: IStandaloneCodeEditor) => {
+      if (!readOnly) {
+        addPrettifyAction(editor);
+      }
+      onEditorMount?.(editor);
+    },
+    [onEditorMount, readOnly]
+  );
+
   return (
     <CodeEditor
       languageId={ESQL_LANG_ID}
@@ -134,7 +145,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
       onChange={onChange}
       height="100%"
       options={options}
-      editorDidMount={onEditorMount}
+      editorDidMount={handleEditorMount}
       dataTestSubj={dataTestSubj}
     />
   );
