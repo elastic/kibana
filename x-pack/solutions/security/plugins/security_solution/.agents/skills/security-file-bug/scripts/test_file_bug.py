@@ -371,5 +371,34 @@ class FileBugCliTest(unittest.TestCase):
         self.assertIn("**Steps to reproduce:**", json.loads(result.stdout)["body"])
 
 
+SKILL = Path(__file__).resolve().parents[1] / "SKILL.md"
+
+
+class SkillProtocolTest(unittest.TestCase):
+    def setUp(self):
+        self.text = SKILL.read_text(encoding="utf-8")
+
+    def test_frontmatter(self):
+        self.assertIn("name: security-file-bug", self.text)
+        self.assertIn("disable-model-invocation: true", self.text)
+
+    def test_human_gate(self):
+        self.assertIn("only the findings a human names", self.text.lower().replace("'", ""))
+        # allow either phrasing:
+        self.assertTrue(
+            "do not file the report" in self.text.lower()
+            or "never file the whole report" in self.text.lower()
+        )
+        self.assertNotIn("shall I file these", self.text)
+
+    def test_confirm_before_write(self):
+        self.assertIn("explicit yes", self.text.lower())
+        self.assertIn("file-bug.py", self.text)
+
+    def test_duplicate_table(self):
+        self.assertIn("reopen_comment", self.text)
+        self.assertIn("elastic/kibana", self.text)
+
+
 if __name__ == "__main__":
     unittest.main()
