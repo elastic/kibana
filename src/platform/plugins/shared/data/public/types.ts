@@ -20,10 +20,12 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import type { DateRangePickerPresetsService } from '@kbn/date-range-picker-presets-common';
 import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import type { QuerySetup, QueryStart } from './query';
-import type { DataViewsContract } from './data_views';
 import type { NowProviderPublicContract } from './now_provider';
 import type {
   MultiValueClickDataContext,
@@ -47,6 +49,7 @@ export interface DataStartDependencies {
   inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;
+  cps?: CPSPluginStart;
 }
 
 /**
@@ -89,12 +92,6 @@ export interface DataPublicPluginStart {
   datatableUtilities: DatatableUtilitiesService;
 
   /**
-   * index patterns service
-   * {@link DataViewsContract}
-   * @deprecated Use dataViews service instead.  All index pattern interfaces were renamed.
-   */
-  indexPatterns: DataViewsContract;
-  /**
    * search service
    * {@link ISearchStart}
    */
@@ -108,6 +105,13 @@ export interface DataPublicPluginStart {
    * {@link QueryStart}
    */
   query: QueryStart;
+
+  /**
+   * date range picker presets service — reads and persists per-user date range
+   * presets (space-scoped `userStorage`), defaulting to the configured quick ranges.
+   * {@link DateRangePickerPresetsService}
+   */
+  dateRangePickerPresets: DateRangePickerPresetsService;
 
   nowProvider: NowProviderPublicContract;
 }

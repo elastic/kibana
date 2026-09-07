@@ -6,6 +6,6 @@
  */
 
 import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import type { TheHiveConfig, TheHiveSecrets, ExecutorParams } from '../../../common/thehive/types';
+import type { TheHiveConfig, TheHiveSecrets, ExecutorParams } from '@kbn/connector-schemas/thehive';
 
 export type TheHiveConnector = ConnectorTypeModel<TheHiveConfig, TheHiveSecrets, ExecutorParams>;

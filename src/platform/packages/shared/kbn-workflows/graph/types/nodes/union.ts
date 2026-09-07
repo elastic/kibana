@@ -7,46 +7,80 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import {
   AtomicGraphNodeSchema,
-  HttpGraphNodeSchema,
-  WaitGraphNodeSchema,
+  DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
+  WaitGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
 } from './base';
 import {
-  EnterIfNodeSchema,
-  ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
+  EnterIfNodeSchema,
   ExitConditionBranchNodeSchema,
+  ExitIfNodeSchema,
 } from './branching_nodes';
-import { EnterForeachNodeSchema, ExitForeachNodeSchema } from './loop_nodes';
+import { LoopBreakNodeSchema, LoopContinueNodeSchema } from './flow_control_nodes';
 import {
-  EnterRetryNodeSchema,
-  ExitRetryNodeSchema,
+  EnterForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitForeachNodeSchema,
+  ExitWhileNodeSchema,
+} from './loop_nodes';
+import {
   EnterContinueNodeSchema,
-  ExitContinueNodeSchema,
-  EnterTryBlockNodeSchema,
-  ExitTryBlockNodeSchema,
-  EnterNormalPathNodeSchema,
-  ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
+  EnterNormalPathNodeSchema,
+  EnterRetryNodeSchema,
+  EnterTimeoutZoneNodeSchema,
+  EnterTryBlockNodeSchema,
+  ExitContinueNodeSchema,
   ExitFallbackPathNodeSchema,
+  ExitNormalPathNodeSchema,
+  ExitRetryNodeSchema,
+  ExitTimeoutZoneNodeSchema,
+  ExitTryBlockNodeSchema,
+  OnFailureNodeSchema,
+  StepLevelOnFailureNodeSchema,
+  WorkflowLevelOnFailureNodeSchema,
 } from './on_failure_nodes';
+import { EnterParallelNodeSchema, ExitParallelNodeSchema } from './parallel_nodes';
+import {
+  EnterCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  EnterSwitchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+} from './switch_nodes';
 
-const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
+const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   AtomicGraphNodeSchema,
+  DataSetGraphNodeSchema,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNodeSchema,
-  HttpGraphNodeSchema,
   WaitGraphNodeSchema,
+  WaitForInputGraphNodeSchema,
+  WaitForApprovalGraphNodeSchema,
+  WorkflowExecuteGraphNodeSchema,
+  WorkflowExecuteAsyncGraphNodeSchema,
+  WorkflowOutputGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
   EnterConditionBranchNodeSchema,
   ExitConditionBranchNodeSchema,
   EnterForeachNodeSchema,
   ExitForeachNodeSchema,
+  EnterWhileNodeSchema,
+  ExitWhileNodeSchema,
+  EnterParallelNodeSchema,
+  ExitParallelNodeSchema,
   EnterRetryNodeSchema,
   ExitRetryNodeSchema,
   EnterContinueNodeSchema,
@@ -57,6 +91,19 @@ const UnionExecutionGraphNodeSchema = z.discriminatedUnion('type', [
   ExitNormalPathNodeSchema,
   EnterFallbackPathNodeSchema,
   ExitFallbackPathNodeSchema,
+  EnterTimeoutZoneNodeSchema,
+  ExitTimeoutZoneNodeSchema,
+  OnFailureNodeSchema,
+  StepLevelOnFailureNodeSchema,
+  WorkflowLevelOnFailureNodeSchema,
+  EnterSwitchNodeSchema,
+  EnterCaseBranchNodeSchema,
+  ExitCaseBranchNodeSchema,
+  EnterDefaultBranchNodeSchema,
+  ExitDefaultBranchNodeSchema,
+  ExitSwitchNodeSchema,
+  LoopBreakNodeSchema,
+  LoopContinueNodeSchema,
 ]);
 
-export type UnionExecutionGraphNode = z.infer<typeof UnionExecutionGraphNodeSchema>;
+export type GraphNodeUnion = z.infer<typeof GraphNodeUnionSchema>;

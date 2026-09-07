@@ -25,6 +25,7 @@ jest.mock('../app_context', () => {
       getConfig: () => {},
       getMessageSigningService: jest.fn(),
       getExperimentalFeatures: jest.fn().mockResolvedValue({}),
+      getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
     },
   };
 });
@@ -180,7 +181,7 @@ describe('update_agent_tags', () => {
     expect(errorResults.operations[1].error).toEqual('error reason');
   });
 
-  it('should throw error on version conflicts', async () => {
+  it('should retry error on version conflicts', async () => {
     esClient.updateByQuery.mockReset();
     esClient.updateByQuery.mockResolvedValue({
       failures: [],
@@ -190,7 +191,7 @@ describe('update_agent_tags', () => {
 
     await expect(
       updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], [])
-    ).rejects.toThrowError('Version conflict of 100 agents');
+    ).rejects.toThrow('Version conflict of 100 agents');
   });
 
   it('should write out error results on last retry with version conflicts', async () => {
@@ -216,7 +217,7 @@ describe('update_agent_tags', () => {
           retryCount: MAX_RETRY_COUNT,
         }
       )
-    ).rejects.toThrowError('Version conflict of 100 agents');
+    ).rejects.toThrow('Version conflict of 100 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
     expect(agentAction?.document.agents.length).toEqual(100);
@@ -248,7 +249,7 @@ describe('update_agent_tags', () => {
           retryCount: MAX_RETRY_COUNT,
         }
       )
-    ).rejects.toThrowError('Version conflict of 1 agents');
+    ).rejects.toThrow('Version conflict of 1 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
     expect(agentAction?.document.agents.length).toEqual(3);
@@ -442,7 +443,7 @@ describe('update_agent_tags', () => {
         expect.objectContaining({
           batchSize: 10000,
           kuery:
-            '((namespaces:"default" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
+            '((namespaces:"default" or namespaces:"*" or not namespaces:*)) AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),
@@ -466,7 +467,8 @@ describe('update_agent_tags', () => {
         expect.anything(),
         expect.objectContaining({
           batchSize: 10000,
-          kuery: '(namespaces:(myspace)) AND (status:healthy OR status:offline) AND (tags:remove)',
+          kuery:
+            '(namespaces:(myspace) or namespaces:"*") AND (status:healthy OR status:offline) AND (tags:remove)',
           tagsToAdd: [],
           tagsToRemove: ['remove'],
         }),

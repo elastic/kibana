@@ -17,6 +17,7 @@ import {
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
   TrustedDeviceValidator,
+  CustomYaraSignaturesValidator,
 } from '../validators';
 
 export const getExceptionsPreExportHandler = (
@@ -74,17 +75,22 @@ export const getExceptionsPreExportHandler = (
       await new BlocklistValidator(endpointAppContextService, request).validatePreExport();
     }
 
+    // Validate YARA signatures
+    if (CustomYaraSignaturesValidator.isCustomYaraSignature({ listId })) {
+      isEndpointArtifact = true;
+      await new CustomYaraSignaturesValidator(
+        endpointAppContextService,
+        request
+      ).validatePreExport();
+    }
+
     // Validate Endpoint Exceptions
     if (EndpointExceptionsValidator.isEndpointException({ listId })) {
       isEndpointArtifact = true;
       await new EndpointExceptionsValidator(endpointAppContextService, request).validatePreExport();
     }
 
-    // If space awareness is enabled, add space filter to export options
-    if (
-      isEndpointArtifact &&
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!request) {
         throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
       }

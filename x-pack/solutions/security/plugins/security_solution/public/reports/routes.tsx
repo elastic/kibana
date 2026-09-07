@@ -6,22 +6,24 @@
  */
 
 import React from 'react';
-import { SecurityPageName, AI_VALUE_PATH } from '../../common/constants';
+import { AI_VALUE_PATH } from '../../common/constants';
 import type { SecuritySubPluginRoutes } from '../app/types';
-
-import { AIValue } from './pages/ai_value';
+import { SecurityPageName } from '../app/types';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
+import { AIValue } from './pages/ai_value';
 
-const AIValueRoutes = () => (
+export const AIValueRoutes = () => (
   <PluginTemplateWrapper>
-    <AIValue />
+    <SecurityRoutePageWrapper pageName={SecurityPageName.aiValue}>
+      <AIValue />
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [
   {
     path: AI_VALUE_PATH,
-    component: withSecurityRoutePageWrapper(AIValueRoutes, SecurityPageName.aiValue),
+    component: AIValueRoutes,
   },
 ];

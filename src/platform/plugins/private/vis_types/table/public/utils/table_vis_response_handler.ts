@@ -37,7 +37,7 @@ export function tableVisResponseHandler(input: Datatable, visConfig: TableVisCon
       if (!Object.hasOwn(splitMap, splitValue)) {
         splitMap[splitValue] = splitIndex++;
         const tableGroup: TableGroup = {
-          title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
+          title: `${splitColumnFormatter.convertToText(splitValue)}: ${splitColumn.name}`,
           table: {
             columns: input.columns,
             rows: [],

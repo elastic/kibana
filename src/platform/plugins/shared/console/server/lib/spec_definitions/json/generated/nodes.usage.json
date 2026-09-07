@@ -11,6 +11,13 @@
         "0"
       ]
     },
+    "url_components": {
+      "metric": [
+        "_all",
+        "rest_actions",
+        "aggregations"
+      ]
+    },
     "methods": [
       "GET"
     ],

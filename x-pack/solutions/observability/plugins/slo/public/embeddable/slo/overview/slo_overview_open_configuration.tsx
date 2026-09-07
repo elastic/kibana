@@ -7,21 +7,24 @@
 
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
-import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
 import type { SLOPublicPluginsStart } from '../../..';
 import type { SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
+import type {
+  GroupOverviewCustomState,
+  SingleOverviewCustomState,
+} from '../../../../common/embeddables/overview/types';
 
 export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginsStart: SLOPublicPluginsStart,
   sloClient: SLORepositoryClient,
-  initialState?: GroupSloCustomInput
-): Promise<GroupSloCustomInput | SingleSloCustomInput> {
+  initialState?: GroupOverviewCustomState
+): Promise<GroupOverviewCustomState | SingleOverviewCustomState> {
   const { overlays } = coreStart;
 
   const queryClient = new QueryClient();
@@ -54,7 +57,7 @@ export async function openSloConfiguration(
                 <Suspense fallback={<EuiSkeletonText />}>
                   <LazySloConfiguration
                     initialInput={initialState}
-                    onCreate={(update: GroupSloCustomInput | SingleSloCustomInput) => {
+                    onCreate={(update: GroupOverviewCustomState | SingleOverviewCustomState) => {
                       flyoutSession.close();
                       resolve(update);
                     }}

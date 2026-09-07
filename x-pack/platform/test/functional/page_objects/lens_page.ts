@@ -69,6 +69,34 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
+     * Navigate directly to the editor for a saved Lens visualization by id and
+     * wait for the rendered chart to settle. Prefer this over going through
+     * the visualize listing page (search + click) when the saved object id is
+     * known (e.g. fixture-loaded visualizations).
+     *
+     * @param id - the saved object id of the Lens visualization
+     * @param visDataTestSubj - the chart container `data-test-subj`.
+     *   example: `xyVisChart` (line/bar/area), `partitionVisChart`
+     *   (pie/treemap/donut), `mtrVis` (new metric), `legacyMtrVis` (legacy
+     *   metric), `heatmapChart`, `lnsVisualizationContainer` (datatable).
+     */
+    async openEditor(id: string, visDataTestSubj: string) {
+      await common.navigateToApp('lens', { hash: `#/edit/${id}` });
+      await this.waitForVisualization(visDataTestSubj);
+    },
+
+    /**
+     * Navigate directly to a new Lens editor, skipping the visualize
+     * listing page and the visualization-type selection modal. Prefer this
+     * over `visualize.navigateToNewVisualization() + visualize.clickVisType('lens')`
+     * when the test builds a chart from scratch.
+     */
+    async openNewEditor() {
+      await common.navigateToApp('lens');
+      await testSubjects.existOrFail('lnsApp', { timeout: 10000 });
+    },
+
+    /**
      * Move the date filter to the specified time range, defaults to
      * a range that has data in our dataset.
      */
@@ -113,13 +141,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Clicks a visualize list item's title (in the visualize app).
+     * Clicks a visualize list item's title (visualize app or dashboard Visualizations tab).
      *
      * @param title - the title of the list item to be clicked
      */
     clickVisualizeListItemTitle(title: string) {
       return retry.try(async () => {
-        await testSubjects.click(`visListingTitleLink-${title}`);
+        const link = (await testSubjects.exists(`visualizationListingListingTitleLink-${title}`))
+          ? `visualizationListingListingTitleLink-${title}`
+          : (await testSubjects.exists(`visListingTitleLink-${title}`))
+          ? `visListingTitleLink-${title}`
+          : `visualizationListingTitleLink-${title}`;
+        await testSubjects.click(link);
         await this.isLensPageOrFail();
       });
     },
@@ -195,10 +228,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       disableEmptyRows?: boolean;
     }) {
       await retry.try(async () => {
-        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+        if (
+          !(await testSubjects.exists('lns-indexPattern-dimensionContainerClose', {
+            timeout: 1000,
+          }))
+        ) {
           await testSubjects.click(opts.dimension);
         }
-        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose', {
+          timeout: 1000,
+        });
       });
 
       if (opts.operation === 'formula') {
@@ -206,8 +245,19 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       } else {
         await this.selectOperation(opts.operation, opts.isPreviousIncompatible);
       }
-      if (opts.field) {
-        await this.selectOptionFromComboBox('indexPattern-dimension-field', opts.field);
+      const field = opts.field;
+      if (field) {
+        await this.selectOptionFromComboBox('indexPattern-dimension-field', field);
+        // Close too early discards the operation→field transition. Do not wait on the
+        // combobox input: setElement types `field` as a filter before the option is
+        // clicked. data-selected-field is the committed option display name and
+        // updates only after insertOrReplaceColumn. Independent of aria-invalid
+        // (incompleteOperation / CCS). Compare exactly — labels are case-sensitive.
+        await retry.waitFor('field selection to commit', async () => {
+          const fieldCombo = await testSubjects.find('indexPattern-dimension-field');
+          const committedLabel = (await fieldCombo.getAttribute('data-selected-field')) ?? '';
+          return committedLabel === field;
+        });
       }
 
       if (opts.formula) {
@@ -381,7 +431,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       log.debug(`Press ${metaKey} with keyboard`);
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
-        await find.existsByCssSelector(
+        await find.byCssSelector(
           `.domDroppable__extraTarget > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDroppable--hover`
         );
       });
@@ -486,12 +536,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async waitForLensDragDropToFinish() {
-      await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
-        if (exists) {
-          throw new Error('UI still in drag/drop mode');
-        }
-      });
+      await find.waitForDeletedByCssSelector('.domDragDrop-isActiveGroup');
     },
 
     /**
@@ -579,10 +624,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
         const dimensionEditor = (
-          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`, 1000)
         )[dimensionIndex];
         await dimensionEditor.click();
       });
+      await retry.waitFor('dimension editor flyout to open', async () =>
+        this.isDimensionEditorOpen()
+      );
     },
 
     /**
@@ -590,6 +638,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async performLayerAction(testSubject: string, layerIndex = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[layerIndex]) {
+          await tabs[layerIndex].moveMouseTo();
+        }
         await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
         await testSubjects.click(testSubject);
       });
@@ -602,7 +655,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await browser.execute(() => {
+          const btn = document.querySelector(
+            '[data-test-subj="lns-indexPattern-dimensionContainerClose"]'
+          ) as HTMLElement;
+          if (btn) btn.click();
+        });
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
@@ -612,10 +670,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         ? `lns-indexPatternDimension-${operation} incompatible`
         : `lns-indexPatternDimension-${operation}`;
       async function getAriaPressed() {
-        const operationSelectorContainer = await testSubjects.find(operationSelector);
-        await testSubjects.click(operationSelector);
-        const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
-        return ariaPressed;
+        await testSubjects.click(`${operationSelector}-label`);
+        const operationButton = await testSubjects.find(operationSelector);
+        return await operationButton.getAttribute('aria-pressed');
       }
 
       // adding retry here as it seems that there is a flakiness of the operation click
@@ -779,12 +836,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
     },
 
     /**
@@ -828,7 +880,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async editDimensionLabel(label: string) {
-      await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+      // NameInput sits in the Appearance block at the bottom of the flyout and
+      // remounts when the column label commits (DebouncedInput key). Wait for it
+      // to exist, then type+assert in one retry so a remount cannot leave the
+      // wait looking at a detached node.
+      await retry.waitFor('name-input to exist', async () =>
+        testSubjects.exists('name-input', { timeout: 1000 })
+      );
+      await retry.try(async () => {
+        await testSubjects.setValue('name-input', label, { clearWithKeyboard: true });
+        expect(
+          await testSubjects.getAttribute('name-input', 'value', {
+            findTimeout: 2000,
+            tryTimeout: 5000,
+          })
+        ).to.eql(label);
+      });
     },
     async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
       await this.selectOptionFromComboBox('indexPattern-dimension-format', format);
@@ -846,27 +913,44 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await common.sleep(1000); // give time for debounced components to rerender
     },
-    hasVisualOptionsButton() {
-      return testSubjects.exists('lnsVisualOptionsButton');
+    async hasStyleToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="style"]');
     },
-    async openVisualOptions() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
-        return;
+    async hasLegendToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="legend"]');
+    },
+    async openStyleSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      await find.clickByCssSelector('button[data-test-subj="style"]');
       await retry.try(async () => {
-        await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsPopover_title');
+        await find.byCssSelector('#lnsDimensionContainerTitle');
       });
     },
-    async openTextOptions() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
-        return;
+
+    async openLegendSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      if (await this.hasLegendToolbarButton()) {
+        const button = await find.byCssSelector('button[data-test-subj="legend"]');
+        await button.click();
+      }
+    },
+    async closeFlyoutWithBackButton() {
       await retry.try(async () => {
-        await testSubjects.click('lnsTextOptionsButton');
-        await testSubjects.exists('lnsTextOptionsPopover_title');
+        if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
+          await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+          await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        }
       });
     },
+
     async retrySetValue(
       input: string,
       value: string,
@@ -943,13 +1027,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      await this.ensureLayerTabIsActive(layerIndex);
+
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
-        await allChartSwitches[layerIndex].click();
-        await testSubjects.existOrFail('lnsChartSwitchList');
+        expect(allChartSwitches.length).to.be(1);
+        await allChartSwitches[0].click();
+        await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 5000 });
       });
     },
 
@@ -958,43 +1045,53 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getSelectedAxisSide() {
-      const axisSideGroups = await find.allByCssSelector(
-        `[data-test-subj^="lnsXY_axisSide_groups_"]`
-      );
-      for (const axisSideGroup of axisSideGroups) {
-        const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
-        const isSelected = ariaPressed === 'true';
-        if (isSelected) {
-          return axisSideGroup?.getVisibleText();
+      return retry.try(async () => {
+        const axisSideGroups = await find.allByCssSelector(
+          `[data-test-subj^="lnsXY_axisSide_groups_"]`
+        );
+        for (const axisSideGroup of axisSideGroups) {
+          const ariaPressed = await axisSideGroup.getAttribute('aria-pressed');
+          const isSelected = ariaPressed === 'true';
+          if (isSelected) {
+            const text = await axisSideGroup.getVisibleText();
+            if (!text) {
+              throw new Error('Axis side button text not yet rendered');
+            }
+            return text;
+          }
         }
-      }
+        throw new Error('No axis side button is selected');
+      });
     },
 
     async getDonutHoleSize() {
-      await this.openVisualOptions();
+      await this.openStyleSettingsFlyout();
+
       const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
       return comboboxOptions[0];
     },
 
     async setDonutHoleSize(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsEmptySizeRatioOption');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsEmptySizeRatioOption', value);
+      await this.closeFlyoutWithBackButton();
     },
 
     async setGaugeShape(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsToolbarGaugeAngleType');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+      await this.closeFlyoutWithBackButton();
+    },
+
+    async setGaugeOrientation(value: 'horizontal' | 'vertical') {
+      await this.openStyleSettingsFlyout();
+      await testSubjects.click(`lns_gaugeOrientation_${value}Bullet`);
+      await this.closeFlyoutWithBackButton();
     },
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
-        await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
         return await testSubjects.exists('lns_barOrientation');
       });
       const orientationButtons = await find.allByCssSelector(
@@ -1069,19 +1166,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the number of layers visible in the chart configuration
-     */
-    async getLayerCount() {
-      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
-    },
-
-    /**
      * Returns the layer vis type from chart switch label
      */
-    async getLayerType(index = 0) {
-      return (await find.allByCssSelector(`[data-test-subj^="lnsChartSwitchPopover"]`))[
-        index
-      ].getVisibleText();
+    async getLayerType() {
+      const switchPopovers = await find.allByCssSelector(
+        `[data-test-subj^="lnsChartSwitchPopover"]`
+      );
+      expect(switchPopovers.length).to.be(1);
+      return await switchPopovers[0].getVisibleText();
     },
 
     /**
@@ -1093,11 +1185,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
-      const layerCount = await this.getLayerCount();
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      const layerCount = tabs.length;
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
-          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length > layerCount,
+          (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`, 1000)).length >
+            layerCount,
           testSubjects.exists(`lnsLayerAddButton-${layerType}`),
         ]);
         return fasterChecks.filter(Boolean).length > 0;
@@ -1123,6 +1217,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async duplicateLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1205,9 +1304,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Gets text of the specified datatable header cell
      *
      * @param index - index of th element in datatable
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableHeaderText(index = 0) {
-      const el = await this.getDatatableHeader(index);
+    async getDatatableHeaderText(index = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableHeader(index, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1221,9 +1321,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      *
      * @param rowIndex - index of row of the cell
      * @param colIndex - index of column of the cell
+     * @param addRowNumberColumn - when true, increments the column number to ignore row number column
      */
-    async getDatatableCellText(rowIndex = 0, colIndex = 0) {
-      const el = await this.getDatatableCell(rowIndex, colIndex);
+    async getDatatableCellText(rowIndex = 0, colIndex = 0, addRowNumberColumn?: boolean) {
+      const el = await this.getDatatableCell(rowIndex, colIndex, addRowNumberColumn);
       return el.getVisibleText();
     },
 
@@ -1261,28 +1362,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return (await $('.euiDataGridHeaderCell__content')).length;
     },
 
-    async getDatatableHeader(index = 0) {
+    async getDatatableHeader(index = 0, addRowNumberColumn: boolean = true) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
-          index + 1
+          index + 1 + (addRowNumberColumn ? 1 : 0)
         })`
       );
     },
 
-    async getDatatableCell(rowIndex = 0, colIndex = 0) {
+    async getDatatableCell(rowIndex = 0, colIndex = 0, addRowNumberColumn: boolean = true) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${
+          colIndex + (addRowNumberColumn ? 1 : 0)
+        }"][data-gridcell-visible-row-index="${rowIndex}"]`
       );
     },
 
-    async getDatatableCellsByColumn(colIndex = 0) {
+    async getDatatableCellsByColumn(colIndex = 1) {
       return await find.allByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"]`
       );
     },
 
-    async isDatatableHeaderSorted(index = 0) {
+    async isDatatableHeaderSorted(index = 1) {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridHeader"] [role=columnheader]:nth-child(${
           index + 1
@@ -1315,8 +1418,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
-      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge' | 'progress') {
+      // The "Cell decoration" combo box label diverges from the stored value
+      // (the `cell` value is surfaced as "Background"), so map explicitly rather
+      // than title-casing the stored value.
+      const labelByColoringType: Record<typeof coloringType, string> = {
+        none: 'None',
+        cell: 'Background',
+        text: 'Text',
+        badge: 'Badge',
+        progress: 'Progress bar',
+      };
+      await this.selectOptionFromComboBox(
+        'lnsDatatable_dynamicColoring_groups',
+        labelByColoringType[coloringType]
+      );
     },
 
     async openPalettePanel() {
@@ -1385,6 +1501,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openLayerContextMenu(index: number = 0) {
+      // Hover over the tab to make the layer actions button visible
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      if (tabs[index]) {
+        await tabs[index].moveMouseTo();
+      }
       await testSubjects.click(`lnsLayerSplitButton--${index}`);
     },
 
@@ -1529,7 +1650,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (inViewMode) {
         await dashboard.switchToEditMode();
       }
-      await dashboardAddPanel.clickCreateNewLink();
+      await dashboardAddPanel.clickAddLensPanel();
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
@@ -1636,6 +1757,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /** resets visualization/layer or removes a layer */
     async removeLayer(index: number = 0) {
       await retry.try(async () => {
+        // Hover over the tab to make the layer actions button visible
+        const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+        if (tabs[index]) {
+          await tabs[index].moveMouseTo();
+        }
         if (await testSubjects.exists(`lnsLayerSplitButton--${index}`)) {
           await testSubjects.click(`lnsLayerSplitButton--${index}`);
         }
@@ -1645,6 +1771,112 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.click('lnsLayerRemoveConfirmButton');
         }
       });
+    },
+
+    async ensureLayerTabIsActive(index: number = 0) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
+      if (tabs[index]) {
+        // Check if the tab is already active
+        const isActive = await tabs[index].getAttribute('aria-selected');
+        if (isActive === 'true') {
+          await testSubjects.exists(`lns-layerPanel-${index}`);
+          return;
+        }
+
+        // Scroll tabs into view by clicking scroll buttons if needed.
+        // The tab may be hidden behind the scroll navigation buttons.
+        // Note: scroll buttons only exist when there are enough tabs to overflow.
+        // We try scrolling right first for higher indices, left for lower indices.
+        let scrollAttempts = 0;
+        const maxScrollAttempts = 10;
+
+        await retry.try(async () => {
+          // Try clicking the tab - if it fails due to scroll button overlap, scroll and retry
+          try {
+            await tabs[index].click();
+          } catch (e) {
+            if (e instanceof Error && e.message.includes('element click intercepted')) {
+              scrollAttempts++;
+              if (scrollAttempts > maxScrollAttempts) {
+                throw e; // Give up after max attempts
+              }
+
+              // Determine scroll direction based on tab index
+              // Lower indices are on the left, higher indices are on the right
+              const scrollRightBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollRightBtn',
+                { timeout: 500 }
+              );
+              const scrollLeftBtnExists = await testSubjects.exists(
+                'unifiedTabs_tabsBar_scrollLeftBtn',
+                { timeout: 500 }
+              );
+
+              // Try scrolling in the appropriate direction
+              if (index >= tabs.length / 2 && scrollRightBtnExists) {
+                // Tab is in the right half, try scrolling right
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              } else if (scrollLeftBtnExists) {
+                // Tab is in the left half, try scrolling left
+                await testSubjects.click('unifiedTabs_tabsBar_scrollLeftBtn');
+              } else if (scrollRightBtnExists) {
+                // Fallback to scrolling right if left isn't available
+                await testSubjects.click('unifiedTabs_tabsBar_scrollRightBtn');
+              }
+
+              throw e; // Rethrow to retry
+            }
+            throw e;
+          }
+        });
+
+        // Wait for the layer panel to render
+        await retry.waitFor('layer panel to be visible', async () => {
+          return await testSubjects.exists(`lns-layerPanel-${index}`, { timeout: 1000 });
+        });
+      }
+    },
+
+    async ensureLayerTabWithNameIsActive(name: string) {
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+      for (let i = 0; i < tabs.length; i++) {
+        const tabText = await tabs[i].getVisibleText();
+        if (tabText === name) {
+          // Check if the tab is already active
+          const isActive = await tabs[i].getAttribute('aria-selected');
+          if (isActive === 'true') {
+            await testSubjects.exists(`lns-layerPanel-${i}`);
+            return;
+          }
+
+          // Click to make it active
+          await tabs[i].click();
+
+          // Wait for the layer panel to render
+          await retry.waitFor('layer panel to be visible', async () => {
+            return await testSubjects.exists(`lns-layerPanel-${i}`, { timeout: 1000 });
+          });
+          return;
+        }
+      }
+      throw new Error(`Layer tab with name "${name}" not found`);
+    },
+
+    async assertLayerCount(expectedCount: number) {
+      // Inside the tab content there should be one panel
+      const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]', 1000);
+      expect(layerPanels.length).to.eql(1);
+
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]', 1000);
+
+      // tabs will hidden if there's just one layer
+      if (expectedCount <= 1) {
+        expect(tabs.length).to.eql(0);
+        return;
+      }
+
+      expect(tabs.length).to.eql(expectedCount);
     },
 
     /**
@@ -1770,7 +2002,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await testSubjects.exists('confirmModalConfirmButton');
           await testSubjects.click('confirmModalConfirmButton');
         }
-        await testSubjects.existOrFail('visualizationLandingPage', { timeout: 3000 });
+        await retry.waitFor('dashboard visualizations list to load', async () => {
+          const url = await browser.getCurrentUrl();
+          return url.includes('#/list/visualizations');
+        });
       });
     },
 
@@ -1990,7 +2225,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return isExportPopoverOpen;
       });
 
-      await testSubjects.click(`exportMenuItem-${label}`);
+      await testSubjects.clickWhenNotDisabled(`exportMenuItem-${label}`);
     },
 
     async getUrl() {
@@ -2011,7 +2246,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async triggerCSVDownloadExport() {
       await this.clickExportButton();
       // simply clicking the export button is enough, to trigger the CSV download in lens
-      await exports.clickPopoverItem('CSV', this.clickExportButton);
+      await exports.clickPopoverItem('CSV', async () => {
+        await this.clickExportButton();
+        return true;
+      });
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -2118,18 +2356,36 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await option.click();
     },
 
+    async toggleShowRowNumbers() {
+      const rowNumberSwitch = await testSubjects.find('lens-table-row-numbers-switch');
+      await rowNumberSwitch.click();
+    },
+
+    async findRowNumberColumn() {
+      return await testSubjects.exists('lnsDataTable-rowNumber');
+    },
+
     async checkDataTableDensity(size: 'l' | 'm' | 's') {
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
       );
     },
 
+    /** Returns `undefined` when the name is hidden, as the chart omits the element for an empty label. */
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
-      const label = tile
-        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
-        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
-      return label ? label.getAttribute('innerText') : undefined;
+      if (tile) {
+        const label = await this.getMetricElementIfExists(
+          ECH_SECONDARY_METRIC_LABEL_SELECTOR,
+          tile
+        );
+        return label ? label.getAttribute('innerText') : undefined;
+      }
+      if (!(await find.existsByCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR))) {
+        return undefined;
+      }
+      const label = await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label.getAttribute('innerText');
     },
 
     async hasSecondaryMetricBadge(tile?: WebElementWrapper) {

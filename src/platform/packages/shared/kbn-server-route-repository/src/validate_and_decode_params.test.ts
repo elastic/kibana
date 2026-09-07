@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import * as t from 'io-ts';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 

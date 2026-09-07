@@ -8,15 +8,22 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { Global } from '@emotion/react';
 import {
-  useEuiTheme,
   euiAnimFadeIn,
-  transparentize,
+  euiAnimSlideInUp,
   euiBackgroundColor,
   euiCanAnimate,
-  euiAnimSlideInUp,
+  transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
 
-export const usePaneStyles = () => {
+/**
+ * @param zIndexOverride When the new flyout system is enabled, this is dynamically computed by
+ * `useUnmanagedFlyoutZIndex` so that Timeline stays correctly stacked relative to the new
+ * EUI-managed flyouts. Falls back to the static `maskBelowHeader` theme value otherwise (ie the
+ * legacy expandable flyout system, where `TimelineFlyout`/`SecuritySolutionFlyout` handle their own
+ * fixed offsets relative to that same static value).
+ */
+export const usePaneStyles = (zIndexOverride?: number) => {
   const EuiTheme = useEuiTheme();
   const { euiTheme } = EuiTheme;
 
@@ -28,9 +35,8 @@ export const usePaneStyles = () => {
     right: var(--kbn-layout--application-right, 0px);
     bottom: var(--kbn-layout--application-bottom, 0px);
     // TODO EUI: add color with transparency
-    background: ${transparentize(euiTheme.colors.ink, 0.5)};
-    z-index: ${(euiTheme.levels.flyout as number) +
-    1}; // this z-index needs to be between the eventFlyout (set at 1000) and the timelineFlyout (set at 1002)
+    background: ${transparentize(euiTheme.colors.plainDark, 0.5)};
+    z-index: ${zIndexOverride ?? euiTheme.levels.maskBelowHeader};
 
     ${euiCanAnimate} {
       animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;

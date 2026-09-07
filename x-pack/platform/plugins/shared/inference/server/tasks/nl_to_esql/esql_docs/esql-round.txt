@@ -1,6 +1,6 @@
 # ROUND
 
-Rounds a number to the specified number of decimal places. By default, it rounds to 0 decimal places, returning the nearest integer. If the precision is a negative number, it rounds to the specified number of digits left of the decimal point.
+The ROUND function rounds a number to a specified number of decimal places. By default, it rounds to 0 decimal places, returning the nearest integer. If the precision is negative, it rounds to the number of digits left of the decimal point.
 
 ## Syntax
 
@@ -8,31 +8,20 @@ Rounds a number to the specified number of decimal places. By default, it rounds
 
 ### Parameters
 
-#### `number`
+#### number
 
 The numeric value to round. If `null`, the function returns `null`.
 
-#### `decimals`
+#### decimals
 
-The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.
+The number of decimal places to round to. This parameter is optional and defaults to 0. If `null`, the function returns `null`.
 
 ## Examples
 
-Rounding a height value to one decimal place
+Calculates each employee's height in feet and rounds the result to one decimal place, displaying their first name, last name, and the rounded height.
+
 ```esql
 FROM employees
 | KEEP first_name, last_name, height
 | EVAL height_ft = ROUND(height * 3.281, 1)
 ```
-
-This example converts the `height` column from meters to feet and rounds the result to one decimal place.
-
-```esql
-FROM sales
-| KEEP product_name, revenue
-| EVAL rounded_revenue = ROUND(revenue, -2)
-```
-
-## Notes
-
-If "decimals" is a negative number, the ROUND function rounds to the number of digits left of the decimal point.

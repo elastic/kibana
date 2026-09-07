@@ -18,7 +18,20 @@ export const waitForCallOutToBeShown = (id: string, color: string) => {
   getCallOut(id).should('have.class', `euiCallOut--${color}`);
 };
 
-export const dismissCallOut = (id: string) => {
+export const dismissCallOut = (id: string, namespace = 'detections') => {
   getCallOut(id).find(CALLOUT_DISMISS_BTN).click();
   getCallOut(id).should('not.exist');
+
+  // Wait for localStorage persistence before allowing subsequent actions (e.g., reload)
+  // This prevents race conditions where the page reloads before the dismissal is persisted
+  // Note: The full callout ID may include a hash suffix (e.g., 'missing-user-privileges-abc123'),
+  // so we check if any dismissed ID starts with the provided id prefix
+  // Storage key format: useMessagesStorage appends '-messages' to the plugin key
+  const storageKey = `kibana.securitySolution.${namespace}.callouts.dismissed-messages`;
+  cy.window()
+    .then((win) => {
+      const dismissed: string[] = JSON.parse(win.localStorage.getItem(storageKey) || '[]');
+      return dismissed.some((dismissedId) => dismissedId.startsWith(id));
+    })
+    .should('be.true');
 };

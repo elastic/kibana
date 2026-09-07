@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { useKibana } from './use_kibana';
 import type { SearchQueryDocumentResponse } from '../types';
@@ -19,7 +19,7 @@ export const useFetchDocument = (indexName: string, documentId: string) => {
     queryKey: ['fetchDocument', indexName, documentId],
     queryFn: async () => {
       const response = await http.get<SearchQueryDocumentResponse>(
-        `/internal/search_query_rules/document/${indexName}/${documentId}`
+        `/internal/search_query_rules/document/${indexName}/${encodeURIComponent(documentId)}`
       );
       return response;
     },

@@ -9,11 +9,11 @@ import { analyzeDocuments } from './analyze_documents';
 
 describe('analyzeDocuments', () => {
   it('should handle zero input', () => {
-    const result = analyzeDocuments({ eventsCount: 0, alertsCount: 0 });
+    const result = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 0 });
 
     expect(result).toEqual({
-      eventsCount: 0,
-      alertsCount: 0,
+      uniqueEventsCount: 0,
+      uniqueAlertsCount: 0,
       isSingleAlert: false,
       isSingleEvent: false,
       isGroupOfEvents: false,
@@ -23,42 +23,42 @@ describe('analyzeDocuments', () => {
   });
 
   it('should identify single event', () => {
-    const result = analyzeDocuments({ eventsCount: 1, alertsCount: 0 });
+    const result = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 0 });
 
     expect(result.isSingleEvent).toBe(true);
-    expect(result.eventsCount).toBe(1);
-    expect(result.alertsCount).toBe(0);
+    expect(result.uniqueEventsCount).toBe(1);
+    expect(result.uniqueAlertsCount).toBe(0);
   });
 
   it('should identify single alert', () => {
-    const result = analyzeDocuments({ eventsCount: 0, alertsCount: 1 });
+    const result = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 1 });
 
     expect(result.isSingleAlert).toBe(true);
-    expect(result.eventsCount).toBe(0);
-    expect(result.alertsCount).toBe(1);
+    expect(result.uniqueEventsCount).toBe(0);
+    expect(result.uniqueAlertsCount).toBe(1);
   });
 
   it('should identify group of events', () => {
-    const result = analyzeDocuments({ eventsCount: 2, alertsCount: 0 });
+    const result = analyzeDocuments({ uniqueEventsCount: 2, uniqueAlertsCount: 0 });
 
     expect(result.isGroupOfEvents).toBe(true);
-    expect(result.eventsCount).toBe(2);
-    expect(result.alertsCount).toBe(0);
+    expect(result.uniqueEventsCount).toBe(2);
+    expect(result.uniqueAlertsCount).toBe(0);
   });
 
   it('should identify group of alerts', () => {
-    const result = analyzeDocuments({ eventsCount: 0, alertsCount: 2 });
+    const result = analyzeDocuments({ uniqueEventsCount: 0, uniqueAlertsCount: 2 });
 
     expect(result.isGroupOfAlerts).toBe(true);
-    expect(result.eventsCount).toBe(0);
-    expect(result.alertsCount).toBe(2);
+    expect(result.uniqueEventsCount).toBe(0);
+    expect(result.uniqueAlertsCount).toBe(2);
   });
 
   it('should identify group of events and alerts', () => {
-    const result = analyzeDocuments({ eventsCount: 1, alertsCount: 1 });
+    const result = analyzeDocuments({ uniqueEventsCount: 1, uniqueAlertsCount: 1 });
 
     expect(result.isGroupOfEventsAndAlerts).toBe(true);
-    expect(result.eventsCount).toBe(1);
-    expect(result.alertsCount).toBe(1);
+    expect(result.uniqueEventsCount).toBe(1);
+    expect(result.uniqueAlertsCount).toBe(1);
   });
 });

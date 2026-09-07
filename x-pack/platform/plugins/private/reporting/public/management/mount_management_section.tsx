@@ -17,7 +17,7 @@ import type { ClientConfigType, ReportingAPIClient, KibanaContext } from '@kbn/r
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { InternalApiClientProvider } from '@kbn/reporting-public';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
@@ -59,6 +59,7 @@ export async function mountManagementSection({
     license$,
     actions: actionsService,
     notifications: notificationsService,
+    userProfile: coreStart.userProfile,
   };
   const sections: Section[] = ['exports', 'schedules'];
   const { element, history } = params;
@@ -67,29 +68,31 @@ export async function mountManagementSection({
 
   ReactDOM.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={services}>
-        <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
-          <PolicyStatusContextProvider config={config}>
-            <QueryClientProvider client={queryClient}>
-              <Router history={history}>
-                <Routes>
-                  <Route
-                    path={`/:section(${sectionsRegex})`}
-                    render={(routerProps) => {
-                      return (
-                        <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
-                          <ReportingTabs config={config} />
-                        </Suspense>
-                      );
-                    }}
-                  />
-                  <Redirect from={'/'} to="/exports" />
-                </Routes>
-              </Router>
-            </QueryClientProvider>
-          </PolicyStatusContextProvider>
-        </InternalApiClientProvider>
-      </KibanaContextProvider>
+      coreStart.chrome.withProvider(
+        <KibanaContextProvider services={services}>
+          <InternalApiClientProvider apiClient={apiClient} http={coreStart.http}>
+            <PolicyStatusContextProvider config={config}>
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Routes>
+                    <Route
+                      path={`/:section(${sectionsRegex})`}
+                      render={() => {
+                        return (
+                          <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
+                            <ReportingTabs config={config} />
+                          </Suspense>
+                        );
+                      }}
+                    />
+                    <Redirect from={'/'} to="/exports" />
+                  </Routes>
+                </Router>
+              </QueryClientProvider>
+            </PolicyStatusContextProvider>
+          </InternalApiClientProvider>
+        </KibanaContextProvider>
+      )
     ),
     element
   );

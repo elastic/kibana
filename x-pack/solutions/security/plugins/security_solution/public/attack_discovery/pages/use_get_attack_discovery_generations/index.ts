@@ -8,16 +8,12 @@
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { API_VERSIONS, ATTACK_DISCOVERY_GENERATIONS } from '@kbn/elastic-assistant-common';
 import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useRef } from 'react';
-import type {
   GetAttackDiscoveryGenerationsRequestQuery,
   GetAttackDiscoveryGenerationsResponse,
 } from '@kbn/elastic-assistant-common';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
+import { useCallback, useRef } from 'react';
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -45,6 +41,7 @@ export const useGetAttackDiscoveryGenerations = ({
   end,
   http,
   isAssistantEnabled,
+  scheduled,
   size,
   start,
   refetchOnWindowFocus = false,
@@ -58,20 +55,26 @@ export const useGetAttackDiscoveryGenerations = ({
   }, []);
 
   const queryFn = useCallback(async () => {
-    return http.fetch<GetAttackDiscoveryGenerationsResponse>(ATTACK_DISCOVERY_GENERATIONS, {
-      method: 'GET',
-      version: API_VERSIONS.internal.v1,
-      query: {
-        end,
-        size,
-        start,
-      },
-      signal: abortController.current.signal,
-    });
-  }, [end, http, size, start]);
+    const response = await http.fetch<GetAttackDiscoveryGenerationsResponse>(
+      ATTACK_DISCOVERY_GENERATIONS,
+      {
+        method: 'GET',
+        version: API_VERSIONS.public.v1,
+        query: {
+          end,
+          scheduled,
+          size,
+          start,
+        },
+        signal: abortController.current.signal,
+      }
+    );
+
+    return response;
+  }, [end, http, scheduled, size, start]);
 
   const { data, error, isLoading, refetch, status } = useQuery(
-    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, size, start],
+    ['GET', ATTACK_DISCOVERY_GENERATIONS, end, isAssistantEnabled, scheduled, size, start],
     queryFn,
     {
       enabled: isAssistantEnabled,

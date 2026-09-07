@@ -15,6 +15,7 @@ export const ExecuteActionRequestSchema = {
     parameters: schema.object({
       command: schema.string({
         minLength: 1,
+        maxLength: 8192,
         validate: (value) => {
           if (!value.trim().length) {
             return 'command cannot be an empty string';
@@ -22,7 +23,7 @@ export const ExecuteActionRequestSchema = {
         },
       }),
       /**
-       * The max timeout value before the command is killed. Number represents milliseconds
+       * The max timeout value before the command is killed. Number represents **seconds**
        */
       timeout: schema.maybe(schema.number({ min: 1 })),
     }),

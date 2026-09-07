@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { CriteriaWithPagination } from '@elastic/eui';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -24,6 +26,7 @@ import { PlaygroundsListEmptyState } from './empty_state';
 import type { PlaygroundsTableProps } from './playgrounds_table';
 import { PlaygroundsTable } from './playgrounds_table';
 import type { PlaygroundListObject } from '../../types';
+import { PlaygroundDeprecationNotice } from './playground_deprecation_notice';
 
 function PlaygroundListObjectFieldToSortField(field: string): 'updated_at' {
   // SO Index does not currently allow sorting on name, update this when we update SO index settings
@@ -66,6 +69,20 @@ export const PlaygroundsList = () => {
     },
     []
   );
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      primaryActionItem: {
+        id: 'newPlayground',
+        label: i18n.translate('xpack.searchPlayground.playgroundsList.page.cta.text', {
+          defaultMessage: 'New Playground',
+        }),
+        iconType: 'plusCircle',
+        testId: 'newPlaygroundButton',
+        run: onNewPlayground,
+      },
+    }),
+    [onNewPlayground]
+  );
 
   if (isLoading) {
     return <PlaygroundsListLoading />;
@@ -76,31 +93,40 @@ export const PlaygroundsList = () => {
   }
 
   if (data._meta.total === 0) {
-    return <PlaygroundsListEmptyState onNewPlayground={onNewPlayground} />;
+    return (
+      <PlaygroundsListEmptyState
+        CTAContent={
+          <span>
+            <EuiButton
+              data-test-subj="newPlaygroundButton"
+              fill
+              iconType="plusCircle"
+              fullWidth={false}
+              onClick={onNewPlayground}
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.playgroundsList.emptyPrompt.cta.text"
+                defaultMessage="New Playground"
+              />
+            </EuiButton>
+          </span>
+        }
+      />
+    );
   }
 
   return (
     <>
-      <KibanaPageTemplate.Header
-        pageTitle={PLUGIN_NAME}
+      <AppHeader
+        title={PLUGIN_NAME}
         description={i18n.translate('xpack.searchPlayground.playgroundsList.page.description', {
           defaultMessage: 'Use your data to experiment with creating a chat experience.',
         })}
-        rightSideItems={[
-          <EuiButton
-            data-test-subj="newPlaygroundButton"
-            fill
-            iconType="plusInCircle"
-            onClick={onNewPlayground}
-          >
-            <FormattedMessage
-              id="xpack.searchPlayground.playgroundsList.page.cta.text"
-              defaultMessage="New Playground"
-            />
-          </EuiButton>,
-        ]}
+        menu={menu}
       />
       <KibanaPageTemplate.Section color="plain">
+        <PlaygroundDeprecationNotice />
+        <EuiSpacer />
         <PlaygroundsTable
           playgroundsData={data}
           onChange={onTablePageChange}

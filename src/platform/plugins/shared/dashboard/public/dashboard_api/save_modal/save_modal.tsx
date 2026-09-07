@@ -9,13 +9,29 @@
 
 import React, { Fragment, useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip, EuiSwitch } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModalWithSaveResult } from '@kbn/saved-objects-plugin/public';
-import { savedObjectsTaggingService } from '../../services/kibana_services';
+import { AccessModeContainer } from '@kbn/content-management-access-control-public';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
+import { getAccessControlClient } from '../../services/access_control_service';
+import {
+  coreServices,
+  savedObjectsTaggingService,
+  spacesService,
+} from '../../services/kibana_services';
 import type { DashboardSaveOptions } from './types';
+import { hasLibraryItemWithTitle } from '../../dashboard_client';
 
 interface DashboardSaveModalProps {
   onSave: ({
@@ -24,25 +40,28 @@ interface DashboardSaveModalProps {
     newCopyOnSave,
     newTags,
     newTimeRestore,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
+    newProjectRoutingRestore,
+    newAccessMode,
   }: DashboardSaveOptions) => Promise<SaveResult>;
   onClose: () => void;
+  lastSavedTitle: string;
   title: string;
   description: string;
   tags?: string[];
   timeRestore: boolean;
+  projectRoutingRestore: boolean;
   showCopyOnSave: boolean;
   showStoreTimeOnSave?: boolean;
+  showStoreProjectRoutingOnSave?: boolean;
   customModalTitle?: string;
+  accessControl?: Partial<SavedObjectAccessControl>;
+  showAccessContainer?: boolean;
 }
 
 type SaveDashboardHandler = (args: {
   newTitle: string;
   newDescription: string;
   newCopyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-  onTitleDuplicate: () => void;
 }) => ReturnType<DashboardSaveModalProps['onSave']>;
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
@@ -52,31 +71,41 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   onSave,
   showCopyOnSave,
   showStoreTimeOnSave = true,
+  showStoreProjectRoutingOnSave = true,
   tags,
+  lastSavedTitle,
   title,
   timeRestore,
+  projectRoutingRestore,
+  accessControl,
+  showAccessContainer,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
+  const [persistSelectedProjectRouting, setPersistSelectedProjectRouting] =
+    React.useState(projectRoutingRestore);
+  const [selectedAccessMode, setSelectedAccessMode] = React.useState(
+    accessControl?.accessMode ?? 'default'
+  );
 
   const saveDashboard = React.useCallback<SaveDashboardHandler>(
-    async ({
-      newTitle,
-      newDescription,
-      newCopyOnSave,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate,
-    }) =>
+    async ({ newTitle, newDescription, newCopyOnSave }) =>
       onSave({
         newTitle,
         newDescription,
         newCopyOnSave,
         newTimeRestore: persistSelectedTimeInterval,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
+        newProjectRoutingRestore: persistSelectedProjectRouting,
         newTags: selectedTags,
+        newAccessMode: selectedAccessMode,
       }),
-    [onSave, persistSelectedTimeInterval, selectedTags]
+    [
+      onSave,
+      persistSelectedTimeInterval,
+      persistSelectedProjectRouting,
+      selectedTags,
+      selectedAccessMode,
+    ]
   );
 
   const renderDashboardSaveOptions = useCallback(() => {
@@ -126,14 +155,69 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
+        {showStoreProjectRoutingOnSave ? (
+          <EuiFormRow>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="storeProjectRoutingWithDashboard"
+                  checked={persistSelectedProjectRouting}
+                  onChange={(event) => {
+                    setPersistSelectedProjectRouting(event.target.checked);
+                  }}
+                  label={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowLabel"
+                      defaultMessage="Store CPS scope with dashboard"
+                    />
+                  }
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeProjectRoutingWithDashboardFormRowHelpText"
+                      defaultMessage="Saves the current cross-project search (CPS) scope with the dashboard. Anyone who opens the dashboard will start with that scope."
+                    />
+                  }
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        ) : null}
+        {showAccessContainer && (
+          <>
+            <EuiSpacer size="l" />
+            <AccessModeContainer
+              accessControl={accessControl}
+              onChangeAccessMode={setSelectedAccessMode}
+              getActiveSpace={spacesService?.getActiveSpace}
+              getCurrentUser={coreServices.userProfile.getCurrent}
+              accessControlClient={getAccessControlClient()}
+              contentTypeId={DASHBOARD_SAVED_OBJECT_TYPE}
+            />
+          </>
+        )}
       </Fragment>
     );
-  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [
+    persistSelectedTimeInterval,
+    persistSelectedProjectRouting,
+    selectedTags,
+    showStoreTimeOnSave,
+    showStoreProjectRoutingOnSave,
+    accessControl,
+    showAccessContainer,
+  ]);
 
   return (
     <SavedObjectSaveModalWithSaveResult
+      hasLibraryItemWithTitle={hasLibraryItemWithTitle}
       onSave={saveDashboard}
       onClose={onClose}
+      lastSavedTitle={lastSavedTitle}
       title={title}
       description={description}
       showDescription

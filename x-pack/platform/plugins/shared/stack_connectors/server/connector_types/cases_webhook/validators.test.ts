@@ -6,8 +6,8 @@
  */
 
 import { validateCasesWebhookConfig } from './validators';
-import { AuthType } from '../../../common/auth/constants';
-import type { CasesWebhookPublicConfigurationType } from './types';
+import { AuthType } from '@kbn/connector-schemas/common/auth';
+import type { CasesWebhookPublicConfigurationType } from '@kbn/connector-schemas/cases_webhook';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 
 describe('validateCasesWebhookConfig', () => {
@@ -19,6 +19,23 @@ describe('validateCasesWebhookConfig', () => {
       getIncidentUrl: 'https://example.com/get-incident',
       updateIncidentUrl: 'https://example.com/update-incident',
       authType: AuthType.OAuth2ClientCredentials,
+    } as unknown as CasesWebhookPublicConfigurationType;
+
+    expect(() =>
+      validateCasesWebhookConfig(configObject, {} as ValidatorServices)
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"OAuth2 authentication is not supported for cases webhook connector"`
+    );
+  });
+
+  it('throws an error for OAuth2 password grant auth type', () => {
+    const configObject: CasesWebhookPublicConfigurationType = {
+      createCommentUrl: 'https://example.com/create-comment',
+      createIncidentUrl: 'https://example.com/create-incident',
+      viewIncidentUrl: 'https://example.com/view-incident',
+      getIncidentUrl: 'https://example.com/get-incident',
+      updateIncidentUrl: 'https://example.com/update-incident',
+      authType: AuthType.OAuth2Password,
     } as unknown as CasesWebhookPublicConfigurationType;
 
     expect(() =>

@@ -24,13 +24,13 @@ export const ADD_INTEGRATIONS_BUTTON_TEST_ID = 'alert-summary-add-integrations-b
 
 export interface IntegrationSectionProps {
   /**
-   * List of installed AI for SOC integrations
+   * List of installed EASE integrations
    */
   packages: PackageListItem[];
 }
 
 /**
- * Section rendered at the top of the alert summary page. It displays all the AI for SOC installed integrations
+ * Section rendered at the top of the alert summary page. It displays all EASE installed integrations
  * and allow the user to add more integrations by clicking on a button that links to a Fleet page.
  * Each integration card is also displaying the last time the sync happened (using streams).
  */
@@ -51,7 +51,7 @@ export const IntegrationSection = memo(({ packages }: IntegrationSectionProps) =
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj={ADD_INTEGRATIONS_BUTTON_TEST_ID}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={navigateToIntegrationsPage}
         >
           {ADD_INTEGRATION}

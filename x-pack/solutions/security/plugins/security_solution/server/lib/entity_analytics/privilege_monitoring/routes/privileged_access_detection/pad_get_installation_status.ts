@@ -10,9 +10,10 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '../../../../../../common/api/entity_analytics';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID, PAD_STATUS_URL } from '../../../../../../common/constants';
 
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const padGetStatusRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -22,7 +23,7 @@ export const padGetStatusRoute = (
   router.versioned
     .get({
       access: 'public',
-      path: '/api/entity_analytics/privileged_user_monitoring/pad/status',
+      path: PAD_STATUS_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -34,30 +35,32 @@ export const padGetStatusRoute = (
         version: API_VERSIONS.public.v1,
         validate: {},
       },
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<GetPrivilegedAccessDetectionPackageStatusResponse>> => {
+          const siemResponse = buildSiemResponse(response);
+          const secSol = await context.securitySolution;
 
-      async (
-        context,
-        request,
-        response
-      ): Promise<IKibanaResponse<GetPrivilegedAccessDetectionPackageStatusResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-
-        try {
-          const clientResponse = await secSol.getPadPackageInstallationClient().getStatus();
-          return response.ok({
-            body: {
-              ...clientResponse,
-            },
-          });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error with PAD installation: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+          try {
+            const clientResponse = await secSol.getPadPackageInstallationClient().getStatus();
+            return response.ok({
+              body: {
+                ...clientResponse,
+              },
+            });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error with PAD installation: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

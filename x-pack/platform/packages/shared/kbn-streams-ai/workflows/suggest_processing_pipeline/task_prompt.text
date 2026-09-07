@@ -1,0 +1,29 @@
+Follow the **system prompt** (rules, workflow, tools, pipeline schema).
+
+**Target schema:** {{{fields_schema}}}
+
+---
+
+## Dataset: {{stream.name}}
+
+{{{stream.description}}}
+
+---
+
+{{#upstream_extraction_context}}
+## Upstream extraction (already applied)
+
+{{{upstream_extraction_context}}}
+
+---
+{{/upstream_extraction_context}}
+
+## Sample document structure
+
+JSON overview of fields, sample values, and mapping/schema hints for the **same documents** used in **`simulate_pipeline`**. Not the result of your proposed pipeline—validate with **`simulate_pipeline`**.
+
+{{{initial_dataset_analysis}}}
+
+---
+
+Start by running through the **Inspection checklist** from the system prompt. Then call **`simulate_pipeline`** with your first candidate and iterate from the response (`errors`, `processors`, `temporary_fields`).

@@ -17,7 +17,7 @@ import {
   addExceptionList,
   addEndpointExceptionList,
 } from '@kbn/securitysolution-list-api';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 
 import { fetchRuleById, patchRule } from '../../rule_management/api/api';
@@ -67,7 +67,7 @@ export const useFetchOrCreateRuleExceptionList = ({
           // Endpoint exception list already exists, fetch it
           newExceptionList = await fetchExceptionListById({
             http,
-            id: ENDPOINT_LIST_ID,
+            id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
             namespaceType: 'agnostic',
             signal: abortCtrl.signal,
           });
@@ -157,7 +157,10 @@ export const useFetchOrCreateRuleExceptionList = ({
         let exceptionListToUse: ExceptionListSchema;
         const matchingList = exceptionLists.find((list) => {
           if (exceptionListType === 'endpoint') {
-            return list.type === exceptionListType && list.list_id === ENDPOINT_LIST_ID;
+            return (
+              list.type === exceptionListType &&
+              list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+            );
           } else {
             return list.type === exceptionListType;
           }

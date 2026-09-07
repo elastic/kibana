@@ -1,7 +1,12 @@
 post:
   summary: Update saved objects
   operationId: bulkUpdateSavedObjects
-  description: Update the attributes for multiple Kibana saved objects.
+  description: >
+    Update the attributes for multiple Kibana saved objects.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    Consider using the import API for your use case.
   deprecated: true
   tags:
     - saved objects

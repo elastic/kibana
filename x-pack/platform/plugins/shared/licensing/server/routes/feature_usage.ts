@@ -29,7 +29,7 @@ export function registerFeatureUsageRoute(
       return response.ok({
         body: {
           features: featureUsage.getLastUsages().map((usage) => ({
-            name: usage.name,
+            id: usage.id,
             last_used: usage.lastUsed,
             license_level: usage.licenseType,
           })),

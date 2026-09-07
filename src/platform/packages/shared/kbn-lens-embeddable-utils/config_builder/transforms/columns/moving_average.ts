@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MovingAverageIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { MovingAverageIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensApiMovingAverageOperation,
   LensApiFieldMetricOperations,
@@ -16,12 +16,11 @@ import { getLensAPIMetricSharedProps, getLensStateMetricSharedProps } from './ut
 import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 
 export function fromMovingAverageAPItoLensState(
-  options: LensApiMovingAverageOperation,
-  ref: { id: string; field?: string; label?: string }
+  options: LensApiMovingAverageOperation
 ): MovingAverageIndexPatternColumn {
   return {
     operationType: 'moving_average',
-    references: [ref.id],
+    references: [], // populated later when we have the ID of the referenced column
     ...getLensStateMetricSharedProps(options),
     params: {
       window: options.window,

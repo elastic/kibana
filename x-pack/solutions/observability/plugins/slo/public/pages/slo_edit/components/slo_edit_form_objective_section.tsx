@@ -98,7 +98,7 @@ export function SloEditFormObjectiveSection() {
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         {isServerless && (
-          <EuiCallOut>
+          <EuiCallOut announceOnMount>
             {i18n.translate('xpack.slo.sloEdit.timeWindow.serverlessWarning', {
               defaultMessage: 'Initial data backfill is limited to the past 7 days',
             })}
@@ -133,6 +133,9 @@ export function SloEditFormObjectiveSection() {
                     data-test-subj="sloFormTimeWindowTypeSelect"
                     options={TIMEWINDOW_TYPE_OPTIONS}
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowType.ariaLabel', {
+                      defaultMessage: 'Time window',
+                    })}
                   />
                 )}
               />
@@ -170,6 +173,9 @@ export function SloEditFormObjectiveSection() {
                         : ROLLING_TIMEWINDOW_OPTIONS
                     }
                     value={field.value}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.timeWindowDuration.ariaLabel', {
+                      defaultMessage: 'Duration',
+                    })}
                   />
                 )}
               />
@@ -179,7 +185,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.metric.timeslice' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.timesliceMetric.objectiveMessage"
@@ -192,7 +198,7 @@ export function SloEditFormObjectiveSection() {
 
         {indicator === 'sli.synthetics.availability' && (
           <EuiFlexItem>
-            <EuiCallOut color="warning">
+            <EuiCallOut announceOnMount color="warning">
               <p>
                 <FormattedMessage
                   id="xpack.slo.sloEdit.sliType.syntheticAvailability.objectiveMessage"
@@ -236,6 +242,9 @@ export function SloEditFormObjectiveSection() {
                     id={budgetingSelect}
                     data-test-subj="sloFormBudgetingMethodSelect"
                     options={BUDGETING_METHOD_OPTIONS}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.budgetingMethod.ariaLabel', {
+                      defaultMessage: 'Budgeting method',
+                    })}
                   />
                 )}
               />
@@ -283,6 +292,9 @@ export function SloEditFormObjectiveSection() {
                     min={0.001}
                     max={99.999}
                     step={0.001}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.targetSlo.ariaLabel', {
+                      defaultMessage: 'Target / SLO (%)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}

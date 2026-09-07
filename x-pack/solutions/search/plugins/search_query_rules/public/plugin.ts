@@ -50,8 +50,8 @@ export class QueryRulesPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 4,
-      visibleIn: ['globalSearch', 'sideNav'],
+      order: 5,
+      visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
     });
 
     return {};

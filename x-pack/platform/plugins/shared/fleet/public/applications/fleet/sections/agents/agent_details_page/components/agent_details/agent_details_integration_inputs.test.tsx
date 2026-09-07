@@ -6,21 +6,15 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+
 import userEvent from '@testing-library/user-event';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
-import { ThemeProvider } from 'styled-components';
-
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 import type { Agent } from '../../../../../types';
-import { useLink } from '../../../../../hooks';
+
 import { createPackagePolicyMock } from '../../../../../../../../common/mocks';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
-
-jest.mock('../../../../../hooks');
-const mockUseLink = useLink as jest.Mock;
 
 describe('AgentDetailsIntegrationInputs', () => {
   const agent: Agent = {
@@ -35,17 +29,10 @@ describe('AgentDetailsIntegrationInputs', () => {
 
   const packageMock = createPackagePolicyMock();
 
-  beforeEach(() => {
-    mockUseLink.mockReturnValue({ getHref: jest.fn() });
-  });
-
   const renderComponent = () => {
-    return render(
-      <IntlProvider locale="en">
-        <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' } })}>
-          <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />
-        </ThemeProvider>
-      </IntlProvider>
+    const renderer = createFleetTestRendererMock();
+    return renderer.render(
+      <AgentDetailsIntegrationInputs agent={agent} packagePolicy={packageMock} />
     );
   };
 
@@ -128,8 +115,36 @@ describe('AgentDetailsIntegrationInputs', () => {
     agent.components = undefined;
 
     const component = renderComponent();
-    await userEvent.click(component.container.querySelector('#agentIntegrationsInputs')!);
+    await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
     await userEvent.click(component.container.querySelector('#endpoint')!);
     expect(component.getByText('Endpoint')).toBeInTheDocument();
+  });
+
+  it('should render input type using input id for otelcol inputs', async () => {
+    packageMock.inputs.push({
+      type: 'otelcol',
+      enabled: true,
+      streams: [],
+      id: 'otelcol/my-otelcol-input',
+    });
+
+    const component = renderComponent();
+    await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    await userEvent.click(component.container.querySelector('#otelcol')!);
+    expect(component.getByText('otelcol/my-otelcol-input')).toBeInTheDocument();
+  });
+
+  it('should render input type using input type for non-otelcol inputs', async () => {
+    packageMock.inputs.push({
+      type: 'logfile',
+      enabled: true,
+      streams: [],
+      id: 'logfile/my-logfile-input',
+    });
+
+    const component = renderComponent();
+    await userEvent.click(component.container.querySelector('#agentIntegrationsItems')!);
+    await userEvent.click(component.container.querySelector('#logfile')!);
+    expect(component.getByText('Logs')).toBeInTheDocument();
   });
 });

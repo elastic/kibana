@@ -29,7 +29,9 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
       },
       validate: {
         body: schema.object({
-          apiKeys: schema.arrayOf(schema.object({ id: schema.string(), name: schema.string() })),
+          apiKeys: schema.arrayOf(schema.object({ id: schema.string(), name: schema.string() }), {
+            maxSize: 1000,
+          }),
           isAdmin: schema.boolean(),
         }),
       },

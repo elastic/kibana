@@ -20,20 +20,6 @@ export const BULK_FILL_RULE_GAPS_TIME_RANGE_TITLE = i18n.translate(
   }
 );
 
-export const BULK_FILL_RULE_GAPS_START_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFillRuleGapsModal.startAtTitle',
-  {
-    defaultMessage: 'Start at',
-  }
-);
-
-export const BULK_FILL_RULE_GAPS_END_AT_TITLE = i18n.translate(
-  'xpack.securitySolution.bulkFillRuleGapsModal.endAtTitle',
-  {
-    defaultMessage: 'Finish at',
-  }
-);
-
 export const BULK_FILL_RULE_GAPS_CONFIRM_BUTTON = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.confirmButton',
   {
@@ -81,5 +67,13 @@ export const BULK_FILL_RULE_GAPS_MAX_GAPS_LIMITATIONS = i18n.translate(
   'xpack.securitySolution.bulkFillRuleGapsModal.maxGapsLimitations',
   {
     defaultMessage: 'A maximum of 1000 gaps will be filled per rule.',
+  }
+);
+
+export const BULK_FILL_RULE_GAPS_EXCLUDED_REASONS = i18n.translate(
+  'xpack.securitySolution.bulkFillRuleGapsModal.excludedReasons',
+  {
+    defaultMessage:
+      'Gaps caused by disabled rules will not be filled. You can change this in Rule Settings.',
   }
 );

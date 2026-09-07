@@ -47,6 +47,7 @@ export function LabelsBreakdown({ series, seriesId }: Props) {
         selectedOptions={labelFieldOptions?.filter((labelField) => labelField.label === breakdown)}
         options={labelFieldOptions}
         placeholder={CHOOSE_BREAKDOWN_FIELD}
+        aria-label={CHOOSE_BREAKDOWN_FIELD}
         onChange={(value) => {
           setSeries(seriesId, {
             ...series,

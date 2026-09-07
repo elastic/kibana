@@ -30,6 +30,7 @@ interface ContentStreamDocument {
   index: string;
   if_primary_term?: number;
   if_seq_no?: number;
+  created_at?: string;
 }
 
 interface ChunkOutput {
@@ -63,6 +64,7 @@ export class ContentStream extends Duplex {
   private parameters: Required<ContentStreamParameters>;
   private primaryTerm?: number;
   private seqNo?: number;
+  private createdAt?: string;
 
   /**
    * The number of bytes written so far.
@@ -86,6 +88,7 @@ export class ContentStream extends Duplex {
   ) {
     super();
     this.parameters = { encoding };
+    this.createdAt = document.created_at;
   }
 
   private decode(content: string) {
@@ -213,7 +216,7 @@ export class ContentStream extends Duplex {
       op_type: 'create',
       document: {
         parent_id: parentId,
-        '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
+        '@timestamp': this.createdAt || new Date().toISOString(), // use report creation time for better diagnosis
         output: {
           content,
           chunk: this.chunksWritten,

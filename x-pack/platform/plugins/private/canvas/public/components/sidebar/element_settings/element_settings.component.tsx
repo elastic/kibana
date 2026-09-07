@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -125,8 +124,4 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       {tabsContent}
     </>
   );
-};
-
-ElementSettings.propTypes = {
-  element: PropTypes.object,
 };

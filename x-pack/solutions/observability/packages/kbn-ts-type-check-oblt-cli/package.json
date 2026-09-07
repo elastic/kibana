@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/ts-type-check-oblt-cli",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "main": "./run_type_check_cli"
+}

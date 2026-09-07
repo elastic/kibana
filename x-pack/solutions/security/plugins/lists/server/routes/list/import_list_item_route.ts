@@ -10,21 +10,27 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ImportListItemsRequestQuery,
   ImportListItemsResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import type { ConfigType } from '../../config';
 import { buildSiemResponse } from '../utils';
 import { createStreamFromBuffer } from '../utils/create_stream_from_buffer';
+import { getUnsupportedParamWarnings } from '../utils/get_unsupported_param_warnings';
 import { getListClient } from '..';
 
 const validFileExtensions = ['.csv', '.txt'];
 
-export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
+export const importListItemRoute = (
+  router: ListsPluginRouter,
+  config: ConfigType,
+  kibanaVersion: string
+): void => {
   router.versioned
     .post({
       access: 'public',
@@ -41,7 +47,7 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       path: `${LIST_ITEM_URL}/_import`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })
@@ -58,7 +64,10 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { deserializer, list_id: listId, serializer, type, refresh } = request.query;
+          const { list_id: listId, type, refresh } = request.query;
+
+          // Check for unsupported query parameters (seriarlizer or deserializer) and generate warning headers
+          const warningHeaders = getUnsupportedParamWarnings(request, kibanaVersion);
           const lists = await getListClient(context);
 
           const filename = await lists.getImportFilename({
@@ -116,24 +125,23 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               });
             }
             await lists.importListItemsToStream({
-              deserializer: list.deserializer,
               listId,
               meta: undefined,
               refresh,
-              serializer: list.serializer,
               stream,
               type: list.type,
               version: 1,
             });
 
-            return response.ok({ body: ImportListItemsResponse.parse(list) });
+            return response.ok({
+              body: ImportListItemsResponse.parse(list),
+              ...(warningHeaders && { headers: warningHeaders }),
+            });
           } else if (type != null) {
             const importedList = await lists.importListItemsToStream({
-              deserializer,
               listId: undefined,
               meta: undefined,
               refresh,
-              serializer,
               stream,
               type,
               version: 1,
@@ -145,7 +153,10 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
               });
             }
 
-            return response.ok({ body: ImportListItemsResponse.parse(importedList) });
+            return response.ok({
+              body: ImportListItemsResponse.parse(importedList),
+              ...(warningHeaders && { headers: warningHeaders }),
+            });
           } else {
             return siemResponse.error({
               body: 'Either type or list_id need to be defined in the query',

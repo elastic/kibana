@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import type { CanvasWorkpad } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
@@ -38,11 +37,3 @@ export const SimpleTemplate: FunctionComponent<Props> = ({ getArgValue, setArgVa
 );
 
 SimpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
-
-SimpleTemplate.propTypes = {
-  getArgValue: PropTypes.func.isRequired,
-  setArgValue: PropTypes.func.isRequired,
-  workpad: PropTypes.shape({
-    colors: PropTypes.array.isRequired,
-  }),
-};

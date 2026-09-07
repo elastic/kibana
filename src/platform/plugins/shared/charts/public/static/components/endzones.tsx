@@ -156,7 +156,7 @@ const Prompt: AnnotationTooltipFormatter = () => {
   return (
     <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs" css={headerPartialCss}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="info" />
+        <EuiIcon type="info" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>{partialDataText}</EuiFlexItem>
     </EuiFlexGroup>
@@ -194,5 +194,6 @@ export const renderEndzoneTooltip =
       );
     }
 
+    // @ts-expect-error upgrade typescript v5.9.3
     return renderValue ? formattedValue : null;
   };

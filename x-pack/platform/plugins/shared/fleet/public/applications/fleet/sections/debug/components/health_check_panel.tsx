@@ -12,12 +12,14 @@ import {
   EuiSuperSelect,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
   EuiHealth,
+  EuiFormPrepend,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { sendPostHealthCheck, useGetFleetServerHosts } from '../../../hooks';
 import type { FleetServerHost, PostHealthCheckResponse } from '../../../types';
@@ -115,13 +117,21 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
           <EuiSuperSelect
             fullWidth
             data-test-subj="fleetDebug.fleetServerHostsSelect"
+            aria-label={i18n.translate(
+              'xpack.fleet.debug.healthCheckPanel.fleetServerHostsSelectAriaLabel',
+              {
+                defaultMessage: 'Fleet Server hosts',
+              }
+            )}
             prepend={
-              <EuiText size="relative" color={''}>
-                <FormattedMessage
-                  id="xpack.fleet.debug.healthCheckPanel.fleetServerHostsLabel"
-                  defaultMessage="Fleet Server Hosts"
-                />
-              </EuiText>
+              <EuiFormPrepend
+                label={
+                  <FormattedMessage
+                    id="xpack.fleet.debug.healthCheckPanel.fleetServerHostsLabel"
+                    defaultMessage="Fleet Server Hosts"
+                  />
+                }
+              />
             }
             onChange={(fleetServerHostId) => {
               setHealthData(undefined);
@@ -150,17 +160,21 @@ export const HealthCheckPanel: React.FunctionComponent = () => {
       {error && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Error" color="danger">
-            {error?.message ?? (
-              <FormattedMessage
-                id="xpack.fleet.debug.healthCheckPanel.fetchError"
-                defaultMessage="Message: {errorMessage}"
-                values={{
-                  errorMessage: error?.message,
-                }}
-              />
-            )}
-          </EuiCallOut>
+          <KbnDangerCallout
+            announceOnMount
+            title="Error"
+            text={
+              error?.message ?? (
+                <FormattedMessage
+                  id="xpack.fleet.debug.healthCheckPanel.fetchError"
+                  defaultMessage="Message: {errorMessage}"
+                  values={{
+                    errorMessage: error?.message,
+                  }}
+                />
+              )
+            }
+          />
         </>
       )}
     </>

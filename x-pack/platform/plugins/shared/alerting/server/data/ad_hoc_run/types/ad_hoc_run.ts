@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { RawRule } from '../../../types';
 import type { RuleDomain } from '../../../application/rule/types';
-import type { AdHocRunStatus } from '../../../../common/constants';
+import type { AdHocRunStatus, BackfillInitiator } from '../../../../common/constants';
 
 export interface AdHocRunSchedule extends Record<string, unknown> {
   interval: string;
@@ -50,10 +51,18 @@ type AdHocRunRule = Omit<AdHocRunSORule, 'actions'> & Pick<RuleDomain, 'id' | 'a
 export interface AdHocRunSO extends Record<string, unknown> {
   apiKeyId: string;
   apiKeyToUse: string;
+  // UIAM API key snapshotted from the rule when the backfill was scheduled.
+  // Optional because legacy ad hoc runs and ES-only deployments don't have one.
+  uiamApiKey?: string;
+  // UIAM's verdict on whether `uiamApiKey` is an external (user-created Cloud) API key, also
+  // snapshotted from the rule. Absent means internal-key treatment (fail closed).
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;
   end?: string;
+  initiator: BackfillInitiator;
+  initiatorId?: string;
   rule: AdHocRunSORule;
   spaceId: string;
   start: string;
@@ -64,13 +73,17 @@ export interface AdHocRunSO extends Record<string, unknown> {
 export interface AdHocRun {
   apiKeyId: string;
   apiKeyToUse: string;
+  uiamApiKey?: string;
+  uiamApiKeyExternal?: boolean;
   createdAt: string;
   duration: string;
   enabled: boolean;
   end?: string;
   id: string;
+  initiator: BackfillInitiator;
+  initiatorId?: string;
   rule: AdHocRunRule;
-  spaceId: string;
+  spaceId: SpaceId;
   start: string;
   status: AdHocRunStatus;
   schedule: AdHocRunSchedule[];

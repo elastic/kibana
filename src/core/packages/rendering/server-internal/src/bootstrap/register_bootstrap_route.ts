@@ -51,13 +51,17 @@ export const registerBootstrapRoute = ({
     {
       path: '/bootstrap-anonymous.js',
       security: {
+        authc: {
+          enabled: 'optional',
+          reason:
+            'Anonymous bootstrap script must be loadable on pages like the login page where the user is not yet authenticated',
+        },
         authz: {
           enabled: false,
           reason: 'This route is only used for serving the bootstrap script.',
         },
       },
       options: {
-        authRequired: 'optional',
         tags: ['api'],
         access: 'public',
         excludeFromRateLimiter: true,

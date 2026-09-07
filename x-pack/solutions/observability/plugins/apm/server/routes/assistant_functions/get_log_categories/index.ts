@@ -8,8 +8,7 @@
 import datemath from '@elastic/datemath';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { KeyValuePair } from '@kbn/key-value-metadata-table';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -18,6 +17,7 @@ import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
 import { getDownstreamServiceResource } from '../get_observability_alert_details_context/get_downstream_dependency_name';
 import { getShouldMatchOrNotExistFilter } from '../utils/get_should_match_or_not_exist_filter';
+import { asKeyValuePairs } from '../utils/as_key_value_pair';
 
 export interface LogCategory {
   errorCategory: string;
@@ -126,10 +126,10 @@ export async function getLogCategories({
   const promises = categorizedLogsRes.aggregations?.sampling.categories?.buckets.map(
     async ({ doc_count: docCount, key, sample }) => {
       const hit = sample.hits.hits[0];
-      const event = unflattenKnownApmEventFields(hit?.fields);
+      const event = accessKnownApmEventFields(hit.fields);
 
       const sampleMessage = event.message as string;
-      const sampleTraceId = event.trace?.id;
+      const sampleTraceId = event[TRACE_ID];
       const errorCategory = key as string;
 
       if (!sampleTraceId) {
@@ -147,12 +147,12 @@ export async function getLogCategories({
     }
   );
 
-  const event = unflattenKnownApmEventFields(maybe(categorizedLogsRes.hits.hits[0])?.fields);
+  const hits = maybe(categorizedLogsRes.hits.hits[0])?.fields;
 
-  const sampleDoc = event as Record<string, string>;
+  const event = hits && accessKnownApmEventFields(hits);
 
   return {
     logCategories: await Promise.all(promises ?? []),
-    entities: getFlattenedKeyValuePairs(sampleDoc),
+    entities: asKeyValuePairs(event),
   };
 }

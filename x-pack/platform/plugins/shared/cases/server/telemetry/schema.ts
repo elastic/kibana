@@ -15,8 +15,9 @@ import type {
   SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
-  AttachmentItemsSchema,
+  AttachmentTypeStatsSchema,
   CustomFieldsSolutionTelemetrySchema,
+  ObservablesSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -29,29 +30,43 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
-interface AttachmentRegistrySchema {
-  type: 'array';
-  items: AttachmentItemsSchema;
-}
-
-const attachmentRegistrySchema: AttachmentRegistrySchema = {
-  type: 'array',
-  items: {
-    average: long,
-    maxOnACase: long,
-    total: long,
-    type: string,
+const attachmentTypeStatsSchema: AttachmentTypeStatsSchema = {
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of attachments of this type, across all cases' },
+  },
+  average: {
+    type: 'long',
+    _meta: { description: 'Average number of attachments of this type per case' },
   },
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
-  persistableAttachments: attachmentRegistrySchema,
-  externalAttachments: attachmentRegistrySchema,
+  attachmentsByType: {
+    DYNAMIC_KEY: attachmentTypeStatsSchema,
+  },
+  bySavedObject: {
+    legacy: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+    unified: {
+      total: {
+        type: 'long',
+        _meta: {
+          description:
+            'Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
+        },
+      },
+    },
+  },
   files: {
-    average: long,
     averageSize: long,
-    maxOnACase: long,
-    total: long,
     topMimeTypes: {
       type: 'array',
       items: {
@@ -74,12 +89,44 @@ const statusSchema: StatusSchema = {
   closed: long,
 };
 
+const observablesSchema: ObservablesSchema = {
+  auto: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables automatically extracted' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables automatically extracted' },
+    },
+  },
+  manual: {
+    default: {
+      type: 'long',
+      _meta: { description: 'Number of default type observables manually added' },
+    },
+    custom: {
+      type: 'long',
+      _meta: { description: 'Number of custom type observables manually added' },
+    },
+  },
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of observables' },
+  },
+};
+
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
   attachmentFramework: attachmentFrameworkSchema,
   totalWithAlerts: long,
   status: statusSchema,
+  observables: observablesSchema,
+  totalWithMaxObservables: {
+    type: 'long',
+    _meta: { description: 'Number of cases with maximum observables' },
+  },
 };
 
 const customFieldsSolutionTelemetrySchema: CustomFieldsSolutionTelemetrySchema = {
@@ -107,6 +154,19 @@ export const casesSchema: CasesTelemetrySchema = {
       status: statusSchema,
       syncAlertsOn: long,
       syncAlertsOff: long,
+      extractObservablesOn: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting enabled' },
+      },
+      extractObservablesOff: {
+        type: 'long',
+        _meta: { description: 'Automatically extract observables setting disabled' },
+      },
+      observables: observablesSchema,
+      totalWithMaxObservables: {
+        type: 'long',
+        _meta: { description: 'Number of cases with maximum observables' },
+      },
       totalUsers: long,
       totalParticipants: long,
       totalTags: long,
@@ -128,12 +188,54 @@ export const casesSchema: CasesTelemetrySchema = {
   },
   connectors: {
     all: {
-      all: { totalAttached: long },
-      itsm: { totalAttached: long },
-      sir: { totalAttached: long },
-      jira: { totalAttached: long },
-      resilient: { totalAttached: long },
-      swimlane: { totalAttached: long },
+      all: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of all cases with any connector attached' },
+        },
+      },
+      itsm: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow ITSM connector attached' },
+        },
+      },
+      sir: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with ServiceNow SIR connector attached' },
+        },
+      },
+      jira: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Jira connector attached' },
+        },
+      },
+      resilient: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Resilient connector attached' },
+        },
+      },
+      swimlane: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Swimlane connector attached' },
+        },
+      },
+      thehive: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with The Hive connector attached' },
+        },
+      },
+      caseswebhook: {
+        totalAttached: {
+          type: 'long',
+          _meta: { description: 'Total number of cases with Cases Webhook connector attached' },
+        },
+      },
       maxAttachedToACase: long,
     },
   },

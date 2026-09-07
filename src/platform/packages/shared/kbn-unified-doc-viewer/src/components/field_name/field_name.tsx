@@ -24,7 +24,8 @@ interface Props {
   fieldMapping?: DataViewField;
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
-  highlight?: string;
+  highlight?: string | string[];
+  disableMultiFieldBadge?: boolean;
 }
 
 export function FieldName({
@@ -35,6 +36,7 @@ export function FieldName({
   displayNameOverride,
   scripted = false,
   highlight = '',
+  disableMultiFieldBadge = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const fieldMappingDisplayName = fieldMapping?.displayName ? fieldMapping.displayName : fieldName;
@@ -68,20 +70,16 @@ export function FieldName({
             grow={false}
             data-test-subj={`tableDocViewRow-${fieldName}-name`}
           >
-            <EuiToolTip
-              position="top"
-              content={tooltip}
-              delay="long"
-              anchorClassName="eui-textBreakAll"
-            >
-              <EuiHighlight search={highlight}>{fieldDisplayName}</EuiHighlight>
+            <EuiToolTip position="top" content={tooltip} anchorClassName="eui-textBreakAll">
+              <EuiHighlight search={highlight} highlightAll>
+                {fieldDisplayName}
+              </EuiHighlight>
             </EuiToolTip>
           </EuiFlexItem>
 
-          {isMultiField && (
+          {isMultiField && !disableMultiFieldBadge && (
             <EuiToolTip
               position="top"
-              delay="long"
               content={i18n.translate(
                 'unifiedDocViewer.fieldChooser.discoverField.multiFieldTooltipContent',
                 {
@@ -90,6 +88,7 @@ export function FieldName({
               )}
             >
               <EuiBadge
+                tabIndex={0}
                 title=""
                 className="kbnDocViewer__fieldName_multiFieldBadge"
                 color="default"

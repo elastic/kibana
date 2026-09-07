@@ -6,7 +6,7 @@
  */
 
 import type { SeverityMappingItem, Threat } from '@kbn/securitysolution-io-ts-alerting-types';
-import { getMockThreatData } from '@kbn/security-solution-plugin/public/detections/mitre/mitre_tactics_techniques';
+import { getMockThreatData } from '@kbn/security-solution-plugin/common/detection_engine/mitre/mitre_tactics_techniques';
 import type {
   EqlRuleCreateProps,
   EsqlRuleCreateProps,
@@ -18,8 +18,6 @@ import type {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { CreateRulePropsRewrites } from './types';
-
-const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
@@ -234,48 +232,6 @@ export const getBuildingBlockRule = (
   ...rewrites,
 });
 
-export const getUnmappedRule = (
-  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
-): QueryRuleCreateProps => ({
-  type: 'query',
-  query: '*:*',
-  index: ['auditbeat-unmapped*'],
-  name: 'Rule with unmapped fields',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
-export const getUnmappedCCSRule = (
-  rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
-): QueryRuleCreateProps => ({
-  type: 'query',
-  query: '*:*',
-  index: [`${ccsRemoteName}:unmapped*`],
-  name: 'Rule with unmapped fields',
-  description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
 export const getExistingRule = (
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
 ): QueryRuleCreateProps => ({
@@ -384,8 +340,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'v3_linux_anomalous_network_activity',
-    'v3_linux_anomalous_process_all_hosts',
+    'v3_linux_anomalous_network_activity_ea',
+    'v3_linux_anomalous_process_all_hosts_ea',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',
@@ -432,28 +388,6 @@ export const getEsqlRule = (
   query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   name: 'ES|QL Rule',
   description: 'The new rule description.',
-  severity: 'high',
-  risk_score: 17,
-  tags: ['test', 'newRule'],
-  references: ['http://example.com/', 'https://example.com/'],
-  false_positives: ['False1', 'False2'],
-  threat: [getMitre1(), getMitre2()],
-  note: '# test markdown',
-  interval: '100m',
-  from: '1900-01-01T00:00:00.000Z',
-  max_signals: 100,
-  ...rewrites,
-});
-
-export const getCCSEqlRule = (
-  rewrites?: CreateRulePropsRewrites<EqlRuleCreateProps>
-): EqlRuleCreateProps => ({
-  type: 'eql',
-  language: 'eql',
-  query: 'any where process.name == "run-parts"',
-  name: 'New EQL Rule',
-  index: [`${ccsRemoteName}:run-parts`],
-  description: 'New EQL rule description.',
   severity: 'high',
   risk_score: 17,
   tags: ['test', 'newRule'],
@@ -537,8 +471,6 @@ export const indicatorRuleMatchingDoc = {
   matchedIndex: 'logs-ti_abusech.malware',
 };
 
-export const getSeveritiesOverride = (): string[] => ['Low', 'Medium', 'High', 'Critical'];
-
 export const getEditedRule = (): QueryRuleCreateProps =>
   getExistingRule({
     severity: 'medium',
@@ -549,7 +481,7 @@ export const getEditedRule = (): QueryRuleCreateProps =>
 export const getEndpointRule = (): QueryRuleCreateProps => ({
   type: 'query',
   query: 'event.kind:alert and event.module:(endpoint and not endgame)',
-  index: ['endpoint.alerts-*'],
+  index: ['logs-endpoint.alerts-*'],
   name: 'Endpoint Rule',
   description: 'The new rule description.',
   severity: 'high',

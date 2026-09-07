@@ -49,7 +49,7 @@ export const buildXjsonRules = (root: string = 'root') => {
       [/:/, { token: 'punctuation.colon' }],
       [/\s+/, { token: 'whitespace' }],
       [/["](?:(?:\\.)|(?:[^"\\]))*?["]\s*(?=:)/, { token: 'variable' }],
-      [/"""/, { token: 'string_literal', next: 'string_literal' }],
+      [/"""/, { token: 'string', next: 'string_literal' }],
       [/0[xX][0-9a-fA-F]+\b/, { token: 'constant.numeric' }],
       [/[+-]?\d+(?:(?:\.\d*)?(?:[eE][+-]?\d+)?)?\b/, { token: 'constant.numeric' }],
       [/(?:true|false)\b/, { token: 'constant.language.boolean' }],
@@ -98,29 +98,32 @@ export const buildXjsonRules = (root: string = 'root') => {
     ],
 
     string_literal: [
-      [/"""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
-      [/\\""""/, { token: 'punctuation.end_triple_quote', next: '@pop' }],
-      [/./, { token: 'multi_string' }],
+      [/"""/, { token: 'string', next: '@pop' }],
+      [/\\""""/, { token: 'string', next: '@pop' }],
+      [/./, { token: 'string' }],
     ],
   };
 };
-export const lexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
-
+// Monarch rules are written as array literals (e.g. [/regex/, action]) which TypeScript
+// infers as general arrays, not tuples. The IMonarchLanguageRule union requires tuples,
+// so the tokenizer shape cannot satisfy IMonarchLanguage without a type-level override.
+export const lexerRules = {
+  ...globals,
   defaultToken: 'invalid',
   tokenPostfix: '',
-
   tokenizer: { ...buildXjsonRules() },
-};
+} as monaco.languages.IMonarchLanguage;
 
 export const languageConfiguration: monaco.languages.LanguageConfiguration = {
   brackets: [
     ['{', '}'],
     ['[', ']'],
+    ['"""', '"""'],
   ],
   autoClosingPairs: [
     { open: '{', close: '}' },
     { open: '[', close: ']' },
     { open: '"', close: '"' },
+    { open: '"""', close: '"""' },
   ],
 };

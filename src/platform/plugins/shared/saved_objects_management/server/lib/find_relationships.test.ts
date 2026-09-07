@@ -13,7 +13,9 @@ import { findRelationships } from './find_relationships';
 import { managementMock } from '../services/management.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-const createObj = (parts: Partial<SavedObject<any>>): SavedObject<any> => ({
+const createObj = (
+  parts: Partial<SavedObject<any>> & { error?: SavedObjectError }
+): SavedObject<any> => ({
   id: 'id',
   type: 'type',
   attributes: {},
@@ -178,18 +180,24 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'some-type',
         meta: expect.any(Object),
+        managed: false,
+        references: [],
       },
       {
         id: 'ref-2',
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        managed: false,
+        references: [],
       },
       {
         id: 'parent-id',
         relationship: 'parent',
         type: 'parent-type',
         meta: expect.any(Object),
+        managed: false,
+        references: [],
       },
     ]);
     expect(invalidRelations).toHaveLength(0);
@@ -250,6 +258,8 @@ describe('findRelationships', () => {
         relationship: 'child',
         type: 'another-type',
         meta: expect.any(Object),
+        managed: false,
+        references: [],
       },
     ]);
 
@@ -323,7 +333,10 @@ describe('findRelationships', () => {
             path: 'path',
             uiCapabilitiesPath: 'uiCapabilitiesPath',
           },
+          namespaceType: undefined,
         },
+        managed: false,
+        references: [],
       },
     ]);
   });

@@ -30,9 +30,9 @@ export default ({ getService }: FtrProviderContext) => {
     user: USER
   ) {
     const { body, status } = await supertest
-      .post(`/internal/ml/saved_objects/update_trained_models_spaces`)
+      .post(`/api/ml/saved_objects/update_trained_models_spaces`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(getCommonRequestHeader('1'))
+      .set(getCommonRequestHeader('2023-10-31'))
       .send(requestBody);
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
@@ -77,6 +77,25 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body).to.eql({ [trainedModelId]: { type: 'trained-model', success: true } });
       await ml.api.assertTrainedModelSpaces(trainedModelId, [idSpace1]);
+    });
+
+    it('should fail when attempting to remove all spaces from a trained model', async () => {
+      await ml.api.assertTrainedModelSpaces(trainedModelId, [defaultSpaceId]);
+      const body = await runRequest(
+        {
+          modelIds: [trainedModelId],
+          spacesToAdd: [],
+          spacesToRemove: [defaultSpaceId],
+        },
+        400,
+        USER.ML_POWERUSER
+      );
+
+      expect(body.error).to.eql('Bad Request');
+      expect(body.message).to.eql(
+        `Cannot remove trained model '${trainedModelId}' from all spaces`
+      );
+      await ml.api.assertTrainedModelSpaces(trainedModelId, [defaultSpaceId]);
     });
 
     it('should fail to update trained model spaces for space the user has no access to', async () => {

@@ -21,10 +21,31 @@ export const GROUP_BY_ALERT = i18n.translate(
   }
 );
 
+export const GROUP_BY_ALERT_INVALID_FIELD_ERROR = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.groupByAlertInvalidFieldError',
+  {
+    defaultMessage: 'Invalid field. Select a field from the list.',
+  }
+);
+
 export const TIME_WINDOW = i18n.translate(
   'xpack.cases.systemActions.casesConnector.timeWindowLabel',
   {
     defaultMessage: 'Time window',
+  }
+);
+
+export const TIME_WINDOW_VALUE_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.timeWindowValueLabel',
+  {
+    defaultMessage: 'Time window value',
+  }
+);
+
+export const TIME_WINDOW_UNIT_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.timeWindowUnitLabel',
+  {
+    defaultMessage: 'Time window unit',
   }
 );
 
@@ -101,3 +122,28 @@ export const ATTACK_DISCOVERY_TEMPLATE_TOOLTIP = i18n.translate(
       'Attack Discovery Schedules fully manage Case actions, automatically filling in all fields for new Cases.',
   }
 );
+
+export const AUTO_PUSH_CASE_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.autoPushCaseLabel',
+  {
+    defaultMessage: 'Auto-push case to connected external system',
+  }
+);
+export const MAX_CASES_TO_OPEN_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.maxCasesToOpenLabel',
+  {
+    defaultMessage: 'Maximum amount of cases to open',
+  }
+);
+
+export const MAX_CASES_TO_OPEN_ERROR = (maxCases: number) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.maxCasesToOpenError', {
+    defaultMessage: '"Maximum cases" must be between 1 and {maxCases}.',
+    values: { maxCases },
+  });
+
+export const MAX_CASES_TO_OPEN_HELP_TEXT = (maxCases: number) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.maxCasesToOpenHelpText', {
+    defaultMessage: 'Set the maximum amount of cases to be opened. (Max {maxCases})',
+    values: { maxCases },
+  });

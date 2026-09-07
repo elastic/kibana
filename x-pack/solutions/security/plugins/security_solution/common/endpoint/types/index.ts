@@ -18,6 +18,7 @@ export type * from './agents';
 export type * from './sentinel_one';
 export type * from './microsoft_defender_endpoint';
 export type { ConditionEntriesMap, ConditionEntry } from './exception_list_items';
+export type * from './scripts_library';
 
 /**
  * Supported React-Router state for the Policy Details page
@@ -816,6 +817,18 @@ export type SafeEndpointEvent = Partial<{
   }>;
   file: Partial<{ path: ECSField<string> }>;
   registry: Partial<{ path: ECSField<string>; key: ECSField<string> }>;
+  device: Partial<{
+    serial_number: ECSField<string>;
+    vendor: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    product: Partial<{
+      name: ECSField<string>;
+      id: ECSField<string>;
+    }>;
+    type: ECSField<string>;
+  }>;
 }>;
 
 export interface SafeLegacyEndpointEvent {
@@ -1046,11 +1059,16 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     device_control?: DeviceControlFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -1074,6 +1092,7 @@ export interface PolicyConfig {
   linux: {
     advanced?: {};
     events: {
+      dns?: boolean;
       file: boolean;
       process: boolean;
       network: boolean;
@@ -1129,6 +1148,7 @@ export interface UIPolicyConfig {
   mac: Pick<
     PolicyConfig['mac'],
     | 'malware'
+    | 'ransomware'
     | 'events'
     | 'popup'
     | 'advanced'
@@ -1347,13 +1367,21 @@ export interface HostPolicyResponse {
           };
         };
         artifacts: {
+          /**
+           * The Global artifacts applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           global: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
+          /**
+           * The user defined artifacts (Kibana) applied to the host. Object could be empty if download of
+           * artifacts failed on the host.
+           */
           user: {
-            version: string;
-            identifiers: HostPolicyResponseAppliedArtifact[];
+            version?: string;
+            identifiers?: HostPolicyResponseAppliedArtifact[];
           };
         };
       };

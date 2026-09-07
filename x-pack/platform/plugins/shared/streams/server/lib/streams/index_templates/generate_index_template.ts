@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { getAncestorsAndSelf } from '@kbn/streams-schema';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { getAncestorsAndSelf, isDslLifecycle } from '@kbn/streams-schema';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { ASSET_VERSION } from '../../../../common/constants';
+import { failureStoreToIndexTemplateDataStreamOptions } from '../data_streams/manage_data_streams';
+import {
+  type FormattedIngestSettings,
+  formattedIngestSettingsToTemplateIndexSettings,
+} from '../state_management/streams/helpers';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
@@ -16,10 +23,26 @@ import { getIndexTemplateName } from './name';
 // with the index pattern.
 export const MAX_PRIORITY = 9223372036854775807n;
 
-export function generateIndexTemplate(name: string) {
+export function generateIndexTemplate(
+  name: string,
+  lifecycle?: IngestStreamLifecycle,
+  failureStore?: FailureStore,
+  isServerless?: boolean,
+  /** When the backing data stream is deferred, ingest settings must live on the template. */
+  deferredFormattedIngestSettings?: FormattedIngestSettings
+) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
     return [...acc, `${ancestorName}@stream.layer`];
   }, [] as string[]);
+
+  const dataStreamOptions =
+    failureStore !== undefined && isServerless !== undefined
+      ? failureStoreToIndexTemplateDataStreamOptions(failureStore, isServerless)
+      : undefined;
+
+  const deferredIndexSettings = deferredFormattedIngestSettings
+    ? formattedIngestSettingsToTemplateIndexSettings(deferredFormattedIngestSettings)
+    : {};
 
   return {
     name: getIndexTemplateName(name),
@@ -40,11 +63,7 @@ export function generateIndexTemplate(name: string) {
       settings: {
         index: {
           default_pipeline: getProcessingPipelineName(name),
-        },
-      },
-      data_stream_options: {
-        failure_store: {
-          enabled: true,
+          ...deferredIndexSettings,
         },
       },
       mappings: {
@@ -55,6 +74,16 @@ export function generateIndexTemplate(name: string) {
           },
         },
       },
+      ...(lifecycle && isDslLifecycle(lifecycle)
+        ? {
+            lifecycle: {
+              ...(lifecycle.dsl.data_retention
+                ? { data_retention: lifecycle.dsl.data_retention }
+                : {}),
+            },
+          }
+        : {}),
+      ...(dataStreamOptions ? { data_stream_options: dataStreamOptions } : {}),
     },
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs

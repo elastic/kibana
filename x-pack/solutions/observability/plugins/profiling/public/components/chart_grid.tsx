@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { take } from 'lodash';
 import React, { useMemo } from 'react';
 import type { TopNSubchart } from '../../common/topn';
@@ -49,7 +50,13 @@ export function ChartGrid({ limit, charts, showFrames, onChartClick }: ChartGrid
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGrid columns={2} gutterSize="m">
+      <EuiFlexGrid
+        columns={2}
+        gutterSize="m"
+        aria-label={i18n.translate('xpack.profiling.chartGrid.ariaLabel', {
+          defaultMessage: 'Stack trace charts',
+        })}
+      >
         {subCharts}
       </EuiFlexGrid>
     </>

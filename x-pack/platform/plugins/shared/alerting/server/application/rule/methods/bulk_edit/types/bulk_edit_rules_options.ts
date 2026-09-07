@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { KueryNode } from '@kbn/es-query';
+import type { RuleChangeTracking } from '@kbn/alerting-types';
 import type { ParamsModifier, ShouldIncrementRevision } from '../../../../../rules_client/common';
 import type {
   bulkEditRuleSnoozeScheduleSchema,
@@ -27,8 +28,10 @@ export type BulkEditFields = keyof Pick<
 
 export interface BulkEditOptionsCommon<Params extends RuleParams> {
   operations: BulkEditOperation[];
+  ignoreInternalRuleTypes?: boolean;
   paramsModifier?: ParamsModifier<Params>;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
+  changeTracking?: RuleChangeTracking;
 }
 
 export type BulkEditOptionsFilter<Params extends RuleParams> = BulkEditOptionsCommon<Params> & {

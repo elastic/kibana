@@ -6,17 +6,14 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
-import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
 
-import type {
-  ObltApiServicesFixture,
-  ObltParallelTestFixtures,
-  ObltParallelWorkerFixtures,
-} from './types';
+import type { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
 
 /**
- * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
+ * Does not merge `profilingSetupFixture`: it extends non-space `test`; `mergeTests`
+ * would overwrite the space-scoped `page` and break `scoutSpace` isolation.
+ * Profiling stays on single-thread `test` / `apiTest` / global setup.
  */
 export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
@@ -33,15 +30,10 @@ export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallel
     await use(extendedPageObjects);
   },
   apiServices: [
-    async (
-      { apiServices, kbnClient }: { apiServices: ApiServicesFixture; kbnClient: KbnClient },
-      use: (extendedApiServices: ObltApiServicesFixture) => Promise<void>
-    ) => {
-      const extendedApiServices = apiServices as ObltApiServicesFixture;
+    async ({ apiServices }, use) => {
       // extend with Observability specific API services
-      // extendedApiServices.<service_name> = getServiceApiHelper(kbnClient);
-
-      await use(extendedApiServices);
+      // apiServices.<service_name> = getServiceApiHelper(kbnClient);
+      await use(apiServices);
     },
     { scope: 'worker' },
   ],

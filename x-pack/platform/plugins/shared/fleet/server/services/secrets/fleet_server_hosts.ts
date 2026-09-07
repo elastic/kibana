@@ -75,14 +75,25 @@ export function getFleetServerHostsSecretReferences(
 ): SecretReference[] {
   const secretPaths: SecretReference[] = [];
 
-  if (typeof fleetServerHost.secrets?.ssl?.key === 'object') {
+  if (fleetServerHost.secrets?.ssl?.key && typeof fleetServerHost.secrets?.ssl?.key === 'object') {
     secretPaths.push({
       id: fleetServerHost.secrets.ssl.key.id,
     });
   }
-  if (typeof fleetServerHost.secrets?.ssl?.es_key === 'object') {
+  if (
+    fleetServerHost.secrets?.ssl?.es_key &&
+    typeof fleetServerHost.secrets?.ssl?.es_key === 'object'
+  ) {
     secretPaths.push({
       id: fleetServerHost.secrets.ssl.es_key.id,
+    });
+  }
+  if (
+    fleetServerHost.secrets?.ssl?.agent_key &&
+    typeof fleetServerHost.secrets?.ssl?.agent_key === 'object'
+  ) {
+    secretPaths.push({
+      id: fleetServerHost.secrets.ssl.agent_key.id,
     });
   }
 
@@ -104,6 +115,12 @@ function getFleetServerHostsSecretPaths(
     secretPaths.push({
       path: 'secrets.ssl.es_key',
       value: fleetServerHost.secrets.ssl.es_key,
+    });
+  }
+  if (fleetServerHost?.secrets?.ssl?.agent_key) {
+    secretPaths.push({
+      path: 'secrets.ssl.agent_key',
+      value: fleetServerHost.secrets.ssl.agent_key,
     });
   }
 

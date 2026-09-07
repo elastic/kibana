@@ -32,3 +32,5 @@ export const PRE_EXCLUDE_INDICES: string[] = [
 
 // Indices that are excludes from the search result (This patterns can't be excluded from the search)
 export const POST_EXCLUDE_INDICES = ['.']; // internal indices
+
+export const PRIVILEGED_USERS_RISK_MODIFIER = 1.5;

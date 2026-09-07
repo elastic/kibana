@@ -12,6 +12,8 @@ import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview'
 import errorApmOtelFixture from '../../__fixtures__/error_apm_otel.json';
 import otelExampleFixture from '../../__fixtures__/log_otel_example.json';
 import k8sContainerLogFixture from '../../__fixtures__/log_k8s_filebeat.json';
+import errorApmWithCulprit from '../../__fixtures__/error_apm_with_culprit.json';
+import exceptionUprocessedOtel from '../../__fixtures__/exception_unprocessed_otel.json';
 import { LogsOverview, type LogsOverviewProps } from './logs_overview';
 
 type Args = UnifiedDocViewerStorybookArgs<LogsOverviewProps>;
@@ -57,6 +59,27 @@ export const ApmErrorOtelExample: Story = {
   tags: ['apm', 'otel', 'log', 'error', 'exception', 'event'],
 };
 
+/**
+ * APM error with processor.event: error and culprit
+ */
+export const APMErrorExample: Story = {
+  name: 'APM Error',
+  args: {
+    hit: errorApmWithCulprit,
+  },
+  tags: ['apm', 'log', 'error', 'culprit'],
+};
+
+/**
+ * An OpenTelemetry exception event, without any processing
+ */
+export const OtelUnprocessedException: Story = {
+  name: 'OpenTelemetry uprocessed exception',
+  args: {
+    hit: exceptionUprocessedOtel,
+  },
+  tags: ['exception', 'otel', 'unprocessed'],
+};
 /**
  * Kubernetes container log captured by Filebeat.
  */

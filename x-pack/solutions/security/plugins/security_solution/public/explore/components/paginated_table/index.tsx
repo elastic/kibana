@@ -22,6 +22,7 @@ import {
   EuiPagination,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n as i18nCore } from '@kbn/i18n';
 import { noop } from 'lodash/fp';
 import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
@@ -227,7 +228,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
     <EuiButtonEmpty
       size="xs"
       color="text"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -319,6 +320,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                     itemsPerRow.length > 0 &&
                     totalCount >= itemsPerRow[0].numberOfRow && (
                       <EuiPopover
+                        aria-label={i18n.ROWS}
                         id="customizablePagination"
                         data-test-subj="loadingMoreSizeRowPopover"
                         button={button}
@@ -342,6 +344,12 @@ const PaginatedTableComponent: FC<SiemTables> = ({
                       pageCount={pageCount}
                       activePage={myActivePage}
                       onPageClick={goToPage}
+                      aria-label={i18nCore.translate(
+                        'xpack.securitySolution.paginatedTable.pagination.ariaLabel',
+                        {
+                          defaultMessage: 'Table pagination',
+                        }
+                      )}
                     />
                   )}
                 </PaginationWrapper>

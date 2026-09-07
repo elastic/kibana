@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -21,6 +21,7 @@
     "@kbn/data-views-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-plugin",
-    "@kbn/response-ops-alerts-fields-browser"
+    "@kbn/response-ops-alerts-fields-browser",
+    "@kbn/react-query"
   ]
 }

@@ -7,7 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxObject, ObjectScope } from '@elastic/eui-test-helpers';
 import type { Page } from '@playwright/test';
+import type {
+  EuiBasicTableObject,
+  EuiDataGridObject,
+  EuiDraggableObject,
+  EuiGlobalToastListObject,
+  EuiSelectableObject,
+  EuiSuperSelectObject,
+} from '../../../../eui_components';
+import type { RunA11yScanOptions } from '../../../../utils';
 import type { PathOptions } from '../../../../../common/services/kibana_url';
 
 /**
@@ -27,10 +37,36 @@ export type ScoutPage = Page & {
    */
   gotoApp: (appName: string, pathOptions?: PathOptions) => ReturnType<Page['goto']>;
   /**
-   * Waits for the Kibana loading spinner indicator to disappear.
-   * @returns A Promise resolving when the indicator is hidden.
+   * Presses a key until the element with the css selector is in focus. If multiple elements match it will
+   * press the key until the first occurrence of the element is focused.
+   * @param selector - The css selector for the element.
+   * @param key The key to press for keyboard navigation. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+   * @param maxElementsToTraverse The maximum number of times the key will be pressed before throwing an error. Defaults to 1000.
+   * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
    */
-  waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
+  keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
+
+  /**
+   * Performs an accessibility (a11y) scan of the current page using axe-core.
+   * Use this in tests to collect formatted violation summaries (one string per violation).
+   *
+   * @param options - Optional accessibility scan configuration (e.g. selectors to include, exclude, timeout).
+   * @returns A Promise resolving to an object with a 'violations' array containing
+   *          human-readable formatted strings for each detected violation (empty if none).
+   */
+  checkA11y: (options?: RunA11yScanOptions) => Promise<{
+    violations: string[];
+  }>;
+
+  /**
+   * Types text into an input field character by character with a specified delay between each character.
+   * @param selector - The css selector for the input element.
+   * @param text - The text to type into the input field.
+   * @param options - Optional configuration object.
+   * @param options.delay - The delay in milliseconds between typing each character (default: 25ms).
+   * @returns A Promise that resolves once the text has been typed.
+   */
+  typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
   /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
@@ -98,8 +134,40 @@ export type ScoutPage = Page & {
      * @returns A Promise that resolves once the text has been cleared.
      */
     clearInput: (selector: string) => Promise<void>;
+    /**
+     * Drags an element with the source selector to the element with the target selector.
+     * @param sourceSelector The selector for the source element to drag (supports 'data-test-subj' attributes).
+     * @param targetSelector The selector for the target element to drop onto (supports 'data-test-subj' attributes).
+     * @returns A Promise that resolves once the drag operation is complete.
+     */
+    dragTo: (sourceSelector: string, targetSelector: string) => Promise<void>;
+  };
+
+  /**
+   * Factory accessors for EUI Component Objects from `@elastic/eui-test-helpers`,
+   * pre-bound to this page. By default a Component Object is scoped to the whole
+   * page; pass an optional `scope` (a `Locator` or another Component Object) to
+   * target an instance inside a specific subtree — e.g. one combo box in a flyout
+   * when several share the same `data-test-subj`.
+   *
+   * @example
+   * await page.components.comboBox('dataViewSelector').setSelectedOptions(['logs-*']);
+   * await page.components.comboBox('roleComboBox', flyout).clear();
+   */
+  components: {
+    comboBox: (testSubj: string, scope?: ObjectScope) => EuiComboBoxObject;
+    dataGrid: (testSubj: string, scope?: ObjectScope) => EuiDataGridObject;
+    superSelect: (testSubj: string, scope?: ObjectScope) => EuiSuperSelectObject;
+    selectable: (testSubj: string, scope?: ObjectScope) => EuiSelectableObject;
+    basicTable: (testSubj: string, scope?: ObjectScope) => EuiBasicTableObject;
+    draggable: (testSubj: string, scope?: ObjectScope) => EuiDraggableObject;
+    /**
+     * Drives the global toast list (`EuiGlobalToastListObject`); `testSubj`
+     * defaults to `globalToastList`, the subj Kibana core sets on the list.
+     */
+    toast: (testSubj?: string, scope?: ObjectScope) => EuiGlobalToastListObject;
   };
 };
 
-export { scoutPageFixture } from './single_thread';
 export { scoutPageParallelFixture } from './parallel';
+export { scoutPageFixture } from './single_thread';

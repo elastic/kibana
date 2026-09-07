@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { SUB_ACTION } from '../../../common/sentinelone/constants';
-import type { SentinelOneActionParams } from '../../../common/sentinelone/types';
+import { render, screen } from '@testing-library/react';
+import { SUB_ACTION } from '@kbn/connector-schemas/sentinelone/constants';
+import type { SentinelOneActionParams } from '@kbn/connector-schemas/sentinelone';
 import SentinelOneParamsFields from './sentinelone_params';
 
 const actionParams = {
@@ -18,7 +18,7 @@ const actionParams = {
 
 describe('SentinelOneParamsFields renders', () => {
   test('all params fields are rendered', () => {
-    const wrapper = mountWithIntl(
+    render(
       <SentinelOneParamsFields
         actionParams={actionParams}
         errors={{ body: [] }}
@@ -27,9 +27,8 @@ describe('SentinelOneParamsFields renders', () => {
         messageVariables={[]}
       />
     );
-    expect(wrapper.find('[data-test-subj="actionTypeSelect"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="actionTypeSelect"]').first().prop('readOnly')).toEqual(
-      true
-    );
+    const actionTypeSelect = screen.getByTestId('actionTypeSelect');
+    expect(actionTypeSelect).toBeInTheDocument();
+    expect(actionTypeSelect).toBeDisabled();
   });
 });

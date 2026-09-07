@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
-import minimatch from 'minimatch';
+import type { MMRegExp } from 'minimatch';
+import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -41,6 +44,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -71,12 +75,16 @@ import { getEsPackage } from '../archive/storage';
 import { normalizeKuery } from '../../saved_object';
 import { getPackagePolicySavedObjectType } from '../../package_policy';
 import { auditLoggingService } from '../../audit_logging';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
 
-import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
+import type {
+  PackageAssetReference,
+  RegistryPolicyTemplate,
+} from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
@@ -224,6 +232,7 @@ interface GetInstalledPackagesOptions {
   perPage: number;
   sortOrder: 'asc' | 'desc';
   showOnlyActiveDataStreams?: boolean;
+  dependencyPackageName?: string;
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
@@ -265,6 +274,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -340,6 +350,7 @@ export async function getPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -355,7 +366,8 @@ export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
-  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType, dependencyPackageName } =
+    options;
 
   const result = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -374,6 +386,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
+      ...(dependencyPackageName
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.dependencies`,
+              nodeBuilder.is('name', dependencyPackageName)
+            ),
+          ]
+        : []),
       ...(dataStreamType
         ? [
             // Filter for a "queryable" marker
@@ -394,6 +415,7 @@ export async function getInstalledPackageSavedObjects(
   });
 
   for (const savedObject of result.saved_objects) {
+    savedObject.attributes = brandInstallationSpaceId(savedObject.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
@@ -424,7 +446,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -466,7 +488,7 @@ function getInstalledPackageSavedObjectDataStreams(
         const patternRegex = new minimatch.Minimatch(stream.name, {
           noglobstar: true,
           nonegate: true,
-        }).makeRe();
+        }).makeRe() as MMRegExp;
 
         return filterActiveDatastreamsName.some((dataStreamName) =>
           dataStreamName.match(patternRegex)
@@ -638,7 +660,7 @@ export const getPackageUsageStats = async ({
 
   const filter = normalizeKuery(
     packagePolicySavedObjectType,
-    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
+    `${packagePolicySavedObjectType}.package.name: ${pkgName} AND NOT ${packagePolicySavedObjectType}.latest_revision: false`
   );
   const agentPolicyCount = new Set<string>();
   // using saved Objects client directly, instead of the `list()` method of `package_policy` service
@@ -671,9 +693,34 @@ export const getPackageUsageStats = async ({
   };
 };
 
-interface PackageResponse {
+export async function getPackageDependencies(
+  pkgName: string,
+  pkgVersion: string
+): Promise<Array<{ name: string; version: string; title: string }>> {
+  const pkg = await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined);
+  if (!pkg) {
+    throw new PackageNotFoundError(`[${pkgName}-${pkgVersion}] package not found in registry`);
+  }
+
+  const deps = pkg.requires?.content ?? [];
+
+  return Promise.all(
+    deps.map(async (dep) => {
+      const depPkg = await Registry.fetchFindLatestPackageOrUndefined(dep.package);
+      return {
+        name: dep.package,
+        version: dep.version,
+        title: depPkg && 'title' in depPkg ? depPkg.title : dep.package,
+      };
+    })
+  );
+}
+
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -729,6 +776,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -748,6 +799,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 
@@ -755,11 +808,20 @@ export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  failOnUnexpectedError?: boolean;
 }) {
-  const { savedObjectsClient, pkgName, logger } = options;
+  const { savedObjectsClient, pkgName, logger, failOnUnexpectedError } = options;
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
+      // Not being installed is an expected condition (e.g. fetching input schema for a package
+      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
+      }
+      if (failOnUnexpectedError) {
+        throw e;
+      }
       logger?.error(e);
       return undefined;
     });
@@ -767,6 +829,8 @@ export async function getInstallationObject(options: {
   if (!installation) {
     return;
   }
+
+  installation.attributes = brandInstallationSpaceId(installation.attributes);
 
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
@@ -787,9 +851,12 @@ async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  const installations = res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter(
+    (so): so is SavedObject<Installation> => !isSavedObjectErrorResult(so)
+  );
 
   for (const installation of installations) {
+    installation.attributes = brandInstallationSpaceId(installation.attributes);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
@@ -824,18 +891,20 @@ export async function getInstalledPackageWithAssets(options: {
   if (!installation) {
     return;
   }
-  const assetsReference =
-    (typeof options.assetsFilter !== 'undefined'
-      ? installation.package_assets?.filter(({ path }) =>
-          typeof path !== 'undefined' ? options.assetsFilter!(path) : true
-        )
-      : installation.package_assets) ?? [];
 
   const esPackage = await getEsPackage(
     installation.name,
     installation.version,
-    assetsReference,
-    options.savedObjectsClient
+    installation.package_assets ?? [],
+    options.savedObjectsClient,
+    {
+      shouldFetchBuffer: (reference: PackageAssetReference) => {
+        if (typeof options.assetsFilter === 'undefined' || typeof reference.path === 'undefined') {
+          return true;
+        }
+        return options.assetsFilter(reference.path);
+      },
+    }
   );
 
   if (!esPackage) {
@@ -973,11 +1042,12 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
+  signal?: AbortSignal;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName } = options;
+  const { esClient, pkgName, signal } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName, signal);
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;

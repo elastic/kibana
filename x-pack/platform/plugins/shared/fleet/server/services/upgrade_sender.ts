@@ -25,11 +25,16 @@ export interface PackageUpdateEvent {
   packageType?: string;
   discoveryDatasets?: DiscoveryDataset[];
   automaticInstall?: boolean;
+  latestExecutedState?: {
+    name: string;
+    error?: string;
+  };
 }
 
 export enum UpdateEventType {
   PACKAGE_POLICY_UPGRADE = 'package-policy-upgrade',
   PACKAGE_INSTALL = 'package-install',
+  PACKAGE_ROLLBACK = 'package-rollback',
 }
 
 export interface UpgradeError {

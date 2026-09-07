@@ -22,7 +22,10 @@ export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
 
   const args = ['kbn', 'build-shared'];
   if (quiet) args.push('--quiet');
-  if (dist) args.push('--dist');
+  if (dist) {
+    args.push('--dist');
+    args.push('--no-cache');
+  }
 
   await execa('yarn', args, { cwd: REPO_ROOT, stdio });
 }

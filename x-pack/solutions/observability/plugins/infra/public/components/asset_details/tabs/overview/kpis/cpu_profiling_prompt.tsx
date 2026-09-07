@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useProfilingPluginSetting } from '../../../../../hooks/use_profiling_integration_setting';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
 
@@ -27,20 +26,25 @@ export function CpuProfilingPrompt() {
       gutterSize="s"
       data-test-subj="infraAssetDetailsCPUProfilingPrompt"
     >
-      <EuiFlexGroup alignItems="baseline" justifyContent="flexStart" gutterSize="xs">
+      <EuiFlexItem grow={false}>
         {i18n.translate('xpack.infra.cpuProfilingPrompt.promptText', {
           defaultMessage: 'View CPU Breakdown using',
         })}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj="infraCpuProfilingPromptProfilingButton"
           onClick={() => showTab('profiling')}
           flush="both"
+          aria-label={i18n.translate('xpack.infra.cpuProfilingPrompt.profilingButtonAriaLabel', {
+            defaultMessage: 'Profiling',
+          })}
         >
           {i18n.translate('xpack.infra.cpuProfilingPrompt.profilingLinkLabel', {
             defaultMessage: 'Profiling',
           })}
         </EuiButtonEmpty>
-      </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

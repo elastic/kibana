@@ -71,9 +71,15 @@ export function createAggregators({
   adHocTaskCounter,
   startingCapacity,
   taskPollingLifecycle,
+  executionControlService,
 }: CreateMonitoringStatsOpts): AggregatedStatProvider {
   const aggregators: AggregatedStatProvider[] = [
-    createConfigurationAggregator(config, startingCapacity, taskPollingLifecycle),
+    createConfigurationAggregator(
+      config,
+      startingCapacity,
+      taskPollingLifecycle,
+      executionControlService
+    ),
 
     createWorkloadAggregator({
       taskStore,
@@ -128,11 +134,7 @@ export function createMonitoringStatsStream(
 
 export function summarizeMonitoringStats(
   logger: Logger,
-  {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    last_update,
-    stats: { runtime, workload, configuration, utilization },
-  }: MonitoringStats,
+  { last_update, stats: { runtime, workload, configuration, utilization } }: MonitoringStats,
   config: TaskManagerConfig,
   assumedKibanaInstances: number
 ): RawMonitoringStats {

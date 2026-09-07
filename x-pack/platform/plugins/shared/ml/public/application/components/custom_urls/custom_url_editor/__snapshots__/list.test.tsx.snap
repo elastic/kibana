@@ -13,17 +13,17 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <label
+        <span
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-0"
         >
           Custom URL 1
-        </label>
+        </span>
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -36,6 +36,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
               <button
                 aria-label="Test custom URL"
@@ -47,7 +48,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="popout"
+                  data-euiicon-type="external"
                 />
               </button>
             </span>
@@ -64,6 +65,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
                 >
                   <button
                     aria-label="Delete custom URL"
@@ -188,17 +190,17 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <label
+        <span
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-1"
         >
           Custom URL 2
-        </label>
+        </span>
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -211,6 +213,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
               <button
                 aria-label="Test custom URL"
@@ -222,7 +225,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="popout"
+                  data-euiicon-type="external"
                 />
               </button>
             </span>
@@ -239,6 +242,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
                 >
                   <button
                     aria-label="Delete custom URL"
@@ -405,17 +409,17 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
     role="listitem"
   >
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-l-spaceBetween-center-row"
+      class="euiFlexGroup emotion-euiFlexGroup-m-spaceBetween-center-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
-        <label
+        <span
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-2"
         >
           Custom URL 3
-        </label>
+        </span>
       </div>
       <div
         class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -428,6 +432,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           >
             <span
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+              id="generated-id-wrapper"
             >
               <button
                 aria-label="Test custom URL"
@@ -439,7 +444,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="popout"
+                  data-euiicon-type="external"
                 />
               </button>
             </span>
@@ -456,6 +461,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
               >
                 <span
                   class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                  id="generated-id-wrapper"
                 >
                   <button
                     aria-label="Delete custom URL"

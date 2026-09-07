@@ -106,6 +106,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -116,6 +117,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -161,7 +167,9 @@ Object {
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "column-top-values-id-generated-uuid",
+          "splitAccessors": Array [
+            "column-top-values-id-generated-uuid",
+          ],
           "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],
@@ -271,6 +279,7 @@ Object {
           "negate": false,
           "params": Array [
             "signal-index",
+            "*:signal-index",
           ],
           "type": "phrases",
         },
@@ -281,6 +290,11 @@ Object {
               Object {
                 "match_phrase": Object {
                   "_index": "signal-index",
+                },
+              },
+              Object {
+                "match_phrase": Object {
+                  "_index": "*:signal-index",
                 },
               },
             ],
@@ -326,7 +340,9 @@ Object {
           "position": "top",
           "seriesType": "bar_stacked",
           "showGridlines": false,
-          "splitAccessor": "column-top-values-id-generated-uuid",
+          "splitAccessors": Array [
+            "column-top-values-id-generated-uuid",
+          ],
           "xAccessor": "column-timestamp-id-generated-uuid",
         },
       ],

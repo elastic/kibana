@@ -6,7 +6,6 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import fetch from 'node-fetch';
 import type { MetricEvent } from './types';
 
 const eventsToNDJSON = (events: MetricEvent[]) => {

@@ -30,7 +30,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 import type { FleetStart } from '@kbn/fleet-plugin/public';
@@ -58,27 +57,29 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { KqlPluginStart } from '@kbn/kql/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { CPSPluginStart } from '@kbn/cps/public';
+import { getSyntheticsProjectPickerAccess } from './cps_app_access';
+import {
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+} from '../common/cps_feature_flag';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
 import { OVERVIEW_ROUTE } from '../common/constants/ui';
 import { locators } from './apps/locators';
 import { syntheticsAlertTypeInitializers } from './apps/synthetics/lib/alert_types';
-import {
-  SYNTHETICS_MONITORS_EMBEDDABLE,
-  SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-} from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
 
 export interface ClientPluginsSetup {
@@ -89,7 +90,6 @@ export interface ClientPluginsSetup {
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   share: SharePluginSetup;
-  security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   cloud?: CloudSetup;
   embeddable: EmbeddableSetup;
@@ -100,18 +100,17 @@ export interface ClientPluginsSetup {
 export interface ClientPluginsStart {
   fleet: FleetStart;
   data: DataPublicPluginStart;
+  kql: KqlPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   discover: DiscoverStart;
   inspector: InspectorPluginStart;
   contentManagement: ContentManagementPublicStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   exploratoryView: ExploratoryViewPublicStart;
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   share: SharePluginStart;
-  security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases?: CasesPublicStart;
   dataViews: DataViewsPublicPluginStart;
@@ -130,12 +129,13 @@ export interface ClientPluginsStart {
   licenseManagement?: LicenseManagementUIPluginSetup;
   licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   settings: SettingsStart;
+  agentBuilder?: AgentBuilderPluginStart;
+  cps?: CPSPluginStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {
@@ -174,6 +174,7 @@ export class SyntheticsPlugin
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
+        isCCSEnabled: !this._isServerless,
       });
     });
 
@@ -214,6 +215,7 @@ export class SyntheticsPlugin
                 defaultMessage: 'Monitors',
               }),
           path: '/',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
         {
           id: 'certificates',
@@ -221,6 +223,7 @@ export class SyntheticsPlugin
             defaultMessage: 'TLS Certificates',
           }),
           path: '/certificates',
+          visibleIn: ['globalSearch', 'projectSideNav'],
         },
       ],
       mount: async (params: AppMountParameters) => {
@@ -238,15 +241,17 @@ export class SyntheticsPlugin
   public start(coreStart: CoreStart, pluginsStart: ClientPluginsStart): void {
     const { triggersActionsUi } = pluginsStart;
 
-    pluginsStart.dashboard.registerDashboardPanelSettings(
-      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-      () => {
-        return { placementSettings: { width: 10, height: 8 } };
-      }
-    );
-    pluginsStart.dashboard.registerDashboardPanelSettings(SYNTHETICS_MONITORS_EMBEDDABLE, () => {
-      return { placementSettings: { width: 30, height: 12 } };
-    });
+    if (
+      coreStart.featureFlags.getBooleanValue(
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_FEATURE_FLAG,
+        OBSERVABILITY_SYNTHETICS_CPS_ENABLED_DEFAULT
+      )
+    ) {
+      pluginsStart.cps?.cpsManager?.registerAppAccess(
+        'synthetics',
+        getSyntheticsProjectPickerAccess
+      );
+    }
 
     registerSyntheticsUiActions(coreStart, pluginsStart);
 

@@ -9,25 +9,31 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import type { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import type { Conversation } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useConversation } from '../../assistant/use_conversation';
 import { useAssistantContext } from '../../assistant_context';
-import { useLoadConnectors } from '../use_load_connectors';
 import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onConversationUpdate?: ({ cId }: { cId: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
+  /**
+   * The ID of the feature to load connectors for.
+   * By default, it loads connectors for 'elastic_assistant'.
+   */
+  loadConnectorFeatureId?: string;
 }
 
 export const ConnectorSetup = ({
   conversation: defaultConversation,
   onConversationUpdate,
   updateConversationsOnSaveConnector = true,
+  loadConnectorFeatureId = 'elastic_assistant',
 }: ConnectorSetupProps) => {
   const conversation = useMemo(
     () => defaultConversation || WELCOME_CONVERSATION,
@@ -35,9 +41,15 @@ export const ConnectorSetup = ({
   );
   const { setApiConfig } = useConversation();
   // Access all conversations so we can add connector to all on initial setup
-  const { actionTypeRegistry, http, inferenceEnabled } = useAssistantContext();
+  const { actionTypeRegistry, assistantAvailability, http, settings } = useAssistantContext();
 
-  const { refetch: refetchConnectors } = useLoadConnectors({ http, inferenceEnabled });
+  const isMissingConnectorPrivileges = !assistantAvailability.hasConnectorsAllPrivilege;
+
+  const { refetch: refetchConnectors } = useLoadConnectors({
+    http,
+    featureId: loadConnectorFeatureId,
+    settings,
+  });
 
   const { data: actionTypes } = useLoadActionTypes({ http });
 
@@ -90,6 +102,7 @@ export const ConnectorSetup = ({
       onSelectActionType={setSelectedActionType}
       selectedActionType={selectedActionType}
       actionTypeSelectorInline={true}
+      isMissingConnectorPrivileges={isMissingConnectorPrivileges}
     />
   );
 };

@@ -13,6 +13,7 @@ import type { EntityTypes } from '../../common/http_api/shared/entity_type';
 import type { GetTimeRangeMetadataResponse } from '../../common/metrics_sources/get_has_data';
 import { getTimeRangeMetadataResponseRT } from '../../common/metrics_sources/get_has_data';
 import { useFetcher } from './use_fetcher';
+import { useProjectRouting } from './use_project_routing';
 
 export const useTimeRangeMetadata = ({
   dataSource,
@@ -20,29 +21,37 @@ export const useTimeRangeMetadata = ({
   filters,
   start,
   end,
+  isInventoryView = false,
 }: {
   kuery?: string;
   filters?: string;
   dataSource: EntityTypes;
   start: string;
   end: string;
+  isInventoryView?: boolean;
 }): FetcherResult<GetTimeRangeMetadataResponse> => {
+  // Schema availability is scoped to the CPS projects being searched, so a
+  // project-picker change must re-resolve the metadata.
+  const projectRouting = useProjectRouting();
+
   const { data, refetch, status } = useFetcher(
     async (callApi) => {
       const response = await callApi('/api/metrics/source/time_range_metadata', {
         method: 'GET',
+        ...(projectRouting ? { headers: { 'x-project-routing': projectRouting } } : {}),
         query: {
           from: start,
           to: end,
           kuery,
           dataSource,
           filters,
+          isInventoryView,
         },
       });
 
       return decodeOrThrow(getTimeRangeMetadataResponseRT)(response);
     },
-    [start, end, kuery, filters, dataSource],
+    [start, end, kuery, filters, dataSource, isInventoryView, projectRouting],
     {
       reloadRequestTimeUpdateEnabled: false,
     }

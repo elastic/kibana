@@ -75,7 +75,9 @@ describe('class Screenshots', () => {
     new Screenshots(
       browserDriverFactory,
       mockLogger,
+      // @ts-expect-error upgrade typescript v5.9.3
       mockPackageInfo,
+      // @ts-expect-error upgrade typescript v5.9.3
       mockHttpSetup,
       mockConfig,
       mockCloudSetup

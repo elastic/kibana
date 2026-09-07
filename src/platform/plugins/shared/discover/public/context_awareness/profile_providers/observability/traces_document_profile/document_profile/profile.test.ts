@@ -8,13 +8,14 @@
  */
 
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataSourceContext, RootContext } from '../../../../profiles';
 import { DataSourceCategory, DocumentType, SolutionType } from '../../../../profiles';
-import { createContextAwarenessMocks } from '../../../../__mocks__';
+import { createProfileProviderSharedServicesMock } from '../../../../__mocks__';
 import { createObservabilityTracesDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
-import type { ProfileProviderServices } from '../../../profile_provider_services';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../toolkit';
 
 describe('tracesDocumentProfileProvider', () => {
   const getRootContext = ({
@@ -44,9 +45,7 @@ describe('tracesDocumentProfileProvider', () => {
     isMatch: false,
   };
 
-  const mockServices: ProfileProviderServices = {
-    ...createContextAwarenessMocks().profileProviderServices,
-  };
+  const mockServices = createProfileProviderSharedServicesMock();
 
   describe('when root profile is observability', () => {
     const profileId = OBSERVABILITY_ROOT_PROFILE_ID;
@@ -87,6 +86,65 @@ describe('tracesDocumentProfileProvider', () => {
           }),
         })
       ).toEqual(RESOLUTION_MATCH);
+    });
+  });
+
+  describe('getDocViewer', () => {
+    const spanDocumentProfileProvider =
+      createObservabilityTracesDocumentProfileProvider(mockServices);
+
+    const getDocViewer = spanDocumentProfileProvider.profile.getDocViewer!(
+      () => ({
+        title: 'test title',
+        docViewsRegistry: (registry) => registry,
+      }),
+      {
+        context: { type: DocumentType.Trace },
+        toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+      }
+    );
+
+    it('adds only the overview tab when the record has no gen_ai fields', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', { 'trace.id': ['c0ffee'] }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll().map(({ id }) => id)).toEqual(['doc_view_obs_traces_overview']);
+    });
+
+    it('adds the GenAI tab when the record has gen_ai fields', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', {
+          'trace.id': ['c0ffee'],
+          'attributes.gen_ai.request.model': ['gpt-4o'],
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      expect(registry.getAll().map(({ id }) => id)).toEqual([
+        'doc_view_obs_traces_overview',
+        'doc_view_obs_traces_genai',
+      ]);
+    });
+
+    it('registers the GenAI tab with viewGenAi EBT click attributes', () => {
+      const docViewer = getDocViewer({
+        record: buildTraceMockRecord('traces-index', {
+          'trace.id': ['c0ffee'],
+          'attributes.gen_ai.request.model': ['gpt-4o'],
+        }),
+      });
+
+      const registry = new DocViewsRegistry();
+      docViewer.docViewsRegistry(registry);
+
+      const genAiDocView = registry.getAll().find(({ id }) => id === 'doc_view_obs_traces_genai');
+      expect(genAiDocView?.ebt).toEqual({ action: 'viewGenAi', element: 'docViewerTabs' });
     });
   });
 

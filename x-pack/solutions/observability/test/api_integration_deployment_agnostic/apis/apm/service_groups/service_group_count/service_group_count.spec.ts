@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
@@ -23,21 +23,28 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const apmApiClient = getService('apmApi');
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
+  const retry = getService('retry');
 
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  const cleanUpAlerts = ({ roleAuthc, ruleId }: { roleAuthc: RoleCredentials; ruleId: string }) => {
+  const cleanUpAlerts = ({
+    roleAuthc,
+    ruleId,
+  }: {
+    roleAuthc: RoleCredentials;
+    ruleId?: string;
+  }) => {
     return alertingApi.cleanUpAlerts({
       roleAuthc,
-      ruleId,
+      ...(ruleId ? { ruleId } : {}),
       alertIndexName: APM_ALERTS_INDEX,
       connectorIndexName: APM_ACTION_VARIABLE_INDEX,
       consumer: 'apm',
     });
   };
 
-  describe('Service group counts', () => {
+  describe('Service group counts', function () {
     let synthbeansServiceGroupId: string;
     let opbeansServiceGroupId: string;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
@@ -83,7 +90,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-        await cleanUpAlerts({ roleAuthc, ruleId });
+        await cleanUpAlerts({ roleAuthc });
         const createdRule = await alertingApi.createRule({
           name: 'Latency threshold | synth-go',
           params: {
@@ -100,8 +107,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           roleAuthc,
         });
 
+        expect(createdRule.id).to.be.ok();
         ruleId = createdRule.id;
-        await alertingApi.waitForAlertInIndex({ ruleId, indexName: APM_ALERTS_INDEX });
+        await alertingApi.runRule(roleAuthc, ruleId);
+        await alertingApi.waitForAlertInIndex({
+          ruleId,
+          indexName: APM_ALERTS_INDEX,
+        });
       });
 
       after(async () => {
@@ -110,11 +122,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns the correct number of alerts', async () => {
-        const response = await getServiceGroupCounts(apmApiClient);
-        expect(response.status).to.be(200);
-        expect(Object.keys(response.body).length).to.be(2);
-        expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
-        expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
+        // Retry to handle timing/indexing flakiness - alert exists but aggregation may need time to update
+        await retry.tryForTime(10000, async () => {
+          const response = await getServiceGroupCounts(apmApiClient);
+          expect(response.status).to.be(200);
+          expect(Object.keys(response.body).length).to.be(2);
+          expect(response.body[synthbeansServiceGroupId]).to.have.property('alerts', 1);
+          expect(response.body[opbeansServiceGroupId]).to.have.property('alerts', 0);
+        });
       });
     });
   });

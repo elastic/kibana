@@ -94,6 +94,7 @@ const mockCase: Cases[0] = {
   totalAlerts: 0,
   settings: {
     syncAlerts: true,
+    extractObservables: false,
   },
   observables: [],
   severity: CaseSeverity.LOW,

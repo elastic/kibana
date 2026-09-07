@@ -6,17 +6,13 @@
       ],
       "help": "__flag__",
       "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "h": [],
-      "s": [],
-      "local": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
       ],
       "time": [
         "nanos",
@@ -26,6 +22,23 @@
         "m",
         "h",
         "d"
+      ],
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "h": [
+        "insertOrder",
+        "timeInQueue",
+        "priority",
+        "source"
+      ],
+      "s": [],
+      "local": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
       ]
     },
     "methods": [

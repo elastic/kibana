@@ -45,7 +45,7 @@ describe('<UpdateStatus />', () => {
     expect(result.asFragment()).toMatchInlineSnapshot(`
       <DocumentFragment>
         <div
-          class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
+          class="euiFlexGroup emotion-euiFlexGroup-responsive-m-flexStart-stretch-row"
         >
           <div
             class="euiFlexItem emotion-euiFlexItem-growZero"

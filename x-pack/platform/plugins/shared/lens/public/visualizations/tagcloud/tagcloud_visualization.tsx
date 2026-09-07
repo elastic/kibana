@@ -21,15 +21,17 @@ import type { SystemPaletteExpressionFunctionDefinition } from '@kbn/charts-plug
 import useObservable from 'react-use/lib/useObservable';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { FormatFactory } from '@kbn/visualization-ui-components';
+import { LENS_TAGCLOUD_ID } from '@kbn/lens-common';
 import type { OperationMetadata, Visualization } from '../..';
 import { getColorMappingDefaults } from '../../utils';
 import type { TagcloudState } from './types';
 import { getSuggestions } from './suggestions';
-import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { convertToRuntimeState } from './runtime_state';
+import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { TagcloudAppearanceSettings } from './tagcloud_toolbar';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -43,14 +45,14 @@ export const getTagcloudVisualization = ({
   kibanaTheme: ThemeServiceStart;
   formatFactory: FormatFactory;
 }): Visualization<TagcloudState> => ({
-  id: 'lnsTagcloud',
+  id: LENS_TAGCLOUD_ID,
 
   getVisualizationTypeId() {
     return this.id;
   },
   visualizationTypes: [
     {
-      id: 'lnsTagcloud',
+      id: LENS_TAGCLOUD_ID,
       icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
       sortPriority: 12,
@@ -324,9 +326,10 @@ export const getTagcloudVisualization = ({
     return null;
   },
 
-  ToolbarComponent(props) {
-    return <TagcloudToolbar {...props} />;
+  FlyoutToolbarComponent(props) {
+    return <FlyoutToolbar {...props} contentMap={{ style: TagcloudAppearanceSettings }} />;
   },
+
   getTelemetryEventsOnSave(state, prevState) {
     return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },

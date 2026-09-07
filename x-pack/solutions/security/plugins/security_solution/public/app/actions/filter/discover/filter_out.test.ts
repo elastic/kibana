@@ -52,7 +52,7 @@ describe('createFilterOutDiscoverCellActionFactory', () => {
   });
 
   it('should return icon type', () => {
-    expect(filterOutAction.getIconType(context)).toEqual('minusInCircle');
+    expect(filterOutAction.getIconType(context)).toEqual('minusCircle');
   });
 
   describe('isCompatible', () => {

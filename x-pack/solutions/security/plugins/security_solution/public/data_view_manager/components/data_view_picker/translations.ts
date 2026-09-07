@@ -25,6 +25,13 @@ export const DEFAULT_SECURITY_ALERT_DATA_VIEW = i18n.translate(
   }
 );
 
+export const DEFAULT_SECURITY_ATTACK_DATA_VIEW = i18n.translate(
+  'xpack.securitySolution.dataViewManager.defaultSecurityAttackDataView',
+  {
+    defaultMessage: 'Security solution attacks',
+  }
+);
+
 export const SECURITY_SOLUTION_EXPLORE_DATA_VIEW = i18n.translate(
   'xpack.securitySolution.dataViewManager.securitySolutionExploreDataView',
   {

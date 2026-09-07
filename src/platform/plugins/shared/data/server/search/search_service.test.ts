@@ -13,7 +13,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { DataPluginStart, DataPluginStartDependencies } from '../plugin';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
-import { createIndexPatternsStartMock } from '../data_views/mocks';
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 import type { SearchServiceSetupDependencies } from './search_service';
 import { SearchService } from './search_service';
@@ -128,6 +128,45 @@ describe('Search service', () => {
       mockScopedClient = searchPluginStart.asScoped(r);
     });
 
+    describe('asScoped with opts', () => {
+      it('calls elasticsearch.client.asScoped with only request when opts is omitted', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        searchPluginStart.asScoped(request);
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request);
+      });
+
+      it('calls elasticsearch.client.asScoped with request and projectRouting: "space" when opts.projectRouting is "space"', () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = { url: new URL('https://kibana/s/my-space') } as any;
+        searchPluginStart.asScoped(request, { projectRouting: 'space' });
+
+        expect(asScopedSpy).toHaveBeenCalledTimes(1);
+        expect(asScopedSpy).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+      });
+
+      it('returns a scoped client that can search when called with opts', async () => {
+        const asScopedSpy = mockCoreStart.elasticsearch.client.asScoped as jest.Mock;
+        asScopedSpy.mockClear();
+
+        const request = {} as any;
+        const scopedClient = searchPluginStart.asScoped(request, {
+          projectRouting: 'space',
+        });
+
+        expect(scopedClient).toHaveProperty('search');
+        expect(scopedClient).toHaveProperty('cancel');
+        const res = await lastValueFrom(scopedClient.search({ params: {} }));
+        expect(res).toBeDefined();
+      });
+    });
+
     describe('search', () => {
       it('searches using the original request if not restoring, trackId is not called if there is no id in the response', async () => {
         const searchRequest = { params: {} };
@@ -146,7 +185,7 @@ describe('Search service', () => {
 
         expect(callOptions).toBe(options);
         expect(request).toBe(searchRequest);
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('searches using the original request if `id` is provided', async () => {
@@ -204,7 +243,7 @@ describe('Search service', () => {
 
         const result = await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
         expect(result?.isStored).toBeUndefined();
       });
 
@@ -222,7 +261,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(0);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(0);
       });
 
       it('calls `trackId` once, if the response contains an `id`, session is stored and not restoring', async () => {
@@ -245,9 +284,9 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).toBeCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
 
-        expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
+        expect(mockSessionClient.trackId.mock.calls[0]).toEqual(['my_id', options, true]);
       });
 
       it('does not call `trackId` if search is already tracked', async () => {
@@ -258,7 +297,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if restoring', async () => {
@@ -269,7 +308,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if no session id provided', async () => {
@@ -280,7 +319,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
     });
 
@@ -497,9 +536,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
@@ -518,15 +555,23 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
-          'Failed to extend the expiration of some searches'
-        );
+        await expect(extendRes).rejects.toThrow('Failed to extend the expiration of some searches');
 
         expect(mockSessionClient.extend).not.toHaveBeenCalled();
         const [searchId, keepAlive, options] = mockStrategy.extend.mock.calls[0];
         expect(searchId).toBe('def');
         expect(keepAlive).toContain('ms');
         expect(options).toHaveProperty('strategy', ENHANCED_ES_SEARCH_STRATEGY);
+      });
+    });
+
+    describe('updateSessionStatuses', () => {
+      it('calls updateSessionStatuses on the session client', async () => {
+        mockSessionClient.updateStatuses = jest.fn().mockResolvedValue(undefined);
+
+        await mockScopedClient.updateSessionStatuses(['id1', 'id2']);
+
+        expect(mockSessionClient.updateStatuses).toHaveBeenCalledWith(['id1', 'id2']);
       });
     });
   });

@@ -9,6 +9,7 @@ import { type ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 export interface LogEventsDependencies {
   embeddable: EmbeddableStart;
@@ -17,12 +18,15 @@ export interface LogEventsDependencies {
 }
 
 export interface LogEventsProps {
-  query: Query;
+  query?: Query;
   timeRange: TimeRange;
   index: string;
+  // Query for context filters that shouldn't trigger highlighting (e.g., trace IDs, span IDs)
+  nonHighlightingQuery?: Query;
   displayOptions?: {
     solutionNavIdOverride?: 'oblt' | 'security' | 'search';
     enableDocumentViewer?: boolean;
     enableFilters?: boolean;
   };
+  executionContext?: KibanaExecutionContext;
 }

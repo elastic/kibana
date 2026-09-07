@@ -14,6 +14,13 @@ export const NEW = i18n.translate(
   }
 );
 
+export const NEW_ENTRY_OPTIONS_ARIA_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.newEntryOptionsAriaLabel',
+  {
+    defaultMessage: 'New knowledge base entry options',
+  }
+);
+
 export const INDEX = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.indexLabel',
   {
@@ -282,6 +289,13 @@ export const KNOWLEDGE_BASE_DOCUMENTATION = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseDocumentation',
   {
     defaultMessage: 'Learn more',
+  }
+);
+
+export const KNOWLEDGE_BASE_TABLE_CAPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettingsManagement.knowledgeBaseTableCaption',
+  {
+    defaultMessage: 'Knowledge base entries',
   }
 );
 

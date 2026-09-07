@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FleetError } from '../../errors';
 import { packagePolicyService } from '../../services';
 
 import {
@@ -122,7 +123,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         undefined
       );
 
@@ -192,7 +193,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         previousSyncIntegrationsData
       );
 
@@ -240,7 +241,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         previousSyncIntegrationsData
       );
 
@@ -351,7 +352,11 @@ describe('custom assets', () => {
     });
 
     it('should return pipelines from vars', async () => {
-      const pipelines = await getPipelinesFromVars(esClientMock, {} as any, new AbortController());
+      const pipelines = await getPipelinesFromVars(
+        esClientMock,
+        {} as any,
+        new AbortController().signal
+      );
 
       expect(pipelines).toEqual([
         {
@@ -407,7 +412,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -440,7 +445,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -475,7 +480,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -539,7 +544,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -603,7 +608,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -641,7 +646,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -672,7 +677,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -702,11 +707,16 @@ describe('custom assets', () => {
               },
             ],
             version: 1,
+            description: 'description pipeline',
+            created_date: '2024-01-01T12:00:00.000Z',
+            created_date_millis: 1704110400000,
+            modified_date: '2025-01-01T12:00:00.000Z',
+            modified_date_millis: 1735732800000,
           },
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -721,6 +731,7 @@ describe('custom assets', () => {
             },
           ],
           version: 1,
+          description: 'description pipeline',
         },
         expect.anything()
       );
@@ -764,7 +775,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -820,7 +831,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -877,8 +888,100 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
+      );
+
+      expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
+    });
+
+    it('should not update ingest pipeline if not changed except timestamps', async () => {
+      esClientMock = {
+        ingest: {
+          getPipeline: jest.fn().mockResolvedValue({
+            'logs-system.auth@custom': {
+              processors: [
+                {
+                  user_agent: {
+                    field: 'user_agent',
+                  },
+                },
+              ],
+              created_date_millis: 1762258252589,
+            },
+          }),
+          putPipeline: jest.fn().mockResolvedValue({}),
+        },
+      };
+
+      await installCustomAsset(
+        {
+          is_deleted: false,
+          name: 'logs-system.auth@custom',
+          package_name: 'system',
+          package_version: '0.1.0',
+          pipeline: {
+            processors: [
+              {
+                user_agent: {
+                  field: 'user_agent',
+                },
+              },
+            ],
+            created_date_millis: 1762258252588,
+          },
+          type: 'ingest_pipeline',
+        },
+        esClientMock,
+        new AbortController().signal,
+        { debug: jest.fn() } as any
+      );
+
+      expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();
+    });
+
+    it('should not create ingest pipeline if has enrich processor', async () => {
+      esClientMock = {
+        ingest: {
+          getPipeline: jest.fn().mockResolvedValue({}),
+          putPipeline: jest.fn().mockResolvedValue({}),
+        },
+      };
+
+      await expect(
+        installCustomAsset(
+          {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '0.1.0',
+            pipeline: {
+              processors: [
+                {
+                  enrich: {
+                    field: 'test_field',
+                    policy_name: 'test_enrich_policy',
+                    target_field: 'target',
+                  },
+                },
+              ],
+              version: 1,
+              description: 'description pipeline',
+              created_date: '2024-01-01T12:00:00.000Z',
+              created_date_millis: 1704110400000,
+              modified_date: '2025-01-01T12:00:00.000Z',
+              modified_date_millis: 1735732800000,
+            },
+            type: 'ingest_pipeline',
+          },
+          esClientMock,
+          new AbortController().signal,
+          { debug: jest.fn() } as any
+        )
+      ).rejects.toThrow(
+        new FleetError(
+          `Syncing ingest pipelines that reference enrich policies is not supported. Please sync manually.`
+        )
       );
 
       expect(esClientMock.ingest.putPipeline).not.toHaveBeenCalled();

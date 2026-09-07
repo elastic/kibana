@@ -32,6 +32,7 @@ export async function processDocument(
         resolvedDocument,
       },
       visitedDocumentNodes: new Set(),
+      parent: undefined,
       parentNode: resolvedDocument.document,
       parentKey: '',
     },
@@ -88,6 +89,7 @@ export async function processDocument(
         node: resolvedRef.refNode,
         context: childContext,
         visitedDocumentNodes: new Set(),
+        parent: traverseItem,
         parentNode: traverseItem.parentNode,
         parentKey: traverseItem.parentKey,
       });
@@ -103,6 +105,7 @@ export async function processDocument(
           node: nodeItem as DocumentNode,
           context: traverseItem.context,
           visitedDocumentNodes: traverseItem.visitedDocumentNodes,
+          parent: traverseItem,
           parentNode: traverseItem.node,
           parentKey: i,
         });
@@ -117,6 +120,7 @@ export async function processDocument(
           node: value as DocumentNode,
           context: traverseItem.context,
           visitedDocumentNodes: traverseItem.visitedDocumentNodes,
+          parent: traverseItem,
           parentNode: traverseItem.node,
           parentKey: key,
         });

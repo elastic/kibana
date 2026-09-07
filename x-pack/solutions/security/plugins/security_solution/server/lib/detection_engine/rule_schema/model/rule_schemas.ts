@@ -16,7 +16,7 @@ import type {
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
-import * as z from '@kbn/zod';
+import * as z from '@kbn/zod/v4';
 import type { CreateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/create';
 import type { UpdateRuleData } from '@kbn/alerting-plugin/server/application/rule/methods/update';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
@@ -76,6 +76,7 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 
 // 8.10.x is mapped as an array of strings
 export type LegacyInvestigationFields = z.infer<typeof LegacyInvestigationFields>;
@@ -95,19 +96,33 @@ export const InvestigationFieldsCombined = z.union([
   LegacyInvestigationFields,
 ]);
 
+export type ExternalRuleSourceCamelCased = z.infer<typeof ExternalRuleSourceCamelCased>;
+export const ExternalRuleSourceCamelCased = z.object({
+  type: z.literal('external'),
+  isCustomized: IsExternalRuleCustomized,
+  customizedFields: z
+    .array(
+      z.object({
+        fieldName: z.string(),
+      })
+    )
+    .optional(),
+  hasBaseVersion: z.boolean().optional(),
+});
+
+export type InternalRuleSourceCamelCased = z.infer<typeof InternalRuleSourceCamelCased>;
+export const InternalRuleSourceCamelCased = z.object({
+  type: z.literal('internal'),
+});
+
 /**
  * This is the same type as RuleSource, but with the keys in camelCase. Intended
  * for internal use only (not for API responses).
  */
 export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
 export const RuleSourceCamelCased = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('external'),
-    isCustomized: IsExternalRuleCustomized,
-  }),
-  z.object({
-    type: z.literal('internal'),
-  }),
+  ExternalRuleSourceCamelCased,
+  InternalRuleSourceCamelCased,
 ]);
 
 // Conversion to an interface has to be disabled for the entire file; otherwise,
@@ -132,7 +147,7 @@ export const BaseRuleParams = z.object({
   timelineId: TimelineTemplateId.optional(),
   timelineTitle: TimelineTemplateTitle.optional(),
   meta: RuleMetadata.optional(),
-  maxSignals: MaxSignals,
+  maxSignals: MaxSignals.default(DEFAULT_MAX_SIGNALS),
   riskScore: RiskScore,
   riskScoreMapping: RiskScoreMapping,
   ruleNameOverride: RuleNameOverride.optional(),

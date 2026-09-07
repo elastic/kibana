@@ -10,12 +10,15 @@
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import agent from 'elastic-apm-node';
 import { getConfiguration, shouldInstrumentClient } from '@kbn/apm-config-loader';
+import { getPageLoadTransactionName } from './get_page_load_transaction_name';
 
 const OMIT_APM_CONFIG: Array<keyof AgentConfigOptions> = [
   'secretToken',
   'apiKey',
   'captureSpanStackTraces',
   'metricsInterval',
+  'captureHeaders',
+  'captureBody',
 ];
 
 export const getApmConfig = (requestPath: string) => {
@@ -34,7 +37,8 @@ export const getApmConfig = (requestPath: string) => {
   const { contextPropagationOnly, ...restOfConfig } = baseConfig;
   const config: Record<string, any> = {
     ...restOfConfig,
-    pageLoadTransactionName: requestPath,
+    flushInterval: 150,
+    pageLoadTransactionName: getPageLoadTransactionName(requestPath),
   };
 
   // Get current active backend transaction to make distributed tracing

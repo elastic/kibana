@@ -24,10 +24,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const emailServicesOptions = await find.allByCssSelector(
         '[data-test-subj="emailServiceSelectInput"] > option'
       );
-      expect(emailServicesOptions.length).to.be(3);
-      expect(await emailServicesOptions[0].getVisibleText()).to.be(' '); // empty option
-      expect(await emailServicesOptions[1].getVisibleText()).to.be('Gmail');
-      expect(await emailServicesOptions[2].getVisibleText()).to.be('Amazon SES');
+
+      expect(emailServicesOptions.length).to.be(2);
+
+      expect(await emailServicesOptions[0].getVisibleText()).to.be('Gmail');
+      expect(await emailServicesOptions[1].getVisibleText()).to.be('Amazon SES');
     });
   });
 };

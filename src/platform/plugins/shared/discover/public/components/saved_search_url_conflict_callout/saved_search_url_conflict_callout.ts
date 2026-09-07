@@ -10,32 +10,36 @@
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 
 interface SavedSearchURLConflictCalloutProps {
-  savedSearch?: SavedSearch;
+  discoverSession?: DiscoverSession;
   spaces?: SpacesApi;
   history: History;
 }
 
 export const SavedSearchURLConflictCallout = ({
-  savedSearch,
+  discoverSession,
   spaces,
   history,
 }: SavedSearchURLConflictCalloutProps) => {
-  if (spaces && savedSearch?.id && savedSearch?.sharingSavedObjectProps?.outcome === 'conflict') {
-    const otherObjectId = savedSearch.sharingSavedObjectProps?.aliasTargetId;
+  if (
+    spaces &&
+    discoverSession?.id &&
+    discoverSession?.sharingSavedObjectProps?.outcome === 'conflict'
+  ) {
+    const otherObjectId = discoverSession.sharingSavedObjectProps?.aliasTargetId;
 
     if (otherObjectId) {
       return spaces.ui.components.getLegacyUrlConflict({
         objectNoun: i18n.translate('discover.savedSearchURLConflictCallout.objectNoun', {
           defaultMessage: `''{savedSearch}'' Discover session`,
           values: {
-            savedSearch: savedSearch.title,
+            savedSearch: discoverSession.title,
           },
         }),
-        currentObjectId: savedSearch.id,
+        currentObjectId: discoverSession.id,
         otherObjectPath: `${getSavedSearchUrl(otherObjectId)}${history.location.search}`,
         otherObjectId,
       });

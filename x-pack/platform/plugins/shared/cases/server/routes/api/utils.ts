@@ -8,15 +8,10 @@
 import type { Boom } from '@hapi/boom';
 import { boomify, isBoom } from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
-import type { CustomHttpResponseOptions, ResponseError, Headers, Logger } from '@kbn/core/server';
-import { isInternalURL } from '@kbn/std';
-import {
-  type PageAttachmentPersistedState,
-  PAGE_ATTACHMENT_TYPE,
-} from '@kbn/page-attachment-schema';
-import type { AttachmentRequestAttributes } from '../../common/types/attachments';
+import type { CustomHttpResponseOptions, ResponseError, Logger } from '@kbn/core/server';
 import type { CaseError, HTTPError } from '../../common/error';
 import { isCaseError, isHTTPError } from '../../common/error';
+import { getTypedApiErrorAttributes } from '../../common/api_errors';
 
 /**
  * Transforms an error into the correct format for a kibana response.
@@ -34,52 +29,20 @@ export function wrapError(
     boom = isBoom(error) ? error : boomify(error, options);
   }
 
+  // Kibana's response adapter only serializes `payload.attributes` — a Boom's
+  // `data` is silently dropped. Lift typed attributes (created via
+  // createTypedApiError) into a ResponseError object so machine-readable codes
+  // like `field_identity_immutable` reach API clients.
+  const attributes = getTypedApiErrorAttributes(boom);
+
   return {
-    body: boom,
+    body: attributes ? { message: boom.message, attributes } : boom,
     headers: boom.output.headers as { [key: string]: string },
     statusCode: boom.output.statusCode,
   };
 }
 
-export const escapeHatch = schema.object(
-  {},
-  {
-    unknowns: 'allow',
-  }
-);
-
-export const validAttachment = schema.object(
-  {},
-  {
-    unknowns: 'allow',
-    validate: (value) => {
-      if (
-        isPersistableStatePageAttachment(value) &&
-        value.persistableStateAttachmentTypeId === PAGE_ATTACHMENT_TYPE
-      ) {
-        const persistedState =
-          value.persistableStateAttachmentState as PageAttachmentPersistedState;
-        const url = persistedState?.url?.pathAndQuery;
-        if (url && !isInternalURL(url)) {
-          return `External urls are not supported for page attachments. The provided url is: ${url}`;
-        }
-      }
-    },
-  }
-);
-
-/**
- * Checks if the given value is a persistable state page attachment type.
- */
-export const isPersistableStatePageAttachment = (
-  value: unknown
-): value is AttachmentRequestAttributes => {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    Boolean((value as AttachmentRequestAttributes).persistableStateAttachmentTypeId)
-  );
-};
+export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
 /**
  * Creates a warning header with a message formatted according to RFC7234.
@@ -93,19 +56,8 @@ export const getWarningHeader = (
   warning: `299 Kibana-${kibanaVersion} "${msg}"`,
 });
 
-/**
- * Taken from
- * https://github.com/elastic/kibana/blob/ec30f2aeeb10fb64b507935e558832d3ef5abfaa/x-pack/plugins/spaces/server/usage_stats/usage_stats_client.ts#L113-L118
- */
-
-export const getIsKibanaRequest = (headers?: Headers): boolean => {
-  // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
-  // We can't be 100% certain, but this is a reasonable attempt.
-  return !!(headers && headers['kbn-version'] && headers.referer);
-};
-
-export const logDeprecatedEndpoint = (logger: Logger, headers: Headers, msg: string) => {
-  if (!getIsKibanaRequest(headers)) {
+export const logDeprecatedEndpoint = (logger: Logger, isKibanaRequest: Boolean, msg: string) => {
+  if (!isKibanaRequest) {
     logger.warn(msg);
   }
 };

@@ -29,7 +29,7 @@ import {
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { AdditionalEmailServices } from '../../../common';
-import { getEmailServices } from './email';
+import { emailServices, getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
 import * as i18n from './translations';
 
@@ -108,7 +108,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   const form = useFormContext();
   const { updateFieldValues } = form;
   const [{ config }] = useFormData({
-    watch: ['config.service', 'config.hasAuth'],
+    watch: ['config.service', 'config.hasAuth', 'config.allowHtml'],
   });
 
   const emailFieldConfig = useMemo(
@@ -116,13 +116,18 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
   );
 
-  const { service = null, hasAuth = false } = config ?? {};
+  const { service = null, hasAuth = false, allowHtml = false } = config ?? {};
+
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
+  const showAllowHtmlConfig =
+    !isEmpty(service) && service !== AdditionalEmailServices.ELASTIC_CLOUD;
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
   const initialService = useRef(service);
+
   if (!initialService.current && service) {
     initialService.current = service;
   }
+
   const availableEmailServices = getEmailServices(
     isCloud,
     enabledEmailServices,
@@ -140,6 +145,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
       }
 
       const emailConfig = await getEmailServiceConfig(service);
+
       updateFieldValues({
         config: {
           host: emailConfig?.host,
@@ -151,6 +157,16 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
 
     fetchConfig();
   }, [updateFieldValues, getEmailServiceConfig, service]);
+
+  useEffect(() => {
+    if (service === AdditionalEmailServices.ELASTIC_CLOUD && allowHtml) {
+      updateFieldValues({
+        config: {
+          allowHtml: false,
+        },
+      });
+    }
+  }, [allowHtml, service, updateFieldValues]);
 
   return (
     <>
@@ -166,12 +182,14 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <UseField
             path="config.service"
             component={SelectField}
             config={{
+              defaultValue: getDefaultService({ service, enabledEmailServices }),
               label: i18n.SERVICE_LABEL,
               validations: [
                 {
@@ -193,10 +211,34 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {service === AdditionalEmailServices.EXCHANGE ? (
-        <ExchangeFormFields readOnly={readOnly} />
-      ) : (
+      {showAllowHtmlConfig && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiSpacer size="m" />
+            <UseField
+              path="config.allowHtml"
+              component={ToggleField}
+              config={{
+                defaultValue: false,
+                helpText: i18n.ALLOW_HTML_HELP,
+              }}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'emailAllowHtmlSwitch',
+                  label: i18n.ALLOW_HTML_LABEL,
+                  disabled: readOnly,
+                  readOnly,
+                },
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {service === AdditionalEmailServices.EXCHANGE && <ExchangeFormFields readOnly={readOnly} />}
+
+      {!isEmpty(service) && service !== AdditionalEmailServices.EXCHANGE && (
         <>
+          <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
               <UseField
@@ -274,6 +316,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 config={{ defaultValue: true }}
                 componentProps={{
                   euiFieldProps: {
+                    'data-test-subj': 'emailHasAuthSwitch',
                     label: i18n.HAS_AUTH_LABEL,
                     disabled: readOnly,
                     readOnly,
@@ -284,6 +327,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           </EuiFlexGroup>
           {hasAuth ? (
             <>
+              <EuiSpacer size="m" />
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem>
                   <UseField
@@ -336,3 +380,28 @@ export function nullableString(str: string | null | undefined) {
 
 // eslint-disable-next-line import/no-default-export
 export { EmailActionConnectorFields as default };
+
+const getDefaultService = ({
+  service,
+  enabledEmailServices,
+}: {
+  service?: string | null;
+  enabledEmailServices?: string[];
+}): string => {
+  if (service || !enabledEmailServices) {
+    return service ?? '';
+  }
+
+  const hasAll = enabledEmailServices.some((emailService) => emailService === '*');
+  const firstAvailableService = enabledEmailServices[0];
+
+  const foundService = emailServices.find(
+    (emailService) => emailService['kbn-setting-value'] === firstAvailableService
+  );
+
+  const defaultService = hasAll
+    ? AdditionalEmailServices.OTHER
+    : (foundService?.value as string) ?? '';
+
+  return defaultService;
+};

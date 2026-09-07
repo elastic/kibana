@@ -6,47 +6,74 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { buildEuidCspPreviewOptions } from '../utils/build_euid_csp_preview_options';
 import { UserDetailsPanelKey } from '../../flyout/entity_details/user_details_left';
 import { HostDetailsPanelKey } from '../../flyout/entity_details/host_details_left';
 import { EntityDetailsLeftPanelTab } from '../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from './use_non_closed_alerts';
-import { useHasRiskScore } from './use_risk_score_data';
-import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
+import type { IdentityFields } from '../../flyout/document_details/shared/utils';
+import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { getRiskFromEntityRecord } from '../../flyout/entity_details/shared/entity_store_risk_utils';
 
 export const useNavigateEntityInsight = ({
-  field,
-  value,
+  identityFields,
   subTab,
   queryIdExtension,
 }: {
-  field: CloudPostureEntityIdentifier;
-  value: string;
+  identityFields: IdentityFields;
   subTab: string;
   queryIdExtension: string;
 }) => {
-  const isHostNameField = field === 'host.name';
+  const isHostNameField = 'host.name' in identityFields;
   const { to, from } = useGlobalTime();
+  const euidApi = useEntityStoreEuidApi();
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field,
-    value,
+    identityFields,
+    entityType: isHostNameField ? 'host' : 'user',
     to,
     from,
     queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}${queryIdExtension}`,
   });
 
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(field, value);
+  const primaryField = useMemo(() => {
+    if (identityFields['host.name']) return 'host.name';
+    if (identityFields['user.name']) return 'user.name';
+    return Object.keys(identityFields)[0] || '';
+  }, [identityFields]);
 
-  const { hasRiskScore } = useHasRiskScore({
-    field,
-    value,
+  const value = useMemo(() => {
+    return identityFields[primaryField] || Object.values(identityFields)[0] || '';
+  }, [identityFields, primaryField]);
+
+  const entityType = primaryField === 'host.name' ? 'host' : 'user';
+
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
+  );
+
+  const entityFromStore = useEntityFromStore({
+    entityId:
+      entityType === 'host' ? identityFields['host.entity.id'] : identityFields['user.entity.id'],
+    identityFields,
+    entityType,
+    skip: false,
   });
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(field, value);
+
+  const hasRiskScore = useMemo(() => {
+    const record = entityFromStore.entityRecord;
+    return record ? !!getRiskFromEntityRecord(record)?.calculated_level : false;
+  }, [entityFromStore.entityRecord]);
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(
+    buildEuidCspPreviewOptions(entityType, identityFields, euidApi)
+  );
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToEntityInsightTab = useCallback(() => {

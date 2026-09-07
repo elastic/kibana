@@ -5,40 +5,34 @@
  * 2.0.
  */
 
-import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTimeRange,
   PublishingSubject,
-  SerializedTimeRange,
-  SerializedTitles,
 } from '@kbn/presentation-publishing';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
+
+export type ChangePointEmbeddableCustomState = Omit<
+  ChangePointChartEmbeddableState,
+  'time_range' | 'title' | 'description' | 'hide_title' | 'hide_border'
+>;
 
 export interface ChangePointComponentApi {
-  viewType: PublishingSubject<ChangePointEmbeddableState['viewType']>;
-  dataViewId: PublishingSubject<ChangePointEmbeddableState['dataViewId']>;
-  fn: PublishingSubject<ChangePointEmbeddableState['fn']>;
-  metricField: PublishingSubject<ChangePointEmbeddableState['metricField']>;
-  splitField: PublishingSubject<ChangePointEmbeddableState['splitField']>;
-  partitions: PublishingSubject<ChangePointEmbeddableState['partitions']>;
-  maxSeriesToPlot: PublishingSubject<ChangePointEmbeddableState['maxSeriesToPlot']>;
-  updateUserInput: (update: ChangePointEmbeddableState) => void;
+  viewType: PublishingSubject<ChangePointChartEmbeddableState['view_type']>;
+  dataViewId: PublishingSubject<ChangePointChartEmbeddableState['data_view_id']>;
+  // Runtime alias for the serialized aggregation_function state field.
+  fn: PublishingSubject<ChangePointChartEmbeddableState['aggregation_function']>;
+  metricField: PublishingSubject<ChangePointChartEmbeddableState['metric_field']>;
+  splitField: PublishingSubject<ChangePointChartEmbeddableState['split_field']>;
+  partitions: PublishingSubject<ChangePointChartEmbeddableState['partitions']>;
+  maxSeriesToPlot: PublishingSubject<ChangePointChartEmbeddableState['max_series_to_plot']>;
+  updateUserInput: (update: ChangePointEmbeddableCustomState) => void;
 }
 
-export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointEmbeddableState> &
+export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointChartEmbeddableState> &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesTimeRange &
   ChangePointComponentApi;
-
-export interface ChangePointEmbeddableState extends SerializedTitles, SerializedTimeRange {
-  viewType: ChangePointDetectionViewType;
-  dataViewId: string;
-  fn: 'avg' | 'sum' | 'min' | 'max' | string;
-  metricField: string;
-  splitField?: string;
-  partitions?: string[];
-  maxSeriesToPlot?: number;
-}

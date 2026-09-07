@@ -8,17 +8,19 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject, debounceTime, distinctUntilChanged, map } from 'rxjs';
+import { isEqual } from 'lodash';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type {
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableApi,
+import {
+  type SearchEmbeddableApi,
+  type SearchEmbeddablePanelApiState,
 } from '@kbn/discover-plugin/public';
-import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { SavedSearchComponentProps } from '../types';
+import { isOfAggregateQueryType, type ProjectRouting } from '@kbn/es-query';
+import type { SavedSearchComponentProps, SavedSearchTableConfig } from '../types';
 import { SavedSearchComponentErrorContent } from './error';
 
 const TIMESTAMP_FIELD = '@timestamp';
@@ -26,8 +28,7 @@ const TIMESTAMP_FIELD = '@timestamp';
 export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props) => {
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
-  const [initialSerializedState, setInitialSerializedState] =
-    useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
+  const [initialSerializedState, setInitialSerializedState] = useState<SearchEmbeddableState>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -36,9 +37,15 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     timeRange,
     query,
     filters,
+    nonHighlightingFilters,
     index,
     timestampField,
     columns,
+    sort,
+    grid,
+    rowHeight,
+    rowsPerPage,
+    density,
     height,
   } = props;
 
@@ -47,6 +54,9 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     enableDocumentViewer: documentViewerEnabled = true,
     enableFilters: filtersEnabled = true,
   } = props.displayOptions ?? {};
+
+  const latestColumnsRef = useRef(columns);
+  latestColumnsRef.current = columns;
 
   useEffect(() => {
     // Ensure we get a stabilised set of initial state incase dependencies change, as
@@ -66,6 +76,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
           searchSource.setField('index', dataView);
           searchSource.setField('query', query);
           searchSource.setField('filter', filters);
+          searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
           const { searchSourceJSON, references } = searchSource.serialize();
           // By-value saved object structure
           const savedSearch: SavedSearch = {
@@ -73,24 +84,26 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
-            columns,
-            sort: getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
+            columns: latestColumnsRef.current,
+            sort:
+              sort ?? getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
+            grid,
+            rowHeight,
+            rowsPerPage,
+            density,
             managed: false,
           };
           setInitialSerializedState({
-            rawState: {
-              attributes: {
-                ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
-                references,
-              },
-              timeRange,
-              nonPersistedDisplayOptions: {
-                solutionNavIdOverride,
-                enableDocumentViewer: documentViewerEnabled,
-                enableFilters: filtersEnabled,
-              },
-            } as SearchEmbeddableSerializedState,
-            references,
+            attributes: {
+              ...toSavedSearchAttributes(savedSearch, searchSourceJSON),
+              references,
+            },
+            time_range: timeRange,
+            nonPersistedDisplayOptions: {
+              solutionNavIdOverride,
+              enableDocumentViewer: documentViewerEnabled,
+              enableFilters: filtersEnabled,
+            },
           });
         }
       } catch (e) {
@@ -103,11 +116,18 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     return () => {
       abortController.abort();
     };
+    // columns is synced after mount via syncColumns; omitting it here avoids remounting
+    // the embeddable when columns change.
   }, [
-    columns,
+    sort,
+    grid,
+    rowHeight,
+    rowsPerPage,
+    density,
     dataViews,
     documentViewerEnabled,
     filters,
+    nonHighlightingFilters,
     filtersEnabled,
     index,
     query,
@@ -137,28 +157,47 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
-    initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+    initialSerializedState: SearchEmbeddableState;
   }
 > = (props) => {
   const {
     dependencies: { dataViews },
     initialSerializedState,
     filters,
+    nonHighlightingFilters,
     query,
     timeRange,
     timestampField,
     index,
     columns,
+    onTableConfigChange,
+    resolveColumnsOnChange,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
+  const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
+
+  const { executionContext, projectRouting } = props;
+
+  // created once; later changes are published through the effect below
+  const [projectRouting$] = useState(
+    () => new BehaviorSubject<ProjectRouting | undefined>(projectRouting)
+  );
+
+  useEffect(() => {
+    if (projectRouting$.getValue() !== projectRouting) {
+      projectRouting$.next(projectRouting);
+    }
+  }, [projectRouting, projectRouting$]);
 
   const parentApi = useMemo(() => {
     return {
+      ...(executionContext ? { executionContext } : {}),
+      projectRouting$,
       getSerializedStateForChild: () => {
         return initialSerializedState;
       },
     };
-  }, [initialSerializedState]);
+  }, [initialSerializedState, executionContext, projectRouting$]);
 
   useEffect(
     function syncIndex() {
@@ -203,6 +242,26 @@ const SavedSearchComponentTable: React.FC<
   );
 
   useEffect(
+    function syncNonHighlightingFilters() {
+      if (!embeddableApi.current) return;
+
+      const applyNonHighlightingFilters = (savedSearch: SavedSearch) => {
+        savedSearch.searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
+      };
+
+      applyNonHighlightingFilters(embeddableApi.current.savedSearch$.getValue());
+      const subscription = embeddableApi.current.savedSearch$.subscribe(
+        applyNonHighlightingFilters
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [nonHighlightingFilters, isEmbeddableApiAvailable]
+  );
+
+  useEffect(
     function syncTimeRange() {
       if (!embeddableApi.current) return;
       embeddableApi.current.setTimeRange(timeRange);
@@ -215,16 +274,75 @@ const SavedSearchComponentTable: React.FC<
       if (!embeddableApi.current) return;
       embeddableApi.current.setColumns(columns);
     },
-    [columns]
+    [columns, isEmbeddableApiAvailable]
+  );
+
+  useEffect(
+    function reconcileColumnsOnEmbeddableChange() {
+      if (!embeddableApi.current || !resolveColumnsOnChange) return;
+
+      const subscription = embeddableApi.current.savedSearch$
+        .pipe(
+          map((savedSearch) => savedSearch.columns),
+          distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+        )
+        .subscribe((emittedColumns) => {
+          const resolvedColumns = resolveColumnsOnChange(emittedColumns);
+
+          if (resolvedColumns && !isEqual(resolvedColumns, emittedColumns)) {
+            embeddableApi.current?.setColumns(resolvedColumns);
+          }
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [resolveColumnsOnChange, isEmbeddableApiAvailable]
+  );
+
+  // Subscribe to table config changes and notify parent via callback
+  useEffect(
+    function notifyTableConfigChanges() {
+      if (!embeddableApi.current || !onTableConfigChange) return;
+
+      const subscription = embeddableApi.current.savedSearch$
+        .pipe(
+          // Debounce to avoid too many updates during rapid changes
+          debounceTime(300),
+          // Map to our table config structure
+          map(
+            (savedSearch): SavedSearchTableConfig => ({
+              columns: savedSearch.columns,
+              sort: savedSearch.sort,
+              grid: savedSearch.grid,
+              rowHeight: savedSearch.rowHeight,
+              rowsPerPage: savedSearch.rowsPerPage,
+              density: savedSearch.density,
+            })
+          ),
+          // Only emit when config actually changes
+          distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+        )
+        .subscribe((config) => {
+          onTableConfigChange(config);
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [onTableConfigChange, isEmbeddableApiAvailable]
   );
 
   return (
-    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
+    <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}
       onApiAvailable={(api) => {
         embeddableApi.current = api;
+        setIsEmbeddableApiAvailable(true);
       }}
       hidePanelChrome
     />

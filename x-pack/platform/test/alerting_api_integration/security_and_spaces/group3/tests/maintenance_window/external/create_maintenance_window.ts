@@ -14,14 +14,13 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  const start = new Date();
+  const start = new Date(Date.now() + 5 * 60 * 1000);
   const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
 
   describe('createMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
-      enabled: false,
       schedule: {
         custom: {
           duration: '1m',
@@ -83,7 +82,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
               expect(response.body.status).to.eql('upcoming');
-              expect(response.body.enabled).to.eql(false);
+              expect(response.body.enabled).to.eql(true);
               expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
@@ -99,6 +98,28 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
         });
       });
     }
+
+    it('should handle create a disabled maintenance window', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix('default')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({ ...createRequestBody, enabled: false });
+
+      if (response.body.id) {
+        objectRemover.add(
+          'default',
+          response.body.id,
+          'rules/maintenance_window',
+          'alerting',
+          true
+        );
+      }
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body.title).to.eql('test-maintenance-window');
+      expect(response.body.status).to.eql('disabled');
+      expect(response.body.enabled).to.eql(false);
+    });
 
     it('should throw if creating maintenance window with invalid kql', async () => {
       await supertest

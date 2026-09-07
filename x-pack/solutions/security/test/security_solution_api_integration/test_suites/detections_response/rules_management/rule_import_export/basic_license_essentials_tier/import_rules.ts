@@ -8,13 +8,13 @@
 import expect from 'expect';
 
 import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getCustomQueryRuleParams, combineToNdJson } from '../../../utils';
-import { deleteAllRules } from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   describe('@ess @serverless @serverlessQA import_rules', () => {
@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should set the response content types to be expected', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect('Content-Type', 'application/json; charset=utf-8')
@@ -34,7 +34,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should reject with an error if the file type is not that of a ndjson', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(''), 'rules.txt')
           .expect(400);
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should report that it imported a simple rule successfully', async () => {
         const ndjson = combineToNdJson(getCustomQueryRuleParams());
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -65,12 +65,12 @@ export default ({ getService }: FtrProviderContext): void => {
         const ruleToImport = getCustomQueryRuleParams({ rule_id: 'rule-to-import' });
         const ndjson = combineToNdJson(ruleToImport);
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-import' },
           })
@@ -87,7 +87,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -107,7 +107,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -146,12 +146,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-1' },
           })
@@ -164,13 +164,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
             rule_id: 'rule-1',
+            name: 'Imported rule 1',
           }),
           getCustomQueryRuleParams({
             rule_id: 'rule-2',
+            name: 'Imported rule 2',
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -181,6 +183,18 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 2,
           rules_count: 2,
         });
+
+        const { body: found } = await detectionsApi
+          .findRules({
+            query: { page: 1, per_page: 10 },
+          })
+          .expect(200);
+
+        expect(found.total).toBe(2);
+        expect(found.data.map((rule: { rule_id: string }) => rule.rule_id).sort()).toEqual([
+          'rule-1',
+          'rule-2',
+        ]);
       });
 
       // import is very slow in 7.10+ due to the alerts client find api
@@ -195,7 +209,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
           )
         );
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -206,6 +220,14 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 10,
           rules_count: 10,
         });
+
+        const { body: found } = await detectionsApi
+          .findRules({
+            query: { page: 1, per_page: 1 },
+          })
+          .expect(200);
+
+        expect(found.total).toBe(10);
       });
 
       // uncomment the below test once we speed up the alerts client find api
@@ -234,7 +256,7 @@ export default ({ getService }: FtrProviderContext): void => {
           )
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(500);
@@ -249,13 +271,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
             rule_id: 'rule-1',
+            name: 'First in file',
           }),
           getCustomQueryRuleParams({
             rule_id: 'rule-1',
+            name: 'Last in file',
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -274,6 +298,20 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 1,
           rules_count: 2,
         });
+
+        // In-file duplicate still creates exactly one rule; last entry wins.
+        const { body: found } = await detectionsApi
+          .findRules({
+            query: {
+              page: 1,
+              per_page: 10,
+              filter: 'alert.attributes.params.ruleId: "rule-1"',
+            },
+          })
+          .expect(200);
+
+        expect(found.total).toBe(1);
+        expect(found.data[0].name).toBe('Last in file');
       });
 
       it('should NOT report a conflict if there is an attempt to import two rules with the same rule_id and overwrite is set to true', async () => {
@@ -286,7 +324,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -300,15 +338,21 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists', async () => {
-        const ruleToImport = getCustomQueryRuleParams({
+        const existingRule = getCustomQueryRuleParams({
           rule_id: 'rule-1',
+          name: 'Already exists',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: existingRule });
 
-        const ndjson = combineToNdJson(ruleToImport);
+        const ndjson = combineToNdJson(
+          getCustomQueryRuleParams({
+            rule_id: 'rule-1',
+            name: 'Should not overwrite',
+          })
+        );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -327,6 +371,12 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_count: 1,
           success_count: 0,
         });
+
+        const { body: persisted } = await detectionsApi
+          .readRule({ query: { rule_id: 'rule-1' } })
+          .expect(200);
+
+        expect(persisted).toMatchObject(existingRule);
       });
 
       it('should NOT report a conflict if there is an attempt to import a rule with a rule_id that already exists and overwrite is set to true', async () => {
@@ -334,11 +384,11 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-1',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(ruleToImport);
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -356,7 +406,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-to-overwrite',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
@@ -365,12 +415,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: importedRule } = await securitySolutionApi
+        const { body: importedRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -386,9 +436,9 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_id: 'rule-to-overwrite',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: ruleToImport });
 
-        const { body: ruleBeforeOverwriting } = await securitySolutionApi
+        const { body: ruleBeforeOverwriting } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -401,12 +451,12 @@ export default ({ getService }: FtrProviderContext): void => {
           })
         );
 
-        await securitySolutionApi
+        await detectionsApi
           .importRules({ query: { overwrite: true } })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: ruleAfterOverwriting } = await securitySolutionApi
+        const { body: ruleAfterOverwriting } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule-to-overwrite' },
           })
@@ -421,25 +471,31 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should report a conflict if there is an attempt to import a rule with a rule_id that already exists, but still have some successes with other rules', async () => {
-        const ruleToImport = getCustomQueryRuleParams({
+        const existingRule = getCustomQueryRuleParams({
           rule_id: 'existing-rule',
+          name: 'Existing conflict',
+        });
+        const createdOne = getCustomQueryRuleParams({
+          rule_id: 'non-existing-rule-1',
+          name: 'Created one',
+        });
+        const createdTwo = getCustomQueryRuleParams({
+          rule_id: 'non-existing-rule-2',
+          name: 'Created two',
         });
 
-        await securitySolutionApi.createRule({ body: ruleToImport });
+        await detectionsApi.createRule({ body: existingRule });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
             rule_id: 'existing-rule',
+            name: 'Should not overwrite',
           }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule-1',
-          }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule-2',
-          })
+          createdOne,
+          createdTwo
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -458,33 +514,52 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 2,
           rules_count: 3,
         });
+
+        const { body: conflicted } = await detectionsApi
+          .readRule({ query: { rule_id: 'existing-rule' } })
+          .expect(200);
+        const { body: rule1 } = await detectionsApi
+          .readRule({ query: { rule_id: 'non-existing-rule-1' } })
+          .expect(200);
+        const { body: rule2 } = await detectionsApi
+          .readRule({ query: { rule_id: 'non-existing-rule-2' } })
+          .expect(200);
+
+        expect(conflicted).toMatchObject(existingRule);
+        expect(rule1).toMatchObject(createdOne);
+        expect(rule2).toMatchObject(createdTwo);
       });
 
       it('should report a mix of conflicts and a mix of successes', async () => {
-        await securitySolutionApi.createRule({
-          body: getCustomQueryRuleParams({
-            rule_id: 'existing-rule-1',
-          }),
+        const existingRule1 = getCustomQueryRuleParams({
+          rule_id: 'existing-rule-1',
+          name: 'Existing one',
         });
-        await securitySolutionApi.createRule({
-          body: getCustomQueryRuleParams({
-            rule_id: 'existing-rule-2',
-          }),
+        const existingRule2 = getCustomQueryRuleParams({
+          rule_id: 'existing-rule-2',
+          name: 'Existing two',
         });
+        const created = getCustomQueryRuleParams({
+          rule_id: 'non-existing-rule',
+          name: 'Created by import',
+        });
+
+        await detectionsApi.createRule({ body: existingRule1 });
+        await detectionsApi.createRule({ body: existingRule2 });
 
         const ndjson = combineToNdJson(
           getCustomQueryRuleParams({
             rule_id: 'existing-rule-1',
+            name: 'Should not overwrite one',
           }),
           getCustomQueryRuleParams({
             rule_id: 'existing-rule-2',
+            name: 'Should not overwrite two',
           }),
-          getCustomQueryRuleParams({
-            rule_id: 'non-existing-rule',
-          })
+          created
         );
 
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
@@ -510,42 +585,81 @@ export default ({ getService }: FtrProviderContext): void => {
           success_count: 1,
           rules_count: 3,
         });
+
+        const { body: rule1 } = await detectionsApi
+          .readRule({ query: { rule_id: 'existing-rule-1' } })
+          .expect(200);
+        const { body: rule2 } = await detectionsApi
+          .readRule({ query: { rule_id: 'existing-rule-2' } })
+          .expect(200);
+        const { body: rule3 } = await detectionsApi
+          .readRule({ query: { rule_id: 'non-existing-rule' } })
+          .expect(200);
+
+        expect(rule1).toMatchObject(existingRule1);
+        expect(rule2).toMatchObject(existingRule2);
+        expect(rule3).toMatchObject(created);
       });
 
       it('should be able to correctly read back a mixed import of different rules even if some cause conflicts', async () => {
         const existingRule1 = getCustomQueryRuleParams({
           rule_id: 'existing-rule-1',
+          name: 'Existing one',
         });
         const existingRule2 = getCustomQueryRuleParams({
           rule_id: 'existing-rule-2',
+          name: 'Existing two',
         });
         const ruleToImportSuccessfully = getCustomQueryRuleParams({
           rule_id: 'non-existing-rule',
+          name: 'Created by import',
         });
 
-        await securitySolutionApi.createRule({ body: existingRule1 });
-        await securitySolutionApi.createRule({ body: existingRule2 });
+        await detectionsApi.createRule({ body: existingRule1 });
+        await detectionsApi.createRule({ body: existingRule2 });
 
         const ndjson = combineToNdJson(existingRule1, existingRule2, ruleToImportSuccessfully);
 
-        await securitySolutionApi
+        const { body: importResponse } = await detectionsApi
           .importRules({ query: {} })
           .attach('file', Buffer.from(ndjson), 'rules.ndjson')
           .expect(200);
 
-        const { body: rule1 } = await securitySolutionApi
+        expect(importResponse).toMatchObject({
+          success: false,
+          success_count: 1,
+          rules_count: 3,
+          errors: [
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: 'existing-rule-1',
+            },
+            {
+              error: {
+                message: 'Rule with this rule_id already exists',
+                status_code: 409,
+              },
+              rule_id: 'existing-rule-2',
+            },
+          ],
+        });
+
+        const { body: rule1 } = await detectionsApi
           .readRule({
             query: { rule_id: 'existing-rule-1' },
           })
           .expect(200);
 
-        const { body: rule2 } = await securitySolutionApi
+        const { body: rule2 } = await detectionsApi
           .readRule({
             query: { rule_id: 'existing-rule-2' },
           })
           .expect(200);
 
-        const { body: rule3 } = await securitySolutionApi
+        const { body: rule3 } = await detectionsApi
           .readRule({
             query: { rule_id: 'non-existing-rule' },
           })

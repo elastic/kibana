@@ -36,8 +36,16 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
-export const fetchTotalDocsFailedNotifier = (toasts: IToasts, error: Error, meta: any) => {
-  const dataStreamType = meta._event.origin as DataStreamType;
+interface FetchTotalDocsFailedMeta {
+  _event?: { origin?: DataStreamType };
+}
+
+export const fetchTotalDocsFailedNotifier = (
+  toasts: IToasts,
+  error: Error,
+  meta: FetchTotalDocsFailedMeta
+) => {
+  const dataStreamType = meta._event?.origin ?? 'unknown';
 
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchTotalDocsFailed', {
@@ -63,5 +71,22 @@ export const fetchFailedStatsFailedNotifier = (toasts: IToasts, error: Error) =>
       defaultMessage: "We couldn't get your failed docs information.",
     }),
     text: error.message,
+  });
+};
+
+export const updateFailureStoreFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreFailed', {
+      defaultMessage: "We couldn't update the failure store settings.",
+    }),
+    text: error.message,
+  });
+};
+
+export const updateFailureStoreSuccessNotifier = (toasts: IToasts) => {
+  toasts.addSuccess({
+    title: i18n.translate('xpack.datasetQuality.updateFailureStoreSuccess', {
+      defaultMessage: 'Failure store settings saved',
+    }),
   });
 };

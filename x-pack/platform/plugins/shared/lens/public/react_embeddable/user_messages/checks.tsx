@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import React from 'react';
-import { DOC_TYPE } from '../../../common/constants';
 import type {
   IndexPatternMap,
   IndexPatternRef,
   SharingSavedObjectProps,
   UserMessage,
-} from '../../types';
-import type { LensApi } from '../types';
+} from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
+import { DOC_TYPE } from '../../../common/constants';
 import type { MergedSearchContext } from '../expressions/merged_search_context';
 import { MISSING_TIME_RANGE_ON_EMBEDDABLE, URL_CONFLICT } from '../../user_messages_ids';
 

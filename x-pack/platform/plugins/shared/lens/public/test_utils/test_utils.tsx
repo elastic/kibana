@@ -15,7 +15,7 @@ import type { ComponentType, MountRendererProps } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import type { PropsWithChildren, ReactElement } from 'react';
-import type { LensAppServices } from '../app_plugin/types';
+import type { LensAppServices } from '@kbn/lens-common';
 
 export const renderWithProviders = (
   ui: ReactElement,

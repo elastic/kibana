@@ -9,7 +9,7 @@
 
 import type { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
-import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import { getAccessorByDimension } from '@kbn/chart-expressions-common';
 import type { FC } from 'react';
 import React from 'react';
 import { euiFontSize, euiShadow, type UseEuiTheme } from '@elastic/eui';
@@ -74,7 +74,7 @@ export const Tooltip: FC<Props> = ({
       : formatFactory(layerFormats.xAccessors[xAccessor]);
     data.push({
       label: layerTitles?.xTitles?.[xAccessor],
-      value: headerFormatter ? headerFormatter.convert(header.value) : `${header.value}`,
+      value: headerFormatter ? headerFormatter.convertToText(header.value) : `${header.value}`,
     });
   }
 
@@ -85,7 +85,7 @@ export const Tooltip: FC<Props> = ({
     const yFormatter = formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
     data.push({
       label: layerTitles?.yTitles?.[tooltipYAccessor],
-      value: yFormatter ? yFormatter.convert(pickedValue.value) : `${pickedValue.value}`,
+      value: yFormatter ? yFormatter.convertToText(pickedValue.value) : `${pickedValue.value}`,
     });
   }
   if (markSizeColumnId && pickedValue.formattedMarkValue) {
@@ -100,7 +100,9 @@ export const Tooltip: FC<Props> = ({
       : layerFormats.splitSeriesAccessors[key].formatter;
 
     const label = layerTitles?.splitSeriesTitles?.[key];
-    const value = splitSeriesFormatter ? splitSeriesFormatter.convert(splitValue) : `${splitValue}`;
+    const value = splitSeriesFormatter
+      ? splitSeriesFormatter.convertToText(splitValue)
+      : `${splitValue}`;
     data.push({ label, value });
   });
 
@@ -163,7 +165,7 @@ const styles = {
       ${euiFontSize(euiThemeContext, 's')}
       color: ${euiThemeContext.euiTheme.colors.textParagraph};
 
-      ${euiShadow(euiThemeContext)}
+      ${euiShadow(euiThemeContext, 'l', { border: 'none' })}
       background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
 
       table {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { ClientMessage, Conversation } from '../..';
 export const MOCK_CURRENT_USER = { id: '123', name: 'elastic' };
 export const MOCK_USER_PROFILE = {

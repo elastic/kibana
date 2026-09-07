@@ -7,7 +7,7 @@
 
 import { type DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { sharedStateSelector } from '../redux/selectors';
 
 /**
@@ -15,17 +15,16 @@ import { sharedStateSelector } from '../redux/selectors';
  * The list excludes managed data views (default security solution data view and alert data view)
  */
 export const useSavedDataViews = (): DataViewListItem[] => {
-  const { dataViews: dataViewSpecs, alertDataViewId } = useSelector(sharedStateSelector);
+  const { dataViews: dataViewSpecs } = useSelector(sharedStateSelector);
 
   return useMemo(
     () =>
-      dataViewSpecs
-        .filter((dv) => dv.id !== alertDataViewId)
-        .map((spec) => ({
-          id: spec.id ?? '',
-          title: spec.title ?? '',
-          name: spec.name,
-        })),
-    [dataViewSpecs, alertDataViewId]
+      dataViewSpecs.map((spec) => ({
+        id: spec.id ?? '',
+        title: spec.title ?? '',
+        name: spec.name,
+        managed: spec.managed,
+      })),
+    [dataViewSpecs]
   );
 };

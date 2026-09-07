@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { countDownTest } from '../../../../config/services/detections_response';
+import { countDownTest } from '@kbn/detections-response-ftr-services';
 import { getConversationsApis } from './apis';
 import { getSimpleConversation } from '../mocks';
 
@@ -46,7 +46,7 @@ export const deleteAllConversations = async ({
   await countDownTest(
     async () => {
       const { data, total } = await conversationApis.find({
-        query: { page: 1, per_page: 100 },
+        query: { page: 1, per_page: 100, is_owner: false },
         kibanaSpace,
       });
 
@@ -77,7 +77,7 @@ export const getConversationNotFoundError = (conversationId: string) => {
 export const getConversationBadRequestError = (attributeName: string) => {
   return {
     error: 'Bad Request',
-    message: `[request body]: ${attributeName}: Required`,
+    message: `[request body]: ${attributeName}: Invalid input: expected string, received undefined`,
     statusCode: 400,
   };
 };

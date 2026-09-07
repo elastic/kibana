@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
+import type {
+  BulkActionsConfig,
+  BulkActionsPanelConfig,
+} from '@kbn/response-ops-alerts-table/types';
 import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+import type { AlertClosingReason } from '../../../../common/types';
+import {
+  RuntimeFieldTypeEnum,
+  type RuntimeFieldType,
+} from '../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
+
+// Derived from the server's Zod enum so this stays in sync if new types are added.
+// Filters out ES-only types ('composite', 'lookup') that the server schema does not accept,
+// preventing a Zod validation 400 from failing the entire bulk-close request.
+const SUPPORTED_RUNTIME_FIELD_TYPES = new Set<string>(Object.values(RuntimeFieldTypeEnum));
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
@@ -21,7 +36,7 @@ import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
 
-interface UseBulkAlertActionItemsArgs {
+export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
   tableId: TableId;
   /* start time being passed to the Events Table */
@@ -31,6 +46,8 @@ interface UseBulkAlertActionItemsArgs {
   /* filter of the Alerts Query*/
   filters: Filter[];
   refetch?: () => void;
+  /* Runtime mappings from the active data view, forwarded to bulk-close so unmapped fields can be resolved */
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export const useBulkAlertActionItems = ({
@@ -38,9 +55,18 @@ export const useBulkAlertActionItems = ({
   from,
   to,
   refetch: refetchProp,
+  runtimeMappings,
 }: UseBulkAlertActionItemsArgs) => {
-  const { hasIndexWrite } = useAlertsPrivileges();
+  const { hasAlertsUpdate } = useAlertsPrivileges();
   const { startTransaction } = useStartTransaction();
+
+  const runtimeFields = useMemo(() => {
+    if (!runtimeMappings) return undefined;
+    const entries = Object.entries(runtimeMappings)
+      .filter(([, field]) => SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
+      .map(([name, field]) => [name, field.type] as [string, RuntimeFieldType]);
+    return entries.length > 0 ? Object.fromEntries(entries) : undefined;
+  }, [runtimeMappings]);
 
   const { addSuccess, addError, addWarning } = useAppToasts();
 
@@ -85,13 +111,13 @@ export const useBulkAlertActionItems = ({
         case 'acknowledged':
           title = i18n.ACKNOWLEDGED_ALERT_FAILED_TOAST;
       }
-      addError(error.message, { title });
+      addError(error, { title });
     },
     [addError]
   );
 
   const getOnAction = useCallback(
-    (status: AlertWorkflowStatus) => {
+    (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
       const onActionClick: BulkActionsConfig['onClick'] = async (
         items,
         isSelectAllChecked,
@@ -100,10 +126,6 @@ export const useBulkAlertActionItems = ({
         refresh
       ) => {
         try {
-          if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
-            return;
-          }
-
           let ids: string[] | undefined = items.map((item) => item._id);
           let query: Record<string, unknown> | undefined;
 
@@ -111,6 +133,16 @@ export const useBulkAlertActionItems = ({
             const timeFilter = buildTimeRangeFilter(from, to);
             query = buildEsQuery(undefined, [], [...timeFilter, ...filters], undefined);
             ids = undefined;
+          }
+
+          if (
+            status === 'closed' &&
+            !(await promptAlertCloseConfirmation(ids ? { ids } : { query: JSON.stringify(query) }))
+          ) {
+            return;
+          }
+
+          if (isSelectAllChecked) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
           } else if (items.length > 1) {
             startTransaction({ name: APM_USER_INTERACTIONS.BULK_STATUS_UPDATE });
@@ -123,6 +155,8 @@ export const useBulkAlertActionItems = ({
             status,
             query,
             signalIds: ids,
+            reason,
+            runtimeFields,
           });
 
           setAlertLoading(false);
@@ -155,8 +189,30 @@ export const useBulkAlertActionItems = ({
       to,
       refetchProp,
       promptAlertCloseConfirmation,
+      runtimeFields,
     ]
   );
+
+  const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
+    useBulkClosingReasonItems({
+      isEnabled: hasAlertsUpdate ?? false,
+      onSubmitCloseReason({
+        reason,
+        alertItems,
+        setIsBulkActionsLoading,
+        clearSelection,
+        isAllSelected,
+        refresh,
+      }) {
+        getOnAction(FILTER_CLOSED as AlertWorkflowStatus, reason)(
+          alertItems,
+          !!isAllSelected,
+          setIsBulkActionsLoading,
+          () => clearSelection?.(),
+          () => refresh?.()
+        );
+      },
+    });
 
   const getUpdateAlertStatusAction = useCallback(
     (status: AlertWorkflowStatus) => {
@@ -167,6 +223,10 @@ export const useBulkAlertActionItems = ({
           ? i18n.BULK_ACTION_CLOSE_SELECTED
           : i18n.BULK_ACTION_ACKNOWLEDGED_SELECTED;
 
+      if (status === FILTER_CLOSED) {
+        return alertClosingReasonItem;
+      }
+
       return {
         label,
         key: `${status}-alert-status`,
@@ -175,14 +235,24 @@ export const useBulkAlertActionItems = ({
         onClick: getOnAction(status),
       };
     },
-    [getOnAction]
+    [alertClosingReasonItem, getOnAction]
   );
 
-  return useMemo(() => {
-    return hasIndexWrite
-      ? [FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED].map((status) => {
-          return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
-        })
+  const items = useMemo(() => {
+    return hasAlertsUpdate
+      ? ([FILTER_OPEN, FILTER_CLOSED, FILTER_ACKNOWLEDGED]
+          .map((status) => {
+            return getUpdateAlertStatusAction(status as AlertWorkflowStatus);
+          })
+          //  Filter out undefined items
+          .filter((item) => !!item) as BulkActionsConfig[])
       : [];
-  }, [getUpdateAlertStatusAction, hasIndexWrite]);
+  }, [getUpdateAlertStatusAction, hasAlertsUpdate]);
+
+  const panels = useMemo(
+    () => [...alertClosingReasonPanels] as BulkActionsPanelConfig[],
+    [alertClosingReasonPanels]
+  );
+
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };

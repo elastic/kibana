@@ -9,6 +9,7 @@ import type { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   DocsColumnContainer,
   ActionTypeIconBadgeContainer,
@@ -30,7 +31,7 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
     >
       <EuiFlexItem grow={false}>
         <div css={ActionTypeIconBadgeContainer(euiTheme)}>
-          <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeClosed' : 'pinFilled'}>
+          <EuiBadge iconType={queryRule.type === 'exclude' ? 'eyeSlash' : 'pinFill'}>
             {queryRule.type === 'exclude' ? (
               <FormattedMessage
                 id="xpack.search.queryRulesetDetail.draggableList.excludeLabel"
@@ -48,7 +49,13 @@ export const QueryRuleDraggableListItemActionTypeBadge: React.FC<{
       <EuiFlexItem grow={false} css={DocumentCountLabelContainer(euiTheme)}>
         <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="documents" />
+            <EuiIcon
+              type="documents"
+              aria-label={i18n.translate(
+                'xpack.search.queryRulesetDetail.queryRuleDraggableList.documentsIconAriaLabel',
+                { defaultMessage: 'Documents' }
+              )}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={DocumentCountLabelStyle(euiTheme)}>
             {queryRule.actions.docs?.length ?? 0}

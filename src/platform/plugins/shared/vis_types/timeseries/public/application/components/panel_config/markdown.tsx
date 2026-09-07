@@ -87,6 +87,8 @@ export class MarkdownPanelConfig extends Component<
     const selectedAlignOption = alignOptions.find((option) => {
       return model.markdown_vertical_align === option.value;
     });
+    const verticalAlignmentSelectId = htmlId('valign');
+    const verticalAlignmentLabelId = htmlId('valignLabel');
     let view;
     if (selectedTab === PANEL_CONFIG_TABS.MARKDOWN) {
       view = (
@@ -229,7 +231,7 @@ export class MarkdownPanelConfig extends Component<
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFormLabel htmlFor={htmlId('valign')}>
+                <EuiFormLabel htmlFor={verticalAlignmentSelectId} id={verticalAlignmentLabelId}>
                   <FormattedMessage
                     id="visTypeTimeseries.markdown.optionsTab.verticalAlignmentLabel"
                     defaultMessage="Vertical alignment:"
@@ -238,7 +240,8 @@ export class MarkdownPanelConfig extends Component<
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiComboBox
-                  id={htmlId('valign')}
+                  id={verticalAlignmentSelectId}
+                  aria-labelledby={verticalAlignmentLabelId}
                   isClearable={false}
                   options={alignOptions}
                   selectedOptions={selectedAlignOption ? [selectedAlignOption] : []}

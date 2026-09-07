@@ -9,7 +9,6 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -18,8 +17,9 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import { AzureArmTemplateGuide } from '../../../../../../../../components/cloud_security_posture';
 import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
@@ -81,7 +81,7 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
         {error && isError && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut title={error} color="danger" iconType="error" />
+            <KbnDangerCallout announceOnMount title={error} />
           </>
         )}
       </EuiModalBody>

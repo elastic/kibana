@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
 import type {
@@ -71,23 +71,25 @@ export const getKBVectorSearchQuery = ({
 
   const userFilter = {
     should: [
-      {
-        nested: {
-          path: 'users',
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match: user.profile_uid
-                    ? { 'users.id': user.profile_uid }
-                    : { 'users.name': user.username },
+      ...(user.profile_uid
+        ? [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: { 'users.id': user.profile_uid },
+                      },
+                    ],
+                  },
                 },
-              ],
+              },
             },
-          },
-        },
-      },
+          ]
+        : []),
       {
         bool: {
           must_not: [
@@ -160,7 +162,7 @@ export const getStructuredToolForIndexEntry = ({
         ? z.number()
         : input.fieldType === 'boolean'
         ? z.boolean()
-        : z.any();
+        : z.any().optional();
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 
@@ -183,7 +185,7 @@ export const getStructuredToolForIndexEntry = ({
       // Generate filters for inputSchema fields
       const filter =
         indexEntry.inputSchema?.reduce(
-          // @ts-expect-error Possible to override types with dynamic input schema?
+          // @ts-expect-error upgrade typescript v5.9.3
           (prev, i) => [...prev, { term: { [`${i.fieldName}`]: input?.[i.fieldName] } }],
           [] as Array<{ term: { [key: string]: string } }>
         ) ?? [];

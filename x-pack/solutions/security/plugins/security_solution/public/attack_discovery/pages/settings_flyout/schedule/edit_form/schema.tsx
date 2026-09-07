@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+import type {
+  ActionConnector,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 import type { AttackDiscoveryScheduleSchema } from './types';
 import { debouncedValidateRuleActionsField } from '../../../../../common/containers/rule_actions/validate_rule_actions_field';
@@ -17,8 +20,10 @@ const { emptyField } = fieldValidators;
 
 export const getSchema = ({
   actionTypeRegistry,
+  connectors,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
+  connectors?: ActionConnector[];
 }): FormSchema<AttackDiscoveryScheduleSchema> => ({
   name: {
     type: FIELD_TYPES.TEXT,
@@ -37,14 +42,8 @@ export const getSchema = ({
   },
   connectorId: {
     label: i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel', {
-      defaultMessage: 'Connector',
+      defaultMessage: 'Connector for generating attack discoveries',
     }),
-    helpText: i18n.translate(
-      'xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText',
-      {
-        defaultMessage: 'This connector will apply to this schedule, only.',
-      }
-    ),
     validations: [
       {
         validator: emptyField(
@@ -61,7 +60,7 @@ export const getSchema = ({
   alertsSelectionSettings: {},
   interval: {
     label: i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel', {
-      defaultMessage: 'Runs every',
+      defaultMessage: 'Run every',
     }),
   },
   actions: {
@@ -69,7 +68,7 @@ export const getSchema = ({
       {
         // Debounced validator is necessary here to prevent error validation
         // flashing when first adding an action. Also prevents additional renders
-        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry, connectors),
       },
     ],
   },

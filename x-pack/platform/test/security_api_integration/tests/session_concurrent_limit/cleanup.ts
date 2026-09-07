@@ -14,9 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
   getSAMLRequestId,
   getSAMLResponse,
@@ -56,8 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
-    return Array.isArray(apiResponse.headers['set-cookie'])
-      ? parseCookie(apiResponse.headers['set-cookie'][0])!
+    return apiResponse.headers['set-cookie']
+      ? findSessionCookie(apiResponse.headers['set-cookie'])
       : undefined;
   }
 
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function startSAMLHandshake() {
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       .expect(200);
 
     return {
-      cookie: parseCookie(handshakeResponse.headers['set-cookie'][0])!,
+      cookie: findSessionCookie(handshakeResponse.headers['set-cookie']),
       location: handshakeResponse.body.location,
     };
   }
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function loginWithSAML() {
@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(200);
 
-    return parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    return findSessionCookie(authenticationResponse.headers['set-cookie']);
   }
 
   async function runCleanupTaskSoon() {

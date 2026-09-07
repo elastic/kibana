@@ -74,7 +74,83 @@ const OBJECTS_TO_SHARE: Array<{
   },
   {
     spacesToAdd: [SPACE_1.id, SPACE_2.id],
-    objects: [{ type: 'resolvetype', id: 'conflict-newid' }],
+    objects: [
+      { type: 'resolvetype', id: 'exact-match' },
+      { type: 'resolvetype', id: 'alias-match-newid' },
+      { type: 'resolvetype', id: 'conflict-newid' },
+      { type: 'sharedtype', id: 'conflict_1' },
+      { type: 'sharedtype', id: 'conflict_3' },
+      { type: 'sharedtype', id: 'conflict_4a' },
+    ],
+  },
+  {
+    spacesToAdd: ['*'],
+    spacesToRemove: ['default'],
+    objects: [
+      { type: 'sharedtype', id: 'outbound-missing-reference-conflict-1' },
+      { type: 'sharedtype', id: 'outbound-missing-reference-conflict-2a' },
+      { type: 'index-pattern', id: 'inbound-reference-origin-match-1-newId' },
+      { type: 'index-pattern', id: 'inbound-reference-origin-match-2a' },
+      { type: 'index-pattern', id: 'inbound-reference-origin-match-2b' },
+      { type: 'nestedtype', id: '1' },
+      { type: 'nestedtype', id: '2' },
+      { type: 'nestedtype', id: '3' },
+      { type: 'nestedtype', id: '4' },
+    ],
+  },
+];
+
+// These resolve-specific objects are created directly in ES (bypassing the
+// saved objects import API) because the import's origin-conflict detection
+// search for the ID "conflict" collides with other objects in the index.
+const RESOLVE_TEST_OBJECTS = [
+  {
+    _id: 'resolvetype:conflict',
+    _source: {
+      type: 'resolvetype',
+      updated_at: '2017-09-21T18:51:23.794Z',
+      resolvetype: { title: 'Resolve outcome conflict (1 of 2)' },
+      namespaces: ['default', SPACE_1.id, SPACE_2.id],
+    },
+  },
+  {
+    _id: 'resolvetype:all_spaces',
+    _source: {
+      type: 'resolvetype',
+      updated_at: '2017-09-21T18:51:23.794Z',
+      resolvetype: {
+        title:
+          "This is used to test that 1. the 'disabled' alias does not resolve to this target (because the alias is disabled), and 2. when this object that exists in all spaces is deleted, the alias that targets it is deleted too (even though the alias is disabled)",
+      },
+      namespaces: ['*'],
+    },
+  },
+];
+
+// These conflict objects are created directly in ES because the import API
+// doesn't preserve `updated_at`, and the _update_objects_spaces sharing call
+// also overwrites it. Tests assert on the exact `title` and `updatedAt` of
+// these objects in the ambiguous_conflict error response.
+const CONFLICT_DEST_OBJECTS = [
+  {
+    _id: 'sharedtype:conflict_2a',
+    _source: {
+      originId: 'conflict_2',
+      type: 'sharedtype',
+      updated_at: '2017-09-21T18:59:16.270Z',
+      sharedtype: { title: 'A shared saved-object in all spaces' },
+      namespaces: ['default', SPACE_1.id, SPACE_2.id],
+    },
+  },
+  {
+    _id: 'sharedtype:conflict_2b',
+    _source: {
+      originId: 'conflict_2',
+      type: 'sharedtype',
+      updated_at: '2017-09-21T18:59:16.270Z',
+      sharedtype: { title: 'A shared saved-object in all spaces' },
+      namespaces: ['default', SPACE_1.id, SPACE_2.id],
+    },
   },
 ];
 
@@ -125,6 +201,21 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
           .send({ objects, spacesToAdd, spacesToRemove })
           .expect(200);
       }
+
+      // Ensure all sharing updates are visible to subsequent search operations.
+      await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
+
+      // Create objects directly in ES that can't go through the import API.
+      await Promise.all(
+        [...RESOLVE_TEST_OBJECTS, ...CONFLICT_DEST_OBJECTS].map(async (obj) => {
+          await es.index({
+            id: obj._id,
+            index: '.kibana',
+            refresh: 'wait_for',
+            document: obj._source,
+          });
+        })
+      );
     },
 
     createLegacyUrlAliases: async (
@@ -141,7 +232,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
 
           await Promise.all(
             aliases.map(async (alias) => {
-              await es.create({
+              await es.index({
                 id: `legacy-url-alias:${spaceString}:${alias.targetType}:${alias.sourceId}`,
                 index: '.kibana',
                 refresh: 'wait_for',
@@ -170,7 +261,10 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
       await Promise.all(
         allSpacesIds.flatMap((spaceId) => [
           kbnServer.savedObjects.cleanStandardList({ space: spaceId }),
-          kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype', 'isolatedtype'] }),
+          kbnServer.savedObjects.clean({
+            space: spaceId,
+            types: ['sharedtype', 'isolatedtype', 'resolvetype'],
+          }),
         ])
       );
     },
@@ -180,6 +274,7 @@ export function getTestDataLoader({ getService }: Pick<FtrProviderContext, 'getS
         index: ALL_SAVED_OBJECT_INDICES,
         ignore_unavailable: true,
         wait_for_completion: true,
+        refresh: true,
         conflicts: 'proceed',
         query: {
           bool: {

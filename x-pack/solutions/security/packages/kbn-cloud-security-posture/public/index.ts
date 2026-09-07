@@ -21,8 +21,14 @@ export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
 export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
 export { useGetMisconfigurationStatusColor } from './src/hooks/use_get_misconfiguration_status_color';
+export {
+  useMisconfigurationFindings,
+  MISCONFIGURATION,
+} from './src/hooks/use_misconfiguration_findings';
+export type { MisconfigurationFindingDetailFields } from './src/hooks/use_misconfiguration_findings';
+export { useGetNavigationUrlParams } from './src/hooks/use_get_navigation_url_params';
+export { useHasMisconfigurations } from './src/hooks/use_has_misconfigurations';
 export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
-export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_builders';
 export { ActionableBadge, type MultiValueCellAction } from './src/components/actionable_badge';
 export { MultiValueCellPopover } from './src/components/multi_value_cell_popover';
 export {
@@ -30,7 +36,6 @@ export {
   isCveReference,
   getNonCveReferences,
 } from './src/utils/vulnerability_reference';
-export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
 export { getGroupPanelTitle } from './src/utils/get_group_panel_title';
 export {
   GroupWrapper,

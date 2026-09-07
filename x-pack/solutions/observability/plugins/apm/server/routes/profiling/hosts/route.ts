@@ -5,35 +5,24 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
-import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
-import * as t from 'io-ts';
+import {
+  routeDefinitions,
+  type ProfilingHostsFlamegraphResponse,
+  type ProfilingHostsFunctionsResponse,
+} from '@kbn/apm-api-shared';
 import { CONTAINER_ID, HOST_NAME } from '../../../../common/es_fields/apm';
 import { mergeKueries, toKueryFilterFormat } from '../../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  serviceTransactionDataSourceRt,
-} from '../../default_api_types';
 import { fetchFlamegraph } from '../fetch_flamegraph';
 import { fetchFunctions } from '../fetch_functions';
 import { getServiceCorrelationFields } from '../get_service_correlation_fields';
 
 const profilingHostsFlamegraphRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/hosts/flamegraph',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([rangeRt, environmentRt, serviceTransactionDataSourceRt, kueryRt]),
-  }),
+  endpoint: routeDefinitions.profiling.hostsFlamegraph.endpoint,
+  params: routeDefinitions.profiling.hostsFlamegraph.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<
-    { flamegraph: BaseFlameGraph; hostNames: string[]; containerIds: string[] } | undefined
-  > => {
+  handler: async (resources): Promise<ProfilingHostsFlamegraphResponse | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([
@@ -81,23 +70,10 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
 });
 
 const profilingHostsFunctionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/profiling/hosts/functions',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      serviceTransactionDataSourceRt,
-      t.type({ startIndex: toNumberRt, endIndex: toNumberRt }),
-      kueryRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.profiling.hostsFunctions.endpoint,
+  params: routeDefinitions.profiling.hostsFunctions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<
-    { functions: TopNFunctions; hostNames: string[]; containerIds: string[] } | undefined
-  > => {
+  handler: async (resources): Promise<ProfilingHostsFunctionsResponse | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
     const [esClient, apmEventClient, profilingDataAccessStart] = await Promise.all([

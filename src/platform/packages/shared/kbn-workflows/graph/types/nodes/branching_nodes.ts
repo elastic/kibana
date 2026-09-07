@@ -7,25 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
-import { IfStepSchema } from '../../../spec/schema';
+import { z } from '@kbn/zod/v4';
 import { GraphNodeSchema } from './base';
+import { IfStepSchema } from '../../../spec/schema';
+
+export const EnterIfNodeConfigurationSchema = IfStepSchema.omit({
+  steps: true,
+  else: true,
+});
 
 export const EnterIfNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-if'),
   exitNodeId: z.string(),
-  configuration: IfStepSchema.omit({
-    steps: true,
-    else: true,
-  }),
+  configuration: EnterIfNodeConfigurationSchema,
 });
 export type EnterIfNode = z.infer<typeof EnterIfNodeSchema>;
 
 export const EnterConditionBranchNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.union([z.literal('enter-then-branch'), z.literal('enter-else-branch')]),
-  condition: z.union([z.string(), z.undefined()]),
+  condition: z.union([z.string(), z.undefined()]).optional(),
 });
 export type EnterConditionBranchNode = z.infer<typeof EnterConditionBranchNodeSchema>;
 

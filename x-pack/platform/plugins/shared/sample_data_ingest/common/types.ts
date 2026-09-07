@@ -5,18 +5,43 @@
  * 2.0.
  */
 
-export type InstallationStatus = 'installed' | 'uninstalled' | 'installing' | 'error';
+export enum InstallationStatus {
+  Installed = 'installed',
+  Uninstalled = 'uninstalled',
+  Installing = 'installing',
+  Error = 'error',
+}
 
 export interface StatusResponse {
   status: InstallationStatus;
   indexName?: string;
   dashboardId?: string;
+  taskId?: string;
+  error?: string;
 }
 
-export interface InstallResponse {
+export interface SampleDataResponse {
   status: InstallationStatus;
+  error?: string;
+}
+
+export interface InstalledResponse extends SampleDataResponse {
+  status: InstallationStatus.Installed;
   indexName: string;
+  dashboardId: string;
+}
+
+export interface InstallingResponse extends SampleDataResponse {
+  status: InstallationStatus.Installing;
+  taskId: string;
+}
+
+export interface SampleDataInstallState {
+  status: InstallationStatus;
+  indexName?: string;
   dashboardId?: string;
+  taskId?: string;
+  error?: string;
 }
 
 export enum DatasetSampleType {

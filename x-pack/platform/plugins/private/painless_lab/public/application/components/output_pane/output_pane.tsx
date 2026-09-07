@@ -57,9 +57,9 @@ export const OutputPane: FunctionComponent<Props> = ({ isLoading, response }) =>
         {isLoading ? (
           <EuiLoadingSpinner size="m" />
         ) : response && response.error ? (
-          <EuiIcon type="warning" color="danger" />
+          <EuiIcon type="warning" color="danger" aria-hidden={true} />
         ) : (
-          <EuiIcon type="check" color="success" />
+          <EuiIcon type="check" color="success" aria-hidden={true} />
         )}
       </EuiFlexItem>
 

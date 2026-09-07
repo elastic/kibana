@@ -27,9 +27,11 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-browser-mocks';
+import { userStorageServiceMock } from '@kbn/core-user-storage-browser-mocks';
+import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
-  const mock = {
+  const mock = lazyObject({
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: applicationServiceMock.createStartContract(),
     chrome: chromeServiceMock.createStartContract(),
@@ -51,10 +53,11 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     userProfile: userProfileServiceMock.createStart(),
     rendering: renderingServiceMock.create(),
     pricing: pricingServiceMock.createStartContract(),
-    plugins: {
+    userStorage: userStorageServiceMock.createStartContract(),
+    plugins: lazyObject({
       onStart: jest.fn(),
-    },
-  };
+    }),
+  });
 
   return mock;
 }

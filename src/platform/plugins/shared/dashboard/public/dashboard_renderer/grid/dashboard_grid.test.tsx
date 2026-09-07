@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { useBatchedPublishingSubjects as mockUseBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { RenderResult } from '@testing-library/react';
-import { act, getByLabelText, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, getByLabelText, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { DashboardState } from '../../../common';
@@ -93,10 +93,10 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
   );
 
   // panels in collapsed sections should not render
-  const { panels, sections } = internalApi.layout$.value;
+  const { panels, sections } = api.layout$.value;
   const panelRenderCount = sections
     ? Object.values(panels).filter((value) => {
-        const sectionId = value.gridData.sectionId;
+        const sectionId = value.grid.sectionId;
         return sectionId ? !sections[sectionId].collapsed : true;
       }).length
     : Object.keys(panels).length;
@@ -110,6 +110,9 @@ const createAndMountDashboardGrid = async (overrides?: Partial<DashboardState>) 
 };
 
 describe('DashboardGrid', () => {
+  beforeAll(() => {
+    Element.prototype.scrollIntoView = jest.fn();
+  });
   test('renders', async () => {
     await createAndMountDashboardGrid();
   });
@@ -207,7 +210,7 @@ describe('DashboardGrid', () => {
     });
 
     test('can add new section', async () => {
-      const { dashboardApi, internalApi } = await createAndMountDashboardGrid({
+      const { dashboardApi } = await createAndMountDashboardGrid({
         panels: getMockPanelsWithSections(),
       });
       dashboardApi.addNewSection();
@@ -216,10 +219,9 @@ describe('DashboardGrid', () => {
         expect(headers.length).toEqual(3);
       });
 
-      const newSection = internalApi.layout$.getValue().sections['54321'];
+      const newSection = dashboardApi.layout$.getValue().sections['54321'];
       expect(newSection).toEqual({
-        gridData: {
-          i: '54321',
+        grid: {
           y: 8,
         },
         title: 'New collapsible section',
@@ -232,27 +234,31 @@ describe('DashboardGrid', () => {
     });
 
     test('dashboard state updates on collapse', async () => {
-      const { internalApi } = await await createAndMountDashboardGrid({
+      const { dashboardApi } = await await createAndMountDashboardGrid({
         panels: getMockPanelsWithSections(),
       });
 
       const headerButton = screen.getByTestId(`kbnGridSectionTitle-section2`);
       expect(headerButton.nodeName.toLowerCase()).toBe('button');
-      userEvent.click(headerButton);
+      act(() => {
+        fireEvent.mouseDown(headerButton);
+        fireEvent.mouseUp(headerButton);
+      });
       await waitFor(() => {
-        expect(internalApi.layout$.getValue().sections.section2.collapsed).toBe(true);
+        expect(dashboardApi.layout$.getValue().sections.section2.collapsed).toBe(true);
       });
       expect(headerButton.getAttribute('aria-expanded')).toBe('false');
     });
 
     test('dashboard state updates on section deletion', async () => {
-      const { internalApi } = await createAndMountDashboardGrid({
+      const { dashboardApi } = await createAndMountDashboardGrid({
         panels: [
           ...getMockPanelsWithSections(),
           {
             title: 'Empty section',
             collapsed: false,
-            gridData: { i: 'emptySection', y: 8 },
+            grid: { y: 8 },
+            id: 'emptySection',
             panels: [],
           },
         ],
@@ -267,7 +273,7 @@ describe('DashboardGrid', () => {
         await userEvent.click(deleteEmptySectionButton);
       });
       await waitFor(() => {
-        expect(Object.keys(internalApi.layout$.getValue().sections)).not.toContain('emptySection');
+        expect(Object.keys(dashboardApi.layout$.getValue().sections)).not.toContain('emptySection');
       });
 
       // can delete non-empty section
@@ -283,14 +289,14 @@ describe('DashboardGrid', () => {
       const confirmDeleteButton = screen.getByText('Delete section and 1 panel');
       await userEvent.click(confirmDeleteButton);
       await waitFor(() => {
-        expect(Object.keys(internalApi.layout$.getValue().sections)).not.toContain('section1');
-        expect(Object.keys(internalApi.layout$.getValue().panels)).not.toContain('3'); // this is the panel in section1
+        expect(Object.keys(dashboardApi.layout$.getValue().sections)).not.toContain('section1');
+        expect(Object.keys(dashboardApi.layout$.getValue().panels)).not.toContain('3'); // this is the panel in section1
       });
     });
   });
 
   test('layout responds to dashboard state update', async () => {
-    const { internalApi } = await createAndMountDashboardGrid({
+    const { dashboardApi } = await createAndMountDashboardGrid({
       panels: getMockPanels(),
     });
 
@@ -299,7 +305,7 @@ describe('DashboardGrid', () => {
     });
     expect(sectionContainers.length).toBe(1); // only the first top section is rendered
 
-    internalApi.layout$.next(getMockLayoutWithSections());
+    dashboardApi.layout$.next(getMockLayoutWithSections());
 
     await waitFor(() => {
       sectionContainers = screen.getAllByTestId(`kbnGridSectionWrapper-`, {

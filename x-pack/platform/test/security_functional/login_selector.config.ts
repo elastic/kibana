@@ -8,7 +8,7 @@
 import { resolve } from 'path';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { type FtrConfigProviderContext, getUrl } from '@kbn/test';
 
 import { pageObjects } from '../functional/page_objects';
 import { services } from '../functional/services';
@@ -85,17 +85,39 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               realm: 'saml1',
               description: 'Log-in-with-SAML',
               icon: 'logoKibana',
+              origin: getUrl.baseUrl(kibanaFunctionalConfig.get('servers.kibana')),
             },
             unknown_saml: {
               order: 2,
               realm: 'unknown_realm',
               description: 'Do-not-log-in-with-THIS-SAML',
               icon: 'logoAWS',
+              origin: [
+                'https://some-domain-that-doesnt-exist.com',
+                getUrl.baseUrl(kibanaFunctionalConfig.get('servers.kibana')),
+              ],
             },
             saml_never: {
               order: 4,
               realm: 'saml_never',
               description: 'Never-log-in-with-SAML',
+              icon: 'logoKibana',
+            },
+            saml_hidden: {
+              order: 5,
+              realm: 'saml_never',
+              description: 'This-SAML-should-be-hidden',
+              origin: [
+                'https://some-domain-that-doesnt-exist.com',
+                'https://some-other-domain-that-doesnt-exist.com',
+              ],
+              icon: 'logoKibana',
+            },
+            saml_hidden_2: {
+              order: 6,
+              realm: 'saml_never',
+              description: 'This-SAML-should-be-hidden',
+              origin: 'https://some-domain-that-doesnt-exist.com',
               icon: 'logoKibana',
             },
           },

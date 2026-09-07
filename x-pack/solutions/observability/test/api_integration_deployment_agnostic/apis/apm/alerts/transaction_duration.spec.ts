@@ -8,10 +8,10 @@
 import { AggregationType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionDurationActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_duration/register_transaction_duration_rule_type';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import type { ApmAlertFields } from './helpers/alerting_helper';
@@ -28,24 +28,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const synthtrace = getService('synthtrace');
   const alertingApi = getService('alertingApi');
   const samlAuth = getService('samlAuth');
+  const retry = getService('retry');
 
   const ruleParams = {
     threshold: 3000,
     windowSize: 5,
     windowUnit: 'm',
     transactionType: 'request',
-    serviceName: 'opbeans-java',
     environment: 'production',
     aggregationType: AggregationType.Avg,
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  describe('transaction duration alert', () => {
+  describe('transaction duration alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let roleAuthc: RoleCredentials;
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+      // Clean up any existing alerts and rules from previous test runs
+      await alertingApi.cleanUpAlerts({
+        roleAuthc,
+        consumer: 'apm',
+        alertIndexName: APM_ALERTS_INDEX,
+        connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+      });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -100,11 +108,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           name: 'Apm transaction duration without kql filter',
           consumer: 'apm',
           schedule: {
-            interval: '1m',
+            interval: '1h',
           },
           tags: ['apm'],
           params: {
             ...ruleParams,
+            serviceName: 'opbeans-java',
           },
           actions: [indexAction],
           roleAuthc,
@@ -195,10 +204,23 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        expect(alerts[0]).property('service.name', 'opbeans-java');
-        expect(alerts[0]).property('service.environment', 'production');
-        expect(alerts[0]).property('transaction.type', 'request');
-        expect(alerts[0]).property('transaction.name', 'tx-java');
+        const alert = alerts[0];
+        expect({
+          'service.name': alert['service.name'],
+          'service.environment': alert['service.environment'],
+          'transaction.type': alert['transaction.type'],
+          'transaction.name': alert['transaction.name'],
+          'kibana.alert.grouping': alert['kibana.alert.grouping'],
+        }).to.eql({
+          'service.name': 'opbeans-java',
+          'service.environment': 'production',
+          'transaction.type': 'request',
+          'transaction.name': 'tx-java',
+          'kibana.alert.grouping': {
+            service: { name: 'opbeans-java', environment: 'production' },
+            transaction: { type: 'request', name: 'tx-java' },
+          },
+        });
       });
 
       it('shows the correct alert count for each service on service inventory', async () => {
@@ -231,12 +253,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          consumer: 'apm',
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+        });
+
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
           consumer: 'apm',
           schedule: {
-            interval: '1m',
+            interval: '1h',
           },
           tags: ['apm'],
           params: {
@@ -248,6 +277,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               },
             },
             ...ruleParams,
+            serviceName: 'opbeans-node',
           },
           actions: [],
           roleAuthc,
@@ -287,34 +317,53 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('indexes alert document with all group-by fields', async () => {
-        expect(alerts[0]).property('service.name', 'opbeans-node');
-        expect(alerts[0]).property('service.environment', 'production');
-        expect(alerts[0]).property('transaction.type', 'request');
-        expect(alerts[0]).property('transaction.name', 'tx-node');
+        const alert = alerts[0];
+        expect({
+          'service.name': alert['service.name'],
+          'service.environment': alert['service.environment'],
+          'transaction.type': alert['transaction.type'],
+          'transaction.name': alert['transaction.name'],
+          'kibana.alert.grouping': alert['kibana.alert.grouping'],
+        }).to.eql({
+          'service.name': 'opbeans-node',
+          'service.environment': 'production',
+          'transaction.type': 'request',
+          'transaction.name': 'tx-node',
+          'kibana.alert.grouping': {
+            service: { name: 'opbeans-node', environment: 'production' },
+            transaction: { type: 'request', name: 'tx-node' },
+          },
+        });
       });
 
       it('shows alert count=1 for opbeans-node on service inventory', async () => {
-        const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
-        expect(serviceInventoryAlertCounts).to.eql({
-          'opbeans-node': 1,
-          'opbeans-java': 0,
+        await retry.tryForTime(5000, async () => {
+          const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
+          expect(serviceInventoryAlertCounts).to.eql({
+            'opbeans-node': 1,
+            'opbeans-java': 0,
+          });
         });
       });
 
       it('shows alert count=0 in opbeans-java service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-java',
+        await retry.tryForTime(5000, async () => {
+          const serviceTabAlertCount = await fetchServiceTabAlertCount({
+            apmApiClient,
+            serviceName: 'opbeans-java',
+          });
+          expect(serviceTabAlertCount).to.be(0);
         });
-        expect(serviceTabAlertCount).to.be(0);
       });
 
       it('shows alert count=1 in opbeans-node service', async () => {
-        const serviceTabAlertCount = await fetchServiceTabAlertCount({
-          apmApiClient,
-          serviceName: 'opbeans-node',
+        await retry.tryForTime(5000, async () => {
+          const serviceTabAlertCount = await fetchServiceTabAlertCount({
+            apmApiClient,
+            serviceName: 'opbeans-node',
+          });
+          expect(serviceTabAlertCount).to.be(1);
         });
-        expect(serviceTabAlertCount).to.be(1);
       });
     });
   });

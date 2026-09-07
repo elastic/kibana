@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { AddToDashboard } from './add_to_dashboard';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../embeddables/constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
 
 interface Props {
   title?: string;

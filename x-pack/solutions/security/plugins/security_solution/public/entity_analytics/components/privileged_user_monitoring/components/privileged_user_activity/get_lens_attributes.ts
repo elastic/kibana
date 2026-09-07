@@ -59,16 +59,13 @@ export const getLensAttributes: GetLensAttributes = ({ esql, stackByField, extra
             seriesType: 'bar_stacked',
             xAccessor: columnTimestampId,
             accessors: [columnResultId],
-            splitAccessor: columnUserId,
+            splitAccessors: [columnUserId],
             layerType: 'data',
             showGridlines: false,
           },
         ],
       },
       filters: [], // empty, because filters are applied directly to the lens.EmbeddableComponent
-      query: {
-        esql: '', // empty, because filters are applied directly to the lens.EmbeddableComponent
-      },
       datasourceStates: {
         textBased: {
           layers: {

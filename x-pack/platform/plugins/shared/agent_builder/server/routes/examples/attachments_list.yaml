@@ -1,0 +1,41 @@
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          listAttachmentsResponseExample:
+            description: "Example response containing active attachments for a conversation"
+            value:
+              results:
+                - id: attachment-1
+                  type: text
+                  current_version: 2
+                  versions:
+                    - version: 1
+                      data: "Initial content"
+                      created_at: "2025-01-01T10:00:00.000Z"
+                      content_hash: "abc123"
+                      estimated_tokens: 3
+                    - version: 2
+                      data: "Updated content"
+                      created_at: "2025-01-01T11:00:00.000Z"
+                      content_hash: "def456"
+                      estimated_tokens: 3
+                  description: "My text file"
+                  active: true
+                - id: attachment-2
+                  type: json
+                  current_version: 1
+                  versions:
+                    - version: 1
+                      data:
+                        key: "value"
+                        nested:
+                          field: 123
+                      created_at: "2025-01-01T12:00:00.000Z"
+                      content_hash: "ghi789"
+                      estimated_tokens: 15
+                  description: "Configuration data"
+                  active: true
+              total_token_estimate: 21

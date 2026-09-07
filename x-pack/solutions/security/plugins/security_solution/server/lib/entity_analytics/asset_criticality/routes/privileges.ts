@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AssetCriticalityGetPrivilegesResponse } from '../../../../../common/api/entity_analytics';
@@ -19,11 +19,13 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const assetCriticalityInternalPrivilegesRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger,
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
-) => {
+export const assetCriticalityInternalPrivilegesRoute = ({
+  config,
+  docLinks,
+  router,
+  logger,
+  getStartServices,
+}: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .get({
       access: 'internal',
@@ -38,6 +40,17 @@ export const assetCriticalityInternalPrivilegesRoute = (
       {
         version: API_VERSIONS.internal.v1,
         validate: false,
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       async (
         context,

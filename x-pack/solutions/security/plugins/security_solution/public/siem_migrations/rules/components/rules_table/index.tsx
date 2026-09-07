@@ -13,9 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiBasicTable,
   EuiButton,
-  EuiSwitch,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
@@ -42,24 +41,18 @@ import {
   SiemMigrationRetryFilter,
 } from '../../../../../common/siem_migrations/constants';
 import * as i18n from './translations';
-import type { RulesFilterOptions, RuleMigrationStats } from '../../types';
+import type { RulesFilterOptions, RuleMigrationStats, RuleMigrationSettings } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
-import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 import { UpdateIndexPatternForm } from './update_index_pattern';
-import {
-  DATA_TEST_SUBJ_PREFIX,
-  EmptyMigration,
-  SearchField,
-  StartMigrationModal,
-} from '../../../common/components';
-import type { MigrationSettingsBase } from '../../../common/types';
+import { EmptyMigration, MemoizedBasicTable, SearchField } from '../../../common/components';
 import {
   UtilityBar,
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
 } from '../../../../common/components/utility_bar';
+import { useStartRulesMigrationModal } from '../../hooks/use_start_rules_migration_modal';
 import { useStartMigration } from '../../logic/use_start_migration';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -203,7 +196,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     const { mutateAsync: installMigrationRule } = useInstallMigrationRule(migrationId);
     const { mutateAsync: installMigrationRules } = useInstallMigrationRules(
-      migrationId,
+      migrationStats,
       translationStats
     );
     const { mutateAsync: updateIndexPattern } = useUpdateIndexPattern({
@@ -213,7 +206,6 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         closeMissingIndexPatternFlyout();
       },
     });
-    const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
 
     const [isTableLoading, setTableLoading] = useState(false);
 
@@ -226,6 +218,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           ids: selectedMigrationRules.map((rule) => rule.id),
         });
         setTableLoading(false);
+        setSelectedMigrationRules([]);
       },
       [migrationId, updateIndexPattern, selectedMigrationRules, setTableLoading]
     );
@@ -276,44 +269,20 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       [addError, installMigrationRules]
     );
 
-    const defaultSettingsForModal = useMemo(
-      () => ({
-        connectorId: migrationStats?.last_execution?.connector_id,
-        skipPrebuiltRulesMatching: migrationStats?.last_execution?.skip_prebuilt_rules_matching,
-      }),
-      [migrationStats.last_execution]
-    );
-
-    const [enablePrebuiltRulesMatching, setEnablePrebuiltRuleMatching] = useState<boolean>(
-      !defaultSettingsForModal.skipPrebuiltRulesMatching
-    );
-
-    const reprocessFailedRulesWithSettings = useCallback(
-      (settings: MigrationSettingsBase) => {
-        startMigration(migrationId, SiemMigrationRetryFilter.FAILED, {
-          ...settings,
-          skipPrebuiltRulesMatching: !enablePrebuiltRulesMatching,
-        });
+    const { startMigration, isLoading: isStarting } = useStartMigration(refetchData);
+    const onStartMigrationWithSettings = useCallback(
+      (settings: RuleMigrationSettings) => {
+        startMigration(migrationStats, SiemMigrationRetryFilter.FAILED, settings);
       },
-      [enablePrebuiltRulesMatching, migrationId, startMigration]
+      [migrationStats, startMigration]
     );
-
-    const {
-      isOpen: isReprocessFailedRulesModalVisible,
-      open: showReprocessFailedRulesModal,
-      close: closeReprocessFailedRulesModal,
-    } = useIsOpenState(false);
-
-    const prebuiltRulesMatchingSwitch = useMemo(() => {
-      return (
-        <EuiSwitch
-          data-test-subj={`${DATA_TEST_SUBJ_PREFIX}-PrebuiltRulesMatchingSwitch`}
-          label={i18n.START_RULE_MIGRATION_MODAL_PREBUILT_RULES_LABEL}
-          checked={enablePrebuiltRulesMatching}
-          onChange={(e) => setEnablePrebuiltRuleMatching(e.target.checked)}
-        />
-      );
-    }, [enablePrebuiltRulesMatching]);
+    const { modal: reprocessMigrationModal, showModal: showReprocessMigrationModal } =
+      useStartRulesMigrationModal({
+        type: 'reprocess',
+        migrationStats,
+        translationStats,
+        onStartMigrationWithSettings,
+      });
 
     const isRulesLoading = isPrebuiltRulesLoading || isDataLoading || isTableLoading || isStarting;
 
@@ -391,11 +360,31 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
+      openedMigrationRuleId,
     } = useMigrationRuleDetailsFlyout({
       isLoading: isRulesLoading,
+      migrationRules,
       getMigrationRuleData,
       ruleActionsFactory,
     });
+
+    const { euiTheme } = useEuiTheme();
+    // Stable identity: never changes with selection, so EuiBasicTable rows are not
+    // re-rendered when the opened rule changes. Each row is tagged with its id; the
+    // highlight is applied purely via CSS on the wrapper below.
+    const rowProps = useCallback((rule: RuleMigrationRule) => ({ 'data-rule-id': rule.id }), []);
+    // Only this wrapper re-renders when the opened rule changes; the table body stays put.
+    const highlightCss = useMemo(
+      () =>
+        openedMigrationRuleId
+          ? {
+              [`.euiTableRow[data-rule-id="${openedMigrationRuleId}"]`]: {
+                backgroundColor: euiTheme.colors.backgroundBaseInteractiveSelect,
+              },
+            }
+          : undefined,
+      [openedMigrationRuleId, euiTheme.colors.backgroundBaseInteractiveSelect]
+    );
 
     const rulesColumns = useMigrationRulesTableColumns({
       disableActions: isTableLoading,
@@ -406,20 +395,10 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
-        {isReprocessFailedRulesModalVisible && (
-          <StartMigrationModal
-            title={i18n.REPROCESS_RULES_DIALOG_TITLE(translationStats?.rules.failed ?? 0)}
-            description={i18n.REPROCESS_RULES_DIALOG_DESCRIPTION}
-            defaultSettings={defaultSettingsForModal}
-            onStartMigrationWithSettings={reprocessFailedRulesWithSettings}
-            onClose={closeReprocessFailedRulesModal}
-            additionalSettings={prebuiltRulesMatchingSwitch}
-          />
-        )}
-
-        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
+        {reprocessMigrationModal}
 
         <EuiSkeletonLoading
+          data-test-subj="migrationRulesTableSkeleton"
           isLoading={isStatsLoading}
           loadingContent={
             <>
@@ -455,7 +434,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       setMissingIndexPatternFlyoutOpen={openMissingIndexPatternFlyout}
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
-                      reprocessFailedRules={showReprocessFailedRulesModal}
+                      reprocessFailedRules={showReprocessMigrationModal}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -483,17 +462,21 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                     </UtilityBar>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <EuiBasicTable<RuleMigrationRule>
-                  loading={isTableLoading}
-                  items={migrationRules}
-                  pagination={pagination}
-                  sorting={sorting}
-                  onChange={onTableChange}
-                  selection={tableSelection}
-                  itemId={'id'}
-                  data-test-subj={'rules-translation-table'}
-                  columns={rulesColumns}
-                />
+                <div css={highlightCss}>
+                  <MemoizedBasicTable<RuleMigrationRule>
+                    loading={isTableLoading}
+                    items={migrationRules}
+                    pagination={pagination}
+                    sorting={sorting}
+                    onChange={onTableChange}
+                    selection={tableSelection}
+                    itemId={'id'}
+                    rowProps={rowProps}
+                    data-test-subj={'rules-translation-table'}
+                    columns={rulesColumns}
+                    tableCaption={i18n.RULES_MIGRATION_TABLE_CAPTION}
+                  />
+                </div>
               </>
             )
           }

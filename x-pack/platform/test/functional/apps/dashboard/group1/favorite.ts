@@ -18,6 +18,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
 
+  /**
+   * Purpose: Verify dashboard can be stared/unstarred from listing page and edit page
+   *
+   * Migration: Migrate to scout
+   */
   describe('favorites', function () {
     const USERNAME = 'dashboard_read_user';
     const ROLE = 'dashboard_read_role';
@@ -86,25 +91,28 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can favorite and unfavorite a dashboard', async () => {
-      await testSubjects.exists('tabbedTableFilter');
+      await testSubjects.exists('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
-      await testSubjects.click('favoriteTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 0, 1000);
-      await testSubjects.click('allTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
+
       await testSubjects.moveMouseTo('~dashboardListingTitleLink-A-Dashboard');
       await testSubjects.click('favoriteButton');
       await listingTable.expectItemsCount('dashboard', 1);
-      await testSubjects.click('favoriteTab');
+
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
 
       await browser.refresh(); // make sure the favorite state is persisted and filter state is preserved
-      await testSubjects.exists('tabbedTableFilter');
 
       await listingTable.expectItemsCount('dashboard', 1);
       await testSubjects.click('unfavoriteButton');
       await listingTable.expectItemsCount('dashboard', 0, 1000);
-      await testSubjects.click('allTab');
+      await testSubjects.click('favoritesFilterButton');
       await listingTable.expectItemsCount('dashboard', 1);
     });
 
@@ -121,7 +129,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           shouldLoginIfPrompted: false,
         },
       });
-      await testSubjects.exists('tabbedTableFilter');
       await listingTable.expectItemsCount('dashboard', 1);
     });
   });

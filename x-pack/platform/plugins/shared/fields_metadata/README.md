@@ -12,6 +12,9 @@ The `FieldsMetadataService` is instantiated during the plugin setup/start lifecy
 
 The start contract exposes a `FieldsMetadataClient` instance, which offers the following methods:
 - `getByName(name: string, params? {integration: string, dataset?: string})`: Retrieves a single `FieldMetadata` instance by name.
+- `find(params?: {fieldNames?: string[], integration?: string, dataset?: string})`: Retrieves a record of matching `FieldMetadata` instances based on the query parameters.
+- `getFieldChildren(fieldName: string, params?)`: Returns immediate child fields of a parent name (one extra dot segment only), as a `FieldsMetadataDictionary`.
+- `matchesAnyTypeForEventCategory(categories: string[], expectedTypes: string[])`: Returns whether any expected event type is allowed for any of the given ECS `event.category` values, using ECS `allowed_values` / `expected_event_types` metadata.
 
 ```ts
 const timestampField = await client.getByName('@timestamp')
@@ -24,14 +27,13 @@ const timestampField = await client.getByName('@timestamp')
 */
 ```
 
-- `find(params?: {fieldNames?: string[], integration?: string, dataset?: string})`: Retrieves a record of matching `FieldMetadata` instances based on the query parameters.
-
-**Parameters**
+**`find` parameters**
 | Name | Type | Example | Optional |
 |---|---|---|---|
 | fieldNames | <EcsFieldName \| string>[] | ['@timestamp', 'onepassword.client.platform_version'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 ```ts
 const fields = await client.find({
@@ -63,6 +65,37 @@ Still, is recommended always passing the `dataset` as well if known or unless th
 
 > N.B. In case the `fieldNames` parameter is not passed to `.find`, the result will give the whole list of ECS fields by default. This should be avoided as much as possible, although it helps covering cases where we might need the whole ECS fields list.
 
+##### `getFieldChildren`
+
+Returns a `FieldsMetadataDictionary` of **immediate** children of `fieldName`: keys are exactly one dot segment below the parent (for example, under `host` you get `host.name`, but not `host.name.grandchild`). Implementation uses the same merged field map as `find` without `fieldNames`, then filters keys; the optional `source` filter matches `find` / `getByName` (omit or pass `[]` to include all sources).
+
+**Parameters**
+| Name | Type | Example | Optional |
+|---|---|---|---|
+| fieldName | FieldName | host | |
+| integration | string | 1password | ✅ |
+| dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' \| 'metadata' \| 'otel' \| 'integration'> | ['ecs'] | ✅ |
+
+```ts
+const children = await client.getFieldChildren('host', { source: ['ecs'] });
+const fields = children.getFields(); // e.g. { 'host.name': FieldMetadata, ... }
+```
+
+##### `matchesAnyTypeForEventCategory`
+
+Loads ECS `event.category` via `getByName('event.category', { source: ['ecs'] })` and returns `true` if **any** value in `expectedTypes` is listed in `expected_event_types` for **any** `allowed_values` entry whose `name` matches **any** value in `categories`. If `event.category` is missing or has no `allowed_values`, returns `false`.
+
+**Parameters**
+| Name | Type | Example | Optional |
+|---|---|---|---|
+| categories | string[] | ['process', 'network'] | |
+| expectedTypes | string[] | ['start', 'connection'] | |
+
+```ts
+const allowed = await client.matchesAnyTypeForEventCategory(['process'], ['start']);
+```
+
 #### Source Repositories
 
 The `FieldsMetadataClient` relies on source repositories to fetch field metadata. Currently, there are two repository sources:
@@ -84,6 +117,7 @@ A REST API endpoint is exposed to facilitate the retrieval of field metadata:
 | attributes | FieldAttribute[] | ['type', 'description', 'name'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 ### FieldsMetadataService (Client-side)
 
@@ -115,6 +149,7 @@ For simpler use cases, the `useFieldsMetadata` React custom hook is provided. Th
 | attributes | FieldAttribute[] | ['type', 'description', 'name'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 It also accepts a second argument, an array of dependencies to determine when the hook should update the retrieved data.
 

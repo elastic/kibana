@@ -28,7 +28,7 @@ const tabsCss = {
 
 export interface HeaderProps {
   children?: React.ReactNode;
-  maxWidth?: number;
+  maxWidth?: number | false;
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
@@ -60,7 +60,7 @@ const HeaderComponent: React.FC<HeaderProps> = ({
 }) => {
   const wrapperCss = useCallback(
     ({ euiTheme }: UseEuiTheme) => css`
-      max-width: ${maxWidth || 1200}px;
+      ${maxWidth !== false ? `max-width: ${maxWidth || 1200}px;` : ''}
       margin-left: auto;
       margin-right: auto;
       padding-top: ${euiTheme.size.xl};

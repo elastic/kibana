@@ -40,8 +40,23 @@ export const getCspBenchmarkRulesStatesHandler = async (
   } catch (err) {
     const error = transformError(err);
     if (error.statusCode === 404) {
-      const newCspSettings = await createCspSettingObject(encryptedSoClient);
-      return newCspSettings.attributes.rules;
+      try {
+        const newCspSettings = await createCspSettingObject(encryptedSoClient);
+        return newCspSettings.attributes.rules;
+      } catch (createErr) {
+        const createError = transformError(createErr);
+        if (createError.statusCode === 403) {
+          return {};
+        }
+        if (createError.statusCode === 409) {
+          const existingSettings = await encryptedSoClient.get<CspSettings>(
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID
+          );
+          return existingSettings.attributes.rules;
+        }
+        throw createErr;
+      }
     }
 
     throw new Error(

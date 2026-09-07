@@ -22,7 +22,6 @@ import { safeDecode } from '@kbn/rison';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
-import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../containers/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -53,8 +52,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 
   return (
     <>
-      <HelpCenterContent feedbackLink={feedbackLinkUrl} appName={pageTitle} />
-
       {setHeaderActionMenu && theme$ && (
         <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
           <EuiFlexGroup responsive={false} gutterSize="s">
@@ -124,8 +121,6 @@ export const LogsPageContent: React.FunctionComponent = () => {
 const pageTitle = i18n.translate('xpack.infra.header.logsTitle', {
   defaultMessage: 'Logs',
 });
-
-const feedbackLinkUrl = 'https://discuss.elastic.co/c/logs';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.logsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',

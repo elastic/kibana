@@ -1,8 +1,8 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/securitysolution-exception-list-components",
   "owner": [
-    "@elastic/security-detection-engine"
+    "@elastic/security-detection-engineering"
   ],
   "group": "security",
   "visibility": "private"

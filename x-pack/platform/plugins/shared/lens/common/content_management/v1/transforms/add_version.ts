@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LENS_ITEM_VERSION_V1 } from '../constants';
-import type { LensAttributes } from '../../../../server/content_management';
+import { LENS_ITEM_VERSION_V1 } from '@kbn/lens-common/content_management/constants';
+import type { LensAttributes } from '../../../../server/content_management/v1';
 
 export function addVersion(attributes: LensAttributes): LensAttributes {
   return {

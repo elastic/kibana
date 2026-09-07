@@ -80,10 +80,11 @@ export class ApiService {
   }
 
   public async createPipeline(pipeline: Pipeline) {
+    const { deprecated, isManaged, ...body } = pipeline;
     const result = await this.sendRequest({
       path: API_BASE_PATH,
       method: 'post',
-      body: JSON.stringify(pipeline),
+      body: JSON.stringify(body),
     });
 
     this.trackUiMetric(UIM_PIPELINE_CREATE);
@@ -92,7 +93,7 @@ export class ApiService {
   }
 
   public async updatePipeline(pipeline: Pipeline) {
-    const { name, ...body } = pipeline;
+    const { name, deprecated, isManaged, ...body } = pipeline;
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/${encodeURIComponent(name)}`,
       method: 'put',
@@ -118,7 +119,7 @@ export class ApiService {
   public async simulatePipeline(reqBody: {
     documents: object[];
     verbose?: boolean;
-    pipeline: Pick<Pipeline, 'processors' | 'on_failure'>;
+    pipeline: Pick<Pipeline, 'processors' | 'on_failure' | 'field_access_pattern'>;
   }) {
     const result = await this.sendRequest({
       path: `${API_BASE_PATH}/simulate`,

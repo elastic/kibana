@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,12 +34,15 @@ import type { IntegrationCardItem } from '../screens/home';
 import { InlineReleaseBadge } from '../../../components';
 import { useStartServices } from '../../../hooks';
 import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
+import { VariantCountBadge } from '../screens/home/components/variant_count_badge';
 
 import {
   InstallationStatus,
   getLineClampStyles,
   shouldShowInstallationStatus,
 } from './installation_status';
+import { buildPackageCardNavigateState } from './package_card_navigate_state';
+import { wrapTitleWithDeprecated } from './utils';
 
 export type PackageCardProps = IntegrationCardItem;
 
@@ -56,9 +58,11 @@ export function PackageCard({
   release,
   id,
   fromIntegrations,
+  fromCollection,
   isReauthorizationRequired,
   isUnverified,
   isUpdateAvailable,
+  isDeprecated,
   showLabels = true,
   showInstallationStatus,
   showCompressedInstallationStatus,
@@ -67,9 +71,11 @@ export function PackageCard({
   installStatus,
   onCardClick: onClickProp = undefined,
   isCollectionCard = false,
+  groupMembers,
   titleLineClamp,
   titleBadge,
-  descriptionLineClamp,
+  titleSize = 'xs',
+  descriptionLineClamp = 2,
   maxCardHeight,
   minCardHeight,
   showDescription = true,
@@ -116,8 +122,13 @@ export function PackageCard({
             display="inlineBlock"
             content={DEFERRED_ASSETS_WARNING_MSG}
             title={DEFERRED_ASSETS_WARNING_LABEL}
+            css={css`
+              width: 100%;
+            `}
           >
-            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+            <EuiBadge color="warning" tabIndex={0}>
+              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+            </EuiBadge>
           </EuiToolTip>
         </span>
       </EuiFlexItem>
@@ -141,20 +152,32 @@ export function PackageCard({
     );
   }
 
-  let collectionButton: React.ReactNode | null = null;
-  if (isCollectionCard) {
-    collectionButton = (
-      <EuiFlexItem>
-        <EuiButton
-          color="text"
-          data-test-subj="xpack.fleet.packageCard.collectionButton"
-          iconType="package"
-        >
-          <FormattedMessage
-            id="xpack.fleet.packageCard.collectionButton.copy"
-            defaultMessage="View collection"
-          />
-        </EuiButton>
+  let deprecatedBadge: React.ReactNode | null = null;
+
+  if (isDeprecated && showLabels) {
+    deprecatedBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <EuiBadge color="warning" iconType="warning">
+            <FormattedMessage
+              id="xpack.fleet.packageCard.deprecatedLabel"
+              defaultMessage="Deprecated"
+            />
+          </EuiBadge>
+        </span>
+      </EuiFlexItem>
+    );
+  }
+
+  let collectionBadge: React.ReactNode | null = null;
+  if (isCollectionCard && groupMembers?.length) {
+    collectionBadge = (
+      <EuiFlexItem grow={false}>
+        <EuiSpacer size="xs" />
+        <span>
+          <VariantCountBadge count={groupMembers.length} />
+        </span>
       </EuiFlexItem>
     );
   }
@@ -176,13 +199,29 @@ export function PackageCard({
     );
   }
 
-  const { application } = useStartServices();
+  const { application, http } = useStartServices();
 
   const onCardClick = () => {
-    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+    // Use basePath-prefixed comparison so this works with server.basePath or space-path prefixes.
+    const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+    if (url.startsWith(integrationsBase)) {
+      const path = url.slice(integrationsBase.length);
+      // When navigating straight to the add-integration page, pass the current URL as
+      // onCancelUrl so the Cancel button returns the user to where they came from
+      // (e.g. the integrations catalog) rather than the integration detail page.
+      const cancelState = /\/add-integration([/?]|$)/.test(path)
+        ? { onCancelUrl: window.location.href }
+        : {};
       application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-        path: url.slice(INTEGRATIONS_BASE_PATH.length),
-        state: { fromIntegrations },
+        path,
+        state: {
+          ...buildPackageCardNavigateState({
+            search: typeof window !== 'undefined' ? window.location.search : '',
+            fromIntegrations,
+            fromCollection,
+          }),
+          ...cancelState,
+        },
       });
     } else if (url.startsWith('http') || url.startsWith('https')) {
       window.open(url, '_blank');
@@ -190,6 +229,14 @@ export function PackageCard({
       application.navigateToUrl(url);
     }
   };
+
+  const installationStatusVisible = shouldShowInstallationStatus({
+    installStatus,
+    showInstallationStatus,
+    isActive: hasDataStreams,
+  });
+
+  const displayTitle = wrapTitleWithDeprecated({ title, deprecated: isDeprecated });
 
   const testid = `integration-card:${id}`;
   return (
@@ -204,23 +251,22 @@ export function PackageCard({
             display: flex;
             flex-direction: column;
             block-size: 100%;
+            overflow: hidden;
           }
 
           [class*='euiCard__description'] {
             flex-grow: 1;
             ${descriptionLineClamp
-              ? shouldShowInstallationStatus({
-                  installStatus,
-                  showInstallationStatus,
-                  isActive: hasDataStreams,
-                })
+              ? installationStatusVisible
                 ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                 : getLineClampStyles(descriptionLineClamp)
               : ''}
           }
 
           [class*='euiCard__titleButton'] {
-            width: 100%;
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
             ${getLineClampStyles(titleLineClamp)}
           }
 
@@ -232,8 +278,16 @@ export function PackageCard({
         data-test-subj={testid}
         betaBadgeProps={quickstartBadge(isQuickstart)}
         layout="horizontal"
-        title={<CardTitle title={title} titleBadge={titleBadge} />}
-        titleSize="xs"
+        title={
+          titleLineClamp ? (
+            <EuiToolTip content={displayTitle} position="top" display="block">
+              <CardTitle title={displayTitle} titleBadge={titleBadge} />
+            </EuiToolTip>
+          ) : (
+            <CardTitle title={displayTitle} titleBadge={titleBadge} />
+          )
+        }
+        titleSize={titleSize}
         description={showDescription ? description : ''}
         hasBorder
         icon={
@@ -247,14 +301,29 @@ export function PackageCard({
         }
         onClick={onClickProp ?? onCardClick}
       >
-        <EuiFlexGroup gutterSize="xs" wrap={true}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          wrap={true}
+          css={css`
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+
+            & > .euiFlexItem {
+              min-width: 0;
+            }
+          `}
+        >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
           {verifiedBadge}
           {updateAvailableBadge}
+          {deprecatedBadge}
           {contentBadge}
           {releaseBadge}
           {hasDeferredInstallationsBadge}
-          {collectionButton}
+          {collectionBadge}
           <InstallationStatus
             installStatus={installStatus}
             showInstallationStatus={showInstallationStatus}
@@ -281,7 +350,7 @@ const CardTitle = React.memo<Pick<IntegrationCardItem, 'title' | 'titleBadge'>>(
         responsive={false}
       >
         <EuiFlexItem>
-          <EuiTitle size="xs">
+          <EuiTitle>
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>

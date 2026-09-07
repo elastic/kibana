@@ -22,6 +22,7 @@ import type { Logger } from '@kbn/logging';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
@@ -74,13 +75,14 @@ export const createDefaultAlertExecutorOptions = <
     snoozeSchedule: [],
   },
   params,
-  spaceId: 'SPACE_ID',
+  spaceId: asSpaceId('space-id'),
   services: {
     alertFactory: alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>()
       .alertFactory,
     alertsClient: null,
     getDataViews: async () => dataViewPluginMocks.createStartContract(),
     getMaintenanceWindowIds: async () => ['test-id-1', 'test-id-2'],
+    getMaintenanceWindowNames: async () => ['test-name-1', 'test-name-2'],
     getSearchSourceClient: async () => searchSourceCommonMock,
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),

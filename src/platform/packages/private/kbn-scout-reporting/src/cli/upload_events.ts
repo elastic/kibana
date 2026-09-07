@@ -36,14 +36,16 @@ const readFilesRecursively = (directory: string, callback: Function) => {
   });
 };
 
+export interface EventUploadOptions {
+  esURL: string;
+  esAPIKey: string;
+  verifyTLSCerts: boolean;
+  log: ToolingLog;
+}
+
 export const uploadAllEventsFromPath = async (
   eventLogPath: string,
-  options: {
-    esURL: string;
-    esAPIKey: string;
-    verifyTLSCerts: boolean;
-    log: ToolingLog;
-  }
+  options: EventUploadOptions
 ) => {
   // Validate CLI options
   if (!fs.existsSync(eventLogPath)) {
@@ -78,6 +80,11 @@ export const uploadAllEventsFromPath = async (
 
     readFilesRecursively(eventLogPath, (filePath: string) => {
       if (filePath.endsWith('.ndjson')) {
+        if (path.basename(filePath).startsWith('scout-failures-')) {
+          // Won't consider this for upload; the file is NDJSON, but not in the events reporter format
+          return;
+        }
+
         ndjsonFilePaths.push(filePath);
       }
     });
@@ -91,12 +98,21 @@ export const uploadAllEventsFromPath = async (
         } in directory '${eventLogPath}'.`
       );
 
-      for (const filePath of ndjsonFilePaths) {
-        await reportDataStream.addEventsFromFile(filePath);
-      }
+      await reportDataStream.addEventsFromFile(...ndjsonFilePaths);
     }
   } else if (eventLogPath.endsWith('.ndjson')) {
     await reportDataStream.addEventsFromFile(eventLogPath);
+  }
+};
+
+export const nonThrowingUploadAllEventsFromPath = async (
+  eventLogPath: string,
+  options: EventUploadOptions
+) => {
+  try {
+    await uploadAllEventsFromPath(eventLogPath, options);
+  } catch (error) {
+    options.log.warning(`An error was suppressed: ${error.message}`);
   }
 };
 
@@ -123,25 +139,17 @@ export const uploadEvents: Command<void> = {
   run: async ({ flagsReader, log }) => {
     // default to Scout report output directory if no eventLogPath is provided
     const eventLogPath = flagsReader.string('eventLogPath') || SCOUT_REPORT_OUTPUT_ROOT;
-
-    const esURL = flagsReader.requiredString('esURL');
-    const esAPIKey = flagsReader.requiredString('esAPIKey');
-    const verifyTLSCerts = flagsReader.boolean('verifyTLSCerts');
     const dontFailOnError = flagsReader.boolean('dontFailOnError');
+    const eventUploadOptions: EventUploadOptions = {
+      esURL: flagsReader.requiredString('esURL'),
+      esAPIKey: flagsReader.requiredString('esAPIKey'),
+      verifyTLSCerts: flagsReader.boolean('verifyTLSCerts'),
+      log,
+    };
 
-    try {
-      await uploadAllEventsFromPath(eventLogPath, {
-        esURL,
-        esAPIKey,
-        verifyTLSCerts,
-        log,
-      });
-    } catch (error) {
-      log.error(error);
-
-      if (!dontFailOnError) {
-        throw error;
-      }
-    }
+    await (dontFailOnError ? nonThrowingUploadAllEventsFromPath : uploadAllEventsFromPath)(
+      eventLogPath,
+      eventUploadOptions
+    );
   },
 };

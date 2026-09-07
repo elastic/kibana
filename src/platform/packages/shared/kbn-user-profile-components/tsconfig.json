@@ -1,11 +1,14 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "jest",
       "node",
       "@emotion/react/types/css-prop",
+      "@testing-library/jest-dom",
+      "react",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -22,6 +25,8 @@
     "@kbn/core-i18n-browser",
     "@kbn/test-jest-helpers",
     "@kbn/core-user-profile-browser",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-user-settings-types",
   ],
   "exclude": [
     "target/**/*",

@@ -70,6 +70,17 @@ export const getDashboardResourcesPerMigrationFromES = async ({
   });
 };
 
+export const deleteAllLookupIndices = async (es: Client): Promise<void> => {
+  const indicesResponse = await es.indices.get({ index: 'lookup_*' });
+  if (Object.keys(indicesResponse).length === 0) {
+    return;
+  }
+
+  for (const indexName of Object.keys(indicesResponse)) {
+    await es.indices.delete({ index: indexName });
+  }
+};
+
 export const deleteAllDashboardMigrations = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: [

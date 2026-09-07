@@ -15,12 +15,17 @@ export function plugin() {
 
 export type { DiscoverSharedPublicSetup, DiscoverSharedPublicStart } from './types';
 export type {
+  ObservabilityLogsAiInsightFeatureRenderDeps,
+  ObservabilityLogsAIInsightFeature,
   ObservabilityLogsAIAssistantFeatureRenderDeps,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityStreamsFeatureRenderDeps,
+  ObservabilityStreamsFeatureRenderByStreamNameDeps,
   ObservabilityStreamsFeature,
+  ObservabilityServiceFlyoutFeatureRenderDeps,
+  ObservabilityServiceFlyoutFeature,
   SecuritySolutionCellRendererFeature,
-  SecuritySolutionAppWrapperFeature,
+  SecuritySolutionAlertFlyoutOverviewTabFeature,
   DiscoverFeature,
   DiscoverFeaturesServiceSetup,
   DiscoverFeaturesServiceStart,

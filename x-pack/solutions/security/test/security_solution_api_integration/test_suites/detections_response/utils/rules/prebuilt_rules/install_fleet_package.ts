@@ -11,10 +11,10 @@ import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { EPM_API_ROUTES, epmRouteService } from '@kbn/fleet-plugin/common';
 import { getPrebuiltRuleMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import type { FtrProviderContext, RetryService } from '@kbn/ftr-common-functional-services';
+import { generatePrebuiltRulesPackageBuffer } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
 import expect from 'expect';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
 import { refreshSavedObjectIndices } from '../../refresh_index';
-import { createPrebuiltRulesPackage } from './create_prebuilt_rules_package';
 
 const MAX_RETRIES = 2;
 const TOTAL_TIMEOUT = 6 * 60000; // 6 mins, applies to all attempts (1 + MAX_RETRIES)
@@ -50,7 +50,7 @@ export const installFleetPackage = async ({
   log.debug(`Installing ${packageName} package`);
 
   const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installMockPrebuiltRulesPackage.name,
+    installFleetPackage.name,
     async () => {
       const response = await supertest
         .post(epmRouteService.getInstallPath(packageName, packageVersion))
@@ -98,7 +98,7 @@ export const installFleetPackageByUpload = async ({
   log.debug('Uploading a package to Fleet...');
 
   const fleetResponse = await retryService.tryWithRetries<InstallPackageResponse>(
-    installMockPrebuiltRulesPackage.name,
+    installFleetPackageByUpload.name,
     async () => {
       const response = await supertest
         .post(EPM_API_ROUTES.INSTALL_BY_UPLOAD_PATTERN)
@@ -134,15 +134,24 @@ interface InstallMockPrebuiltRulesPackageParams {
 /**
  * Installs a prepared mock prebuilt rules package `security_detection_engine`.
  * Installing it up front prevents installing the real package when making API requests.
+ *
+ * On TEST_CLOUD (MKI quality gate) Fleet rejects that upload because the name
+ * exists in the registry, and `kbnTestServerArgs` are not applied to the
+ * pre-deployed Kibana. Leave the environment package in place.
  */
 export const installMockPrebuiltRulesPackage = async ({
   getService,
-}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse> => {
+}: InstallMockPrebuiltRulesPackageParams): Promise<InstallPackageResponse | undefined> => {
   const log = getService('log');
+
+  if (process.env.TEST_CLOUD === '1') {
+    log.info('Skipping mock prebuilt rules package upload on TEST_CLOUD');
+    return undefined;
+  }
 
   log.info('Installing mock prebuilt rules package...');
 
-  const securityDetectionEnginePackageZip = createPrebuiltRulesPackage({
+  const securityDetectionEnginePackageZip = await generatePrebuiltRulesPackageBuffer({
     packageName: PREBUILT_RULES_PACKAGE_NAME,
     // Use a high version to avoid conflicts with real packages
     // including mock bundled packages path configured via "xpack.fleet.developer.bundledPackageLocation"
@@ -152,7 +161,7 @@ export const installMockPrebuiltRulesPackage = async ({
 
   return installFleetPackageByUpload({
     getService,
-    packageBuffer: securityDetectionEnginePackageZip.toBuffer(),
+    packageBuffer: securityDetectionEnginePackageZip,
   });
 };
 

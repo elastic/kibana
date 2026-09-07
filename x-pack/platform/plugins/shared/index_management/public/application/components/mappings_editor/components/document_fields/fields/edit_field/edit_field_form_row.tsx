@@ -135,7 +135,7 @@ export const EditFieldFormRow = React.memo(
         </UseField>
       );
 
-    const renderContent = () => {
+    const renderContent = (isVisible: boolean) => {
       const toggle = withToggle && <EuiFlexItem grow={false}>{renderToggleInput()}</EuiFlexItem>;
 
       const controlsTitle = (
@@ -176,14 +176,14 @@ export const EditFieldFormRow = React.memo(
         </div>
       );
 
-      const controls = ((isContentVisible && children !== undefined) || isChildrenFunction) && (
+      const controls = ((isVisible && children !== undefined) || isChildrenFunction) && (
         <div
           style={{
             paddingLeft: withToggle === false ? '0' : undefined,
           }}
         >
           <EuiSpacer size="m" />
-          {isChildrenFunction ? (children as ChildrenFunc)(isContentVisible) : children}
+          {isChildrenFunction ? (children as ChildrenFunc)(isVisible) : children}
         </div>
       );
 
@@ -203,12 +203,11 @@ export const EditFieldFormRow = React.memo(
     return formFieldPath ? (
       <FormDataProvider pathsToWatch={formFieldPath}>
         {(formData) => {
-          setIsContentVisible(get(formData, formFieldPath));
-          return renderContent();
+          return renderContent(get(formData, formFieldPath));
         }}
       </FormDataProvider>
     ) : (
-      renderContent()
+      renderContent(isContentVisible)
     );
   }
 );

@@ -17,13 +17,16 @@ import { CreateCaseUserActionRt, CreateCaseUserActionWithoutConnectorIdRt } from
 import { DeleteCaseUserActionRt } from './delete_case/v1';
 import { DescriptionUserActionRt } from './description/v1';
 import { PushedUserActionRt, PushedUserActionWithoutConnectorIdRt } from './pushed/v1';
+import type { SettingsUserActionPayloadRt } from './settings/v1';
 import { SettingsUserActionRt } from './settings/v1';
 import { SeverityUserActionRt } from './severity/v1';
 import { StatusUserActionRt } from './status/v1';
 import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 import { CustomFieldsUserActionRt } from './custom_fields/v1';
-
+import { ObservablesUserActionRt } from './observables/v1';
+import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
+import { TemplateUserActionRt } from './template/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionRt } from './status/v1';
 
@@ -61,6 +64,9 @@ const BasicUserActionsRt = rt.union([
   DeleteCaseUserActionRt,
   CategoryUserActionRt,
   CustomFieldsUserActionRt,
+  ObservablesUserActionRt,
+  ExtendedFieldsUserActionRt,
+  TemplateUserActionRt,
 ]);
 
 const CommonUserActionsWithIdsRt = rt.union([BasicUserActionsRt, CommentUserActionRt]);
@@ -145,6 +151,7 @@ export type PushedUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof PushedUserActionWithoutConnectorIdRt>
 >;
 export type SettingsUserAction = UserAction<rt.TypeOf<typeof SettingsUserActionRt>>;
+export type SettingsUserActionPayload = rt.TypeOf<typeof SettingsUserActionPayloadRt>;
 export type SeverityUserAction = UserAction<rt.TypeOf<typeof SeverityUserActionRt>>;
 export type StatusUserAction = UserAction<rt.TypeOf<typeof StatusUserActionRt>>;
 export type TagsUserAction = UserAction<rt.TypeOf<typeof TagsUserActionRt>>;
@@ -154,3 +161,7 @@ export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
   rt.TypeOf<typeof CreateCaseUserActionWithoutConnectorIdRt>
 >;
 export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUserActionRt>>;
+export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserActionRt>>;
+export type ExtendedFieldsUserAction = UserAction<rt.TypeOf<typeof ExtendedFieldsUserActionRt>>;
+export { ExtendedFieldsRt } from './extended_fields/v1';
+export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionRt>>;

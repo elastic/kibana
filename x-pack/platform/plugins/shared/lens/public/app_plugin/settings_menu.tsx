@@ -10,11 +10,11 @@ import ReactDOM from 'react-dom';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { Store } from 'redux';
-import { Provider } from 'react-redux';
+import type { Store } from 'redux-v4';
+import { Provider } from 'react-redux-v7';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { LensAppState } from '../state_management';
+import type { LensAppState, LensStartServices as StartServices } from '@kbn/lens-common';
 import {
   disableAutoApply,
   enableAutoApply,
@@ -24,7 +24,6 @@ import {
 } from '../state_management';
 import { writeToStorage } from '../settings_storage';
 import { AUTO_APPLY_DISABLED_STORAGE_KEY } from '../editor_frame_service/editor_frame/workspace_panel/workspace_panel_wrapper';
-import type { StartServices } from '../types';
 
 const container = document.createElement('div');
 let isMenuOpen = false;
@@ -54,6 +53,9 @@ export function SettingsMenu({
 
   return (
     <EuiWrappingPopover
+      aria-label={i18n.translate('xpack.lens.settings.popoverAriaLabel', {
+        defaultMessage: 'Lens settings',
+      })}
       data-test-subj="lnsApp__settingsMenu"
       ownFocus
       button={anchorElement}

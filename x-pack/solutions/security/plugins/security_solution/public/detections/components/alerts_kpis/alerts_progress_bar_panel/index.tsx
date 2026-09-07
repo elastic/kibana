@@ -36,7 +36,7 @@ interface AlertsProgressBarPanelProps extends ChartsPanelProps {
 /**
  * Renders a list showing the percentages of alerts grouped by a property.
  * The component is used in the alerts page, where users can select what fields they want the alerts to be grouped by,
- * and in the AI for SOC alert summary page where the alerts are automatically grouped by host.
+ * and in EASE alert summary page where the alerts are automatically grouped by host.
  */
 export const AlertsProgressBarPanel: React.FC<AlertsProgressBarPanelProps> = ({
   filters,

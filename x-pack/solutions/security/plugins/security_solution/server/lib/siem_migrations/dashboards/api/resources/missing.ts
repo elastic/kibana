@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 
 import type { SiemMigrationResourceBase } from '../../../../../../common/siem_migrations/model/common.gen';
 import {
@@ -15,7 +15,7 @@ import {
 } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import { SIEM_DASHBOARD_MIGRATION_RESOURCES_MISSING_PATH } from '../../../../../../common/siem_migrations/dashboards/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
 

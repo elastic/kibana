@@ -46,12 +46,24 @@ export function ilmPhases({
     const sizeInBytes = ilmDetails
       .filter((detail) => detail.managed && detail.phase === phase.name)
       .map((detail) => indicesStats[detail.index!])
-      .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
+      .reduce((size, stats) => size + (stats?.total?.store?.total_data_set_size_in_bytes ?? 0), 0);
+
+    const downsample = phase.actions?.downsample;
+    const hasReadonly = phase.actions?.readonly !== undefined;
 
     const policyPhase = {
       name: phase.name,
       size_in_bytes: sizeInBytes,
       min_age: phase.min_age?.toString(),
+      downsample:
+        downsample && phase.min_age
+          ? {
+              after: phase.min_age.toString(),
+              fixed_interval: downsample.fixed_interval!.toString(),
+            }
+          : undefined,
+      readonly: hasReadonly || undefined,
+      searchable_snapshot: phase.actions?.searchable_snapshot?.snapshot_repository,
     };
     if (phase.name === 'hot') {
       const rollover = phase.actions?.rollover;

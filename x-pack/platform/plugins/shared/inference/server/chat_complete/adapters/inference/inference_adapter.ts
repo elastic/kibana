@@ -7,7 +7,7 @@
 
 import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
+import { isNativeFunctionCallingSupported, handleConnectorStreamResponse } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -22,10 +22,12 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     tools,
     functionCalling,
     temperature,
+    reasoning,
     modelName,
     logger,
     abortSignal,
     metadata,
+    timeout,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -40,6 +42,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       tools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
+      reasoning,
       modelName,
     });
 
@@ -52,12 +55,13 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
           ...(metadata?.connectorTelemetry
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
+          ...(typeof timeout === 'number' && isFinite(timeout) ? { timeout } : {}),
         },
       });
     }).pipe(
-      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
+      handleConnectorStreamResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
-      emitTokenCountEstimateIfMissing({ request }),
+      emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },

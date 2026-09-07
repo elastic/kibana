@@ -5,9 +5,7 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "requests_per_second": [
-        "-1"
-      ]
+      "requests_per_second": ""
     },
     "methods": [
       "POST"

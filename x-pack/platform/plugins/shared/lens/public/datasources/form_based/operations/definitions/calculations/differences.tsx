@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { DIFFERENCES_ID, DIFFERENCES_NAME } from '@kbn/lens-formula-docs';
-import type {
-  FormattedIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-} from '../column_types';
-import type { FormBasedLayer } from '../../../types';
+import type { DerivativeIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
 import {
   buildLabelFunction,
   checkForDateHistogram,
@@ -19,6 +15,7 @@ import {
   dateBasedOperationToExpression,
   hasDateField,
   checkForDataLayerType,
+  getReferencedColumnLabel,
 } from './utils';
 import type { OperationDefinition } from '..';
 import { getFormatFromPreviousColumn, getFilter } from '../helpers';
@@ -35,11 +32,6 @@ const ofName = buildLabelFunction((name?: string) => {
     },
   });
 });
-
-export type DerivativeIndexPatternColumn = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: typeof DIFFERENCES_ID;
-  };
 
 export const derivativeOperation: OperationDefinition<
   DerivativeIndexPatternColumn,
@@ -66,15 +58,17 @@ export const derivativeOperation: OperationDefinition<
     }
   },
   getDefaultLabel: (column, columns, indexPattern) => {
-    return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
+    const refLabel = getReferencedColumnLabel(column.references[0], columns, indexPattern);
+    return ofName(refLabel, column.timeScale, column.timeShift);
   },
-  toExpression: (layer, columnId) => {
-    return dateBasedOperationToExpression(layer, columnId, 'derivative');
+  toExpression: (layer, columnId, indexPattern) => {
+    return dateBasedOperationToExpression(layer, columnId, 'derivative', {}, indexPattern);
   },
   buildColumn: ({ referenceIds, previousColumn, layer }, columnParams) => {
     const ref = layer.columns[referenceIds[0]];
     const differencesColumnParams = columnParams as DerivativeIndexPatternColumn;
     const timeScale = differencesColumnParams?.timeScale ?? previousColumn?.timeScale;
+
     return {
       label: ofName(ref?.label, previousColumn?.timeScale, previousColumn?.timeShift),
       dataType: 'number',

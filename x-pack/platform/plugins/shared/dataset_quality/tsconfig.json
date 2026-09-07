@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
@@ -33,6 +34,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/discover-plugin",
     "@kbn/ebt-tools",
+    "@kbn/es-errors",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/field-formats-plugin",
@@ -60,17 +62,24 @@
     "@kbn/shared-ux-utility",
     "@kbn/stack-alerts-plugin",
     "@kbn/std",
-    "@kbn/task-manager-plugin",
-    "@kbn/telemetry-plugin",
     "@kbn/timerange",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/ui-theme",
     "@kbn/unified-histogram",
     "@kbn/unified-search-plugin",
-    "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
-    "@kbn/failure-store-modal"
+    "@kbn/failure-store-modal",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/test-jest-helpers",
+    "@kbn/streams-schema",
+    "@kbn/streams-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/ui-callout",
+    "@kbn/scout",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client"
   ],
   "exclude": [
     "target/**/*"

@@ -8,7 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiPanel, EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { Agent, AgentPolicy } from '../../types';
 import { useStartServices } from '../../hooks';
@@ -40,22 +41,21 @@ export const AgentlessStepConfirmEnrollment = ({
   if (overallState === 'success') {
     return (
       <>
-        <EuiCallOut
-          color="success"
+        <KbnSuccessCallout
+          announceOnMount
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successText',
             {
-              defaultMessage: 'Agentless deployment was successful',
+              defaultMessage: 'Managed integration deployment was successful',
             }
           )}
-          iconType="check"
         />
         <EuiSpacer size="m" />
         <EuiText>
           <p>
             <FormattedMessage
               id="xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.successHelperText"
-              defaultMessage="{integrationTitle} agentless integration has been successfully established. You can now seamlessly monitor and manage your {integrationTitle} resources without the need for any additional agents."
+              defaultMessage="{integrationTitle} managed integration has been successfully established. You can now seamlessly monitor and manage your {integrationTitle} resources without the need for any additional agents."
               values={{
                 integrationTitle,
               }}
@@ -67,24 +67,22 @@ export const AgentlessStepConfirmEnrollment = ({
   } else if (overallState === 'failure') {
     return (
       <>
-        <EuiCallOut
-          color="danger"
+        <KbnDangerCallout
+          announceOnMount
           title={i18n.translate(
             'xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failureText',
             {
-              defaultMessage: 'Agentless deployment failed',
+              defaultMessage: 'Managed integration deployment failed',
             }
           )}
-          iconType="warning"
-        >
-          {agent?.last_checkin_message && <p>{agent.last_checkin_message}</p>}
-        </EuiCallOut>
+          text={agent?.last_checkin_message}
+        />
         <EuiSpacer size="m" />
         <EuiText>
           <p>
             <FormattedMessage
               id="xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.failureHelperText"
-              defaultMessage="{integrationTitle} agentless integration failed to establish. Check out the {troubleshootingGuideLink} for help."
+              defaultMessage="{integrationTitle} managed integration failed to establish. Check out the {troubleshootingGuideLink} for help."
               values={{
                 integrationTitle,
                 troubleshootingGuideLink: (
@@ -115,7 +113,7 @@ export const AgentlessStepConfirmEnrollment = ({
         <EuiButton disabled={true} size="s" isLoading={true}>
           <FormattedMessage
             id="xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.pendingText"
-            defaultMessage="Listening for agentless connection... this could take several minutes"
+            defaultMessage="Listening for managed integration connection... this could take several minutes"
           />
         </EuiButton>
       </EuiPanel>
@@ -138,7 +136,7 @@ export const AgentlessStepConfirmEnrollment = ({
                 <strong>
                   <FormattedMessage
                     id="xpack.fleet.agentlessEnrollmentFlyout.confirmEnrollment.pendingHelperText.policyPagePath"
-                    defaultMessage="Integration policies &rarr; Agentless Integrations"
+                    defaultMessage="Integration policies &rarr; Managed Integrations"
                   />
                 </strong>
               ),

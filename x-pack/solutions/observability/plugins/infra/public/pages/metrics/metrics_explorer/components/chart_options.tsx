@@ -39,6 +39,7 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
         { defaultMessage: 'Customize' }
       )}
       iconSide="left"
+      size="s"
       iconType="eye"
       onClick={togglePopover}
       data-test-subj="metricsExplorer-customize"
@@ -125,6 +126,9 @@ export const MetricsExplorerChartOptions = ({ chartOptions, onChange }: Props) =
       button={button}
       isOpen={isPopoverOpen}
       closePopover={togglePopover}
+      aria-label={i18n.translate('xpack.infra.metricsExplorer.chartOptions.popoverAriaLabel', {
+        defaultMessage: 'Chart options',
+      })}
     >
       <EuiForm>
         <EuiFormRow

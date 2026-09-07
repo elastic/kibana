@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { NormalizedField, NormalizedFields, State } from '../../../types';
 
 import { getTypeLabelFromField } from '../../../lib';
-import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
+import { CHILD_FIELD_INDENT_SIZE } from '../../../constants';
 
 import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
@@ -121,11 +121,6 @@ function FieldListItemComponent(
 
   const isSemanticText = source.type === 'semantic_text';
 
-  const indentCreateField =
-    (treeDepth + 1) * CHILD_FIELD_INDENT_SIZE +
-    LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER -
-    substractIndentAmount;
-
   const hasDottedLine = isMultiField
     ? isLastItem
       ? false
@@ -142,8 +137,6 @@ function FieldListItemComponent(
         allFields={allFields}
         isRootLevelField={false}
         isMultiField={canHaveMultiFields}
-        paddingLeft={indentCreateField}
-        maxNestedDepth={maxNestedDepth}
         isAddingFields={isAddingFields}
       />
     );
@@ -175,7 +168,7 @@ function FieldListItemComponent(
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addField}
                 data-test-subj="addPropertyButton"
                 aria-label={addPropertyButtonLabel}
@@ -238,6 +231,7 @@ function FieldListItemComponent(
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
+            wrap
             css={[
               styles.content,
               !hasChildFields &&
@@ -248,12 +242,8 @@ function FieldListItemComponent(
           >
             {(hasChildFields || hasMultiFields) && (
               <EuiFlexItem grow={false} css={styles.toggle}>
-                <EuiButtonIcon
-                  color="text"
-                  onClick={toggleExpand}
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                  data-test-subj="toggleExpandButton"
-                  aria-label={
+                <EuiToolTip
+                  content={
                     isExpanded
                       ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
                           defaultMessage: 'Collapse field {name}',
@@ -268,22 +258,49 @@ function FieldListItemComponent(
                           },
                         })
                   }
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    onClick={toggleExpand}
+                    iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                    data-test-subj="toggleExpandButton"
+                    aria-label={
+                      isExpanded
+                        ? i18n.translate('xpack.idxMgmt.mappingsEditor.collapseFieldButtonLabel', {
+                            defaultMessage: 'Collapse field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                        : i18n.translate('xpack.idxMgmt.mappingsEditor.expandFieldButtonLabel', {
+                            defaultMessage: 'Expand field {name}',
+                            values: {
+                              name: source.name,
+                            },
+                          })
+                    }
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             )}
 
-            {isMultiField && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+                {isMultiField && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon color="subdued" type="documents" aria-hidden="true" />
+                  </EuiFlexItem>
+                )}
 
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
-              aria-label={i18nTexts.fieldListNameLabel}
-            >
-              {source.name}
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+                  aria-label={i18nTexts.fieldListNameLabel}
+                >
+                  {source.name}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>
@@ -313,7 +330,7 @@ function FieldListItemComponent(
               {isShadowed && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={i18nTexts.fieldIsShadowedLabel}>
-                    <EuiBadge color="warning" data-test-subj="isShadowedIndicator">
+                    <EuiBadge color="warning" data-test-subj="isShadowedIndicator" tabIndex={0}>
                       {i18n.translate('xpack.idxMgmt.mappingsEditor.shadowedBadgeLabel', {
                         defaultMessage: 'Shadowed',
                       })}

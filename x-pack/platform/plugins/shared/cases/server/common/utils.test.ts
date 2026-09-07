@@ -16,8 +16,8 @@ import {
   groupTotalAlertsByID,
   transformCases,
   transformComments,
-  flattenCommentSavedObjects,
-  flattenCommentSavedObject,
+  flattenAttachmentSavedObjects,
+  flattenAttachmentSavedObject,
   extractLensReferencesFromCommentString,
   getOrUpdateLensReferences,
   asArray,
@@ -26,6 +26,8 @@ import {
   getCaseViewPath,
   countUserAttachments,
   isPersistableStateOrExternalReference,
+  getAlertInfoFromComments,
+  getEventInfoFromComments,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
 import { CASE_VIEW_PAGE_TABS } from '../../common/types';
@@ -35,6 +37,7 @@ import type {
   AttachmentAttributes,
   Case,
   CaseConnector,
+  EventAttachmentPayload,
   UserCommentAttachmentPayload,
 } from '../../common/types/domain';
 import {
@@ -44,11 +47,13 @@ import {
   CustomFieldTypes,
 } from '../../common/types/domain';
 import type { AttachmentRequest } from '../../common/types/api';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 import {
   createAlertRequests,
   createExternalReferenceRequests,
   createPersistableStateRequests,
   createUserRequests,
+  createUnifiedAlertRequests,
 } from './limiter_checker/test_utils';
 
 interface CommentReference {
@@ -77,7 +82,7 @@ function createCommentFindResponse(
           attributes: transformNewComment({
             ...comment,
             createdDate: '',
-          }),
+          }) as AttachmentAttributes,
         });
       }
     }
@@ -154,6 +159,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -163,6 +169,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -211,6 +218,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "medium",
@@ -220,6 +228,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -272,6 +281,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -281,6 +291,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -339,6 +350,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -348,6 +360,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -401,6 +414,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -411,6 +425,8 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -446,6 +462,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -456,6 +473,8 @@ describe('common utils', () => {
               "title": "Damaging Data Destruction Detected",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -495,6 +514,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -505,6 +525,8 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -548,6 +570,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -558,6 +581,8 @@ describe('common utils', () => {
               "title": "Another bad one",
               "totalAlerts": 0,
               "totalComment": 2,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -630,6 +655,7 @@ describe('common utils', () => {
               "observables": Array [],
               "owner": "securitySolution",
               "settings": Object {
+                "extractObservables": true,
                 "syncAlerts": true,
               },
               "severity": "low",
@@ -640,6 +666,8 @@ describe('common utils', () => {
               "title": "Super Bad Security Issue",
               "totalAlerts": 0,
               "totalComment": 0,
+              "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -700,6 +728,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -710,6 +739,8 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -761,6 +792,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -771,6 +803,8 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -845,6 +879,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -855,6 +890,8 @@ describe('common utils', () => {
           "title": "Another bad one",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -904,6 +941,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -914,6 +952,8 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -968,6 +1008,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -978,6 +1019,8 @@ describe('common utils', () => {
           "title": "Super Bad Security Issue",
           "totalAlerts": 0,
           "totalComment": 2,
+          "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -1004,7 +1047,7 @@ describe('common utils', () => {
         page: 1,
         per_page: 10,
         total: mockCaseComments.length,
-        comments: flattenCommentSavedObjects(comments.saved_objects),
+        comments: flattenAttachmentSavedObjects(comments.saved_objects),
       });
     });
   });
@@ -1012,10 +1055,10 @@ describe('common utils', () => {
   describe('flattenCommentSavedObjects', () => {
     it('flattens correctly', () => {
       const comments = [{ ...mockCaseComments[0] }, { ...mockCaseComments[1] }];
-      const res = flattenCommentSavedObjects(comments);
+      const res = flattenAttachmentSavedObjects(comments);
       expect(res).toEqual([
-        flattenCommentSavedObject(comments[0]),
-        flattenCommentSavedObject(comments[1]),
+        flattenAttachmentSavedObject(comments[0]),
+        flattenAttachmentSavedObject(comments[1]),
       ]);
     });
   });
@@ -1023,7 +1066,7 @@ describe('common utils', () => {
   describe('flattenCommentSavedObject', () => {
     it('flattens correctly', () => {
       const comment = { ...mockCaseComments[0] };
-      const res = flattenCommentSavedObject(comment);
+      const res = flattenAttachmentSavedObject(comment);
       expect(res).toEqual({
         id: comment.id,
         version: comment.version,
@@ -1034,7 +1077,7 @@ describe('common utils', () => {
     it('flattens correctly without version', () => {
       const comment = { ...mockCaseComments[0] };
       comment.version = undefined;
-      const res = flattenCommentSavedObject(comment);
+      const res = flattenAttachmentSavedObject(comment);
       expect(res).toEqual({
         id: comment.id,
         version: '0',
@@ -1628,6 +1671,213 @@ describe('common utils', () => {
       expect(isPersistableStateOrExternalReference(createAlertRequests(1, 'alert-id')[0])).toBe(
         false
       );
+    });
+  });
+
+  describe('getAlertInfoFromComments', () => {
+    it('extracts id/index pairs for legacy alert attachments', () => {
+      const requests = createAlertRequests(1, ['alert-1', 'alert-2']);
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'alert-1' },
+        { id: 'alert-2', index: 'alert-2' },
+      ]);
+    });
+
+    it('extracts id/index pairs for unified alert attachments when metadata.index is present', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1', 'index-2'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'index-1' },
+        { id: 'alert-2', index: 'index-2' },
+      ]);
+    });
+
+    it('silently drops a unified alert attachment that omits metadata.index', () => {
+      // Lenient by default so reads of already-persisted (possibly malformed) data don't fail;
+      // write-time validation passes `strict: true` instead (see below).
+      const requests = createUnifiedAlertRequests(1, 'alert-1');
+
+      expect(getAlertInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('silently drops when attachmentId and a metadata.index array have mismatched lengths', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('broadcasts a scalar metadata.index across every id (no length mismatch)', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: 'shared-index' },
+      }));
+
+      expect(getAlertInfoFromComments(requests)).toEqual([
+        { id: 'alert-1', index: 'shared-index' },
+        { id: 'alert-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('ignores non-alert attachments', () => {
+      expect(getAlertInfoFromComments(createUserRequests(1))).toEqual([]);
+    });
+  });
+
+  describe('getAlertInfoFromComments (strict: true)', () => {
+    it('extracts id/index pairs for unified alert attachments when metadata.index is present', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1', 'index-2'] },
+      }));
+
+      expect(getAlertInfoFromComments(requests, true)).toEqual([
+        { id: 'alert-1', index: 'index-1' },
+        { id: 'alert-2', index: 'index-2' },
+      ]);
+    });
+
+    it('throws instead of silently skipping when a unified alert attachment omits metadata.index', () => {
+      // the exact shape that let ensureAlertsAuthorized be bypassed before this fix.
+      const requests = createUnifiedAlertRequests(1, 'alert-1');
+
+      expect(() => getAlertInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('broadcasts a scalar metadata.index across every id instead of throwing', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: 'shared-index' },
+      }));
+
+      expect(getAlertInfoFromComments(requests, true)).toEqual([
+        { id: 'alert-1', index: 'shared-index' },
+        { id: 'alert-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('throws when attachmentId and a metadata.index array have mismatched lengths', () => {
+      const requests = createUnifiedAlertRequests(1, ['alert-1', 'alert-2']).map((request) => ({
+        ...request,
+        metadata: { index: ['index-1'] },
+      }));
+
+      expect(() => getAlertInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('ignores non-alert attachments', () => {
+      expect(getAlertInfoFromComments(createUserRequests(1), true)).toEqual([]);
+    });
+  });
+
+  describe('getEventInfoFromComments', () => {
+    it('extracts id/index pairs for legacy event attachments', () => {
+      const requests: EventAttachmentPayload[] = [
+        {
+          type: AttachmentType.event as const,
+          eventId: 'event-1',
+          index: 'event-index-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('extracts id/index pairs for unified security.event attachments when metadata.index is present', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          metadata: { index: 'event-index-1' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('silently drops a unified event attachment that omits metadata.index', () => {
+      // getEventInfoFromComments stays lenient by default — see the getAlertInfoFromComments
+      // comment above for why. Write-time validation passes `strict: true` instead.
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([]);
+    });
+
+    it('broadcasts a scalar metadata.index across every id (no length mismatch)', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: ['event-1', 'event-2'],
+          metadata: { index: 'shared-index' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests)).toEqual([
+        { id: 'event-1', index: 'shared-index' },
+        { id: 'event-2', index: 'shared-index' },
+      ]);
+    });
+
+    it('ignores non-event attachments', () => {
+      expect(getEventInfoFromComments(createAlertRequests(1, 'alert-1'))).toEqual([]);
+    });
+  });
+
+  describe('getEventInfoFromComments (strict: true)', () => {
+    it('extracts id/index pairs for unified security.event attachments when metadata.index is present', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          metadata: { index: 'event-index-1' },
+          owner: 'test',
+        },
+      ];
+
+      expect(getEventInfoFromComments(requests, true)).toEqual([
+        { id: 'event-1', index: 'event-index-1' },
+      ]);
+    });
+
+    it('throws instead of silently skipping when a unified event attachment omits metadata.index', () => {
+      const requests = [
+        {
+          type: SECURITY_EVENT_ATTACHMENT_TYPE,
+          attachmentId: 'event-1',
+          owner: 'test',
+        },
+      ];
+
+      expect(() => getEventInfoFromComments(requests, true)).toThrow(
+        /missing a valid index reference/
+      );
+    });
+
+    it('ignores non-event attachments', () => {
+      expect(getEventInfoFromComments(createAlertRequests(1, 'alert-1'), true)).toEqual([]);
     });
   });
 });

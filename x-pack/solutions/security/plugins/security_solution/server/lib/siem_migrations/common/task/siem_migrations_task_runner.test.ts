@@ -46,6 +46,7 @@ const mockProcessTaskOutput = jest.fn().mockResolvedValue({});
 const mockInitialize = jest.fn().mockResolvedValue(undefined);
 
 class TestMigrationTaskRunner extends SiemMigrationTaskRunner {
+  protected taskConcurrency = 10;
   protected TaskRunnerClass = SiemMigrationTaskRunner;
   protected EvaluatorClass = undefined;
 
@@ -83,6 +84,7 @@ describe('SiemMigrationTaskRunner', () => {
     abortController = new AbortController();
     taskRunner = new TestMigrationTaskRunner(
       'test-migration-id',
+      'splunk',
       mockRequest,
       mockUser,
       abortController,
@@ -107,7 +109,7 @@ describe('SiemMigrationTaskRunner', () => {
         throw new Error(errorMessage);
       });
 
-      await expect(taskRunner.setup('test-connector-id')).rejects.toThrowError(errorMessage);
+      await expect(taskRunner.setup('test-connector-id')).rejects.toThrow(errorMessage);
     });
   });
 
@@ -136,6 +138,22 @@ describe('SiemMigrationTaskRunner', () => {
       expect(mockProcessTaskOutput).toHaveBeenCalledTimes(1);
       expect(mockSiemMigrationsDataClient.items.saveCompleted).toHaveBeenCalled();
       expect(mockSiemMigrationsDataClient.items.get).toHaveBeenCalledTimes(2); // One with data, one without
+      expect(mockSiemMigrationsDataClient.items.get).toHaveBeenNthCalledWith(
+        1,
+        'test-migration-id',
+        {
+          filters: { status: SiemMigrationStatus.PENDING, isEligibleForTranslation: true },
+          size: 100,
+        }
+      );
+      expect(mockSiemMigrationsDataClient.items.get).toHaveBeenNthCalledWith(
+        2,
+        'test-migration-id',
+        {
+          filters: { status: SiemMigrationStatus.PENDING, isEligibleForTranslation: true },
+          size: 100,
+        }
+      );
       expect(mockLogger.info).toHaveBeenCalledWith('Migration completed successfully');
     });
 

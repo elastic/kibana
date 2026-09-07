@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { ComponentProps } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { ConnectorSelectorBase as Component } from './connector_selector_base';
@@ -31,9 +32,25 @@ export const Loaded: StoryObj<typeof Component> = {
     loading: false,
     selectedConnector: 'gpt-4',
     connectors: [
-      { id: 'gpt-4', name: 'OpenAI GPT-4' },
-      { id: 'gpt-3.5-turbo', name: 'OpenAI GPT-3.5 Turbo' },
-    ] as FindActionResult[],
+      {
+        connectorId: 'gpt-4',
+        name: 'OpenAI GPT-4',
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      },
+      {
+        connectorId: 'gpt-3.5-turbo',
+        name: 'OpenAI GPT-3.5 Turbo',
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      },
+    ] as InferenceConnector[],
   },
   render,
 };

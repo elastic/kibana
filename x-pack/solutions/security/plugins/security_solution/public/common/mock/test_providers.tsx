@@ -12,11 +12,11 @@ import { EuiProvider } from '@elastic/eui';
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
-import { Provider as ReduxStoreProvider } from 'react-redux';
-import type { Store } from 'redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
+import type { Store } from 'redux-v4';
 import { ThemeProvider } from 'styled-components';
 import type { Capabilities } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';

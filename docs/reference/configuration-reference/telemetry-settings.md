@@ -3,34 +3,44 @@ navigation_title: "Telemetry settings"
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/telemetry-settings-kbn.html
 applies_to:
-  deployment:
-    self: all
+  stack: ga
+  serverless: ga
 ---
 
 # Telemetry settings in {{kib}} [telemetry-settings-kbn]
-
 
 Usage Collection (also known as Telemetry) is enabled by default. This allows us to learn what our users are most interested in, so we can improve our products and services.
 
 Refer to our [Privacy Statement](https://www.elastic.co/legal/product-privacy-statement) to learn more.
 
-You can control whether this data is sent from the {{kib}} servers, or if it should be sent from the user’s browser, in case a firewall is blocking the connections from the server. Additionally, you can disable this feature either in **Stack Management > {{kib}} > Advanced Settings > Global Settings > Usage collection** or the config file with the following settings.
-
-
 ## General telemetry settings [telemetry-general-settings]
+```{applies_to}
+deployment:
+  self: ga
+  ece: ga
+  eck: ga
+  ech: unavailable
+serverless: unavailable
+```
 
-$$$telemetry-optIn$$$ `telemetry.optIn`
-:   Set to `false` to stop sending any telemetry data to Elastic. Reporting your cluster statistics helps us improve your user experience. **Default: `true`.**<br>
+You can control whether this data is sent from the {{kib}} servers, or if it should be sent from the user's browser, in case a firewall is blocking the connections from the server. Additionally, you can disable this feature either in **Stack Management > {{kib}} > Advanced Settings > Global Settings > Usage collection** or the config file with the following settings.
 
-    This setting can be changed at any time in [Advanced Settings](/reference/advanced-settings.md). To prevent users from changing it, set [`telemetry.allowChangingOptInStatus`](/reference/configuration-reference/general-settings.md#telemetry-allowChangingOptInStatus) to `false`.
+:::{settings} /reference/configuration-reference/telemetry-settings.yml
+:::
 
+## Security telemetry [security-telemetry]
+```{applies_to}
+stack: ga
+serverless:
+  security: ga
+```
 
-`telemetry.allowChangingOptInStatus`
-:   Set to `false` to disallow overwriting the [`telemetry.optIn`](#telemetry-optIn) setting via the [Advanced Settings](/reference/advanced-settings.md) in {{kib}}. **Default: `true`.**
+{{kib}} transmits certain information about {{elastic-sec}} when users interact with the {{security-app}}, detailed below. {{kib}} redacts or obfuscates personal data such as IP addresses, host names, and usernames before transmitting messages to Elastic. Security-specific telemetry events include:
 
-`telemetry.sendUsageFrom`
-:   Set to `'server'` to report the cluster statistics from the {{kib}} server. If the server fails to connect to our endpoint at [https://telemetry.elastic.co/](https://telemetry.elastic.co/), it assumes it is behind a firewall and falls back to `'browser'` to send it from users' browsers when they are navigating through {{kib}}. **Default: `'server'`.**
+* **Detection rule security alerts:** Information about Elastic-authored prebuilt detection rules using the detection engine. Examples of alert data include machine learning job influencers, process names, and cloud audit events.
+* **{{elastic-endpoint}} Security alerts:** Information about malicious activity detected using {{elastic-endpoint}} detection engines. Examples of alert data include malicious process names, digital signatures, and file names written by the malicious software. Examples of alert metadata include the time of the alert, the {{elastic-endpoint}} version and related detection engine versions.
+* **Configuration data for {{elastic-endpoint}}:** Information about the configuration of {{elastic-endpoint}} deployments. Examples of configuration data include the Endpoint versions, operating system versions, and performance counters for Endpoint.
+* **Exception list entries for Elastic rules:** Information about exceptions added for Elastic rules. Examples include trusted applications, detection exceptions, and rule exceptions.
+* **Security alert activity records:** Information about actions taken on alerts generated in the {{security-app}}, such as acknowledged or closed.
 
-`xpack.apm.telemetryCollectionEnabled`
-:   Collects information about APM data and API performance. Set this to `false` to specifically disable APM’s collector. **Default: `'true'`.**
-
+To learn more, refer to our [Privacy Statement](https://www.elastic.co/legal/product-privacy-statement).

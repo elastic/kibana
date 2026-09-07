@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { DataPanelWrapper } from './data_panel_wrapper';
-import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
+import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '@kbn/lens-common';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
@@ -16,6 +17,7 @@ import { selectTriggerApplyChanges } from '../../state_management';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { EditorFrameServiceProvider } from '../editor_frame_service_context';
 
 describe('Data Panel Wrapper', () => {
   describe('Datasource data panel properties', () => {
@@ -33,21 +35,24 @@ describe('Data Panel Wrapper', () => {
         } as unknown as Datasource,
       };
       const renderResult = renderWithReduxStore(
-        <DataPanelWrapper
+        <EditorFrameServiceProvider
           datasourceMap={datasourceMap}
           visualizationMap={{} as VisualizationMap}
-          showNoDataPopover={() => {}}
-          core={{} as DatasourceDataPanelProps['core']}
-          dropOntoWorkspace={() => {}}
-          hasSuggestionForField={() => true}
-          plugins={{
-            uiActions: {} as UiActionsStart,
-            dataViews: {} as DataViewsPublicPluginStart,
-            eventAnnotationService: {} as EventAnnotationServiceType,
-          }}
-          indexPatternService={createIndexPatternServiceMock()}
-          frame={createMockFramePublicAPI()}
-        />,
+        >
+          <DataPanelWrapper
+            showNoDataPopover={() => {}}
+            core={{} as DatasourceDataPanelProps['core']}
+            dropOntoWorkspace={() => {}}
+            hasSuggestionForField={() => true}
+            plugins={{
+              uiActions: {} as UiActionsStart,
+              dataViews: {} as DataViewsPublicPluginStart,
+              eventAnnotationService: {} as EventAnnotationServiceType,
+            }}
+            indexPatternService={createIndexPatternServiceMock()}
+            frame={createMockFramePublicAPI()}
+          />
+        </EditorFrameServiceProvider>,
         {},
         {
           preloadedState: {
@@ -70,11 +75,15 @@ describe('Data Panel Wrapper', () => {
 
     describe('setState', () => {
       it('applies state immediately when option true', async () => {
-        store.dispatch(disableAutoApply());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
         selectTriggerApplyChanges(store.getState());
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        });
 
         expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
@@ -82,11 +91,15 @@ describe('Data Panel Wrapper', () => {
         expect(selectTriggerApplyChanges(store.getState())).toBeTruthy();
       });
       it('applies state immediately when option trueenz', async () => {
-        store.dispatch(disableAutoApply());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
         selectTriggerApplyChanges(store.getState());
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: true });
+        });
 
         expect(store.getState().lens.datasourceStates.activeDatasource.state).toEqual(
           newDatasourceState
@@ -95,11 +108,15 @@ describe('Data Panel Wrapper', () => {
       });
 
       it('does not apply state immediately when option false', async () => {
-        store.dispatch(disableAutoApply());
+        act(() => {
+          store.dispatch(disableAutoApply());
+        });
         selectTriggerApplyChanges(store.getState());
 
         const newDatasourceState = { age: 'new' };
-        datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
+        act(() => {
+          datasourceDataPanelProps.setState(newDatasourceState, { applyImmediately: false });
+        });
 
         const lensState = store.getState().lens;
         expect(lensState.datasourceStates.activeDatasource.state).toEqual(newDatasourceState);

@@ -8,15 +8,15 @@
  */
 
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
-  EuiFlyout,
+  EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiTitle,
-  useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
@@ -25,43 +25,44 @@ import { SearchSessionsMgmtTable } from '../components/table';
 import type { SearchUsageCollector } from '../../../collectors';
 import type { BackgroundSearchOpenedHandler, LocatorsStart } from '../types';
 import { getColumns } from './get_columns';
+import type { ISearchSessionEBTManager } from '../../ebt_manager';
 
 export const Flyout = ({
-  onClose,
   api,
   coreStart,
   usageCollector,
+  ebtManager,
   config,
   kibanaVersion,
   locators,
   appId,
+  trackingProps,
   onBackgroundSearchOpened,
+  onClose,
 }: {
-  onClose: () => void;
   api: SearchSessionsMgmtAPI;
   coreStart: CoreStart;
   usageCollector: SearchUsageCollector;
+  ebtManager: ISearchSessionEBTManager;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
   locators: LocatorsStart;
   appId?: string;
+  trackingProps: { openedFrom: string };
   onBackgroundSearchOpened?: BackgroundSearchOpenedHandler;
+  onClose: () => void;
 }) => {
-  const flyoutId = useGeneratedHtmlId();
+  const technicalPreviewLabel = i18n.translate('data.session_mgmt.technical_preview_label', {
+    defaultMessage: 'Technical preview',
+  });
 
   return (
-    <EuiFlyout size="s" aria-labelledby={flyoutId} onClose={onClose}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle id={flyoutId} size="m">
-          <h1>
-            <FormattedMessage
-              id="data.session_mgmt.flyout_title"
-              defaultMessage="Background searches"
-            />
-          </h1>
-        </EuiTitle>
-      </EuiFlyoutHeader>
+    <>
       <EuiFlyoutBody>
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label={technicalPreviewLabel}>{technicalPreviewLabel}</EuiBetaBadge>
+        </EuiFlexItem>
+        <EuiSpacer size="m" />
         <SearchSessionsMgmtTable
           core={coreStart}
           api={api}
@@ -74,6 +75,8 @@ export const Flyout = ({
           getColumns={getColumns}
           appId={appId}
           onBackgroundSearchOpened={onBackgroundSearchOpened}
+          searchSessionEBTManager={ebtManager}
+          trackingProps={{ openedFrom: trackingProps.openedFrom, renderedIn: 'flyout' }}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -81,6 +84,6 @@ export const Flyout = ({
           <FormattedMessage id="data.session_mgmt.close_flyout" defaultMessage="Close" />
         </EuiButtonEmpty>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 };

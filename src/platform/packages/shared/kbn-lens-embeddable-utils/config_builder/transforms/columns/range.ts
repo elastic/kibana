@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RangeIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { RangeIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiRangeOperation, LensApiHistogramOperation } from '../../schema/bucket_ops';
 import { LENS_RANGE_DEFAULT_INTERVAL } from '../../schema/constants';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
@@ -42,6 +42,7 @@ export function fromRangeOrHistogramLensApiToLensState(
     ...getLensStateBucketSharedProps(options),
     params: {
       type: 'histogram',
+      // `granularity` is the raw target bar count Lens stores as `maxBars` (1..histogram:maxBars | 'auto').
       maxBars: options.granularity,
       ranges: [],
       format: fromFormatAPIToLensState(options.format),
@@ -70,6 +71,7 @@ export function fromRangeOrHistogramLensStateToAPI(
   return {
     operation: 'histogram',
     include_empty_rows: Boolean(column.params.includeEmptyRows),
+    // Pass `maxBars` through verbatim
     granularity: column.params?.maxBars,
     ...getLensAPIBucketSharedProps(column),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),

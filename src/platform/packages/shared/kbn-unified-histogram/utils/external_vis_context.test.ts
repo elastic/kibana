@@ -14,7 +14,9 @@ import {
   exportVisContext,
   isSuggestionShapeAndVisContextCompatible,
   injectESQLQueryIntoLensLayers,
+  deriveLensSuggestionFromLensAttributes,
 } from './external_vis_context';
+import type { QueryParams } from './external_vis_context';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { tableMock, tableQueryMock } from '../__mocks__/table';
@@ -288,6 +290,57 @@ describe('external_vis_context', () => {
           'timestamp every 10 minutes'
         )
       ).toStrictEqual(expectedAttributes);
+    });
+  });
+
+  describe('deriveLensSuggestionFromLensAttributes', () => {
+    const currentQuery = { esql: 'from foo | stats count(*)' };
+
+    const getVisContext = (textBased: Record<string, unknown>): UnifiedHistogramVisContext =>
+      ({
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+        requestData: {},
+        attributes: {
+          title: 'test',
+          visualizationType: 'lnsXY',
+          state: {
+            visualization: { preferredSeriesType: 'line' },
+            datasourceStates: { textBased },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext);
+
+    const queryParams = { query: currentQuery, columnsMap: {} } as unknown as QueryParams;
+
+    it('should derive a suggestion when a layer query matches the current query', () => {
+      const externalVisContext = getVisContext({
+        layers: { layer1: { query: currentQuery, columns: [] } },
+      });
+      expect(
+        deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
+      ).toBeDefined();
+    });
+
+    it('should treat a diverged layer query as stale', () => {
+      const externalVisContext = getVisContext({
+        layers: { layer1: { query: { esql: 'from bar' }, columns: [] } },
+      });
+      expect(
+        deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
+      ).toBeUndefined();
+    });
+
+    it('should treat a slot-only text-based doc (no layer queries) as stale', () => {
+      // fail-safe: without an authoritative layer query the stored context
+      // cannot be trusted to describe the chart for the current query, even
+      // if a legacy aggregate `state.query` slot copy happens to match
+      const externalVisContext = getVisContext({ layers: { layer1: { columns: [] } } });
+      // legacy aggregate slot copy — no longer part of the narrowed type
+      externalVisContext.attributes.state.query =
+        currentQuery as unknown as typeof externalVisContext.attributes.state.query;
+      expect(
+        deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
+      ).toBeUndefined();
     });
   });
 });

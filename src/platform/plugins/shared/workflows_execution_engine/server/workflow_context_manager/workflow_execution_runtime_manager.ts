@@ -7,22 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNode, WorkflowGraph } from '@kbn/workflows/graph';
-import { withSpan } from '@kbn/apm-utils';
 import agent from 'elastic-apm-node';
-import type { RunStepResult } from '../step/node_implementation';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { addTransactionLabels } from '@kbn/apm-utils';
+import type { CoreStart } from '@kbn/core/server';
+import type { EsWorkflowExecution, SerializedError, StackFrame } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExecutionError } from '@kbn/workflows/server';
+import {
+  getActiveOtelSpanId,
+  getActiveOtelTraceId,
+  getAlertingRuleId,
+  getTraceId,
+  setCurrentTransaction,
+} from './apm_internal';
+import { buildWorkflowContext } from './build_workflow_context';
+import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
+import type { StepIoService } from './step_io_service';
+import type { ContextDependencies } from './types';
+import type { WorkflowExecutionCursor } from './workflow_execution_cursor';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { buildStepExecutionId } from '../utils';
+import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
+import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
+import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionCursor: WorkflowExecutionCursor;
   workflowLogger: IWorkflowEventLogger;
+  coreStart?: CoreStart;
+  dependencies?: ContextDependencies;
+  telemetryClient?: WorkflowExecutionTelemetryClient;
 }
 
 /**
@@ -44,24 +67,32 @@ interface WorkflowExecutionRuntimeManagerInit {
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
  * and uses topological sorting to determine execution order.
  */
+
 export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
+  private readonly workflowExecutionCursor: WorkflowExecutionCursor;
+  private stepIoService: StepIoService;
   private entryTransactionId?: string;
-  private workflowTransaction?: any; // APM transaction instance
+  private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
-
-  private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
-  }
+  private coreStart?: CoreStart;
+  private dependencies?: ContextDependencies;
+  private telemetryClient?: WorkflowExecutionTelemetryClient;
+  private telemetryReported: boolean = false;
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
+    this.workflowExecutionCursor = workflowExecutionRuntimeManagerInit.workflowExecutionCursor;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+    this.stepIoService = workflowExecutionRuntimeManagerInit.stepIoService;
+    this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
+    this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
+    this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
   }
 
   public get workflowExecution() {
@@ -90,268 +121,168 @@ export class WorkflowExecutionRuntimeManager {
     return this.workflowExecutionState.getWorkflowExecution();
   }
 
-  public getCurrentNode(): GraphNode | null {
-    if (!this.workflowExecution.currentNodeId) {
-      return null;
-    }
-
-    return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
-  }
-
-  public getCurrentStepExecutionId(): string {
-    return buildStepExecutionId(
-      this.workflowExecution.id,
-      this.getCurrentNode()!.stepId,
-      this.workflowExecution.scopeStack
-    );
+  public getCurrentNode(): GraphNodeUnion | null {
+    return this.workflowExecutionCursor.currentNode;
   }
 
   public navigateToNode(nodeId: string): void {
-    if (!this.workflowGraph.getNode(nodeId)) {
-      throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
-    }
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      currentNodeId: nodeId,
-    });
+    this.workflowExecutionCursor.navigateToNode(nodeId);
   }
 
   public navigateToNextNode(): void {
-    const currentNodeId = this.workflowExecution.currentNodeId;
-    const currentNodeIndex = this.topologicalOrder.findIndex((nodeId) => nodeId === currentNodeId);
-    if (currentNodeIndex < this.topologicalOrder.length - 1) {
-      this.workflowExecutionState.updateWorkflowExecution({
-        currentNodeId: this.topologicalOrder[currentNodeIndex + 1],
-      });
-      return;
-    }
+    this.workflowExecutionCursor.navigateToNextNode();
+  }
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      currentNodeId: undefined,
-    });
+  public navigateToAfterNode(nodeId: string): void {
+    this.workflowExecutionCursor.navigateToAfterNode(nodeId);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return [...this.workflowExecution.scopeStack];
+    return this.workflowExecutionCursor.currentStackFrames;
   }
 
+  /**
+   * Replaces the global scope stack outright. Unlike {@link enterScope} /
+   * {@link exitScope}, this is not guarded by the current node type. It exists
+   * for control-flow nodes (e.g. the parallel fan-out node) that drive nested
+   * branch steps in-process and must temporarily install — then restore — a
+   * branch's scope so per-branch context (e.g. {{ foreach.item }}) resolves.
+   */
+  public setScopeStack(scopeStack: StackFrame[]): void {
+    this.workflowExecutionState.updateWorkflowExecution({ scopeStack: [...scopeStack] });
+  }
+
+  /**
+   * Enters a new scope in the workflow execution context.
+   *
+   * This method creates a new scope frame and pushes it onto the scope stack, establishing
+   * a new execution context for nested workflow operations. Scopes are used to track
+   * hierarchical execution contexts such as loops, conditionals, or sub-workflows.
+   *
+   * @param subScopeId - Optional identifier for the sub-scope being entered
+   *
+   * @remarks
+   * This method includes a guard condition that prevents scope entry if the current node
+   * is not an appropriate "enter" node. The scope update will be silently ignored if:
+   * - The current node type does not start with 'enter' (e.g., 'enter-foreach', 'enter-if', etc)
+   *
+   * This guard ensures that scopes are only created at the correct workflow execution points,
+   * maintaining the integrity of the execution context hierarchy.
+   */
   public enterScope(subScopeId?: string): void {
-    const currentNode = this.getCurrentNode()!;
+    this.workflowExecutionCursor.setCurrentScopeId(subScopeId);
+  }
+
+  public setWorkflowOutputs(outputs: Record<string, unknown>): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
-        nodeId: currentNode.id,
-        nodeType: currentNode.type,
-        stepId: currentNode.stepId,
-        scopeId: subScopeId,
-      }).stackFrames,
+      context: {
+        ...(this.workflowExecution.context || {}),
+        output: outputs,
+      },
     });
   }
 
-  public exitScope(): void {
+  public setWorkflowStatus(status: ExecutionStatus): void {
+    this.workflowExecutionState.updateWorkflowExecution({ status });
+
+    if (isTerminalStatus(status)) {
+      this.workflowExecutionCursor.stop();
+    }
+  }
+
+  /**
+   * Sets workflow status to CANCELLED with a reason (and cancelledAt, cancelledBy).
+   * Use when workflow.output has status: 'cancelled' or when cancelling with a specific message.
+   */
+  public setWorkflowCancelled(reason: string): void {
+    const cancelledAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
-        .stackFrames,
+      status: ExecutionStatus.CANCELLED,
+      cancellationReason: reason,
+      cancelledAt,
+      cancelledBy: 'workflow',
     });
+    this.workflowExecutionCursor.stop();
   }
 
-  public setWorkflowError(error: Error | string | undefined): void {
+  /**
+   * Finishes ancestor enter-node step executions by walking a local copy of the scope
+   * stack. Does **not** mutate the execution cursor stack; scope position is reconciled
+   * by navigation and {@link WorkflowExecutionCursor.commitPendingNavigation}.
+   *
+   * The local {@link WorkflowScopeStack.exitScope} calls exist only to compute the
+   * correct `stackFrames` when creating each ancestor's `StepExecutionRuntime`.
+   *
+   * @param inclusive — when true the scope that matches {@link shouldStop} is also
+   *   popped and finished. Defaults to false (stop *before* the matching scope).
+   *
+   * Used by:
+   * - loop.break — stop at and *include* the enclosing loop enter node (inclusive)
+   * - loop.continue — stop *before* the enclosing loop enter node (exclusive)
+   */
+  public unwindScopes(
+    stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
+    shouldStop?: (scope: ScopeData) => boolean,
+    { inclusive = false }: { inclusive?: boolean } = {}
+  ): void {
+    let scopeStack = WorkflowScopeStack.fromStackFrames(
+      this.workflowExecutionCursor.currentStackFrames
+    );
+
+    while (!scopeStack.isEmpty()) {
+      const currentScope = scopeStack.getCurrentScope();
+      const matched = shouldStop?.(currentScope) ?? false;
+      if (matched && !inclusive) {
+        break;
+      }
+
+      scopeStack = scopeStack.exitScope();
+
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
+        nodeId: currentScope.nodeId,
+        stackFrames: scopeStack.stackFrames,
+      });
+      if (scopeStepRuntime.stepExecutionExists()) {
+        scopeStepRuntime.finishStep();
+      }
+
+      if (matched && inclusive) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer reading
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
+  public getWorkflowErrorSerialized(): SerializedError | undefined {
+    return this.workflowExecutionCursor.error
+      ? ExecutionError.fromError(this.workflowExecutionCursor.error).toSerializableObject()
+      : undefined;
+  }
+
+  /**
+   * @deprecated Temporary bridge for node implementations. Prefer writing
+   * `workflowExecutionCursor.error` directly once nodes receive cursor access.
+   */
+  public setWorkflowError(error: Error | undefined): void {
+    if (error) {
+      this.workflowExecutionCursor.captureError(error);
+    } else {
+      this.workflowExecutionCursor.clearError();
+    }
+  }
+
+  public markWorkflowTimeouted(): void {
+    const finishedAt = new Date().toISOString();
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? String(error) : undefined,
+      status: ExecutionStatus.TIMED_OUT,
+      finishedAt,
+      duration:
+        new Date(finishedAt).getTime() - new Date(this.workflowExecution.startedAt).getTime(),
     });
-  }
-
-  public getCurrentStepResult(): RunStepResult | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(
-      this.getCurrentStepExecutionId()
-    );
-
-    if (!stepExecution) {
-      return undefined;
-    }
-    return {
-      input: stepExecution.input || {},
-      output: stepExecution.output || {},
-      error: stepExecution.error,
-    };
-  }
-
-  public async setCurrentStepResult(result: RunStepResult): Promise<void> {
-    const currentNode = this.getCurrentNode()!;
-
-    if (result.error) {
-      this.setWorkflowError(result.error);
-    }
-
-    this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
-      stepId: currentNode.stepId,
-      input: result.input,
-      output: result.output,
-      error: result.error,
-    });
-  }
-
-  public getCurrentStepState(): Record<string, any> | undefined {
-    return this.workflowExecutionState.getStepExecution(this.getCurrentStepExecutionId())?.state;
-  }
-
-  public async setCurrentStepState(state: Record<string, any> | undefined): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    this.workflowExecutionState.upsertStep({
-      id: this.getCurrentStepExecutionId(),
-      stepId,
-      state,
-    });
-  }
-
-  public async startStep(): Promise<void> {
-    const currentNode = this.getCurrentNode()!;
-    const stepId = currentNode.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}`,
-        type: 'workflow',
-        subtype: 'step',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(), // Ensure consistent traceId
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        const stepStartedAt = new Date();
-
-        const stepExecution = {
-          id: this.getCurrentStepExecutionId(),
-          stepId: currentNode.stepId,
-          stepType: currentNode.stepType,
-          scopeStack: this.workflowExecution.scopeStack,
-          topologicalIndex: this.topologicalOrder.indexOf(currentNode.id),
-          status: ExecutionStatus.RUNNING,
-          startedAt: stepStartedAt.toISOString(),
-        } as Partial<EsWorkflowStepExecution>;
-
-        this.workflowExecutionState.upsertStep(stepExecution);
-        this.logStepStart(stepId, stepExecution.id!);
-        await this.workflowExecutionState.flushStepChanges();
-      }
-    );
-  }
-
-  public async finishStep(): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    const stepExecutionId = this.getCurrentStepExecutionId();
-    const startedStepExecution = this.workflowExecutionState.getStepExecution(stepExecutionId);
-
-    if (startedStepExecution?.error) {
-      await this.failStep(startedStepExecution.error);
-      return;
-    }
-
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.complete`,
-        type: 'workflow',
-        subtype: 'step_completion',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        const stepExecutionUpdate = {
-          id: stepExecutionId,
-          status: ExecutionStatus.COMPLETED,
-          completedAt: new Date().toISOString(),
-        } as Partial<EsWorkflowStepExecution>;
-
-        if (startedStepExecution?.startedAt) {
-          stepExecutionUpdate.executionTimeMs =
-            new Date(stepExecutionUpdate.completedAt as string).getTime() -
-            new Date(startedStepExecution.startedAt).getTime();
-        }
-
-        this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-        this.logStepComplete(stepExecutionUpdate);
-      }
-    );
-  }
-
-  public async failStep(error: Error | string): Promise<void> {
-    const stepId = this.getCurrentNode()!.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.fail`,
-        type: 'workflow',
-        subtype: 'step_failure',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: this.workflowExecution.id,
-          workflow_id: this.workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        // if there is a last step execution, fail it
-        // if not, create a new step execution with fail
-        const startedStepExecution = this.workflowExecutionState.getStepExecution(
-          this.getCurrentStepExecutionId()
-        );
-        const stepExecutionUpdate = {
-          id: this.getCurrentStepExecutionId(),
-          status: ExecutionStatus.FAILED,
-          completedAt: new Date().toISOString(),
-          output: null,
-          error: String(error),
-        } as Partial<EsWorkflowStepExecution>;
-
-        if (startedStepExecution && startedStepExecution.startedAt) {
-          stepExecutionUpdate.executionTimeMs =
-            new Date(stepExecutionUpdate.completedAt as string).getTime() -
-            new Date(startedStepExecution.startedAt).getTime();
-        }
-        this.workflowExecutionState.updateWorkflowExecution({
-          error: String(error),
-        });
-        this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-        this.logStepFail(stepExecutionUpdate.id!, error);
-      }
-    );
-  }
-
-  public async setWaitStep(): Promise<void> {
-    const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const stepId = this.getCurrentNode()!.stepId;
-    return withSpan(
-      {
-        name: `workflow.step.${stepId}.delayed`,
-        type: 'workflow',
-        subtype: 'step_delayed',
-        labels: {
-          workflow_step_id: stepId,
-          workflow_execution_id: workflowExecution.id,
-          workflow_id: workflowExecution.workflowId,
-          trace_id: this.getTraceId(),
-          service_name: 'workflow-engine',
-        },
-      },
-      async () => {
-        this.workflowExecutionState.upsertStep({
-          id: this.getCurrentStepExecutionId(),
-          status: ExecutionStatus.WAITING,
-        });
-
-        this.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.WAITING,
-        });
-      }
-    );
+    this.workflowExecutionCursor.stop();
   }
 
   public async start(): Promise<void> {
@@ -363,14 +294,15 @@ export class WorkflowExecutionRuntimeManager {
 
     if (existingTransaction) {
       // Check if this is triggered by alerting (has alerting labels) or task manager directly
-      const isTriggeredByAlerting = !!(existingTransaction as any)._labels?.alerting_rule_id;
+      const alertingRuleId = getAlertingRuleId(existingTransaction);
+      const isTriggeredByAlerting = alertingRuleId !== undefined;
 
       this.workflowLogger?.logDebug('Found existing transaction context', {
         transaction: {
           name: existingTransaction.name,
           type: existingTransaction.type,
           is_triggered_by_alerting: isTriggeredByAlerting,
-          alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
+          alerting_rule_id: alertingRuleId,
           transaction_id: existingTransaction.ids?.['transaction.id'],
         },
       });
@@ -389,18 +321,16 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = workflowTransaction;
 
-        // Add workflow-specific labels
-        workflowTransaction.addLabels({
+        setCurrentTransaction(agent, workflowTransaction);
+
+        addTransactionLabels({
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
           transaction_hierarchy: 'alerting->workflow->steps',
           triggered_by: 'alerting',
-          parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
+          parent_alerting_rule_id: alertingRuleId,
         });
-
-        // Make the workflow transaction the current transaction for subsequent spans
-        (agent as any).setCurrentTransaction(workflowTransaction);
 
         // Store the workflow transaction ID (not the alerting transaction ID)
         const workflowTransactionId = workflowTransaction.ids?.['transaction.id'];
@@ -416,15 +346,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Workflow transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the workflow transaction
-        let realTraceId: string | undefined;
-        if ((workflowTransaction as any)?.traceId) {
-          realTraceId = (workflowTransaction as any).traceId;
-        } else if (workflowTransaction.ids?.['trace.id']) {
-          realTraceId = workflowTransaction.ids['trace.id'];
-        } else if ((workflowTransaction as any)?.trace?.id) {
-          realTraceId = (workflowTransaction as any).trace.id;
-        }
+        // Capture trace ID from the workflow transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(workflowTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -440,14 +364,20 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = existingTransaction;
 
-        // Add workflow-specific labels to the existing transaction
-        existingTransaction.addLabels({
+        const taskManagerLabels: Record<string, string | number | boolean> = {
           workflow_execution_id: this.workflowExecution.id,
           workflow_id: this.workflowExecution.workflowId,
           service_name: 'kibana',
           transaction_hierarchy: 'task->steps',
           triggered_by: 'task_manager',
-        });
+        };
+
+        const { triggeredBy } = this.workflowExecution;
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
+          taskManagerLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(taskManagerLabels);
 
         // Store the task transaction ID in the workflow execution
         const taskTransactionId = existingTransaction.ids?.['transaction.id'];
@@ -463,15 +393,9 @@ export class WorkflowExecutionRuntimeManager {
           this.workflowLogger?.logDebug('Task transaction ID stored in workflow execution');
         }
 
-        // Capture trace ID from the task transaction
-        let realTraceId: string | undefined;
-        if ((existingTransaction as any)?.traceId) {
-          realTraceId = (existingTransaction as any).traceId;
-        } else if (existingTransaction.ids?.['trace.id']) {
-          realTraceId = existingTransaction.ids['trace.id'];
-        } else if ((existingTransaction as any)?.trace?.id) {
-          realTraceId = (existingTransaction as any).trace.id;
-        }
+        // Capture trace ID from the task transaction, falling back to the
+        // active OTEL span context under EDOT-only instrumentation.
+        const realTraceId = getTraceId(existingTransaction) ?? getActiveOtelTraceId();
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
@@ -487,25 +411,72 @@ export class WorkflowExecutionRuntimeManager {
       // It will be overridden if the workflow fails
       existingTransaction.outcome = 'success';
     } else {
-      // Fallback if no task transaction exists - proceed without tracing
-      this.workflowLogger?.logWarn(
-        'No active Task Manager transaction found, proceeding without APM tracing'
-      );
+      // No APM transaction. Under EDOT-only instrumentation this is the normal path rather
+      // than an error: spans are exported by OTEL, there is just no APM agent to read them
+      // from. Read the trace id from the active OTEL span context so the execution stays
+      // linkable to its own trace.
+      const otelTraceId = getActiveOtelTraceId();
+
+      if (otelTraceId) {
+        this.workflowLogger?.logDebug('Captured OTEL trace ID (no APM transaction)', {
+          trace: { trace_id: otelTraceId },
+        });
+        this.workflowExecutionState.updateWorkflowExecution({
+          traceId: otelTraceId,
+          entryTransactionId: getActiveOtelSpanId(),
+        });
+
+        // Mirror the APM branches: addTransactionLabels also writes to the
+        // active OTEL span, keeping trace -> execution lookup searchable.
+        // Under EDOT-only instrumentation there is no APM transaction, so
+        // alert-triggered executions land here too; attribute them via the
+        // execution's `triggeredBy` instead of mislabeling them as task manager.
+        const { triggeredBy } = this.workflowExecution;
+        const isTriggeredByAlerting = triggeredBy === 'alert';
+
+        const otelLabels: Record<string, string | number | boolean> = {
+          workflow_execution_id: this.workflowExecution.id,
+          workflow_id: this.workflowExecution.workflowId,
+          service_name: 'kibana',
+          transaction_hierarchy: isTriggeredByAlerting
+            ? 'alerting->workflow->steps'
+            : 'task->steps',
+          triggered_by: isTriggeredByAlerting ? 'alerting' : 'task_manager',
+        };
+
+        if (triggeredBy && isEventDrivenWorkflowTriggerSource(this.workflowExecution)) {
+          otelLabels.event_trigger_id = triggeredBy;
+        }
+
+        addTransactionLabels(otelLabels);
+      } else {
+        this.workflowLogger?.logWarn(
+          'No active Task Manager transaction or OTEL span found, proceeding without tracing'
+        );
+      }
     }
 
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.topologicalOrder[0],
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
       scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await this.workflowExecutionState.flush();
+    await this.stepIoService.flush();
   }
 
   public async resume(): Promise<void> {
-    await this.workflowExecutionState.load();
+    if (!this.workflowExecution.currentNodeId) {
+      throw new Error(
+        'Execution can`t be resummed because current node ID is not set in execution state'
+      );
+    }
+    await this.stepIoService.load();
+    this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
+    this.workflowExecutionCursor.navigateToNode(this.workflowExecution.currentNodeId);
+    this.workflowExecutionCursor.commitPendingNavigation();
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
@@ -514,24 +485,54 @@ export class WorkflowExecutionRuntimeManager {
 
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {};
-    if (!workflowExecution.currentNodeId) {
-      workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
-    }
+    const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
+      currentNodeId: this.workflowExecutionCursor.currentNode?.id,
+      scopeStack: this.workflowExecutionCursor.currentStackFrames,
+    };
 
-    if (workflowExecution.error) {
+    if (isTerminalStatus(workflowExecution.status)) {
+      // Preserve a terminal status already written by cancel/timeout paths.
+      // A stale cursor error must not downgrade CANCELLED → FAILED.
+      workflowExecutionUpdate.status = workflowExecution.status;
+      // When the status is FAILED (e.g. set by workflow.fail via setWorkflowStatus),
+      // the cursor error was captured separately and must also be persisted.
+      if (
+        workflowExecution.status === ExecutionStatus.FAILED &&
+        this.workflowExecutionCursor.error
+      ) {
+        workflowExecutionUpdate.error = ExecutionError.fromError(
+          this.workflowExecutionCursor.error
+        ).toSerializableObject();
+      }
+    } else if (this.workflowExecutionCursor.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
+      workflowExecutionUpdate.error = ExecutionError.fromError(
+        this.workflowExecutionCursor.error
+      ).toSerializableObject();
+    } else if (!this.workflowExecutionCursor.currentNode) {
+      // Parked waits must stay WAITING*; COMPLETED here races TM resume.
+      const isParkedWait =
+        workflowExecution.status === ExecutionStatus.WAITING ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        workflowExecution.status === ExecutionStatus.WAITING_FOR_CHILD;
+      if (!isParkedWait) {
+        workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
+      }
     }
 
     if (
-      [ExecutionStatus.COMPLETED, ExecutionStatus.FAILED].includes(
-        workflowExecutionUpdate.status as ExecutionStatus
-      )
+      (workflowExecutionUpdate.status && isTerminalStatus(workflowExecutionUpdate.status)) ||
+      isTerminalStatus(workflowExecution.status)
     ) {
       const startedAt = new Date(workflowExecution.startedAt);
-      const completeDate = new Date();
-      workflowExecutionUpdate.finishedAt = completeDate.toISOString();
-      workflowExecutionUpdate.duration = completeDate.getTime() - startedAt.getTime();
+      const finishDate = new Date();
+      workflowExecutionUpdate.finishedAt = finishDate.toISOString();
+      workflowExecutionUpdate.duration = finishDate.getTime() - startedAt.getTime();
+      workflowExecutionUpdate.context = buildWorkflowContext(
+        this.workflowExecution,
+        this.coreStart,
+        this.dependencies
+      );
       this.logWorkflowComplete(workflowExecutionUpdate.status === ExecutionStatus.COMPLETED);
 
       // Update the workflow transaction outcome when workflow completes
@@ -556,10 +557,12 @@ export class WorkflowExecutionRuntimeManager {
           );
         }
       }
+
+      // Report telemetry for terminal status (only once)
+      this.reportTelemetryIfTerminal(workflowExecution, workflowExecutionUpdate);
     }
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
-    await this.workflowExecutionState.flush();
   }
 
   private logWorkflowStart(): void {
@@ -583,76 +586,33 @@ export class WorkflowExecutionRuntimeManager {
     );
   }
 
-  private logStepStart(stepId: string, stepExecutionId: string): void {
-    const currentNode = this.getCurrentNode()!;
-    this.workflowLogger?.logInfo(`Step '${stepId}' started`, {
-      workflow: { step_id: stepId, step_execution_id: stepExecutionId },
-      event: { action: 'step-start', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'start'],
-      labels: {
-        step_type: currentNode.stepType,
-        connector_type: currentNode.stepType,
-        step_name: currentNode.stepId,
-        step_id: stepId,
-      },
-    });
-  }
+  /**
+   * Reports telemetry for workflow execution when it reaches a terminal status.
+   * Only reports once per execution to avoid duplicate events.
+   */
+  private reportTelemetryIfTerminal(
+    workflowExecution: EsWorkflowExecution,
+    workflowExecutionUpdate: Partial<EsWorkflowExecution>
+  ): void {
+    const finalStatus = workflowExecutionUpdate.status || workflowExecution.status;
+    if (!this.telemetryClient || this.telemetryReported || !isTerminalStatus(finalStatus)) {
+      return;
+    }
 
-  private logStepComplete(step: Partial<EsWorkflowStepExecution>): void {
-    const isSuccess = step?.status === ExecutionStatus.COMPLETED;
-    const currentNode = this.getCurrentNode()!;
-    const stepId = currentNode.stepId;
-    this.workflowLogger?.logInfo(`Step '${stepId}' ${isSuccess ? 'completed' : 'failed'}`, {
-      workflow: { step_id: stepId, step_execution_id: step.id },
-      event: {
-        action: 'step-complete',
-        category: ['workflow', 'step'],
-        outcome: isSuccess ? 'success' : 'failure',
-      },
-      tags: ['workflow', 'step', 'complete'],
-      labels: {
-        step_type: currentNode.stepType,
-        connector_type: currentNode.stepType,
-        step_name: currentNode.stepId,
-        step_id: currentNode.stepId,
-        execution_time_ms: step.executionTimeMs,
-      },
-      ...(step.error && {
-        error: {
-          message:
-            typeof step.error === 'string'
-              ? step.error
-              : (step.error as Error)?.message || 'Unknown error',
-          type:
-            typeof step.error === 'string'
-              ? 'WorkflowStepError'
-              : (step.error as Error)?.name || 'Error',
-          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
-        },
-      }),
-    });
-  }
+    this.telemetryReported = true;
+    const stepExecutions = this.workflowExecutionState.getAllStepExecutions();
+    const finalWorkflowExecution = {
+      ...workflowExecution,
+      ...workflowExecutionUpdate,
+      status: finalStatus,
+    } as EsWorkflowExecution;
 
-  private logStepFail(stepExecutionId: string, error: Error | string): void {
-    const currentNode = this.getCurrentNode()!;
-    const stepName = currentNode.stepId;
-    const stepType = currentNode.stepType || 'unknown';
-    const _error = typeof error === 'string' ? Error(error) : error;
-
-    // Include error message in the log message
-    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
-    const message = `Step '${stepName}' failed: ${errorMsg}`;
-
-    this.workflowLogger?.logError(message, _error, {
-      workflow: { step_id: currentNode.stepId, step_execution_id: stepExecutionId },
-      event: { action: 'step-fail', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'fail'],
-      labels: {
-        step_type: stepType,
-        connector_type: stepType,
-        step_name: stepName,
-        step_id: currentNode.stepId,
-      },
+    const outputSizeStats = this.stepIoService.getOutputSizeStats();
+    this.telemetryClient.reportWorkflowExecutionTerminated({
+      workflowExecution: finalWorkflowExecution,
+      stepExecutions,
+      finalStatus,
+      outputSizeStats,
     });
   }
 }

@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
+/**
+ * Purpose: geojson file upload smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }) {
   const { geoFileUpload, maps } = getPageObjects(['geoFileUpload', 'maps']);
   const security = getService('security');
@@ -54,6 +59,7 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should add as document layer', async () => {
+      await maps.setView(0, 0, 1); //  set stable viewport to prevent flakiness caused by MVT tiles loading different data at varying zoom levels
       await geoFileUpload.addFileAsDocumentLayer();
       await maps.waitForLayersToLoad();
 

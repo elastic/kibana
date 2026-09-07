@@ -11,7 +11,7 @@ import type { CaseAttributes } from '../../../common/types/domain';
 import type { CasesBulkGetRequest, CasesBulkGetResponse } from '../../../common/types/api';
 import { CasesBulkGetResponseRt, CasesBulkGetRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError, generateCaseErrorResponse } from '../../common/error';
+import { createCaseError, generateCaseErrorResponse, isSOError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
@@ -40,7 +40,7 @@ export const bulkGet = async (
 
     const [validCases, soBulkGetErrors] = partition(
       cases.saved_objects,
-      (caseInfo) => caseInfo.error === undefined
+      (caseInfo) => !isSOError(caseInfo)
     ) as [CaseSavedObjectTransformed[], CaseSavedObjectWithErrors];
 
     const { authorized: authorizedCases, unauthorized: unauthorizedCases } =
@@ -54,15 +54,17 @@ export const bulkGet = async (
     });
 
     const flattenedCases = authorizedCases.map((theCase) => {
-      const { userComments, alerts } = commentTotals.get(theCase.id) ?? {
+      const { userComments, alerts, events } = commentTotals.get(theCase.id) ?? {
         alerts: 0,
         userComments: 0,
+        events: 0,
       };
 
       return flattenCaseSavedObject({
         savedObject: theCase,
         totalComment: userComments,
         totalAlerts: alerts,
+        totalEvents: events,
       });
     });
 

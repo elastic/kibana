@@ -7,31 +7,24 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import { NetflowRenderer } from '../netflow';
 import { ZeekSignature } from './zeek_signature';
 
-const Details = styled.div`
-  margin: 5px 0;
-`;
-
-Details.displayName = 'Details';
-
 interface ZeekDetailsProps {
   data: Ecs;
-  timelineId: string;
+  scopeId: string;
 }
 
-export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, timelineId }) =>
+export const ZeekDetails = React.memo<ZeekDetailsProps>(({ data, scopeId }) =>
   data.zeek != null ? (
-    <Details>
-      <ZeekSignature data={data} timelineId={timelineId} />
+    <div css={{ margin: '5px 0' }}>
+      <ZeekSignature data={data} scopeId={scopeId} />
       <EuiSpacer size="s" />
-      <NetflowRenderer data={data} timelineId={timelineId} />
-    </Details>
+      <NetflowRenderer data={data} timelineId={scopeId} />
+    </div>
   ) : null
 );
 

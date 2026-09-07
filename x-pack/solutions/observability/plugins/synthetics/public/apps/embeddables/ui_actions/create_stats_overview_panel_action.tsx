@@ -11,12 +11,12 @@ import {
 } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { CoreStart } from '@kbn/core/public';
 import type { ClientPluginsStart } from '../../../plugin';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ADD_SYNTHETICS_OVERVIEW_ACTION_ID } from './constants';
 import { openMonitorConfiguration } from '../common/monitors_open_configuration';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 export function createStatusOverviewPanelAction(
   coreStart: CoreStart,
@@ -26,7 +26,7 @@ export function createStatusOverviewPanelAction(
     id: ADD_SYNTHETICS_OVERVIEW_ACTION_ID,
     grouping: COMMON_OBSERVABILITY_GROUPING,
     order: 5,
-    getIconType: () => 'online',
+    getIconType: () => 'wifi',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -43,7 +43,7 @@ export function createStatusOverviewPanelAction(
         });
         embeddable.addNewPanel({
           panelType: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-          serializedState: { rawState: initialState },
+          serializedState: initialState,
         });
       } catch (e) {
         return Promise.reject();

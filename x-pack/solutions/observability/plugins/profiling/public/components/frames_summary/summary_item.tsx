@@ -35,9 +35,22 @@ interface Props {
   compressed?: boolean;
 }
 
-function Title({ title, size }: { title: string; size?: EuiTextProps['size'] }) {
+function Title({
+  title,
+  size,
+  dataTestSubj,
+}: {
+  title: string;
+  size?: EuiTextProps['size'];
+  dataTestSubj?: string;
+}) {
   return (
-    <EuiText style={{ fontWeight: 'bold' }} textAlign="left" size={size}>
+    <EuiText
+      style={{ fontWeight: 'bold' }}
+      textAlign="left"
+      size={size}
+      data-test-subj={dataTestSubj}
+    >
       {title}
     </EuiText>
   );
@@ -58,7 +71,13 @@ function BaseValue({
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
       {icon ? (
         <EuiFlexItem grow={false} style={{ justifyContent: 'center' }}>
-          <EuiIcon data-test-subj={`${id}_${icon}_${color}`} type={icon} color={color} size="l" />
+          <EuiIcon
+            data-test-subj={`${id}_${icon}_${color}`}
+            type={icon}
+            color={color}
+            size="l"
+            aria-hidden={true}
+          />
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
@@ -98,14 +117,14 @@ export function SummaryItem({
             {titleHint ? (
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <Title title={title} size={textSize} />
+                  <Title dataTestSubj={`${id}_summary_title`} title={title} size={textSize} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip content={titleHint} type="question" />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
-              <Title title={title} size={textSize} />
+              <Title dataTestSubj={`${id}_summary_title`} title={title} size={textSize} />
             )}
             <EuiSpacer />
           </>

@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/response-ops-retry-service",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "shared"
+}
+

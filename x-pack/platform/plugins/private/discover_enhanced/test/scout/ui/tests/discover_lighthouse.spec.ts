@@ -10,7 +10,7 @@ import { testData } from '../fixtures';
 
 lighthouseTest.describe(
   'Discover App - Lighthouse Performance Audit',
-  { tag: [...tags.DEPLOYMENT_AGNOSTIC, ...tags.PERFORMANCE] },
+  { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
     lighthouseTest.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
@@ -29,8 +29,10 @@ lighthouseTest.describe(
     lighthouseTest(
       'runs audit on Discover Page',
       async ({ browserAuth, lighthouse, page, pageObjects }) => {
+        // A full Lighthouse audit is intrinsically slow; triple the default timeout for headroom.
+        lighthouseTest.slow();
         await browserAuth.loginAsAdmin();
-        await pageObjects.discover.goto();
+        await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitForHistogramRendered();
         const currentUrl = page.url();
 

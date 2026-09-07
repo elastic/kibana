@@ -45,6 +45,8 @@ export const benchmarkResponseSchema = () =>
           totalPassed: schema.number({ defaultValue: 0, min: 0 }),
         }),
         evaluation: schema.number({ defaultValue: 0, min: 0 }),
-      })
+      }),
+      // maxSize is set to 5 as there are only 5 benchmark types (cis_k8s, cis_azure, cis_aws, cis_eks, cis_gcp)
+      { maxSize: 5 }
     ),
   });

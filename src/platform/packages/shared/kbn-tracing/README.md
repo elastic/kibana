@@ -1,12 +1,19 @@
 # @kbn/tracing
 
-OpenTelemetry tracing bootstrap for Kibana Node processes.
+This package includes the logic to initialize the OpenTelemetry Tracing client and its exporters.
 
-`initTracing()` wires up the global `NodeTracerProvider`, sampling, context propagation and registers inference-tracing exporters (Phoenix / Langfuse) when configured in `kibana.yml`. OpenTelemetry tracing is disabled by default and should not be enabled in conjuction with Elastic APM.
+It is intended to be used by the package `@kbn/telemetry`.
 
 ---
 
-## 1. Configure tracing in `kibana.yml`
+## Enable OTel Tracing
+
+[Kibana debugging](https://www.elastic.co/docs/extend/kibana/kibana-debugging) has some very minimal piece of configuration to enable Kibana OTel tracing.
+
+> [!TIP]
+> The best way to get started is by using an ECH deployment. It offers a Managed OTLP endpoint (mOTLP) that you can use to ship your OTel Traces, Metrics and Logs without the hassle of starting one locally.
+
+Below is a larger piece of config with examples for all the supported exporters:
 
 ```yaml
 # Sample 20 % of root spans (fallback when no parent span exists)
@@ -14,6 +21,28 @@ telemetry.tracing.sample_rate: 0.2
 
 # One or more exporters
 telemetry.tracing.exporters:
+  # OTLP Proto exporter (for APM Server, OpenTelemetry Collector, etc.)
+  - proto:
+      url: 'http://localhost:4318/v1/traces' # OTLP HTTP/Proto receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
+
+  # OTLP HTTP exporter (for APM Server, OpenTelemetry Collector, etc.)
+  - http:
+      url: 'http://localhost:4318/v1/traces' # OTLP HTTP receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
+
+  # OTLP gRPC exporter
+  - grpc:
+      url: 'http://localhost:4317' # OTLP gRPC receiver endpoint
+      headers:
+        Authorization: 'Bearer ${SECRET_TOKEN}' # optional
+      scheduled_delay: 2000
+
+  ### Inference-specific exporters ###
   # Phoenix exporter
   - phoenix:
       base_url: 'https://api.phoenix.dev'
@@ -30,25 +59,26 @@ telemetry.tracing.exporters:
       scheduled_delay: 2000
 ```
 
-The YAML follows the schema exported from `@kbn/inference-tracing-config`:
-
-- `InferenceTracingPhoenixExportConfig`
-- `InferenceTracingLangfuseExportConfig`
-
-See those types for a full list of allowed fields.
-
 ---
 
-## 2. What happens at runtime?
+## Instrumenting new traces
 
-1. `src/cli/apm.js` calls `initTracing()` early in process start-up.
-2. `initTracing()`
-   - installs `AsyncLocalStorage` context management,
-   - applies the configured sample rate (parent-based),
-   - adds a `LateBindingSpanProcessor` so exporters can be registered later,
-   - creates a `NodeTracerProvider` with resource attributes derived from the Elastic APM config,
-   - for each entry under `telemetry.tracing.exporters` instantiates the corresponding span processor from `@kbn/inference-tracing` and registers it.
+The recommendation for Kibana developers is to use the `withActiveSpan` utility exposed by the package `@kbn/tracing-utils`:
 
-After this, any code using the helpers from `@kbn/inference-tracing` (`withActiveInferenceSpan`, `withChatCompleteSpan`, …) will produce spans that are forwarded to Phoenix / Langfuse.
+```TS
+import { withActiveSpan } from '@kbn/tracing-utils';
 
-No additional application code is needed—configuration alone enables exporting.
+const result = await withActiveSpan('my_parent_span', { attributes: { ... } }, async (parentSpan) => {
+  /** do my critical piece of work */
+
+  // Create more subspans if needed
+  const meaningOfLife = withActiveSpan('my_sub_span', { attributes: { ... } }, () => 42);
+
+  // I can interact with the span if needed
+  parentSpan?.setAttribute('kibana.meaning_of_life', meaningOfLife);
+
+  return meaningfulResult;
+});
+```
+
+The `withActiveSpan` utility abstracts the verbose OTel Traces API. It is designed to correctly handle span closing and error appending for synchronous, asynchronous, and RxJS observable code. If preferred, you may still use the vanilla instrumentation via the `@opentelemetry/api` package.

@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/synthtrace-client';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, kibanaClient, synthtraceEsClients, logger, esClient } from '../../services';
 import {

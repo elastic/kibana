@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import type {
   ISearchSource,
   RefreshInterval,
@@ -16,10 +17,20 @@ import type {
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import type { SortOrder } from '@kbn/discover-utils';
-import type { DiscoverSessionTab as DiscoverSessionTabSchema } from '../server';
+import type {
+  DiscoverSessionTab as DiscoverSessionTabSchema,
+  DiscoverSessionTabAttributes,
+} from '../server';
 import type { VIEW_MODE } from '.';
+
+/** Tab-type specific state persisted with a Discover session tab. */
+export type DiscoverSessionTabTypeState = NonNullable<DiscoverSessionTabAttributes['tabTypeState']>;
 
 export interface DiscoverGridSettings extends SerializableRecord {
   columns?: Record<string, DiscoverGridSettingsColumn>;
@@ -43,7 +54,7 @@ export type VisContextUnmapped =
     }
   | {}; // cleared value
 
-/** @internal **/
+/** @deprecated Use DiscoverSessionAttributes instead **/
 export interface SavedSearchAttributes {
   title: string;
   sort: SortOrder[];
@@ -51,6 +62,7 @@ export interface SavedSearchAttributes {
   description: string;
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   kibanaSavedObjectMeta: {
@@ -68,11 +80,19 @@ export interface SavedSearchAttributes {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
   tabs: DiscoverSessionTabSchema[];
 }
+
+export type SavedSearchByValueAttributes = SavedSearchAttributes & {
+  /** @deprecated References are now extracted/injected by server transforms */
+  references?: Reference[];
+};
 
 /** @internal **/
 export type { SortOrder } from '@kbn/discover-utils';
@@ -106,6 +126,7 @@ export interface DiscoverSessionTab {
   columns: string[];
   grid: DiscoverGridSettings;
   hideChart: boolean;
+  hideTable: boolean;
   isTextBasedQuery: boolean;
   usesAdHocDataView?: boolean;
   serializedSearchSource: SerializedSearchSourceFields;
@@ -113,15 +134,20 @@ export interface DiscoverSessionTab {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   headerRowHeight?: number;
+  esqlApproximation?: boolean;
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  chartInterval?: string;
   density?: DataGridDensity;
+  documentsDisplayMode?: DocumentsDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
   visContext?: VisContextUnmapped;
-  controlGroupJson?: string; // JSON string of ControlPanelsState<ESQLControlState>
+  controlGroupJson?: string; // JSON string of ControlPanelsState<OptionsListESQLControlState>
+  tabTypeState?: DiscoverSessionTabTypeState;
 }
 
 export interface DiscoverSession {

@@ -26,6 +26,10 @@ export const getCustomMetricLabel = (metric: SnapshotCustomMetricInput) => {
       defaultMessage: 'Rate of {field}',
       values: { field: metric.field },
     }),
+    last_value: i18n.translate('xpack.infra.waffle.aggregationNames.last_value', {
+      defaultMessage: 'Last value of {field}',
+      values: { field: metric.field },
+    }),
   };
   return metric.label ? metric.label : METRIC_LABELS[metric.aggregation];
 };

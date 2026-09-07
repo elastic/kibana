@@ -1,0 +1,173 @@
+{
+  "sha1": "003b9bc9bcd71e7cca16fcb360e8171bfa59690e",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "df10ec4d06aa91e-ef23b1ace86d1c8",
+      "title": "Load logstash + lens_basic archives for search_examples",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "a396aa0c2e44f9b-130d4392f8055c9",
+      "title": "Partial results example should update a progress bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/partial_results_example.spec.ts",
+        "line": 15,
+        "column": 23
+      }
+    },
+    {
+      "id": "431038a9dc80b95-678ad92fdc7f647",
+      "title": "Search example with bfetch disabled should have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 21,
+        "column": 47
+      }
+    },
+    {
+      "id": "431038a9dc80b95-88ac1fd3c97f400",
+      "title": "Search example with bfetch disabled should not have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 25,
+        "column": 11
+      }
+    },
+    {
+      "id": "431038a9dc80b95-ac6f8147056ae3c",
+      "title": "Search example with bfetch disabled should show a warning toast",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example_bfetch_disabled.spec.ts",
+        "line": 31,
+        "column": 5
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-66493493f623dac",
+      "title": "Search example should have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 17,
+        "column": 39
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-26e2cab1cf7ba51",
+      "title": "Search example should not have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 24,
+        "column": 66
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-504f27ff07a6412",
+      "title": "Search example should handle warnings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "fb19ff88e33b9b5-4b8f07b8fb4dc22",
+      "title": "Search session example should start search, save session, restore session using restore button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_session_example.spec.ts",
+        "line": 60,
+        "column": 41
+      }
+    },
+    {
+      "id": "e150f352b1c4eec-afb78081a21608b",
+      "title": "Search example shard-failure warnings shows shard-failure warnings as toasts and can open inspector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_warnings.spec.ts",
+        "line": 15,
+        "column": 23
+      }
+    },
+    {
+      "id": "e150f352b1c4eec-4cd0c06d3d6c1ad",
+      "title": "Search example shard-failure warnings shows incomplete warnings on the results tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_warnings.spec.ts",
+        "line": 26,
+        "column": 22
+      }
+    },
+    {
+      "id": "0a881f744f0b6a1-94d9cdaca9f2f42",
+      "title": "SQL search example should search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/sql_search_example.spec.ts",
+        "line": 14,
+        "column": 39
+      }
+    },
+    {
+      "id": "17a1cfdc955352f-554076c4cd62fb3",
+      "title": "Unload lens_basic archives for search_examples",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    }
+  ]
+}

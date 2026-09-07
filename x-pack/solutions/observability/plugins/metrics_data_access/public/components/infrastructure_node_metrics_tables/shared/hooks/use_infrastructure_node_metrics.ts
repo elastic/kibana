@@ -114,7 +114,7 @@ export const useInfrastructureNodeMetrics = <T>(
           groupBy: metricsExplorerOptions.groupBy,
           limit: NODE_COUNT_LIMIT,
           indexPattern: metricIndices,
-          kuery: metricsExplorerOptions.filterQuery,
+          kuery: metricsExplorerOptions.kuery,
           timerange: timerangeWithInterval,
         };
 
@@ -177,6 +177,7 @@ export const useInfrastructureNodeMetrics = <T>(
   return {
     isLoading,
     data,
+    metricIndices,
   };
 };
 

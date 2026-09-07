@@ -5,21 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTitle,
-  EuiSpacer,
   EuiKeyPadMenuItem,
-  EuiToolTip,
   EuiLink,
-  EuiEmptyPrompt,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
   RuleActionAlertsFilterProperty,
@@ -27,29 +24,32 @@ import type {
   RuleActionParam,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
-import { v4 as uuidv4 } from 'uuid';
-import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
-import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
-import type {
-  ActionTypeModel,
-  ActionTypeIndex,
-  ActionConnector,
-  ActionVariables,
-  ActionTypeRegistryContract,
-  NotifyWhenSelectOptions,
-  RuleUiAction,
-  RuleAction,
-} from '../../../types';
-import { SectionLoading } from '../../components/section_loading';
-import { ActionTypeForm } from './action_type_form';
-import { AddConnectorInline } from './connector_add_inline';
-import { actionTypeCompare } from '../../lib/action_type_compare';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import React, { useCallback, useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { ConnectorAddModal } from '.';
 import { DEFAULT_FREQUENCY, VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorAddModal } from '.';
+import type {
+  ActionConnector,
+  ActionTypeIndex,
+  ActionTypeModel,
+  ActionTypeRegistryContract,
+  ActionVariables,
+  NotifyWhenSelectOptions,
+  RuleAction,
+  RuleUiAction,
+} from '../../../types';
+import { SectionLoading } from '../../components/section_loading';
+import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
+import { actionTypeCompare } from '../../lib/action_type_compare';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { ActionTypeForm } from './action_type_form';
+import { AddConnectorInline } from './connector_add_inline';
 import { SystemActionTypeForm } from './system_action_type_form';
 
 export interface ActionAccordionFormProps {
@@ -57,9 +57,8 @@ export interface ActionAccordionFormProps {
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
-  setActionIdByIndex: (id: string, index: number) => void;
+  setActionIdByIndex: (id: string, index: number, connector?: ActionConnector) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActions: (actions: RuleUiAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
@@ -98,7 +97,6 @@ export const ActionForm = ({
   defaultActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
-  setActionUseAlertDataForTemplate,
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
@@ -208,6 +206,7 @@ export const ActionForm = ({
       const hasActionsDisabled = actions.some(
         (action) =>
           actionTypesIndex &&
+          actionTypesIndex[action.actionTypeId] &&
           !actionTypesIndex[action.actionTypeId].enabled &&
           !checkActionFormActionTypeEnabled(
             actionTypesIndex[action.actionTypeId],
@@ -275,7 +274,7 @@ export const ActionForm = ({
       if (actionTypeConnectors.length > 0) {
         // If a connector was successfully found, update the actionTypeId
         actions.push({ ...actionToPush, actionTypeId: actionTypeConnectors[0].actionTypeId });
-        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1, actionTypeConnectors[0]);
       } else {
         // if no connectors exists or all connectors is already assigned an action under current alert
         // set actionType as id to be able to create new connector within the alert form
@@ -285,7 +284,7 @@ export const ActionForm = ({
       }
     } else {
       actions.push(actionToPush);
-      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1, actionTypeConnectors[0]);
     }
   }
 
@@ -296,7 +295,9 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
+      .filter(
+        (item) => actionTypesIndex[item.id] && !item.getHideInUi?.(Object.values(actionTypesIndex))
+      )
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
@@ -315,8 +316,10 @@ export const ActionForm = ({
           hasDisabledByLicenseActionTypes = true;
         }
 
+        // Disable system action if it's already selected and doesn't allow multiple instances
         const isSystemActionSelected = Boolean(
           actionTypesIndex[item.id].isSystemActionType &&
+            !actionTypesIndex[item.id].allowMultipleSystemActions &&
             actions.find((action) => action.actionTypeId === item.id)
         );
 
@@ -339,6 +342,7 @@ export const ActionForm = ({
                   ? item.iconClass
                   : suspendedComponentWithProps(item.iconClass as React.ComponentType)
               }
+              aria-hidden={true}
             />
           </EuiKeyPadMenuItem>
         );
@@ -433,9 +437,13 @@ export const ActionForm = ({
                   setAddModalVisibility(true);
                 }}
                 onSelectConnector={(connectorId: string) => {
-                  setActionIdByIndex(connectorId, index);
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
-                  if (newConnector && newConnector.actionTypeId) {
+                  setActionIdByIndex(connectorId, index, newConnector);
+                  if (
+                    newConnector &&
+                    newConnector.actionTypeId &&
+                    actionTypeRegistry.has(newConnector.actionTypeId)
+                  ) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                     if (actionTypeRegistered.convertParamsBetweenGroups) {
                       const updatedActions = actions.map((_item: RuleUiAction, i: number) => {
@@ -490,7 +498,6 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
-              setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
@@ -509,12 +516,13 @@ export const ActionForm = ({
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
-                setActionIdByIndex(id, index);
                 const newConnector = connectors.find((connector) => connector.id === id);
+                setActionIdByIndex(id, index, newConnector);
                 if (
                   newConnector &&
                   actionConnector &&
-                  newConnector.actionTypeId !== actionConnector.actionTypeId
+                  newConnector.actionTypeId !== actionConnector.actionTypeId &&
+                  actionTypeRegistry.has(newConnector.actionTypeId)
                 ) {
                   const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                   if (actionTypeRegistered.convertParamsBetweenGroups) {
@@ -610,7 +618,7 @@ export const ActionForm = ({
             <EuiButton
               size="m"
               fullWidth
-              iconType="plusInCircle"
+              iconType="plusCircle"
               data-test-subj="addAlertActionButton"
               onClick={() => setIsAddActionPanelOpen(true)}
             >
@@ -635,7 +643,9 @@ export const ActionForm = ({
             });
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
-            indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));
+            indicesToUpdate.forEach((index: number) =>
+              setActionIdByIndex(savedAction.id, index, savedAction)
+            );
           }}
           actionTypeRegistry={actionTypeRegistry}
         />

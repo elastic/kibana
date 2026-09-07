@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,9 +17,10 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ReindexStatus } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   IndexWarning,
   IndexWarningType,
@@ -140,23 +140,23 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
         {isMLAnomalyIndex && <MlAnomalyCallout />}
         {warnings.length > 0 && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutTitle"
                   defaultMessage="This index requires destructive changes that cannot be reversed"
                 />
               }
-              color="warning"
-              iconType="warning"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutDetail"
-                  defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.calloutDetail"
+                    defaultMessage="Back up the index before continuing. To proceed with the reindex, accept each change."
+                  />
+                </p>
+              }
+            />
 
             <EuiSpacer />
 

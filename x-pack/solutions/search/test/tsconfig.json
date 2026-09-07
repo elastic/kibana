@@ -1,11 +1,10 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -14,7 +13,7 @@
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
@@ -33,5 +32,6 @@
     "@kbn/dev-utils",
     "@kbn/cases-plugin",
     "@kbn/serverless-search-settings",
+    "@kbn/management-settings-ids"
   ]
 }

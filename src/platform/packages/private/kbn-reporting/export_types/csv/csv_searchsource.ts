@@ -29,6 +29,8 @@ import type {
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
+const spaceProjectRouting = { projectRouting: 'space' } as const;
+
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
@@ -71,8 +73,9 @@ export class CsvSearchSourceExportType extends ExportType<
     request,
     cancellationToken,
     stream,
+    useInternalUser = false,
   }: RunTaskOpts<TaskPayloadCSV>) => {
-    const logger = this.logger.get(`execute-job:${jobId}`);
+    const logger = this.logger.get('execute-job');
 
     const { csv: csvConfig } = this.config;
 
@@ -80,12 +83,15 @@ export class CsvSearchSourceExportType extends ExportType<
     const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const es = this.startDeps.esClient.asScoped(request);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
+    const es = this.startDeps.esClient.asScoped(request, spaceProjectRouting);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(
+      request,
+      spaceProjectRouting
+    );
 
     const clients = {
       uiSettings,
-      data: dataPluginStart.search.asScoped(request),
+      data: dataPluginStart.search.asScoped(request, spaceProjectRouting),
       es,
     };
     const dependencies = {
@@ -101,7 +107,10 @@ export class CsvSearchSourceExportType extends ExportType<
       dependencies,
       cancellationToken,
       logger,
-      stream
+      stream,
+      this.isServerless,
+      jobId,
+      useInternalUser
     );
     return await csv.generateData();
   };

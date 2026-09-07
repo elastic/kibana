@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
+import type { GenericIndexPatternColumn } from '@kbn/lens-common';
 import type {
   LensBreakdownConfig,
   LensBreakdownDateHistogramConfig,
@@ -75,6 +75,13 @@ export const getBreakdownColumn = ({
         field,
         options: {
           size: topValuesOptions.size || DEFAULT_BREAKDOWN_SIZE,
+          ...(topValuesOptions.secondaryFields?.length
+            ? { secondaryFields: topValuesOptions.secondaryFields }
+            : {}),
+          ...(topValuesOptions.accuracyMode !== undefined
+            ? { accuracyMode: topValuesOptions.accuracyMode }
+            : {}),
+          ...topValuesOptions.orderBy,
         },
       });
     case 'intervals':

@@ -81,12 +81,33 @@ export function getWebpackConfig(
       },
     },
 
-    externals: {
-      'node:crypto': 'commonjs crypto',
-      ...UiSharedDepsSrc.externals,
-    },
+    externals: [
+      // Function externals: skip externalizing react-redux when imported by kea
+      // so the NormalModuleReplacementPlugin can redirect it to react-redux-v7.
+      ({ context, request }, callback) => {
+        if (context && request === 'react-redux' && /node_modules[\\/]kea/.test(context)) {
+          return callback();
+        }
+        const sharedExternals: Record<string, string> = {
+          'node:crypto': 'commonjs crypto',
+          ...UiSharedDepsSrc.externals,
+        };
+        if (request && request in sharedExternals) {
+          return callback(undefined, sharedExternals[request]);
+        }
+        return callback();
+      },
+    ],
 
     plugins: [
+      // Redirect kea's react-redux import to react-redux-v7 so it shares the
+      // same React context as the <Provider> from react-redux-v7 used by
+      // consumers like enterprise_search.
+      new webpack.NormalModuleReplacementPlugin(/^react-redux$/, (resource) => {
+        if (resource.context && /node_modules[\\/]kea/.test(resource.context)) {
+          resource.request = 'react-redux-v7';
+        }
+      }),
       new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin(),
       new BundleRemotesPlugin(bundle, bundleRemotes),
@@ -119,10 +140,7 @@ export function getWebpackConfig(
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary dependencies
-      noParse: [
-        /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
-        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
-      ],
+      noParse: [/[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/],
 
       rules: [
         {
@@ -279,7 +297,7 @@ export function getWebpackConfig(
           type: 'asset/source',
         },
         {
-          test: /\.(html|md|txt|tmpl)$/,
+          test: /\.(html|md|txt|tmpl|yaml|yml)$/,
           type: 'asset/source',
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
@@ -299,7 +317,6 @@ export function getWebpackConfig(
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'module', 'main'],
       alias: {
-        vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
         buffer: [

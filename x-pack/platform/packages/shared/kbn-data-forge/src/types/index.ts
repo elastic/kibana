@@ -8,7 +8,7 @@
 import type { Moment } from 'moment';
 import type { Client } from '@elastic/elasticsearch';
 import * as rt from 'io-ts';
-import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS } from '../constants';
+import { FAKE_HOSTS, FAKE_LOGS, FAKE_STACK, SERVICE_LOGS, DATABASE_LOGS } from '../constants';
 
 export interface Doc {
   namespace: string;
@@ -27,6 +27,7 @@ export const DatasetRT = rt.keyof({
   [FAKE_LOGS]: null,
   [FAKE_STACK]: null,
   [SERVICE_LOGS]: null,
+  [DATABASE_LOGS]: null,
 });
 
 export type Dataset = rt.TypeOf<typeof DatasetRT>;
@@ -102,7 +103,21 @@ export const ParsedScheduleRT = rt.intersection([
 
 export type ParsedSchedule = rt.TypeOf<typeof ParsedScheduleRT>;
 
+export const DestinationRT = rt.union([
+  rt.type({
+    type: rt.literal('elasticsearch'),
+  }),
+  rt.type({
+    type: rt.literal('http'),
+    url: rt.string,
+    headers: rt.record(rt.string, rt.string),
+  }),
+]);
+
+export type Destination = rt.TypeOf<typeof DestinationRT>;
+
 export const ConfigRT = rt.type({
+  destination: DestinationRT,
   elasticsearch: rt.type({
     host: rt.string,
     username: rt.string,
@@ -135,6 +150,7 @@ export const ConfigRT = rt.type({
 export type Config = rt.TypeOf<typeof ConfigRT>;
 
 export const PartialConfigRT = rt.partial({
+  destination: DestinationRT,
   elasticsearch: rt.partial(ConfigRT.props.elasticsearch.props),
   kibana: rt.partial(ConfigRT.props.kibana.props),
   indexing: rt.partial(ConfigRT.props.indexing.props),

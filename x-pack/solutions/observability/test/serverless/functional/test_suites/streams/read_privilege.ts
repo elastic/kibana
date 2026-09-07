@@ -19,9 +19,10 @@ import {
   putStream,
 } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/apis/streams/helpers/requests';
 
-const STREAM_NAME = 'logs.crud';
+const STREAM_NAME = 'logs.otel.crud';
 const request: Streams.WiredStream.UpsertRequest = {
   stream: {
+    type: 'wired',
     description: '',
     ingest: {
       lifecycle: { inherit: {} },
@@ -35,6 +36,7 @@ const request: Streams.WiredStream.UpsertRequest = {
           },
         },
       },
+      failure_store: { inherit: {} },
     },
   },
   ...emptyAssets,

@@ -5,12 +5,16 @@
  * 2.0.
  */
 import type { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
+import { isNumber } from 'lodash';
+import type { GapReason, GapReasonType } from '../../../../common/constants';
+import { gapReasonType } from '../../../../common/constants';
 import { Gap } from '../gap';
-import type { StringInterval } from '../types';
+import type { StringInterval } from '../../../application/gaps/types/intervals';
 
 type PotentialInterval = { lte?: string; gte?: string } | undefined;
+type PotentialGapReason = { type?: string } | undefined;
 
-const validateInterval = (interval: PotentialInterval): StringInterval | null => {
+const normalizeInterval = (interval: PotentialInterval): StringInterval | null => {
   if (!interval?.gte || !interval?.lte) return null;
 
   return {
@@ -19,9 +23,20 @@ const validateInterval = (interval: PotentialInterval): StringInterval | null =>
   };
 };
 
-const validateIntervals = (intervals: PotentialInterval[] | undefined): StringInterval[] =>
-  (intervals?.map(validateInterval)?.filter((interval) => interval !== null) as StringInterval[]) ??
-  [];
+const normalizeIntervals = (intervals: PotentialInterval[] | undefined): StringInterval[] =>
+  (intervals
+    ?.map(normalizeInterval)
+    ?.filter((interval) => interval !== null) as StringInterval[]) ?? [];
+
+const validReasonTypes: string[] = Object.values(gapReasonType);
+
+const normalizeReason = (reason: PotentialGapReason): GapReason => {
+  if (reason?.type && validReasonTypes.includes(reason.type)) {
+    return { type: reason.type as GapReasonType };
+  }
+
+  return { type: gapReasonType.RULE_DID_NOT_RUN };
+};
 
 /**
  * Transforms event log results into Gap objects
@@ -42,12 +57,17 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
         return null;
       }
 
-      const range = validateInterval(gap.range);
+      const range = normalizeInterval(gap.range);
 
       if (!range || !doc['@timestamp']) return null;
 
-      const filledIntervals = validateIntervals(gap?.filled_intervals);
-      const inProgressIntervals = validateIntervals(gap?.in_progress_intervals);
+      const filledIntervals = normalizeIntervals(gap?.filled_intervals);
+      const inProgressIntervals = normalizeIntervals(gap?.in_progress_intervals);
+      const reason = normalizeReason(gap?.reason);
+
+      const failedAutoFillAttempts = isNumber(gap?.failed_auto_fill_attempts)
+        ? gap!.failed_auto_fill_attempts
+        : 0;
 
       return new Gap({
         ruleId,
@@ -55,12 +75,15 @@ export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'dat
         range,
         filledIntervals,
         inProgressIntervals,
+        updatedAt: gap?.updated_at,
         internalFields: {
           _id: doc._id,
           _index: doc._index,
           _seq_no: doc._seq_no,
           _primary_term: doc._primary_term,
         },
+        failedAutoFillAttempts,
+        reason,
       });
     })
     .filter((gap): gap is Gap => gap !== null);

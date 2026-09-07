@@ -8,7 +8,8 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -149,7 +150,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <EuiButton
             {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createPolicyButton"
           >
             <FormattedMessage
@@ -169,34 +170,34 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
       <section data-test-subj="policyList">
         {!isSlmRunning ? (
           <Fragment>
-            <EuiCallOut
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.slmWarningTitle"
                   defaultMessage="Snapshot lifecycle management (SLM) is not running"
                 />
               }
-              color="warning"
-              iconType="warning"
-            >
-              <FormattedMessage
-                id="xpack.snapshotRestore.slmWarningDescription"
-                defaultMessage="Policies are not being executed. You must restart SLM {slmDocLink}"
-                values={{
-                  slmDocLink: (
-                    <EuiLink
-                      href={docLinks.links.snapshotRestore.slmStart}
-                      external={true}
-                      target="_blank"
-                    >
-                      {i18n.translate('xpack.snapshotRestore.slmDocLink', {
-                        defaultMessage: 'using the API.',
-                      })}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </EuiCallOut>
+              text={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.slmWarningDescription"
+                  defaultMessage="Policies are not being executed. You must restart SLM {slmDocLink}"
+                  values={{
+                    slmDocLink: (
+                      <EuiLink
+                        href={docLinks.links.snapshotRestore.slmStart}
+                        external={true}
+                        target="_blank"
+                      >
+                        {i18n.translate('xpack.snapshotRestore.slmDocLink', {
+                          defaultMessage: 'using the API.',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            />
             <EuiSpacer />
           </Fragment>
         ) : null}

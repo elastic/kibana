@@ -151,6 +151,10 @@ export default function ({ getService }: FtrProviderContext) {
           as_cost: 20,
         },
         claim_strategy: 'mget',
+        execution_control: {
+          paused: false,
+          paused_task_types: [],
+        },
       });
     });
 
@@ -258,7 +262,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       const {
         runtime: {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           value: { drift, drift_by_type, load, polling, execution },
         },
       } = (await getHealthForSampleTask()).stats;

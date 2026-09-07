@@ -4,58 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
   savedObjectSchema,
   objectTypeToGetResultSchema,
-  createOptionsSchemas,
   createResultSchema,
-  updateOptionsSchema,
-} from '@kbn/content-management-utils';
-
-export const mapAttributesSchema = schema.object(
-  {
-    title: schema.string(),
-    description: schema.maybe(schema.nullable(schema.string())),
-    mapStateJSON: schema.maybe(schema.string()),
-    layerListJSON: schema.maybe(schema.string()),
-    uiStateJSON: schema.maybe(schema.string()),
-  },
-  { unknowns: 'forbid' }
-);
+  referencesSchema,
+} from '@kbn/content-management-utils/zod';
+import { mapAttributesSchema } from './map_attributes_schema/map_attributes_schema';
 
 export const mapSavedObjectSchema = savedObjectSchema(mapAttributesSchema);
 
-export const searchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
+export const searchOptionsSchema = z
+  .object({
+    onlyTitle: z.boolean().optional(),
+  })
+  .strict()
+  .optional();
 
-export const mapsSearchOptionsSchema = schema.maybe(
-  schema.object(
-    {
-      onlyTitle: schema.maybe(schema.boolean()),
-    },
-    { unknowns: 'forbid' }
-  )
-);
+export const mapsSearchOptionsSchema = z
+  .object({
+    onlyTitle: z.boolean().optional(),
+  })
+  .strict()
+  .optional();
 
-export const createOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
-});
+export const mapsCreateOptionsSchema = z
+  .object({
+    references: referencesSchema.optional(),
+  })
+  .strict()
+  .optional();
 
-export const mapsCreateOptionsSchema = schema.object({
-  references: schema.maybe(createOptionsSchemas.references),
-});
-
-export const mapsUpdateOptionsSchema = schema.object({
-  references: updateOptionsSchema.references,
-});
+export const mapsUpdateOptionsSchema = z
+  .object({
+    references: referencesSchema.optional(),
+  })
+  .strict()
+  .optional();
 
 export const mapsGetResultSchema = objectTypeToGetResultSchema(mapSavedObjectSchema);
 
@@ -74,7 +61,7 @@ export const serviceDefinition: ServicesDefinition = {
   create: {
     in: {
       options: {
-        schema: createOptionsSchema,
+        schema: mapsCreateOptionsSchema,
       },
       data: {
         schema: mapAttributesSchema,
@@ -89,7 +76,7 @@ export const serviceDefinition: ServicesDefinition = {
   update: {
     in: {
       options: {
-        schema: mapsUpdateOptionsSchema, // Is still the same as create?
+        schema: mapsUpdateOptionsSchema,
       },
       data: {
         schema: mapAttributesSchema,

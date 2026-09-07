@@ -17,6 +17,7 @@ import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_
 export interface LogEventsResultContentProps {
   dependencies: LogEventsResultContentDependencies;
   documentFilters: QueryDslQueryContainer[];
+  nonHighlightingFilters?: QueryDslQueryContainer[];
   logsSource: ResolvedIndexNameLogsSourceConfiguration;
   timeRange: {
     start: string;
@@ -31,7 +32,7 @@ export interface LogEventsResultContentDependencies {
 }
 
 export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
-  ({ dependencies, documentFilters, logsSource, timeRange }) => {
+  ({ dependencies, documentFilters, nonHighlightingFilters = [], logsSource, timeRange }) => {
     const savedSearchDependencies = React.useMemo(
       () => ({
         embeddable: dependencies.embeddable,
@@ -64,6 +65,21 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
       [documentFilters, logsSource.indexName]
     );
 
+    const savedSearchNonHighlightingFilters = React.useMemo(
+      () =>
+        nonHighlightingFilters.map((filter) =>
+          buildCustomFilter(
+            logsSource.indexName,
+            filter,
+            false,
+            false,
+            'Context Filters',
+            FilterStateStore.APP_STATE
+          )
+        ),
+      [nonHighlightingFilters, logsSource.indexName]
+    );
+
     return (
       <LazySavedSearchComponent
         dependencies={savedSearchDependencies}
@@ -71,6 +87,7 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
         timestampField={logsSource.timestampField}
         timeRange={savedSearchTimeRange}
         filters={savedSearchFilters}
+        nonHighlightingFilters={savedSearchNonHighlightingFilters}
         displayOptions={{
           solutionNavIdOverride: 'oblt',
           enableDocumentViewer: true,

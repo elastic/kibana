@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
 import type {
   CreateRuleExceptionListItemProps,
   ExceptionList,
@@ -22,6 +22,9 @@ import {
   CreateRuleExceptionListItemsResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
 
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ZodError } from '@kbn/zod/v4';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
@@ -29,7 +32,6 @@ import { checkDefaultRuleExceptionListReferences } from '../../../rule_managemen
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { IDetectionRulesClient } from '../../../rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -38,7 +40,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
       access: 'public',
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })
@@ -65,7 +67,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
           ]);
           const rulesClient = await ctx.alerting.getRulesClient();
           const listsClient = ctx.securitySolution.getExceptionListClient();
-          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { items } = request.body;
           const { id: ruleId } = request.params;
@@ -88,7 +89,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            detectionRulesClient,
+            alertingRulesClient: rulesClient,
           });
 
           return response.ok({ body: CreateRuleExceptionListItemsResponse.parse(createdItems) });
@@ -107,12 +108,12 @@ export const createRuleExceptions = async ({
   items,
   rule,
   listsClient,
-  detectionRulesClient,
+  alertingRulesClient,
 }: {
   items: CreateRuleExceptionListItemProps[];
-  listsClient: ExceptionListClient | null;
-  detectionRulesClient: IDetectionRulesClient;
   rule: SanitizedRule<RuleParams>;
+  listsClient: ExceptionListClient | null;
+  alertingRulesClient: RulesClient;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
     (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
@@ -146,8 +147,8 @@ export const createRuleExceptions = async ({
       const defaultList = await createAndAssociateDefaultExceptionList({
         rule,
         listsClient,
-        detectionRulesClient,
         removeOldAssociation: true,
+        alertingRulesClient,
       });
 
       return createExceptionListItems({ items, defaultList, listsClient });
@@ -156,8 +157,8 @@ export const createRuleExceptions = async ({
     const defaultList = await createAndAssociateDefaultExceptionList({
       rule,
       listsClient,
-      detectionRulesClient,
       removeOldAssociation: false,
+      alertingRulesClient,
     });
 
     return createExceptionListItems({ items, defaultList, listsClient });
@@ -215,7 +216,7 @@ export const createExceptionList = async ({
   const parseResult = CreateExceptionListRequestBody.safeParse(exceptionList);
 
   if (!parseResult.success) {
-    throw new Error(stringifyZodError(parseResult.error));
+    throw new Error(stringifyZodError(parseResult.error as unknown as ZodError));
   }
 
   const {
@@ -224,6 +225,7 @@ export const createExceptionList = async ({
     meta,
     name,
     namespace_type: namespaceType,
+    os_types: osTypes = [],
     tags,
     type,
     version,
@@ -237,6 +239,7 @@ export const createExceptionList = async ({
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
     version,
@@ -246,13 +249,13 @@ export const createExceptionList = async ({
 export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
-  detectionRulesClient,
   removeOldAssociation,
+  alertingRulesClient,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  detectionRulesClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
+  alertingRulesClient: RulesClient;
 }): Promise<ExceptionList> => {
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
@@ -268,20 +271,23 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  await detectionRulesClient.patchRule({
-    rulePatch: {
-      rule_id: rule.params.ruleId,
-      ...rule.params,
-      exceptions_list: [
-        ...ruleExceptionLists,
-        {
-          id: exceptionListToAssociate.id,
-          list_id: exceptionListToAssociate.list_id,
-          type: exceptionListToAssociate.type,
-          namespace_type: exceptionListToAssociate.namespace_type,
-        },
-      ],
-    },
+  await alertingRulesClient.bulkEditRuleParamsWithReadAuth({
+    ids: [rule.id],
+    operations: [
+      {
+        field: 'exceptionsList',
+        operation: 'set',
+        value: [
+          ...ruleExceptionLists,
+          {
+            id: exceptionListToAssociate.id,
+            list_id: exceptionListToAssociate.list_id,
+            type: exceptionListToAssociate.type,
+            namespace_type: exceptionListToAssociate.namespace_type,
+          },
+        ],
+      },
+    ],
   });
 
   return exceptionListToAssociate;

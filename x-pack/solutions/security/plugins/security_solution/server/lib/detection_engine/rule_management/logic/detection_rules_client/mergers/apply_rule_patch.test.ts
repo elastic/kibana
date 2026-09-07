@@ -95,8 +95,8 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError(
-        'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
+      ).rejects.toThrow(
+        'event_category_override: Invalid input: expected string, received number, tiebreaker_field: Invalid input: expected string, received number, timestamp_field: Invalid input: expected string, received number'
       );
     });
     test('should reject EQL params with invalid suppression group_by field', async () => {
@@ -120,7 +120,9 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError('alert_suppression.group_by: Expected array, received string');
+      ).rejects.toThrow(
+        'alert_suppression.group_by: Invalid input: expected array, received string, alert_suppression.group_by: Too big: expected string to have <=3 characters'
+      );
     });
   });
 
@@ -155,8 +157,8 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
-      'threat_query: Expected string, received number, threat_indicator_path: Expected string, received number'
+    ).rejects.toThrow(
+      'threat_query: Invalid input: expected string, received number, threat_indicator_path: Invalid input: expected string, received number'
     );
   });
 
@@ -191,8 +193,8 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
-      "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
+    ).rejects.toThrow(
+      'index.0: Invalid input: expected string, received number, language: Invalid option: expected one of "kuery"|"lucene'
     );
   });
 
@@ -227,8 +229,8 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
-      "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
+    ).rejects.toThrow(
+      'index.0: Invalid input: expected string, received number, language: Invalid option: expected one of "kuery"|"lucene"'
     );
   });
 
@@ -269,7 +271,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('threshold.value: Expected number, received string');
+    ).rejects.toThrow('threshold.value: Invalid input: expected number, received string');
   });
 
   test('should accept ES|QL alerts suppression params', async () => {
@@ -395,7 +397,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError('anomaly_threshold: Expected number, received string');
+      ).rejects.toThrow('anomaly_threshold: Invalid input: expected number, received string');
     });
 
     it('accepts suppression params', async () => {
@@ -451,7 +453,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('new_terms_fields: Expected array, received string');
+    ).rejects.toThrow('new_terms_fields: Invalid input: expected array, received string');
   });
 
   test('should retain existing required_fields when not present in rule patch body', async () => {

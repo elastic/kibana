@@ -29,6 +29,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_tsvb_chart'));
+    loadTestFile(require.resolve('./_tsvb_metric'));
   });
 }

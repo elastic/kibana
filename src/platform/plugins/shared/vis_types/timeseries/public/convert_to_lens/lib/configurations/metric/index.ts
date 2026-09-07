@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { MetricVisualizationState as MetricVisConfiguration } from '@kbn/lens-common';
 import { getValidColor } from '@kbn/coloring';
 import type { Panel } from '../../../../../common/types';
 import type { Column, Layer } from '../../convert';
@@ -45,6 +45,7 @@ export const getConfigurationForMetric = (
     secondaryMetricAccessor: secondaryColumn?.columnId,
     breakdownByAccessor: bucket?.columnId,
     palette,
+    applyColorTo: model.background_color_rules || model.background_color ? 'background' : undefined,
     collapseFn: primaryMetricWithCollapseFn.collapseFn ?? secondaryMetricWithCollapseFn?.collapseFn,
   };
 };

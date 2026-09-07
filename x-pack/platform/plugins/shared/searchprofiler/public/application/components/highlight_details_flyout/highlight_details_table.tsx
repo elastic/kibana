@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiToolTip, EuiBadge } from '@elastic/eui';
 
 import type { BreakdownItem } from '../../types';
@@ -22,7 +23,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
       name: 'Description',
       render: (item: BreakdownItem) => (
         <EuiToolTip position="left" content={item.tip}>
-          <span>{item.key}</span>
+          <span tabIndex={0}>{item.key}</span>
         </EuiToolTip>
       ),
     },
@@ -42,5 +43,13 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
     },
   ];
 
-  return <EuiBasicTable items={breakdown} columns={columns} />;
+  return (
+    <EuiBasicTable
+      items={breakdown}
+      columns={columns}
+      tableCaption={i18n.translate('xpack.searchProfiler.highlightDetailsTable.tableCaption', {
+        defaultMessage: 'Highlight breakdown details',
+      })}
+    />
+  );
 };

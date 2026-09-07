@@ -12,7 +12,9 @@ import type {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from '@kbn/expressions-plugin/common';
-import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
+import { euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { FrameMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';
@@ -23,13 +25,13 @@ import type {
   OperationDescriptor,
   OperationMetadata,
   Visualization,
-} from '../../types';
-import { GROUP_ID } from './constants';
+  MetricVisualizationState,
+} from '@kbn/lens-common';
+import { LENS_METRIC_GROUP_ID, LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR } from '@kbn/lens-common';
 import { getMetricVisualization } from './visualization';
 import type { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
-import type { MetricVisualizationState } from './types';
-import { getDefaultConfigForMode } from './helpers';
+import { getDefaultConfigForMode } from './palette_config';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 
 const paletteService = chartPluginMock.createPaletteRegistry();
@@ -65,6 +67,9 @@ describe('metric visualization', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
   } as const;
 
+  // Current-state fixture. Initialize consumes secondaryPrefix, valuesTextAlign,
+  // titleWeight, and secondaryLabelPosition. secondaryLabel is omitted because it
+  // is optional leftover (kept as a render fallback), not because initialize deletes it.
   const fullState: Required<
     Omit<
       MetricVisualizationState,
@@ -77,6 +82,9 @@ describe('metric visualization', () => {
       | 'secondaryColor'
       | 'secondaryPrefix'
       | 'valuesTextAlign'
+      | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
     >
   > = {
     layerId: 'first',
@@ -88,7 +96,6 @@ describe('metric visualization', () => {
     collapseFn: 'sum',
     subtitle: 'subtitle',
     icon: 'empty',
-    secondaryLabel: 'extra-text',
     progressDirection: 'vertical',
     maxCols: 5,
     color: 'static-color',
@@ -98,18 +105,31 @@ describe('metric visualization', () => {
     primaryAlign: 'right',
     secondaryAlign: 'right',
     primaryPosition: 'bottom',
-    titleWeight: 'bold',
     iconAlign: 'right',
     valueFontMode: 'default',
+    density: 'compact',
     secondaryTrend: { type: 'none' },
-    secondaryLabelPosition: 'before',
+    secondaryNameVisibility: 'before',
     applyColorTo: 'background',
   };
 
+  const getLegacyStateWithoutDensity = (): MetricVisualizationState => {
+    const legacyState: MetricVisualizationState = { ...fullState };
+    delete legacyState.density;
+    return legacyState;
+  };
+
+  // Same legacy omissions as fullState: secondaryLabel stays optional leftover.
   const fullStateWTrend: Required<
     Omit<
       MetricVisualizationState,
-      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign'
+      | 'secondaryTrend'
+      | 'secondaryColor'
+      | 'secondaryPrefix'
+      | 'valuesTextAlign'
+      | 'titleWeight'
+      | 'secondaryLabel'
+      | 'secondaryLabelPosition'
     >
   > = {
     ...fullState,
@@ -123,6 +143,11 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => 'some-id')).toEqual({
         layerId: 'some-id',
         layerType: LayerTypes.DATA,
+        titlesTextAlign: 'left',
+        primaryPosition: 'bottom',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
+        density: 'default',
       });
     });
 
@@ -130,8 +155,37 @@ describe('metric visualization', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
     });
 
+    test('sets compact density for persisted state without density', () => {
+      expect(
+        visualization.initialize(() => fullState.layerId, getLegacyStateWithoutDensity())
+      ).toEqual(fullState);
+    });
+
+    test('preserves explicit persisted density', () => {
+      const stateWithDefaultDensity: MetricVisualizationState = {
+        ...fullState,
+        density: 'default',
+      };
+      expect(visualization.initialize(() => fullState.layerId, stateWithDefaultDensity)).toEqual(
+        stateWithDefaultDensity
+      );
+    });
+
+    test('removes legacy state property titleWeight', () => {
+      const stateWithLegacyTitleWeight: MetricVisualizationState = {
+        ...fullState,
+        titleWeight: 'bold',
+      };
+      expect(
+        visualization.initialize(
+          () => stateWithLegacyTitleWeight.layerId,
+          stateWithLegacyTitleWeight
+        )
+      ).toEqual(fullState);
+    });
+
     test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
-      const { secondaryLabel, primaryAlign, secondaryAlign, ...restFullState } = fullState;
+      const { secondaryNameVisibility, primaryAlign, secondaryAlign, ...restFullState } = fullState;
       const stateWithLegacyProperties: MetricVisualizationState = {
         ...restFullState,
         secondaryPrefix: LEGACY_SECONDARY_PREFIX,
@@ -144,24 +198,9 @@ describe('metric visualization', () => {
       expect(result).toEqual({
         ...fullState,
         secondaryLabel: LEGACY_SECONDARY_PREFIX,
+        secondaryNameVisibility: 'before',
         primaryAlign: LEGACY_VALUES_TEXT_ALIGN,
         secondaryAlign: LEGACY_VALUES_TEXT_ALIGN,
-      });
-    });
-
-    test('migrates legacy state property secondaryPrefix', () => {
-      const { secondaryLabel, ...restFullState } = fullState;
-      const stateWithLegacyProperties: MetricVisualizationState = {
-        ...restFullState,
-        secondaryPrefix: LEGACY_SECONDARY_PREFIX,
-      };
-      const result = visualization.initialize(
-        () => stateWithLegacyProperties.layerId,
-        stateWithLegacyProperties
-      );
-      expect(result).toEqual({
-        ...fullState,
-        secondaryLabel: LEGACY_SECONDARY_PREFIX,
       });
     });
 
@@ -186,7 +225,6 @@ describe('metric visualization', () => {
       const stateWithBoth: MetricVisualizationState = {
         ...fullState,
         secondaryPrefix: LEGACY_SECONDARY_PREFIX,
-        secondaryLabel: 'secondaryLabel',
         valuesTextAlign: LEGACY_VALUES_TEXT_ALIGN,
         primaryAlign: 'right',
         secondaryAlign: 'right',
@@ -194,9 +232,67 @@ describe('metric visualization', () => {
       const result = visualization.initialize(() => stateWithBoth.layerId, stateWithBoth);
       expect(result).toEqual({
         ...fullState,
-        secondaryLabel: 'secondaryLabel',
+        secondaryLabel: LEGACY_SECONDARY_PREFIX,
         primaryAlign: 'right',
         secondaryAlign: 'right',
+      });
+    });
+
+    describe('secondary label migration', () => {
+      const getStateWithLegacyLabel = (
+        legacy: Pick<MetricVisualizationState, 'secondaryLabel'>
+      ): MetricVisualizationState => {
+        const { secondaryNameVisibility, ...restFullState } = fullState;
+        return { ...restFullState, ...legacy };
+      };
+
+      const initialize = (state: MetricVisualizationState) =>
+        visualization.initialize(() => state.layerId, state);
+
+      test('hides the name when secondaryLabel was explicitly emptied', () => {
+        expect(initialize(getStateWithLegacyLabel({ secondaryLabel: '' }))).toEqual({
+          ...fullState,
+          secondaryNameVisibility: 'hidden',
+        });
+      });
+
+      test('keeps the custom secondaryLabel as a runtime fallback and keeps the name visible', () => {
+        expect(initialize(getStateWithLegacyLabel({ secondaryLabel: 'custom-text' }))).toEqual({
+          ...fullState,
+          secondaryLabel: 'custom-text',
+          secondaryNameVisibility: 'before',
+        });
+      });
+
+      test('shows the name before the value when no legacy label was persisted', () => {
+        expect(initialize(getStateWithLegacyLabel({}))).toEqual({
+          ...fullState,
+          secondaryNameVisibility: 'before',
+        });
+      });
+
+      test('preserves an explicit position over the legacy label', () => {
+        expect(
+          initialize({ ...fullState, secondaryNameVisibility: 'after', secondaryLabel: 'ignored' })
+        ).toEqual({ ...fullState, secondaryLabel: 'ignored', secondaryNameVisibility: 'after' });
+      });
+
+      test('migrates the pre-rename secondaryLabelPosition key, preserving an explicit position', () => {
+        // Real saved objects created after #261247 (which introduced this field as
+        // `before`/`after`) but before its rename to `secondaryNameVisibility` persist it
+        // under this legacy key, which no longer exists on `MetricVisualizationState`.
+        const { secondaryNameVisibility, ...restFullState } = fullState;
+        const legacyState = {
+          ...restFullState,
+          secondaryLabelPosition: 'after',
+        } as MetricVisualizationState;
+
+        expect(initialize(legacyState)).toEqual({ ...fullState, secondaryNameVisibility: 'after' });
+      });
+
+      test('leaves the position unset without a secondary metric', () => {
+        const { secondaryMetricAccessor, secondaryNameVisibility, ...restFullState } = fullState;
+        expect(initialize({ ...restFullState, secondaryLabel: '' })).toEqual(restFullState);
       });
     });
   });
@@ -250,7 +346,9 @@ describe('metric visualization', () => {
           layerId: fullState.layerId,
           frame: mockFrameApi,
         }).groups;
-        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        const breakdownGroup = groups.find(
+          ({ groupId }) => groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY
+        );
         expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
       });
 
@@ -267,7 +365,9 @@ describe('metric visualization', () => {
             ]),
           }),
         }).groups;
-        const breakdownGroup = groups.find(({ groupId }) => groupId === GROUP_ID.BREAKDOWN_BY);
+        const breakdownGroup = groups.find(
+          ({ groupId }) => groupId === LENS_METRIC_GROUP_ID.BREAKDOWN_BY
+        );
         expect(breakdownGroup?.accessors[0].triggerIconType).toBeUndefined();
       });
 
@@ -287,7 +387,7 @@ describe('metric visualization', () => {
         ).toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -311,7 +411,7 @@ describe('metric visualization', () => {
           .toMatchInlineSnapshot(`
           Array [
             Object {
-              "color": "#ffffff",
+              "color": "#FFFFFF",
               "columnId": "metric-col-id",
               "triggerIconType": "color",
             },
@@ -515,6 +615,9 @@ describe('metric visualization', () => {
                 "color": Array [
                   "static-color",
                 ],
+                "density": Array [
+                  "compact",
+                ],
                 "iconAlign": Array [
                   "right",
                 ],
@@ -555,20 +658,14 @@ describe('metric visualization', () => {
                 "secondaryAlign": Array [
                   "right",
                 ],
-                "secondaryLabel": Array [
-                  "extra-text",
-                ],
-                "secondaryLabelPosition": Array [
-                  "before",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
+                "secondaryNameVisibility": Array [
+                  "before",
+                ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -587,6 +684,21 @@ describe('metric visualization', () => {
       `);
     });
 
+    it('keeps legacy persisted metrics on compact density when building an expression', () => {
+      const initializedState = visualization.initialize(() => fullState.layerId, {
+        ...getLegacyStateWithoutDensity(),
+        breakdownByAccessor: undefined,
+        collapseFn: undefined,
+      });
+
+      const expression = visualization.toExpression(
+        initializedState,
+        datasourceLayers
+      ) as ExpressionAstExpression;
+
+      expect(expression.chain[0].arguments.density).toEqual(['compact']);
+    });
+
     it('builds breakdown by metric', () => {
       expect(visualization.toExpression({ ...fullState, collapseFn: undefined }, datasourceLayers))
         .toMatchInlineSnapshot(`
@@ -602,6 +714,9 @@ describe('metric visualization', () => {
                 ],
                 "color": Array [
                   "static-color",
+                ],
+                "density": Array [
+                  "compact",
                 ],
                 "iconAlign": Array [
                   "right",
@@ -646,20 +761,14 @@ describe('metric visualization', () => {
                 "secondaryAlign": Array [
                   "right",
                 ],
-                "secondaryLabel": Array [
-                  "extra-text",
-                ],
-                "secondaryLabelPosition": Array [
-                  "before",
-                ],
                 "secondaryMetric": Array [
                   "secondary-metric-col-id",
                 ],
+                "secondaryNameVisibility": Array [
+                  "before",
+                ],
                 "subtitle": Array [
                   "subtitle",
-                ],
-                "titleWeight": Array [
-                  "bold",
                 ],
                 "titlesTextAlign": Array [
                   "left",
@@ -946,6 +1055,9 @@ describe('metric visualization', () => {
               "color": Array [
                 "static-color",
               ],
+              "density": Array [
+                "compact",
+              ],
               "iconAlign": Array [
                 "right",
               ],
@@ -961,7 +1073,6 @@ describe('metric visualization', () => {
               "metric": Array [
                 "metric-col-id",
               ],
-              "palette": Array [],
               "primaryAlign": Array [
                 "right",
               ],
@@ -971,17 +1082,11 @@ describe('metric visualization', () => {
               "secondaryAlign": Array [
                 "right",
               ],
-              "secondaryLabel": Array [
-                "extra-text",
-              ],
-              "secondaryLabelPosition": Array [
+              "secondaryNameVisibility": Array [
                 "before",
               ],
               "subtitle": Array [
                 "subtitle",
-              ],
-              "titleWeight": Array [
-                "bold",
               ],
               "titlesTextAlign": Array [
                 "left",
@@ -1044,13 +1149,14 @@ describe('metric visualization', () => {
             visualization.toExpression(
               {
                 ...fullState,
+                applyColorTo: undefined,
                 showBar: true,
                 color: undefined,
               },
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorPrimary);
+        ).toBe(euiThemeVars.euiColorVis2);
 
         expect(
           (
@@ -1063,7 +1169,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         expect(
           (
@@ -1077,7 +1183,7 @@ describe('metric visualization', () => {
               datasourceLayers
             ) as ExpressionAstExpression
           ).chain[1].arguments.color[0]
-        ).toBe(euiLightVars.euiColorEmptyShade);
+        ).toBe(euiThemeVars.euiColorEmptyShade);
 
         // this case isn't currently relevant because other parts of the code don't allow showBar to be
         // set when there isn't a max dimension but this test covers the branch anyhow
@@ -1173,9 +1279,14 @@ describe('metric visualization', () => {
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual([
-            '#F6726A',
-            '#ECF1F9',
-            '#24C292',
+            euiThemeVars.euiColorBackgroundLightDanger,
+            euiThemeVars.euiColorBackgroundLightText,
+            euiThemeVars.euiColorBackgroundLightSuccess,
+          ]);
+          expect(secondaryMetricAST.secondaryTrendTextPalette).toEqual([
+            euiThemeVars.euiColorTextDanger,
+            euiThemeVars.euiColorTextParagraph,
+            euiThemeVars.euiColorTextSuccess,
           ]);
         } else {
           fail('AST is not an object');
@@ -1183,36 +1294,78 @@ describe('metric visualization', () => {
       });
     });
 
-    it('forwards secondary prefix correctly when is an empty string', () => {
+    it('forwards a legacy secondary label as a fallback for unmigrated by-value state', () => {
       const expression = visualization.toExpression(
-        { ...fullState, secondaryLabel: '', collapseFn: undefined },
+        { ...fullState, secondaryLabel: 'custom-text', collapseFn: undefined },
         datasourceLayers
       );
       if (expression && typeof expression === 'object') {
-        const secondaryLabel = expression.chain[0].arguments.secondaryLabel[0];
-        expect(secondaryLabel).toBe('');
+        expect(expression.chain[0].arguments.secondaryLabel).toEqual(['custom-text']);
       } else {
         fail('Expression is not an object');
       }
     });
 
-    it('forwards secondary prefix correctly when is undefined', () => {
-      const expression = visualization.toExpression(
-        { ...fullState, secondaryLabel: undefined, collapseFn: undefined },
-        datasourceLayers
-      );
-      if (expression && typeof expression === 'object') {
-        expect(expression.chain[0].arguments.secondaryLabel).toBe(undefined);
-      } else {
-        fail('Expression is not an object');
+    const expressionArgumentsFromLegacyState = (
+      legacy: Pick<MetricVisualizationState, 'secondaryLabel' | 'secondaryPrefix'>
+    ) => {
+      const { secondaryNameVisibility, ...restFullState } = fullState;
+      const runtimeState = visualization.initialize(() => fullState.layerId, {
+        ...restFullState,
+        ...legacy,
+        collapseFn: undefined,
+      });
+      const expression = visualization.toExpression(runtimeState, datasourceLayers);
+      if (!expression || typeof expression !== 'object') {
+        throw new Error('Expression is not an object');
       }
-    });
+      return expression.chain[0].arguments;
+    };
+
+    // Guards the fallback end to end. The assertions above call `toExpression` directly, so
+    // they stay green even when the runtime conversion drops the legacy label entirely.
+    it.each(['secondaryLabel', 'secondaryPrefix'] as const)(
+      'forwards a legacy %s through initialization into the expression',
+      (property) => {
+        expect(expressionArgumentsFromLegacyState({ [property]: 'custom-text' })).toEqual(
+          expect.objectContaining({
+            secondaryLabel: ['custom-text'],
+            secondaryNameVisibility: ['before'],
+          })
+        );
+      }
+    );
+
+    it.each(['secondaryLabel', 'secondaryPrefix'] as const)(
+      'hides the name in the expression when a legacy %s was explicitly emptied',
+      (property) => {
+        expect(expressionArgumentsFromLegacyState({ [property]: '' })).toEqual(
+          expect.objectContaining({ secondaryNameVisibility: ['hidden'] })
+        );
+      }
+    );
+
+    it.each(['hidden', 'before', 'after'] as const)(
+      'forwards the %s name visibility',
+      (visibility) => {
+        const expression = visualization.toExpression(
+          { ...fullState, secondaryNameVisibility: visibility, collapseFn: undefined },
+          datasourceLayers
+        );
+        if (expression && typeof expression === 'object') {
+          expect(expression.chain[0].arguments.secondaryNameVisibility).toEqual([visibility]);
+        } else {
+          fail('Expression is not an object');
+        }
+      }
+    );
   });
 
   it('clears a layer', () => {
     expect(visualization.clearLayer(fullState, 'some-id', 'indexPattern1')).toMatchInlineSnapshot(`
       Object {
         "applyColorTo": "background",
+        "density": "compact",
         "icon": "empty",
         "iconAlign": "right",
         "layerId": "first",
@@ -1220,7 +1373,6 @@ describe('metric visualization', () => {
         "primaryAlign": "right",
         "primaryPosition": "bottom",
         "secondaryAlign": "right",
-        "titleWeight": "bold",
         "titlesTextAlign": "left",
         "valueFontMode": "default",
       }
@@ -1465,7 +1617,7 @@ describe('metric visualization', () => {
 
       expect(supportedLayers[1].initialDimensions).toHaveLength(1);
       expect(supportedLayers[1].initialDimensions![0]).toMatchObject({
-        groupId: GROUP_ID.TREND_TIME,
+        groupId: LENS_METRIC_GROUP_ID.TREND_TIME,
         autoTimeField: true,
         columnId: expect.any(String),
       });
@@ -1476,7 +1628,7 @@ describe('metric visualization', () => {
       expect(supportedLayers[0].initialDimensions).toHaveLength(1);
       expect(supportedLayers[0].initialDimensions![0]).toEqual(
         expect.objectContaining({
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           staticValue: 0,
         })
       );
@@ -1488,17 +1640,23 @@ describe('metric visualization', () => {
     const columnId = 'col-id';
 
     const cases: Array<{
-      groupId: (typeof GROUP_ID)[keyof typeof GROUP_ID];
+      groupId: (typeof LENS_METRIC_GROUP_ID)[keyof typeof LENS_METRIC_GROUP_ID];
       accessor: keyof MetricVisualizationState;
     }> = [
-      { groupId: GROUP_ID.METRIC, accessor: 'metricAccessor' },
-      { groupId: GROUP_ID.SECONDARY_METRIC, accessor: 'secondaryMetricAccessor' },
-      { groupId: GROUP_ID.MAX, accessor: 'maxAccessor' },
-      { groupId: GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
-      { groupId: GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
-      { groupId: GROUP_ID.TREND_SECONDARY_METRIC, accessor: 'trendlineSecondaryMetricAccessor' },
-      { groupId: GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
-      { groupId: GROUP_ID.TREND_BREAKDOWN_BY, accessor: 'trendlineBreakdownByAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.METRIC, accessor: 'metricAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC, accessor: 'secondaryMetricAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.MAX, accessor: 'maxAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.BREAKDOWN_BY, accessor: 'breakdownByAccessor' },
+      { groupId: LENS_METRIC_GROUP_ID.TREND_METRIC, accessor: 'trendlineMetricAccessor' },
+      {
+        groupId: LENS_METRIC_GROUP_ID.TREND_SECONDARY_METRIC,
+        accessor: 'trendlineSecondaryMetricAccessor',
+      },
+      { groupId: LENS_METRIC_GROUP_ID.TREND_TIME, accessor: 'trendlineTimeAccessor' },
+      {
+        groupId: LENS_METRIC_GROUP_ID.TREND_BREAKDOWN_BY,
+        accessor: 'trendlineBreakdownByAccessor',
+      },
     ];
 
     it.each(cases)('sets %s', ({ groupId, accessor }) => {
@@ -1517,12 +1675,42 @@ describe('metric visualization', () => {
       );
     });
 
+    it('hides the name by default when the secondary metric dimension is set', () => {
+      expect(
+        visualization.setDimension({
+          prevState: state,
+          columnId,
+          groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+          layerId: 'some-id',
+          frame: mockFrameApi,
+        })
+      ).toEqual({
+        secondaryMetricAccessor: columnId,
+        secondaryNameVisibility: 'hidden',
+      });
+    });
+
+    it('preserves the name visibility when the secondary metric dimension is replaced', () => {
+      expect(
+        visualization.setDimension({
+          prevState: { ...state, secondaryNameVisibility: 'after' },
+          columnId,
+          groupId: LENS_METRIC_GROUP_ID.SECONDARY_METRIC,
+          layerId: 'some-id',
+          frame: mockFrameApi,
+        })
+      ).toEqual({
+        secondaryMetricAccessor: columnId,
+        secondaryNameVisibility: 'after',
+      });
+    });
+
     it('shows the progress bar when maximum dimension set', () => {
       expect(
         visualization.setDimension({
           prevState: state,
           columnId,
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           layerId: 'some-id',
           frame: mockFrameApi,
         })
@@ -1537,7 +1725,7 @@ describe('metric visualization', () => {
         visualization.setDimension({
           prevState: { ...state, ...trendlineProps },
           columnId,
-          groupId: GROUP_ID.MAX,
+          groupId: LENS_METRIC_GROUP_ID.MAX,
           layerId: 'some-id',
           frame: mockFrameApi,
         })
@@ -1572,7 +1760,7 @@ describe('metric visualization', () => {
       });
 
       expect(removed).not.toHaveProperty('secondaryMetricAccessor');
-      expect(removed).not.toHaveProperty('secondaryLabel');
+      expect(removed).not.toHaveProperty('secondaryNameVisibility');
       expect(removed).not.toHaveProperty('secondaryColorMode');
       expect(removed).not.toHaveProperty('secondaryTrend');
     });
@@ -1634,6 +1822,127 @@ describe('metric visualization', () => {
     expect(visualization.getDisplayOptions!()).toEqual({
       noPanelTitle: false,
       noPadding: true,
+    });
+  });
+
+  describe('#onDatasourceUpdate', () => {
+    function createOperationByType(type: DataType) {
+      return {
+        dataType: type,
+        hasTimeShift: false,
+        label: 'label',
+        isBucketed: false,
+        hasReducedTimeRange: false,
+      };
+    }
+
+    const createFrame = (
+      operationFn: (id: string) => ReturnType<typeof createOperationByType>
+    ): FrameMock => {
+      return createMockFramePublicAPI({
+        datasourceLayers: {
+          [fullState.layerId]: createMockDatasource('formBased', {
+            getOperationForColumnId: jest.fn(operationFn),
+          }).publicAPIMock,
+        },
+      });
+    };
+
+    it('keeps leftover secondaryLabel even when the secondary column already has a custom name', () => {
+      const frame = createFrame(() => ({
+        ...createOperationByType('number'),
+        customLabel: true,
+      }));
+      const result = visualization.onDatasourceUpdate!(
+        { ...fullState, secondaryLabel: 'legacy-custom' },
+        frame
+      );
+      expect(result.secondaryLabel).toBe('legacy-custom');
+    });
+
+    it('keeps legacy secondaryLabel when the secondary column name is not custom', () => {
+      const frame = createFrame(() => createOperationByType('number'));
+      const result = visualization.onDatasourceUpdate!(
+        { ...fullState, secondaryLabel: 'legacy-custom' },
+        frame
+      );
+      expect(result.secondaryLabel).toBe('legacy-custom');
+    });
+
+    it('clears palette when primary metric becomes non-numeric', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.metricAccessor ? 'string' : 'number')
+      );
+      const result = visualization.onDatasourceUpdate!({ ...fullState, palette }, frame);
+      expect(result).toHaveProperty('palette', undefined);
+    });
+
+    it('does not clear palette when primary metric is numeric', () => {
+      const frame = createFrame(() => createOperationByType('number'));
+      const result = visualization.onDatasourceUpdate!({ ...fullState, palette }, frame);
+      expect(result.palette).toEqual(palette);
+    });
+
+    it('resets secondary trend when secondary metric becomes non-numeric and trend was dynamic', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.secondaryMetricAccessor ? 'string' : 'number')
+      );
+      const stateWithDynamicTrend: MetricVisualizationState = {
+        ...fullState,
+        secondaryTrend: {
+          type: 'dynamic',
+          visuals: 'both',
+          reversed: false,
+          paletteId: 'compare_to',
+          baselineValue: 0,
+        },
+      };
+      const result = visualization.onDatasourceUpdate!(stateWithDynamicTrend, frame);
+      expect(result).toEqual(
+        expect.objectContaining({
+          secondaryTrend: {
+            type: 'static',
+            color: LENS_METRIC_SECONDARY_DEFAULT_STATIC_COLOR,
+          },
+        })
+      );
+    });
+
+    it('resets secondary trend when baseline is "primary" but primary becomes non-numeric', () => {
+      const frame = createFrame((id) =>
+        createOperationByType(id === fullState.metricAccessor ? 'string' : 'number')
+      );
+      const stateWithPrimaryBaseline: MetricVisualizationState = {
+        ...fullState,
+        palette,
+        secondaryTrend: {
+          type: 'dynamic',
+          visuals: 'both',
+          reversed: false,
+          paletteId: 'compare_to',
+          baselineValue: 'primary',
+        },
+      };
+      const result = visualization.onDatasourceUpdate!(stateWithPrimaryBaseline, frame);
+      // palette cleared because primary is non-numeric
+      expect(result).toHaveProperty('palette', undefined);
+      // secondary trend reset because baseline='primary' with non-numeric primary
+      expect(result).toEqual(
+        expect.objectContaining({
+          secondaryTrend: {
+            type: 'dynamic',
+            visuals: 'both',
+            reversed: false,
+            paletteId: 'compare_to',
+            baselineValue: 0,
+          },
+        })
+      );
+    });
+
+    it('returns state unchanged when frame is undefined', () => {
+      const result = visualization.onDatasourceUpdate!(fullState, undefined);
+      expect(result).toBe(fullState);
     });
   });
 

@@ -18,8 +18,8 @@ import { isString } from 'lodash';
  * @public
  */
 export function luceneStringToDsl(
-  query: string | estypes.QueryDslQueryContainer
-): estypes.QueryDslQueryContainer {
+  query: string | NonNullable<estypes.QueryDslQueryContainer>
+): NonNullable<estypes.QueryDslQueryContainer> {
   if (isString(query)) {
     if (query.trim() === '') {
       return { match_all: {} };

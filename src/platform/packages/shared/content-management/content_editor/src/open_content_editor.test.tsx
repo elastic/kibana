@@ -34,19 +34,21 @@ describe('useOpenContentEditor() hook', () => {
   };
 
   const mockedServices = getMockServices();
-  const openFlyout = mockedServices.openFlyout as jest.MockedFunction<Services['openFlyout']>;
+  const openSystemFlyout = mockedServices.openSystemFlyout as jest.MockedFunction<
+    Services['openSystemFlyout']
+  >;
 
   const setup = registerTestBed(WithServices(TestComp, mockedServices), {
     memoryRouter: { wrapComponent: false },
   });
 
-  test('should call the "openFlyout" provided', () => {
+  test('should call the "openSystemFlyout" provided', () => {
     const { find } = setup();
 
     find('openContentEditorButton').simulate('click');
 
-    expect(openFlyout).toHaveBeenCalled();
-    const args = openFlyout.mock.calls[0][0] as any;
+    expect(openSystemFlyout).toHaveBeenCalled();
+    const args = openSystemFlyout.mock.calls[0][0] as any;
     expect(args?.type).toBe(ContentEditorLoader);
     expect(args?.props.item).toBe(savedObjectItem);
     expect(args?.props.services).toEqual(mockedServices);

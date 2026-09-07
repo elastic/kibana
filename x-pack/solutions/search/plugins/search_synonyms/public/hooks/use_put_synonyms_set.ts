@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
@@ -30,7 +30,7 @@ export const usePutSynonymsSet = (
   return useMutation(
     async ({ synonymsSetId, forceWrite }: MutationArgs) => {
       return await http.put<SynonymsPutSynonymResponse>(
-        `/internal/search_synonyms/synonyms/${synonymsSetId}`,
+        `/internal/search_synonyms/synonyms/${encodeURIComponent(synonymsSetId)}`,
         {
           query: { forceWrite },
         }

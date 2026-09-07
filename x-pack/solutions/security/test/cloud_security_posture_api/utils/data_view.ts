@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type SuperTest from 'supertest';
+import type { Agent } from 'supertest';
 
 export const dataViewRouteHelpersFactory = (
-  supertest: SuperTest.Agent,
+  supertest: Pick<Agent, 'get' | 'post' | 'delete'>,
   namespace: string = 'default'
 ) => ({
   create: async (name: string) => {

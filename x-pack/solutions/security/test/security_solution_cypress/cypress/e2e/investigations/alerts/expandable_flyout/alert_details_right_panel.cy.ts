@@ -44,6 +44,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES_TITLE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_TITLE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_NOTES_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN,
 } from '../../../../screens/expandable_flyout/alert_details_right_panel';
 import {
   closeFlyout,
@@ -57,6 +58,7 @@ import {
   selectTakeActionItem,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../../../tasks/api_calls/kibana_advanced_settings';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -66,9 +68,9 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../../env_var_names_constants';
 import {
-  confirmAlertCloseModal,
   goToAcknowledgedAlerts,
   goToClosedAlerts,
+  selectAndConfirmClosingReason,
   toggleKPICharts,
 } from '../../../../tasks/alerts';
 import {
@@ -84,6 +86,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   const rule = getNewRule();
 
   beforeEach(() => {
+    disableNewFlyout();
     deleteAlertsAndRules();
     login(role);
     createRule(rule);
@@ -203,7 +206,9 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     expandAlertAtIndexExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
-    confirmAlertCloseModal();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON_DROPDOWN).within(() => {
+      selectAndConfirmClosingReason();
+    });
 
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');

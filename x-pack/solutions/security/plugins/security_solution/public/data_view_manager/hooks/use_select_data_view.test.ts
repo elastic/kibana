@@ -8,14 +8,14 @@
 import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { useSelectDataView } from './use_select_data_view';
-import { useDispatch } from 'react-redux';
-import { DataViewManagerScopeName } from '../constants';
+import { useDispatch } from 'react-redux-v7';
+import { PageScope } from '../constants';
 
-jest.mock('react-redux', () => {
+jest.mock('react-redux-v7', () => {
   const dispatch = jest.fn();
 
   return {
-    ...jest.requireActual('react-redux'),
+    ...jest.requireActual('react-redux-v7'),
     useDispatch: () => dispatch,
   };
 });
@@ -31,7 +31,7 @@ describe('useSelectDataView', () => {
       { wrapper: TestProviders }
     );
 
-    result.current({ id: 'test', scope: DataViewManagerScopeName.default });
+    result.current({ id: 'test', scope: PageScope.default });
 
     expect(useDispatch()).toHaveBeenCalledWith({
       payload: { id: 'test', scope: 'default' },
@@ -51,7 +51,7 @@ describe('useSelectDataView', () => {
       result.current({
         id: undefined,
         fallbackPatterns: [],
-        scope: DataViewManagerScopeName.default,
+        scope: PageScope.default,
       });
 
       expect(useDispatch()).not.toHaveBeenCalledWith({

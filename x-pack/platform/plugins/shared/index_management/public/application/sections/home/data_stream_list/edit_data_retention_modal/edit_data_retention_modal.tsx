@@ -17,8 +17,8 @@ import {
   EuiSpacer,
   EuiLink,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { has } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -97,13 +97,11 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
   const formHasErrors = form.getErrors().length > 0;
   const disableSubmit = formHasErrors || !isDirty || form.isValid === false;
 
-  // Whenever the timeUnit field changes, we need to re-validate
+  // Whenever a form data field changes, we need to re-validate
   // the dataRetention field
   useEffect(() => {
-    if (formData.dataRetention) {
-      form.validateFields(['dataRetention']);
-    }
-  }, [formData.timeUnit, form, formData.dataRetention]);
+    form.validateFields(['dataRetention']);
+  }, [form, formData]);
 
   const onSubmitForm = async () => {
     const { isValid, data } = await form.submit();
@@ -190,7 +188,7 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
               ds.lifecycle.data_retention,
               `${formData.dataRetention}${formData.timeUnit}`
             )) ||
-          (ds.lifecycle?.effective_retention &&
+          (typeof ds.lifecycle?.effective_retention === 'string' &&
             isRetentionBiggerThan(
               ds.lifecycle.effective_retention,
               `${formData.dataRetention}${formData.timeUnit}`
@@ -203,6 +201,12 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
       onClose={() => onClose()}
       data-test-subj="editDataRetentionModal"
       css={{ width: 650 }}
+      aria-label={i18n.translate(
+        'xpack.idxMgmt.dataStreams.editDataRetentionModal.modalAriaLabel',
+        {
+          defaultMessage: 'Edit data retention modal',
+        }
+      )}
     >
       <Form form={form} data-test-subj="editDataRetentionForm">
         <EuiModalHeader>
@@ -352,51 +356,62 @@ export const EditDataRetentionModal: React.FunctionComponent<Props> = ({
           <EuiSpacer />
 
           {affectedDataStreams.length > 0 && !formData.infiniteRetentionPeriod && (
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title={i18n.translate(
                 'xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutTitle',
                 {
                   defaultMessage: 'Some data will be deleted',
                 }
               )}
-              color="danger"
-              iconType="warning"
               data-test-subj="reducedDataRetentionCallout"
-            >
-              <p>
-                {isBulkEdit ? (
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.affectedDataStreamsCalloutText"
-                    defaultMessage="The retention period will be reduced for {affectedDataStreamCount} {affectedDataStreamCount, plural, one {data stream} other {data streams}}. Data older than then new
-                retention period will be permanently deleted."
-                    values={{
-                      affectedDataStreamCount: affectedDataStreams.length,
-                    }}
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.affectedDataStreamsSingleCalloutText"
-                    defaultMessage="The retention period will be reduced. Data older than then new retention period will be permanently deleted."
-                  />
-                )}
-              </p>
-              {isBulkEdit && affectedDataStreams.length <= 10 && (
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
-                    defaultMessage="Affected data streams: {affectedDataStreams}"
-                    values={{
-                      affectedDataStreams: <b>{affectedDataStreams.join(', ')}</b>,
-                    }}
-                  />
-                </p>
-              )}
-            </EuiCallOut>
+              text={
+                <>
+                  <p>
+                    {isBulkEdit ? (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.bulkEdit.affectedDataStreamsCalloutText"
+                        defaultMessage="The retention period will be reduced for {affectedDataStreamCount} {affectedDataStreamCount, plural, one {data stream} other {data streams}}. Data older than then new
+                    retention period will be permanently deleted."
+                        values={{
+                          affectedDataStreamCount: affectedDataStreams.length,
+                        }}
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.singleEdit.affectedDataStreamsSingleCalloutText"
+                        defaultMessage="The retention period will be reduced. Data older than then new retention period will be permanently deleted."
+                      />
+                    )}
+                  </p>
+                  {isBulkEdit && affectedDataStreams.length <= 10 && (
+                    <p>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.dataStreams.editDataRetentionModal.affectedDataStreamsCalloutList"
+                        defaultMessage="Affected data streams: {affectedDataStreams}"
+                        values={{
+                          affectedDataStreams: <b>{affectedDataStreams.join(', ')}</b>,
+                        }}
+                      />
+                    </p>
+                  )}
+                </>
+              }
+            />
           )}
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onClose()}>
+          <EuiButtonEmpty
+            data-test-subj="cancelButton"
+            onClick={() => onClose()}
+            aria-label={i18n.translate(
+              'xpack.idxMgmt.dataStreams.editDataRetentionModal.cancelButtonAriaLabel',
+              {
+                defaultMessage: 'Cancel editing data retention',
+              }
+            )}
+          >
             <FormattedMessage
               id="xpack.idxMgmt.dataStreams.editDataRetentionModal.cancelButtonLabel"
               defaultMessage="Cancel"

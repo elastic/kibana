@@ -7,28 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows/graph';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { KQLSyntaxError } from '@kbn/es-query';
-import type { NodeImplementation } from '../node_implementation';
+import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { evaluateKql } from './eval_kql';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+import { evaluateCondition } from '../evaluate_condition';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterIfNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowGraph: WorkflowGraph,
-    private workflowContextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
-    const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
+    this.stepExecutionRuntime.startStep();
+
+    const successors = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
       successors.some((node) => !['enter-then-branch', 'enter-else-branch'].includes(node.type))
@@ -49,8 +47,25 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-
-    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
+    const context = this.stepExecutionRuntime.contextManager.getContext();
+    const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
+      thenNode.condition,
+      context
+    );
+    const evaluatedConditionResult = evaluateCondition(
+      renderedCondition,
+      context,
+      this.node.stepId
+    );
+    this.stepExecutionRuntime.setInput({
+      rawCondition: thenNode.condition as string,
+      condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
+    // set the condition result to the step state so that it can be used in the exit node
+    this.stepExecutionRuntime.setCurrentStepState({
+      conditionResult: evaluatedConditionResult,
+    });
 
     if (evaluatedConditionResult) {
       this.goToThenBranch(thenNode);
@@ -85,25 +100,5 @@ export class EnterIfNodeImpl implements NodeImplementation {
       `Condition "${thenNode.condition}" evaluated to false for step ${this.node.stepId}. No else branch defined. Exiting if condition.`
     );
     this.wfExecutionRuntimeManager.navigateToNode(this.node.exitNodeId);
-  }
-
-  private evaluateCondition(condition: string | boolean | undefined): boolean {
-    if (typeof condition === 'boolean') {
-      return condition;
-    } else if (typeof condition === 'undefined') {
-      return false; // Undefined condition defaults to false
-    }
-
-    try {
-      return evaluateKql(condition, this.workflowContextManager.getContext());
-    } catch (error) {
-      if (error instanceof KQLSyntaxError) {
-        throw new Error(
-          `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(error)}`
-        );
-      }
-
-      throw error;
-    }
   }
 }

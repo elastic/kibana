@@ -10,24 +10,27 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
 import moment from 'moment';
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObject,
   SavedObjectsClientContract,
   Logger,
+  KibanaRequest,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
+import { addSpanLabels } from '@kbn/apm-utils';
 
 import type {
   KibanaAssetReference,
   PackageDataStreamTypes,
+  PackageDependencies,
   PackageInstallContext,
+  RegistryDataStream,
 } from '../../../../common/types';
-import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
 import { FLEET_INSTALL_FORMAT_VERSION } from '../../../constants/fleet_es_assets';
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
@@ -43,6 +46,7 @@ import type {
   KibanaAssetType,
   PackageVerificationResult,
   InstallResultStatus,
+  InstallLatestExecutedState,
 } from '../../../types';
 import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
@@ -56,6 +60,7 @@ import {
   FleetUnauthorizedError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
+  PackageAssetsVerificationError,
 } from '../../../errors';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -64,6 +69,7 @@ import {
 } from '../../../constants';
 import { licenseService } from '../..';
 import { appContextService } from '../../app_context';
+import { AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID } from '../../../tasks/auto_install_content_packages_task';
 import * as Registry from '../registry';
 import {
   setPackageInfo,
@@ -86,8 +92,10 @@ import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agen
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
 
 import { formatVerificationResultForSO } from './package_verification';
+import { brandInstallationSpaceId } from './brand_installation_space_id';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
+import { validatePackageUpload } from './validate_package_upload';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -100,13 +108,14 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
 import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
+import { mergeIsDependencyOf } from './dependencies';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
 const MAX_INSTALL_RETRIES = 5;
 const BASE_RETRY_DELAY_MS = 1000; // 1s
 
-const PACKAGES_TO_INSTALL_WITH_STREAMING = [
+export const PACKAGES_TO_INSTALL_WITH_STREAMING = [
   // The security_detection_engine package contains a large number of assets and
   // is not suitable for regular installation as it might cause OOM errors.
   'security_detection_engine',
@@ -181,7 +190,7 @@ export async function ensureInstalledPackage(options: {
   pkgVersion?: string;
   spaceId?: string;
   force?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
 }): Promise<EnsurePackageResult> {
   const {
     savedObjectsClient,
@@ -190,7 +199,7 @@ export async function ensureInstalledPackage(options: {
     pkgVersion,
     force = false,
     spaceId = DEFAULT_SPACE_ID,
-    authorizationHeader,
+    request,
   } = options;
 
   // If pkgVersion isn't specified, find the latest package version
@@ -221,7 +230,7 @@ export async function ensureInstalledPackage(options: {
       esClient,
       neverIgnoreVerificationError: !force,
       force: true, // Always force outdated packages to be installed if a later version isn't installed
-      authorizationHeader,
+      request,
     });
 
     if (
@@ -275,7 +284,7 @@ export async function handleInstallPackageFailure({
   installedPkg,
   esClient,
   spaceId,
-  authorizationHeader,
+  request,
   keepFailedInstallation,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -285,7 +294,7 @@ export async function handleInstallPackageFailure({
   installedPkg: SavedObject<Installation> | undefined;
   esClient: ElasticsearchClient;
   spaceId: string;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   keepFailedInstallation?: boolean;
 }) {
   if (error instanceof ConcurrentInstallOperationError) {
@@ -302,6 +311,7 @@ export async function handleInstallPackageFailure({
     targetVersion: pkgVersion,
     createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+    missingAssets: error instanceof PackageAssetsVerificationError ? error.meta : undefined,
   });
   // if there is an unknown server error, check the installType and do the following actions
   try {
@@ -342,7 +352,7 @@ export async function handleInstallPackageFailure({
         pkgkey,
         esClient,
         spaceId,
-        authorizationHeader,
+        request,
         retryFromLastState: true,
       });
       return;
@@ -364,7 +374,7 @@ export async function handleInstallPackageFailure({
         esClient,
         spaceId,
         force: true,
-        authorizationHeader,
+        request,
       });
     }
   } catch (e) {
@@ -400,16 +410,19 @@ interface InstallRegistryPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
+  allowOutdatedVersion?: boolean;
   neverIgnoreVerificationError?: boolean;
   ignoreConstraints?: boolean;
   prerelease?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   keepFailedInstallation?: boolean;
   useStreaming?: boolean;
   automaticInstall?: boolean;
+  installedAsDependencyOf?: { name: string; version: string };
+  skipDependencyCheck?: boolean;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -423,7 +436,7 @@ interface InstallCustomPackageParams {
   esClient: ElasticsearchClient;
   spaceId: string;
   force?: boolean;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   kibanaVersion: string;
 }
 interface InstallUploadedArchiveParams {
@@ -433,7 +446,7 @@ interface InstallUploadedArchiveParams {
   contentType: string;
   spaceId: string;
   version?: string;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
@@ -460,13 +473,33 @@ function sendEvent(telemetryEvent: PackageUpdateEvent) {
   );
 }
 
+function sendEventWithLatestState(
+  telemetryEvent: PackageUpdateEvent,
+  errorMessage: string,
+  latestExecutedState?: InstallLatestExecutedState
+) {
+  sendEvent({
+    ...telemetryEvent,
+    errorMessage,
+    ...(latestExecutedState
+      ? {
+          latestExecutedState: {
+            name: latestExecutedState.name,
+            error: latestExecutedState.error,
+          },
+        }
+      : {}),
+  });
+}
+
 async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   esClient,
   spaceId,
-  authorizationHeader,
+  request,
   force = false,
+  allowOutdatedVersion = false,
   ignoreConstraints = false,
   neverIgnoreVerificationError = false,
   prerelease = false,
@@ -476,6 +509,8 @@ async function installPackageFromRegistry({
   keepFailedInstallation = false,
   useStreaming = false,
   automaticInstall = false,
+  installedAsDependencyOf,
+  skipDependencyCheck = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
   // TODO: change epm API to /packageName/version so we don't need to do this
@@ -487,15 +522,10 @@ async function installPackageFromRegistry({
   let installType: InstallType = 'unknown';
   const installSource = 'registry';
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent(pkgName, pkgVersion);
+  let installedPkg: SavedObject<Installation> | undefined;
 
   try {
     // get the currently installed package
-
-    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-    installType = getInstallType({ pkgVersion, installedPkg });
-
-    telemetryEvent.installType = installType;
-    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     const queryLatest = () =>
       Registry.fetchFindLatestPackageOrThrow(pkgName, {
@@ -509,6 +539,12 @@ async function installPackageFromRegistry({
       latestPkg = await queryLatest();
       pkgVersion = latestPkg.version;
     }
+
+    installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    installType = getInstallType({ pkgVersion, installedPkg });
+
+    telemetryEvent.installType = installType;
+    telemetryEvent.currentVersion = installedPkg?.attributes.version || 'not_installed';
 
     // get latest package version and requested version in parallel for performance
     const [latestPackage, { paths, packageInfo, archiveIterator, verificationResult }] =
@@ -528,9 +564,9 @@ async function installPackageFromRegistry({
     telemetryEvent.discoveryDatasets = packageInfo.discovery?.datasets;
     telemetryEvent.automaticInstall = automaticInstall;
 
-    // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
+    // let the user install if using the force flag, allow_outdated_version flag, or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
-      force || ['reinstall', 'reupdate', 'rollback'].includes(installType);
+      force || allowOutdatedVersion || ['reinstall', 'reupdate', 'rollback'].includes(installType);
 
     // if the requested version is out-of-date of the latest package version, check if we allow it
     // if we don't allow it, return an error
@@ -542,7 +578,11 @@ async function installPackageFromRegistry({
       }
       logger.debug(
         `${pkgkey} is out-of-date, installing anyway due to ${
-          force ? 'force flag' : `install type ${installType}`
+          force
+            ? 'force flag'
+            : allowOutdatedVersion
+            ? 'allow_outdated_version flag'
+            : `install type ${installType}`
         }`
       );
     }
@@ -561,7 +601,7 @@ async function installPackageFromRegistry({
       );
     }
 
-    return await installPackageWithStateMachine({
+    const result = await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
       installSource,
@@ -574,19 +614,39 @@ async function installPackageFromRegistry({
       packageInstallContext,
       paths,
       verificationResult,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
       keepFailedInstallation,
       automaticInstall,
+      installedAsDependencyOf,
+      skipDependencyCheck,
     });
+
+    // After a successful, user-initiated (non-automatic) non-content-package install, trigger an
+    // immediate content pack autodiscovery run so users see content packs appear quickly rather
+    // than waiting for the next scheduled interval. Guard against re-triggering from the task's
+    // own content-pack installs (automaticInstall=true, type='content').
+    if (!result.error && !automaticInstall && packageInfo.type !== 'content') {
+      appContextService
+        .getTaskManagerStart()
+        ?.runSoon(AUTO_INSTALL_CONTENT_PACKAGES_TASK_ID)
+        .catch((e) =>
+          logger.debug(
+            `[AutoInstallContentPackagesTask] runSoon trigger after install failed (non-critical): ${e.message}`
+          )
+        );
+    }
+
+    return result;
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,
@@ -616,13 +676,15 @@ export async function installPackageWithStateMachine(options: {
   paths: string[];
   verificationResult?: PackageVerificationResult;
   telemetryEvent?: PackageUpdateEvent;
-  authorizationHeader?: HTTPAuthorizationHeader | null;
+  request?: KibanaRequest;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
   retryFromLastState?: boolean;
   useStreaming?: boolean;
   keepFailedInstallation?: boolean;
   automaticInstall?: boolean;
+  installedAsDependencyOf?: { name: string; version: string };
+  skipDependencyCheck?: boolean;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -637,7 +699,7 @@ export async function installPackageWithStateMachine(options: {
     esClient,
     spaceId,
     verificationResult,
-    authorizationHeader,
+    request,
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
@@ -645,6 +707,8 @@ export async function installPackageWithStateMachine(options: {
     useStreaming,
     keepFailedInstallation,
     automaticInstall,
+    installedAsDependencyOf,
+    skipDependencyCheck,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -669,7 +733,7 @@ export async function installPackageWithStateMachine(options: {
   }
 
   try {
-    span?.addLabels({
+    addSpanLabels({
       packageName: pkgName,
       packageVersion: pkgVersion,
       installType,
@@ -763,12 +827,14 @@ export async function installPackageWithStateMachine(options: {
       spaceId,
       verificationResult,
       installSource,
-      authorizationHeader,
+      request,
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       useStreaming,
+      installedAsDependencyOf,
+      skipDependencyCheck,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -791,7 +857,7 @@ export async function installPackageWithStateMachine(options: {
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-          error: { stack_trace: err.stack },
+          error: err,
         });
         await handleInstallPackageFailure({
           savedObjectsClient,
@@ -801,20 +867,22 @@ export async function installPackageWithStateMachine(options: {
           installedPkg,
           spaceId,
           esClient,
-          authorizationHeader,
+          request,
           keepFailedInstallation,
         });
-        sendEvent({
-          ...telemetryEvent!,
-          errorMessage: err.message,
-        });
+        sendEventWithLatestState(
+          telemetryEvent,
+          err.message,
+          installedPkg?.attributes.latest_executed_state
+        );
         return { error: err, installType, installSource, pkgName };
       });
   } catch (e) {
-    sendEvent({
-      ...telemetryEvent,
-      errorMessage: e.message,
-    });
+    sendEventWithLatestState(
+      telemetryEvent,
+      e.message,
+      installedPkg?.attributes.latest_executed_state
+    );
     return {
       error: e,
       installType,
@@ -833,7 +901,7 @@ async function installPackageByUpload({
   contentType,
   spaceId,
   version,
-  authorizationHeader,
+  request,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
   isBundledPackage,
@@ -877,9 +945,26 @@ async function installPackageByUpload({
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
       pkgName,
+      failOnUnexpectedError: !isBundledPackage,
     });
 
     installType = getInstallType({ pkgVersion, installedPkg });
+
+    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
+      archiveBuffer,
+      contentType,
+      useStreaming,
+    });
+
+    if (!isBundledPackage) {
+      await validatePackageUpload({
+        packageInfo,
+        paths,
+        installedPkg,
+        savedObjectsClient,
+        esClient,
+      });
+    }
 
     // as we do not verify uploaded packages, we must invalidate the verification cache
     deleteVerificationResult(packageInfo);
@@ -888,12 +973,6 @@ async function installPackageByUpload({
       name: pkgName,
       version: pkgVersion,
       packageInfo,
-    });
-
-    const { paths, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
-      contentType,
-      useStreaming,
     });
 
     const packageInstallContext: PackageInstallContext = {
@@ -916,7 +995,7 @@ async function installPackageByUpload({
       spaceId,
       force: true, // upload has implicit force
       paths,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       useStreaming,
@@ -935,6 +1014,7 @@ export type InstallPackageParams = {
   spaceId: string;
   neverIgnoreVerificationError?: boolean;
   retryFromLastState?: boolean;
+  skipDependencyCheck?: boolean;
 } & (
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
   | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
@@ -953,12 +1033,13 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 
-  const authorizationHeader = args.authorizationHeader;
+  const request = args.request;
 
   if (args.installSource === 'registry') {
     const {
       pkgkey,
       force,
+      allowOutdatedVersion,
       ignoreConstraints,
       spaceId,
       neverIgnoreVerificationError,
@@ -969,6 +1050,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      installedAsDependencyOf,
+      skipDependencyCheck,
     } = args;
 
     const matchingBundledPackage = await getBundledPackageByPkgKey(pkgkey);
@@ -987,7 +1070,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
         contentType: 'application/zip',
         spaceId,
         version: matchingBundledPackage.version,
-        authorizationHeader,
+        request,
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
         isBundledPackage: true,
@@ -1004,16 +1087,19 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
+      allowOutdatedVersion,
       neverIgnoreVerificationError,
       ignoreConstraints,
       prerelease,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
       retryFromLastState,
       keepFailedInstallation,
       useStreaming,
       automaticInstall,
+      installedAsDependencyOf,
+      skipDependencyCheck,
     });
 
     return response;
@@ -1032,7 +1118,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       archiveBuffer,
       contentType,
       spaceId,
-      authorizationHeader,
+      request,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
     });
@@ -1047,7 +1133,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       esClient,
       spaceId,
       force,
-      authorizationHeader,
+      request,
       kibanaVersion,
     });
     return response;
@@ -1064,7 +1150,7 @@ export async function installCustomPackage(
     spaceId,
     pkgName,
     force,
-    authorizationHeader,
+    request,
     datasets,
     kibanaVersion,
   } = args;
@@ -1080,7 +1166,12 @@ export async function installCustomPackage(
     title: convertStringToTitle(pkgName),
     description: generateDescription(datasets.map((dataset) => dataset.name)),
     version: INITIAL_VERSION,
-    owner: { github: authorizationHeader?.username ?? 'unknown' },
+    owner: {
+      github:
+        (request
+          ? appContextService.getSecurityCore().authc.getCurrentUser(request)?.username
+          : null) ?? 'unknown',
+    },
     type: 'integration' as const,
     data_streams: generateDatastreamEntries(datasets, pkgName),
   };
@@ -1114,7 +1205,7 @@ export async function installCustomPackage(
     spaceId,
     force,
     paths,
-    authorizationHeader,
+    request,
   });
 }
 
@@ -1173,6 +1264,9 @@ export async function restartInstallation(options: {
   installSource: InstallSource;
   verificationResult?: PackageVerificationResult;
   previousVersion?: string | null;
+  installedAsDependencyOf?: { name: string; version: string };
+  existingIsDependencyOf?: { name: string; version: string }[];
+  dependencies?: PackageDependencies | null;
 }) {
   const {
     savedObjectsClient,
@@ -1181,6 +1275,7 @@ export async function restartInstallation(options: {
     installSource,
     verificationResult,
     previousVersion,
+    dependencies,
   } = options;
 
   let savedObjectUpdate: Partial<Installation> = {
@@ -1189,7 +1284,21 @@ export async function restartInstallation(options: {
     install_started_at: new Date().toISOString(),
     install_source: installSource,
     previous_version: previousVersion,
+    ...(dependencies ? { dependencies } : {}),
   };
+
+  if (options.installedAsDependencyOf) {
+    savedObjectUpdate.is_dependency_of = mergeIsDependencyOf(
+      options.installedAsDependencyOf,
+      options.existingIsDependencyOf
+    );
+    // Do not overwrite installed_as_dependency here: if the package was manually installed
+    // before becoming a dependency (e.g. it is being updated to satisfy a new constraint),
+    // we want to preserve the existing false value so cleanup won't auto-remove it.
+  } else {
+    // Explicit user install: ensure the package is not marked as a pure dependency.
+    savedObjectUpdate.installed_as_dependency = false;
+  }
 
   if (verificationResult) {
     savedObjectUpdate = {
@@ -1215,12 +1324,22 @@ export async function createInstallation(options: {
   installSource: InstallSource;
   spaceId: string;
   verificationResult?: PackageVerificationResult;
+  installedAsDependencyOf?: { name: string; version: string };
+  dependencies?: PackageDependencies | null;
 }) {
-  const { savedObjectsClient, packageInfo, installSource, verificationResult } = options;
+  const {
+    savedObjectsClient,
+    packageInfo,
+    installSource,
+    verificationResult,
+    dependencies,
+    installedAsDependencyOf,
+  } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
-  const toSaveESIndexPatterns = generateESIndexPatterns(
-    getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME)
+  const typedStreams = getNormalizedDataStreams(packageInfo, GENERIC_DATASET_NAME).filter(
+    (ds): ds is RegistryDataStream => !!ds.type
   );
+  const toSaveESIndexPatterns = generateESIndexPatterns(typedStreams, packageInfo);
 
   // For "stack-aligned" packages, default the `keep_policies_up_to_date` setting to true. For all other
   // packages, default it to undefined. Use undefined rather than false to allow us to differentiate
@@ -1233,7 +1352,8 @@ export async function createInstallation(options: {
 
   let savedObject: Installation = {
     installed_kibana: [],
-    installed_kibana_space_id: options.spaceId,
+    installed_kibana_space_id: brandSpaceId(options.spaceId),
+    installed_kibana_version: appContextService.getKibanaVersion(),
     installed_es: [],
     package_assets: [],
     es_index_patterns: toSaveESIndexPatterns,
@@ -1246,6 +1366,10 @@ export async function createInstallation(options: {
     install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
     keep_policies_up_to_date: defaultKeepPoliciesUpToDate,
     verification_status: 'unknown',
+    ...(dependencies ? { dependencies } : {}),
+    ...(installedAsDependencyOf
+      ? { is_dependency_of: [installedAsDependencyOf], installed_as_dependency: true }
+      : {}),
   };
 
   if (verificationResult) {
@@ -1259,13 +1383,10 @@ export async function createInstallation(options: {
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const created = await savedObjectsClient.create<Installation>(
-    PACKAGES_SAVED_OBJECT_TYPE,
-    savedObject,
-    { id: pkgName, overwrite: true }
-  );
-
-  return created;
+  return savedObjectsClient.create<Installation>(PACKAGES_SAVED_OBJECT_TYPE, savedObject, {
+    id: pkgName,
+    overwrite: true,
+  });
 }
 
 export const kibanaAssetsToAssetsRef = (
@@ -1278,7 +1399,10 @@ export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
   assetRefs: KibanaAssetReference[] | null,
-  saveAsAdditionnalSpace = false
+  spaceId: string,
+  saveAsAdditionnalSpace = false,
+  append = false,
+  typesToReplace: string[] = []
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
@@ -1287,40 +1411,82 @@ export const saveKibanaAssetsRefs = async (
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const spaceId = savedObjectsClient.getCurrentNamespace() || DEFAULT_SPACE_ID;
-
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
   await pRetry(
     async () => {
-      const installation = saveAsAdditionnalSpace
-        ? await savedObjectsClient
-            .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
-            .catch((e) => {
-              if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-                return undefined;
-              }
-              throw e;
-            })
-        : undefined;
+      let installation: SavedObject<Installation> | undefined;
+      if (saveAsAdditionnalSpace || append) {
+        const installationSo = await savedObjectsClient
+          .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+          .catch((e) => {
+            if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+              return undefined;
+            }
+            throw e;
+          });
+        installation = installationSo
+          ? { ...installationSo, attributes: brandInstallationSpaceId(installationSo.attributes) }
+          : undefined;
+      }
+
+      if (saveAsAdditionnalSpace) {
+        const primarySpaceId = installation?.attributes?.installed_kibana_space_id;
+
+        if (primarySpaceId && primarySpaceId === spaceId) {
+          appContextService
+            .getLogger()
+            .error(
+              `saveKibanaAssetsRefs: unexpectedly received spaceId '${spaceId}' for package '${pkgName}' for saving as additional space that matches primary installation space. Skipping.`
+            );
+          return; // no-op: skip SO update
+        }
+
+        // Strip the primary-space key if it was unexpectedly written there
+        const keysToOmit = primarySpaceId ? [spaceId, primarySpaceId] : [spaceId];
+
+        let spaceAssetRefs = assetRefs !== null ? assetRefs : [];
+        if (append && installation) {
+          const existingSpaceRefs = (
+            installation.attributes?.additional_spaces_installed_kibana?.[spaceId] ?? []
+          ).filter((r) => !typesToReplace.includes(r.type));
+          spaceAssetRefs = uniqBy(
+            [...spaceAssetRefs, ...existingSpaceRefs],
+            (asset) => asset.id + asset.type
+          );
+        }
+        return savedObjectsClient.update<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          pkgName,
+          {
+            additional_spaces_installed_kibana: {
+              ...omit(
+                installation?.attributes?.additional_spaces_installed_kibana ?? {},
+                keysToOmit
+              ),
+              ...(assetRefs !== null ? { [spaceId]: spaceAssetRefs } : {}),
+            },
+          },
+          { refresh: false }
+        );
+      }
+
+      let newAssetRefs = assetRefs !== null ? assetRefs : [];
+      if (append && installation) {
+        const existingRefs = (installation.attributes.installed_kibana ?? []).filter(
+          (r) => !typesToReplace.includes(r.type)
+        );
+        newAssetRefs = uniqBy([...newAssetRefs, ...existingRefs], (asset) => asset.id + asset.type);
+      }
 
       return savedObjectsClient.update<Installation>(
         PACKAGES_SAVED_OBJECT_TYPE,
         pkgName,
-        saveAsAdditionnalSpace
-          ? {
-              additional_spaces_installed_kibana: {
-                ...omit(
-                  installation?.attributes?.additional_spaces_installed_kibana ?? {},
-                  spaceId
-                ),
-                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
-              },
-            }
-          : {
-              installed_kibana: assetRefs !== null ? assetRefs : [],
-            },
+        {
+          installed_kibana: newAssetRefs,
+          installed_kibana_version: appContextService.getKibanaVersion(),
+        },
         { refresh: false }
       );
     },

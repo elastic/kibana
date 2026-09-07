@@ -22,6 +22,13 @@ const Component = dynamic(async () => {
   };
 });
 
+/**
+ * A lazy-loaded wrapper component for the {@link DashboardRenderer}.
+ * This component dynamically imports the dashboard renderer to reduce initial bundle size.
+ *
+ * @param props - The {@link DashboardRendererProps} to pass to the dashboard renderer.
+ * @returns A React element containing the lazy-loaded dashboard renderer.
+ */
 export function LazyDashboardRenderer(props: DashboardRendererProps) {
   return <Component {...props} />;
 }

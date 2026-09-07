@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -30,6 +30,7 @@ export const useGetHistogramsForFields = (
   fields: FieldHistogramRequestConfig[],
   query: string | SavedSearchQuery,
   runtimeMappings?: FieldHistogramsRequestSchema['runtimeMappings'],
+  projectRouting?: FieldHistogramsRequestSchema['projectRouting'],
   enabled?: boolean,
   samplerShardSize = DEFAULT_SAMPLER_SHARD_SIZE
 ) => {
@@ -43,6 +44,7 @@ export const useGetHistogramsForFields = (
         fields,
         query,
         runtimeMappings,
+        projectRouting,
         samplerShardSize,
       },
     ],
@@ -55,6 +57,7 @@ export const useGetHistogramsForFields = (
             fields,
             samplerShardSize,
             ...(runtimeMappings !== undefined ? { runtimeMappings } : {}),
+            ...(projectRouting !== undefined ? { projectRouting } : {}),
           }),
           version: '1',
           signal,

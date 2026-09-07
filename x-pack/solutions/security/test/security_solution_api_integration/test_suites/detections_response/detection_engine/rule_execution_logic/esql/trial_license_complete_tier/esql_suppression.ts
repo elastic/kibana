@@ -25,6 +25,7 @@ import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
+import { deleteAllRules, deleteAllAlerts, createRule } from '@kbn/detections-response-ftr-services';
 import {
   getPreviewAlerts,
   previewRule,
@@ -34,17 +35,14 @@ import {
   setAlertStatus,
   patchRule,
 } from '../../../../utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-  createRule,
-} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EntityStoreV2EnrichmentSetup } from '../../entity_store_v2_enrichment_setup';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const entityStoreV2 = EntityStoreV2EnrichmentSetup(getService);
   const es = getService('es');
   const log = getService('log');
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
@@ -2029,11 +2027,22 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts enrichment', () => {
       before(async () => {
-        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: {
+                id: 'host:host-0',
+                type: 'host',
+                risk: { calculated_level: 'Low', calculated_score_norm: 1 },
+              },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched with host risk score', async () => {
@@ -2071,15 +2080,19 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.setup({
+          hosts: [
+            {
+              host: { name: 'host-0' },
+              entity: { id: 'host:host-0', type: 'host' },
+              asset: { criticality: 'extreme_impact' },
+            },
+          ],
+        });
       });
 
       after(async () => {
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
-        );
+        await entityStoreV2.teardown();
       });
 
       it('should be enriched alert with criticality_level', async () => {

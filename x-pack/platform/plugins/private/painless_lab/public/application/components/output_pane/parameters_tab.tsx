@@ -31,12 +31,12 @@ export const ParametersTab: FunctionComponent = () => {
               defaultMessage: 'These variables are assigned to the "params" object in your script',
             })}
           >
-            <span>
+            <span tabIndex={0}>
               <FormattedMessage
                 id="xpack.painlessLab.parametersFieldLabel"
                 defaultMessage="Parameters (JSON)"
               />{' '}
-              <EuiIcon type="question" color="subdued" />
+              <EuiIcon type="question" color="subdued" aria-hidden={true} />
             </span>
           </EuiToolTip>
         }

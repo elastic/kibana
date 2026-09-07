@@ -20,6 +20,7 @@ export const migrateSingleAgentHandler: FleetRequestHandler<
   TypeOf<typeof MigrateSingleAgentRequestSchema.body>
 > = async (context, request, response) => {
   const [coreContext] = await Promise.all([context.core, context.fleet]);
+
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   const options = request.body;
@@ -58,10 +59,13 @@ export const bulkMigrateAgentsHandler: FleetRequestHandler<
 
   const agentOptions = Array.isArray(agents) ? { agentIds: agents } : { kuery: agents };
 
-  const body = await AgentService.bulkMigrateAgents(esClient, soClient, {
+  const result = await AgentService.bulkMigrateAgents(esClient, soClient, {
     ...options,
     ...agentOptions,
   });
 
-  return response.ok({ body });
+  if (options.dryRun) {
+    return response.ok({ body: { count: (result as { count: number }).count } });
+  }
+  return response.ok({ body: result as { actionId: string } });
 };

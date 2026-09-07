@@ -44,12 +44,15 @@ describe('registerRouteForBundle', () => {
         path: '/route-path/{path*}',
         options: {
           access: 'public',
-          authRequired: false,
           excludeFromRateLimiter: true,
           httpResource: true,
         },
         validate: expect.any(Object),
         security: {
+          authc: {
+            enabled: false,
+            reason: expect.any(String),
+          },
           authz: {
             enabled: false,
             reason: expect.any(String),

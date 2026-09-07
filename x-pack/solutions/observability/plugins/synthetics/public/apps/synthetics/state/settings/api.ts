@@ -45,6 +45,8 @@ export const setDynamicSettings = async ({
     defaultEmail: settings.defaultEmail,
     defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
     defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
+    privateLocationsSyncInterval: settings.privateLocationsSyncInterval,
+    rebalancePrivateLocationShardsEnabled: settings.rebalancePrivateLocationShardsEnabled,
   };
   return await apiService.put(
     SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,
@@ -54,6 +56,14 @@ export const setDynamicSettings = async ({
       version: '2023-10-31',
     }
   );
+};
+
+export const triggerMwSync = async (): Promise<void> => {
+  const url = SYNTHETICS_API_URLS.TRIGGER_TASK_RUN.replace(
+    '{taskType}',
+    'syncPrivateLocationMonitors'
+  );
+  await apiService.post(url);
 };
 
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {

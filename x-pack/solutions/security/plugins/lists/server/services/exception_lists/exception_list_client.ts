@@ -11,6 +11,7 @@ import type {
   SavedObjectsClosePointInTimeResponse,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
@@ -23,7 +24,7 @@ import {
   createExceptionListItemSchema,
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { createPromiseFromStreams } from '@kbn/utils';
 
 import type {
@@ -32,6 +33,7 @@ import type {
 } from '../extension_points';
 
 import type {
+  BulkDeleteExceptionListItemsOptions,
   ClosePointInTimeOptions,
   ConstructorOptions,
   CreateEndpointListItemOptions,
@@ -99,6 +101,7 @@ import { findValueListExceptionListItemsPointInTimeFinder } from './find_value_l
 import { findExceptionListItemPointInTimeFinder } from './find_exception_list_item_point_in_time_finder';
 import { duplicateExceptionListAndItems } from './duplicate_exception_list';
 import { updateOverwriteExceptionListItem } from './update_overwrite_exception_list_item';
+import { bulkDeleteExceptionListItems } from './bulk_delete_exception_list_items';
 
 /**
  * Class for use for exceptions that are with trusted applications or
@@ -290,20 +293,39 @@ export class ExceptionListClient {
   }: CreateEndpointListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
-    return createExceptionListItem({
+
+    let itemData: CreateExceptionListItemOptions = {
       comments,
       description,
       entries,
       expireTime: undefined, // Not currently used with endpoint exceptions
       itemId,
-      listId: ENDPOINT_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
       meta,
       name,
       namespaceType: 'agnostic',
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      itemData = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreCreateItem',
+        itemData,
+        this.getServerExtensionCallbackContext(),
+        (data) => {
+          return validateData(
+            createExceptionListItemSchema,
+            transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return createExceptionListItem({
+      ...itemData,
+      savedObjectsClient,
       user,
     });
   };
@@ -364,7 +386,8 @@ export class ExceptionListClient {
   }: UpdateEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
-    return updateExceptionListItem({
+
+    let updatedItem: UpdateExceptionListItemOptions = {
       _version,
       comments,
       description,
@@ -376,9 +399,27 @@ export class ExceptionListClient {
       name,
       namespaceType: 'agnostic',
       osTypes,
-      savedObjectsClient,
       tags,
       type,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      updatedItem = await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreUpdateItem',
+        updatedItem,
+        this.getServerExtensionCallbackContext(),
+        (data) => {
+          return validateData(
+            updateExceptionListItemSchema,
+            transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
+          );
+        }
+      );
+    }
+
+    return updateExceptionListItem({
+      ...updatedItem,
+      savedObjectsClient,
       user,
     });
   };
@@ -395,6 +436,15 @@ export class ExceptionListClient {
     id,
   }: GetEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreGetOneItem',
+        { id, itemId, namespaceType: 'agnostic' },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return getExceptionListItem({ id, itemId, namespaceType: 'agnostic', savedObjectsClient });
   };
 
@@ -402,6 +452,7 @@ export class ExceptionListClient {
    * Create an exception list container
    * @param options
    * @param options.description a description of the exception list
+   * @param options.osTypes item os types to apply
    * @param options.immutable True if it's a immutable list, otherwise false
    * @param options.listId the "list_id" of the exception list
    * @param options.meta Optional meta data to add to the exception list
@@ -414,6 +465,7 @@ export class ExceptionListClient {
    */
   public createExceptionList = async ({
     description,
+    osTypes,
     immutable,
     listId,
     meta,
@@ -431,6 +483,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -781,6 +834,33 @@ export class ExceptionListClient {
   };
 
   /**
+   * Bulk delete exception list items by an `id` array
+   * @param options
+   * @param options.ids the array of ids of exception list items to delete
+   * @param options.namespaceType saved object namespace (single | agnostic)
+   */
+  public bulkDeleteExceptionListItems = async ({
+    ids,
+    namespaceType,
+  }: BulkDeleteExceptionListItemsOptions): Promise<void> => {
+    const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      // todo: this is not ideal, items will be checked one-by-one. we'd need an `exceptionsListPreBulkDeleteItems`
+      // callback, but then that also needs a bulkGet function in exceptionListClient, which we don't have yet.
+      for (const id of ids) {
+        await this.serverExtensionsClient.pipeRun(
+          'exceptionsListPreDeleteItem',
+          { id, itemId: undefined, namespaceType },
+          this.getServerExtensionCallbackContext()
+        );
+      }
+    }
+
+    return bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+  };
+
+  /**
    * This is the same as "deleteExceptionListItem" except it applies specifically to the endpoint list.
    * Either id or itemId has to be defined to delete but not both is required. If both are provided, the id
    * is preferred.
@@ -793,6 +873,15 @@ export class ExceptionListClient {
     itemId,
   }: DeleteEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreDeleteItem',
+        { id, itemId, namespaceType: 'agnostic' },
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
     return deleteExceptionListItem({
       id,
       itemId,
@@ -829,36 +918,30 @@ export class ExceptionListClient {
   }: FindExceptionListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
 
-    if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
-        'exceptionsListPreSingleListFind',
-        {
-          filter,
-          listId,
-          namespaceType,
-          page,
-          perPage,
-          pit,
-          searchAfter,
-          sortField,
-          sortOrder,
-        },
-        this.getServerExtensionCallbackContext()
-      );
-    }
-
-    return findExceptionListItem({
+    const findOptions = {
       filter,
       listId,
       namespaceType,
       page,
       perPage,
       pit,
-      savedObjectsClient,
-      search,
       searchAfter,
       sortField,
       sortOrder,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSingleListFind',
+        findOptions,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return findExceptionListItem({
+      ...findOptions,
+      savedObjectsClient,
+      search,
     });
   };
 
@@ -1025,19 +1108,41 @@ export class ExceptionListClient {
     sortOrder,
   }: FindEndpointListItemOptions): Promise<FoundExceptionListItemSchema | null> => {
     const { savedObjectsClient } = this;
-    await this.createEndpointList();
-    return findExceptionListItem({
+
+    // Attempt to auto-create the endpoint list for users with write access.
+    // Silently ignore forbidden errors for read-only users - they can still query existing lists.
+    try {
+      await this.createEndpointList();
+    } catch (err) {
+      if (!SavedObjectsErrorHelpers.isForbiddenError(err)) {
+        throw err;
+      }
+    }
+
+    const findOptions = {
       filter,
-      listId: ENDPOINT_LIST_ID,
-      namespaceType: 'agnostic',
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      namespaceType: 'agnostic' as const,
       page,
       perPage,
       pit,
-      savedObjectsClient,
-      search,
       searchAfter,
       sortField,
       sortOrder,
+    };
+
+    if (this.enableServerExtensionPoints) {
+      await this.serverExtensionsClient.pipeRun(
+        'exceptionsListPreSingleListFind',
+        findOptions,
+        this.getServerExtensionCallbackContext()
+      );
+    }
+
+    return findExceptionListItem({
+      ...findOptions,
+      savedObjectsClient,
+      search,
     });
   };
 
@@ -1092,18 +1197,21 @@ export class ExceptionListClient {
       ...readStream,
     ]);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });
@@ -1127,18 +1235,21 @@ export class ExceptionListClient {
     // validation of import and sorting of lists and items
     const parsedObjects = exceptionsChecksFromArray(exceptionsToImport, maxExceptionsImportSize);
 
+    let shouldListApiPerformOverwrite = overwrite;
     if (this.enableServerExtensionPoints) {
-      await this.serverExtensionsClient.pipeRun(
+      const result = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreImport',
-        parsedObjects,
+        { data: parsedObjects, overwrite },
         this.getServerExtensionCallbackContext()
       );
+
+      shouldListApiPerformOverwrite = result.overwrite;
     }
 
     return importExceptions({
       exceptions: parsedObjects,
       generateNewListId: false,
-      overwrite,
+      overwrite: shouldListApiPerformOverwrite,
       savedObjectsClient,
       user,
     });

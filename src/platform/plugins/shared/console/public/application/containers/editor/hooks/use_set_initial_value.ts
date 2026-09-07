@@ -14,6 +14,11 @@ import { decompressFromEncodedURIComponent } from 'lz-string';
 import { i18n } from '@kbn/i18n';
 import { useEffect, useRef } from 'react';
 import { DEFAULT_INPUT_VALUE } from '../../../../../common/constants';
+import { removeLoadFromParameter } from '../../../lib/load_from';
+import { useEditorActionContext } from '../../../contexts';
+
+const httpsProtocol = 'https:';
+const elasticHostname = 'www.elastic.co';
 
 interface QueryParams {
   load_from: string;
@@ -26,6 +31,8 @@ interface SetInitialValueParams {
   setValue: (value: string) => void;
   /** The toasts service. */
   toasts: IToasts;
+  /** Optional override for the default editor content shown when no saved buffer exists. */
+  defaultEditorContent?: string;
 }
 
 /**
@@ -45,10 +52,13 @@ export const readLoadFromParam = () => {
  * @param params The {@link SetInitialValueParams} to use.
  */
 export const useSetInitialValue = (params: SetInitialValueParams) => {
-  const { localStorageValue, setValue, toasts } = params;
+  const { localStorageValue, setValue, toasts, defaultEditorContent } = params;
   const isInitialValueSet = useRef<boolean>(false);
+  const editorDispatch = useEditorActionContext();
 
   useEffect(() => {
+    const ALLOWED_PATHS = ['/guide/', '/docs/'];
+
     const loadBufferFromRemote = async (url: string) => {
       if (/^https?:\/\//.test(url)) {
         // Check if this is a valid URL
@@ -59,10 +69,20 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
         }
         // Parse the URL to avoid issues with spaces and other special characters.
         const parsedURL = new URL(url);
-        if (parsedURL.origin === 'https://www.elastic.co') {
-          const resp = await fetch(parsedURL);
+        // Validate protocol, hostname, and allowed path to prevent request forgery
+        if (
+          parsedURL.protocol === httpsProtocol &&
+          parsedURL.hostname === elasticHostname &&
+          ALLOWED_PATHS.some((path) => parsedURL.pathname.startsWith(path))
+        ) {
+          // Construct a safe URL from validated components to prevent request forgery
+          const safeURL = new URL(parsedURL.href);
+          safeURL.protocol = httpsProtocol;
+          safeURL.hostname = elasticHostname;
+
+          const resp = await fetch(safeURL);
           const data = await resp.text();
-          setValue(`${localStorageValue ?? ''}\n\n${data}`);
+          editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
         } else {
           toasts.addWarning(
             i18n.translate('console.monaco.loadFromDataUnrecognizedUrlErrorMessage', {
@@ -88,36 +108,41 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
           return;
         }
 
-        setValue(data);
+        editorDispatch({ type: 'setRequestToRestore', payload: { request: data } });
       }
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
-    const onHashChange = debounce(async () => {
+    const loadFromUrl = debounce(async () => {
       const url = readLoadFromParam();
       if (!url) {
         return;
       }
-      await loadBufferFromRemote(url);
+      try {
+        await loadBufferFromRemote(url);
+      } catch (e) {
+        // Nothing was appended, so leave the parameter in place and let a reload retry it.
+        return;
+      }
+      // The parameter is a one-shot instruction. Leaving it in the URL would re-append the
+      // request on every later page load, resurrecting requests the user has since cleared.
+      // Replace rather than push, so Back cannot return to the URL and re-consume it.
+      removeLoadFromParameter({ replace: true });
     }, 200);
 
-    window.addEventListener('hashchange', onHashChange);
-
-    const loadFromParam = readLoadFromParam();
+    window.addEventListener('hashchange', loadFromUrl);
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
-      if (loadFromParam) {
-        loadBufferFromRemote(loadFromParam);
-      } else {
-        // Only set to default input value if the localstorage value is undefined
-        setValue(localStorageValue ?? DEFAULT_INPUT_VALUE);
-      }
+      // Only set to default input value if the localstorage value is undefined
+      setValue(localStorageValue ?? defaultEditorContent ?? DEFAULT_INPUT_VALUE);
+      loadFromUrl();
       isInitialValueSet.current = true;
     }
 
     return () => {
-      window.removeEventListener('hashchange', onHashChange);
+      window.removeEventListener('hashchange', loadFromUrl);
+      loadFromUrl.cancel();
     };
-  }, [localStorageValue, setValue, toasts]);
+  }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

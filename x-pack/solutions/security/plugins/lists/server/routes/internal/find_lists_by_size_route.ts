@@ -13,6 +13,7 @@ import {
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
 import { chunk } from 'lodash';
+import { LISTS_API_READ } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { decodeCursor } from '../../services/utils';
@@ -26,7 +27,7 @@ export const findListsBySizeRoute = (router: ListsPluginRouter): void => {
       path: INTERNAL_FIND_LISTS_BY_SIZE,
       security: {
         authz: {
-          requiredPrivileges: ['lists-read'],
+          requiredPrivileges: [LISTS_API_READ],
         },
       },
     })

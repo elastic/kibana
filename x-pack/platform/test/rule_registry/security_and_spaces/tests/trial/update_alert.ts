@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit } from 'lodash/fp';
 
 import {
   superUser,
@@ -34,11 +33,11 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === '.alerts-observability.apm.alerts'
+    const observabilityIndex = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith('.alerts-observability.apm.alerts')
     );
-    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts');
-    return observabilityIndex;
+    expect(observabilityIndex).to.eql('.alerts-observability.apm.alerts-default');
+    return '.alerts-observability.apm.alerts';
   };
 
   describe('rbac', () => {
@@ -93,29 +92,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(409);
       });
 
-      it(`${obsMinReadAlertsAllSpacesAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {
-        const apmIndex = await getAPMIndexName(superUser);
-        const res = await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-          .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
-          .set('kbn-xsrf', 'true')
-          .send({
-            ids: ['NoxgpHkBqbdrfX07MqXV'],
-            status: 'closed',
-            index: apmIndex,
-            _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
-          })
-          .expect(200);
-        expect(omit(['_version', '_seq_no'], res.body)).to.eql({
-          success: true,
-          _index: '.alerts-observability.apm.alerts',
-          _id: 'NoxgpHkBqbdrfX07MqXV',
-          result: 'updated',
-          _shards: { total: 2, successful: 1, failed: 0 },
-          _primary_term: 1,
-        });
-      });
-      it(`${obsMinReadAlertsAllSpacesAll.username} should receive a 409 if trying to update an old alert document version`, async () => {
+      it(`${obsMinReadAlertsAllSpacesAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
@@ -127,21 +104,10 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(200);
-        await supertestWithoutAuth
-          .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
-          .auth(obsMinReadAlertsAllSpacesAll.username, obsMinReadAlertsAllSpacesAll.password)
-          .set('kbn-xsrf', 'true')
-          .send({
-            ids: ['NoxgpHkBqbdrfX07MqXV'],
-            status: 'closed',
-            index: apmIndex,
-            _version: Buffer.from(JSON.stringify([999, 999]), 'utf8').toString('base64'),
-          })
-          .expect(409);
+          .expect(404);
       });
 
-      it(`${obsMinReadAlertsAll.username} should be able to update the APM alert in ${SPACE1}`, async () => {
+      it(`${obsMinReadAlertsAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth
           .post(`${getSpaceUrlPrefix(SPACE1)}${TEST_URL}`)
@@ -153,8 +119,9 @@ export default ({ getService }: FtrProviderContext) => {
             index: apmIndex,
             _version: Buffer.from(JSON.stringify([0, 1]), 'utf8').toString('base64'),
           })
-          .expect(200);
+          .expect(404);
       });
+
       it(`${obsMinAll.username} should NOT be able to update the APM alert in ${SPACE1}`, async () => {
         const apmIndex = await getAPMIndexName(superUser);
         await supertestWithoutAuth

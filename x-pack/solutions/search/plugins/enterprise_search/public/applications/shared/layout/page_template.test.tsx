@@ -5,36 +5,45 @@
  * 2.0.
  */
 
+jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+  const MockKibanaPageTemplate: any = jest.fn(({ children, solutionNav }: any) =>
+    solutionNav?.footer ? [solutionNav.footer, children] : children
+  );
+  MockKibanaPageTemplate.Section = jest.fn(({ children }: any) => children);
+  return { KibanaPageTemplate: MockKibanaPageTemplate };
+});
+
 import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
 
-import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
-import { FlashMessages } from '../flash_messages';
-import { Loading } from '../loading';
-
+import type { PageTemplateProps } from './page_template';
 import { EnterpriseSearchPageTemplateWrapper } from './page_template';
+
+const MockKibanaPageTemplate = jest.mocked(KibanaPageTemplate);
 
 describe('EnterpriseSearchPageTemplateWrapper', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    setMockValues({ readOnlyMode: false });
+    setMockValues({
+      readOnlyMode: false,
+      notifications: { tours: { isEnabled: jest.fn(() => false) } },
+    });
   });
 
   it('renders', () => {
-    const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
-
-    expect(wrapper.type()).toEqual(KibanaPageTemplate);
+    renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
+    expect(MockKibanaPageTemplate).toHaveBeenCalled();
   });
 
   it('renders children', () => {
-    const wrapper = shallow(
+    renderWithKibanaRenderContext(
       <EnterpriseSearchPageTemplateWrapper>
         <div className="hello">
           {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
@@ -42,155 +51,148 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       </EnterpriseSearchPageTemplateWrapper>
     );
 
-    expect(wrapper.find('.hello').text()).toEqual('world');
+    expect(screen.getByText('world')).toBeInTheDocument();
   });
 
   describe('loading state', () => {
     it('renders a loading icon in place of children', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper isLoading>
-          <div className="test" />
+          <div data-test-subj="test" />
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find(Loading).exists()).toBe(true);
-      expect(wrapper.find('.test').exists()).toBe(false);
+      expect(screen.getByTestId('enterpriseSearchLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('test')).not.toBeInTheDocument();
     });
 
     it('renders children & does not render a loading icon when the page is done loading', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper isLoading={false}>
-          <div className="test" />
+          <div data-test-subj="test" />
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find(Loading).exists()).toBe(false);
-      expect(wrapper.find('.test').exists()).toBe(true);
+      expect(screen.queryByTestId('enterpriseSearchLoading')).not.toBeInTheDocument();
+      expect(screen.getByTestId('test')).toBeInTheDocument();
     });
   });
 
   describe('empty state', () => {
     it('renders a custom empty state in place of children', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper
           isEmptyState
           emptyState={
-            <div className="emptyState">
+            <div data-test-subj="emptyState">
               {i18n.translate('xpack.enterpriseSearch..div.nothingHereYetLabel', {
                 defaultMessage: 'Nothing here yet!',
               })}
             </div>
           }
         >
-          <div className="test" />
+          <div data-test-subj="test" />
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find('.emptyState').exists()).toBe(true);
-      expect(wrapper.find('.test').exists()).toBe(false);
-
-      // @see https://github.com/elastic/kibana/blob/main/dev_docs/tutorials/kibana_page_template.mdx#isemptystate
-      // if you want to use KibanaPageTemplate's `isEmptyState` without a custom emptyState
+      expect(screen.getByTestId('emptyState')).toBeInTheDocument();
+      expect(screen.queryByTestId('test')).not.toBeInTheDocument();
     });
 
     it('does not render the custom empty state if the page is not empty', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper
           isEmptyState={false}
           emptyState={
-            <div className="emptyState">
+            <div data-test-subj="emptyState">
               {i18n.translate('xpack.enterpriseSearch..div.nothingHereYetLabel', {
                 defaultMessage: 'Nothing here yet!',
               })}
             </div>
           }
         >
-          <div className="test" />
+          <div data-test-subj="test" />
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find('.emptyState').exists()).toBe(false);
-      expect(wrapper.find('.test').exists()).toBe(true);
+      expect(screen.queryByTestId('emptyState')).not.toBeInTheDocument();
+      expect(screen.getByTestId('test')).toBeInTheDocument();
     });
 
     it('does not render an empty state if the page is still loading', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper
           isLoading
           isEmptyState
-          emptyState={<div className="emptyState" />}
+          emptyState={<div data-test-subj="emptyState" />}
         />
       );
 
-      expect(wrapper.find(Loading).exists()).toBe(true);
-      expect(wrapper.find('.emptyState').exists()).toBe(false);
+      expect(screen.getByTestId('enterpriseSearchLoading')).toBeInTheDocument();
+      expect(screen.queryByTestId('emptyState')).not.toBeInTheDocument();
     });
   });
 
   describe('read-only mode', () => {
     it('renders a callout if in read-only mode', () => {
-      setMockValues({ readOnlyMode: true });
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
+      setMockValues({
+        readOnlyMode: true,
+        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+      });
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
 
-      expect(wrapper.find(EuiCallOut).exists()).toBe(true);
+      expect(screen.getByText(/Enterprise Search is in read-only mode/)).toBeInTheDocument();
     });
 
     it('does not render a callout if not in read-only mode', () => {
-      setMockValues({ readOnlyMode: false });
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
+      setMockValues({
+        readOnlyMode: false,
+        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+      });
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
 
-      expect(wrapper.find(EuiCallOut).exists()).toBe(false);
+      expect(screen.queryByText(/Enterprise Search is in read-only mode/)).not.toBeInTheDocument();
     });
   });
 
   describe('flash messages', () => {
     it('renders FlashMessages by default', () => {
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper />);
-
-      expect(wrapper.find(FlashMessages).exists()).toBe(true);
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper />);
+      expect(screen.getByTestId('FlashMessages')).toBeInTheDocument();
     });
 
     it('does not render FlashMessages if hidden', () => {
-      // Example use case: manually showing flash messages in an open flyout or modal
-      // and not wanting to duplicate flash messages on the overlayed page
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper hideFlashMessages />);
-
-      expect(wrapper.find(FlashMessages).exists()).toBe(false);
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper hideFlashMessages />);
+      expect(screen.queryByTestId('FlashMessages')).not.toBeInTheDocument();
     });
   });
 
   describe('page chrome', () => {
-    const SetPageChrome = () => <div />;
+    const SetPageChrome = () => <div data-test-subj="setPageChrome" />;
 
     it('renders a product-specific <SetPageChrome />', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper setPageChrome={<SetPageChrome />} />
       );
-
-      expect(wrapper.find(SetPageChrome).exists()).toBe(true);
+      expect(screen.getByTestId('setPageChrome')).toBeInTheDocument();
     });
 
     it('invokes page chrome immediately (without waiting for isLoading to be finished)', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper setPageChrome={<SetPageChrome />} isLoading />
       );
-
-      expect(wrapper.find(SetPageChrome).exists()).toBe(true);
-
-      // This behavior is in contrast to page view telemetry, which is invoked after isLoading finishes
-      // In addition to the pageHeader prop also changing immediately, this makes navigation feel much snappier
+      expect(screen.getByTestId('setPageChrome')).toBeInTheDocument();
     });
   });
 
   describe('EuiPageTemplate props', () => {
     it('overrides the restrictWidth prop', () => {
-      const wrapper = shallow(<EnterpriseSearchPageTemplateWrapper restrictWidth />);
-
-      expect(wrapper.find(KibanaPageTemplate).prop('restrictWidth')).toEqual(true);
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper restrictWidth />);
+      expect(MockKibanaPageTemplate.mock.calls[0][0].restrictWidth).toEqual(true);
     });
 
     it('passes down any ...pageTemplateProps that EuiPageTemplate accepts', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper
           panelled
           paddingSize="s"
@@ -198,30 +200,29 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
         />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('panelled')).toEqual(true);
-      expect(wrapper.find(KibanaPageTemplate).prop('paddingSize')).toEqual('s');
-      expect(wrapper.find(KibanaPageTemplate).prop('pageHeader')!.pageTitle).toEqual('hello world');
+      const props = MockKibanaPageTemplate.mock.calls[0][0];
+      expect(props.panelled).toEqual(true);
+      expect(props.paddingSize).toEqual('s');
+      expect(props.pageHeader?.pageTitle).toEqual('hello world');
     });
 
     it('sets enterpriseSearchPageTemplate classNames while still accepting custom classNames', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper className="hello" mainProps={{ className: 'world' }} />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('className')).toContain(
-        'enterpriseSearchPageTemplate hello'
-      );
-      expect(wrapper.find(KibanaPageTemplate).prop('mainProps')!.className).toEqual(
-        'enterpriseSearchPageTemplate__content world'
-      );
+      const props = MockKibanaPageTemplate.mock.calls[0][0];
+      expect(props.className).toContain('hello');
+      expect(props.mainProps?.className).toContain('enterpriseSearchPageTemplate__content');
+      expect(props.mainProps?.className).toContain('world');
     });
 
     it('automatically sets the Elasticsearch logo onto passed solution navs', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper solutionNav={{ name: 'Elasticsearch', items: [] }} />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
+      expect(MockKibanaPageTemplate.mock.calls[0][0].solutionNav).toMatchObject({
         icon: 'logoElasticsearch',
         name: 'Elasticsearch',
         items: [],
@@ -229,14 +230,14 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
     });
 
     it('sets the solutionNavIcon passed', () => {
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper
           solutionNav={{ name: 'Elasticsearch', items: [] }}
           solutionNavIcon="logoElasticsearch"
         />
       );
 
-      expect(wrapper.find(KibanaPageTemplate).prop('solutionNav')).toEqual({
+      expect(MockKibanaPageTemplate.mock.calls[0][0].solutionNav).toMatchObject({
         icon: 'logoElasticsearch',
         name: 'Elasticsearch',
         items: [],
@@ -247,7 +248,7 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
   describe('Embedded Console', () => {
     it('renders embedded console if available', () => {
       const FakeEmbeddedConsole: React.FC = () => (
-        <div className="embedded_console">
+        <div data-test-subj="embeddedConsole">
           {i18n.translate('xpack.enterpriseSearch.fakeEmbeddedConsole.div.fooLabel', {
             defaultMessage: 'foo',
           })}
@@ -257,22 +258,22 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       setMockValues({
         readOnlyMode: false,
+        notifications: { tours: { isEnabled: jest.fn(() => false) } },
         consolePlugin,
       });
 
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper>
-          <div className="hello">
-            {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
-          </div>
+          <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(true);
+      expect(screen.getByTestId('embeddedConsole')).toBeInTheDocument();
     });
+
     it('Hides embedded console if available but page template prop set to hide', () => {
       const FakeEmbeddedConsole: React.FC = () => (
-        <div className="embedded_console">
+        <div data-test-subj="embeddedConsole">
           {i18n.translate('xpack.enterpriseSearch.fakeEmbeddedConsole.div.fooLabel', {
             defaultMessage: 'foo',
           })}
@@ -282,18 +283,87 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
 
       setMockValues({
         readOnlyMode: false,
+        notifications: { tours: { isEnabled: jest.fn(() => false) } },
         consolePlugin,
       });
 
-      const wrapper = shallow(
+      renderWithKibanaRenderContext(
         <EnterpriseSearchPageTemplateWrapper hideEmbeddedConsole>
-          <div className="hello">
-            {i18n.translate('xpack.enterpriseSearch..div.worldLabel', { defaultMessage: 'world' })}
-          </div>
+          <div className="hello">world</div>
         </EnterpriseSearchPageTemplateWrapper>
       );
 
-      expect(wrapper.find(consolePlugin.EmbeddableConsole).exists()).toBe(false);
+      expect(screen.queryByTestId('embeddedConsole')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('solution nav footer', () => {
+    const MockFooter = () => <div data-test-subj="mockSolutionNavFooter">footer</div>;
+
+    const renderTemplate = (props: Partial<PageTemplateProps> = {}) =>
+      renderWithKibanaRenderContext(<EnterpriseSearchPageTemplateWrapper {...props} />);
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('merges SolutionViewSwitchCallout into solutionNav when available', () => {
+      setMockValues({
+        notifications: { tours: { isEnabled: jest.fn(() => true) } },
+        capabilities: { spaces: { manage: true } },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(screen.getByTestId('mockSolutionNavFooter')).toBeInTheDocument();
+    });
+
+    it('does not set footer when announcements are disabled', () => {
+      setMockValues({
+        notifications: { tours: { isEnabled: jest.fn(() => false) } },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(screen.queryByTestId('mockSolutionNavFooter')).not.toBeInTheDocument();
+    });
+
+    it('does not set footer when canManageSpaces is false', () => {
+      setMockValues({
+        notifications: { tours: { isEnabled: jest.fn(() => true) } },
+        capabilities: { spaces: { manage: false } },
+        spaces: {
+          ui: {
+            components: {
+              getSolutionViewSwitchCallout: MockFooter,
+            },
+          },
+        },
+      });
+
+      renderTemplate({
+        solutionNav: { items: [], name: 'Elasticsearch' },
+      });
+
+      expect(screen.queryByTestId('mockSolutionNavFooter')).not.toBeInTheDocument();
     });
   });
 });

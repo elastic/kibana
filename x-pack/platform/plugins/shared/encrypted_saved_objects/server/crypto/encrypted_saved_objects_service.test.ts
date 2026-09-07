@@ -57,14 +57,14 @@ describe('#registerType', () => {
   it('throws if `attributesToEncrypt` is empty', () => {
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set() })
-    ).toThrowError('The "attributesToEncrypt" array for "known-type-1" is empty.');
+    ).toThrow('The "attributesToEncrypt" array for "known-type-1" is empty.');
   });
 
   it('throws if `type` has been registered already', () => {
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) });
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) })
-    ).toThrowError('The "known-type-1" saved object type is already registered.');
+    ).toThrow('The "known-type-1" saved object type is already registered.');
   });
 });
 
@@ -656,7 +656,7 @@ describe('#encryptAttributes', () => {
       service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
         user: mockUser,
       })
-    ).rejects.toThrowError(EncryptionError);
+    ).rejects.toThrow(EncryptionError);
 
     expect(attributes).toEqual({
       attrOne: 'one',
@@ -698,7 +698,7 @@ describe('#encryptAttributes', () => {
         service.encryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
 
       expect(attributes).toEqual({
         attrOne: 'one',
@@ -1156,7 +1156,7 @@ describe('#decryptAttributes', () => {
           attributesWithoutAttr,
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if ID does not match', async () => {
@@ -1165,7 +1165,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id*' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if type does not match', async () => {
@@ -1174,7 +1174,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-2', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace does not match', async () => {
@@ -1190,7 +1190,7 @@ describe('#decryptAttributes', () => {
           encryptedAttributes,
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace is expected, but is not provided', async () => {
@@ -1204,7 +1204,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails if retry decryption without namespace is not correct', async () => {
@@ -1227,7 +1227,7 @@ describe('#decryptAttributes', () => {
           encryptedAttributes,
           { user: mockUser, isTypeBeingConverted: true }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
       expect(mockNodeCrypto.decrypt).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decrypt).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
@@ -1249,9 +1249,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrThree: 2 },
           { user: mockUser }
         )
-      ).rejects.toThrowError(
-        'Encrypted "attrThree" attribute should be a string, but found number'
-      );
+      ).rejects.toThrow('Encrypted "attrThree" attribute should be a string, but found number');
     });
 
     it('fails to decrypt if encrypted attribute is not correct', async () => {
@@ -1262,7 +1260,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrThree: 'some-unknown-string' },
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails to decrypt if the AAD attribute has changed', async () => {
@@ -1273,7 +1271,7 @@ describe('#decryptAttributes', () => {
           { ...encryptedAttributes, attrOne: 'oNe' },
           { user: mockUser }
         )
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
 
     it('fails if encrypted with another encryption key', async () => {
@@ -1292,7 +1290,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, encryptedAttributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
   });
 
@@ -1450,7 +1448,7 @@ describe('#decryptAttributes', () => {
         service.decryptAttributes({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).rejects.toThrowError(EncryptionError);
+      ).rejects.toThrow(EncryptionError);
     });
   });
 });
@@ -1632,7 +1630,7 @@ describe('#encryptAttributesSync', () => {
 
     expect(() =>
       service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes)
-    ).toThrowError(EncryptionError);
+    ).toThrow(EncryptionError);
 
     expect(attributes).toEqual({
       attrOne: 'one',
@@ -1674,7 +1672,7 @@ describe('#encryptAttributesSync', () => {
         service.encryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
 
       expect(attributes).toEqual({
         attrOne: 'one',
@@ -2097,7 +2095,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           attributesWithoutAttr
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if ID does not match', () => {
@@ -2106,7 +2104,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id*' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if type does not match', () => {
@@ -2115,7 +2113,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-2', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace does not match', () => {
@@ -2129,7 +2127,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id', namespace: 'object-NS' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if namespace is expected, but is not provided', () => {
@@ -2143,7 +2141,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails if retry decryption without namespace is not correct', () => {
@@ -2166,7 +2164,7 @@ describe('#decryptAttributesSync', () => {
           encryptedAttributes,
           { user: mockUser, isTypeBeingConverted: true }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
       expect(mockNodeCrypto.decryptSync).toHaveBeenCalledTimes(2);
       expect(mockNodeCrypto.decryptSync).toHaveBeenNthCalledWith(
         1, // first attempted to decrypt with the namespace in the descriptor (fail)
@@ -2189,7 +2187,7 @@ describe('#decryptAttributesSync', () => {
             attrThree: 2,
           }
         )
-      ).toThrowError('Encrypted "attrThree" attribute should be a string, but found number');
+      ).toThrow('Encrypted "attrThree" attribute should be a string, but found number');
     });
 
     it('fails to decrypt if encrypted attribute is not correct', () => {
@@ -2201,7 +2199,7 @@ describe('#decryptAttributesSync', () => {
             attrThree: 'some-unknown-string',
           }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails to decrypt if the AAD attribute has changed', () => {
@@ -2213,7 +2211,7 @@ describe('#decryptAttributesSync', () => {
             attrOne: 'oNe',
           }
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
 
     it('fails if encrypted with another encryption key', () => {
@@ -2232,7 +2230,7 @@ describe('#decryptAttributesSync', () => {
           { type: 'known-type-1', id: 'object-id' },
           encryptedAttributes
         )
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
   });
 
@@ -2401,7 +2399,7 @@ describe('#decryptAttributesSync', () => {
         service.decryptAttributesSync({ type: 'known-type-1', id: 'object-id' }, attributes, {
           user: mockUser,
         })
-      ).toThrowError(EncryptionError);
+      ).toThrow(EncryptionError);
     });
   });
 });
@@ -2424,5 +2422,177 @@ describe('#shouldEnforceRandomId', () => {
     });
     expect(service.shouldEnforceRandomId('known-type-1')).toBe(false);
     expect(service.shouldEnforceRandomId('known-type-2')).toBe(true);
+  });
+});
+
+describe('#__dangerousClone', () => {
+  it('returns a new EncryptedSavedObjectsService instance', () => {
+    const clone = service.__dangerousClone();
+    expect(clone).toBeInstanceOf(EncryptedSavedObjectsService);
+    expect(clone).not.toBe(service);
+  });
+
+  it('clones existing registered types from the original service', () => {
+    service.registerType({
+      type: 'existing-type',
+      attributesToEncrypt: new Set(['password']),
+    });
+
+    const clone = service.__dangerousClone();
+    expect(clone.isRegistered('existing-type')).toBe(true);
+  });
+
+  it('registers type registration overrides', () => {
+    const clone = service.__dangerousClone([
+      { type: 'override-type', attributesToEncrypt: new Set(['secret']) },
+    ]);
+
+    expect(clone.isRegistered('override-type')).toBe(true);
+  });
+
+  it('skips existing type registrations when override has matching type', () => {
+    service.registerType({
+      type: 'shared-type',
+      attributesToEncrypt: new Set(['oldSecret']),
+    });
+
+    const clone = service.__dangerousClone([
+      { type: 'shared-type', attributesToEncrypt: new Set(['newSecret']) },
+    ]);
+
+    expect(clone.isRegistered('shared-type')).toBe(true);
+    const registeredTypes = clone.getRegisteredTypes();
+    expect(registeredTypes.filter((t) => t === 'shared-type').length).toBe(1);
+  });
+
+  it('registers both overrides and non-conflicting existing types', () => {
+    service.registerType({
+      type: 'existing-type-1',
+      attributesToEncrypt: new Set(['secret1']),
+    });
+    service.registerType({
+      type: 'existing-type-2',
+      attributesToEncrypt: new Set(['secret2']),
+    });
+
+    const clone = service.__dangerousClone([
+      { type: 'override-type', attributesToEncrypt: new Set(['overrideSecret']) },
+    ]);
+
+    expect(clone.isRegistered('existing-type-1')).toBe(true);
+    expect(clone.isRegistered('existing-type-2')).toBe(true);
+    expect(clone.isRegistered('override-type')).toBe(true);
+  });
+
+  it('dangerously exposes string attributes from overrides', () => {
+    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+
+    service.__dangerousClone([
+      {
+        type: 'test-type',
+        attributesToEncrypt: new Set(['secret', 'apiKey']),
+      },
+    ]);
+
+    const registeredArgs = registerTypeSpy.mock.calls.find(([reg]) => reg.type === 'test-type');
+    expect(registeredArgs).toBeDefined();
+    const registeredAttrs = [...registeredArgs![0].attributesToEncrypt];
+    expect(registeredAttrs).toEqual(
+      expect.arrayContaining([
+        { key: 'secret', dangerouslyExposeValue: true },
+        { key: 'apiKey', dangerouslyExposeValue: true },
+      ])
+    );
+
+    registerTypeSpy.mockRestore();
+  });
+
+  it('dangerously exposes object attributes without dangerouslyExposeValue from overrides', () => {
+    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+
+    service.__dangerousClone([
+      {
+        type: 'test-type',
+        attributesToEncrypt: new Set([{ key: 'token' }, { key: 'password' }]),
+      },
+    ]);
+
+    const registeredArgs = registerTypeSpy.mock.calls.find(([reg]) => reg.type === 'test-type');
+    expect(registeredArgs).toBeDefined();
+    const registeredAttrs = [...registeredArgs![0].attributesToEncrypt];
+    expect(registeredAttrs).toEqual(
+      expect.arrayContaining([
+        { key: 'token', dangerouslyExposeValue: true },
+        { key: 'password', dangerouslyExposeValue: true },
+      ])
+    );
+
+    registerTypeSpy.mockRestore();
+  });
+
+  it('dangerously exposes attributes from existing registrations', () => {
+    service.registerType({
+      type: 'existing-type',
+      attributesToEncrypt: new Set(['secret']),
+    });
+
+    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+
+    service.__dangerousClone();
+
+    const registeredArgs = registerTypeSpy.mock.calls.find(([reg]) => reg.type === 'existing-type');
+    expect(registeredArgs).toBeDefined();
+    const registeredAttrs = [...registeredArgs![0].attributesToEncrypt];
+    expect(registeredAttrs).toEqual([{ key: 'secret', dangerouslyExposeValue: true }]);
+
+    registerTypeSpy.mockRestore();
+  });
+
+  it('preserves dangerouslyExposeValue when already set to true', () => {
+    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+
+    service.__dangerousClone([
+      {
+        type: 'test-type',
+        attributesToEncrypt: new Set([{ key: 'token', dangerouslyExposeValue: true }]),
+      },
+    ]);
+
+    const registeredArgs = registerTypeSpy.mock.calls.find(([reg]) => reg.type === 'test-type');
+    expect(registeredArgs).toBeDefined();
+    const registeredAttrs = [...registeredArgs![0].attributesToEncrypt];
+    expect(registeredAttrs).toEqual([{ key: 'token', dangerouslyExposeValue: true }]);
+
+    registerTypeSpy.mockRestore();
+  });
+
+  it('sets dangerouslyExposeValue to true if it was already set to false', () => {
+    const registerTypeSpy = jest.spyOn(EncryptedSavedObjectsService.prototype, 'registerType');
+
+    service.__dangerousClone([
+      {
+        type: 'test-type',
+        attributesToEncrypt: new Set([{ key: 'token', dangerouslyExposeValue: false }]),
+      },
+    ]);
+
+    const registeredArgs = registerTypeSpy.mock.calls.find(([reg]) => reg.type === 'test-type');
+    expect(registeredArgs).toBeDefined();
+    const registeredAttrs = [...registeredArgs![0].attributesToEncrypt];
+    expect(registeredAttrs).toEqual([{ key: 'token', dangerouslyExposeValue: true }]);
+
+    registerTypeSpy.mockRestore();
+  });
+
+  it('clones without any overrides when called with no arguments', () => {
+    service.registerType({
+      type: 'type-a',
+      attributesToEncrypt: new Set(['attr1']),
+    });
+
+    const clone = service.__dangerousClone();
+
+    expect(clone.isRegistered('type-a')).toBe(true);
+    expect(clone.getRegisteredTypes()).toEqual(['type-a']);
   });
 });

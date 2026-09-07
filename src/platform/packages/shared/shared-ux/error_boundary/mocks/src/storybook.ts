@@ -27,12 +27,11 @@ export class KibanaErrorBoundaryStorybookMock extends AbstractStorybookMock<
 
   getServices(params: Params = {}): KibanaErrorBoundaryServices {
     const onClickRefresh = action('Reload window');
-    const analytics = { reportEvent: action('Report telemetry event') };
 
     return {
       ...params,
       onClickRefresh,
-      errorService: new KibanaErrorService({ analytics }),
+      errorService: new KibanaErrorService(),
     };
   }
 

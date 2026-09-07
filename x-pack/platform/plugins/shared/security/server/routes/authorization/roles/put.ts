@@ -39,6 +39,28 @@ export function definePutRolesRoutes({
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    createOrUpdateRoleRequest: {
+                      value: {
+                        description: 'My custom Kibana role.',
+                        elasticsearch: {
+                          cluster: ['monitor'],
+                          indices: [{ names: ['logs-*'], privileges: ['read'] }],
+                        },
+                        kibana: [{ spaces: ['default'], base: ['read'], feature: {} }],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
         validate: {
           request: {
             params: schema.object({

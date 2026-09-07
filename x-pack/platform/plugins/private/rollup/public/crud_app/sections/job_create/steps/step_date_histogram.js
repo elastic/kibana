@@ -295,6 +295,7 @@ export class StepDateHistogram extends Component {
               fullWidth
             >
               <EuiSelect
+                isInvalid={Boolean(areStepErrorsVisible && errorDateHistogramTimeZone)}
                 options={timeZoneOptions}
                 value={dateHistogramTimeZone}
                 onChange={(e) => onFieldsChange({ dateHistogramTimeZone: e.target.value })}

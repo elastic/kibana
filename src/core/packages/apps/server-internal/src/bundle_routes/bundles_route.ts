@@ -33,16 +33,19 @@ export function registerRouteForBundle(
       path: `${routePath}{path*}`,
       options: {
         httpResource: true,
-        authRequired: false,
         access: 'public',
         excludeFromRateLimiter: true,
       },
       validate: {
         params: schema.object({
-          path: schema.string(),
+          path: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {
+        authc: {
+          enabled: false,
+          reason: 'This route serves static bundles and must be accessible without authentication.',
+        },
         authz: {
           enabled: false,
           reason: 'This route is used for serving assets and does not require authorization.',

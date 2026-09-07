@@ -16,6 +16,7 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import { SecurityService } from './security_service';
 import { configServiceMock } from '@kbn/config-mocks';
 import { getFips } from 'crypto';
@@ -71,6 +72,102 @@ describe('SecurityService', function () {
             expect(fips.isEnabled()).toBe(true);
           }
         });
+      });
+    });
+
+    describe('#acquireFakeRequestEnricher', () => {
+      it('returns a function on the first call', () => {
+        const setup = service.setup();
+
+        const enricher = setup.acquireFakeRequestEnricher();
+
+        expect(typeof enricher).toBe('function');
+      });
+
+      it('throws if called more than once (one-shot, reserved for Task Manager)', () => {
+        const setup = service.setup();
+
+        setup.acquireFakeRequestEnricher();
+
+        expect(() => setup.acquireFakeRequestEnricher()).toThrow(
+          /can only be called once and is reserved for Task Manager/
+        );
+      });
+
+      it('throws when the returned enricher is invoked before the security delegate is registered', () => {
+        const setup = service.setup();
+        const enricher = setup.acquireFakeRequestEnricher();
+
+        const request = { isFakeRequest: true } as any;
+        expect(() => enricher(request, { profileId: 'u_test_profile_123' })).toThrow(
+          /Cannot enrich a fake request before the security delegate has been registered/
+        );
+      });
+
+      it('delegates to the registered security delegate when invoked', () => {
+        const setup = service.setup();
+        const enricher = setup.acquireFakeRequestEnricher();
+
+        const fakeRequestEnricher = jest.fn();
+        setup.registerSecurityDelegate({
+          fakeRequestEnricher,
+        } as unknown as CoreSecurityDelegateContract);
+
+        const request = { isFakeRequest: true } as any;
+        enricher(request, { profileId: 'u_test_profile_123', username: 'jdoe' });
+
+        expect(fakeRequestEnricher).toHaveBeenCalledTimes(1);
+        expect(fakeRequestEnricher).toHaveBeenCalledWith(request, {
+          profileId: 'u_test_profile_123',
+          username: 'jdoe',
+        });
+      });
+    });
+
+    describe('#uiam', () => {
+      it('should be set to `null` if UIAM is not configured ', () => {
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should be set to `null` if UIAM is not enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: {
+                  security: {
+                    fipsMode: { enabled: !!getFips() },
+                    uiam: { enabled: false, sharedSecret: 'some-secret' },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        expect(service.setup().uiam).toBeNull();
+      });
+
+      it('should attach the configured shared secret if UIAM is enabled', () => {
+        service = new SecurityService(
+          mockCoreContext.create({
+            configService: configServiceMock.create({
+              getConfig$: {
+                xpack: {
+                  security: {
+                    fipsMode: { enabled: !!getFips() },
+                    uiam: { enabled: true, sharedSecret: 'some-secret' },
+                  },
+                },
+              },
+            }),
+          })
+        );
+        expect(
+          service.setup().uiam?.getElasticsearchClientAuthentication({
+            credentialSource: 'internal',
+            credential: new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key'),
+          })
+        ).toBe('some-secret');
       });
     });
   });

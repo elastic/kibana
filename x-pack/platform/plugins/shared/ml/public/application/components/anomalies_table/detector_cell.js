@@ -27,7 +27,7 @@ export function DetectorCell({ detectorDescription, numberOfRules }) {
             defaultMessage="rules have been configured for this detector"
           />
         }
-        type="controlsHorizontal"
+        type="controls"
         css={{
           marginLeft: euiTheme.size.xs,
         }}

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UseQueryResult } from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { UseQueryResult } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { casesQueriesKeys, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
 import type { CasesFindResponseUI, FilterOptions, QueryParams } from './types';
 import { useToasts } from '../common/lib/kibana';
@@ -16,12 +16,14 @@ import type { ServerError } from '../types';
 import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../components/app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../utils/permissions';
+import { getIncrementalIdSearchOverrides, parseExtendedFieldSearch } from './utils';
 
 export const initialData: CasesFindResponseUI = {
   cases: [],
   countClosedCases: 0,
   countInProgressCases: 0,
   countOpenCases: 0,
+  mttr: null,
   page: 0,
   perPage: 0,
   total: 0,
@@ -45,6 +47,39 @@ export const useGetCases = (
       ? { owner: params.filterOptions.owner }
       : { owner: initialOwner };
 
+  const rawSearch = params.filterOptions?.search ?? '';
+
+  // overrides for incremental_id search
+  const overrides = getIncrementalIdSearchOverrides(rawSearch);
+
+  const extendedFieldOverrides = (() => {
+    if (Object.keys(overrides).length > 0) {
+      return {};
+    }
+    const { extendedFieldFilters: parsedSearchFilters, freeText } =
+      parseExtendedFieldSearch(rawSearch);
+    if (parsedSearchFilters.length === 0) {
+      return {};
+    }
+    const searchFilters = parsedSearchFilters.filter(({ value }) => value.length > 0);
+    const pickerFilters = params.filterOptions?.extendedFieldFilters ?? [];
+    const seen = new Set(
+      pickerFilters.map((entry) => `${entry.label.toLowerCase()}\0${entry.value}`)
+    );
+    const merged = [
+      ...pickerFilters,
+      ...searchFilters.filter((entry) => {
+        const key = `${entry.label.toLowerCase()}\0${entry.value}`;
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      }),
+    ];
+    return { search: freeText, extendedFieldFilters: merged };
+  })();
+
   return useQuery(
     casesQueriesKeys.cases(params),
     ({ signal }) => {
@@ -53,6 +88,8 @@ export const useGetCases = (
           ...DEFAULT_FILTER_OPTIONS,
           ...(params.filterOptions ?? {}),
           ...ownerFilter,
+          ...overrides,
+          ...extendedFieldOverrides,
         },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,

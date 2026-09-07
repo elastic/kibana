@@ -12,8 +12,9 @@ import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
 import { deleteKibanaAssets } from '../../remove';
 import type { KibanaAssetReference } from '../../../../../../common/types';
-import { INSTALL_STATES } from '../../../../../../common/types';
+import { INSTALL_STATES, KibanaSavedObjectType } from '../../../../../../common/types';
 import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install_with_streaming';
+import { indexPatternTypes } from '../../../kibana/index_pattern/install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
   const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
@@ -40,7 +41,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 }
 
 export async function stepInstallKibanaAssetsWithStreaming(context: InstallContext) {
-  const { savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { savedObjectsClient, packageInstallContext, spaceId, installedPkg } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -52,6 +53,7 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
+        installedPkg,
       })
   );
 
@@ -78,16 +80,21 @@ export async function cleanUpKibanaAssetsStep(context: InstallContext) {
     installedPkg?.attributes?.installed_kibana &&
     installedPkg.attributes.installed_kibana.length > 0
   ) {
-    const { installed_kibana: installedObjects } = installedPkg.attributes;
+    let { installed_kibana: installedObjects } = installedPkg.attributes;
     logger.debug('Retry transition - clean up Kibana assets first');
 
-    await withPackageSpan('Retry transition - clean up Kibana assets first', async () => {
-      await deleteKibanaAssets({
-        installedObjects,
-        spaceId,
-        packageSpecConditions: packageInfo?.conditions,
-        logger,
-      });
+    // Do not delete created alerting rules or alerting rule templates
+    installedObjects = (installedObjects ?? []).filter(
+      (asset) =>
+        asset.type !== KibanaSavedObjectType.alert &&
+        asset.type !== KibanaSavedObjectType.alertingRuleTemplate
+    );
+
+    await deleteKibanaAssets({
+      installedObjects,
+      spaceId,
+      packageSpecConditions: packageInfo?.conditions,
+      logger,
     });
   }
 }
@@ -120,8 +127,18 @@ export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
   const nextAssetRefKeys = new Set(
     installedKibanaAssetsRefs.map((asset: KibanaAssetReference) => `${asset.id}-${asset.type}`)
   );
+  const reservedIndexPatternIds = new Set(indexPatternTypes.map((pattern) => `${pattern}-*`));
+
+  // Do not remove alerting rules, alerting rule templates, or reserved Fleet index patterns
   const assetsToRemove = previousAssetRefs.filter(
-    (existingAsset) => !nextAssetRefKeys.has(`${existingAsset.id}-${existingAsset.type}`)
+    (existingAsset) =>
+      !nextAssetRefKeys.has(`${existingAsset.id}-${existingAsset.type}`) &&
+      existingAsset.type !== KibanaSavedObjectType.alert &&
+      existingAsset.type !== KibanaSavedObjectType.alertingRuleTemplate &&
+      !(
+        existingAsset.type === KibanaSavedObjectType.indexPattern &&
+        reservedIndexPatternIds.has(existingAsset.id)
+      )
   );
 
   if (assetsToRemove.length === 0) {

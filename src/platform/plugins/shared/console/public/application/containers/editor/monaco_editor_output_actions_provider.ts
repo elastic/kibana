@@ -9,14 +9,11 @@
 
 import type { CSSProperties } from 'react';
 import { debounce } from 'lodash';
+import type { DebouncedFunc } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';
 
-import {
-  getRequestEndLineNumber,
-  getRequestStartLineNumber,
-  SELECTED_REQUESTS_CLASSNAME,
-} from './utils';
+import { getRequestEndLineNumber, getRequestStartLineNumber } from './utils/request';
 
 import type { AdjustedParsedRequest } from './types';
 
@@ -25,18 +22,21 @@ const OFFSET_EDITOR_ACTIONS = 1;
 
 export class MonacoEditorOutputActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
+  private readonly debouncedHighlightRequests: DebouncedFunc<() => Promise<void>>;
+
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void
+    private setEditorActionsCss: (css: CSSProperties) => void,
+    private highlightedLinesClassName: string
   ) {
     this.highlightedLines = this.editor.createDecorationsCollection();
 
-    const debouncedHighlightRequests = debounce(
+    this.debouncedHighlightRequests = debounce(
       async () => {
         if (editor.hasTextFocus()) {
-          await this.highlightRequests();
+          await this.highlightRequests(this.highlightedLinesClassName);
         } else {
-          this.clearEditorDecorations();
+          this.resetOutputActions();
         }
       },
       DEBOUNCE_HIGHLIGHT_WAIT_MS,
@@ -47,16 +47,16 @@ export class MonacoEditorOutputActionsProvider {
 
     // init all listeners
     editor.onDidChangeCursorPosition(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidScrollChange(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidChangeCursorSelection(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
     editor.onDidContentSizeChange(async () => {
-      await debouncedHighlightRequests();
+      await this.debouncedHighlightRequests();
     });
 
     editor.onDidBlurEditorText(() => {
@@ -64,18 +64,35 @@ export class MonacoEditorOutputActionsProvider {
       // the clearing of the editor decorations to ensure that the actions buttons
       // are not hidden.
       setTimeout(() => {
-        this.clearEditorDecorations();
+        this.resetOutputActions();
       }, 100);
     });
   }
 
-  private clearEditorDecorations() {
+  public resetOutputActions() {
+    this.debouncedHighlightRequests.cancel();
     // remove the highlighted lines
     this.highlightedLines.clear();
     // hide action buttons
     this.setEditorActionsCss({
       visibility: 'hidden',
     });
+    // Relinquish editor focus so any highlight recomputation queued after this reset
+    // sees hasTextFocus() === false and stays in the hide branch. Without this, the copy
+    // callback keeps the editor focused with its selection intact -- via the actions'
+    // onMouseDown preventDefault -- so the debounced highlight re-renders the button
+    // that the copy just hid. See https://github.com/elastic/kibana/issues/278855.
+    this.blurEditor();
+  }
+
+  private blurEditor() {
+    // Monaco exposes focus() but no blur(); when the editor has text focus, the
+    // focused element is its hidden input, so blurring the active element
+    // relinquishes editor focus without coupling to Monaco's internal DOM.
+    if (!this.editor.hasTextFocus()) {
+      return;
+    }
+    (this.editor.getDomNode()?.ownerDocument.activeElement as HTMLElement | null)?.blur();
   }
 
   private updateEditorActions(lineNumber?: number) {
@@ -87,16 +104,24 @@ export class MonacoEditorOutputActionsProvider {
     } else {
       // if a request is selected, the actions buttons are placed at lineNumberOffset - scrollOffset
       const offset = this.editor.getTopForLineNumber(lineNumber) - this.editor.getScrollTop();
+      // The offset can be negative when the selected request's start line has scrolled
+      // above the current viewport (e.g. due to the debounced recalculation lagging behind
+      // a scroll or selection change). A negative offset renders the actions buttons above
+      // the editor's own visible area, where they can end up hidden behind, or overlapping
+      // the click target of, unrelated page chrome (e.g. the Console tab bars) -- silently
+      // swallowing clicks intended for the buttons. Clamp to the editor's own top edge so the
+      // buttons never escape its visible bounds. See https://github.com/elastic/kibana/issues/266698.
+      const clampedOffset = Math.max(offset, 0);
       this.setEditorActionsCss({
         visibility: 'visible',
         // Add a little bit of padding to the top of the actions buttons so that
         // it doesnt overlap with the selected request delimiter
-        top: offset + OFFSET_EDITOR_ACTIONS,
+        top: clampedOffset + OFFSET_EDITOR_ACTIONS,
       });
     }
   }
 
-  private async highlightRequests(): Promise<void> {
+  private async highlightRequests(highlightedLinesClassName: string): Promise<void> {
     // get the requests in the selected range
     const parsedRequests = await this.getSelectedParsedOutput();
     // if any requests are selected, highlight the lines and update the position of actions buttons
@@ -117,7 +142,7 @@ export class MonacoEditorOutputActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            blockClassName: SELECTED_REQUESTS_CLASSNAME,
+            blockClassName: highlightedLinesClassName,
           },
         },
       ]);
@@ -145,7 +170,7 @@ export class MonacoEditorOutputActionsProvider {
     endLineNumber: number
   ): Promise<AdjustedParsedRequest[]> {
     const parser = createOutputParser();
-    const parsedRequests = await parser(model.getValue(), undefined).responses;
+    const parsedRequests = parser(model.getValue())?.responses ?? [];
 
     const selectedRequests: AdjustedParsedRequest[] = [];
     for (const [index, parsedRequest] of parsedRequests.entries()) {

@@ -15,6 +15,18 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardListingPageProps } from './dashboard_listing_page';
 import { DashboardListingPage } from './dashboard_listing_page';
+import { coreServices } from '../../services/kibana_services';
+
+const mockUseParams = jest.fn().mockReturnValue({});
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => mockUseParams(),
+}));
+
+const mockGetListingTabs = jest.fn().mockReturnValue([]);
+jest.mock('../hooks/dashboard_mount_context', () => ({
+  useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
+}));
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
@@ -27,11 +39,8 @@ jest.mock('../../dashboard_listing/dashboard_listing', () => {
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
 import { dataService } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
-const dashboardContentManagementService = getDashboardContentManagementService();
 const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
-
 jest.mock('../no_data/dashboard_app_no_data', () => {
   const originalModule = jest.requireActual('../no_data/dashboard_app_no_data');
   return {
@@ -41,6 +50,13 @@ jest.mock('../no_data/dashboard_app_no_data', () => {
     DashboardAppNoDataPage: jest.fn().mockReturnValue(null),
   };
 });
+
+const mockFindByTitle = jest.fn();
+jest.mock('../../dashboard_client', () => ({
+  findService: {
+    findByTitle: () => mockFindByTitle(),
+  },
+}));
 
 const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
   render(
@@ -77,10 +93,7 @@ test('initialFilter is passed through if title is not provided', async () => {
 });
 
 test('When given a title that matches multiple dashboards, filter on the title', async () => {
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue(
-    undefined
-  );
-
+  mockFindByTitle.mockResolvedValue(undefined);
   const redirectTo = jest.fn();
 
   renderDashboardListingPage({ title: 'search by title', redirectTo });
@@ -95,7 +108,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
 });
 
 test('When given a title that matches one dashboard, redirect to dashboard', async () => {
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue({
+  mockFindByTitle.mockResolvedValue({
     id: 'you_found_me',
   });
   const redirectTo = jest.fn();
@@ -108,5 +121,37 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
       id: 'you_found_me',
       useReplace: true,
     });
+  });
+});
+
+test('sets only "Dashboards" breadcrumb on default tab', async () => {
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Dashboards' }], {
+      project: { value: [] },
+    });
+  });
+});
+
+test('sets "Dashboards > Tab Title" breadcrumbs on active tab', async () => {
+  mockUseParams.mockReturnValue({ activeTab: 'visualizations' });
+  mockGetListingTabs.mockReturnValue([
+    { id: 'visualizations', title: 'Visualizations', getTableList: jest.fn() },
+  ]);
+
+  renderDashboardListingPage();
+
+  await waitFor(() => {
+    expect(coreServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(
+      [
+        expect.objectContaining({
+          text: 'Dashboards',
+          'data-test-subj': 'dashboardListingBreadcrumb-visualizations',
+        }),
+        { text: 'Visualizations' },
+      ],
+      { project: { value: [{ text: 'Visualizations' }] } }
+    );
   });
 });

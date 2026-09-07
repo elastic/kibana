@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { LicensingRouter } from '../../types';
+import { MAX_LICENSING_FEATURE_ID_LENGTH } from './route_length_limits';
 
 export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
   router.post(
@@ -20,15 +21,15 @@ export function registerNotifyFeatureUsageRoute(router: LicensingRouter) {
       },
       validate: {
         body: schema.object({
-          featureName: schema.string(),
+          featureId: schema.string({ maxLength: MAX_LICENSING_FEATURE_ID_LENGTH }),
           lastUsed: schema.number(),
         }),
       },
     },
     async (context, request, response) => {
-      const { featureName, lastUsed } = request.body;
+      const { featureId, lastUsed } = request.body;
 
-      (await context.licensing).featureUsage.notifyUsage(featureName, lastUsed);
+      (await context.licensing).featureUsage.notifyUsage(featureId, lastUsed);
 
       return response.ok({
         body: {

@@ -182,16 +182,26 @@ export interface PackagePolicyCreateExtension {
 }
 
 /**
- * UI Component Extension is used on the pages displaying the ability to Create a multi step
- * Integration Policy
+ * UI Component Extension rendered additively below the native data-streams list on the
+ * Integration Policy Create page. It is read-only: there is intentionally no `onChange`
+ * callback, so changes made here can never reach the policy payload.
+ *
+ * Use this slot for supplemental UI affordances (e.g. launching an external setup flow)
+ * that should appear alongside native data stream configuration without replacing it.
  */
-export type PackagePolicyCreateMultiStepExtensionComponent = ComponentType<{}>;
+export type PackagePolicyCreateBottomExtensionComponent =
+  ComponentType<PackagePolicyCreateBottomExtensionComponentProps>;
 
-/** Extension point registration contract for Integration Policy Create views in multi-step onboarding */
-export interface PackagePolicyCreateMultiStepExtension {
+export interface PackagePolicyCreateBottomExtensionComponentProps {
+  /** The integration policy being created (read-only — do not mutate) */
+  newPolicy: NewPackagePolicy;
+}
+
+/** Extension point registration contract for additive bottom-of-create-page views */
+export interface PackagePolicyCreateBottomExtension {
   package: string;
-  view: 'package-policy-create-multi-step';
-  Component: LazyExoticComponent<PackagePolicyCreateMultiStepExtensionComponent>;
+  view: 'package-policy-create-bottom';
+  Component: LazyExoticComponent<PackagePolicyCreateBottomExtensionComponent>;
 }
 
 /**
@@ -239,9 +249,9 @@ export type UIExtensionPoint =
   | PackagePolicyEditTabsExtension
   | PackageCustomExtension
   | PackagePolicyCreateExtension
+  | PackagePolicyCreateBottomExtension
   | PackageAssetsExtension
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
-  | PackagePolicyCreateMultiStepExtension
   | EndpointAgentTamperProtectionExtension
   | PliAuthBlockExtension;

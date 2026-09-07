@@ -10,8 +10,6 @@ import React, { type ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
-
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { CreateSearchApplicationButton } from './search_applications_list';
@@ -31,8 +29,6 @@ describe('CreateSearchApplicationButton', () => {
     await userEvent.hover(
       await screen.findByTestId('enterprise-search-search-applications-creation-button')
     );
-
-    await waitForEuiToolTipVisible();
 
     expect(
       await screen.findByTestId('create-search-application-button-popover-content')

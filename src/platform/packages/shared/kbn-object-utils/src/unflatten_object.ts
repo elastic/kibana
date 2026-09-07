@@ -18,13 +18,18 @@ export function unflattenObject<T extends Record<string, any>>(
   for (const key in source) {
     const val = source[key as keyof typeof source];
     if (Array.isArray(val)) {
-      const unflattenedArray = val.map((item: unknown) => {
-        if (item && typeof item === 'object' && !Array.isArray(item)) {
+      const unflattenedArray = val.map(function unflattenArray(item: unknown): unknown {
+        if (Array.isArray(item)) {
+          return item.map(unflattenArray);
+        }
+        if (item !== null && typeof item === 'object') {
           return unflattenObject(item);
         }
         return item;
       });
       set(target, key, unflattenedArray);
+    } else if (val !== null && typeof val === 'object') {
+      set(target, key, unflattenObject(val));
     } else {
       set(target, key, val);
     }

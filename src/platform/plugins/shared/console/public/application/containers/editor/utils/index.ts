@@ -7,20 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  AutocompleteType,
-  SELECTED_REQUESTS_CLASSNAME,
-  STATUS_CODE_LINE_CLASSNAME,
-} from './constants';
-export {
-  getRequestStartLineNumber,
-  getRequestEndLineNumber,
-  replaceRequestVariables,
-  getCurlRequest,
-  trackSentRequests,
-  getAutoIndentedRequests,
-  getRequestFromEditor,
-} from './requests_utils';
+export { AutocompleteType } from './constants';
 export {
   getDocumentationLinkFromAutocomplete,
   getMethodCompletionItems,
@@ -29,7 +16,8 @@ export {
   getBodyCompletionItems,
   shouldTriggerSuggestions,
 } from './autocomplete_utils';
-export { getLineTokens, containsUrlParams } from './tokens_utils';
+export { getLineTokens, containsUrlParams, isRequestLineStart } from './tokens_utils';
+export { getKibanaApiDocLink } from './kibana_api_doc_links';
 export { getStatusCodeDecorations } from './status_code_decoration_utils';
 export {
   isMapboxVectorTile,
@@ -38,3 +26,5 @@ export {
   isJSONContentType,
 } from './output_data';
 export { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
+export { getTripleQuoteContext } from './triple_quote_context';
+export type { TripleQuoteContext } from './triple_quote_context';

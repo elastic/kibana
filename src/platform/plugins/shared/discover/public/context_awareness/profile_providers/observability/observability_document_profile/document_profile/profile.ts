@@ -17,20 +17,22 @@ import { createGetDocViewer } from './accessors';
 const OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID = 'observability-generic-document-profile';
 
 export const createObservabilityGenericDocumentProfileProvider = ({
-  tracesContextService,
-  apmErrorsContextService,
+  apmContextService,
   logsContextService,
 }: ProfileProviderServices): DocumentProfileProvider => ({
   profileId: OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID,
   restrictedToProductFeature: TRACES_PRODUCT_FEATURE_ID,
   profile: {
-    getDocViewer: createGetDocViewer({
-      apm: {
-        errors: apmErrorsContextService.getErrorsIndexPattern(),
-        traces: tracesContextService.getAllTracesIndexPattern(),
+    getDocViewer: createGetDocViewer(
+      {
+        apm: {
+          errors: apmContextService.errorsService.getErrorsIndexPattern(),
+          traces: apmContextService.tracesService.getAllTracesIndexPattern(),
+        },
+        logs: logsContextService.getAllLogsIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern(),
-    }),
+      OBSERVABILITY_GENERIC_DOCUMENT_PROFILE_ID
+    ),
   },
   resolve: ({ record, rootContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;

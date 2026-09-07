@@ -9,7 +9,7 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { DashboardCollectorData } from './dashboard_telemetry';
+import type { DashboardCollectorData } from './types';
 import { collectDashboardTelemetry } from './dashboard_telemetry';
 
 export function registerDashboardUsageCollector(
@@ -25,6 +25,16 @@ export function registerDashboardUsageCollector(
       return await collectDashboardTelemetry(taskManager);
     },
     schema: {
+      access_mode: {
+        DYNAMIC_KEY: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'The number of dashboards that have an applied access mode.',
+            },
+          },
+        },
+      },
       panels: {
         total: { type: 'long' },
         by_reference: { type: 'long' },
@@ -64,50 +74,19 @@ export function registerDashboardUsageCollector(
         },
       },
       controls: {
-        total: { type: 'long' },
+        total: {
+          type: 'long',
+          _meta: {
+            description: 'The total number of pinned controls',
+          },
+        },
         by_type: {
           DYNAMIC_KEY: {
             total: {
               type: 'long',
               _meta: {
-                description: 'The number of this type of control in all Control Groups',
+                description: 'The number of pinned controls of this specific type',
               },
-            },
-            details: {
-              DYNAMIC_KEY: {
-                type: 'long',
-                _meta: {
-                  description:
-                    'Collection of telemetry metrics that embeddable service reports. Will be used for details which are specific to the current control type',
-                },
-              },
-            },
-          },
-        },
-        ignore_settings: {
-          DYNAMIC_KEY: {
-            type: 'long',
-            _meta: {
-              description:
-                'Collection of telemetry metrics that count the number of control groups which have this ignore setting turned on',
-            },
-          },
-        },
-        chaining_system: {
-          DYNAMIC_KEY: {
-            type: 'long',
-            _meta: {
-              description:
-                'Collection of telemetry metrics that count the number of control groups which are using this chaining system',
-            },
-          },
-        },
-        label_position: {
-          DYNAMIC_KEY: {
-            type: 'long',
-            _meta: {
-              description:
-                'Collection of telemetry metrics that count the number of control groups which have their labels in this position',
             },
           },
         },

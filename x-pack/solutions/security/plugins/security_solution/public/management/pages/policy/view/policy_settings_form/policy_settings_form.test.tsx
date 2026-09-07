@@ -51,23 +51,16 @@ describe('Endpoint Policy Settings Form', () => {
       'data-test-subj': 'test',
     };
 
-    mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
+    storageMock.set('securitySolution.showEventMergingBanner', false);
 
     render = () => (renderResult = mockedContext.render(<PolicySettingsForm {...formProps} />));
   });
 
   describe('event merging banner', () => {
     beforeEach(() => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: true });
+      storageMock.set('securitySolution.showEventMergingBanner', true);
     });
 
-    it('should hide the banner if its not allowed to be displayed', () => {
-      mockedContext.setExperimentalFlag({ eventCollectionDataReductionBannerEnabled: false });
-
-      render();
-
-      expect(renderResult.queryByTestId('eventMergingCallout')).not.toBeInTheDocument();
-    });
     it('should show the event merging banner if it has never been dismissed', () => {
       render();
 
@@ -166,7 +159,7 @@ describe('Endpoint Policy Settings Form', () => {
           userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
 
         expectOnChangeToBeCalledWith = (updatedPolicy) =>
-          expect(formProps.onChange).toBeCalledWith({
+          expect(formProps.onChange).toHaveBeenCalledWith({
             isValid: true,
             updatedPolicy,
           });

@@ -6,35 +6,18 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { mockGlobalState, TestProviders, createMockStore } from '../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
 import React from 'react';
-import { SourcererScopeName } from '../../sourcerer/store/model';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname }) };
 });
 
-const defaultDataViewPattern = 'test-dataview-patterns';
-const timelinePattern = 'test-timeline-patterns';
 const pathname = '/alerts';
 const store = createMockStore({
   ...mockGlobalState,
-  sourcerer: {
-    ...mockGlobalState.sourcerer,
-    defaultDataView: {
-      ...mockGlobalState.sourcerer.defaultDataView,
-      patternList: [defaultDataViewPattern],
-    },
-    sourcererScopes: {
-      ...mockGlobalState.sourcerer.sourcererScopes,
-      [SourcererScopeName.analyzer]: {
-        ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-        selectedPatterns: [timelinePattern],
-      },
-    },
-  },
   inputs: {
     ...mockGlobalState.inputs,
     timeline: {

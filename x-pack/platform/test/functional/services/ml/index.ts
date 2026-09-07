@@ -71,6 +71,7 @@ import { MachineLearningFieldStatsFlyoutProvider } from './field_stats_flyout';
 import { MachineLearningDataDriftProvider } from './data_drift';
 import { TrainedModelsFlyoutProvider } from './add_trained_models_flyout';
 import { MachineLearningMemoryUsageProvider } from './memory_usage';
+import { MachineLearningJobDetailsFlyoutProvider } from './job_details_flyout';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
@@ -123,6 +124,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const forecast = MachineLearningForecastProvider(context);
   const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
+  const jobDetailsFlyout = MachineLearningJobDetailsFlyoutProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
@@ -217,6 +219,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizerTable,
     forecast,
     jobAnnotations,
+    jobDetailsFlyout,
     jobExpandedDetails,
     jobManagement,
     jobSelection,

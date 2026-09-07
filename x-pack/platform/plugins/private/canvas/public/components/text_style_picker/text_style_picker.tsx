@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { FontValue } from '@kbn/expressions-plugin/common';
@@ -36,6 +35,10 @@ const strings = {
   getFontColorLabel: () =>
     i18n.translate('xpack.canvas.textStylePicker.fontColorLabel', {
       defaultMessage: 'Font Color',
+    }),
+  getFontSizeLabel: () =>
+    i18n.translate('xpack.canvas.textStylePicker.fontSizeLabel', {
+      defaultMessage: 'Size',
     }),
   getStyleBoldOption: () =>
     i18n.translate('xpack.canvas.textStylePicker.styleBoldOption', {
@@ -76,17 +79,17 @@ const alignmentButtons = [
   {
     id: 'left',
     label: strings.getAlignLeftOption(),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: 'center',
     label: strings.getAlignCenterOption(),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: 'right',
     label: strings.getAlignRightOption(),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 
@@ -94,17 +97,17 @@ const styleButtons = [
   {
     id: 'bold',
     label: strings.getStyleBoldOption(),
-    iconType: 'editorBold',
+    iconType: 'textBold',
   },
   {
     id: 'italic',
     label: strings.getStyleItalicOption(),
-    iconType: 'editorItalic',
+    iconType: 'textItalic',
   },
   {
     id: 'underline',
     label: strings.getStyleUnderlineOption(),
-    iconType: 'editorUnderline',
+    iconType: 'textUnderline',
   },
 ];
 
@@ -177,7 +180,8 @@ export const TextStylePicker: FC<Props> = ({
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}
             options={fontSizes.map((fontSize) => ({ text: String(fontSize), value: fontSize }))}
-            prepend="Size"
+            prepend={strings.getFontSizeLabel()}
+            aria-label={strings.getFontSizeLabel()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -219,22 +223,4 @@ export const TextStylePicker: FC<Props> = ({
       </EuiFlexGroup>
     </div>
   );
-};
-
-TextStylePicker.propTypes = {
-  family: PropTypes.string,
-  size: PropTypes.number,
-  align: PropTypes.oneOf(['left', 'center', 'right']),
-  color: PropTypes.string,
-  weight: PropTypes.oneOf(['normal', 'bold']),
-  underline: PropTypes.bool,
-  italic: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
-  colors: PropTypes.array,
-};
-
-TextStylePicker.defaultProps = {
-  align: 'left',
-  size: 14,
-  weight: 'normal',
 };

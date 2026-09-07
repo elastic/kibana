@@ -1,8 +1,8 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/siem-readiness",
   "owner": [
-    "@elastic/kibana-cloud-security-posture"
+    "@elastic/contextual-security-apps"
   ],
   "group": "security",
   "visibility": "private"

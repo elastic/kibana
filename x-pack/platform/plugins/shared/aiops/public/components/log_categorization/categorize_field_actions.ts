@@ -7,11 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
 import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
-import type { AiopsPluginStartDeps } from '../../types';
+import type { AiopsCoreSetup } from '../../types';
 
-export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: AiopsPluginStartDeps) =>
+export const createCategorizeFieldAction = (getStartServices: AiopsCoreSetup['getStartServices']) =>
   createAction<CategorizeFieldContext>({
     type: ACTION_CATEGORIZE_FIELD,
     id: ACTION_CATEGORIZE_FIELD,
@@ -24,12 +23,15 @@ export const createCategorizeFieldAction = (coreStart: CoreStart, plugins: Aiops
     },
     execute: async (context: CategorizeFieldContext) => {
       const { field, dataView, originatingApp, additionalFilter, focusTrapProps } = context;
-      const { showCategorizeFlyout } = await import('./show_flyout');
+      const [[coreStart, pluginStart], { showCategorizeFlyout }] = await Promise.all([
+        getStartServices(),
+        import('./show_flyout'),
+      ]);
       showCategorizeFlyout(
         field,
         dataView,
         coreStart,
-        plugins,
+        pluginStart,
         originatingApp,
         additionalFilter,
         focusTrapProps

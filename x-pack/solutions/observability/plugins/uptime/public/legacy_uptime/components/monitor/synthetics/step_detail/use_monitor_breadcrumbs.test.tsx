@@ -34,10 +34,10 @@ describe('useMonitorBreadcrumbs', () => {
       uiSettings: {
         ...uiSettingsServiceMock.createSetupContract(),
         get(key: string, defaultOverride?: any): any {
-          return `MMM D, YYYY @ HH:mm:ss.SSS` || defaultOverride;
+          return `MMM D, YYYY @ HH:mm:ss.SSS`;
         },
         get$(key: string, defaultOverride?: any): any {
-          return of(`MMM D, YYYY @ HH:mm:ss.SSS`) || of(defaultOverride);
+          return of(`MMM D, YYYY @ HH:mm:ss.SSS`);
         },
       },
     };
@@ -103,10 +103,10 @@ describe('useMonitorBreadcrumbs', () => {
       uiSettings: {
         ...uiSettingsServiceMock.createSetupContract(),
         get(key: string, defaultOverride?: any): any {
-          return `MMM D, YYYY @ HH:mm:ss.SSS` || defaultOverride;
+          return `MMM D, YYYY @ HH:mm:ss.SSS`;
         },
         get$(key: string, defaultOverride?: any): any {
-          return of(`MMM D, YYYY @ HH:mm:ss.SSS`) || of(defaultOverride);
+          return of(`MMM D, YYYY @ HH:mm:ss.SSS`);
         },
       },
     };

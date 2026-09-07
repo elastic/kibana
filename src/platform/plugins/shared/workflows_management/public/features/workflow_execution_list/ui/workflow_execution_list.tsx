@@ -7,54 +7,142 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import type { EuiEmptyPromptProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
-  type EuiEmptyPromptProps,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
-  EuiFlexItem,
 } from '@elastic/eui';
-import { type WorkflowExecutionListDto } from '@kbn/workflows';
-import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useQuery } from '@kbn/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components';
+import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import {
+  type ExecutedByFilterOption,
+  ExecutionListFilters,
+} from './workflow_execution_list_filters';
+import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
-import { ExecutionListFilters } from './workflow_execution_list_filters';
 import type { ExecutionListFiltersQueryParams } from './workflow_execution_list_stateful';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface WorkflowExecutionListProps {
   executions: WorkflowExecutionListDto | null;
   filters: ExecutionListFiltersQueryParams;
   onFiltersChange: (filters: ExecutionListFiltersQueryParams) => void;
-  isLoading: boolean;
+  isInitialLoading: boolean;
+  isLoadingMore: boolean;
   error: Error | null;
   onExecutionClick: (executionId: string) => void;
   selectedId: string | null;
+  setPaginationObserver: (ref: HTMLDivElement | null) => void;
+  showExecutor?: boolean;
+  canCancel: boolean;
+  isCancelInProgress: boolean;
+  onConfirmCancel: () => Promise<void>;
 }
 
 // TODO: use custom table? add pagination and search
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 'm' };
+const USER_PROFILES_STALE_TIME = 60 * 1000;
+const EMPTY_EXECUTED_BY_USER_PROFILES = new Map<string, UserProfileWithAvatar>();
+
+const profilesToMap = (profiles: UserProfileWithAvatar[]): Map<string, UserProfileWithAvatar> =>
+  profiles.reduce<Map<string, UserProfileWithAvatar>>((acc, profile) => {
+    acc.set(profile.uid, profile);
+    return acc;
+  }, new Map<string, UserProfileWithAvatar>());
+
+const getExecutedByLabel = (
+  profile?: UserProfileWithAvatar,
+  fallbackLabel?: string
+): string | undefined => {
+  if (!profile?.user) return fallbackLabel;
+
+  return getUserDisplayName(profile.user) || fallbackLabel;
+};
+
+const useExecutedByUserProfiles = ({ enabled, uids }: { enabled: boolean; uids: string[] }) => {
+  const { userProfile } = useKibana().services;
+
+  return useQuery<UserProfileWithAvatar[], Error, Map<string, UserProfileWithAvatar>>(
+    ['workflowsExecutionListExecutedByUserProfiles', ...uids],
+    () => userProfile.bulkGet({ uids: new Set(uids), dataPath: 'avatar' }),
+    {
+      enabled: enabled && uids.length > 0,
+      keepPreviousData: true,
+      retry: false,
+      select: profilesToMap,
+      staleTime: USER_PROFILES_STALE_TIME,
+    }
+  );
+};
 
 export const WorkflowExecutionList = ({
   filters,
   onFiltersChange,
-  isLoading,
+  isInitialLoading,
+  isLoadingMore,
   error,
   executions,
   onExecutionClick,
   selectedId,
+  setPaginationObserver,
+  showExecutor = false,
+  canCancel,
+  isCancelInProgress,
+  onConfirmCancel,
 }: WorkflowExecutionListProps) => {
   const styles = useMemoCss(componentStyles);
+  const { cloud } = useKibana().services;
+  const showUnresolvedExecutors = !cloud?.isServerlessEnabled;
+  const scrollableContentRef = useRef<HTMLDivElement>(null);
+
+  const executedByValuesToResolve = useMemo(() => {
+    const uniqueUsers = new Set(filters.executedBy);
+    executions?.results.forEach((execution) => {
+      if (execution.executedBy) {
+        uniqueUsers.add(execution.executedBy);
+      }
+    });
+    return Array.from(uniqueUsers).sort();
+  }, [executions, filters.executedBy]);
+
+  const { data: executedByUserProfiles = EMPTY_EXECUTED_BY_USER_PROFILES } =
+    useExecutedByUserProfiles({
+      enabled: showExecutor,
+      uids: executedByValuesToResolve,
+    });
+
+  const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
+    return executedByValuesToResolve.flatMap((executedBy) => {
+      const label = getExecutedByLabel(
+        executedByUserProfiles.get(executedBy),
+        showUnresolvedExecutors ? executedBy : undefined
+      );
+
+      return label ? [{ label, value: executedBy }] : [];
+    });
+  }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
+
+  useEffect(() => {
+    if (scrollableContentRef.current) {
+      scrollableContentRef.current.scrollTop = 0;
+    }
+  }, [filters.statuses, filters.executionTypes]);
 
   let content: React.ReactNode = null;
 
-  if (isLoading) {
+  if (isInitialLoading) {
     content = (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
@@ -75,7 +163,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -92,7 +180,7 @@ export const WorkflowExecutionList = ({
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
         css={styles.container}
-        icon={<EuiIcon type="play" size="l" />}
+        icon={<EuiIcon type="play" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -112,16 +200,51 @@ export const WorkflowExecutionList = ({
       />
     );
   } else {
-    content = executions.results.map((execution) => (
-      <WorkflowExecutionListItem
-        key={execution.id}
-        status={execution.status}
-        startedAt={new Date(execution.startedAt)}
-        duration={execution.duration}
-        selected={execution.id === selectedId}
-        onClick={() => onExecutionClick(execution.id)}
-      />
-    ));
+    const lastExecutionId = executions.results[executions.results.length - 1]?.id;
+
+    content = (
+      <>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {executions.results.map((execution) => (
+            <React.Fragment key={execution.id}>
+              <EuiFlexItem grow={false}>
+                <WorkflowExecutionListItem
+                  status={execution.status}
+                  isTestRun={execution.isTestRun}
+                  startedAt={toValidDate(execution.startedAt)}
+                  duration={execution.duration}
+                  executedByProfile={
+                    execution.executedBy
+                      ? executedByUserProfiles.get(execution.executedBy)
+                      : undefined
+                  }
+                  executedByLabel={showUnresolvedExecutors ? execution.executedBy : undefined}
+                  triggeredBy={execution.triggeredBy}
+                  showExecutor={showExecutor}
+                  selected={execution.id === selectedId}
+                  onClick={() => onExecutionClick(execution.id)}
+                />
+              </EuiFlexItem>
+              {execution.id === lastExecutionId && (
+                <div
+                  ref={setPaginationObserver}
+                  css={css`
+                    height: 1px;
+                  `}
+                />
+              )}
+            </React.Fragment>
+          ))}
+        </EuiFlexGroup>
+        {isLoadingMore && (
+          <EuiFlexGroup justifyContent="center" css={css({ marginTop: '8px' })}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+      </>
+    );
   }
 
   return (
@@ -130,6 +253,7 @@ export const WorkflowExecutionList = ({
       gutterSize="s"
       justifyContent="flexStart"
       css={styles.container}
+      data-test-subj="workflowExecutionList"
     >
       <header>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
@@ -144,11 +268,28 @@ export const WorkflowExecutionList = ({
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ExecutionListFilters filters={filters} onFiltersChange={onFiltersChange} />
+            <ExecutionListFilters
+              filters={filters}
+              onFiltersChange={onFiltersChange}
+              availableExecutedByOptions={availableExecutedByOptions}
+              showExecutor={showExecutor}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </header>
-      {content}
+      <EuiFlexItem grow={true} css={styles.scrollableWrapper}>
+        <div ref={scrollableContentRef} css={styles.scrollableContent}>
+          {content}
+        </div>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <WorkflowExecutionListFooter
+          loadedExecutions={executions?.results ?? []}
+          canCancel={canCancel}
+          isCancelInProgress={isCancelInProgress}
+          onConfirmCancel={onConfirmCancel}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
@@ -157,5 +298,20 @@ const componentStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: euiTheme.size.m,
+      height: '100%',
+      overflow: 'hidden',
+      backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
+  scrollableWrapper: css({
+    minHeight: 0,
+  }),
+  scrollableContent: css({
+    height: '100%',
+    overflowY: 'auto',
+  }),
+};
+
+const toValidDate = (value: string): Date | null => {
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
 };

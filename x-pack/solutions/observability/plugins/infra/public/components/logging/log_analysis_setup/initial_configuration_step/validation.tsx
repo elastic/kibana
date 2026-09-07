@@ -19,11 +19,18 @@ export const timeRangeValidationErrorRT = rt.strict({
 
 export type TimeRangeValidationError = rt.TypeOf<typeof timeRangeValidationErrorRT>;
 
+export const projectRoutingValidationErrorRT = rt.strict({
+  error: rt.literal('MISSING_PROJECT_ROUTING'),
+});
+
+export type ProjectRoutingValidationError = rt.TypeOf<typeof projectRoutingValidationErrorRT>;
+
 export type ValidationUIError =
   | ValidationIndicesError
   | { error: 'NETWORK_ERROR' }
   | { error: 'TOO_FEW_SELECTED_INDICES' }
-  | TimeRangeValidationError;
+  | TimeRangeValidationError
+  | ProjectRoutingValidationError;
 
 interface ValidAvailableIndex {
   validity: 'valid';

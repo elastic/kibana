@@ -9,18 +9,25 @@
 
 export type {
   // commands
+  BulkCreateWorkflowsCommand,
   CreateWorkflowCommand,
   // elasticsearch documents types
   EsWorkflow,
+  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   // execution engine
   Provider,
   ProviderInput,
   RunWorkflowCommand,
+  RunStepCommand,
   RunWorkflowResponseDto,
+  ResumeWorkflowExecutionResponseDto,
+  TestWorkflowResponseDto,
+  TestWorkflowCommand,
   StackFrame,
   UpdatedWorkflowResponseDto,
+  ValidateWorkflowResponseDto,
   // dtos
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -30,21 +37,66 @@ export type {
   WorkflowExecutionListItemDto,
   WorkflowExecutionLogModel,
   WorkflowStepExecutionDto,
+  WorkflowTokenUsage,
+  WorkflowStepTokenUsage,
   WorkflowListDto,
   WorkflowListItemAction,
   WorkflowListItemDto,
+  WorkflowAggsDto,
+  WorkflowStatsDto,
+  WorkflowStepExecutionListDto,
+  WorkflowMgetResponseDto,
+  ChildWorkflowExecutionItem,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+  WorkflowExecutionSortOrder,
+  // enums
   ExecutionStatusUnion,
   ExecutionTypeUnion,
+  // api types
+  WorkflowSortField,
+  WorkflowsSearchParams,
+  // connector types
+  ConnectorSubAction,
+  ConnectorInstance,
+  ConnectorTypeInfo,
+  ConnectorContractUnion,
+  InternalConnectorContract,
+  DynamicConnectorContract,
+  BaseConnectorContract,
+  StabilityLevel,
+  HttpMethod,
+  EditorHandlers,
+  EditorHandlersConfig,
+  EditorHandlersInput,
+  DynamicSchema,
+  StepPropertyHandler,
+  PropertySelectionHandler,
+  SelectionOption,
+  SelectionDetails,
+  SelectionContext,
+  StepSelectionValues,
+  RequestOptions,
+  GetAvailableConnectorsResponse,
+  BulkScheduleWorkflowResult,
 } from './v1';
 
 // exported full to use enum as values
 export {
   // command schemas
+  BulkCreateWorkflowsCommandSchema,
   CreateWorkflowCommandSchema,
   ExecutionStatus,
   ExecutionType,
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+  WorkflowExecutionSortFields,
+  TerminalExecutionStatuses,
+  NonTerminalExecutionStatuses,
+  ConcurrencySlotOccupyingExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
+  // shared constants
+  MAX_WORKFLOW_YAML_LENGTH,
 } from './v1';

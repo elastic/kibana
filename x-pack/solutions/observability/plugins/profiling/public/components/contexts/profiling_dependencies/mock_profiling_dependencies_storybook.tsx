@@ -15,6 +15,8 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { Observable } from 'rxjs';
 import { RouterProvider } from '@kbn/typed-react-router-config';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import type { ProfilingDependencies } from './profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from './profiling_dependencies_context';
 import { profilingRouter } from '../../../routing';
@@ -68,13 +70,7 @@ const mockCore = {
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },
-  notifications: {
-    toasts: {
-      addWarning: () => {},
-      addDanger: () => {},
-      add: () => {},
-    },
-  },
+  notifications: notificationServiceMock.createStartContract(),
 };
 
 const mockProfilingDependenciesContext = {
@@ -109,18 +105,20 @@ export function MockProfilingDependenciesStorybook({
     <EuiThemeProvider darkMode={false}>
       <KibanaReactContext.Provider>
         <RouterProvider router={profilingRouter as any} history={history}>
-          <TimeRangeContextProvider>
-            <ProfilingDependenciesContextProvider
-              // We should keep adding more stuff to the mock object as we need
-              value={{
-                start: contextMock,
-                setup: {} as any,
-                services: merge({}, services, mockServices),
-              }}
-            >
-              {children}
-            </ProfilingDependenciesContextProvider>
-          </TimeRangeContextProvider>
+          <PerformanceContextProvider>
+            <TimeRangeContextProvider>
+              <ProfilingDependenciesContextProvider
+                // We should keep adding more stuff to the mock object as we need
+                value={{
+                  start: contextMock,
+                  setup: {} as any,
+                  services: merge({}, services, mockServices),
+                }}
+              >
+                {children}
+              </ProfilingDependenciesContextProvider>
+            </TimeRangeContextProvider>
+          </PerformanceContextProvider>
         </RouterProvider>
       </KibanaReactContext.Provider>
     </EuiThemeProvider>

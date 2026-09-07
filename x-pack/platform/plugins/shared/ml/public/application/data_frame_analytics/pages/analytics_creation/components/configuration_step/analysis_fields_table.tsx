@@ -8,7 +8,6 @@
 import type { FC } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
 import {
-  EuiCallOut,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
@@ -16,6 +15,7 @@ import {
   LEFT_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -85,7 +85,6 @@ export const AnalysisFieldsTable: FC<{
           }
         ),
         id: 'name',
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         render: ({ name, mapping_types }: { name: string; mapping_types: string[] }) => {
           const field: FieldForStats = {
             id: name,
@@ -125,7 +124,7 @@ export const AnalysisFieldsTable: FC<{
         id: 'is_included',
         alignment: LEFT_ALIGNMENT,
         isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         render: ({ is_included }: { is_included: boolean }) => (is_included ? 'Yes' : 'No'),
       },
       {
@@ -138,7 +137,7 @@ export const AnalysisFieldsTable: FC<{
         id: 'is_required',
         alignment: LEFT_ALIGNMENT,
         isSortable: true,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+
         render: ({ is_required }: { is_required: boolean }) => (is_required ? 'Yes' : 'No'),
       },
       {
@@ -254,16 +253,18 @@ export const AnalysisFieldsTable: FC<{
           </EuiText>
         )}
         {tableItems.length === 0 && (
-          <EuiCallOut
+          <KbnInfoCallout
+            announceOnMount={false}
             title={i18n.translate('xpack.ml.dataframe.analytics.create.calloutTitle', {
               defaultMessage: 'Analysis fields not available',
             })}
-          >
-            <FormattedMessage
-              id="xpack.ml.dataframe.analytics.create.calloutMessage"
-              defaultMessage="Additional data required to load analysis fields."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.ml.dataframe.analytics.create.calloutMessage"
+                defaultMessage="Additional data required to load analysis fields."
+              />
+            }
+          />
         )}
         {tableItems.length > 0 && (
           <EuiPanel paddingSize="m" data-test-subj="mlAnalyticsCreateJobWizardIncludesSelect">

@@ -8,18 +8,22 @@
 import type {
   Status,
   SignalIds as AlertIds,
+  ClosingReason,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 export const setAlertStatus = ({
   alertIds,
   query,
   status,
+  reason,
 }: {
   alertIds?: AlertIds;
   query?: object;
   status: Status;
+  reason?: ClosingReason;
 }) => ({
   signal_ids: alertIds,
   query,
   status,
+  reason,
 });

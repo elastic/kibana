@@ -53,6 +53,7 @@ export const registerCleanUpTask = (
 
                 const { items } = await fleet.packagePolicyService.list(soClient, {
                   kuery: getFilterForTestNowRun(),
+                  fields: ['name', 'created_at'],
                 });
 
                 const allItems = items.map((item) => {
@@ -117,7 +118,7 @@ export const scheduleCleanUpTask = async ({ logger, pluginsStart }: SyntheticsSe
       scope: ['uptime'],
     });
 
-    logger?.info(
+    logger?.debug(
       `Task ${SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
     );
 
@@ -130,12 +131,14 @@ export const scheduleCleanUpTask = async ({ logger, pluginsStart }: SyntheticsSe
   }
 };
 
-const getFilterForTestNowRun = () => {
+export const getFilterForTestNowRun = (exclude?: boolean) => {
   const pkg = 'ingest-package-policies';
 
   let filter = `${pkg}.package.name:synthetics and ${pkg}.is_managed:true`;
   const lightweight = `${pkg}.name: ${LIGHTWEIGHT_TEST_NOW_RUN}`;
   const browser = `${pkg}.name: ${BROWSER_TEST_NOW_RUN}`;
-  filter = `${filter} and (${lightweight} or ${browser})`;
+  filter = exclude
+    ? `${filter} and not (${lightweight} or ${browser})`
+    : `${filter} and (${lightweight} or ${browser})`;
   return filter;
 };

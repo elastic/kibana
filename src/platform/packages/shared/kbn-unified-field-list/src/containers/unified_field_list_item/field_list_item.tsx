@@ -211,6 +211,10 @@ export interface UnifiedFieldListItemProps {
    * Custom filters to apply for the field list, ex: namespace custom filter
    */
   additionalFilters?: Filter[];
+  /**
+   * Optional stream name to fetch stream-specific field descriptions
+   */
+  streamNames?: string[];
 }
 
 function UnifiedFieldListItemComponent({
@@ -236,6 +240,7 @@ function UnifiedFieldListItemComponent({
   itemIndex,
   size,
   additionalFilters,
+  streamNames,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -412,6 +417,7 @@ function UnifiedFieldListItemComponent({
           onDeleteField={onDeleteField}
           onEditField={onEditField}
           services={services}
+          streamNames={streamNames}
           {...customPopoverHeaderProps}
         />
       )}

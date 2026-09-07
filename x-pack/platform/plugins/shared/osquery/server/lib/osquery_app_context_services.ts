@@ -12,7 +12,6 @@ import type {
   LoggerFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   AgentService,
@@ -26,7 +25,9 @@ import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions';
 import type { Space, SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { ConfigType } from '../../common/config';
+import type { ExperimentalFeatures } from '../../common';
 import type { TelemetryEventsSender } from './telemetry/sender';
+import type { StartPlugins, OsqueryPluginStart } from '../types';
 import { getIntegrationNamespaces } from '../utils/get_integration_namespaces';
 
 export type OsqueryAppContextServiceStartContract = Partial<
@@ -130,12 +131,19 @@ export class OsqueryAppContextService {
 export interface OsqueryAppContext {
   logFactory: LoggerFactory;
   config(): ConfigType;
+  experimentalFeatures: ExperimentalFeatures;
   security: SecurityPluginStart;
-  getStartServices: CoreSetup['getStartServices'];
+  getStartServices: CoreSetup<StartPlugins, OsqueryPluginStart>['getStartServices'];
   telemetryEventsSender: TelemetryEventsSender;
   licensing: LicensingPluginSetup;
   /**
    * Object readiness is tied to plugin start method
    */
   service: OsqueryAppContextService;
+  /**
+   * Resolves whether THIS request can fan out — deployment capability AND the
+   * `crossProjectSearch` experimental flag AND at least one linked project
+   * visible to the principal.
+   */
+  isCpsActive: (request: KibanaRequest) => Promise<boolean>;
 }

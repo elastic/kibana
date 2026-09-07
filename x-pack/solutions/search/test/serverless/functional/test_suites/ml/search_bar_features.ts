@@ -13,19 +13,17 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   const allLabels = [
     { label: 'Machine Learning', expected: true },
     { label: 'Machine Learning / Overview', expected: true },
-    { label: 'Machine Learning / Anomaly Detection', expected: false },
-    { label: 'Machine Learning / Anomaly Detection / Anomaly explorer', expected: false },
-    { label: 'Machine Learning / Anomaly Detection / Single metric viewer', expected: false },
+    { label: 'Machine Learning / Anomaly Detection Jobs', expected: true },
+    { label: 'Machine Learning / Anomaly Detection / Anomaly explorer', expected: true },
+    { label: 'Machine Learning / Anomaly Detection / Single metric viewer', expected: true },
     { label: 'Machine Learning / Notifications', expected: true },
     { label: 'Machine Learning / Memory Usage', expected: true },
-    { label: 'Machine Learning / Data Frame Analytics', expected: false },
-    { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: false },
-    { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: false },
+    { label: 'Machine Learning / Data Frame Analytics Jobs', expected: true },
+    { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: true },
+    { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: true },
     { label: 'Machine Learning / Trained Models', expected: true },
     { label: 'Machine Learning / Model Management / Nodes', expected: false },
-    { label: 'Machine Learning / Settings', expected: false },
-    { label: 'Machine Learning / Settings / Calendars', expected: false },
-    { label: 'Machine Learning / Settings / Filter Lists', expected: false },
+    { label: 'Machine Learning / Anomaly Detection Settings', expected: true },
     { label: 'Machine Learning / AIOps', expected: true },
     { label: 'Machine Learning / AIOps / Log Rate Analysis', expected: true },
     { label: 'Machine Learning / AIOps / Log Pattern Analysis', expected: true },
@@ -53,7 +51,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           await PageObjects.svlCommonNavigation.search.searchFor(expectedLabel);
           const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
           expect(results.length).to.be.greaterThan(0);
-          expect(results.map((r) => r.label)).to.contain(expectedLabel);
+          expect(results.map((r) => r.label.toLowerCase())).to.contain(expectedLabel.toLowerCase());
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
@@ -67,7 +65,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         for (const notExpectedLabel of notExpectedLabels) {
           await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel);
           const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-          expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
+          expect(results.map((r) => r.label.toLowerCase())).to.not.contain(
+            notExpectedLabel.toLowerCase()
+          );
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });

@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonProps, EuiBetaBadgeProps } from '@elastic/eui';
+import type { EuiButtonProps, EuiBetaBadgeProps, IconType } from '@elastic/eui';
 import type { InjectedIntl } from '@kbn/i18n-react';
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface TopNavMenuData {
   id?: string;
   htmlId?: string;
@@ -22,12 +28,13 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
+  tooltipTitle?: string;
   badge?: EuiBetaBadgeProps;
   emphasize?: boolean;
   fill?: boolean;
   color?: string;
   isLoading?: boolean;
-  iconType?: string;
+  iconType?: IconType;
   iconSide?: EuiButtonProps['iconSide'];
   iconOnly?: boolean;
   target?: string;
@@ -35,6 +42,9 @@ export interface TopNavMenuData {
   intl?: InjectedIntl;
 }
 
+/**
+ * @deprecated Use AppMenu from "@kbn/core-chrome-app-menu" instead
+ */
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;
 }

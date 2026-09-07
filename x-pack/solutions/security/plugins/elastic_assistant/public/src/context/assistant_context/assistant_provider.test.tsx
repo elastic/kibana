@@ -10,12 +10,14 @@ import { AssistantProvider } from './assistant_provider';
 import React from 'react';
 import { ElasticAssistantTestProviders } from '../../utils/elastic_assistant_test_providers.mock';
 import { elasticAssistantSharedStateMock } from '@kbn/elastic-assistant-shared-state-plugin/public/mocks';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
+import type { AIExperienceSelection } from '@kbn/ai-assistant-management-plugin/public';
 import {
   applicationServiceMock,
   httpServiceMock,
   notificationServiceMock,
 } from '@kbn/core/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 
 describe('AssistantProvider', () => {
@@ -26,9 +28,12 @@ describe('AssistantProvider', () => {
     const mockTriggersActionsUi = { actionTypeRegistry };
     const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
     const notifications = notificationServiceMock.createStartContract();
+    const settings = { client: uiSettingsServiceMock.createStartContract() };
+
+    const openChatTrigger$ = new Subject<AIExperienceSelection>();
 
     render(
-      <AssistantProvider>
+      <AssistantProvider openChatTrigger$={openChatTrigger$} completeOpenChat={() => {}}>
         <div data-test-subj="assistant-provider-test">{'Assistant Provider Test'}</div>
       </AssistantProvider>,
       {
@@ -40,6 +45,7 @@ describe('AssistantProvider', () => {
               http: mockHttp,
               notifications,
               elasticAssistantSharedState,
+              settings,
               featureFlags: {
                 getBooleanValue: jest.fn().mockReturnValue(false),
               },

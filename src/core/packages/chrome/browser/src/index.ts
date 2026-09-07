@@ -12,30 +12,58 @@ export type {
   ChromeBreadcrumb,
   ChromeSetBreadcrumbsParams,
 } from './breadcrumb';
-export type { ChromeStart } from './contracts';
+export type {
+  AppHeaderBack,
+  AppHeaderBadge,
+  AppHeaderBadgeItem,
+  AppHeaderConfig,
+  ChromeAppHeaderConfig,
+  AppHeaderDescription,
+  AppHeaderEditableTitle,
+  AppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus,
+  AppHeaderShareAction,
+  AppHeaderMetadataButtonItem,
+  AppHeaderMetadataHealthItem,
+  AppHeaderMetadataItem,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
+  AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+  ChromeNext,
+} from './chrome_next';
+export type { ChromeAiButton, ChromeControls, GlobalSearchConfig } from './controls';
+export type { ChromeHelp, ChromeNewsfeedHandler } from './help';
+export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
   ChromeHelpExtension,
-  ChromeHelpMenuActions,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
   ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
 } from './recently_accessed';
-export type { ChromeBadge, ChromeUserBanner, ChromeStyle } from './types';
+export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle } from './types';
 
 export type {
   ChromeProjectNavigationNode,
-  PanelSelectedNode,
+  RootNodePanelOpenerDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+  RootNodeDefinition,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -46,19 +74,21 @@ export type {
   SideNavNodeStatus,
   ChromeSetProjectBreadcrumbsParams,
   NodeDefinition,
-  NodeDefinitionWithChildren,
   RenderAs as NodeRenderAs,
-  EuiThemeSize,
   NavigationTreeDefinition,
-  GroupDefinition,
-  ItemDefinition,
-  PresetDefinition,
-  RecentlyAccessedDefinition,
-  NavigationGroupPreset,
-  RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
+
+export type {
+  SidebarApp,
+  SidebarAppConfig,
+  SidebarAppDefinition,
+  SidebarSetup,
+  SidebarStart,
+} from './sidebar';

@@ -109,6 +109,7 @@ describe('SearchService', () => {
         find(
           { term: 'foobar', types: ['dashboard', 'map'], tags: ['tag-id'] },
           { preference: 'pref' },
+          // @ts-expect-error upgrade typescript v5.9.3
           request
         );
 
@@ -134,6 +135,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a-b-|', {
@@ -168,6 +170,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-cd-|', {
@@ -207,6 +210,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab--c-|', {
@@ -233,6 +237,7 @@ describe('SearchService', () => {
           const aborted$ = hot('----a--|', { a: undefined });
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, { aborted$ }, request);
 
           expectObservable(results).toBe('--a-|', {
@@ -256,6 +261,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('a 24ms b 74ms |', {
@@ -291,6 +297,7 @@ describe('SearchService', () => {
           );
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe('ab-(c|)', {
@@ -325,6 +332,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
+        // @ts-expect-error upgrade typescript v5.9.3
         const batch = await firstValueFrom(find({ term: 'foobar' }, {}, request));
 
         expect(batch.results).toHaveLength(2);
@@ -354,6 +362,7 @@ describe('SearchService', () => {
           registerResultProvider(createProvider('A', { source: providerResults }));
 
           const { find } = service.start({ core: coreStart, licenseChecker });
+          // @ts-expect-error upgrade typescript v5.9.3
           const results = find({ term: 'foobar' }, {}, request);
 
           expectObservable(results).toBe(
@@ -379,6 +388,7 @@ describe('SearchService', () => {
 
         const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const types = await getSearchableTypes(request);
 
         expect(types).toEqual(['type-a', 'type-b']);
@@ -395,6 +405,7 @@ describe('SearchService', () => {
 
         const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const types = await getSearchableTypes(request);
 
         expect(types).toEqual(['type-a', 'type-b']);
@@ -414,6 +425,7 @@ describe('SearchService', () => {
 
         const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const types = await getSearchableTypes(request);
 
         expect(types.sort()).toEqual(['type-a', 'type-b', 'type-c', 'type-d']);
@@ -433,6 +445,7 @@ describe('SearchService', () => {
 
         const { getSearchableTypes } = service.start({ core: coreStart, licenseChecker });
 
+        // @ts-expect-error upgrade typescript v5.9.3
         const types = await getSearchableTypes(request);
 
         expect(types.sort()).toEqual(['dupe', 'type-a', 'type-b']);

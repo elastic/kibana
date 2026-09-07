@@ -6,14 +6,14 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { v4 as uuidV4 } from 'uuid';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { RuleMigrationTaskExecutionSettings } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { LangSmithEvaluationOptions } from '../../../../../../common/siem_migrations/model/common.gen';
 import { SIEM_RULE_MIGRATION_EVALUATE_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { authz } from '../../../common/api/util/authz';
+import { authz } from '../util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
 
 const REQUEST_TIMEOUT = 10 * 60 * 1000; // 10 minutes

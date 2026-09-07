@@ -5,32 +5,37 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import { map, combineLatest } from 'rxjs';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import type { AIChatExperience } from '@kbn/ai-assistant-common';
 
-import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { securityLink } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
 import { createNavigationTree } from './navigation_tree';
 
 export const registerSolutionNavigation = async (services: Services) => {
   const { securitySolution, navigation } = services;
-  const navigationTree = createNavigationTree(services);
 
-  navigation.isSolutionNavEnabled$.subscribe((isSolutionNavigationEnabled) => {
-    if (isSolutionNavigationEnabled) {
-      securitySolution.setSolutionNavigationTree(navigationTree);
-    } else {
-      securitySolution.setSolutionNavigationTree(null);
+  const chatExperience$ = services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+
+  const navigationTree$ = chatExperience$.pipe(
+    map((chatExperience) => createNavigationTree(services, chatExperience))
+  );
+
+  combineLatest([navigation.isSolutionNavEnabled$, chatExperience$]).subscribe(
+    ([isSolutionNavigationEnabled, chatExperience]) => {
+      if (isSolutionNavigationEnabled) {
+        securitySolution.setSolutionNavigationTree(createNavigationTree(services, chatExperience));
+      } else {
+        securitySolution.setSolutionNavigationTree(null);
+      }
     }
-  });
+  );
 
   navigation.addSolutionNavigation({
     id: 'security',
     title: SOLUTION_NAME,
     icon: 'logoSecurity',
-    homePage: securityLink(SecurityPageName.landing),
-    navigationTree$: Rx.of(navigationTree),
-    dataTestSubj: 'securitySolutionSideNav',
+    navigationTree$,
   });
 };

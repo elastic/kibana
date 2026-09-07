@@ -6,7 +6,12 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
+import type { UpdateFailureStoreParams } from '../../../common/data_stream_details';
+import type {
+  DataStreamDocsStat,
+  NonAggregatableDatasets,
+  UpdateFailureStoreResponse,
+} from '../../../common/api_types';
 import type {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -18,6 +23,7 @@ import type {
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
 import type { Integration } from '../../../common/data_streams_stats/integration';
+import type { ITelemetryClient } from '../telemetry';
 
 export type DataStreamsStatsServiceSetup = void;
 
@@ -27,6 +33,7 @@ export interface DataStreamsStatsServiceStart {
 
 export interface DataStreamsStatsServiceStartDeps {
   http: HttpStart;
+  telemetryClient?: ITelemetryClient;
 }
 
 export interface IDataStreamsStatsClient {
@@ -45,4 +52,5 @@ export interface IDataStreamsStatsClient {
   getNonAggregatableDatasets(
     params: GetNonAggregatableDataStreamsParams
   ): Promise<NonAggregatableDatasets>;
+  updateFailureStore(params: UpdateFailureStoreParams): Promise<UpdateFailureStoreResponse>;
 }

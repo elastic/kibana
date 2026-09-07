@@ -5,6 +5,8 @@
  * 2.0.
  */
 export * from './create_prebuilt_rule_saved_objects';
+export * from './create_deprecated_prebuilt_rule_saved_objects';
+export * from './customize_rule';
 export * from './delete_all_prebuilt_rule_assets';
 export * from './delete_all_timelines';
 export * from './delete_fleet_packages';
@@ -20,4 +22,5 @@ export * from './install_prebuilt_rules';
 export * from './review_install_prebuilt_rules';
 export * from './review_upgrade_prebuilt_rules';
 export * from './perform_upgrade_prebuilt_rules';
-export * from './create_prebuilt_rules_package';
+export * from './review_rule_deprecation';
+export * from './initialize_security_solution';

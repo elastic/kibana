@@ -14,8 +14,8 @@ import { contentCss } from './without_header';
 import { pageCss } from './without_header';
 
 export interface WithHeaderLayoutProps extends HeaderProps {
-  restrictWidth?: number;
-  restrictHeaderWidth?: number;
+  restrictWidth?: number | false;
+  restrictHeaderWidth?: number | false;
   'data-test-subj'?: string;
   children?: React.ReactNode;
   headerChildren?: React.ReactNode;
@@ -39,7 +39,7 @@ export const WithHeaderLayout: React.FC<WithHeaderLayoutProps> = ({
     </Header>
     <EuiPage
       css={pageCss}
-      restrictWidth={restrictWidth || 1200}
+      restrictWidth={restrictWidth === false ? false : restrictWidth || 1200}
       data-test-subj={dataTestSubj ? `${dataTestSubj}_page` : undefined}
     >
       <EuiPageBody>

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SubFeatureConfig } from '@kbn/features-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 
-import { APP_ID } from '../constants';
+import { APP_ID, EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL } from '../constants';
 import type { SecurityFeatureParams } from './types';
 
 const TRANSLATIONS = Object.freeze({
@@ -24,11 +24,6 @@ const TRANSLATIONS = Object.freeze({
 });
 
 export const endpointListSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Endpoint List access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointList',
     { defaultMessage: 'Endpoint List' }
@@ -48,6 +43,7 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeEndpointList`, `${APP_ID}-readEndpointList`],
           id: 'endpoint_list_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -59,6 +55,7 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readEndpointList`],
           id: 'endpoint_list_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -72,11 +69,6 @@ export const endpointListSubFeature = (): SubFeatureConfig => ({
 });
 
 export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Trusted Applications access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedApplications',
     { defaultMessage: 'Trusted Applications' }
@@ -95,6 +87,8 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedApplications`,
@@ -102,6 +96,7 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_applications_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -110,9 +105,15 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedApplications', 'readTrustedApplications'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedApplications`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readTrustedApplications`,
+          ],
           id: 'trusted_applications_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -126,13 +127,6 @@ export const trustedApplicationsSubFeature = (): SubFeatureConfig => ({
 });
 
 export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.privilegesTooltip',
-    {
-      defaultMessage: 'All Spaces is required for Trusted Devices access.',
-    }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices',
     {
@@ -142,8 +136,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
     {
-      defaultMessage:
-        'Allows management of trusted USB and external devices that bypass device control protections.',
+      defaultMessage: 'Manage security exceptions for USB and external devices.',
     }
   ),
   privilegeGroups: [
@@ -153,6 +146,8 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeTrustedDevices`,
@@ -160,6 +155,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'trusted_devices_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -168,9 +164,10 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
           ui: ['writeTrustedDevices', 'readTrustedDevices'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readTrustedDevices`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readTrustedDevices`],
           id: 'trusted_devices_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -184,11 +181,6 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
 });
 
 export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Host Isolation Exceptions access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolationExceptions',
     { defaultMessage: 'Host Isolation Exceptions' }
@@ -207,6 +199,8 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-deleteHostIsolationExceptions`,
@@ -214,6 +208,7 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'host_isolation_exceptions_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -222,9 +217,15 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
           ui: ['readHostIsolationExceptions', 'deleteHostIsolationExceptions'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readHostIsolationExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readHostIsolationExceptions`,
+          ],
           id: 'host_isolation_exceptions_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -237,11 +238,6 @@ export const hostIsolationExceptionsBasicSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const blocklistSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.blockList.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Blocklist access.' }
-  ),
   name: i18n.translate('securitySolutionPackages.features.featureRegistry.subFeatures.blockList', {
     defaultMessage: 'Blocklist',
   }),
@@ -259,6 +255,8 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeBlocklist`,
@@ -266,6 +264,7 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'blocklist_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -274,9 +273,10 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
           ui: ['writeBlocklist', 'readBlocklist'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readBlocklist`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readBlocklist`],
           id: 'blocklist_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -289,11 +289,6 @@ export const blocklistSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const eventFiltersSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Event Filters access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.eventFilters',
     { defaultMessage: 'Event Filters' }
@@ -312,6 +307,8 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
         {
           api: [
             'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
             'lists-read',
             'lists-summary',
             `${APP_ID}-writeEventFilters`,
@@ -319,6 +316,7 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ],
           id: 'event_filters_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
@@ -327,9 +325,10 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
           ui: ['writeEventFilters', 'readEventFilters'],
         },
         {
-          api: ['lists-read', 'lists-summary', `${APP_ID}-readEventFilters`],
+          api: ['lists-read', EXCEPTIONS_API_READ, 'lists-summary', `${APP_ID}-readEventFilters`],
           id: 'event_filters_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -342,11 +341,6 @@ export const eventFiltersSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const policyManagementSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Policy Management access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.policyManagement',
     { defaultMessage: 'Elastic Defend Policy Management' }
@@ -366,6 +360,7 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writePolicyManagement`, `${APP_ID}-readPolicyManagement`],
           id: 'policy_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: ['policy-settings-protection-updates-note'],
@@ -377,6 +372,7 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readPolicyManagement`],
           id: 'policy_management_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -390,11 +386,6 @@ export const policyManagementSubFeature = (): SubFeatureConfig => ({
 });
 
 export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Response Actions History access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.responseActionsHistory',
     { defaultMessage: 'Response Actions History' }
@@ -411,6 +402,7 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -422,6 +414,7 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -433,12 +426,107 @@ export const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
     },
   ],
 });
-export const hostIsolationSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Host Isolation access.' }
+
+export const scriptsManagementSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsManagement',
+    { defaultMessage: 'Elastic Defend Scripts Management' }
   ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.scriptsManagement.description',
+    { defaultMessage: 'Management of scripts used with Elastic Defend response actions.' }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeScriptsManagement`, `${APP_ID}-readScriptsManagement`],
+          id: 'scripts_management_all',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeScriptsManagement', 'readScriptsManagement'],
+        },
+        {
+          api: [`${APP_ID}-readScriptsManagement`],
+          id: 'scripts_management_read',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readScriptsManagement'],
+        },
+      ],
+    },
+  ],
+});
+
+export const customYaraSignaturesSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.customYaraSignatures',
+    { defaultMessage: 'Custom YARA Signatures' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.customYaraSignatures.description',
+    {
+      defaultMessage: 'Management of custom YARA signatures used with Elastic Defend.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [
+            'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-writeCustomYaraSignatures`,
+            `${APP_ID}-readCustomYaraSignatures`,
+          ],
+          id: 'custom_yara_signatures_all',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
+            read: [],
+          },
+          ui: ['writeCustomYaraSignatures', 'readCustomYaraSignatures'],
+        },
+        {
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-readCustomYaraSignatures`,
+          ],
+          id: 'custom_yara_signatures_read',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.read,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['readCustomYaraSignatures'],
+        },
+      ],
+    },
+  ],
+});
+
+export const hostIsolationSubFeature = (): SubFeatureConfig => ({
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.hostIsolation',
     { defaultMessage: 'Host Isolation' }
@@ -455,6 +543,7 @@ export const hostIsolationSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeHostIsolationRelease`],
           id: 'host_isolation_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -468,11 +557,6 @@ export const hostIsolationSubFeature = (): SubFeatureConfig => ({
 });
 
 export const processOperationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Process Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.processOperations',
     { defaultMessage: 'Process Operations' }
@@ -489,6 +573,7 @@ export const processOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -501,11 +586,6 @@ export const processOperationsSubFeature = (): SubFeatureConfig => ({
   ],
 });
 export const fileOperationsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for File Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.fileOperations',
     { defaultMessage: 'File Operations' }
@@ -522,6 +602,7 @@ export const fileOperationsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -537,11 +618,6 @@ export const fileOperationsSubFeature = (): SubFeatureConfig => ({
 // execute operations are not available in 8.7,
 // but will be available in 8.8
 export const executeActionSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Execute Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations',
     { defaultMessage: 'Execute Operations' }
@@ -558,6 +634,7 @@ export const executeActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -572,11 +649,6 @@ export const executeActionSubFeature = (): SubFeatureConfig => ({
 
 // 8.15 feature
 export const scanActionSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Scan Operations access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.scanOperations',
     { defaultMessage: 'Scan Operations' }
@@ -593,6 +665,7 @@ export const scanActionSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -606,11 +679,6 @@ export const scanActionSubFeature = (): SubFeatureConfig => ({
 });
 
 export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Automatic Troubleshooting access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.workflowInsights',
     { defaultMessage: 'Automatic Troubleshooting' }
@@ -628,6 +696,7 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.all,
           savedObject: {
             all: [],
@@ -639,6 +708,7 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',
+          excludeFromBasePrivileges: true,
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
@@ -652,18 +722,16 @@ export const workflowInsightsSubFeature = (): SubFeatureConfig => ({
 });
 
 export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
-  requireAllSpaces: true,
-  privilegesTooltip: i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.privilegesTooltip',
-    { defaultMessage: 'All Spaces is required for Endpoint Exceptions access.' }
-  ),
   name: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions',
     { defaultMessage: 'Endpoint Exceptions' }
   ),
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.endpointExceptions.description',
-    { defaultMessage: 'Manage Endpoint Exceptions.' }
+    {
+      defaultMessage:
+        'Reduce false positive alerts, and keep Elastic Defend from blocking standard processes.',
+    }
   ),
   privilegeGroups: [
     {
@@ -671,25 +739,38 @@ export const endpointExceptionsSubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           id: 'endpoint_exceptions_all',
-          includeIn: 'all',
+          includeIn: 'none',
           name: TRANSLATIONS.all,
           savedObject: {
-            all: [],
+            all: [EXCEPTION_LIST_NAMESPACE_AGNOSTIC],
             read: [],
           },
           ui: ['showEndpointExceptions', 'crudEndpointExceptions'],
-          api: [`${APP_ID}-showEndpointExceptions`, `${APP_ID}-crudEndpointExceptions`],
+          api: [
+            'lists-all',
+            EXCEPTIONS_API_READ,
+            EXCEPTIONS_API_ALL,
+            'lists-read',
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+            `${APP_ID}-crudEndpointExceptions`,
+          ],
         },
         {
           id: 'endpoint_exceptions_read',
-          includeIn: 'read',
+          includeIn: 'none',
           name: TRANSLATIONS.read,
           savedObject: {
             all: [],
             read: [],
           },
           ui: ['showEndpointExceptions'],
-          api: [`${APP_ID}-showEndpointExceptions`],
+          api: [
+            'lists-read',
+            EXCEPTIONS_API_READ,
+            'lists-summary',
+            `${APP_ID}-showEndpointExceptions`,
+          ],
         },
       ],
     },
@@ -716,19 +797,8 @@ export const globalArtifactManagementSubFeature = (
     { defaultMessage: 'Global Artifact Management' }
   );
 
-  const COMING_SOON = i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.comingSoon',
-    { defaultMessage: '(coming soon)' }
-  );
-
-  const name = experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ? GLOBAL_ARTIFACT_MANAGEMENT
-    : `${GLOBAL_ARTIFACT_MANAGEMENT} ${COMING_SOON}`;
-
   return {
-    requireAllSpaces: false,
-    privilegesTooltip: undefined,
-    name,
+    name: GLOBAL_ARTIFACT_MANAGEMENT,
     description: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
       {
@@ -758,3 +828,36 @@ export const globalArtifactManagementSubFeature = (
     ],
   };
 };
+
+export const socManagementSubFeature = (): SubFeatureConfig => ({
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement',
+    { defaultMessage: 'SOC Management' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement.description',
+    {
+      defaultMessage:
+        'Access to SOC management capabilities including AI value reporting and analytics.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-socManagement`],
+          id: 'soc_management_all',
+          includeIn: 'none',
+          excludeFromBasePrivileges: true,
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['socManagement'],
+        },
+      ],
+    },
+  ],
+});

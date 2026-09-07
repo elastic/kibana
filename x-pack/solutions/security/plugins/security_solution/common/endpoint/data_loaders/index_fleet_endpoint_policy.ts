@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -14,16 +13,18 @@ import type {
   CreatePackagePolicyRequest,
   CreatePackagePolicyResponse,
   DeleteAgentPolicyResponse,
+  GetPackagePoliciesResponse,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
 import { memoize } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '../format_http_error';
 import { usageTracker } from './usage_tracker';
 import { getEndpointPackageInfo } from '../utils/package';
 import type { PolicyData } from '../types';
@@ -71,7 +72,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       space_ids: spaceIds,
     };
 
-    let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
+    let agentPolicy: KbnClientResponse<CreateAgentPolicyResponse>;
 
     try {
       agentPolicy = (await kbnClient
@@ -83,7 +84,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
           method: 'POST',
           body: newAgentPolicyData,
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<CreateAgentPolicyResponse>;
     } catch (error) {
       throw new Error(`create fleet agent policy failed ${error}`);
     }
@@ -117,6 +118,25 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       },
     };
 
+    const findPackagePolicyByName = async (): Promise<CreatePackagePolicyResponse | undefined> =>
+      kbnClient
+        .request<GetPackagePoliciesResponse>({
+          path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
+          method: 'GET',
+          query: {
+            perPage: 1,
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name:"${policyName}"`,
+          },
+          headers: {
+            'elastic-api-version': API_VERSIONS.public.v1,
+          },
+        })
+        .catch(catchHttpErrorFormatAndThrow)
+        .then((res) => {
+          const item = res.data.items[0];
+          return item ? { item } : undefined;
+        });
+
     const createPackagePolicy = async (): Promise<CreatePackagePolicyResponse> =>
       kbnClient
         .request<CreatePackagePolicyResponse>({
@@ -127,8 +147,21 @@ export const indexFleetEndpointPolicy = usageTracker.track(
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .then((res) => res.data);
+        .then((res) => res.data)
+        .catch(async (error: Error & { status?: number }) => {
+          // A retried create can 409 if a prior attempt already committed this uniquely named policy.
+          if (error.status === 409) {
+            const existing = await findPackagePolicyByName();
+            if (existing?.item.policy_ids?.includes(agentPolicy.data.item.id)) {
+              log?.debug(
+                `Package policy [${policyName}] already exists after 409; reusing existing policy`
+              );
+              return existing;
+            }
+          }
+
+          return catchHttpErrorFormatAndThrow(error);
+        });
 
     const started = new Date();
     const hasTimedOut = (): boolean => {
@@ -197,7 +230,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 
@@ -216,9 +249,10 @@ export const deleteIndexedFleetEndpointPolicies = async (
               method: 'POST',
               body: {
                 agentPolicyId: agentPolicy.id,
+                force: true,
               },
             })
-            .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>
+            .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<DeleteAgentPolicyResponse>
         ).data
       );
     }

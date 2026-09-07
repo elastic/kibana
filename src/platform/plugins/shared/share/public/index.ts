@@ -29,7 +29,10 @@ export type {
   ExportShare,
   ExportShareConfig,
   ExportShareDerivatives,
+  ExportShareParameters,
   RegisterShareIntegrationArgs,
+  SharingData,
+  ShareActionConfigArgs,
 } from './types';
 
 export type { RedirectOptions } from '../common/url_service';

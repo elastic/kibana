@@ -1,8 +1,6 @@
 # MEDIAN_ABSOLUTE_DEVIATION
 
-Returns the median absolute deviation, a robust measure of variability. It is particularly useful for describing data with outliers or non-normal distributions, as it can be more descriptive than standard deviation. The median absolute deviation is calculated as the median of the absolute deviations from the median of the entire sample. For a random variable `X`, it is defined as `median(|median(X) - X|)`.
-
-**Note:** This function is usually approximate, similar to `PERCENTILE`.
+The MEDIAN_ABSOLUTE_DEVIATION function calculates the median absolute deviation, which is a robust measure of variability. It is particularly useful for describing data with outliers or data that is not normally distributed, and can be more informative than standard deviation in such cases. The value is computed as the median of the absolute differences between each data point and the median of the entire sample.
 
 ## Syntax
 
@@ -10,30 +8,27 @@ Returns the median absolute deviation, a robust measure of variability. It is pa
 
 ### Parameters
 
-#### `number`
+#### number
 
-The input numeric field or expression.
+The column or expression containing numeric values for which the median absolute deviation will be calculated.
 
 ## Examples
 
-Basic Usage
+Calculate the median and median absolute deviation of employee salaries:
 
 ```esql
 FROM employees
 | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
 ```
 
-Calculate the median and the median absolute deviation of employee salaries.
-
-Using Inline Functions
+Calculate the median absolute deviation of the maximum salary change per employee:
 
 ```esql
 FROM employees
 | STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
 ```
 
-Calculate the median absolute deviation of the maximum values of a multivalued column by first using `MV_MAX` to get the maximum value per row.
-
 ## Limitations
 
-- `MEDIAN_ABSOLUTE_DEVIATION` is non-deterministic, meaning that slightly different results may be returned when using the same data.
+- The result of MEDIAN_ABSOLUTE_DEVIATION is usually approximate.
+- The function is non-deterministic, so you may get slightly different results when running the same query on the same data.

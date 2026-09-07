@@ -38,17 +38,18 @@ import type seedrandom from 'seedrandom';
 import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
 import type { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
-import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
-import { catchAxiosErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_axios_error';
+import { catchHttpErrorFormatAndThrow } from '@kbn/security-solution-plugin/common/endpoint/format_http_error';
 import {
   startMetadataTransforms,
   stopMetadataTransforms,
+  waitForMetadataTransformsReady,
 } from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
 import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
-  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;
+  unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse | undefined>;
   spaceId: string;
 };
 
@@ -154,8 +155,9 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
       const endpointPackage = await getEndpointPackageInfo(client);
 
       if (waitUntilTransformed && customIndexFn) {
-        // need this before indexing docs so that the united transform doesn't
-        // create a checkpoint with a timestamp after the doc timestamps
+        // Match the default loader: wait until transforms exist/are healthy, then stop them
+        // before indexing so the united transform does not checkpoint after the doc timestamps.
+        await waitForMetadataTransformsReady(this.esClient, endpointPackage.version);
         await stopMetadataTransforms(this.esClient, endpointPackage.version);
       }
 
@@ -175,6 +177,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             'metrics-endpoint.policy-default',
             'logs-endpoint.events.process-default',
             'logs-endpoint.alerts-default',
+            'logs-endpoint.events.device-default',
             alertsPerHost,
             enableFleetIntegration,
             undefined,
@@ -186,23 +189,27 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
             this.log
           );
 
-      if (waitUntilTransformed && customIndexFn) {
-        await startMetadataTransforms(
-          this.esClient,
-          Array.from(new Set(indexedData.hosts.map((host) => host.agent.id))),
-          endpointPackage.version
-        );
-      }
-
       if (waitUntilTransformed) {
-        const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
+        const agentIds = Array.from(
+          new Set(
+            indexedData.agents
+              .map((agent) => agent.agent?.id)
+              .filter((id): id is string => Boolean(id))
+          )
+        );
+
+        if (customIndexFn) {
+          // United metadata joins fleet agents, not host-only metadata docs.
+          await startMetadataTransforms(this.esClient, agentIds, endpointPackage.version);
+        }
+
         await this.waitForUnitedEndpoints(agentIds, waitTimeout);
       }
 
       return {
         ...indexedData,
         spaceId,
-        unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse> => {
+        unloadEndpointData: (): Promise<DeleteIndexedHostsAndAlertsResponse | undefined> => {
           return this.unloadEndpointData(indexedData, { spaceId });
         },
       };
@@ -216,12 +223,17 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
     async unloadEndpointData(
       indexedData: IndexedHostsAndAlertsResponse,
       { spaceId = DEFAULT_SPACE_ID }: { spaceId?: string } = {}
-    ): Promise<DeleteIndexedHostsAndAlertsResponse> {
+    ): Promise<DeleteIndexedHostsAndAlertsResponse | undefined> {
       return deleteIndexedHostsAndAlerts(
         this.esClient as Client,
         this.getScopedKbnClient(spaceId),
         indexedData
-      );
+      ).catch((error) => {
+        // Avoid returning a rejected promise since this method is normally used at the end of tests to
+        // unload mocked data, so failure here should not impact the test execution state.
+        log.warning(`Error unloading endpoint data: ${error.message}`);
+        return undefined;
+      });
     }
 
     async waitForIndex(
@@ -362,7 +374,7 @@ export function EndpointTestResourcesProvider({ getService }: FtrProviderContext
           body: updatedMetadataDoc,
           op_type: 'create',
         })
-        .catch(catchAxiosErrorFormatAndThrow);
+        .catch(catchHttpErrorFormatAndThrow);
 
       await startMetadataTransforms(this.esClient, [], endpointPackage.version);
 

@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type FC, useCallback, useEffect, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiModal,
-  EuiPageTemplate,
-  EuiSkeletonText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   usePageUrlState,
@@ -26,8 +22,8 @@ import {
   type PageUrlState,
 } from '@kbn/ml-url-state';
 
-import { useAppDependencies } from '../../app_dependencies';
 import type { TransformListRow } from '../../common';
+import type { TransformFunction } from '../../../../common/constants';
 import { isTransformStats } from '../../../../common/types/transform_stats';
 import { useGetTransformsStats } from '../../hooks/use_get_transform_stats';
 import { useEnabledFeatures } from '../../serverless_context';
@@ -40,13 +36,13 @@ import {
   useGetTransforms,
   useGetTransformNodes,
 } from '../../hooks';
-import { RedirectToCreateTransform } from '../../common/navigation';
 import { CapabilitiesWrapper } from '../../components/capabilities_wrapper';
 import { ToastNotificationText } from '../../components/toast_notification_text';
 import { breadcrumbService, docTitleService, BREADCRUMB_SECTION } from '../../services/navigation';
+import { SECTION_SLUG } from '../../common/constants';
 
-import { SearchSelection } from './components/search_selection';
 import { TransformList } from './components/transform_list';
+import { getCreateTransformPrimaryActionItem } from './components/create_transform_button';
 import { TransformStatsBar } from './components/transform_list/transforms_stats_bar';
 import {
   AlertRulesManageContext,
@@ -70,7 +66,7 @@ const ErrorMessageCallout: FC<{
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnDangerCallout
         size="s"
         title={
           <>
@@ -80,8 +76,6 @@ const ErrorMessageCallout: FC<{
             )}
           </>
         }
-        color="danger"
-        iconType="error"
       />
     </>
   );
@@ -90,7 +84,7 @@ const ErrorMessageCallout: FC<{
 export const TransformManagement: FC = () => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
-  const { dataViewEditor } = useAppDependencies();
+  const history = useHistory();
   const [transformPageState, setTransformPageState] = usePageUrlState<PageUrlState>(
     'transform',
     getDefaultTransformListState()
@@ -139,7 +133,8 @@ export const TransformManagement: FC = () => {
 
   const isInitialLoading = transformNodesInitialLoading || transformsInitialLoading;
 
-  const { canStartStopTransform } = useTransformCapabilities();
+  const capabilities = useTransformCapabilities();
+  const { canStartStopTransform } = capabilities;
 
   const unauthorizedTransformsWarning = useMemo(() => {
     const unauthorizedCnt = transforms.filter((t) => needsReauthorization(t)).length;
@@ -171,9 +166,7 @@ export const TransformManagement: FC = () => {
         );
     return (
       <>
-        <EuiCallOut
-          iconType="alert"
-          color="warning"
+        <KbnWarningCallout
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
         />
@@ -182,89 +175,43 @@ export const TransformManagement: FC = () => {
     );
   }, [transforms, canStartStopTransform]);
 
-  const [isSearchSelectionVisible, setIsSearchSelectionVisible] = useState(false);
-  const [savedObjectId, setSavedObjectId] = useState<string | null>(null);
-
-  const onCloseModal = useCallback(() => setIsSearchSelectionVisible(false), []);
-  const onOpenModal = () => setIsSearchSelectionVisible(true);
-
-  const onSearchSelected = useCallback((id: string, type: string) => {
-    setSavedObjectId(id);
-  }, []);
-
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
-
-  const closeDataViewEditorRef = useRef<() => void | undefined>();
-
-  const createNewDataView = useCallback(() => {
-    onCloseModal();
-    closeDataViewEditorRef.current = dataViewEditor?.openEditor({
-      onSave: async (dataView) => {
-        if (dataView.id) {
-          onSearchSelected(dataView.id, 'index-pattern');
-        }
-      },
-
-      allowAdHocDataView: true,
-    });
-  }, [dataViewEditor, onCloseModal, onSearchSelected]);
-
-  useEffect(function cleanUpDataViewEditorFlyout() {
-    return () => {
-      // Close the editor when unmounting
-      if (closeDataViewEditorRef.current) {
-        closeDataViewEditorRef.current();
-      }
-    };
-  }, []);
-
-  if (savedObjectId !== null) {
-    return <RedirectToCreateTransform savedObjectId={savedObjectId} />;
-  }
-
-  const docsLink = (
-    <EuiButtonEmpty
-      href={esTransform}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.transform.transformList.transformDocsLinkText"
-        defaultMessage="Transform docs"
-      />
-    </EuiButtonEmpty>
+  const onCreateTransform = useCallback(
+    (transformFunction: TransformFunction) => {
+      history.push(`/${SECTION_SLUG.CREATE_TRANSFORM}?transformFunction=${transformFunction}`);
+    },
+    [history]
   );
+
+  const showCreateInHeader = !isInitialLoading && transforms.length > 0;
+  const menu: AppHeaderMenu | undefined = showCreateInHeader
+    ? {
+        primaryActionItem: getCreateTransformPrimaryActionItem({
+          onClick: onCreateTransform,
+          transformNodes,
+          capabilities,
+        }),
+      }
+    : undefined;
 
   return (
     <>
-      <EuiPageTemplate.Header
-        pageTitle={
-          <span data-test-subj="transformAppTitle">
-            <FormattedMessage
-              id="xpack.transform.transformList.transformTitle"
-              defaultMessage="Transforms"
-            />
-          </span>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.transform.transformList.transformDescription"
-            defaultMessage="Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access."
-          />
-        }
-        rightSideItems={[docsLink]}
-        bottomBorder
-        paddingSize={'none'}
+      <AppHeader
+        title={i18n.translate('xpack.transform.transformList.transformTitle', {
+          defaultMessage: 'Transforms',
+        })}
+        description={i18n.translate('xpack.transform.transformList.transformDescription', {
+          defaultMessage:
+            'Use transforms to pivot existing Elasticsearch indices into summarized entity-centric indices or to create an indexed view of the latest documents for fast access.',
+        })}
+        docLink={esTransform}
+        menu={menu}
+        spacing="bleed"
       />
 
+      <EuiSpacer size="l" />
+
       <EuiPageTemplate.Section paddingSize={'none'} data-test-subj="transformPageTransformList">
-        {isInitialLoading && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiSkeletonText lines={2} />
-          </>
-        )}
+        {isInitialLoading && <EuiSkeletonText lines={2} />}
         {!isInitialLoading && (
           <>
             {unauthorizedTransformsWarning}
@@ -312,7 +259,7 @@ export const TransformManagement: FC = () => {
               {(transformNodes > 0 || transforms.length > 0) && (
                 <TransformList
                   isLoading={transformsWithoutStatsLoading}
-                  onCreateTransform={onOpenModal}
+                  onCreateTransform={onCreateTransform}
                   transformNodes={transformNodes}
                   transforms={transforms}
                   transformsLoading={transformsWithoutStatsLoading}
@@ -326,20 +273,6 @@ export const TransformManagement: FC = () => {
           </>
         )}
       </EuiPageTemplate.Section>
-
-      {isSearchSelectionVisible && (
-        <EuiModal
-          onClose={onCloseModal}
-          className="transformCreateTransformSearchDialog"
-          data-test-subj="transformSelectSourceModal"
-        >
-          <SearchSelection
-            onSearchSelected={onSearchSelected}
-            canEditDataView={canEditDataView}
-            createNewDataView={createNewDataView}
-          />
-        </EuiModal>
-      )}
     </>
   );
 };

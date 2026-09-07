@@ -1,0 +1,22 @@
+{
+  "10.8.0": [
+    {
+      "name": "default",
+      "type": "elasticsearch",
+      "is_default": true,
+      "is_default_monitoring": true,
+      "hosts": ["https://localhost:9200"],
+      "preset": "balanced"
+    }
+  ],
+  "10.9.0": [
+    {
+      "name": "default",
+      "type": "elasticsearch",
+      "is_default": true,
+      "is_default_monitoring": true,
+      "hosts": ["https://localhost:9200"],
+      "preset": "balanced"
+    }
+  ]
+}

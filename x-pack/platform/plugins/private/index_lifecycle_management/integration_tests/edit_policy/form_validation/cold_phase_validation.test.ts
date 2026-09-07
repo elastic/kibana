@@ -5,18 +5,38 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { screen, fireEvent } from '@testing-library/react';
 import { i18nTexts } from '../../../public/application/sections/edit_policy/i18n_texts';
-import { setupEnvironment } from '../../helpers';
-import type { ValidationTestBed } from './validation.helpers';
-import { setupValidationTestBed } from './validation.helpers';
+import { setupEnvironment } from '../../helpers/setup_environment';
+import {
+  createColdPhaseActions,
+  createDeletePhaseActions,
+  createFrozenPhaseActions,
+  createHotPhaseActions,
+  createWarmPhaseActions,
+} from '../../helpers/actions/phases';
+import { expectErrorMessages } from '../../helpers/actions/errors_actions';
+import { createFormSetValueAction } from '../../helpers/actions/form_set_value_action';
+import { createRolloverActions } from '../../helpers/actions/rollover_actions';
+import { createTogglePhaseAction } from '../../helpers/actions/toggle_phase_action';
+import { renderEditPolicy } from '../../helpers/render_edit_policy';
 
 describe('<EditPolicy /> cold phase validation', () => {
-  let testBed: ValidationTestBed;
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let actions: {
+    togglePhase: ReturnType<typeof createTogglePhaseAction>;
+    setPolicyName: ReturnType<typeof createFormSetValueAction>;
+    toggleSaveAsNewPolicy: () => void;
+    savePolicy: () => void;
+  } & ReturnType<typeof createRolloverActions> &
+    ReturnType<typeof createHotPhaseActions> &
+    ReturnType<typeof createWarmPhaseActions> &
+    ReturnType<typeof createColdPhaseActions> &
+    ReturnType<typeof createFrozenPhaseActions> &
+    ReturnType<typeof createDeletePhaseActions>;
 
   beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
@@ -34,57 +54,54 @@ describe('<EditPolicy /> cold phase validation', () => {
       { nodeId: 'testNodeId', stats: { name: 'testNodeName', host: 'testHost' } },
     ]);
 
-    await act(async () => {
-      testBed = await setupValidationTestBed(httpSetup);
+    renderEditPolicy(httpSetup, {
+      initialEntries: ['/policies/edit'],
     });
 
-    const { component, actions } = testBed;
-    component.update();
+    await screen.findByTestId('savePolicyButton');
+
+    actions = {
+      togglePhase: createTogglePhaseAction(),
+      setPolicyName: createFormSetValueAction('policyNameField'),
+      savePolicy: () => fireEvent.click(screen.getByTestId('savePolicyButton')),
+      toggleSaveAsNewPolicy: () => fireEvent.click(screen.getByTestId('saveAsNewSwitch')),
+      ...createRolloverActions(),
+      ...createHotPhaseActions(),
+      ...createWarmPhaseActions(),
+      ...createColdPhaseActions(),
+      ...createFrozenPhaseActions(),
+      ...createDeletePhaseActions(),
+    };
+
     await actions.setPolicyName('mypolicy');
     await actions.togglePhase('cold');
   });
 
   describe('replicas', () => {
     test(`doesn't allow -1 for replicas`, async () => {
-      const { actions } = testBed;
-
       await actions.cold.setReplicas('-1');
 
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      await expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for replicas`, async () => {
-      const { actions } = testBed;
-
       await actions.cold.setReplicas('0');
 
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([]);
+      await expectErrorMessages([]);
     });
   });
 
   describe('index priority', () => {
     test(`doesn't allow -1 for index priority`, async () => {
-      const { actions } = testBed;
-
       await actions.cold.setIndexPriority('-1');
 
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
+      await expectErrorMessages([i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
 
     test(`allows 0 for index priority`, async () => {
-      const { actions } = testBed;
-
       await actions.cold.setIndexPriority('0');
 
-      actions.errors.waitForValidation();
-
-      actions.errors.expectMessages([]);
+      await expectErrorMessages([]);
     });
   });
 });

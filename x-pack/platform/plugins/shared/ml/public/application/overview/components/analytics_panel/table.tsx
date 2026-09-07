@@ -117,6 +117,9 @@ export const AnalyticsTable: FC<Props> = ({ items }) => {
       pagination={pagination}
       sorting={sorting}
       data-test-subj="mlOverviewTableAnalytics"
+      tableCaption={i18n.translate('xpack.ml.overview.analyticsList.caption', {
+        defaultMessage: 'Analytics jobs overview',
+      })}
     />
   );
 };

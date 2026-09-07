@@ -42,7 +42,7 @@ export const NotFoundPrompt = ({ actions, title, body }: NotFoundProps) => {
 
   const DEFAULT_ACTIONS = useMemo(
     () => [
-      <EuiButtonEmpty iconType="arrowLeft" flush="both" onClick={goBack}>
+      <EuiButtonEmpty iconType="chevronSingleLeft" flush="both" onClick={goBack}>
         {NOT_FOUND_GO_BACK}
       </EuiButtonEmpty>,
     ],

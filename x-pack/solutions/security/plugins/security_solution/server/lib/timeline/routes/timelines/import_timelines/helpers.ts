@@ -10,7 +10,7 @@ import type { Readable } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 import { createPromiseFromStreams } from '@kbn/utils';
 
-import { stringifyZodError } from '@kbn/zod-helpers';
+import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { ImportTimelineResult, TimelineStatusEnum } from '../../../../../../common/api/timeline';
 
 import type { BulkError } from '../../../../detection_engine/routes/utils';

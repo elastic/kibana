@@ -1,0 +1,5 @@
+description: An example of a 400 Bad Request response, returned when the request payload or query parameters fail validation.
+value:
+  statusCode: 400
+  error: Bad Request
+  message: "[request body]: expected value of type [string] but got [undefined]"

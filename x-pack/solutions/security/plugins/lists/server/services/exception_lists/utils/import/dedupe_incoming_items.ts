@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  BulkErrorSchema,
-  ImportExceptionListItemSchemaDecoded,
+import {
+  type BulkErrorSchema,
+  type ImportExceptionListItemSchemaDecoded,
 } from '@kbn/securitysolution-io-ts-list-types';
+
+import { ExceptionItemImportError } from '../../../../exception_item_import_error';
 
 /**
  * Reports on duplicates and returns unique array of items
@@ -21,7 +23,14 @@ export const getTupleErrorsAndUniqueExceptionListItems = (
 ): [BulkErrorSchema[], ImportExceptionListItemSchemaDecoded[]] => {
   const { errors, itemsAcc } = items.reduce(
     (acc, parsedExceptionItem) => {
-      if (parsedExceptionItem instanceof Error) {
+      if (parsedExceptionItem instanceof ExceptionItemImportError) {
+        acc.errors.set(uuidv4(), {
+          error: parsedExceptionItem,
+
+          item_id: parsedExceptionItem.itemId,
+          list_id: parsedExceptionItem.listId,
+        });
+      } else if (parsedExceptionItem instanceof Error) {
         acc.errors.set(uuidv4(), {
           error: {
             message: `Error found importing exception list item: ${parsedExceptionItem.message}`,

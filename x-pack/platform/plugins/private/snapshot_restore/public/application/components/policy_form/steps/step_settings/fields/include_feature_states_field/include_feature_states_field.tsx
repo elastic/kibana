@@ -10,14 +10,8 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
-import {
-  EuiDescribedFormGroup,
-  EuiFormRow,
-  EuiSwitch,
-  EuiTitle,
-  EuiCallOut,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiFormRow, EuiSwitch, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FEATURE_STATES_NONE_OPTION } from '../../../../../../../../common/constants';
 import type { SlmPolicyPayload } from '../../../../../../../../common/types';
@@ -107,9 +101,8 @@ export const IncludeFeatureStatesField: FunctionComponent<Props> = ({ policy, on
               onUpdateFormSettings={onUpdate}
             />
           ) : (
-            <EuiCallOut
-              color="warning"
-              iconType="warning"
+            <KbnWarningCallout
+              announceOnMount={false}
               title={
                 <FormattedMessage
                   id="xpack.snapshotRestore.errorLoadingFeatureStatesLabel"

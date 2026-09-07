@@ -7,7 +7,8 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiCallOut, EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { KbnSuccessCallout, KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SAVE_STATE } from '../page';
@@ -26,39 +27,36 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
     return (
       <>
         {saveState === SAVE_STATE.SAVED && (
-          <EuiCallOut
+          <KbnSuccessCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.jobsCreatedTitle"
                 defaultMessage="Jobs created"
               />
             }
-            color="success"
-            iconType="checkInCircleFilled"
           />
         )}
         {saveState === SAVE_STATE.FAILED && (
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.simple.recognize.jobsCreationFailedTitle"
                 defaultMessage="Jobs creation failed"
               />
             }
-            color="danger"
-            iconType="warning"
           />
         )}
         {saveState === SAVE_STATE.PARTIAL_FAILURE && (
-          <EuiCallOut
+          <KbnWarningCallout
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.someJobsCreationFailedTitle"
                 defaultMessage="Some jobs failed to be created"
               />
             }
-            color="warning"
-            iconType="warning"
           />
         )}
         <EuiSpacer size="l" />

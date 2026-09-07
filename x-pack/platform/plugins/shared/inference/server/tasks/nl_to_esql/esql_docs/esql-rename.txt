@@ -1,39 +1,49 @@
-## RENAME
+# RENAME
 
-The `RENAME` command is used to rename one or more columns in a table. If a column with the new name already exists, it will be replaced by the renamed column.
+The RENAME command changes the names of one or more columns. If a column with the new name already exists, it will be replaced by the renamed column. Renaming multiple columns in a single RENAME command is equivalent to using multiple sequential RENAME commands.
 
 ## Syntax
 
 `RENAME old_name1 AS new_name1[, ..., old_nameN AS new_nameN]`
 
+The following syntax is also supported:
+`RENAME new_name1 = old_name1[, ..., new_nameN = old_nameN]`
+
+Both syntax options can be used interchangeably, but it is recommended to stick to one for consistency and readability.
+
 ### Parameters
 
-#### `old_nameX`
+#### old_nameX
 
 The name of the column you want to rename.
 
-#### `new_nameX`
+#### new_nameX
 
-The new name for the column. If it conflicts with an existing column name, the existing column is dropped. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
+The new name for the column. If the new name conflicts with an existing column, the existing column is dropped. If multiple columns are renamed to the same name, all but the rightmost column with the same new name are dropped.
 
 ## Examples
 
-### Rename a single column
-
-Rename the `still_hired` column to `employed`:
+Renames the `still_hired` column to `employed` after selecting specific columns.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name, still_hired
-| RENAME still_hired AS employed
+| RENAME  still_hired AS employed
 ```
 
-### Rename multiple columns
-
-Rename `first_name` to `fn` and `last_name` to `ln` in a single command:
+Renames `first_name` to `fn` and `last_name` to `ln` in a single command after keeping only those columns.
 
 ```esql
 FROM employees
 | KEEP first_name, last_name
 | RENAME first_name AS fn, last_name AS ln
+```
+
+Renames `first_name` to `fn` and then `last_name` to `ln` using two separate RENAME commands after keeping only those columns.
+
+```esql
+FROM employees
+| KEEP first_name, last_name
+| RENAME first_name AS fn
+| RENAME last_name AS ln
 ```

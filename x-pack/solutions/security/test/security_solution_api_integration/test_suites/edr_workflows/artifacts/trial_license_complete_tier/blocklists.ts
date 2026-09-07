@@ -14,10 +14,11 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type TestAgent from 'supertest/lib/agent';
+import type { PolicyTestResourceInfo } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import { getWithArtifactReadPrivilegesRole } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/with_artifact_read_privileges_role';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
-import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 
 export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
@@ -206,11 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(
-                anErrorMessageWith(
-                  '[request body]: entries.0.value: Array must contain at least 1 element(s)'
-                )
-              );
+              .expect(anErrorMessageWith(/entries\.0\.value.*(?:at least 1|>=1 items)/));
           });
 
           it(`should error on [${blocklistApiCall.method}] if signer is set to match_any and a string is provided`, async () => {
@@ -362,12 +359,18 @@ export default function ({ getService }: FtrProviderContext) {
         }
       });
 
-      // no such role in serverless
-      describe('@skipInServerless and user has authorization to read blocklist', function () {
+      describe('and user has authorization to read blocklist', function () {
         let artifactReadSupertest: TestAgent;
         before(async () => {
-          artifactReadSupertest = await utils.createSuperTest(ROLE.artifact_read_privileges);
+          artifactReadSupertest = await utils.createSuperTestWithCustomRole({
+            name: 'custom_artifact_read_role',
+            privileges: getWithArtifactReadPrivilegesRole(),
+          });
         });
+        after(async () => {
+          await utils.cleanUpCustomRoles();
+        });
+
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await artifactReadSupertest[blocklistApiCall.method](blocklistApiCall.path)

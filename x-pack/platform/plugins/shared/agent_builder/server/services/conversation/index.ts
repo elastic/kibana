@@ -1,0 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export { type ConversationService, ConversationServiceImpl } from './conversation_service';
+export type { ConversationClient } from './client';
+export type { GetEventsOptions } from './client/types';
+export { eventsToRounds, roundsForContext } from './client/events_to_rounds';

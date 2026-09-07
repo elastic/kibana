@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { createResultSchema, updateOptionsSchema } from '@kbn/content-management-utils';
 
-import { lensItemAttributesSchema, lensSavedObjectSchema } from './common';
+import { lensItemAttributesSchemaV1, lensSavedObjectSchemaV1 } from './common';
 import { pickFromObjectSchema } from '../../../utils';
 
 export const lensCMUpdateOptionsSchema = schema.object(
@@ -26,11 +26,11 @@ export const lensCMUpdateOptionsSchema = schema.object(
 export const lensCMUpdateBodySchema = schema.object(
   {
     options: lensCMUpdateOptionsSchema,
-    data: lensItemAttributesSchema,
+    data: lensItemAttributesSchemaV1,
   },
   {
     unknowns: 'forbid',
   }
 );
 
-export const lensCMUpdateResultSchema = createResultSchema(lensSavedObjectSchema);
+export const lensCMUpdateResultSchema = createResultSchema(lensSavedObjectSchemaV1);

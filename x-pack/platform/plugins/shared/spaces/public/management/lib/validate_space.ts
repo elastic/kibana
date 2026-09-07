@@ -134,15 +134,7 @@ export class SpaceValidator {
       return valid();
     }
 
-    if (!space.color) {
-      return invalid(
-        i18n.translate('xpack.spaces.management.validateSpace.requiredColorErrorMessage', {
-          defaultMessage: 'Select a background color.',
-        })
-      );
-    }
-
-    if (!isValidHex(space.color)) {
+    if (space.color && !isValidHex(space.color)) {
       return invalid(
         i18n.translate('xpack.spaces.management.validateSpace.invalidColorErrorMessage', {
           defaultMessage: 'Enter a valid HEX color code.',

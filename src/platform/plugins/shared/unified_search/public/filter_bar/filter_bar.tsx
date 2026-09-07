@@ -7,19 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { FilterItems, type FilterItemsProps } from './filter_item/filter_items';
 
 import { filterBarStyles } from './filter_bar.styles';
-import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
+import type { IUnifiedSearchPluginServices } from '../types';
+import { useFilterBarContext } from './filter_bar_context';
 
 export interface Props {
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className?: string;
@@ -45,35 +50,56 @@ export interface Props {
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
-  const euiTheme = useEuiTheme();
-  const styles = filterBarStyles(euiTheme, props.afterQueryBar);
+  const themeContext = useEuiTheme();
+  const styles = filterBarStyles(themeContext, props.afterQueryBar);
+
   const groupRef = useRef<HTMLDivElement>(null);
+
+  const { isCollapsed, isCollapsible, expandablePillsId } = useFilterBarContext();
+
+  if (!isCollapsible) {
+    return null;
+  }
 
   return (
     <EuiFlexGroup
-      css={styles.group}
-      ref={groupRef}
-      wrap={true}
+      alignItems={!isCollapsed ? 'flexStart' : 'center'}
+      gutterSize="xs"
+      wrap={!isCollapsed}
       responsive={false}
-      gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
-      alignItems="center"
-      tabIndex={-1}
-      data-test-subj="filter-items-group"
-      className={`filter-items-group ${props.className ?? ''}`}
     >
-      {props.prepend}
-      <FilterItems
-        filters={props.filters!}
-        onFiltersUpdated={props.onFiltersUpdated}
-        indexPatterns={props.indexPatterns!}
-        timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-        filtersForSuggestions={props.filtersForSuggestions}
-        hiddenPanelOptions={props.hiddenPanelOptions}
-        readOnly={props.isDisabled}
-        suggestionsAbstraction={props.suggestionsAbstraction}
-      />
+      <EuiFlexItem
+        id={expandablePillsId}
+        aria-hidden={isCollapsed}
+        grow={true}
+        css={[styles.pillsScrollContainer, isCollapsed ? styles.filterBarContentCollapsed : null]}
+      >
+        <EuiFlexGroup
+          css={styles.filterPillGroup}
+          ref={groupRef}
+          wrap={true}
+          responsive={false}
+          gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
+          alignItems="center"
+          tabIndex={-1}
+          data-test-subj="filter-items-group"
+          className={`filter-items-group ${props.className ?? ''}`}
+        >
+          {props.prepend}
+          <FilterItems
+            filters={props.filters!}
+            onFiltersUpdated={props.onFiltersUpdated}
+            indexPatterns={props.indexPatterns!}
+            timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
+            filtersForSuggestions={props.filtersForSuggestions}
+            hiddenPanelOptions={props.hiddenPanelOptions}
+            readOnly={props.isDisabled}
+            suggestionsAbstraction={props.suggestionsAbstraction}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
 
-export const FilterBar = injectI18n(FilterBarUI);
+export const FilterBar = injectI18n(withKibana(FilterBarUI));

@@ -19,10 +19,16 @@ export const TableHeader: React.FC<TableHeaderProps> = React.memo(
   ({ id, title, tooltipContent }) => {
     return (
       <EuiToolTip content={tooltipContent}>
-        <div id={id}>
+        <div id={id} tabIndex={0}>
           {title}
           &nbsp;
-          <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
+          <EuiIcon
+            size="s"
+            type="question"
+            color="subdued"
+            className="eui-alignTop"
+            aria-hidden={true}
+          />
         </div>
       </EuiToolTip>
     );

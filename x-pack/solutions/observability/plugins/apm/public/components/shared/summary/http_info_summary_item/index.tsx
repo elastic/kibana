@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/react';
 import { HttpStatusCode } from '@kbn/apm-ui-shared';
-import { unit } from '../../../../utils/style';
+import { unit } from '@kbn/apm-common';
 
 const urlStyles = css`
   display: inline-block;
@@ -51,12 +51,14 @@ export function HttpInfoSummaryItem({ status, method, url }: HttpInfoProps) {
       >
         {method && (
           <EuiToolTip content={methodLabel}>
-            <span data-test-subj="apmHttpInfoRequestMethod">{method.toUpperCase()}</span>
+            <span tabIndex={0} data-test-subj="apmHttpInfoRequestMethod">
+              {method.toUpperCase()}
+            </span>
           </EuiToolTip>
         )}{' '}
         {url && (
           <EuiToolTip content={url}>
-            <span data-test-subj="apmHttpInfoUrl" css={urlStyles}>
+            <span tabIndex={0} data-test-subj="apmHttpInfoUrl" css={urlStyles}>
               {url}
             </span>
           </EuiToolTip>

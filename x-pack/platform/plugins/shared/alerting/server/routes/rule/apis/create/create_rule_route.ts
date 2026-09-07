@@ -7,6 +7,7 @@
 
 import type { RouteOptions } from '../../..';
 import type {
+  CreateRuleActionV1,
   CreateRuleRequestBodyV1,
   CreateRuleRequestParamsV1,
   CreateRuleResponseV1,
@@ -18,6 +19,7 @@ import {
 } from '../../../../../common/routes/rule/apis/create';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../../../../../common';
 import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
@@ -27,6 +29,7 @@ import {
   handleDisabledApiKeysError,
   verifyAccessAndContext,
 } from '../../../lib';
+import { validateInternalRuleType } from '../../../lib/validate_internal_rule_type';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformCreateBodyV1 } from './transforms';
@@ -70,12 +73,17 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
-          const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
           const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
-          const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
+          const createRuleData = req.body as CreateRuleRequestBodyV1<RuleParamsV1>;
           const params: CreateRuleRequestParamsV1 = req.params;
+
+          // A Kibana-internal caller running on a borrowed API key (e.g. an Agent Builder task)
+          // declares it with this header so the rule is minted its own key instead of keeping the
+          // caller's. A header rather than a body field: it is a directive between Kibana
+          // services, not rule content, and stays out of the public create-rule contract.
+          const cloneApiKey = req.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true';
 
           countUsageOfPredefinedIds({
             predefinedId: params?.id,
@@ -84,20 +92,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
-            const ruleType = ruleTypes.get(createRuleData.rule_type_id);
-
-            /**
-             * Throws a bad request (400) if the rule type is internallyManaged
-             * ruleType will always exist here because ruleTypes.get will throw a 400
-             * error if the rule type is not registered.
-             */
-            if (ruleType?.internallyManaged) {
-              return res.badRequest({
-                body: {
-                  message: `Cannot create rule of type "${createRuleData.rule_type_id}" because it is internally managed.`,
-                },
-              });
-            }
+            validateInternalRuleType({
+              ruleTypeId: createRuleData.rule_type_id,
+              ruleTypes,
+              operationText: 'create',
+            });
 
             /**
              * Throws an error if the group is not defined in default actions
@@ -108,12 +107,12 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
               isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
             });
 
-            const actions = allActions.filter((action) => !actionsClient.isSystemAction(action.id));
-            const systemActions = allActions.filter((action) =>
+            const actions = allActions.filter(
+              (action: CreateRuleActionV1) => !actionsClient.isSystemAction(action.id)
+            );
+            const systemActions = allActions.filter((action: CreateRuleActionV1) =>
               actionsClient.isSystemAction(action.id)
             );
-
-            const flappingSettings = await rulesSettingsClient.flapping().get();
 
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
@@ -123,8 +122,11 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
                 actions,
                 systemActions,
               }),
-              isFlappingEnabled: flappingSettings.enabled,
-              options: { id: params?.id },
+              options: {
+                id: params?.id,
+                ...(cloneApiKey ? { cloneApiKey } : {}),
+              },
+              ...(createRuleData.template_id ? { templateId: createRuleData.template_id } : {}),
             })) as Rule<RuleParamsV1>;
 
             // Assert versioned response type

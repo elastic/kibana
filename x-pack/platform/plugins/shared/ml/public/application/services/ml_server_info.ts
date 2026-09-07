@@ -5,17 +5,12 @@
  * 2.0.
  */
 
+import type {
+  CloudInfo,
+  MlServerDefaults,
+  MlServerLimits,
+} from '@kbn/ml-common-types/ml_server_info';
 import type { MlApi } from './ml_api_service';
-import type { MlServerDefaults, MlServerLimits } from '../../../common/types/ml_server_info';
-
-export interface CloudInfo {
-  cloudId: string | null;
-  isCloud: boolean;
-  isCloudTrial: boolean;
-  deploymentId: string | null;
-  cloudUrl: string | null;
-  isMlAutoscalingEnabled: boolean;
-}
 
 let defaults: MlServerDefaults = {
   anomaly_detectors: {},
@@ -30,6 +25,7 @@ const cloudInfo: CloudInfo = {
   deploymentId: null,
   cloudUrl: null,
   isMlAutoscalingEnabled: false,
+  isMlCpsEnabled: false,
 };
 
 export async function loadMlServerInfo(mlApi: MlApi) {
@@ -41,7 +37,7 @@ export async function loadMlServerInfo(mlApi: MlApi) {
     cloudInfo.isCloud = resp.cloudId !== undefined;
     cloudInfo.isCloudTrial = resp.isCloudTrial === true;
     cloudInfo.deploymentId = !resp.cloudId ? null : extractDeploymentId(resp.cloudId);
-
+    cloudInfo.isMlCpsEnabled = resp.isMlCpsEnabled;
     return { defaults, limits, cloudId: cloudInfo };
   } catch (error) {
     return { defaults, limits, cloudId: cloudInfo };
@@ -70,6 +66,10 @@ export function isCloudTrial(): boolean {
 
 export function getCloudDeploymentId(): string | null {
   return cloudInfo.deploymentId;
+}
+
+export function getIsMlCpsEnabled(): boolean {
+  return cloudInfo.isMlCpsEnabled;
 }
 
 export function extractDeploymentId(cloudId: string) {

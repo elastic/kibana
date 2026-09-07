@@ -8,17 +8,16 @@
 import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormControlLayoutDelimited,
-  EuiFormLabel,
   EuiFormFieldset,
   EuiSpacer,
+  EuiFormAppend,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 const StyledFieldset = styled(EuiFormFieldset)`
@@ -40,6 +39,14 @@ const StyledFieldset = styled(EuiFormFieldset)`
 const StyledField = styled(EuiFieldText)`
   text-align: left;
 `;
+
+const DEFAULT_KEY_LABEL = i18n.translate('xpack.synthetics.keyValuePairsField.key.label', {
+  defaultMessage: 'Key',
+});
+
+const DEFAULT_VALUE_LABEL = i18n.translate('xpack.synthetics.keyValuePairsField.value.label', {
+  defaultMessage: 'Value',
+});
 
 export type Pair = [
   string, // key
@@ -68,6 +75,9 @@ export const KeyValuePairsField = ({
   valueLabel,
 }: KeyValuePairsFieldProps) => {
   const [pairs, setPairs] = useState<Pair[]>(defaultPairs);
+
+  const keyLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsKeyLabel' });
+  const valueLabelId = useGeneratedHtmlId({ prefix: 'keyValuePairsValueLabel' });
 
   const handleOnChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>, index: number, isKey: boolean) => {
@@ -124,22 +134,8 @@ export const KeyValuePairsField = ({
             ? {
                 children: (
                   <EuiFlexGroup responsive={false}>
-                    <EuiFlexItem>
-                      {keyLabel || (
-                        <FormattedMessage
-                          id="xpack.synthetics.keyValuePairsField.key.label"
-                          defaultMessage="Key"
-                        />
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      {valueLabel || (
-                        <FormattedMessage
-                          id="xpack.synthetics.keyValuePairsField.value.label"
-                          defaultMessage="Value"
-                        />
-                      )}
-                    </EuiFlexItem>
+                    <EuiFlexItem id={keyLabelId}>{keyLabel || DEFAULT_KEY_LABEL}</EuiFlexItem>
+                    <EuiFlexItem id={valueLabelId}>{valueLabel || DEFAULT_VALUE_LABEL}</EuiFlexItem>
                   </EuiFlexGroup>
                 ),
               }
@@ -154,31 +150,24 @@ export const KeyValuePairsField = ({
               <EuiFormControlLayoutDelimited
                 fullWidth
                 append={
-                  <EuiFormLabel>
-                    <EuiButtonIcon
-                      data-test-subj="syntheticsKeyValuePairsFieldButton"
-                      iconType="trash"
-                      aria-label={i18n.translate(
-                        'xpack.synthetics.keyValuePairsField.deleteItem.label',
-                        {
-                          defaultMessage: 'Delete item number {index}, {key}:{value}',
-                          values: { index: index + 1, key, value },
-                        }
-                      )}
-                      onClick={() => handleDeletePair(index)}
-                      isDisabled={readOnly}
-                    />
-                  </EuiFormLabel>
+                  <EuiFormAppend
+                    iconLeft="trash"
+                    isDisabled={readOnly}
+                    onClick={() => handleDeletePair(index)}
+                    aria-label={i18n.translate(
+                      'xpack.synthetics.keyValuePairsField.deleteItem.label',
+                      {
+                        defaultMessage: 'Delete item number {index}, {key}:{value}',
+                        values: { index: index + 1, key, value },
+                      }
+                    )}
+                    data-test-subj="syntheticsKeyValuePairsFieldButton"
+                  />
                 }
                 startControl={
                   <StyledField
                     controlOnly
-                    aria-label={i18n.translate(
-                      'xpack.synthetics.keyValuePairsField.key.ariaLabel',
-                      {
-                        defaultMessage: 'Key',
-                      }
-                    )}
+                    aria-labelledby={keyLabelId}
                     data-test-subj={`keyValuePairsKey${index}`}
                     value={key}
                     onChange={(event) => handleOnChange(event, index, true)}
@@ -189,12 +178,7 @@ export const KeyValuePairsField = ({
                 endControl={
                   <StyledField
                     controlOnly
-                    aria-label={i18n.translate(
-                      'xpack.synthetics.keyValuePairsField.value.ariaLabel',
-                      {
-                        defaultMessage: 'Value',
-                      }
-                    )}
+                    aria-labelledby={valueLabelId}
                     data-test-subj={`keyValuePairsValue${index}`}
                     value={value}
                     onChange={(event) => handleOnChange(event, index, false)}

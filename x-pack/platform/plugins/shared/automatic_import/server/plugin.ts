@@ -6,32 +6,37 @@
  */
 
 import type {
-  Plugin,
   PluginInitializerContext,
-  CoreSetup,
   CoreStart,
+  Plugin,
   Logger,
-  CustomRequestHandlerContext,
+  LoggerFactory,
+  EventTypeOpts,
 } from '@kbn/core/server';
-import { MINIMUM_LICENSE_TYPE } from '../common/constants';
-import { registerRoutes } from './routes';
+import { SavedObjectsClient } from '@kbn/core/server';
+
+import { ReplaySubject, type Subject } from 'rxjs';
 import type {
+  AutomaticImportPluginCoreSetupDependencies,
   AutomaticImportPluginSetup,
+  AutomaticImportPluginSetupDependencies,
   AutomaticImportPluginStart,
   AutomaticImportPluginStartDependencies,
-  AutomaticImportPluginSetupDependencies,
+  AutomaticImportPluginRequestHandlerContext,
 } from './types';
-
-export type AutomaticImportRouteHandlerContext = CustomRequestHandlerContext<{
-  automaticImport: {
-    getStartServices: CoreSetup<
-      AutomaticImportPluginStartDependencies,
-      AutomaticImportPluginStart
-    >['getStartServices'];
-    isAvailable: () => boolean;
-    logger: Logger;
-  };
-}>;
+import { RequestContextFactory } from './request_context_factory';
+import { AutomaticImportService } from './services';
+import { AUTOMATIC_IMPORT_FEATURE } from './feature';
+import {
+  automaticImportInferenceFeature,
+  automaticImportParentInferenceFeature,
+} from './inference_feature';
+import { registerRoutes } from './routes/register_routes';
+import {
+  INTEGRATION_SAVED_OBJECT_TYPE,
+  DATA_STREAM_SAVED_OBJECT_TYPE,
+} from './services/saved_objects/constants';
+import { telemetryEventsSchemas } from './telemetry';
 
 export class AutomaticImportPlugin
   implements
@@ -42,57 +47,120 @@ export class AutomaticImportPlugin
       AutomaticImportPluginStartDependencies
     >
 {
+  private readonly loggerFactory: LoggerFactory;
   private readonly logger: Logger;
-  private isAvailable: boolean;
-  private hasLicense: boolean;
+  private pluginStop$: Subject<void>;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private automaticImportService: AutomaticImportService | null = null;
+  private productTierAllowsAutomaticImport = true;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.pluginStop$ = new ReplaySubject(1);
+    this.loggerFactory = initializerContext.logger;
     this.logger = initializerContext.logger.get();
-    this.isAvailable = true;
-    this.hasLicense = false;
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
+  /**
+   * Setup the plugin
+   * @param core
+   * @param plugins
+   * @returns AutomaticImportPluginSetup
+   */
   public setup(
-    core: CoreSetup<AutomaticImportPluginStartDependencies, AutomaticImportPluginStart>
-  ): AutomaticImportPluginSetup {
-    core.http.registerRouteHandlerContext<AutomaticImportRouteHandlerContext, 'automaticImport'>(
-      'automaticImport',
-      () => ({
-        getStartServices: core.getStartServices,
-        isAvailable: () => this.isAvailable && this.hasLicense,
-        logger: this.logger,
-      })
+    core: AutomaticImportPluginCoreSetupDependencies,
+    plugins: AutomaticImportPluginSetupDependencies
+  ) {
+    this.logger.debug('automaticImport: Setup');
+
+    // Register EBT telemetry event types (server-side)
+    (
+      Object.values(telemetryEventsSchemas) as Array<EventTypeOpts<Record<string, unknown>>>
+    ).forEach((eventConfig) => {
+      core.analytics.registerEventType(eventConfig);
+    });
+
+    plugins.features.registerKibanaFeature(AUTOMATIC_IMPORT_FEATURE);
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(automaticImportParentInferenceFeature);
+      plugins.searchInferenceEndpoints.features.register(automaticImportInferenceFeature);
+    }
+
+    this.automaticImportService = new AutomaticImportService(
+      this.loggerFactory,
+      core.savedObjects,
+      plugins.taskManager,
+      core,
+      core.analytics
     );
-    const router = core.http.createRouter<AutomaticImportRouteHandlerContext>();
 
-    this.logger.debug('automaticImport api: Setup');
+    const requestContextFactory = new RequestContextFactory({
+      logger: this.logger,
+      core,
+      plugins,
+      kibanaVersion: this.kibanaVersion,
+      automaticImportService: this.automaticImportService,
+      getProductTierAllowsAutomaticImport: () => this.productTierAllowsAutomaticImport,
+    });
 
-    registerRoutes(router);
+    core.http.registerRouteHandlerContext<
+      AutomaticImportPluginRequestHandlerContext,
+      'automaticImport'
+    >('automaticImport', (context, request) => requestContextFactory.create(context, request));
+
+    const router = core.http.createRouter<AutomaticImportPluginRequestHandlerContext>();
+    registerRoutes(router, this.logger);
 
     return {
+      actions: plugins.actions,
       setIsAvailable: (isAvailable: boolean) => {
-        if (!isAvailable) {
-          this.isAvailable = false;
-        }
+        this.productTierAllowsAutomaticImport = isAvailable;
       },
     };
   }
 
+  /**
+   * Start the plugin
+   * @param core
+   * @param plugins
+   * @returns AutomaticImportPluginStart
+   */
   public start(
-    _: CoreStart,
-    dependencies: AutomaticImportPluginStartDependencies
+    core: CoreStart,
+    plugins: AutomaticImportPluginStartDependencies
   ): AutomaticImportPluginStart {
-    this.logger.debug('automaticImport api: Started');
-    const { licensing } = dependencies;
+    this.logger.debug('automaticImport: Started');
 
-    licensing.license$.subscribe((license) => {
-      this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
-    });
+    if (!this.automaticImportService) {
+      throw new Error('AutomaticImportService not initialized during setup');
+    }
 
-    return {
-      inference: dependencies.inference,
-    };
+    const savedObjectsClient = core.savedObjects.createInternalRepository([
+      INTEGRATION_SAVED_OBJECT_TYPE,
+      DATA_STREAM_SAVED_OBJECT_TYPE,
+    ]);
+
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.automaticImportService
+      .initialize(new SavedObjectsClient(savedObjectsClient), plugins.taskManager, internalEsClient)
+      .then(() => {
+        this.logger.debug('AutomaticImportService initialized successfully');
+      })
+      .catch((error) => {
+        this.logger.error('Failed to initialize AutomaticImportService', error);
+      });
+
+    return {};
   }
 
-  public stop() {}
+  /**
+   * Stop the plugin
+   */
+  public stop() {
+    this.pluginStop$.next();
+    this.pluginStop$.complete();
+    this.automaticImportService?.stop();
+  }
 }

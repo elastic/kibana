@@ -62,6 +62,23 @@ export interface RequestOptions {
   ignoreErrors?: number[];
 }
 
+export interface UpdateFlappingSettingsParams {
+  enabled: boolean;
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
+export interface UpdateQueryDelaySettingsParams {
+  delay: number;
+}
+
+export interface ScheduleSnoozeParams {
+  duration?: number;
+  id?: string;
+  start?: Date | string;
+  tzid?: string;
+}
+
 export interface AlertingApiService {
   rules: {
     create: (params: CreateRuleParams, spaceId?: string) => Promise<any>;
@@ -76,6 +93,11 @@ export interface AlertingApiService {
     muteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
     unmuteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
     snooze: (ruleId: string, duration: number, spaceId?: string) => Promise<any>;
+    scheduleSnooze: (
+      ruleId: string,
+      params?: ScheduleSnoozeParams,
+      spaceId?: string
+    ) => Promise<any>;
     unsnooze: (ruleId: string, scheduleIds?: string[], spaceId?: string) => Promise<any>;
     runSoon: (ruleId: string, spaceId?: string) => Promise<void>;
     getRuleTypes: (spaceId?: string) => Promise<any>;
@@ -95,6 +117,11 @@ export interface AlertingApiService {
     getTypes: (spaceId?: string) => Promise<any>;
     execute: (connectorId: string, params: Record<string, any>, spaceId?: string) => Promise<any>;
   };
+  settings: {
+    updateFlapping: (params: UpdateFlappingSettingsParams, spaceId?: string) => Promise<any>;
+    updateQueryDelay: (params: UpdateQueryDelaySettingsParams, spaceId?: string) => Promise<any>;
+    reset: (spaceId?: string) => Promise<void>;
+  };
   waiting: {
     waitForRuleStatus: (
       ruleId: string,
@@ -107,9 +134,15 @@ export interface AlertingApiService {
       ruleId: string,
       count: number,
       spaceId?: string,
-      timeoutMs?: number
+      timeoutMs?: number,
+      dateStart?: Date
     ) => Promise<void>;
-    waitForNextExecution: (ruleId: string, spaceId?: string, timeoutMs?: number) => Promise<void>;
+    waitForNextExecution: (
+      ruleId: string,
+      spaceId?: string,
+      timeoutMs?: number,
+      dateStart?: Date
+    ) => Promise<void>;
   };
   cleanup: {
     deleteAllRules: (spaceId?: string) => Promise<void>;
@@ -154,6 +187,32 @@ export const getAlertingApiHelper = (
         lastResult!
       )}`
     );
+  };
+
+  const updateFlapping = async (params: UpdateFlappingSettingsParams, spaceId?: string) => {
+    return await measurePerformanceAsync(log, 'alertingApi.settings.updateFlapping', async () => {
+      return await kbnClient.request({
+        method: 'POST',
+        path: `${buildSpacePath(spaceId)}/internal/alerting/rules/settings/_flapping`,
+        retries: 3,
+        body: {
+          enabled: params.enabled,
+          look_back_window: params.lookBackWindow,
+          status_change_threshold: params.statusChangeThreshold,
+        },
+      });
+    });
+  };
+
+  const updateQueryDelay = async (params: UpdateQueryDelaySettingsParams, spaceId?: string) => {
+    return await measurePerformanceAsync(log, 'alertingApi.settings.updateQueryDelay', async () => {
+      return await kbnClient.request({
+        method: 'POST',
+        path: `${buildSpacePath(spaceId)}/internal/alerting/rules/settings/_query_delay`,
+        retries: 3,
+        body: { delay: params.delay },
+      });
+    });
   };
 
   return {
@@ -242,7 +301,7 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'DELETE',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
+              path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}`,
               retries: 0,
               ignoreErrors: [204, 404],
             });
@@ -324,7 +383,9 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'POST',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`,
+              path: `${buildSpacePath(
+                spaceId
+              )}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute?validate_alerts_existence=false`,
               retries: 3,
             });
           }
@@ -363,6 +424,34 @@ export const getAlertingApiHelper = (
                     count: 1,
                     dtstart: new Date().toISOString(),
                     tzid: 'UTC',
+                  },
+                },
+              },
+            });
+          }
+        );
+      },
+
+      scheduleSnooze: async (ruleId: string, params?: ScheduleSnoozeParams, spaceId?: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `alertingApi.rules.scheduleSnooze [${ruleId}]`,
+          async () => {
+            const start = params?.start ?? new Date(Date.now() + 3 * 60 * 60 * 1000);
+            const dtstart = start instanceof Date ? start.toISOString() : start;
+
+            return await kbnClient.request({
+              method: 'POST',
+              path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_snooze`,
+              retries: 3,
+              body: {
+                snooze_schedule: {
+                  duration: params?.duration ?? 0,
+                  ...(params?.id && { id: params.id }),
+                  rRule: {
+                    count: 1,
+                    dtstart,
+                    tzid: params?.tzid ?? 'UTC',
                   },
                 },
               },
@@ -411,7 +500,7 @@ export const getAlertingApiHelper = (
         });
       },
 
-      getExecutionLog: async (ruleId: string, spaceId?: string) => {
+      getExecutionLog: async (ruleId: string, spaceId?: string, dateStart = new Date()) => {
         return await measurePerformanceAsync(
           log,
           `alertingApi.rules.getExecutionLog [${ruleId}]`,
@@ -420,6 +509,7 @@ export const getAlertingApiHelper = (
               method: 'GET',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_execution_log`,
               retries: 3,
+              query: { date_start: dateStart.toISOString() },
             });
             return response.data;
           }
@@ -553,6 +643,24 @@ export const getAlertingApiHelper = (
       },
     },
 
+    settings: {
+      updateFlapping,
+      updateQueryDelay,
+      reset: async (spaceId?: string) => {
+        return await measurePerformanceAsync(log, 'alertingApi.settings.reset', async () => {
+          await updateFlapping(
+            {
+              enabled: true,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
+            },
+            spaceId
+          );
+          await updateQueryDelay({ delay: 10 }, spaceId);
+        });
+      },
+    },
+
     waiting: {
       waitForRuleStatus: async (
         ruleId: string,
@@ -621,7 +729,8 @@ export const getAlertingApiHelper = (
         ruleId: string,
         count: number,
         spaceId?: string,
-        timeoutMs: number = 30000
+        timeoutMs: number = 30000,
+        dateStart: Date = new Date()
       ) => {
         return await measurePerformanceAsync(
           log,
@@ -634,7 +743,8 @@ export const getAlertingApiHelper = (
                   path: `${buildSpacePath(
                     spaceId
                   )}/internal/alerting/rule/${ruleId}/_execution_log`,
-                  retries: 1, // Lower retries for frequent polling operations
+                  retries: 1, // Lower retries for frequent polling operations,
+                  query: { date_start: dateStart.toISOString() },
                 });
                 const logData = executionLog.data as any;
                 return logData.total;
@@ -648,7 +758,12 @@ export const getAlertingApiHelper = (
         );
       },
 
-      waitForNextExecution: async (ruleId: string, spaceId?: string, timeoutMs: number = 30000) => {
+      waitForNextExecution: async (
+        ruleId: string,
+        spaceId?: string,
+        timeoutMs: number = 30000,
+        dateStart: Date = new Date()
+      ) => {
         return await measurePerformanceAsync(
           log,
           `alertingApi.waiting.waitForNextExecution [${ruleId}]`,
@@ -658,6 +773,7 @@ export const getAlertingApiHelper = (
               method: 'GET',
               path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_execution_log`,
               retries: 3,
+              query: { date_start: dateStart.toISOString() },
             });
             const initialLogData = initialLog.data as any;
             const initialCount = initialLogData.total;
@@ -669,7 +785,8 @@ export const getAlertingApiHelper = (
                   path: `${buildSpacePath(
                     spaceId
                   )}/internal/alerting/rule/${ruleId}/_execution_log`,
-                  retries: 1, // Lower retries for frequent polling operations
+                  retries: 1, // Lower retries for frequent polling operations,
+                  query: { date_start: dateStart.toISOString() },
                 });
                 const logData = executionLog.data as any;
                 return logData.total;
@@ -702,7 +819,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   retries: 3,
                   ignoreErrors: [404],
                 });
@@ -725,14 +842,20 @@ export const getAlertingApiHelper = (
 
             const connectorsData = connectors.data as any;
             await Promise.all(
-              connectorsData.map(async (connector: any) => {
-                await kbnClient.request({
-                  method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
-                  retries: 3,
-                  ignoreErrors: [404],
-                });
-              })
+              connectorsData
+                // Preconfigured and system connectors cannot be deleted via the API
+                // (the DELETE endpoint returns 400), so only remove user-created ones.
+                .filter(
+                  (connector: any) => !connector.is_preconfigured && !connector.is_system_action
+                )
+                .map(async (connector: any) => {
+                  await kbnClient.request({
+                    method: 'DELETE',
+                    path: `${buildSpacePath(spaceId)}/api/actions/connector/${connector.id}`,
+                    retries: 3,
+                    ignoreErrors: [404],
+                  });
+                })
             );
           }
         );
@@ -756,7 +879,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   retries: 3,
                   ignoreErrors: [404],
                 });

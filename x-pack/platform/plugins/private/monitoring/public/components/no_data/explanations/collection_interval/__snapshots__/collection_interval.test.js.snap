@@ -8,7 +8,7 @@ Array [
     Success! Wait a moment please.
   </h2>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -18,7 +18,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <span
     aria-label="Loading"
@@ -47,7 +47,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -71,7 +71,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"
@@ -121,7 +121,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule emotion-euiHorizontalRule-half-l"
+    class="euiHorizontalRule emotion-euiHorizontalRule-half-m"
   />,
   <div
     class="euiText emotion-euiText-m"
@@ -145,7 +145,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
   />,
   <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceAround-center-row"

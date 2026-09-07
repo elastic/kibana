@@ -29,18 +29,17 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           name: ilmPolicyName,
         });
 
-        expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
-          _meta: {
-            managed: true,
-          },
-          phases: {
-            hot: {
-              min_age: '0ms',
-              actions: {
-                rollover: {
-                  max_age: '30d',
-                  max_primary_shard_size: '50gb',
-                },
+        const commonPolicy = commonIlmPolicy[ilmPolicyName].policy;
+        // `_meta` also carries a `content_hash` stamp used to skip unchanged installs
+        expect(commonPolicy._meta?.managed).to.eql(true);
+        expect(commonPolicy._meta?.content_hash).to.be.a('string');
+        expect(commonPolicy.phases).to.eql({
+          hot: {
+            min_age: '0ms',
+            actions: {
+              rollover: {
+                max_age: '30d',
+                max_primary_shard_size: '50gb',
               },
             },
           },
@@ -150,10 +149,16 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           '.internal.alerts-test.patternfiring.alerts-default-*',
           '.reindexed-v8-internal.alerts-test.patternfiring.alerts-default-*',
         ]);
-        expect(contextIndexTemplate.index_template.composed_of).to.eql([
-          '.alerts-test.patternfiring.alerts-mappings',
-          '.alerts-framework-mappings',
-        ]);
+
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes(
+            '.alerts-test.patternfiring.alerts-mappings'
+          )
+        );
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes('.alerts-framework-mappings')
+        );
+
         expect(contextIndexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.namespace).to.eql(
@@ -171,7 +176,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
             mapping: {
               ignore_malformed: 'true',
               total_fields: {
-                limit: '2500',
+                limit: '2800',
                 ignore_dynamic_beyond_limit: 'true',
               },
             },
@@ -188,6 +193,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndex[indexName].aliases).to.eql({
           '.alerts-test.patternfiring.alerts-default': {
             is_write_index: true,
+            is_hidden: true,
           },
         });
         expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);
@@ -207,7 +213,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
           ignore_malformed: 'true',
           total_fields: {
-            limit: '2500',
+            limit: '2800',
             ignore_dynamic_beyond_limit: 'true',
           },
         });

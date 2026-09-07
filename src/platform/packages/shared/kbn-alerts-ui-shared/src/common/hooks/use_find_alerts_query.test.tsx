@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '../test_utils/test_query_client_config';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -46,7 +46,7 @@ describe('useFindAlertsQuery', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(true), { timeout: 5000 });
 
     expect(mockServices.http.post).toHaveBeenCalledTimes(1);
-    expect(mockServices.http.post).toBeCalledWith('/internal/rac/alerts/find', {
+    expect(mockServices.http.post).toHaveBeenCalledWith('/internal/rac/alerts/find', {
       body: '{"consumers":["bar"],"rule_type_ids":["foo"]}',
     });
   });

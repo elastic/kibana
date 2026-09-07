@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
+  getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
 import { retryTransientEsErrors } from '../utils/retry';
-import type { SLORepository } from './slo_repository';
+import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
+import { getSloApmLabels } from './utils';
 
 interface Options {
   skipDataDeletion: boolean;
@@ -25,12 +29,13 @@ interface Options {
 
 export class DeleteSLO {
   constructor(
-    private repository: SLORepository,
+    private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
-    private abortController: AbortController = new AbortController()
+    private logger: Logger,
+    private signal: AbortSignal = new AbortController().signal
   ) {}
 
   public async execute(
@@ -41,18 +46,27 @@ export class DeleteSLO {
     }
   ): Promise<void> {
     const slo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(slo));
 
     // First delete the linked resources before deleting the data
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    const wildcardPipelineId = getWildcardPipelineId(slo.id, slo.revision);
+    const customWildcardPipelineId = getCustomSLOWildcardPipelineId(slo.id);
 
     await Promise.all([
       this.transformManager.uninstall(rollupTransformId),
       this.summaryTransformManager.uninstall(summaryTransformId),
       retryTransientEsErrors(() =>
         this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getWildcardPipelineId(slo.id, slo.revision) },
-          { ignore: [404], signal: this.abortController.signal }
+          { id: wildcardPipelineId },
+          { ignore: [404], signal: this.signal }
+        )
+      ),
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: customWildcardPipelineId },
+          { ignore: [404], signal: this.signal }
         )
       ),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
@@ -86,7 +100,7 @@ export class DeleteSLO {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
   }
 
@@ -112,9 +126,10 @@ export class DeleteSLO {
           },
         },
       },
-      { signal: this.abortController.signal }
+      { signal: this.signal }
     );
   }
+
   private async deleteAssociatedRules(sloId: string, skip: boolean): Promise<void> {
     if (skip) {
       return;
@@ -125,7 +140,19 @@ export class DeleteSLO {
         filter: `alert.attributes.params.sloId:${sloId}`,
       });
     } catch (err) {
-      // no-op
+      if (
+        Boom.isBoom(err) &&
+        err.output.statusCode === 400 &&
+        err.message === 'No rules found for bulk delete'
+      ) {
+        return;
+      }
+
+      this.logger.warn('Failed to delete associated rules for SLO.', {
+        service: { name: 'delete_slo' },
+        labels: { slo_id: sloId, error_type: 'cleanup_failed' },
+        error: err,
+      });
     }
   }
 }

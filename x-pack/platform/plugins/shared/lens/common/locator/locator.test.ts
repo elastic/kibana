@@ -6,7 +6,8 @@
  */
 
 import { FilterStateStore } from '@kbn/es-query';
-import { LensAppLocatorDefinition, type LensAppLocatorParams } from './locator';
+import { LensAppLocatorDefinition } from './locator';
+import type { LensAppLocatorParams } from '@kbn/lens-common';
 
 const savedObjectId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
 
@@ -19,7 +20,7 @@ const setup = async () => {
 };
 
 const lensShareableState: LensAppLocatorParams = {
-  visualization: { activeId: 'bar_chart', state: {} },
+  visualization: { activeId: 'bar_chart', state: {}, selectedLayerId: null },
   activeDatasourceId: 'xxxxx',
   datasourceStates: { formBased: { state: {} } },
   references: [],
@@ -34,7 +35,7 @@ function getParams(path: string, param: string) {
 }
 
 describe('Lens url generator', () => {
-  test('can create a link to Lens with no state and no saved viz', async () => {
+  test('can create a link to Lens with no state and no saved vis', async () => {
     const { locator } = await setup();
     const { app, path, state } = await locator.getLocation({});
 
@@ -44,7 +45,7 @@ describe('Lens url generator', () => {
     expect(Object.keys(state.payload)).toHaveLength(0);
   });
 
-  test('can create a link to a saved viz in Lens', async () => {
+  test('can create a link to a saved vis in Lens', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ savedObjectId });
 

@@ -7,11 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   DeleteListItemRequestQuery,
   DeleteListItemResponse,
 } from '@kbn/securitysolution-lists-common/api';
+import { LISTS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../../types';
 import { buildSiemResponse } from '../utils';
@@ -24,7 +25,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       path: LIST_ITEM_URL,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [LISTS_API_ALL],
         },
       },
     })

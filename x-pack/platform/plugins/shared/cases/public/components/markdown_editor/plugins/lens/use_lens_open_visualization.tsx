@@ -8,14 +8,14 @@
 import { useCallback } from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   parseCommentString,
   getLensVisualizations,
 } from '../../../../../common/utils/markdown_plugins/utils';
-import { OPEN_IN_VISUALIZATION } from '../../../visualizations/translations';
+import { OPEN_IN_VISUALIZATION } from '../../../attachments/lens/translations';
 
 export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const parsedComment = parseCommentString(comment);
@@ -31,7 +31,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     navigateToPrefilledEditor(
       {
         id: '',
-        timeRange: lensVisualization[0].timeRange,
+        time_range: lensVisualization[0].timeRange,
         attributes: lensVisualization[0]
           .attributes as unknown as TypedLensByValueInput['attributes'],
       },
@@ -48,7 +48,7 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
   const lensAttributes = lensVisualization[0]
     .attributes as unknown as TypedLensByValueInput['attributes'];
 
-  const isESQLQuery = isOfAggregateQueryType(lensAttributes.state.query);
+  const isESQLQuery = isTextBasedAttributes(lensAttributes);
 
   if (isESQLQuery) {
     return { canUseEditor: hasLensPermissions, actionConfig: null };

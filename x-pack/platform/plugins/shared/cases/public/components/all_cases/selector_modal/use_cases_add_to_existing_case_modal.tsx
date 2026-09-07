@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
@@ -72,20 +73,27 @@ export const useCasesAddToExistingCaseModal = ({
     });
   }, [dispatch]);
 
+  const trackAttachEvents = useAttachEventsEBT();
+
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
-      getAttachments?: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
+      getAttachments: ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner
     ) => {
-      const attachments = getAttachments?.({ theCase }) ?? [];
-
       // when the case is undefined in the modal
-      // the user clicked "create new case"
+      // the user clicked "create new case". The case (and its owner) doesn't exist yet,
+      // so resolve owner-dependent attachments lazily once the flyout creates it instead
+      // of eagerly resolving here, which would lock in an empty array for callers whose
+      // getAttachments depends on theCase.owner.
       if (theCase === undefined) {
         closeModal();
-        openCreateNewCaseFlyout({ attachments });
+        openCreateNewCaseFlyout({
+          getAttachments: (owner: string) => getAttachments({ theCase: { owner } as CaseUI }) ?? [],
+        });
         return;
       }
+
+      const attachments = getAttachments?.({ theCase }) ?? [];
 
       try {
         // add attachments to the case
@@ -105,6 +113,8 @@ export const useCasesAddToExistingCaseModal = ({
           attachments,
         });
 
+        trackAttachEvents(window.location.pathname, attachments);
+
         onSuccess?.(theCase);
 
         casesToasts.showSuccessAttach({
@@ -119,26 +129,23 @@ export const useCasesAddToExistingCaseModal = ({
       }
     },
     [
-      appId,
-      casesToasts,
       closeModal,
-      createAttachments,
       openCreateNewCaseFlyout,
+      startTransaction,
+      appId,
+      createAttachments,
+      trackAttachEvents,
+      onSuccess,
+      casesToasts,
       successToaster?.title,
       successToaster?.content,
       noAttachmentsToaster?.title,
       noAttachmentsToaster?.content,
-      onSuccess,
-      startTransaction,
     ]
   );
 
   const openModal = useCallback(
-    ({
-      getAttachments,
-    }: {
-      getAttachments?: GetAttachments;
-    } = {}) => {
+    ({ getAttachments }: { getAttachments: GetAttachments }) => {
       dispatch({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: {

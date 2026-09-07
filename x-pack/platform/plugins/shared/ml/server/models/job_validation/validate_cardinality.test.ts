@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 import mockFareQuoteCardinality from './__mocks__/mock_farequote_cardinality.json';
 import mockFieldCaps from './__mocks__/mock_field_caps.json';
@@ -178,6 +178,30 @@ describe('ML - validateCardinality', () => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['success_cardinality']);
     });
+  });
+
+  it('forwards datafeed project_routing to fieldCaps and still validates cardinality', async () => {
+    const fieldCaps = jest.fn().mockResolvedValue(mockFieldCaps);
+    const client = {
+      asCurrentUser: {
+        search: () => Promise.resolve(mockFareQuoteCardinality),
+        fieldCaps,
+      },
+      asInternalUser: {},
+    } as unknown as IScopedClusterClient;
+    const job = getJobConfig('partition_field_name') as unknown as CombinedJob;
+    job.datafeed_config.project_routing = '_alias:linked';
+
+    const messages = await validateCardinality(client, job);
+
+    expect(messages.map((m) => m.id)).toStrictEqual(['success_cardinality']);
+    expect(fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fields: ['airline'],
+        project_routing: '_alias:linked',
+      }),
+      { maxRetries: 0 }
+    );
   });
 
   it('field not aggregatable', () => {

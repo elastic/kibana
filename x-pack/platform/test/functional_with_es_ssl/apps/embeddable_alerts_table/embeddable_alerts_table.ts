@@ -19,6 +19,7 @@ import {
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
+import { getEventLog } from '../../../alerting_api_integration/common/lib';
 
 const DASHBOARD_PANEL_TEST_SUBJ = 'dashboardPanel';
 
@@ -41,16 +42,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const comboBox = getService('comboBox');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const dashboardPanelActions = getService('dashboardPanelActions');
   const toasts = getService('toasts');
   const sampleData = getService('sampleData');
   const rules = getService('rules');
-  const es = getService('es');
-  const config = getService('config');
-  const retryTimeout = config.get('timeouts.try');
 
-  // Failing: See https://github.com/elastic/kibana/issues/227748
-  // Failing: See https://github.com/elastic/kibana/issues/227748
-  describe.skip('Embeddable alerts panel', () => {
+  describe('Embeddable alerts panel', function () {
+    this.tags('skipFIPS');
+
     before(async () => {
       await sampleData.testResources.installAllKibanaSampleData();
 
@@ -60,52 +59,65 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       )!;
 
       const [stackRule, observabilityRule, securityRule] = await Promise.all([
-        createEsQueryRule(sampleDataLogsDataView.id, 'stack'),
-        createEsQueryRule(sampleDataLogsDataView.id, 'observability'),
-        createSecurityRule(sampleDataLogsDataView.id),
+        createEsQueryRule(),
+        createCustomThresholdRule(sampleDataLogsDataView.id),
+        createSecurityRule(),
       ]);
 
-      await waitForRuleToBecomeActive(stackRule.id);
-      await waitForRuleToBecomeActive(observabilityRule.id);
-      await waitForRuleToBecomeActive(securityRule.id);
-
-      await waitForAlertsToBeCreated(stackRule.id);
-      await waitForAlertsToBeCreated(observabilityRule.id);
-      await waitForAlertsToBeCreated(securityRule.id);
+      await waitForRuleToExecute(stackRule.id);
+      await waitForRuleToExecute(observabilityRule.id);
+      await waitForRuleToExecute(securityRule.id);
 
       await pageObjects.dashboard.gotoDashboardURL();
     });
 
     after(async () => {
-      await sampleData.testResources.removeAllKibanaSampleData();
-      await objectRemover.removeAll();
+      const [sampleResult, removerResult] = await Promise.allSettled([
+        sampleData.testResources.removeAllKibanaSampleData(),
+        objectRemover.removeAll(),
+      ]);
+      if (sampleResult.status === 'rejected') throw sampleResult.reason;
+      if (removerResult.status === 'rejected') throw removerResult.reason;
     });
 
     describe('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
-        await dashboardAddPanel.clickEditorMenuButton();
+        await dashboardAddPanel.openAddPanelFlyout();
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
         await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
       });
 
       it('should ask for confirmation before resetting filters when switching solution', async () => {
+        await pageObjects.dashboard.gotoDashboardURL();
+        await dashboardAddPanel.openAddPanelFlyout();
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
+
+        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
         await find.clickByCssSelector(`button#observability`);
         await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
         await find.clickByCssSelector(`button#ruleTags`);
+        // Switching solution re-runs the async rule tags query; wait for it to resolve (the combo box
+        // input becomes enabled) before opening the list, otherwise the list opens empty.
+        await retry.waitFor('rule tags filter to finish loading', async () => {
+          const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
+          return (await filter.findByTagName('input')).isEnabled();
+        });
+        // Explicitly open the list via its toggle button; `comboBox.getOptions` alone does not
+        // reliably open this box, so the options never render and the list reads as empty.
         await testSubjects.click('comboBoxToggleListButton');
         const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
         await options[0].click();
 
-        await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
+        await find.clickByCssSelector(`[data-test-subj=${SOLUTION_SELECTOR_SUBJ}] button`);
         await find.clickByCssSelector(`button#security`);
 
-        expect(await find.byButtonText('Switch solution')).to.be.ok();
+        await testSubjects.existOrFail('confirmModalConfirmButton');
       });
     });
 
     for (const solution of ['stack', 'observability', 'security']) {
-      describe(`with ${solution} role`, () => {
+      describe(`with ${solution} role`, function () {
         const ruleName = `${solution}-rule`;
 
         before(async () => {
@@ -115,14 +127,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         it(`should only be able to create panels with ${solution} rule types`, async () => {
           await pageObjects.dashboard.gotoDashboardURL();
           await toasts.dismissIfExists();
-          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.openAddPanelFlyout();
           await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
-          await retry.try(() => testSubjects.exists(FILTERS_FORM_SUBJ));
+          await testSubjects.existOrFail(FILTERS_FORM_SUBJ);
           if (solution === 'stack' || solution === 'observability') {
             await testSubjects.missingOrFail(SOLUTION_SELECTOR_SUBJ);
           }
+
           await find.clickByCssSelector(`[data-test-subj=${FILTERS_FORM_ITEM_SUBJ}] button`);
           await find.clickByCssSelector(`button#ruleTags`);
+          // Rule tags load asynchronously; wait for the query to resolve (the combo box input becomes
+          // enabled) before reading options, otherwise the list opens empty or before labels render.
+          await retry.waitFor('rule tags filter to finish loading', async () => {
+            const filter = await testSubjects.find(RULE_TAGS_FILTER_SUBJ);
+            return (await filter.findByTagName('input')).isEnabled();
+          });
+          // Explicitly open the list via its toggle button; `comboBox.getOptions` alone does not
+          // reliably open this box, so the options never render and the list reads as empty.
           await testSubjects.click('comboBoxToggleListButton');
           const options = await comboBox.getOptions(RULE_TAGS_FILTER_SUBJ);
           expect(options.length).to.equal(1);
@@ -131,7 +152,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           // Dashboard warnings may appear above the save button
           await toasts.dismissIfExists();
           await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
-          await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
+          await testSubjects.existOrFail(DASHBOARD_PANEL_TEST_SUBJ);
           await pageObjects.dashboard.verifyNoRenderErrors();
           const tagsCells = await find.allByCssSelector(
             '[data-gridcell-column-id="kibana.alert.rule.tags"] [data-test-subj="dataGridRowCell"]'
@@ -148,12 +169,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the observability area (o11y+stack) when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await testSubjects.existOrFail(SOLUTION_SELECTOR_SUBJ);
+      await testSubjects.click(SOLUTION_SELECTOR_SUBJ);
       await find.clickByCssSelector(`button#observability`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
-      await retry.try(() => testSubjects.exists(DASHBOARD_PANEL_TEST_SUBJ));
+      await testSubjects.existOrFail(DASHBOARD_PANEL_TEST_SUBJ);
       const featureCells = await find.allByCssSelector(
         '[data-gridcell-column-id="kibana.alert.rule.consumer"] [data-test-subj="dataGridRowCell"]'
       );
@@ -168,7 +190,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it(`should only show alerts from the security area when selecting it`, async () => {
       await toasts.dismissIfExists();
-      await dashboardAddPanel.clickEditorMenuButton();
+      await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Alerts');
       await find.clickByCssSelector(`button#security`);
       await testSubjects.click(SAVE_CONFIG_BUTTON_SUBJ);
@@ -187,27 +209,29 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it("should show a missing authz prompt when the user doesn't have access to a panel's rule types", async () => {
-      // User with o11y-only access should see a missing authz prompt in the security panel
-      await security.testUser.setRoles([`observability_alerting`]);
-      let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(false);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(true);
+      try {
+        // User with o11y-only access should see a missing authz prompt in the security panel
+        await security.testUser.setRoles([`observability_alerting`]);
+        let panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(false);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(true);
 
-      // User with security-only access should see a missing authz prompt in the o11y panel
-      await security.testUser.setRoles([`security_alerting`]);
-      panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
-      ).to.equal(true);
-      expect(
-        await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
-      ).to.equal(false);
-
-      await security.testUser.restoreDefaults();
+        // User with security-only access should see a missing authz prompt in the o11y panel
+        await security.testUser.setRoles([`security_alerting`]);
+        panels = await find.allByCssSelector(`[data-test-subj=${DASHBOARD_PANEL_TEST_SUBJ}]`);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[0])
+        ).to.equal(true);
+        expect(
+          await testSubjects.descendantExists(NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ, panels[1])
+        ).to.equal(false);
+      } finally {
+        await security.testUser.restoreDefaults();
+      }
     });
 
     it('should apply the global time filter to alert panels by default', async () => {
@@ -218,8 +242,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should override the time range for specific panels', async () => {
-      await testSubjects.moveMouseTo(DASHBOARD_PANEL_TEST_SUBJ);
-      await testSubjects.click('embeddablePanelAction-ACTION_CUSTOMIZE_PANEL');
+      await dashboardPanelActions.customizePanel();
       await testSubjects.click('customizePanelShowCustomTimeRange');
       // The nested selector is necessary to disambiguate with the global time picker
       await find.clickByCssSelector(
@@ -233,34 +256,32 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   });
 
-  const createEsQueryRule = async (index: string, solution: 'stack' | 'observability') => {
-    const name = `${solution}-rule`;
+  const createEsQueryRule = async () => {
+    const name = 'stack-rule';
     const createdRule = await rules.api.createRule({
       name,
-      ruleTypeId: `.es-query`,
-      schedule: { interval: '5s' },
-      consumer: solution === 'stack' ? 'stackAlerts' : 'logs',
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'stackAlerts',
+      ruleTypeId: '.es-query',
+      actions: [],
       tags: [name],
       params: {
-        searchConfiguration: {
-          query: {
-            query: '',
-            language: 'kuery',
-          },
-          index,
-        },
-        timeField: 'timestamp',
-        searchType: 'searchSource',
+        searchType: 'esQuery',
         timeWindowSize: 5,
-        timeWindowUnit: 'h',
-        threshold: [-1],
+        timeWindowUnit: 'd',
+        threshold: [0],
         thresholdComparator: '>',
-        size: 1,
+        size: 100,
+        esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
         aggType: 'count',
         groupBy: 'all',
         termSize: 5,
         excludeHitsFromPreviousRun: false,
         sourceFields: [],
+        index: ['kibana_sample_data_logs'],
+        timeField: '@timestamp',
       },
     });
 
@@ -269,39 +290,68 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const createSecurityRule = async (index: string) => {
+  const createCustomThresholdRule = async (dataView: string) => {
+    const name = 'observability-rule';
+    const createdRule = await rules.api.createRule({
+      name,
+      schedule: {
+        interval: '5s',
+      },
+      consumer: 'logs',
+      ruleTypeId: 'observability.rules.custom_threshold',
+      actions: [],
+      tags: [name],
+      params: {
+        criteria: [
+          {
+            comparator: '>',
+            metrics: [
+              {
+                name: 'A',
+                aggType: 'count',
+              },
+            ],
+            threshold: [0],
+            timeSize: 1,
+            timeUnit: 'd',
+          },
+        ],
+        alertOnNoData: false,
+        alertOnGroupDisappear: false,
+        searchConfiguration: {
+          query: {
+            query: '',
+            language: 'kuery',
+          },
+          index: dataView,
+        },
+      },
+    });
+
+    objectRemover.add(createdRule.id, 'rule', 'alerting');
+
+    return createdRule;
+  };
+
+  const createSecurityRule = async () => {
+    const name = 'security-rule';
+
     const { body: createdRule } = await supertest
       .post(`/api/detection_engine/rules`)
       .set('kbn-xsrf', 'foo')
       .send({
-        type: 'query',
-        filters: [],
-        language: 'kuery',
-        query: '_id: *',
-        required_fields: [],
-        data_view_id: index,
-        author: [],
-        false_positives: [],
-        references: [],
-        risk_score: 21,
-        risk_score_mapping: [],
-        severity: 'low',
-        severity_mapping: [],
-        threat: [],
-        max_signals: 100,
-        name: 'security-rule',
-        description: 'security-rule',
-        tags: ['security-rule'],
-        setup: '',
-        license: '',
-        interval: '5s',
-        from: 'now-10m',
-        to: 'now',
-        actions: [],
+        name,
+        description: 'Spammy query rule',
         enabled: true,
-        meta: {
-          kibana_siem_app_url: 'http://localhost:5601/app/security',
-        },
+        risk_score: 1,
+        rule_id: 'rule-1',
+        severity: 'low',
+        type: 'query',
+        query: '_id: *',
+        index: ['kibana_sample_data_logs'],
+        from: 'now-1y',
+        interval: '1m',
+        tags: [name],
       })
       .expect(200);
 
@@ -310,43 +360,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return createdRule;
   };
 
-  const waitForAlertsToBeCreated = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const response = await es.search({
-        index: '.alerts*',
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  'kibana.alert.rule.uuid': ruleId,
-                },
-              },
-            ],
-          },
-        },
+  const waitForRuleToExecute = async (ruleId: string) => {
+    await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId: 'default',
+        type: 'alert',
+        id: ruleId,
+        provider: 'alerting',
+        actions: new Map([['execute', { gte: 1 }]]),
       });
-
-      if (response.hits.hits.length === 0) {
-        throw new Error(`No hits found for index .alerts* and ruleId ${ruleId}`);
-      }
-
-      return response;
-    });
-  };
-
-  const waitForRuleToBecomeActive = async (ruleId: string) => {
-    return await retry.tryForTime(retryTimeout, async () => {
-      const rule = await rules.api.getRule(ruleId);
-
-      const { execution_status: executionStatus } = rule || {};
-      const { status } = executionStatus || {};
-
-      if (status === 'active' || status === 'ok') {
-        return executionStatus?.status;
-      }
-
-      throw new Error(`waitForStatus(active|ok): got ${status}`);
     });
   };
 

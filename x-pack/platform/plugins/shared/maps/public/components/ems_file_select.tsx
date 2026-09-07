@@ -18,6 +18,7 @@ interface Props {
   isColumnCompressed?: boolean;
   onChange: (emsFileId: string) => void;
   value: string | null;
+  fullWidth?: boolean;
 }
 
 interface State {
@@ -79,7 +80,14 @@ export class EMSFileSelect extends Component<Props, State> {
 
   _renderSelect() {
     if (!this.state.hasLoadedOptions) {
-      return <EuiSelect isLoading />;
+      return (
+        <EuiSelect
+          isLoading
+          aria-label={i18n.translate('xpack.maps.emsFileSelect.loadingAriaLabel', {
+            defaultMessage: 'Loading EMS boundaries',
+          })}
+        />
+      );
     }
 
     const selectedOption = this.state.emsFileOptions.find(
@@ -90,6 +98,9 @@ export class EMSFileSelect extends Component<Props, State> {
 
     return (
       <EuiComboBox
+        aria-label={i18n.translate('xpack.maps.emsFileSelect.comboBoxAriaLabel', {
+          defaultMessage: 'Select EMS boundaries',
+        })}
         placeholder={i18n.translate('xpack.maps.emsFileSelect.selectPlaceholder', {
           defaultMessage: 'Select EMS boundaries',
         })}
@@ -112,6 +123,7 @@ export class EMSFileSelect extends Component<Props, State> {
         })}
         helpText={this.state.emsFileOptions.length === 0 ? getEmsUnavailableMessage() : null}
         display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
+        fullWidth={this.props.fullWidth}
       >
         {this._renderSelect()}
       </EuiFormRow>
