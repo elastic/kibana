@@ -388,5 +388,4 @@ export const ConnectorIconsMap: Map<
         )
     ),
   ],
-
 ]);
