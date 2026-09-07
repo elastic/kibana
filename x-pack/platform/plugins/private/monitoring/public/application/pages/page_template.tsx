@@ -138,9 +138,10 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     }
   };
 
+  const { pathname, search } = history.location;
   const createHref = useCallback(
-    (route: string) => history.createHref({ pathname: route, search: history.location.search }),
-    [history]
+    (route: string) => history.createHref({ pathname: route, search }),
+    [history, search]
   );
 
   const renderContent = () => {
@@ -181,7 +182,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
         label: item.label,
         disabled: tabsDisabled,
         'data-test-subj': item.testSubj,
-        isSelected: item.route ? history.location.pathname === item.route : false,
+        isSelected: item.route ? pathname === item.route : false,
         href: item.route ? createHref(item.route) : undefined,
         onClick: item.onClick,
       };
@@ -192,14 +193,14 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
 
       return tab;
     });
-  }, [tabs, tabsDisabled, createHref, history.location.pathname]);
+  }, [tabs, tabsDisabled, createHref, pathname]);
 
   const back = useMemo(
     () =>
-      getMonitoringBack(history.location.pathname, createHref, {
+      getMonitoringBack(pathname, createHref, {
         hasClusterListing: getHasClusterListing(),
       }),
-    [history.location.pathname, createHref]
+    [pathname, createHref]
   );
 
   const menu = useMemo<AppHeaderMenu>(() => {
