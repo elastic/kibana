@@ -70,6 +70,28 @@ describe('toBulkCloseRuntimeMappings', () => {
     expect(result?.valid_rt?.script?.source).toBe("emit('ok')");
   });
 
+  it('drops an inline script entry that has params or lang (server schema rejects them)', () => {
+    // The server schema accepts only { source } on the script object and rejects
+    // unknown properties with a 400. A parameterised script that references
+    // params.x would fail silently at runtime (on_script_error:continue) and
+    // skip alerts instead of matching them. Drop the entry to avoid that.
+    const mappings = {
+      parameterised_rt: {
+        type: 'keyword',
+        script: { source: 'emit(params.label)', params: { label: 'match' } },
+      },
+      lang_rt: {
+        type: 'keyword',
+        script: { source: "emit('x')", lang: 'painless' },
+      },
+      valid_rt: { type: 'keyword', script: { source: "emit('ok')" } },
+    } as unknown as MappingRuntimeFields;
+    const result = toBulkCloseRuntimeMappings(mappings);
+    expect(result).not.toHaveProperty('parameterised_rt');
+    expect(result).not.toHaveProperty('lang_rt');
+    expect(result?.valid_rt?.script?.source).toBe("emit('ok')");
+  });
+
   it('preserves format for date fields', () => {
     const result = toBulkCloseRuntimeMappings({
       event_date: { type: 'date', format: 'strict_date_optional_time' },

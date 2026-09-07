@@ -68,18 +68,26 @@ export const toBulkCloseRuntimeMappings = (
         // A data view runtime field script may be stored as a bare string
         // (shorthand for `{ source: '...' }`). Normalise to the object form
         // that the route schema requires.
-        const source =
-          typeof field.script === 'string'
-            ? field.script
-            : (field.script as { source?: string }).source;
+        if (typeof field.script === 'string') {
+          mapping.script = { source: field.script };
+        } else {
+          const scriptObj = field.script as Record<string, unknown>;
+          const source = scriptObj.source as string | undefined;
+          const hasUnsupportedKeys = Object.keys(scriptObj).some((k) => k !== 'source');
 
-        if (!source) {
-          // Non-inline script (e.g. stored script by id). Forwarding only {type}
-          // would silently change semantics to a _source reader, which can match
-          // a different set of alerts. Drop the entry entirely instead.
-          return [];
+          if (!source || hasUnsupportedKeys) {
+            // Drop the entry when:
+            // - No source: non-inline (e.g. stored script by id) — forwarding
+            //   only {type} would silently become a _source reader.
+            // - Extra keys (params, lang, …): the server schema accepts only
+            //   { source } and rejects unknown properties with a 400. A script
+            //   that references params.x would fail silently at runtime under
+            //   on_script_error:continue, skipping alerts instead of matching
+            //   them. Drop to avoid the semantic change.
+            return [];
+          }
+          mapping.script = { source };
         }
-        mapping.script = { source };
       }
 
       if ('format' in field && field.format) {
