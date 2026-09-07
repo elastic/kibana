@@ -12,7 +12,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
-import { buildElasticsearchRequest } from '@kbn/workflows';
+import { buildElasticsearchRequest, getElasticsearchConnectors } from '@kbn/workflows';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { formatBytes, ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
@@ -20,6 +20,13 @@ import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
+
+/**
+ * Whether the connector for `stepType` defaults to HEAD, which the ES transport resolves to a
+ * scalar boolean instead of the JSON object every other API returns.
+ */
+const isHeadConnector = (stepType: string): boolean =>
+  getElasticsearchConnectors().find(({ type }) => type === stepType)?.methods[0] === 'HEAD';
 
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
   constructor(
@@ -74,11 +81,10 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
         },
       });
 
-      // `elasticsearch.indices.exists` is a HEAD request, which the ES transport resolves to the
-      // scalar `true`. Wrap it so the step output stays object-shaped, matching the storage
-      // mapping and letting workflows branch on `output.result`.
+      // Keep the output object-shaped so it matches the storage mapping and workflows can branch
+      // on `output.result`. The scalar check also covers a user overriding the method to GET.
       const isScalar = result !== null && typeof result !== 'object';
-      const output = stepType === 'elasticsearch.indices.exists' && isScalar ? { result } : result;
+      const output = isScalar && isHeadConnector(stepType) ? { result } : result;
 
       return { input: stepWith, output, error: undefined };
     } catch (error) {
