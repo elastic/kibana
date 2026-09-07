@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { MemoryRouter } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -82,6 +84,31 @@ describe('MainNavigation', () => {
     expect(screen.getByRole('tab', { name: 'History' })).toHaveAttribute('href', 'history');
     expect(screen.getByRole('tab', { name: 'Packs' })).toHaveAttribute('href', 'packs');
     expect(screen.getByRole('tab', { name: 'Queries' })).toHaveAttribute('href', 'saved_queries');
+  });
+
+  it('does not call history.push when a tab is clicked', () => {
+    const history = createMemoryHistory({ initialEntries: ['/history'] });
+    const pushSpy = jest.spyOn(history, 'push');
+
+    render(
+      <EuiProvider>
+        <IntlProvider locale="en">
+          <MockAppHeaderProvider>
+            <OsqueryPageHeaderProvider>
+              <Router history={history}>
+                <MainNavigation />
+              </Router>
+            </OsqueryPageHeaderProvider>
+          </MockAppHeaderProvider>
+        </IntlProvider>
+      </EuiProvider>
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Packs' }));
+
+    // Tabs are href-only. An extra history.push onClick is the double-entry bug.
+    // The SPA interceptor is not in this unit test, so the signal is zero pushes.
+    expect(pushSpy).not.toHaveBeenCalled();
   });
 
   it('should show "Run query" as the primary action', () => {
