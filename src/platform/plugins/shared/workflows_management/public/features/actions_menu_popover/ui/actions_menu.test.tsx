@@ -179,9 +179,14 @@ describe('ActionsMenu', () => {
   });
 
   it('allows text selection in the preview pane', () => {
-    renderComponent();
+    const { container } = renderComponent();
+    const previewPane = container.querySelector('[data-test-subj="actionsMenuPreview"]');
 
-    expect(fireEvent.mouseDown(screen.getByText('Select a step to get started'))).toBe(true);
+    expect(previewPane).not.toBeNull();
+    if (!previewPane) {
+      throw new Error('Preview pane not found');
+    }
+    expect(fireEvent.mouseDown(previewPane)).toBe(true);
   });
 
   describe('keyboard navigation', () => {

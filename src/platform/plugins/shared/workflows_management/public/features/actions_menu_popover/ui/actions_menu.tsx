@@ -696,7 +696,7 @@ export function ActionsMenu({
               )}
             </EuiFlexItem>
 
-            <EuiFlexItem css={styles.rightColumn}>
+            <EuiFlexItem css={styles.rightColumn} data-test-subj="actionsMenuPreview">
               <ActionsMenuPreviewPanel
                 hoveredOption={previewOption}
                 hoveredJumpEntry={hoveredJumpEntry}

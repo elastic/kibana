@@ -329,12 +329,23 @@ describe('WorkflowYAMLEditor', () => {
       expect(defaultProps.editorRef.current).not.toBeNull();
     });
 
-    const focus = defaultProps.editorRef.current?.focus as jest.Mock;
-    focus.mockClear();
+    const requestAnimationFrame = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback) => {
+        callback(0);
+        return 0;
+      });
 
-    act(() => mockCloseActionsPopover?.());
+    try {
+      const focus = defaultProps.editorRef.current?.focus as jest.Mock;
+      focus.mockClear();
 
-    await waitFor(() => expect(focus).toHaveBeenCalledTimes(1));
+      act(() => mockCloseActionsPopover?.());
+
+      expect(focus).toHaveBeenCalledTimes(1);
+    } finally {
+      requestAnimationFrame.mockRestore();
+    }
   });
 
   it('updates store when editor content changes', async () => {
