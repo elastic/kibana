@@ -145,6 +145,10 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       ...(currentData?.esql_variables?.length
         ? { esql_variables: currentData.esql_variables }
         : {}),
+      ...(currentData?.filters?.length ? { filters: currentData.filters } : {}),
+      ...(currentData?.query ? { query: currentData.query } : {}),
+      ...(currentData?.is_approximate ? { is_approximate: true } : {}),
+      ...(currentData?.project_routing ? { project_routing: currentData.project_routing } : {}),
     };
 
     const updated = await attachments.update(

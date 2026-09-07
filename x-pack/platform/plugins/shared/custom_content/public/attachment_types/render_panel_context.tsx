@@ -6,19 +6,22 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import {
   CustomContentComponent,
   type CustomContentRendererServices,
 } from '@kbn/custom-content-renderer';
-import type { CustomContentContextAttachmentData } from '../../common/panel_context_attachment';
+import {
+  MAX_PREVIEW_HEIGHT,
+  type CustomContentContextAttachmentData,
+} from '../../common/panel_context_attachment';
 import { getServices } from '../services';
 
 /** Used when the attachment predates the captured height, or the panel was never measured. */
 const FALLBACK_HEIGHT = 320;
-/** Matches the renderer's own iframe-container floor; above it, a chat card stops being a preview. */
+/** Matches the renderer's own iframe-container floor. */
 const MIN_HEIGHT = 200;
-const MAX_HEIGHT = 1200;
 
 /**
  * The height the chat preview renders at, from the panel's measured height when the
@@ -26,7 +29,7 @@ const MAX_HEIGHT = 1200;
  * reflows and this is a starting point rather than an exact fit.
  */
 export const resolvePreviewHeight = (panelHeight?: number): number =>
-  Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, panelHeight ?? FALLBACK_HEIGHT));
+  Math.min(MAX_PREVIEW_HEIGHT, Math.max(MIN_HEIGHT, panelHeight ?? FALLBACK_HEIGHT));
 
 /**
  * Flex column with a definite height: the panel's own root is `flex: 1 1 100%`
@@ -82,10 +85,10 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
         timeRange={data.time_range}
         generationVersion={0}
         savedTemplate={data.panel_template}
-        isApproximate={false}
-        projectRouting={undefined}
-        query={undefined}
-        filters={undefined}
+        isApproximate={Boolean(data.is_approximate)}
+        projectRouting={data.project_routing}
+        query={data.query as Query | AggregateQuery | undefined}
+        filters={data.filters as Filter[] | undefined}
         esqlVariables={data.esql_variables}
         previewHtml={null}
         onLoadingChange={onLoadingChange}

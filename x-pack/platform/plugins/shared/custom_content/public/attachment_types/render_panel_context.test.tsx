@@ -96,6 +96,39 @@ describe('RenderPanelContext', () => {
     );
   });
 
+  // The preview reproduces the panel's fetch context, so its numbers match the dashboard
+  // the user came from rather than showing an unfiltered superset.
+  it('renders against the captured filters, query and approximation', () => {
+    render(
+      <RenderPanelContext
+        data={makeData({
+          filters: [{ meta: { key: 'host.name' } }],
+          query: { query: 'status:200', language: 'kuery' },
+          is_approximate: true,
+          project_routing: 'project-1',
+        })}
+      />
+    );
+
+    expect(mockComponentProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: [{ meta: { key: 'host.name' } }],
+        query: { query: 'status:200', language: 'kuery' },
+        isApproximate: true,
+        projectRouting: 'project-1',
+      })
+    );
+  });
+
+  // "Generate with chat" on an empty panel pushes a blank template. Rendering it would show
+  // the panel's own empty prompt — dashboard copy with a dead action — inside the card.
+  it('renders nothing until the panel has a template', () => {
+    const { container } = render(<RenderPanelContext data={makeData({ panel_template: '' })} />);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(mockComponentProps).not.toHaveBeenCalled();
+  });
+
   it('renders a static panel with no query', () => {
     render(<RenderPanelContext data={makeData({ esql_query: undefined })} />);
 

@@ -6,9 +6,10 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  MAX_FETCH_CONTEXT_BYTES,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
@@ -20,15 +21,61 @@ import {
 const getCustomContentAttachmentId = (embeddableId: string) =>
   `${CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE}-${embeddableId}`;
 
-export const buildCustomContentContextAttachment = (
-  template: string,
-  esqlQuery: string | undefined,
-  embeddableId: string,
-  panelTitle?: string,
-  timeRange?: { from: string; to: string },
-  panelHeight?: number,
-  esqlVariables?: ESQLControlVariable[]
-): AttachmentInput<
+/**
+ * The parts of the panel's `fetch$` context the chat preview needs to reproduce its data.
+ * Picked from `FetchContext` rather than redeclared, so it cannot drift from what the
+ * embeddable actually receives.
+ */
+export type CustomContentFetchContext = Partial<
+  Pick<
+    FetchContext,
+    'timeRange' | 'esqlVariables' | 'filters' | 'query' | 'isApproximate' | 'projectRouting'
+  >
+>;
+
+export interface BuildCustomContentContextAttachmentParams {
+  template: string;
+  embeddableId: string;
+  esqlQuery?: string;
+  panelTitle?: string;
+  /** The panel's rendered height, so the preview starts at the size it had on the dashboard. */
+  panelHeight?: number;
+  fetchContext?: CustomContentFetchContext;
+}
+
+/** Dropped rather than rejected: an oversized field costs a faithful preview, not the attachment. */
+const withinBudget = <T>(value: T | undefined): T | undefined =>
+  value !== undefined && JSON.stringify(value).length <= MAX_FETCH_CONTEXT_BYTES
+    ? value
+    : undefined;
+
+/** The opaque half of the snapshot — stored as-is, handed back to the panel's own search helpers. */
+const buildSnapshotFetchContext = (fetchContext?: CustomContentFetchContext) => {
+  const esqlVariables = fetchContext?.esqlVariables?.length
+    ? withinBudget(fetchContext.esqlVariables)
+    : undefined;
+  const filters = fetchContext?.filters?.length
+    ? withinBudget(fetchContext.filters as unknown as Array<Record<string, unknown>>)
+    : undefined;
+  const query = withinBudget(fetchContext?.query as unknown as Record<string, unknown>);
+
+  return {
+    ...(esqlVariables ? { esql_variables: esqlVariables } : {}),
+    ...(filters ? { filters } : {}),
+    ...(query ? { query } : {}),
+    ...(fetchContext?.isApproximate ? { is_approximate: true } : {}),
+    ...(fetchContext?.projectRouting ? { project_routing: fetchContext.projectRouting } : {}),
+  };
+};
+
+export const buildCustomContentContextAttachment = ({
+  template,
+  embeddableId,
+  esqlQuery,
+  panelTitle,
+  panelHeight,
+  fetchContext,
+}: BuildCustomContentContextAttachmentParams): AttachmentInput<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData
 > => ({
@@ -39,8 +86,8 @@ export const buildCustomContentContextAttachment = (
     esql_query: esqlQuery,
     panel_title: panelTitle,
     embeddable_id: embeddableId,
-    ...(timeRange ? { time_range: timeRange } : {}),
     ...(panelHeight ? { panel_height: panelHeight } : {}),
-    ...(esqlVariables?.length ? { esql_variables: esqlVariables } : {}),
+    ...(fetchContext?.timeRange ? { time_range: fetchContext.timeRange } : {}),
+    ...buildSnapshotFetchContext(fetchContext),
   },
 });

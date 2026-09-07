@@ -321,6 +321,32 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    // Asserted as a whole rather than field by field: the failure this guards against is
+    // adding a snapshot field and forgetting the carry-through, so a refined version would
+    // silently lose it.
+    it('carries the whole captured snapshot through an update', async () => {
+      const snapshot = {
+        time_range: { from: 'now-7d', to: 'now' },
+        panel_height: 480,
+        esql_variables: [{ key: 'host', value: 'host-1', type: 'values' }],
+        filters: [{ meta: { key: 'host.name' } }],
+        query: { query: 'status:200', language: 'kuery' },
+        is_approximate: true,
+        project_routing: 'project-1',
+      };
+
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        { panel_template: '<div>old</div>', embeddable_id: 'panel-1', ...snapshot }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining(snapshot) },
+        expect.anything()
+      );
+    });
+
     it('carries the captured panel height through an update', async () => {
       const { ctx } = await callHandler(
         { embeddable_id: 'panel-1', prompt: 'make it darker' },

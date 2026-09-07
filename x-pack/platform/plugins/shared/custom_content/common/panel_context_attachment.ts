@@ -14,37 +14,55 @@ import {
 
 export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_context';
 
+/**
+ * Ceiling for the captured panel height. Matches what the chat preview renders at, so a
+ * taller measurement is never stored only to be clamped away at render time.
+ */
+export const MAX_PREVIEW_HEIGHT = 1200;
+
+/** Ceiling for the identifier- and label-sized strings in this schema. */
+const MAX_SHORT_FIELD_LENGTH = 256;
+
+/**
+ * Serialized-size budget for the opaque fetch context (`filters`, `query`, `esql_variables`).
+ * A normal dashboard's filters are well under 1KB; past this the preview drops them and
+ * renders unfiltered rather than carrying an unbounded payload into the conversation.
+ */
+export const MAX_FETCH_CONTEXT_BYTES = 10_000;
+
 export const customContentContextAttachmentDataSchema = z.object({
   panel_template: z.string().max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH),
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
-  panel_title: z.string().max(256).optional(),
-  embeddable_id: z.string().max(256),
-  // The fields below snapshot how the panel was rendering when it was sent to chat. A
-  // snapshot, not a mirror — none of them follow the dashboard afterwards. Filters and the
-  // KQL query are deliberately absent: they only change the numbers, while an unresolved
-  // `?variable` makes Elasticsearch reject the query outright.
+  panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
+  embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),
+  // A snapshot of what the panel was fetching with when it was sent to chat — none of it
+  // follows the dashboard afterwards. Size is enforced when the attachment is built, not
+  // here: an oversized filter should cost a faithful preview, not the whole attachment.
   time_range: z
     .object({
-      from: z.string().max(256),
-      to: z.string().max(256),
+      from: z.string().max(MAX_SHORT_FIELD_LENGTH),
+      to: z.string().max(MAX_SHORT_FIELD_LENGTH),
     })
     .optional(),
   /** Measured from the panel's own container, which is outside the sandboxed iframe. */
-  panel_height: z.number().int().min(1).max(4000).optional(),
+  panel_height: z.number().int().min(1).max(MAX_PREVIEW_HEIGHT).optional(),
   esql_variables: z
     .array(
       z.object({
-        key: z.string().max(256),
+        key: z.string().max(MAX_SHORT_FIELD_LENGTH),
         value: z.union([
-          z.string().max(1024),
+          z.string().max(4096),
           z.number(),
-          z.array(z.union([z.string().max(1024), z.number()])).max(100),
+          z.array(z.union([z.string().max(4096), z.number()])),
         ]),
         type: z.nativeEnum(ESQLVariableType),
       })
     )
-    .max(50)
     .optional(),
+  filters: z.array(z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown())).optional(),
+  query: z.record(z.string().max(MAX_SHORT_FIELD_LENGTH), z.unknown()).optional(),
+  is_approximate: z.boolean().optional(),
+  project_routing: z.string().max(1024).optional(),
 });
 
 export type CustomContentContextAttachmentData = z.infer<
