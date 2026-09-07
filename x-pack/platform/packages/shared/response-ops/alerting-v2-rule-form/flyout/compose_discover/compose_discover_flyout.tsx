@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { monaco } from '@kbn/code-editor';
 import { useDebounceFn } from '@kbn/react-hooks';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -82,6 +83,8 @@ import {
   splitResultToRuleQuery,
 } from './use_heuristic_split';
 import { useSplitQueryCompletion } from './use_split_query_completion';
+import { useSplitQueryValidation } from './use_split_query_validation';
+import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import { useResolveTimeField } from './use_resolve_time_field';
 
@@ -646,14 +649,41 @@ export function ComposeDiscoverFlyout({
    * are immune to React Strict Mode double-mount disposal.
    */
   const sandboxBase = sandboxQuery.format === 'composed' ? sandboxQuery.base : '';
-  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
+  const esqlCallbacks = useEsqlCallbacks({
+    application: baseServices.application,
+    http: baseServices.http,
+    search: baseServices.data.search.search,
+  });
+  const { onEditorMount: onAlertCompletionMount } = useSplitQueryCompletion({
     baseQuery: sandboxBase,
     search: services.data.search.search,
   });
-  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
+  const { onEditorMount: onRecoveryCompletionMount } = useSplitQueryCompletion({
     baseQuery: sandboxBase,
     search: services.data.search.search,
   });
+  const { onEditorMount: onAlertValidationMount } = useSplitQueryValidation({
+    baseQuery: sandboxBase,
+    callbacks: esqlCallbacks,
+  });
+  const { onEditorMount: onRecoveryValidationMount } = useSplitQueryValidation({
+    baseQuery: sandboxBase,
+    callbacks: esqlCallbacks,
+  });
+  const onAlertEditorMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      onAlertCompletionMount(editor);
+      onAlertValidationMount(editor);
+    },
+    [onAlertCompletionMount, onAlertValidationMount]
+  );
+  const onRecoveryEditorMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      onRecoveryCompletionMount(editor);
+      onRecoveryValidationMount(editor);
+    },
+    [onRecoveryCompletionMount, onRecoveryValidationMount]
+  );
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
