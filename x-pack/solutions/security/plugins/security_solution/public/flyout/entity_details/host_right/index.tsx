@@ -300,6 +300,8 @@ export const HostPanel = memo(function HostPanel({
             entityRecord={observedHost.entityRecord}
             criticalityLevel={entityFromStoreResult.entityRecord?.asset?.criticality}
             onCriticalitySave={onCriticalitySave}
+            enableWatchlistManagement
+            onWatchlistsChanged={entityFromStoreResult.refetch}
           />
         )}
         {tabsNode}
