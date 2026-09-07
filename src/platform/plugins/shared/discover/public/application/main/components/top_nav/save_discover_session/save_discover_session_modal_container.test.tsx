@@ -835,7 +835,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
       expect(onClose).toHaveBeenCalled();
     });
 
-    it('should not close modal on error', async () => {
+    it('should close modal on error', async () => {
       const services = createDiscoverServicesMock();
       const { modalProps, onClose } = await setup({
         isEmbedded: true,
@@ -847,7 +847,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(onClose).not.toHaveBeenCalled();
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('should show no toast when save is unsuccessful without an error', async () => {

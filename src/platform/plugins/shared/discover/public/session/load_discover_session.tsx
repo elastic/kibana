@@ -9,37 +9,44 @@
 
 import React from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionPersistence } from './persistence';
 
-/** Shows a session warning toast with access to the full warning details returned by the server. */
-export const showSessionLoadWarning = ({
-  warnings,
+/** Loads a Discover session and warns when the server omitted unsupported content. */
+export const loadDiscoverSession = async ({
+  id,
+  persistence,
   core,
 }: {
-  warnings: Awaited<ReturnType<DiscoverSessionPersistence['get']>>['warnings'];
+  id: string;
+  persistence: DiscoverSessionPersistence;
   core: Pick<CoreStart, 'notifications' | 'overlays' | 'rendering'>;
-}): void => {
+}): Promise<DiscoverSession> => {
+  const { session, warnings } = await persistence.get(id);
+
+  if (!warnings.length) {
+    return session;
+  }
+
   const openModal = () => {
     const modal = core.overlays.openModal(
       toMountPoint(
-        <EuiModal aria-labelledby="discoverSessionWarningDetailsTitle" onClose={() => modal.close()}>
+        <EuiModal
+          aria-labelledby="discoverSessionWarningDetailsTitle"
+          onClose={() => modal.close()}
+        >
           <EuiModalHeader>
             <EuiModalHeaderTitle id="discoverSessionWarningDetailsTitle">
               <FormattedMessage
@@ -71,31 +78,21 @@ export const showSessionLoadWarning = ({
     title: i18n.translate('discover.sessionLoadWarnings.title', {
       defaultMessage: 'Some session content could not be loaded',
     }),
-    text: toMountPoint(
-      <>
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="discover.sessionLoadWarnings.text"
-              defaultMessage="{warningCount, plural, one {One part of this session was omitted.} other {# parts of this session were omitted.}} Saving this session will keep only the content currently shown."
-              values={{ warningCount: warnings.length }}
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton color="warning" size="s" onClick={openModal}>
-              <FormattedMessage
-                id="discover.sessionLoadWarnings.learnMoreButtonLabel"
-                defaultMessage="Learn more"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>,
-      core.rendering
-    ),
+    text: i18n.translate('discover.sessionLoadWarnings.text', {
+      defaultMessage:
+        '{warningCount, plural, one {One part of this session was omitted.} other {# parts of this session were omitted.}} Saving this session will keep only the content currently shown.',
+      values: { warningCount: warnings.length },
+    }),
+    actionProps: {
+      primary: {
+        onClick: openModal,
+        children: i18n.translate('discover.sessionLoadWarnings.learnMoreButtonLabel', {
+          defaultMessage: 'Learn more',
+        }),
+      },
+    },
     'data-test-subj': 'discoverSessionLoadWarning',
   });
+
+  return session;
 };

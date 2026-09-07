@@ -122,37 +122,31 @@ describe('Discover session API client', () => {
     });
   });
 
-  it.each([
-    {
-      operation: 'create',
-      rejectRequest: (http: ReturnType<typeof httpServiceMock.createStartContract>) =>
-        http.post.mockRejectedValue(createBadRequestError()),
-      runRequest: (client: ReturnType<typeof createDiscoverSessionClient>) => client.create(data),
-    },
-    {
-      operation: 'get',
-      rejectRequest: (http: ReturnType<typeof httpServiceMock.createStartContract>) =>
-        http.get.mockRejectedValue(createBadRequestError()),
-      runRequest: (client: ReturnType<typeof createDiscoverSessionClient>) =>
-        client.get('session-id'),
-    },
-    {
-      operation: 'upsert',
-      rejectRequest: (http: ReturnType<typeof httpServiceMock.createStartContract>) =>
-        http.put.mockRejectedValue(createBadRequestError()),
-      runRequest: (client: ReturnType<typeof createDiscoverSessionClient>) =>
-        client.upsert('session-id', data),
-    },
-  ])(
-    'uses the server error message when $operation fails',
-    async ({ rejectRequest, runRequest }) => {
-      const http = httpServiceMock.createStartContract();
-      const client = createDiscoverSessionClient(http);
-      rejectRequest(http);
+  it('uses the server error message when get fails', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    http.get.mockRejectedValue(createBadRequestError());
 
-      await expect(runRequest(client)).rejects.toThrow('chart_interval must be a supported value');
-    }
-  );
+    await expect(client.get('session-id')).rejects.toThrow('chart_interval must be a supported value');
+  });
+
+  it('preserves the original HTTP error when create fails', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    const error = createBadRequestError();
+    http.post.mockRejectedValue(error);
+
+    await expect(client.create(data)).rejects.toBe(error);
+  });
+
+  it('preserves the original HTTP error when upsert fails', async () => {
+    const http = httpServiceMock.createStartContract();
+    const client = createDiscoverSessionClient(http);
+    const error = createBadRequestError();
+    http.put.mockRejectedValue(error);
+
+    await expect(client.upsert('session-id', data)).rejects.toBe(error);
+  });
 });
 
 const createBadRequestError = () =>

@@ -39,12 +39,10 @@ type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
 /** Creates the browser client used by Discover's core session flows. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
-    requestWithReadableError(() =>
-      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
+      version: DISCOVER_SESSION_API_VERSION,
+      body: JSON.stringify(data),
+    }),
 
   get: (id) =>
     requestWithReadableError(
@@ -70,12 +68,10 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
     ),
 
   upsert: (id, data) =>
-    requestWithReadableError(() =>
-      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
+      version: DISCOVER_SESSION_API_VERSION,
+      body: JSON.stringify(data),
+    }),
 });
 
 /** Builds the path for one Discover session. */
