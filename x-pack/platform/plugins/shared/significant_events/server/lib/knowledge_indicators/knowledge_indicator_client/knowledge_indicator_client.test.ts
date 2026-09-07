@@ -121,6 +121,7 @@ function makeClient(): {
     createRule: jest.fn().mockResolvedValue(undefined),
     updateRule: jest.fn().mockResolvedValue(undefined),
     bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+    findExistingRuleIds: jest.fn().mockResolvedValue([]),
     findOwnedRuleIds: jest.fn().mockResolvedValue([]),
     findStreamNamesWithOwnedRules,
   };
@@ -650,6 +651,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       createRule: jest.fn().mockResolvedValue(undefined),
       updateRule: jest.fn().mockResolvedValue(undefined),
       bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
+      findExistingRuleIds: jest.fn().mockResolvedValue([]),
       findOwnedRuleIds: jest.fn().mockResolvedValue([]),
       findStreamNamesWithOwnedRules: jest.fn().mockResolvedValue([]),
     };

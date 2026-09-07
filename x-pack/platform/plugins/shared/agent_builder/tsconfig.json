@@ -17,6 +17,7 @@
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/alerting-plugin",
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/inference-plugin",

@@ -278,7 +278,7 @@ export const useTopNavLinks = ({
           : i18n.translate('discover.localMenu.switchToClassicTooltip', {
               defaultMessage: 'Search your data with data views and KQL in Classic Discover',
             }),
-        iconType: isDataViewMode ? 'code' : 'discoverApp',
+        iconType: isDataViewMode ? 'code' : 'productDiscover',
         testId: isDataViewMode ? 'select-text-based-language-btn' : 'select-classic-mode-btn',
         run: switchLanguageMode,
       });
