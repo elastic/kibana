@@ -8,12 +8,17 @@
 import { parse } from 'yaml';
 
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
-import { outputType, OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT } from '../constants/output';
+import {
+  outputType,
+  OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
+  OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES,
+} from '../constants/output';
 
 import {
   getAllowedOutputTypesForAgentPolicy,
   getAllowedOutputTypesForPackagePolicy,
   outputYmlIncludesReservedPerformanceKey,
+  canUseManagedBulk,
 } from './output_helpers';
 
 describe('getAllowedOutputTypesForAgentPolicy', () => {
@@ -71,7 +76,20 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only OTel-supported output types when any package policy has an enabled OTel input', () => {
+  it('should return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES when all package policies have only OTel inputs', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES);
+  });
+
+  it('should return only OTel-supported output types when any package policy has an enabled OTel input alongside non-OTel inputs', () => {
     const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
@@ -103,6 +121,28 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toContain(outputType.Kafka);
   });
 
+  it('should return all output types for a policy with no package policies (no constraint)', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({} as any);
+
+    expect(res).toContain(outputType.Otlp);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should return all output types for a policy with an empty package_policies array', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ package_policies: [] } as any);
+
+    expect(res).toContain(outputType.Otlp);
+    expect(res).toContain(outputType.Logstash);
+    expect(res).toContain(outputType.Kafka);
+  });
+
+  it('should still return only elasticsearch when has_fleet_server is true and policy has no package policies', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({ has_fleet_server: true } as any);
+
+    expect(res).toEqual([outputType.Elasticsearch]);
+  });
+
   it('should still return only elasticsearch for fleet server even when an OTel input is also present', () => {
     const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
@@ -118,6 +158,65 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     } as any);
 
     expect(res).toEqual([outputType.Elasticsearch]);
+  });
+});
+
+describe('canUseManagedBulk', () => {
+  it('should return true for a policy without connectors or OTel inputs', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'nginx' },
+          inputs: [{ type: 'log', enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(true);
+  });
+
+  it('should return false for a policy using the connectors package', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'elastic_connectors' },
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(false);
+  });
+
+  it('should return false for a policy with an enabled OTel input', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(false);
+  });
+
+  it('should return true when an OTel input exists but is disabled', () => {
+    const res = canUseManagedBulk({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: false }],
+        },
+      ],
+    } as any);
+
+    expect(res).toBe(true);
+  });
+
+  it('should return true for an agent policy with no package policies', () => {
+    const res = canUseManagedBulk({} as any);
+
+    expect(res).toBe(true);
   });
 });
 
@@ -144,13 +243,13 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only OTel-supported output types when any input is an OTel input', () => {
+  it('should return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES when all inputs are OTel inputs', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: false,
       inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
     } as any);
 
-    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+    expect(res).toEqual(OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES);
   });
 
   it('should return only OTel-supported output types when mixed inputs contain an OTel input', () => {

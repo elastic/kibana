@@ -27,7 +27,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { TransactionGroup } from '../../transactions_table/types';
 import { TransactionsTable } from '../../transactions_table';
 import { SERVICE_FLYOUT_TRANSACTIONS_EBT_ELEMENTS } from './ebt_constants';
-import { useServiceFlyoutTransactions } from './hooks/use_service_flyout_transactions';
+import { useServiceFlyoutTransactionData } from './hooks/use_service_flyout_transaction_data';
 
 const MAX_GROUPS_TOOLTIP = (
   <EuiText size="s" style={{ maxWidth: 448 }}>
@@ -60,6 +60,7 @@ interface ServiceFlyoutTransactionsSectionProps {
   transactionType?: string;
   latencyAggregationType?: LatencyAggregationType;
   locators?: SharePluginStart['url']['locators'];
+  refreshToken?: number;
 }
 
 export function ServiceFlyoutTransactionsSection({
@@ -72,11 +73,12 @@ export function ServiceFlyoutTransactionsSection({
   transactionType,
   latencyAggregationType,
   locators,
+  refreshToken,
 }: ServiceFlyoutTransactionsSectionProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { items, isLoading, maxCountExceeded, hasActiveAlerts, error } =
-    useServiceFlyoutTransactions({
+  const { items, isLoading, isSparklineLoading, maxCountExceeded, hasActiveAlerts, error } =
+    useServiceFlyoutTransactionData({
       http,
       notifications,
       serviceName,
@@ -86,6 +88,7 @@ export function ServiceFlyoutTransactionsSection({
       transactionType,
       latencyAggregationType,
       searchQuery,
+      refreshToken,
     });
 
   const openInTransactionsLocator = locators?.get<ServiceTransactionsLocatorParams>(
@@ -110,10 +113,11 @@ export function ServiceFlyoutTransactionsSection({
       transactionDetailLocator?.getRedirectUrl({
         serviceName,
         transactionName: item.name,
+        environment,
         rangeFrom: start,
         rangeTo: end,
       }),
-    [transactionDetailLocator, serviceName, start, end]
+    [transactionDetailLocator, serviceName, environment, start, end]
   );
 
   const getAlertsBadgeHref = useCallback(
@@ -130,6 +134,7 @@ export function ServiceFlyoutTransactionsSection({
 
   return (
     <TransactionsTable
+      data-test-subj="serviceFlyoutSection-transactions"
       errorMessage={
         error
           ? i18n.translate('apmUiShared.serviceFlyout.transactions.dataSourceError', {
@@ -139,9 +144,9 @@ export function ServiceFlyoutTransactionsSection({
       }
       items={items}
       isLoading={isLoading}
+      isSparklineLoading={isSparklineLoading}
       maxCountExceeded={maxCountExceeded}
       latencyAggregationType={latencyAggregationType}
-      showSparklines={false}
       columns={[
         'name',
         ...(hasActiveAlerts ? (['alerts'] as const) : []),

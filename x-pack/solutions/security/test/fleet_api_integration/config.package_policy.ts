@@ -18,5 +18,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     junit: {
       reportName: 'X-Pack Security Solution Fleet Package Policy API Integration Tests',
     },
+    kbnTestServer: {
+      ...baseFleetApiConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseFleetApiConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'customYaraSignaturesEnabled',
+        ])}`,
+      ],
+    },
   };
 }

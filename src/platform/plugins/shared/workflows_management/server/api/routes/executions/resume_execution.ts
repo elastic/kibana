@@ -17,7 +17,7 @@ import { executionIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerResumeExecutionRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces } = deps;
   router.versioned
     .post({
       path: '/api/workflows/executions/{executionId}/resume',
@@ -53,16 +53,8 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
           const { input } = request.body;
           const spaceId = spaces.getSpaceId(request);
 
-          const { resumedBy } = await api.resumeWorkflowExecution(
-            executionId,
-            spaceId,
-            input,
-            request
-          );
-
-          audit.logExecutionResumed(request, {
-            executionId,
-            resumedBy,
+          await api.resumeWorkflowExecution(executionId, spaceId, input, request, {
+            channel: 'kibana_execution_view',
           });
 
           return response.ok({
@@ -73,10 +65,6 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
             },
           });
         } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

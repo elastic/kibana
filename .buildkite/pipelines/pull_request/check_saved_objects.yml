@@ -7,6 +7,13 @@ steps:
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
+      - linting
+      - linting_with_types
+      - linting_with_oxlint
+      - check
+      - checks
+      - quick_checks
+      - check_types
       - build
     timeout_in_minutes: 20
     retry:

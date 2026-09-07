@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -40,11 +41,10 @@ interface WorkflowExecutionListProps {
 }
 
 export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps) {
-  const { uiSettings, notifications } = useKibana().services;
+  const { notifications } = useKibana().services;
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
-  const showExecutor =
-    uiSettings?.get<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, false) ?? false;
+  const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
   const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
 

@@ -7,32 +7,28 @@
 
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole, type Prompt, type ToolCall, type ToolMessage } from '@kbn/inference-common';
+import type { Span } from '@opentelemetry/api';
+import { markToolSpanAsError } from '@kbn/inference-tracing';
 import { executeUntilValid } from './execute_until_valid';
-import { trace as otelTrace } from '@opentelemetry/api';
 
-const trace = otelTrace as jest.Mocked<typeof otelTrace>;
-
-jest.mock('@opentelemetry/api', () => {
-  const recordException = jest.fn();
-
-  const getActiveSpan = jest.fn(() => ({ recordException }));
-
-  return {
-    trace: {
-      getActiveSpan,
-    },
-  };
-});
+const mockToolSpan = {
+  recordException: jest.fn(),
+  setAttribute: jest.fn(),
+  setStatus: jest.fn(),
+  end: jest.fn(),
+} as unknown as Span;
 
 jest.mock('@kbn/inference-tracing', () => ({
   ElasticGenAIAttributes: {
     InferenceSpanKind: 'CHAIN',
   },
+  markToolSpanAsError: jest.fn(),
   withActiveInferenceSpan: jest.fn(async (_name: string, _options: unknown, fn: () => unknown) =>
     fn()
   ),
   withExecuteToolSpan: jest.fn(
-    async (_toolName: string, _attributes: unknown, fn: () => Promise<unknown>) => fn()
+    async (_toolName: string, _attributes: unknown, fn: (span?: Span) => Promise<unknown>) =>
+      fn(mockToolSpan)
   ),
 }));
 
@@ -119,7 +115,7 @@ describe('executeUntilValid', () => {
     );
 
     expect(result.content).toBe(successfulPromptResponse.content);
-    expect(trace.getActiveSpan()?.recordException).toHaveBeenCalledWith(toolCallbackError);
+    expect(markToolSpanAsError).toHaveBeenCalledWith(mockToolSpan, { error: toolCallbackError });
   });
 
   it('throws an AggregateError when retries are exhausted', async () => {
@@ -158,6 +154,6 @@ describe('executeUntilValid', () => {
     });
 
     expect(promptSpy).toHaveBeenCalledTimes(2);
-    expect(trace.getActiveSpan()?.recordException).toHaveBeenCalledTimes(2);
+    expect(markToolSpanAsError).toHaveBeenCalledTimes(2);
   });
 });

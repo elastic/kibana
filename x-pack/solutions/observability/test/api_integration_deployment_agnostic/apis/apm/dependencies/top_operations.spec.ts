@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { ValuesType } from 'utility-types';
-import type { DependencyOperation } from '@kbn/apm-plugin/server/routes/dependencies/get_top_dependency_operations';
+import type { DependencyOperation } from '@kbn/apm-api-shared';
 import { meanBy } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { SPANS_PER_DESTINATION_METRIC } from '@kbn/synthtrace/src/lib/apm/aggregators/create_span_metrics_aggregator';

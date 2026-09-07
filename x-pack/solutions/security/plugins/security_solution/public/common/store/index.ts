@@ -9,7 +9,7 @@ export * from './model';
 export * from './reducer';
 export * from './selectors';
 
-import type { Middleware, Dispatch } from 'redux';
+import type { Middleware, Dispatch } from 'redux-v4';
 import { createStoreFactory, createStore, getStore } from './store';
 import type { ImmutableMiddleware, State } from './types';
 import type { AppAction } from './actions';

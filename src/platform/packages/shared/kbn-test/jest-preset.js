@@ -33,9 +33,7 @@ module.exports = {
   coveragePathIgnorePatterns: ['/node_modules/', '.*\\.d\\.ts', 'jest\\.config\\.js'],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  coverageReporters: !!process.env.CODE_COVERAGE
-    ? [['json', { file: 'jest.json' }]]
-    : ['html', 'text'],
+  coverageReporters: ['html', 'text'],
 
   // An array of file extensions your modules use
   moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'json', 'node'],
@@ -69,7 +67,7 @@ module.exports = {
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
-    '<rootDir>/src/setup_node_env/polyfill.ts',
+    'core-js/stable',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/polyfills.jsdom.js',
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme.js',
   ],
@@ -129,7 +127,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor, monaco-yaml, monaco-promql which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|react-monaco-editor|msw|@bundled-es-modules|until-async|rettime|@open-draft/deferred-promise|react-markdown|@ungap/structured-clone|bail|ccount|character-entities[^/\\\\]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|escape-string-regexp|estree-util-[^/\\\\]*|hast-util-[^/\\\\]*|html-url-attributes|html-void-elements|hastscript|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|parse-entities|parse5|property-information|rehype-raw|rehype-sanitize|remark-gfm|remark-parse|remark-rehype|space-separated-tokens|stringify-entities|trim-lines|trough|unified|unist-util-[^/\\\\]*|vfile[^/\\\\]*|web-namespaces|zwitch))[/\\\\].+\\.m?js$',
+    '[/\\\\]node_modules(?![\\/\\\\](@apidevtools/json-schema-ref-parser|byte-size|monaco-editor|monaco-yaml|monaco-promql|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|date-fns|react-day-picker|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|exit-hook|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4|vega-interpreter|vega-util|vega-tooltip|@modelcontextprotocol|pkce-challenge|ansi-styles|just-bash|react-monaco-editor|msw|@bundled-es-modules|until-async|rettime|@open-draft/deferred-promise|react-markdown|@ungap/structured-clone|bail|ccount|character-entities[^/\\\\]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|escape-string-regexp|estree-util-[^/\\\\]*|hast-util-[^/\\\\]*|html-url-attributes|html-void-elements|hastscript|inversify|@inversifyjs|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|markdown-table|mdast-util-[^/\\\\]*|micromark[^/\\\\]*|parse-entities|parse5|property-information|rehype-raw|rehype-sanitize|remark-gfm|remark-parse|remark-rehype|space-separated-tokens|stringify-entities|trim-lines|trough|unified|unist-util-[^/\\\\]*|uuid|vfile[^/\\\\]*|web-namespaces|zwitch|@faker-js|globby|unicorn-magic|is-path-inside|slash|@sindresorhus/merge-streams))[/\\\\].+\\.m?js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',

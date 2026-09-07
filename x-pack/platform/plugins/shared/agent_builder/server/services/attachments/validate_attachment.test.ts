@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
+import { createResolveContextMock } from '../../test_utils';
 import { validateAttachment } from './validate_attachment';
 import type { AttachmentTypeRegistry } from './attachment_type_registry';
 
@@ -22,12 +22,7 @@ const createRegistry = (definition: {
   } as unknown as AttachmentTypeRegistry);
 
 describe('validateAttachment', () => {
-  const request = httpServerMock.createKibanaRequest();
-  const resolveContext: AttachmentResolveContext = {
-    request,
-    spaceId: 'default',
-    savedObjectsClient: {} as AttachmentResolveContext['savedObjectsClient'],
-  };
+  const resolveContext = createResolveContextMock();
 
   describe('Converse attachment input scenarios (structural + resolution)', () => {
     it('only data: validates using inline data', async () => {

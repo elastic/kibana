@@ -14,7 +14,7 @@ import type { StoredChangePointChartEmbeddableState } from './types';
 
 describe('change point chart embeddable transforms', () => {
   it('validates the dashboard-as-code schema and applies defaults', () => {
-    const state = changePointChartEmbeddableStateSchema.validate({
+    const state = changePointChartEmbeddableStateSchema.parse({
       data_view_id: 'data-view-id',
       aggregation_function: 'avg',
       metric_field: 'bytes',
@@ -30,7 +30,7 @@ describe('change point chart embeddable transforms', () => {
   });
 
   it('defaults aggregation_function to avg when omitted from the schema input', () => {
-    const state = changePointChartEmbeddableStateSchema.validate({
+    const state = changePointChartEmbeddableStateSchema.parse({
       data_view_id: 'data-view-id',
       metric_field: 'bytes',
     });
@@ -40,7 +40,7 @@ describe('change point chart embeddable transforms', () => {
 
   it('rejects unsupported aggregation functions', () => {
     expect(() =>
-      changePointChartEmbeddableStateSchema.validate({
+      changePointChartEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
         aggregation_function: 'median',
         metric_field: 'bytes',
@@ -50,7 +50,7 @@ describe('change point chart embeddable transforms', () => {
 
   it('rejects partitions when split_field is missing', () => {
     expect(() =>
-      changePointChartEmbeddableStateSchema.validate({
+      changePointChartEmbeddableStateSchema.parse({
         data_view_id: 'data-view-id',
         aggregation_function: 'avg',
         metric_field: 'bytes',

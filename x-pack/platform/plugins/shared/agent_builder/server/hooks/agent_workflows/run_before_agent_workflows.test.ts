@@ -50,19 +50,16 @@ describe('runBeforeAgentWorkflows', () => {
     uiSettings.asScopedToClient.mockReturnValue(uiSettingsClient);
 
     const registry = {
-      get: jest.fn().mockResolvedValue({
-        id: 'agent-1',
-        configuration: {
-          workflow_ids: ['wf-1'],
-        },
-      }),
+      get: jest.fn().mockResolvedValue({ id: 'agent-1', type: 'chat', configuration: {} }),
     };
+    const resolveAgentConfiguration = jest.fn().mockResolvedValue({ workflow_ids: ['wf-1'] });
 
     return {
       workflowApi: {} as WorkflowApi,
       getInternalServices: jest.fn(() => ({
         agents: {
           getRegistry: jest.fn().mockResolvedValue(registry),
+          resolveAgentConfiguration,
         },
         spaces: {},
         featureFlags: {
@@ -72,6 +69,7 @@ describe('runBeforeAgentWorkflows', () => {
         savedObjects,
       })) as unknown as GetInternalServices,
       registry,
+      resolveAgentConfiguration,
       uiSettingsClient,
     };
   };
@@ -224,19 +222,15 @@ describe('runBeforeAgentWorkflows', () => {
 
   it('executes each workflow once when global and agent workflows overlap', async () => {
     const context = createContext();
-    const { workflowApi, getInternalServices, uiSettingsClient, registry } = createDeps();
+    const { workflowApi, getInternalServices, uiSettingsClient, resolveAgentConfiguration } =
+      createDeps();
     uiSettingsClient.get.mockImplementation(async (key: string) => {
       if (key === AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS) {
         return ['wf-1', 'wf-2', 'wf-2'];
       }
       return true;
     });
-    registry.get.mockResolvedValue({
-      id: 'agent-1',
-      configuration: {
-        workflow_ids: ['wf-2', 'wf-3'],
-      },
-    });
+    resolveAgentConfiguration.mockResolvedValue({ workflow_ids: ['wf-2', 'wf-3'] });
     executeWorkflowMock.mockResolvedValue({
       success: true,
       execution: {

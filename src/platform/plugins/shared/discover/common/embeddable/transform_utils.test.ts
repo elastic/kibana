@@ -18,7 +18,7 @@ import {
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
-  fromStoredHeight,
+  fromStoredRowHeight,
   toDiscoverSessionPanelOverrides,
   fromStoredSort,
   fromStoredTab,
@@ -294,8 +294,6 @@ describe('search embeddable transform utils', () => {
             sort: [{ name: '@timestamp', direction: 'desc' }],
             column_order: ['message'],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-            density: DataGridDensity.COMPACT,
-            header_row_height: 3,
             data_source: {
               type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
               ref_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
@@ -307,6 +305,15 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSearchEmbeddableByValue(storedState);
 
       expect(result).toEqual(expected);
+      const { state: roundTripped } = toStoredSearchEmbeddableByValue(result);
+      const [roundTrippedTab] = roundTripped.attributes.tabs ?? [];
+
+      if (!roundTrippedTab) {
+        throw new Error('Expected a round-tripped tab');
+      }
+
+      expect(roundTrippedTab.attributes.density).toBeUndefined();
+      expect(roundTrippedTab.attributes.headerRowHeight).toBeUndefined();
     });
   });
 
@@ -344,6 +351,8 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { hideNulls: true, wrapLines: false },
         grid: {
           columns: {
             message: { width: 100 },
@@ -369,11 +378,15 @@ describe('search embeddable transform utils', () => {
           rows_per_page: 100,
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
+          documents_display_mode: 'json',
+          json_mode_settings: { hide_nulls: true, wrap_lines: false },
         },
       });
       expect(result).not.toHaveProperty('sort');
       expect(result).not.toHaveProperty('columns');
       expect(result).not.toHaveProperty('selectedTabId');
+      expect(result).not.toHaveProperty('documentsDisplayMode');
+      expect(result).not.toHaveProperty('jsonModeSettings');
     });
 
     it('throws when no saved search reference matches type and name', () => {
@@ -549,9 +562,6 @@ describe('search embeddable transform utils', () => {
         timeFieldName: '@timestamp',
         fieldFormats: {
           rt: { id: 'string' },
-        },
-        fieldAttrs: {
-          rt: {},
         },
         runtimeFieldMap: {
           rt: {
@@ -731,6 +741,8 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { hideNulls: true, wrapLines: false },
         grid: {
           columns: {
             message: { width: 100 },
@@ -751,6 +763,8 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
+        documents_display_mode: 'json',
+        json_mode_settings: { hide_nulls: true, wrap_lines: false },
       });
     });
 
@@ -770,6 +784,8 @@ describe('search embeddable transform utils', () => {
       expect(result.rows_per_page).toBeUndefined();
       expect(result.header_row_height).toBeUndefined();
       expect(result.density).toBeUndefined();
+      expect(result.documents_display_mode).toBeUndefined();
+      expect(result.json_mode_settings).toBeUndefined();
     });
 
     it('converts numeric row heights to API form', () => {
@@ -908,6 +924,11 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSort(sort);
       expect(result).toEqual([{ name: 'field', direction: 'desc' }]);
     });
+
+    it('converts legacy flat sort [field, direction] to a single sort entry', () => {
+      const result = fromStoredSort(['@timestamp', 'desc']);
+      expect(result).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+    });
   });
 
   describe('toStoredSort', () => {
@@ -932,18 +953,14 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredHeight', () => {
+  describe('fromStoredRowHeight', () => {
     it('returns numeric height as-is', () => {
-      expect(fromStoredHeight(3)).toBe(3);
-      expect(fromStoredHeight(5)).toBe(5);
+      expect(fromStoredRowHeight(3)).toBe(3);
+      expect(fromStoredRowHeight(5)).toBe(5);
     });
 
     it('returns "auto" when height is -1', () => {
-      expect(fromStoredHeight(-1)).toBe('auto');
-    });
-
-    it('defaults to 3 when height is undefined', () => {
-      expect(fromStoredHeight(undefined as unknown as number)).toBe(3);
+      expect(fromStoredRowHeight(-1)).toBe('auto');
     });
   });
 

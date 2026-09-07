@@ -6,8 +6,8 @@
  */
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { DELETE_NOTE_BUTTON_TEST_ID } from './test_ids';
@@ -87,16 +87,17 @@ export const DeleteNoteButtonIcon = memo(({ note, index }: DeleteNoteButtonIconP
   }
 
   return (
-    <EuiButtonIcon
-      data-test-subj={`${DELETE_NOTE_BUTTON_TEST_ID}-${index}`}
-      title={DELETE_NOTE}
-      aria-label={DELETE_NOTE}
-      color="text"
-      iconType="trash"
-      onClick={() => deleteNoteFc(note.noteId)}
-      disabled={deletingNoteId !== note.noteId && deleteStatus === ReqStatus.Loading}
-      isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
-    />
+    <EuiToolTip content={DELETE_NOTE} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj={`${DELETE_NOTE_BUTTON_TEST_ID}-${index}`}
+        aria-label={DELETE_NOTE}
+        color="text"
+        iconType="trash"
+        onClick={() => deleteNoteFc(note.noteId)}
+        disabled={deletingNoteId !== note.noteId && deleteStatus === ReqStatus.Loading}
+        isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
+      />
+    </EuiToolTip>
   );
 });
 

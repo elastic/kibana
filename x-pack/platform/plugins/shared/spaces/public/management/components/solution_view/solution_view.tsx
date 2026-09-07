@@ -26,7 +26,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
+import { SOLUTION_VIEW_OPTIONS } from '../../../solution_view_options';
 import type { SpaceValidator } from '../../lib';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 type SolutionView = Space['solution'];
@@ -34,65 +36,21 @@ type SolutionView = Space['solution'];
 const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<SolutionView>> => {
   const iconCss = { marginRight: size.m };
 
-  return [
-    {
-      value: 'es',
-      inputDisplay: (
-        <>
-          <EuiIcon type="logoElasticsearch" css={iconCss} aria-hidden={true} />
-          {i18n.translate(
-            'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
-            { defaultMessage: 'Elasticsearch' }
-          )}
-        </>
-      ),
-      'data-test-subj': 'solutionViewEsOption',
-    },
-    {
-      value: 'oblt',
-      inputDisplay: (
-        <>
-          <EuiIcon type="logoObservability" css={iconCss} aria-hidden={true} />
-          {i18n.translate(
-            'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
-            { defaultMessage: 'Observability' }
-          )}
-        </>
-      ),
-      'data-test-subj': 'solutionViewObltOption',
-    },
-    {
-      value: 'security',
-      inputDisplay: (
-        <>
-          <EuiIcon type="logoSecurity" css={iconCss} aria-hidden={true} />
-          {i18n.translate(
-            'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
-            { defaultMessage: 'Security' }
-          )}
-        </>
-      ),
-      'data-test-subj': 'solutionViewSecurityOption',
-    },
-    {
-      value: 'classic',
-      inputDisplay: (
-        <>
-          <EuiIcon type="logoElasticStack" css={iconCss} aria-hidden={true} />
-          {i18n.translate(
-            'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
-            { defaultMessage: 'Classic' }
-          )}
-        </>
-      ),
-      'data-test-subj': 'solutionViewClassicOption',
-    },
-  ];
+  return SOLUTION_VIEW_OPTIONS.map(({ value, name, icon, dataTestSubj }) => ({
+    value,
+    inputDisplay: (
+      <>
+        <EuiIcon type={icon} css={iconCss} aria-hidden={true} />
+        {name}
+      </>
+    ),
+    'data-test-subj': dataTestSubj,
+  }));
 };
 
 interface Props {
-  space: Partial<Space>;
-  onChange: (space: Partial<Space>) => void;
+  space: CustomizeSpaceFormValues;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   isEditing: boolean;
   validator: SpaceValidator;
   sectionTitle?: string;

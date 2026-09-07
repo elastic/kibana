@@ -114,7 +114,7 @@ describe('AutoInstallContentPackagesTask', () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
       const createTaskRunner =
         mockTaskManagerSetup.registerTaskDefinitions.mock.calls[0][0][TYPE].createTaskRunner;
-      const taskRunner = createTaskRunner({ taskInstance, abortController: new AbortController() });
+      const taskRunner = createTaskRunner(taskManagerMock.createRunContext({ taskInstance }));
       return taskRunner.run();
     };
 
@@ -243,6 +243,35 @@ describe('AutoInstallContentPackagesTask', () => {
       expect(dataStreamService.getAllFleetDataStreamNames).not.toHaveBeenCalled();
     });
 
+    it('should not install package that has been rolled back', async () => {
+      mockGetInstalledPackages.mockResolvedValue({
+        items: [
+          {
+            name: 'kubernetes_otel',
+            version: '1.0.0',
+            rolledBack: true,
+          },
+          {
+            name: 'test_package',
+            version: '1.0.0',
+          },
+        ],
+      });
+
+      await runTask();
+
+      expect(packageClientMock.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageClientMock.installPackage).toHaveBeenCalledWith({
+        pkgName: 'test_package',
+        pkgVersion: '1.1.0',
+        useStreaming: true,
+        automaticInstall: true,
+      });
+      expect(packageClientMock.installPackage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ pkgName: 'kubernetes_otel' })
+      );
+    });
+
     it('should not downgrade package when a newer prerelease version is installed', async () => {
       // Registry has 1.1.0, but a prerelease 2.0.0-preview is already installed.
       // The task must not downgrade to 1.1.0.
@@ -315,6 +344,62 @@ describe('AutoInstallContentPackagesTask', () => {
         const result: string[] = await (mockTask as any).getDatasetsWithData(esClient, []);
 
         expect(result).toEqual(['system.cpu']);
+      });
+
+      it('should log at INFO level on the first run', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at DEBUG level on subsequent runs when dataset count is unchanged', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.debug).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+        expect((mockTask as any).logger.info).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 1 datasets with data'
+        );
+      });
+
+      it('should log at INFO level on subsequent runs when dataset count changes', async () => {
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+        jest.clearAllMocks();
+
+        (dataStreamService.getAllFleetDataStreamNames as jest.Mock).mockResolvedValue([
+          'logs-system.cpu-default',
+          'logs-system.memory-default',
+        ]);
+
+        await (mockTask as any).getDatasetsWithData(esClient, []);
+
+        expect((mockTask as any).logger.info).toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
+        expect((mockTask as any).logger.debug).not.toHaveBeenCalledWith(
+          '[AutoInstallContentPackagesTask] Found 2 datasets with data'
+        );
       });
     });
   });

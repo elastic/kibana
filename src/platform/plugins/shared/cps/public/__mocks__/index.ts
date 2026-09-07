@@ -14,6 +14,7 @@ export const createCpsManagerMock = (): jest.Mocked<ICPSManager> => ({
   whenReady: jest.fn().mockResolvedValue(undefined),
   fetchProjects: jest.fn().mockResolvedValue(null),
   getTotalProjectCount: jest.fn().mockReturnValue(1),
+  hasLinkedProjects: jest.fn().mockReturnValue(false),
   getProjectRouting$: jest.fn(() => of(undefined)),
   setProjectRouting: jest.fn(),
   getProjectRouting: jest.fn(() => undefined),
@@ -21,6 +22,14 @@ export const createCpsManagerMock = (): jest.Mocked<ICPSManager> => ({
   updateDefaultProjectRouting: jest.fn(),
   getProjectPickerAccess$: jest.fn(() => of(ProjectRoutingAccess.DISABLED)),
   registerAppAccess: jest.fn(),
+  getConfigurationLinks: jest.fn(() => ({
+    currentSpace: {
+      icon: 'controls',
+      label: 'Adjust space defaults',
+      testSubj: 'adjustSpaceDefaultsMenuItem',
+      href: 'https://example.com',
+    },
+  })),
 });
 
 let mockProjectRoutingSubject: BehaviorSubject<string | undefined> | undefined;

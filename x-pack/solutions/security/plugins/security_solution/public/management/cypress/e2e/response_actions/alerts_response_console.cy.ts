@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { navigateToEndpointList } from '../../screens';
 import { closeAllToasts } from '../../tasks/toasts';
 import {
   getAlertsTableRows,
@@ -17,12 +18,19 @@ import { ensureOnResponder } from '../../screens/responder';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
-import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
+import {
+  clearConsoleCommandInput,
+  inputConsoleCommand,
+  openResponseConsoleFromEndpointList,
+  submitCommand,
+  waitForEndpointListPageToBeLoaded,
+} from '../../tasks/response_console';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
+import { disableNewFlyout } from '../../tasks/kibana_advanced_settings';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -38,6 +46,7 @@ describe(
     let ruleId: string;
     let ruleName: string;
     beforeEach(() => {
+      disableNewFlyout();
       login();
     });
 
@@ -117,6 +126,29 @@ describe(
       openAlertDetailsViewFromTimeline();
       openResponderFromEndpointAlertDetails();
       ensureOnResponder();
+    });
+
+    it('should maintain host console entered input across security solution pages', () => {
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      toggleRuleOffAndOn(ruleName);
+      visitRuleAlerts(ruleName);
+      closeAllToasts();
+      getAlertsTableRows().should('have.length.greaterThan', 0);
+      openAlertDetailsView();
+      openResponderFromEndpointAlertDetails();
+      ensureOnResponder();
+
+      clearConsoleCommandInput();
+      inputConsoleCommand('help');
+      submitCommand();
+
+      cy.getByTestSubj('endpointResponseActionsConsole-helpOutput').should('exist');
+
+      // Now open console for same host on the Endpoint list. The help command output from above should be visible
+      navigateToEndpointList(createdHost.hostname);
+      openResponseConsoleFromEndpointList(createdHost.hostname);
+
+      cy.getByTestSubj('endpointResponseActionsConsole-helpOutput').should('exist');
     });
   }
 );

@@ -9,11 +9,15 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import {
   WorkflowExecutionNotFoundError,
   WorkflowNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
+import type { WorkflowsManagementConfig } from '../../../config';
+import { ExternalResumeError } from '../../external_resume/external_resume_error';
+import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
@@ -21,6 +25,7 @@ describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let mockApi: Record<string, jest.Mock>;
   let mockSpaces: { getSpaceId: jest.Mock };
+  let mockRouter: IRouter;
 
   const mockContext = {
     workflows: Promise.resolve({
@@ -58,9 +63,18 @@ describe('Execution Routes', () => {
     ok: jest.fn((params?: any) => ({ type: 'ok', ...params })),
     notFound: jest.fn((params?: any) => ({ type: 'notFound', ...params })),
     badRequest: jest.fn((params?: any) => ({ type: 'badRequest', ...params })),
+    custom: jest.fn(({ statusCode, body, headers, bypassErrorFormat }: any) => ({
+      status: statusCode,
+      body,
+      options: { headers, bypassErrorFormat },
+    })),
     customError: jest.fn((params?: any) => ({ type: 'customError', ...params })),
     forbidden: jest.fn((params?: any) => ({ type: 'forbidden', ...params })),
     conflict: jest.fn((params?: any) => ({ type: 'conflict', ...params })),
+  };
+  const defaultAuthzResult = {
+    [WorkflowsManagementApiActions.readExecution]: true,
+    [WorkflowsManagementApiActions.readManagedExecution]: true,
   };
 
   const mockWorkflow = {
@@ -78,10 +92,11 @@ describe('Execution Routes', () => {
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default') };
     mockApi = {
       getWorkflow: jest.fn(),
-      runWorkflow: jest.fn(),
+      runWorkflowWithAlertPreprocessing: jest.fn(),
       testWorkflow: jest.fn(),
       testStep: jest.fn(),
       getWorkflowExecutions: jest.fn(),
+      searchExecutionsView: jest.fn(),
       searchStepExecutions: jest.fn(),
       getWorkflowExecution: jest.fn(),
       getWorkflowExecutionLogs: jest.fn(),
@@ -89,19 +104,29 @@ describe('Execution Routes', () => {
       cancelAllActiveWorkflowExecutions: jest.fn(),
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
+      resumeWorkflowExecutionExternally: jest.fn(),
+      resumeWorkflowExecutionExternallyViaGet: jest.fn(),
+      resumeWorkflowExecutionExternallyWithInput: jest.fn(),
+      getExternalResumeFormPage: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
     };
+    mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: false });
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
         .fn()
         .mockImplementation((_config: unknown, handler: (...args: any[]) => Promise<any>) => {
-          routeHandlers[`${method}:${path}`] = { handler };
+          routeHandlers[`${method}:${path}`] = {
+            handler: async (context, request, response) => {
+              request.authzResult ??= defaultAuthzResult;
+              return handler(context, request, response);
+            },
+          };
           return { addVersion: jest.fn() };
         }),
     });
 
-    const mockRouter = {
+    const router = {
       versioned: {
         get: jest
           .fn()
@@ -125,13 +150,15 @@ describe('Execution Routes', () => {
           ),
       },
     } as unknown as jest.Mocked<IRouter>;
+    mockRouter = router;
 
     registerExecutionRoutes({
-      router: mockRouter,
+      router,
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
       audit: createWorkflowManagementAuditLogMock(),
+      config: { hitlExternalResume: { enabled: true } } as WorkflowsManagementConfig,
     } as unknown as RouteDependencies);
   });
 
@@ -146,7 +173,10 @@ describe('Execution Routes', () => {
 
     it('should call api methods with correct arguments when workflow is valid', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockResolvedValue('exec-1');
+      mockApi.runWorkflowWithAlertPreprocessing.mockResolvedValue({
+        workflowExecutionId: 'exec-1',
+        inputs: { k: 'v' },
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { id: 'wf-1' },
@@ -156,20 +186,20 @@ describe('Execution Routes', () => {
       const result = await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default');
-      expect(mockApi.runWorkflow).toHaveBeenCalledWith(
-        {
+      expect(mockApi.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
+        workflow: {
           id: 'wf-1',
           name: 'Test',
           enabled: true,
           definition: mockWorkflow.definition,
           yaml: mockWorkflow.yaml,
         },
-        'default',
-        { k: 'v' },
+        spaceId: 'default',
+        inputs: { k: 'v' },
         request,
-        undefined,
-        { src: 'ui' }
-      );
+        preprocessingContext: mockContext,
+        metadata: { src: 'ui' },
+      });
       expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
 
@@ -182,7 +212,7 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
-      expect(mockApi.runWorkflow).not.toHaveBeenCalled();
+      expect(mockApi.runWorkflowWithAlertPreprocessing).not.toHaveBeenCalled();
     });
 
     it('should return bad request when workflow is not valid', async () => {
@@ -222,9 +252,9 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return custom error when api.runWorkflow throws', async () => {
+    it('should return custom error when api.runWorkflowWithAlertPreprocessing throws', async () => {
       mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
-      mockApi.runWorkflow.mockRejectedValue(new Error('engine failed'));
+      mockApi.runWorkflowWithAlertPreprocessing.mockRejectedValue(new Error('engine failed'));
       const h = handler('POST', path)!;
       const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
 
@@ -309,6 +339,97 @@ describe('Execution Routes', () => {
         'default',
         request
       );
+    });
+  });
+
+  describe('GET /api/workflows/workflow/executions (search_executions)', () => {
+    const path = '/api/workflows/workflow/executions';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should call api.searchExecutionsView with converted kql and structured sort', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          kql: 'status: completed',
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          page: 2,
+          size: 25,
+          trackTotalHits: true,
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({ bool: expect.any(Object) }),
+          sortField: 'startedAt',
+          sortOrder: 'desc',
+          page: 2,
+          size: 25,
+          trackTotalHits: true,
+        }),
+        'default'
+      );
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { results: [], page: 1, size: 25, total: 0 },
+      });
+    });
+
+    it('should call api.searchExecutionsView without query when kql is omitted', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: { page: 1, size: 25 } } as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({ query: undefined, sortField: undefined, sortOrder: undefined }),
+        'default'
+      );
+    });
+
+    it('should return bad request for invalid KQL syntax', async () => {
+      const h = handler('GET', path)!;
+      const request = {
+        query: {
+          kql: 'status:',
+        },
+      };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('Invalid KQL') },
+      });
+      expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
+    });
+
+    it('should return bad request when searchExecutionsView throws a query validation error', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        Object.assign(new Error('failed to create query: For input string: "2s"'), {
+          statusCode: 400,
+        })
+      );
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: {} } as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: { message: 'failed to create query: For input string: "2s"' },
+      });
     });
   });
 
@@ -452,6 +573,21 @@ describe('Execution Routes', () => {
       expect(result).toEqual({ type: 'ok', body: execution });
     });
 
+    it('should return workflow document version in the response body when present', async () => {
+      const execution = { id: 'ex-1', version: 5, managed: false };
+      mockApi.getWorkflowExecution.mockResolvedValue(execution);
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toEqual({ type: 'ok', body: execution });
+      expect(result.body.version).toBe(5);
+    });
+
     it('should return not found when execution does not exist', async () => {
       mockApi.getWorkflowExecution.mockResolvedValue(undefined);
       const h = handler('GET', path)!;
@@ -464,6 +600,27 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+
+    it('should reject managed executions without managed execution read privilege', async () => {
+      mockApi.getWorkflowExecution.mockResolvedValue({ id: 'ex-1', managed: true });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1' },
+        query: { includeInput: false, includeOutput: false },
+        authzResult: {
+          [WorkflowsManagementApiActions.readExecution]: true,
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.forbidden).toHaveBeenCalledWith({
+        body: {
+          message: new ManagedWorkflowExecutionReadForbiddenError().message,
+        },
+      });
+      expect(result).toMatchObject({ type: 'forbidden' });
     });
   });
 
@@ -481,11 +638,9 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith(
-        'ex-1',
-        'default',
-        expect.anything()
-      );
+      expect(mockApi.cancelWorkflowExecution).toHaveBeenCalledWith('ex-1', 'default', request, {
+        channel: 'kibana_execution_view',
+      });
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -508,14 +663,19 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.cancelAllActiveWorkflowExecutions with workflow id and space id', async () => {
+    it('should call api.cancelAllActiveWorkflowExecutions with workflow id, space id, and request', async () => {
       mockApi.cancelAllActiveWorkflowExecutions.mockResolvedValue(undefined);
       const h = handler('POST', path)!;
       const request = { params: { workflowId: 'wf-1' } };
 
       await h(mockContext, request as any, mockResponse as any);
 
-      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
+        'wf-1',
+        'default',
+        expect.anything(),
+        { channel: 'kibana_execution_view' }
+      );
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
@@ -605,7 +765,8 @@ describe('Execution Routes', () => {
         'ex-1',
         'default',
         { resume: true },
-        request
+        request,
+        { channel: 'kibana_execution_view' }
       );
       expect(result).toMatchObject({
         type: 'ok',
@@ -680,6 +841,180 @@ describe('Execution Routes', () => {
         stepExecutionId: undefined,
       });
       expect(result).toEqual({ type: 'ok', body: logsResponse });
+    });
+  });
+
+  describe('registerExecutionRoutes hitlExternalResume kill switch', () => {
+    const externalResumePath =
+      '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
+    const externalResumeFormPath =
+      '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form';
+
+    it('does not register external resume routes when hitlExternalResume is disabled', () => {
+      routeHandlers = {};
+      registerExecutionRoutes({
+        router: mockRouter,
+        api: mockApi as any,
+        logger: loggingSystemMock.createLogger(),
+        spaces: mockSpaces as any,
+        audit: createWorkflowManagementAuditLogMock(),
+        config: { hitlExternalResume: { enabled: false } } as WorkflowsManagementConfig,
+      } as unknown as RouteDependencies);
+
+      expect(handler('GET', externalResumePath)).toBeUndefined();
+      expect(handler('POST', externalResumePath)).toBeUndefined();
+      expect(handler('GET', externalResumeFormPath)).toBeUndefined();
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/steps/{stepId}/resume/external (external_resume)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should resume via token and return HTML', async () => {
+      mockApi.resumeWorkflowExecutionExternallyViaGet.mockResolvedValue({
+        resumedBy: 'external_resume:step-exec-1',
+      });
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: {
+          token: 'resume-token',
+          approved: 'true',
+        },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternallyViaGet).toHaveBeenCalledWith({
+        token: 'resume-token',
+        executionId: 'ex-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        query: {
+          token: 'resume-token',
+          approved: 'true',
+        },
+        request: expect.any(Object),
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('Thank you');
+    });
+
+    it('should return HTML error page when resume fails', async () => {
+      mockApi.resumeWorkflowExecutionExternallyViaGet.mockRejectedValue(
+        new ExternalResumeError('Invalid resume token', 401)
+      );
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'bad-token', approved: 'false' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(result).toMatchObject({
+        status: 401,
+        options: {
+          bypassErrorFormat: true,
+          headers: {
+            'content-type': 'text/html; charset=utf-8',
+            'cache-control': 'no-store',
+            'referrer-policy': 'no-referrer',
+          },
+        },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('This workflow response link is no longer valid');
+    });
+  });
+
+  describe('GET /api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form (external_resume_form)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form';
+
+    it('should register the route handler', () => {
+      expect(handler('GET', path)).toBeDefined();
+    });
+
+    it('should return the HTML form page', async () => {
+      mockApi.getExternalResumeFormPage.mockResolvedValue('<html>form</html>');
+      const h = handler('GET', path)!;
+      const request = {
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'resume-token' },
+        basePath: '/kbn',
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.getExternalResumeFormPage).toHaveBeenCalledWith({
+        token: 'resume-token',
+        executionId: 'ex-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        basePath: '/kbn',
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
+        body: '<html>form</html>',
+      });
+    });
+  });
+
+  describe('POST /api/workflows/executions/{executionId}/steps/{stepId}/resume/external (external_resume_input)', () => {
+    const path = '/api/workflows/executions/{executionId}/steps/{stepId}/resume/external';
+
+    it('should register the route handler', () => {
+      expect(handler('POST', path)).toBeDefined();
+    });
+
+    it('should resume via token query param and return HTML', async () => {
+      mockApi.resumeWorkflowExecutionExternallyWithInput.mockResolvedValue({
+        resumedBy: 'external_resume:step-exec-1',
+      });
+      const h = handler('POST', path)!;
+      const request = {
+        params: { executionId: 'ex-1', stepId: 'step-exec-1' },
+        query: { token: 'resume-token' },
+        body: { severity: 'high' },
+      };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.resumeWorkflowExecutionExternallyWithInput).toHaveBeenCalledWith({
+        token: 'resume-token',
+        executionId: 'ex-1',
+        stepId: 'step-exec-1',
+        spaceId: 'default',
+        input: { severity: 'high' },
+        request: expect.any(Object),
+      });
+      expect(result).toMatchObject({
+        type: 'ok',
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+          'referrer-policy': 'no-referrer',
+        },
+      });
+      expect(typeof result.body).toBe('string');
+      expect(result.body).toContain('Thank you');
     });
   });
 

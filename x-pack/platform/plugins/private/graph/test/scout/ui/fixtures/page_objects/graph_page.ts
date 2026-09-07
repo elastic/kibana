@@ -6,10 +6,17 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout';
+import { ContentListWrapper } from '@kbn/scout';
+
+const LISTING_TIMEOUT = 20_000;
 
 export class GraphPage {
+  /** Shared wrapper for the Content List listing UI (toolbar, table, selection bar). */
+  readonly contentList: ContentListWrapper;
+
   // Public locators consumed directly by specs.
   readonly createGraphPromptButton: Locator;
+  readonly createGraphButton: Locator;
   readonly saveButton: Locator;
   readonly currentGraphBreadcrumb: Locator;
   readonly vennLargeTerm1: Locator;
@@ -19,10 +26,10 @@ export class GraphPage {
   readonly vennSmallTerm2: Locator;
 
   // Internal locators — consumed only by methods on this class.
-  private readonly landingPage: Locator;
-  private readonly listingSearchBox: Locator;
   private readonly newButton: Locator;
-  private readonly homeBreadcrumb: Locator;
+  private readonly settingsButton: Locator;
+  private readonly appMenuOverflowButton: Locator;
+  private readonly emptyState: Locator;
   private readonly datasourceButton: Locator;
   private readonly addFieldButton: Locator;
   private readonly fieldSearchInput: Locator;
@@ -43,17 +50,15 @@ export class GraphPage {
   private readonly selectionListFields: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
-    this.landingPage = this.page.testSubj.locator('graphLandingPage');
+    this.contentList = new ContentListWrapper(page);
     this.createGraphPromptButton = this.page.testSubj.locator('graphCreateGraphPromptButton');
-    this.listingSearchBox = this.landingPage.locator('.euiFieldSearch');
+    this.createGraphButton = this.page.testSubj.locator('graphCreateGraphButton');
 
     this.newButton = this.page.testSubj.locator('graphNewButton');
     this.saveButton = this.page.testSubj.locator('graphSaveButton');
-    // Two breadcrumbs register `graphHomeBreadcrumb` (chrome + shared-ux
-    // mirror); match `first` to pick the chrome one.
-    this.homeBreadcrumb = this.page.locator(
-      '[data-test-subj~="graphHomeBreadcrumb"][data-test-subj~="first"]'
-    );
+    this.settingsButton = this.page.testSubj.locator('graphSettingsButton');
+    this.appMenuOverflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    this.emptyState = this.page.testSubj.locator('content-list-emptyState');
     this.currentGraphBreadcrumb = this.page.locator(
       '[data-test-subj~="graphCurrentGraphBreadcrumb"]'
     );
@@ -96,11 +101,31 @@ export class GraphPage {
   }
 
   async waitForListing() {
-    await this.landingPage.waitFor({ state: 'visible' });
+    // Empty prompt button lives inside `content-list-emptyState`; do not `.or()`
+    // both or Playwright strict mode fails when the empty listing is ready.
+    await this.emptyState
+      .or(this.contentList.searchBox)
+      .waitFor({ state: 'visible', timeout: LISTING_TIMEOUT });
+  }
+
+  private async clickAppMenuItem(item: Locator) {
+    if (!(await item.isVisible())) {
+      await this.appMenuOverflowButton.click();
+      await item.waitFor({ state: 'visible' });
+    }
+    await item.click();
   }
 
   async clickCreateGraph() {
-    await this.createGraphPromptButton.click();
+    if (await this.createGraphPromptButton.isVisible()) {
+      await this.createGraphPromptButton.click();
+      return;
+    }
+    if (!(await this.createGraphButton.isVisible())) {
+      await this.appMenuOverflowButton.click();
+      await this.createGraphButton.waitFor({ state: 'visible' });
+    }
+    await this.createGraphButton.click();
   }
 
   /**
@@ -132,8 +157,7 @@ export class GraphPage {
     await this.fieldSearchInput.waitFor({ state: 'visible' });
     for (const field of fields) {
       await this.fieldSearchInput.fill(field);
-      // Match the EuiSelectable item by `title` to wait for the filtered list.
-      const option = this.page.locator(`.euiSelectableListItem[title="${field}"]`);
+      const option = this.page.testSubj.locator(`graph-field-option-${field}`);
       await option.waitFor({ state: 'visible' });
       await option.click();
     }
@@ -148,14 +172,18 @@ export class GraphPage {
   }
 
   async saveWorkspaceAs(title: string) {
-    await this.saveButton.click();
+    await this.clickAppMenuItem(this.saveButton);
     await this.saveTitleInput.fill(title);
     await this.saveConfirmButton.click();
     await this.saveSuccessToast.waitFor({ state: 'visible' });
   }
 
+  async clickSettings() {
+    await this.clickAppMenuItem(this.settingsButton);
+  }
+
   async newWorkspace({ discardChanges = false }: { discardChanges?: boolean } = {}) {
-    await this.newButton.click();
+    await this.clickAppMenuItem(this.newButton);
     if (discardChanges) {
       await this.confirmModalTitle.waitFor({ state: 'visible' });
       await this.confirmModalConfirmButton.click();
@@ -163,7 +191,10 @@ export class GraphPage {
   }
 
   async goToListingViaBreadcrumb() {
-    await this.homeBreadcrumb.click();
+    this.page.once('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+    await this.goto();
   }
 
   async openWorkspace(title: string) {
@@ -172,17 +203,14 @@ export class GraphPage {
 
   async deleteWorkspace(title: string) {
     const rowLink = this.workspaceListingLink(title);
-    await this.listingSearchBox.fill(title);
+    await this.contentList.searchFor(title);
     await rowLink.waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('checkboxSelectAll').click();
-    await this.page.testSubj.locator('deleteSelectedItems').click();
-    await this.confirmModalTitle.waitFor({ state: 'visible' });
-    await this.confirmModalConfirmButton.click();
+    await this.contentList.selectAllAndDelete();
     await rowLink.waitFor({ state: 'hidden' });
   }
 
   private workspaceListingLink(title: string): Locator {
-    return this.page.testSubj.locator(`graphListingTitleLink-${title.split(' ').join('-')}`);
+    return this.contentList.itemLinks.filter({ hasText: title });
   }
 
   async nodeCount(): Promise<number> {
@@ -245,7 +273,9 @@ export class GraphPage {
 
     const keep = new Set([from, to]);
     for (const label of allLabels) {
-      if (keep.has(label)) continue;
+      if (keep.has(label)) {
+        continue;
+      }
       await this.page.locator(`[data-test-subj="graph-selected-${label}"]`).click();
     }
 

@@ -24,6 +24,7 @@ import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_
 import { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import { getRulesMigrationTools } from './agent/tools';
 import type { SiemMigrationVendor } from '../../../../../common/siem_migrations/types';
+import { enrichLookupResourcesWithMappings } from '../../common/task/util/enrich_lookup_resources';
 
 export type RuleMigrationTaskInput = Pick<MigrateRuleState, 'id' | 'original_rule' | 'resources'>;
 export type RuleMigrationTaskOutput = MigrateRuleState;
@@ -113,10 +114,16 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
     const resources = isResourceSupportedVendor(migrationRule.original_rule.vendor)
       ? await this.retriever.resources.getResources(migrationRule.original_rule)
       : {};
+    const enrichedResources = await enrichLookupResourcesWithMappings({
+      resources,
+      resourcesDataClient: this.data.resources,
+      logger: this.logger,
+    });
+
     return {
       id: migrationRule.id,
       original_rule: migrationRule.original_rule,
-      resources,
+      resources: enrichedResources,
     };
   }
 

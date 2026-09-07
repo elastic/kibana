@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/reindex-service-plugin'
   - '@kbn/core-doc-links-browser-mocks'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

@@ -24,6 +24,7 @@ import {
   isConditionBlock,
   validateStreamlang,
   validateStreamlangModeCompatibility,
+  type StreamlangDSLWithUpdatedAt,
 } from '@kbn/streamlang';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
@@ -154,7 +155,7 @@ export const streamEnrichmentMachine = setup({
     // When the definition is refreshed (outside of the machine), this resets state back to match it.
     resetStateFromDefinition: assign(({ context }) => {
       const dslWithIdentifiers = addDeterministicCustomIdentifiersFromIngestProcessing(
-        context.definition.stream.ingest.processing
+        getStreamlangProcessing(context.definition.stream.ingest.processing)
       );
       return {
         previousStreamlangDSL: dslWithIdentifiers,
@@ -357,10 +358,10 @@ export const streamEnrichmentMachine = setup({
     return {
       definition: input.definition,
       previousStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       nextStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
-        input.definition.stream.ingest.processing
+        getStreamlangProcessing(input.definition.stream.ingest.processing)
       ),
       hasChanges: false,
       schemaErrors: [], // Schema errors from Zod parsing
@@ -757,6 +758,12 @@ function createFetchMoreSamplesAction() {
     });
   };
 }
+
+const getStreamlangProcessing = (
+  processing: StreamEnrichmentContextType['definition']['stream']['ingest']['processing']
+): StreamlangDSLWithUpdatedAt => {
+  return 'steps' in processing ? processing : { steps: [], updated_at: processing.updated_at };
+};
 
 const hasChanges = (nextStreamlangDSL: StreamlangDSL, previousStreamlangDSL: StreamlangDSL) => {
   const isValidSchema = isStreamlangDSLSchema(nextStreamlangDSL);

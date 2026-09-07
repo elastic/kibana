@@ -60,7 +60,7 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     ]);
 
     testErrorsAndWarnings(
-      'FROM a_index | LEFT JOIN join_index ON textField == keywordField, booleanField',
+      'FROM a_index | LEFT JOIN lookup_index ON textField == keywordField, booleanField',
       ['JOIN ON clause must be a comma separated list of fields or a single expression']
     );
   });
@@ -145,6 +145,13 @@ export const runCommandsValidationSuite = (setup: Setup) => {
         expect.stringContaining('SyntaxError:'),
       ]);
     }
+
+    testErrorsAndWarnings('from a_index | where (unknownColumn > 0)', [
+      'Unknown column "unknownColumn"',
+    ]);
+    testErrorsAndWarnings('from a_index | where ROUND((unknownColumn)) > 0', [
+      'Unknown column "unknownColumn"',
+    ]);
   });
 
   describe('eval', () => {
@@ -216,6 +223,12 @@ export const runCommandsValidationSuite = (setup: Setup) => {
     testErrorsAndWarnings(`SET time_zone = "CEST";`, [expect.stringContaining('SyntaxError:')]);
     testErrorsAndWarnings(`SET invalid_setting = "_alias:_origin"; FROM index`, [
       expect.stringContaining('Unknown setting invalid_setting'),
+    ]);
+  });
+
+  describe('stats', () => {
+    testErrorsAndWarnings('from a_index | stats avg(doubleField) by (wrongField)', [
+      'Unknown column "wrongField"',
     ]);
   });
 };

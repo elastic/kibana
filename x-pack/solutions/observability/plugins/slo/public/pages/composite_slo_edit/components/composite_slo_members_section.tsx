@@ -280,6 +280,10 @@ function MemberRow({ index, onRemove }: MemberRowProps) {
                   isClearable={false}
                   compressed
                   data-test-subj={`compositeSloMemberInstanceComboBox-${index}`}
+                  aria-label={i18n.translate(
+                    'xpack.slo.compositeSloEdit.members.instanceAriaLabel',
+                    { defaultMessage: 'Select SLO instance' }
+                  )}
                 />
               );
             }}

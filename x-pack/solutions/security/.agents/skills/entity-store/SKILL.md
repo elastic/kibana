@@ -1,21 +1,28 @@
 ---
 name: entity-store
 description: >
-  Security Solution Entity Store architecture and implementation guide.
-  Use when working with Security Entity Store code, entity analytics, entity resolution,
+  Platform Entity Store architecture and implementation guide (Security Entity Analytics
+  still owns HTTP routes/auth for now).
+  Use when working with Entity Store code, entity analytics, entity resolution,
   golden entity, alias entity, resolved_to, resolution fields, entity maintainers,
-  EUID, entity CRUD API, or related features in the Security Solution.
+  EUID, entity CRUD API, or related features.
   Also use when someone asks "how does entity store work", "entity store v2",
   "entity maintainer", or mentions the entity_store plugin under
-  x-pack/solutions/security/plugins/entity_store/.
-  NOTE: This is the Security Solution Entity Store, not Observability's entity model.
+  x-pack/platform/plugins/shared/entity_store/.
+  NOTE: This is the persisted Entity Store index/engine — not Observability's field-based
+  entity model or KI Features. Obs/KI consumers are a follow-up.
 ---
 
-# Security Solution Entity Store
+# Entity Store (platform shared)
 
-Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggregates entity-centric security data from multiple sources into a single shared index. It lives in `x-pack/solutions/security/plugins/entity_store/`.
+Entity Store is a **platform shared** plugin (`group: platform`, `visibility: shared`) that
+aggregates entity-centric data into a solution-neutral shared index. It lives in
+`x-pack/platform/plugins/shared/entity_store/`. Security Solution Entity Analytics is still
+the primary product consumer; HTTP routes remain under `/api/security/entity_store` and
+require `securitySolution` privileges in this phase.
 
-> This skill covers the **Security Solution** Entity Store (`entityStore` plugin). It is not related to Observability's entity model or SLO entities.
+> Observability entity helpers / Nightshift KI Features are a separate model today.
+> Wiring Obs/KI to this shared store is an explicit follow-up.
 
 **Two versions exist:**
 - **v2 (ESQL + Kibana Task)** — active architecture, default since 9.4.0. All new features (Entity Resolution, CRUD API, Maintainers) are v2-only.
@@ -26,8 +33,9 @@ Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggr
 - **Kibana Task** runs ESQL queries with timestamp-based pagination (~10s batches)
 - **Upsert with conflict retry** — never overwrites entire documents
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
-- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`). Also ES stored scripts.
-- **Single shared index** — `.entities.v2.latest.security_{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
+- **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` from `@kbn/entity-store/common/euid_helpers` (there is no `@kbn/entity-store-plugin`). Browser code must not import that synchronously — it pulls in `@kbn/streamlang`; use `loadEuidApi()` / `euid_browser` instead. Also ES stored scripts.
+- **Single shared index** — `.entities.v2.latest.{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
+- **Legacy rename (feature-flagged)** — pre-platform installs used `.entities.v2.*.security_{namespace}`. Migration to solution-neutral names is gated by Cloud FF `entityStore.migrateLegacySecurityAssets` (default **off**). While the old concrete index still exists, reads and writes stay on it. When the flag is enabled, install and the upgrade task `entity_store:v2:legacy_security_assets_migration` reindex latest/metadata/history (and drop the short-retention updates buffer), retarget aliases, then delete the old assets. Compatibility aliases (`.entities.v2.latest.security_{ns}`, `.entities.v2.metadata.security_{ns}`) are added after delete so roles granting `security_*` keep matching. Enable locally with `feature_flags.overrides.entityStore.migrateLegacySecurityAssets: true`. Coordinate elasticsearch-controller / ES reserved role updates with this Kibana release. Custom roles that only grant `security_*` patterns still pass enable/install privilege checks (OR with neutral names), but queries against neutral names can 403 until roles are updated.
 - **Auto-enabled** — installs on Security Solution navigation. `entityStore` is a required plugin dependency of `securitySolution`.
 
 ## Entity Types
@@ -39,17 +47,17 @@ User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity
 ## Plugin Location
 
 ```
-x-pack/solutions/security/plugins/entity_store/
+x-pack/platform/plugins/shared/entity_store/
 ├── common/domain/definitions/        # Entity schemas, field definitions
 ├── server/
 │   ├── plugin.ts                     # Setup + start contracts
 │   ├── domain/
-│   │   ├── asset_manager/            # Engine lifecycle (directory)
+│   │   ├── asset_manager/            # Engine lifecycle + legacy index migration
 │   │   ├── resolution/               # Resolution: link/unlink/group
 │   │   ├── crud_client/              # CRUD: create/update/bulk/delete
 │   │   ├── errors/                   # 12 error classes (see references/errors.md)
 │   │   └── logs_extraction/          # ESQL query builders
-│   ├── routes/apis/                  # Route handlers
+│   ├── routes/apis/                  # Route handlers (still /api/security/...)
 │   └── tasks/
 │       ├── extract_entity_task.ts    # ESQL extraction (~10s)
 │       └── entity_maintainers/       # Maintainers framework (plural)
@@ -64,6 +72,7 @@ x-pack/solutions/security/plugins/entity_store/
 | Call any Entity Store API or write curl | [references/api-routes.md](references/api-routes.md) |
 | Work with resolution (link/unlink/group) | [references/resolution.md](references/resolution.md) |
 | Register or debug a maintainer | [references/maintainers.md](references/maintainers.md) |
+| Work with the risk score maintainer, its feature gates, or create-if-missing | [references/risk-score.md](references/risk-score.md) |
 | Construct or parse an entity.id (EUID) | [references/euid.md](references/euid.md) |
 | Handle errors or write error handling code | [references/errors.md](references/errors.md) |
 | Use plugin contracts or handler context | [references/contracts.md](references/contracts.md) |
@@ -76,7 +85,7 @@ x-pack/solutions/security/plugins/entity_store/
 **Public routes:** status, install, uninstall, start, stop, CRUD (entities), resolution (link/unlink/group), check_privileges
 **Internal routes:** entity_maintainers, force_log_extraction, force_history_snapshot, force_ccs_extract_to_updates
 **Resolution routes (public):** `resolution/link` (POST), `resolution/unlink` (POST), `resolution/group` (GET)
-**Maintainer routes (internal):** `entity_maintainers` (GET), `entity_maintainers/start/{id}` (PUT), `entity_maintainers/stop/{id}` (PUT), `entity_maintainers/run/{id}` (PUT), `entity_maintainers/init` (POST)
+**Maintainer routes (internal):** `entity_maintainers` (GET), `entity_maintainers/start/{id}` (PUT), `entity_maintainers/stop/{id}` (PUT), `entity_maintainers/run/{id}` (POST), `entity_maintainers/init` (POST)
 **Resolution field path:** `entity.relationships.resolution.resolved_to` (NOT `entity.resolved_to`)
 **Target entity** = no `resolved_to` field. **Alias entity** = has `resolved_to` pointing to target's `entity.id`.
 **Create** uses `esClient.create()`. **Bulk** writes to LATEST index (not UPDATES).
@@ -92,9 +101,9 @@ x-pack/solutions/security/plugins/entity_store/
 - **`entity.source` ≠ `entity.namespace`** — `entity.source` (array) lists the index names the entity data came from. `entity.namespace` is the identity provider namespace (`active_directory`, `okta`, `entra_id`, `local`). For resolution target selection by IDP priority, use `entity.namespace`.
 - **Document `_id` = MD5 hash of EUID** — not the EUID itself.
 - **v1 endpoints being removed** — v1 routes are deprecated and being removed. For v1 details, see [references/v1-legacy.md](references/v1-legacy.md).
-- **EUID stored scripts must be registered** before entity store init — they're deployed during install.
 - **CCS indices excluded** from extraction queries — cross-cluster data handled by separate `ccsLogsExtractionClient`.
 - **bucket_sort VALUE_NULL** — grouping queries using `bucket_sort` with pagination error if `from` is null. Always coalesce to 0: `from: pageIndex * pageSize || 0`. Manifests as `EsError: [bucket_sort] from doesn't support values of type: VALUE_NULL`.
+- **Never re-export a *value* from `common/index.ts`** — `kibana.jsonc` lists that barrel under `extraPublicDirs`, so kbn-optimizer makes it a bundle entry, and `BundleRemoteUsedExportsPlugin` marks every one of its exports as used (cross-plugin consumers resolve it at runtime via `__kbnBundles__`). Nothing there can be tree-shaken, so a value re-export ships its entire source module — plus that module's runtime imports — on every page load, even when the only consumer is server code. Re-exporting `ENTITY_CREATED_BY` from `domain/definitions/common_fields` cost +4.9KB (+46% over the `entityStore` page-load limit) and failed CI. Server-only values belong in a deep import at the call site (e.g. `@kbn/entity-store/common/domain/definitions/common_fields`); `export type` is free. Verify with `node scripts/build_kibana_platform_plugins.js --focus entityStore --dist`, then read `page load bundle size` in `x-pack/solutions/security/plugins/entity_store/target/public/metrics.json` (~5s on a warm cache).
 - **ES bulk `update` with partial `doc` does NOT run `default_pipeline`** — known upstream bug ([elastic/elasticsearch#105804](https://github.com/elastic/elasticsearch/issues/105804), fix targeted for ES v9.4.0). The latest index has a `dot_expander` pipeline, but it's bypassed by partial updates. Always use `unflattenObject` from `@kbn/object-utils` when writing partial docs with dotted keys (see `bulkUpdateEntityDocs` in `infra/elasticsearch/resolution.ts`).
 
 ## Licensing
@@ -114,8 +123,10 @@ x-pack/solutions/security/plugins/entity_store/
 
 2. **Experimental feature flag** `entityAnalyticsEntityStoreV2` — gates server-side plugin setup (risk score maintainer registration). Requires Kibana restart.
    - Enable in `kibana.dev.yml`: `xpack.securitySolution.enableExperimental: ['entityAnalyticsEntityStoreV2']`
-   - Defaults to `false` in `common/experimental_features.ts`
+   - Defaults to `true` in `common/experimental_features.ts`
    - The **risk score maintainer** only registers when this flag is `true` (checked in `plugin.ts` at setup)
+
+A third, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
 
 ## Risk Score Architecture (v2)
 
@@ -124,3 +135,5 @@ The risk score maintainer (`id: 'risk-score'`) is registered by `security_soluti
 **When to use which source:**
 - **Entity Store** (`entity.risk.*`, `entity.relationships.resolution.risk.*`) — for displaying score badges, score values, risk levels. Primary source for scores.
 - **Risk score index** (`risk-score.risk-score-default`) — for detailed breakdowns (category scores, inputs, modifiers, Lens visualizations). Query with `useRiskScore()` hook + `score_type` filter.
+
+Optionally, the maintainer can create entities missing from the store instead of dropping their scores, gated by a conservative per-type creation policy and stamped with `entity.created_by`. See [references/risk-score.md](references/risk-score.md) for gates, the creation policy, and funnel semantics.

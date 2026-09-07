@@ -12,12 +12,12 @@ import type { ConversationActions } from './use_conversation_actions';
 
 interface ConversationContextValue {
   conversationId?: string;
-  shouldStickToBottom?: boolean;
   isEmbeddedContext: boolean;
   sessionTag?: string;
   agentId?: string;
   initialMessage?: string;
   autoSendInitialMessage?: boolean;
+  greetingMessage?: string;
   resetInitialMessage?: () => void;
   attachments?: ConversationAttachment[];
   upsertAttachments?: (attachments: ConversationAttachment[]) => void;

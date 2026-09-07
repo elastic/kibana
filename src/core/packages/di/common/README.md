@@ -321,10 +321,11 @@ export function HelloWorldApp() {
 ### Lazy Loading
 Lazy loading can be achieved using the built-in InversifyJS features:
 ```ts
-import { ContainerModule, ServiceIdentifier } from 'inversify';
+import { ContainerModule } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import type { IHeavyService } from './heavy-service';
 
-export const HeavyServiceToken = Symbol.for('HeavyService') as ServiceIdentifier<IHeavyService>;
+export const HeavyServiceToken = createToken<IHeavyService>('HeavyService');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(HeavyServiceToken)
@@ -362,14 +363,15 @@ export const module = new ContainerModule(({ bind }) => {
 The DI should help resolve problems with circular dependencies.
 Since plugins implemented using the container modules no longer depend on the actual implementation of their dependencies, the services can be injected using static tokens rather than classes:
 ```ts
-import { ContainerModule, type ServiceIdentifier } from 'inversify';
+import { ContainerModule } from 'inversify';
+import { createToken } from '@kbn/core-di';
 import { SomeService } from './some-service';
 
 export interface ISomeService {
   run(): void;
 }
 
-export const SomeServiceToken = Symbol.for('SomeService') as ServiceIdentifier<ISomeService>;
+export const SomeServiceToken = createToken<ISomeService>('SomeService');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(SomeServiceToken).to(SomeService);
@@ -379,11 +381,26 @@ export const module = new ContainerModule(({ bind }) => {
 In this case, if `SomeService` depends on another service from a different plugin, which also has dependencies on `SomeService`, an intermediate package should be created to expose static injection tokens with public interfaces.
 In other words, the solution would be to segregate injection tokens from the container module definition.
 
+When a consumer imports the token from such a shared package, the `ServiceTypeOf` helper can infer the service type from the token itself, so the interface does not need to be imported separately:
+```ts
+import { inject, injectable } from 'inversify';
+import { SomeServiceToken } from '@kbn/some-shared-tokens';
+import type { ServiceTypeOf } from '@kbn/core-di';
+
+@injectable()
+class MyService {
+  constructor(
+    @inject(SomeServiceToken) private someService: ServiceTypeOf<typeof SomeServiceToken>
+  ) {}
+}
+```
+
 Another problem is circular dependency between two services.
 It is an anti-pattern that highlights a more serious problem that should be resolved instead.
 But if there is no other option, then it can be resolved by using the `onActivation` hook:
 ```ts
-import { ContainerModule, inject, injectable, type ServiceIdentifier } from 'inversify';
+import { ContainerModule, inject, injectable } from 'inversify';
+import { createToken } from '@kbn/core-di';
 
 export interface IGreeting {
   greet(): string;
@@ -420,8 +437,8 @@ class TestUser implements IUser {
   }
 }
 
-export const GreetingToken = Symbol.for('Greeting') as ServiceIdentifier<IGreeting>;
-export const UserToken = Symbol.for('User') as ServiceIdentifier<IUser>;
+export const GreetingToken = createToken<IGreeting>('Greeting');
+export const UserToken = createToken<IUser>('User');
 
 export const module = new ContainerModule(({ bind }) => {
   bind(GreetingToken).to(Greeting);

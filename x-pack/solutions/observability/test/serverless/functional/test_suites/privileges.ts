@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           return await privilege.getVisibleText();
         })
       );
-      expect(privileges.length).to.be(13);
+      expect(privileges.length).to.be(15);
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
@@ -60,10 +60,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Applications\nAll\nRead\nNone',
         'Agent Builder\nAll\nRead\nNone',
         'Synthetics\nAll\nRead\nNone',
-        'Agent Context Layer\nAll\nRead\nNone',
+        'Agent Builder - Semantic Metadata Layer (SML)\nAll\nRead\nNone',
+        'Context Engine\nAll\nRead\nNone',
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
+        'Observability Alerts\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
       ]);

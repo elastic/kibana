@@ -25,6 +25,7 @@ jest.mock('../../../../../case_view/use_on_refresh_case_view_page');
 
 const mockDeleteCases = jest.fn();
 const mockOnStatusChanged = jest.fn();
+const mockOnSeverityChanged = jest.fn();
 
 (useGetCaseConnectors as jest.Mock).mockReturnValue({ data: {} });
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: mockDeleteCases });
@@ -39,6 +40,7 @@ describe('useCaseViewHeader', () => {
     caseData: basicCase,
     onUpdateField,
     onStatusChanged: mockOnStatusChanged,
+    onSeverityChanged: mockOnSeverityChanged,
   };
 
   beforeEach(() => {
@@ -48,22 +50,159 @@ describe('useCaseViewHeader', () => {
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
   });
 
-  it('returns a formatted title with incremental ID', () => {
+  it('returns an editable title with case name only', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    expect(result.current.headerTitle).toEqual(expect.objectContaining({ text: basicCase.title }));
+  });
+
+  it('returns a plain string title when user lacks update permissions', () => {
+    const readOnlyWrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        TestProviders,
+        {
+          permissions: {
+            all: false,
+            create: true,
+            read: true,
+            update: false,
+            delete: false,
+            push: false,
+            connectors: false,
+            settings: false,
+            reopenCase: false,
+            createComment: false,
+            assign: false,
+            manageTemplates: false,
+          },
+        } as React.ComponentProps<typeof TestProviders>,
+        children
+      );
+
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper: readOnlyWrapper,
+    });
+
+    expect(typeof result.current.headerTitle).toBe('string');
+    expect(result.current.headerTitle).toBe(basicCase.title);
+  });
+
+  it('rejects empty title on save', async () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const title = result.current.headerTitle;
+    expect(typeof title).not.toBe('string');
+    if (typeof title !== 'string') {
+      const error = await act(async () => title.onSave(''));
+      expect(error).toBeDefined();
+      expect(onUpdateField).not.toHaveBeenCalled();
+    }
+  });
+
+  it('calls onUpdateField when editable title is saved', async () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const title = result.current.headerTitle;
+    expect(typeof title).not.toBe('string');
+    if (typeof title !== 'string') {
+      await act(async () => {
+        await title.onSave('New Title');
+      });
+      expect(onUpdateField).toHaveBeenCalledWith({ key: 'title', value: 'New Title' });
+    }
+  });
+
+  it('includes incremental ID in metadata when present', () => {
     const caseWithId: CaseUI = { ...basicCase, incrementalId: 42 };
     const { result } = renderHook(
       () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithId }),
       { wrapper }
     );
 
-    expect(result.current.headerTitle).toBe(`#42 ${basicCase.title}`);
+    expect(result.current.metadata[0]).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        label: '#42',
+        'data-test-subj': 'case-view-incremental-id',
+      })
+    );
   });
 
-  it('returns title without prefix when incrementalId is undefined', () => {
+  it('does not include incremental ID in metadata when undefined', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
     });
 
-    expect(result.current.headerTitle).toBe(basicCase.title);
+    const incrementalIdItem = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-incremental-id'
+    );
+    expect(incrementalIdItem).toBeUndefined();
+  });
+
+  it('returns metadata with reporter name and created date', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    expect(result.current.metadata).toBeDefined();
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        label: `Reported by: ${basicCase.createdBy.fullName!}`,
+      })
+    );
+
+    const createdAt = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-created-at'
+    );
+    expect(createdAt).toEqual(
+      expect.objectContaining({
+        type: 'text',
+        label: expect.stringContaining('on: '),
+      })
+    );
+  });
+
+  it('falls back to the reporter email when the full name is missing', () => {
+    const caseWithoutFullName: CaseUI = {
+      ...basicCase,
+      createdBy: { username: 'lknope', fullName: null, email: 'leslie.knope@elastic.co' },
+    };
+    const { result } = renderHook(
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithoutFullName }),
+      { wrapper }
+    );
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy?.label).toBe('Reported by: leslie.knope@elastic.co');
+  });
+
+  it('falls back to the reporter username when full name and email are missing', () => {
+    const caseWithUsernameOnly: CaseUI = {
+      ...basicCase,
+      createdBy: { username: 'lknope', fullName: null, email: null },
+    };
+    const { result } = renderHook(
+      () => useCaseViewHeader({ ...defaultArgs, caseData: caseWithUsernameOnly }),
+      { wrapper }
+    );
+
+    const reportedBy = result.current.metadata.find(
+      (m) => m?.['data-test-subj'] === 'case-view-reported-by'
+    );
+    expect(reportedBy?.label).toBe('Reported by: lknope');
   });
 
   it('returns a backHref', () => {
@@ -162,6 +301,22 @@ describe('useCaseViewHeader', () => {
     expect(settingsItem).toBeDefined();
   });
 
+  it('omits the settings menu item when the solution enables no case settings', () => {
+    const noSettingsWrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        TestProviders,
+        { owner: ['observability'] } as React.ComponentProps<typeof TestProviders>,
+        children
+      );
+
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper: noSettingsWrapper,
+    });
+
+    const settingsItem = result.current.menu.items!.find((item) => item.id === 'caseSettings');
+    expect(settingsItem).toBeUndefined();
+  });
+
   it('returns delete menu item when user has delete permissions', () => {
     const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
       wrapper,
@@ -233,5 +388,21 @@ describe('useCaseViewHeader', () => {
     });
 
     expect(mockOnStatusChanged).toHaveBeenCalledWith('closed');
+  });
+
+  it('calls onSeverityChanged when severity badge item is clicked', () => {
+    const { result } = renderHook(() => useCaseViewHeader(defaultArgs), {
+      wrapper,
+    });
+
+    const severityBadge = result.current.badges.find(
+      (b) => b['data-test-subj'] === 'case-view-severity-badge'
+    );
+
+    act(() => {
+      severityBadge?.items?.[3]?.onClick?.();
+    });
+
+    expect(mockOnSeverityChanged).toHaveBeenCalledWith('critical');
   });
 });

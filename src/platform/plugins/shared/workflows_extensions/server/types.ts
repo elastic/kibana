@@ -98,7 +98,10 @@ export type WorkflowsExtensionsServerPluginStart =
 
     /**
      * Initialize a plugin-scoped managed workflows client. The plugin id is bound once
-     * and reused for install/uninstall/execute.
+     * and reused for install/uninstall/execute/ready.
+     *
+     * `install` and `ready` are best-effort (may no-op under teardown or ES unreadiness;
+     * resolve does not guarantee persistence). See `RegisteredManagedWorkflowsLifecycleApi`.
      */
     initManagedWorkflowsClient(pluginId: string): Promise<PluginScopedManagedWorkflowsApi>;
 
@@ -116,10 +119,11 @@ export type WorkflowsExtensionsServerPluginSetupDeps = Record<string, never>;
 export type ServerStepDefinitionOrLoader<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
+  State extends z.ZodObject = z.ZodObject
 > =
-  | ServerStepDefinition<Input, Output, Config>
-  | (() => Promise<ServerStepDefinition<Input, Output, Config> | undefined>);
+  | ServerStepDefinition<Input, Output, Config, State>
+  | (() => Promise<ServerStepDefinition<Input, Output, Config, State> | undefined>);
 
 /**
  * Dependencies for the server plugin start phase.

@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/data_view_management
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/data-plugin'
   - '@kbn/management-plugin'
   - '@kbn/url-forwarding-plugin'
@@ -38,12 +39,10 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/test-jest-helpers'
   - '@kbn/shared-ux-prompt-no-data-views'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/utility-types-jest'
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/core-ui-settings-browser'
-  - '@kbn/react-kibana-context-render'
   - '@kbn/field-utils'
   - '@kbn/no-data-page-plugin'
   - '@kbn/core-application-browser'
@@ -62,6 +61,8 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/discover-utils'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod

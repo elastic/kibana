@@ -17,13 +17,23 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
+  ChromeAppHeaderConfig,
+  AppHeaderDescription,
   AppHeaderEditableTitle,
+  AppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus,
+  AppHeaderShareAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
   AppHeaderTab,
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
   ChromeNext,
@@ -38,8 +48,8 @@ export type {
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
@@ -49,6 +59,10 @@ export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle
 
 export type {
   ChromeProjectNavigationNode,
+  RootNodePanelOpenerDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+  RootNodeDefinition,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -64,6 +78,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';

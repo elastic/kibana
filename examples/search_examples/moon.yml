@@ -33,11 +33,13 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/shared-ux-router'
   - '@kbn/search-types'
-  - '@kbn/shared-ux-link-redirect-app'
   - '@kbn/react-kibana-mount'
   - '@kbn/search-response-warnings'
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
+  - '@kbn/ui-callout'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -50,5 +52,6 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_examples/**/*
     - '!target/**/*'
 tasks: {}

@@ -8,8 +8,8 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import { validateStepNameUniqueness } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
-import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
 
 describe('Workflow Step Validation Integration', () => {
   it('should throw WorkflowValidationError for workflows with duplicate step names', () => {

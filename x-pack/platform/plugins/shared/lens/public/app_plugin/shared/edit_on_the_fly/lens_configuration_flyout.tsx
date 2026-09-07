@@ -21,9 +21,8 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -173,6 +172,7 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onCancel = useCallback(() => {
+    setIsInlineFlyoutVisible(false);
     const previousAttrs = previousAttributes.current;
     if (attributesChanged) {
       // Use the datasourceId from the previous attributes, not the current one
@@ -214,7 +214,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = isOfAggregateQueryType(attributes.state.query);
+  const textBasedMode = isTextBasedAttributes(attributes);
 
   const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
     useCurrentAttributes({
@@ -364,10 +364,7 @@ export function LensEditConfigurationFlyout({
 
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === keys.ESCAPE) {
-      closeFlyout?.();
-      setIsInlineFlyoutVisible(false);
-      // Remove the user's preferred chart type from sessionStorage
-      deleteUserChartTypeFromSessionStorage();
+      onCancel();
     }
   };
 

@@ -20,12 +20,14 @@ import type {
   FunctionDefinitionTypes,
   FunctionParameter,
   FunctionParameterType,
+  ParameterHint,
   Signature,
   SupportedDataType,
 } from '../../../types';
 import type { ExpressionPosition } from './position';
 
 export type PreferredExpressionType = SupportedDataType | 'any';
+export type ParenthesizedExpressionPosition = 'inside' | 'after';
 
 export interface SuggestForExpressionParams {
   query: string;
@@ -43,6 +45,7 @@ export interface ExpressionContext {
   cursorPosition: number;
   innerText: string;
   expressionRoot?: ESQLSingleAstItem;
+  parenthesizedExpressionPosition?: ParenthesizedExpressionPosition;
   position?: ExpressionPosition;
   location: Location;
   command: ESQLAstAllCommands;
@@ -63,11 +66,10 @@ export interface ExpressionContextOptions {
   controlType?: ESQLVariableType; // Type of control variable (??/?) to suggest in empty expressions
   addSpaceAfterOperator?: boolean; // Add a space after inserting operands or functions that follow an operator
   openSuggestions?: boolean; // Reopen the suggestions popover after applying a completion
-  allowSubquery?: boolean; // Whether this expression context can suggest subquery operands
-  functionsToIgnore?: {
-    names: string[]; // Functions hidden for the current command/context
-    allowedInsideFunctions?: Record<string, string[]>; // Exceptions: keep fn visible when inside specific parent functions
-  };
+  allowSubquery?: boolean; // Enables subquery operands and multi-column tuple suggestions
+  getFunctionsToIgnore?: (
+    functionParameterContext?: FunctionParameterContext
+  ) => { names: string[]; allowedInsideFunctions?: Record<string, string[]> } | undefined; // Function suggestion exclusions, static or parameter-aware
   parentFunctionNames?: string[]; // Internal loop-prevention stack built by in-function recursion to hide the current parent from suggestions
 }
 
@@ -93,8 +95,7 @@ export interface PartialOperatorDetection {
 
 export interface ParamDefinition {
   type: FunctionParameterType;
-  constantOnly?: boolean;
-  suggestedValues?: string[];
+  hint?: ParameterHint;
   fieldsOnly?: boolean;
   name?: string;
 }

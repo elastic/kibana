@@ -7,6 +7,8 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import { useKibana } from '../../../../lib/kibana';
 import { useAlertResponseActionsSupport } from '../../../../hooks/endpoint/use_alert_response_actions_support';
 import type {
   EndpointCapabilities,
@@ -14,8 +16,10 @@ import type {
 } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../../../management/hooks';
 import { HostStatus } from '../../../../../../common/endpoint/types';
+import { getEventDetailsFieldValues } from '../../../../lib/endpoint/utils/get_event_details_field_values';
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  HOST_ON_LINKED_PROJECT_TOOLTIP,
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
@@ -55,6 +59,26 @@ export const useWithResponderActionDataFromAlert = ({
 
   const isEndpointHost = agentType === 'endpoint';
 
+  // Only meaningful when CPS is on: `cpsManager` is present solely on CPS-enabled deployments. Off
+  // CPS (including CCS deployments), an ancestor index can legitimately carry a remote-cluster prefix
+  // that `isNonLocalIndexName` would flag, so the check must be gated to avoid a false positive.
+  const isCpsEnabled = Boolean(useKibana().services.cps?.cpsManager);
+
+  // In a Cross-Project Search deployment an alert can be generated off a document that lives in a
+  // linked project even though the alert itself is stored locally. Response actions run origin-only
+  // and reject such a host, so every command opened from the console would fail. Elasticsearch
+  // prefixes the source `_index` with the project alias, so a non-local ancestor index is the signal
+  // that the host belongs to a linked project.
+  const isHostFromLinkedProject = useMemo<boolean>(
+    () =>
+      isCpsEnabled &&
+      getEventDetailsFieldValues(
+        { category: 'kibana', field: 'kibana.alert.ancestors.index' },
+        eventData
+      ).some(isNonLocalIndexName),
+    [isCpsEnabled, eventData]
+  );
+
   const endpointHostData = useResponderDataForEndpointHost(
     agentId,
     hostSupportsResponseActions && isEndpointHost
@@ -62,6 +86,12 @@ export const useWithResponderActionDataFromAlert = ({
   const showResponseActionsConsole = useWithShowResponder();
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
+    // Checked first so its reason wins: the metadata lookup that gates the endpoint path can fan out
+    // under CPS and report the linked host as enrolled, which would otherwise leave this enabled.
+    if (isHostFromLinkedProject) {
+      return [true, HOST_ON_LINKED_PROJECT_TOOLTIP];
+    }
+
     if (!hostSupportsResponseActions) {
       return [
         true,
@@ -75,6 +105,7 @@ export const useWithResponderActionDataFromAlert = ({
 
     return [false, undefined];
   }, [
+    isHostFromLinkedProject,
     hostSupportsResponseActions,
     isEndpointHost,
     agentType,

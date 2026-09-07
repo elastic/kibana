@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { MlAnomalyDetectionJobsHealthRuleParams } from '@kbn/ml-common-types/alerts';
+import { DELAYED_DATA_THRESHOLD_TYPE } from '@kbn/ml-common-types/alerts';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { validateLookbackInterval } from '../validators';
@@ -34,7 +35,6 @@ export function registerJobsHealthAlertingRule(
         errors: {
           includeJobs: new Array<string>(),
           testsConfig: new Array<string>(),
-          delayedData: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionJobsHealthRuleParams, string[]>,
       };
 
@@ -60,7 +60,7 @@ export function registerJobsHealthAlertingRule(
         !!resultTestConfig.delayedData.timeInterval &&
         validateLookbackInterval(resultTestConfig.delayedData.timeInterval)
       ) {
-        validationResult.errors.delayedData.push(
+        validationResult.errors.testsConfig.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.timeIntervalErrorMessage',
             {
@@ -70,8 +70,26 @@ export function registerJobsHealthAlertingRule(
         );
       }
 
-      if (resultTestConfig.delayedData.docsCount === 0) {
-        validationResult.errors.delayedData.push(
+      if (
+        resultTestConfig.delayedData.enabled &&
+        resultTestConfig.delayedData.thresholdType === DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE
+      ) {
+        const pct = resultTestConfig.delayedData.docsCountPercentage;
+        if (pct <= 0 || pct > 100) {
+          validationResult.errors.testsConfig.push(
+            i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountPercentageErrorMessage',
+              {
+                defaultMessage: 'Percentage must be greater than 0 and no more than 100',
+              }
+            )
+          );
+        }
+      } else if (
+        resultTestConfig.delayedData.enabled &&
+        resultTestConfig.delayedData.docsCount === 0
+      ) {
+        validationResult.errors.testsConfig.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',
             {
@@ -102,7 +120,8 @@ export function registerJobsHealthAlertingRule(
   '{{/log_time}}{{#failed_category_count}}'Failed category count: '{{failed_category_count}}'
   '{{/failed_category_count}}{{#annotation}}'Annotation: '{{annotation}}'
   '{{/annotation}}{{#missed_docs_count}}'Number of missed documents: '{{missed_docs_count}}'
-  '{{/missed_docs_count}}{{#end_timestamp}}'Latest finalized bucket with missing docs: '{{end_timestamp}}'
+  '{{/missed_docs_count}}{{#missed_docs_percentage}}'Percentage of missed documents: '{{missed_docs_percentage}}'
+  '{{/missed_docs_percentage}}{{#end_timestamp}}'Latest finalized bucket with missing docs: '{{end_timestamp}}'
   '{{/end_timestamp}}{{#errors}}'Error message: '{{message}} {{/errors}}'
 '{{/context.results}}'
 `,

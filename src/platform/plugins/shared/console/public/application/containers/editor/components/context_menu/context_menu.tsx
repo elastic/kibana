@@ -29,6 +29,7 @@ import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
 
 import { useServicesContext } from '../../../../contexts';
+import { copyTextToClipboard } from '../../../../lib/copy_text_to_clipboard';
 import { StorageKeys } from '../../../../../services';
 import {
   DEFAULT_LANGUAGE,
@@ -100,14 +101,6 @@ export const ContextMenu = ({
     }
   }, [defaultLanguage, isKbnRequestSelected]);
 
-  const copyText = async (text: string) => {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
-    }
-    throw new Error('Could not copy to clipboard!');
-  };
-
   // This function will convert all the selected requests to the language by
   // calling convertRequestToLanguage and then copy the data to clipboard.
   const copyAs = async (language?: string) => {
@@ -137,7 +130,7 @@ export const ContextMenu = ({
       requests,
     });
 
-    if (requestError) {
+    if (requestError || !(await copyTextToClipboard(requestsAsCode))) {
       notifications.toasts.addDanger({
         title: i18n.translate('console.consoleMenu.copyAsFailedMessage', {
           defaultMessage:
@@ -156,8 +149,6 @@ export const ContextMenu = ({
         values: { language: getLanguageLabelByValue(withLanguage), requestsCount: requests.length },
       }),
     });
-
-    await copyText(requestsAsCode);
   };
 
   const checkIsKbnRequestSelected = async () => {
@@ -249,7 +240,6 @@ export const ContextMenu = ({
             key="Copy to"
             data-test-subj="consoleMenuCopyAsButton"
             id="copyAs"
-            disabled={!window.navigator?.clipboard}
             onClick={() => onCopyAsSubmit()}
             icon="copy"
             css={styles.button}

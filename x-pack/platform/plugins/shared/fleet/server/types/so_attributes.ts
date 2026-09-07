@@ -17,7 +17,8 @@ import type {
   KafkaConnectionTypeType,
   AgentUpgradeDetails,
   OutputPreset,
-  AgentlessPolicy,
+  AgentlessAgentPolicyConfig,
+  OtlpExporterConfig,
 } from '../../common/types';
 import type {
   AgentStatus,
@@ -82,7 +83,8 @@ export interface AgentPolicySOAttributes {
   agents?: number;
   overrides?: any | null;
   global_data_tags?: Array<{ name: string; value: string | number }>;
-  agentless?: AgentlessPolicy;
+  supports_agentless?: boolean | null;
+  agentless?: AgentlessAgentPolicyConfig;
   version?: string;
   has_agent_version_conditions?: boolean;
   is_verifier?: boolean;
@@ -105,6 +107,7 @@ export interface AgentSOAttributes {
   default_api_key?: string;
   default_api_key_id?: string;
   policy_id?: string;
+  policy_base_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
@@ -133,6 +136,7 @@ export interface FleetServerHostSOAttributes {
   is_default: boolean;
   is_preconfigured: boolean;
   is_internal?: boolean;
+  allow_edit?: string[];
   proxy_id?: string | null;
   secrets?: {
     ssl?: {
@@ -151,7 +155,7 @@ export interface PackagePolicySOAttributes {
   revision: number;
   created_at: string;
   created_by: string;
-  inputs: PackagePolicyInput[];
+  inputs?: PackagePolicyInput[];
   policy_id?: string | null;
   policy_ids: string[];
   // Nullable to allow user to reset to default outputs
@@ -181,19 +185,23 @@ export interface PackagePolicySOAttributes {
 export interface OutputSoBaseAttributes {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   name: string;
+  is_internal?: boolean;
+  is_preconfigured?: boolean;
+  allow_edit?: string[];
+  output_id?: string;
+}
+
+export interface BeatsSoBaseAttributes extends OutputSoBaseAttributes {
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
-  is_internal?: boolean;
-  is_preconfigured?: boolean;
   config_yaml?: string | null;
   otel_exporter_config_yaml?: string | null;
   otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
-  output_id?: string;
   ssl?: string | null; // encrypted ssl field
   preset?: OutputPreset;
   write_to_logs_streams?: boolean | null;
@@ -204,12 +212,12 @@ export interface OutputSoBaseAttributes {
   };
 }
 
-interface OutputSoElasticsearchAttributes extends OutputSoBaseAttributes {
+interface OutputSoElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Elasticsearch'];
   secrets?: {};
 }
 
-export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttributes {
+export interface OutputSoRemoteElasticsearchAttributes extends BeatsSoBaseAttributes {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: {
@@ -224,11 +232,11 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_uninstalled_integrations?: boolean;
 }
 
-interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
+interface OutputSoLogstashAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Logstash'];
 }
 
-export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
+export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
   type: OutputType['Kafka'];
   client_id?: string;
   version?: string;
@@ -276,11 +284,29 @@ export interface OutputSoKafkaAttributes extends OutputSoBaseAttributes {
   };
 }
 
-export type OutputSOAttributes =
+export interface OutputSoOtlpAttributes extends OutputSoBaseAttributes {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: {
+    otlp_exporter?: {
+      tls?: {
+        key_pem?: { id: string };
+        tpm?: {
+          owner_auth?: { id: string };
+          auth?: { id: string };
+        };
+      };
+    };
+  };
+}
+
+export type BeatsOutputSOAttributes =
   | OutputSoElasticsearchAttributes
   | OutputSoRemoteElasticsearchAttributes
   | OutputSoLogstashAttributes
   | OutputSoKafkaAttributes;
+
+export type OutputSOAttributes = BeatsOutputSOAttributes | OutputSoOtlpAttributes;
 
 export interface SettingsSOAttributes {
   prerelease_integrations_enabled?: boolean;
@@ -291,6 +317,7 @@ export interface SettingsSOAttributes {
   action_secret_storage_requirements_met?: boolean;
   ssl_secret_storage_requirements_met?: boolean;
   download_source_auth_secret_storage_requirements_met?: boolean;
+  otlp_output_requirements_met?: boolean;
   use_space_awareness_migration_status?: 'pending' | 'success' | 'error';
   use_space_awareness_migration_started_at?: string | null;
   delete_unenrolled_agents?: {
@@ -314,6 +341,7 @@ export interface DownloadSourceSOAttributes {
   name: string;
   host: string;
   is_default: boolean;
+  is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
   ssl?: string | null; // encrypted ssl field

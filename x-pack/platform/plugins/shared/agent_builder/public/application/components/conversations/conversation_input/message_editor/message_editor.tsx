@@ -143,7 +143,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     }
   `;
   const fontStyles = css`
-    ${useEuiFontSize('m')}
+    ${useEuiFontSize('s')}
   `;
   const commandBadgeStyles = css`
     [${COMMAND_BADGE_ATTRIBUTE}] {
@@ -184,6 +184,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       commandMatch={commandMatch}
       editorRef={ref}
       onSelect={messageEditor.handleCommandSelect}
+      onContentChange={messageEditor.reportMenuContent}
       commandMenuRef={commandMenuRef}
       data-test-subj={`${dataTestSubj}-container`}
     >

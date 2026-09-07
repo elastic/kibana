@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import type { Moment } from 'moment-timezone';
-import * as redux from 'react-redux';
+import * as redux from 'react-redux-v7';
 // eslint-disable-next-line no-restricted-imports
 import * as reactRouterDom from 'react-router-dom';
 

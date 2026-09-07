@@ -16,14 +16,17 @@ import {
   getFunctionSignaturesByReturnType,
   mockFieldsWithTypes,
   getOperatorSuggestions,
+  suggest,
 } from '../../../__tests__/commands/autocomplete';
 import {
   logicalOperators,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
 } from '../../definitions/all_operators';
 import type { ICommandCallbacks } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../definitions/constants';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
@@ -31,11 +34,6 @@ import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
-
-const whereContext = {
-  ...mockContext,
-  subquerySupport: true,
-};
 
 export const EMPTY_WHERE_SUGGESTIONS = [...getFieldNamesByType('any'), ...allEvalFns];
 
@@ -50,7 +48,7 @@ const whereExpectSuggestions = (
   query: string,
   expectedSuggestions: string[],
   mockCallbacks?: ICommandCallbacks,
-  context = whereContext,
+  context = mockContext,
   offset?: number
 ) => {
   return expectSuggestions(
@@ -81,7 +79,7 @@ describe('WHERE Autocomplete', () => {
   });
 
   describe('within the expression', () => {
-    const suggest = async (query: string) => {
+    const whereSuggest = async (query: string) => {
       const cursorPosition = query.length;
       const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
@@ -100,6 +98,7 @@ describe('WHERE Autocomplete', () => {
           '> $0',
           '>= $0',
           ...getOperatorSuggestions([
+            ...matchOperators,
             ...patternMatchOperators,
             ...inOperators,
             ...nullCheckOperators,
@@ -107,6 +106,75 @@ describe('WHERE Autocomplete', () => {
         ]);
       }
     );
+
+    test('after a field name inside parens', async () => {
+      await whereExpectSuggestions('from a | where (keywordField ', [
+        '!= $0',
+        '< $0',
+        '<= $0',
+        '== $0',
+        '> $0',
+        '>= $0',
+        ...getOperatorSuggestions([
+          ...matchOperators,
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
+      ]);
+    });
+
+    test('at the start of a parenthesized expression', async () => {
+      await whereExpectSuggestions('from a | where (', EMPTY_WHERE_SUGGESTIONS);
+    });
+
+    describe('match operator right operand', () => {
+      test('suggests the value placeholder after a text field', async () => {
+        await whereExpectSuggestions('from a | where textField : ', ['"${0:value}"']);
+      });
+
+      test('suggests the value placeholder after a function left operand', async () => {
+        await whereExpectSuggestions('from a | where concat(textField, keywordField) : ', [
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests only the number placeholder after a numeric field', async () => {
+        await whereExpectSuggestions('from a | where doubleField : ', ['${0:0}']);
+      });
+
+      test('suggests date literals after a date field', async () => {
+        await whereExpectSuggestions('from a | where dateField : ', [
+          ...getDateLiterals().map((item) => item.text),
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests boolean constants after a boolean field', async () => {
+        await whereExpectSuggestions('from a | where booleanField : ', [
+          'true',
+          'false',
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests creating a control when controls are supported', async () => {
+        await whereExpectSuggestions(
+          'from a | where textField : ',
+          ['"${0:value}"', ''],
+          undefined,
+          { ...mockContext, supportsControls: true }
+        );
+      });
+
+      test('suggests logical continuations after a complete match expression', async () => {
+        await whereExpectSuggestions('from a | where textField : "value" ', [
+          '\n',
+          '| ',
+          ...getOperatorSuggestions(logicalOperators),
+        ]);
+      });
+    });
 
     test('suggests dates after a comparison with a date', async () => {
       const expectedFields = getFieldNamesByType(['date', 'date_nanos']);
@@ -185,7 +253,13 @@ describe('WHERE Autocomplete', () => {
         `from a | where CASE(doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
         [
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(
+            Location.WHERE,
+            'any',
+            { scalar: true },
+            undefined,
+            FULL_TEXT_SEARCH_DEFINITIONS
+          ),
         ]
       );
     });
@@ -209,6 +283,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests operators after a field name', async () => {
       await whereExpectSuggestions('from a | stats a=avg(doubleField) | where doubleField ', [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'any',
@@ -255,7 +330,8 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
-      await whereExpectSuggestions('from a | where log10(doubleField) ', [
+      const expectedSuggestions = [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'double',
@@ -268,7 +344,10 @@ describe('WHERE Autocomplete', () => {
           { operators: true, skipAssign: true },
           ['double']
         ),
-      ]);
+      ];
+
+      await whereExpectSuggestions('from a | where log10(doubleField) ', expectedSuggestions);
+      await whereExpectSuggestions('from a | where ROUND((doubleField)) ', expectedSuggestions);
     });
 
     test('suggestions after IS', async () => {
@@ -294,6 +373,7 @@ describe('WHERE Autocomplete', () => {
         )
       );
       await whereExpectSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") ', [
+        '\n',
         ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);
@@ -317,13 +397,14 @@ describe('WHERE Autocomplete', () => {
 
       await whereExpectSuggestions(
         'from index | WHERE doubleField in (FROM index | KEEP doubleField) ',
-        [...getOperatorSuggestions(logicalOperators), '| ']
+        ['\n', ...getOperatorSuggestions(logicalOperators), '| ']
       );
       await whereExpectSuggestions(
         'from index | WHERE doubleField not in (FROM index | KEEP doubleField) ',
-        [...getOperatorSuggestions(logicalOperators), '| ']
+        ['\n', ...getOperatorSuggestions(logicalOperators), '| ']
       );
       await whereExpectSuggestions('from index | WHERE doubleField in (ROW doubleField = 1) ', [
+        '\n',
         ...getOperatorSuggestions(logicalOperators),
         '| ',
       ]);
@@ -346,6 +427,25 @@ describe('WHERE Autocomplete', () => {
         ],
         mockCallbacks
       );
+      await whereExpectSuggestions(
+        'from index | WHERE (doubleField) in ( textField, ',
+        [
+          ...getFieldNamesByType('double'),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
+        ],
+        mockCallbacks
+      );
+    });
+
+    test.each([
+      'from index | WHERE (doubleField in (FROM index | KEEP doubleField))',
+      'from index | WHERE (doubleField not in (FROM index | KEEP doubleField)) ',
+    ])('suggests null checks after a parenthesized IN subquery (%s)', async (query) => {
+      await whereExpectSuggestions(query, [
+        '\n',
+        ...getOperatorSuggestions([...logicalOperators, ...nullCheckOperators]),
+        '| ',
+      ]);
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
@@ -373,7 +473,7 @@ describe('WHERE Autocomplete', () => {
     });
 
     test('pipe suggestion after complete expression', async () => {
-      expect(await suggest('from index | WHERE doubleField != doubleField ')).toContainEqual(
+      expect(await whereSuggest('from index | WHERE doubleField != doubleField ')).toContainEqual(
         expect.objectContaining({
           label: '|',
         })
@@ -388,6 +488,70 @@ describe('WHERE Autocomplete', () => {
         DATE_DIFF_TIME_UNITS,
         mockCallbacks
       );
+    });
+  });
+
+  describe('KQL function autocomplete', () => {
+    const kqlSuggestions = [
+      { text: 'field_name', label: 'field_name', kind: 'Field' as const },
+      { text: 'other_field', label: 'other_field', kind: 'Field' as const },
+    ];
+
+    beforeEach(() => {
+      mockCallbacks = {
+        ...getMockCallbacks(),
+        getKqlSuggestions: jest.fn().mockImplementation((kqlQuery: string) =>
+          Promise.resolve(
+            kqlSuggestions.map((suggestion) => ({
+              ...suggestion,
+              // Mimic the KQL provider's per-suggestion range: the current word (after last space to cursor).
+              range: { start: kqlQuery.lastIndexOf(' ') + 1, end: kqlQuery.length },
+            }))
+          )
+        ),
+      };
+    });
+
+    it('returns KQL suggestions when cursor is inside KQL("""...)', async () => {
+      await whereExpectSuggestions(
+        'from index | WHERE KQL("""field_na',
+        ['field_name', 'other_field'],
+        mockCallbacks
+      );
+    });
+
+    it('returns KQL suggestions for an empty KQL query (cursor right after """)', async () => {
+      await whereExpectSuggestions(
+        'from index | WHERE KQL("""',
+        ['field_name', 'other_field'],
+        mockCallbacks
+      );
+    });
+
+    it('rangeToReplace starts at the typed word, not at the """ delimiter', async () => {
+      const query = 'from index | WHERE KQL("""field_na';
+      const kqlStartOffset = 'from index | WHERE KQL("""'.length;
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
+
+      const suggestion = results.find((s) => s.text === 'field_name');
+      expect(suggestion).toBeDefined();
+      expect(suggestion!.rangeToReplace).toEqual({
+        start: kqlStartOffset,
+        end: query.length,
+      });
+    });
+
+    it('rangeToReplace covers only the current word in multi-token KQL queries', async () => {
+      const query = 'from index | WHERE KQL("""fieldA AND field_na';
+      const wordStart = query.lastIndexOf('field_na');
+      const results = await suggest(query, mockContext, 'where', mockCallbacks, autocomplete);
+
+      const suggestion = results.find((s) => s.text === 'field_name');
+      expect(suggestion).toBeDefined();
+      expect(suggestion!.rangeToReplace).toEqual({
+        start: wordStart,
+        end: query.length,
+      });
     });
   });
 });

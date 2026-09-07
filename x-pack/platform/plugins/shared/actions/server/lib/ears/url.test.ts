@@ -28,26 +28,27 @@ describe('resolveEarsUrl', () => {
 
   it('throws when earsBaseUrl is undefined', () => {
     expect(() => resolveEarsUrl('/github/oauth/token', undefined)).toThrow(
-      'EARS base URL is not configured'
+      'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml'
     );
   });
 
   it('throws when earsBaseUrl is an empty string', () => {
     expect(() => resolveEarsUrl('/github/oauth/token', '')).toThrow(
-      'EARS base URL is not configured'
+      'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml'
     );
   });
 });
 
 describe('getEarsEndpointsForProvider', () => {
   it.each(['google', 'microsoft', 'slack'])(
-    'returns authorize, token and refresh endpoints for supported provider "%s"',
+    'returns authorize, token, revoke and refresh endpoints for supported provider "%s"',
     (provider) => {
-      const { authorizeEndpoint, tokenEndpoint, refreshEndpoint } =
+      const { authorizeEndpoint, tokenEndpoint, refreshEndpoint, revokeEndpoint } =
         getEarsEndpointsForProvider(provider);
       expect(authorizeEndpoint).toBe(`v1/${provider}/oauth/authorize`);
       expect(tokenEndpoint).toBe(`v1/${provider}/oauth/token`);
       expect(refreshEndpoint).toBe(`v1/${provider}/oauth/refresh`);
+      expect(revokeEndpoint).toBe(`v1/${provider}/oauth/revoke`);
     }
   );
 

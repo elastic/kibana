@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action, Middleware } from 'redux';
+import type { Action, Middleware } from 'redux-v4';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 

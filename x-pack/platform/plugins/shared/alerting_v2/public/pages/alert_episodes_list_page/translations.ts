@@ -34,9 +34,19 @@ export const EPISODES_LIST_COLUMN_ACTIONS = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_COLUMN_TAGS = i18n.translate('xpack.alertingV2.episodes.columns.tags', {
-  defaultMessage: 'Tags',
-});
+export const EPISODES_LIST_COLUMN_ALERT_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.tags',
+  {
+    defaultMessage: 'Alert tags',
+  }
+);
+
+export const EPISODES_LIST_COLUMN_RULE_TAGS = i18n.translate(
+  'xpack.alertingV2.episodes.columns.ruleTags',
+  {
+    defaultMessage: 'Rule tags',
+  }
+);
 
 export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
   'xpack.alertingV2.episodes.columns.assignees',
@@ -44,6 +54,25 @@ export const EPISODES_LIST_COLUMN_ASSIGNEES = i18n.translate(
     defaultMessage: 'Assignee',
   }
 );
+
+export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCount', {
+    defaultMessage: 'Showing {count, plural, one {# episode} other {# episodes}}',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCapped', {
+    defaultMessage: 'Showing first {count} episodes',
+    values: { count },
+  });
+
+export const EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP = (count: number) =>
+  i18n.translate('xpack.alertingV2.episodes.itemCountCappedTooltip', {
+    defaultMessage:
+      'The table loads at most {count} episodes. Narrow the time range or filters to find others.',
+    values: { count },
+  });
 
 export const EPISODES_ASSIGNEE_EMPTY = i18n.translate('xpack.alertingV2.episodes.assignees.empty', {
   defaultMessage: '—',
@@ -77,6 +106,13 @@ export const EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.searchAriaLabel',
+  {
+    defaultMessage: 'Filter alert episodes',
+  }
+);
+
 export const BULK_ACKNOWLEDGE = i18n.translate(
   'xpack.alertingV2.episodes.bulkActions.acknowledge',
   { defaultMessage: 'Acknowledge' }
@@ -104,7 +140,7 @@ export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActi
 });
 
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
-  defaultMessage: 'Edit tags',
+  defaultMessage: 'Edit alert tags',
 });
 
 export const BULK_ERROR_TOAST = i18n.translate('xpack.alertingV2.episodes.bulkActions.errorToast', {

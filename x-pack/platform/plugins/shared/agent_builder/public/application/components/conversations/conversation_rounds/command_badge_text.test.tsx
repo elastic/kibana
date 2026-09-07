@@ -48,7 +48,7 @@ describe('CommandBadgeText', () => {
   });
 
   it('renders SML badges with full type/title text', () => {
-    renderWithProvider(<CommandBadgeText text="[@dashboard/A](sml://chunk-1)" />);
+    renderWithProvider(<CommandBadgeText text="[@dashboard/A](sml://entry-1)" />);
 
     expect(screen.getByText('@dashboard/A')).toBeInTheDocument();
   });

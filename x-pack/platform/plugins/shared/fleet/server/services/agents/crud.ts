@@ -20,6 +20,10 @@ import type { AgentStatus, FleetServerAgent } from '../../../common/types';
 import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
+import {
+  removeVersionSuffixFromPolicyId,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+} from '../../../common/services/version_specific_policies_utils';
 import { AGENTS_INDEX, LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
 import {
   FleetError,
@@ -159,10 +163,12 @@ export async function getAgentTags(
   esClient: ElasticsearchClient,
   options: ListWithKuery & {
     showInactive: boolean;
+    spaceId?: string;
   }
 ): Promise<string[]> {
-  const { kuery, showInactive = false } = options;
-  const filters = [];
+  const { kuery, showInactive = false, spaceId } = options;
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  const filters = [...namespaceFilters];
 
   if (kuery && kuery !== '') {
     filters.push(kuery);
@@ -467,6 +473,15 @@ export async function fetchAllAgentsByKuery(
     spaceId?: string;
     runtimeFields?: estypes.SearchRequest['runtime_mappings'];
     showInactive?: boolean;
+    /**
+     * Optional ES `_source` filtering, passed through verbatim.
+     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
+     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
+     * you know exactly which fields the caller reads.
+     */
+    _source?: estypes.SearchRequest['_source'];
+    /** Overrides the ES `fields` param. Defaults to all runtime field keys. */
+    fetchFields?: string[];
   }
 ): Promise<AsyncIterable<Agent[]>> {
   const {
@@ -506,7 +521,8 @@ export async function fetchAllAgentsByKuery(
         rest_total_hits_as_int: true,
         track_total_hits: true,
         runtime_mappings: runtimeFields,
-        fields: Object.keys(runtimeFields),
+        fields: options.fetchFields ?? Object.keys(runtimeFields),
+        ...(options._source !== undefined ? { _source: options._source } : {}),
         sort,
         ...query,
       },
@@ -702,13 +718,7 @@ export async function getAgentVersionsForAgentPolicyIds(
       >({
         query: {
           bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
-              },
-            ],
+            filter: [buildPolicyBaseIdsWithFallbackEsFilter(agentPolicyIds)],
           },
         },
         index: AGENTS_INDEX,
@@ -716,7 +726,14 @@ export async function getAgentVersionsForAgentPolicyIds(
       })
     );
 
-    const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
+    const groupedHits = groupBy(
+      hits,
+      (hit) =>
+        hit._source?.policy_base_id ??
+        (hit._source?.policy_id
+          ? removeVersionSuffixFromPolicyId(hit._source.policy_id)
+          : undefined)
+    );
 
     for (const [policyId, policyHits] of Object.entries(groupedHits)) {
       const versionCounts: Record<string, number> = {};
@@ -905,4 +922,36 @@ export async function getSpaceAwarenessFilterForAgents(spaceId: string | undefin
   } else {
     return [`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`];
   }
+}
+
+export async function filterAgentIdsByNamespace(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentIds: string[]
+): Promise<string[]> {
+  if (agentIds.length === 0) {
+    return [];
+  }
+  const spaceId = getCurrentNamespace(soClient);
+  const namespaceFilters = await getSpaceAwarenessFilterForAgents(spaceId);
+  if (namespaceFilters.length === 0) {
+    return agentIds;
+  }
+  const namespaceKueryNode = _joinFilters(namespaceFilters);
+  const result = await retryTransientEsErrors(() =>
+    esClient.search({
+      index: AGENTS_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { terms: { _id: agentIds } },
+            ...(namespaceKueryNode ? [toElasticsearchQuery(namespaceKueryNode)] : []),
+          ],
+        },
+      },
+      _source: false,
+      size: agentIds.length,
+    })
+  );
+  return result.hits.hits.map((hit) => hit._id!);
 }

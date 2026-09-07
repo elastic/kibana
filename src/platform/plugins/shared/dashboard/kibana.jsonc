@@ -24,7 +24,6 @@
       "screenshotMode",
       "uiActions",
       "urlForwarding",
-      "presentationUtil",
       "unifiedSearch"
     ],
     "optionalPlugins": [

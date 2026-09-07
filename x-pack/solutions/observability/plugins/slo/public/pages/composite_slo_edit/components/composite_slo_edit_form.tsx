@@ -46,7 +46,7 @@ export function CompositeSloEditForm({ initialValues, compositeSloId, isEditMode
         <EuiCallOut
           size="s"
           color="primary"
-          iconType="iInCircle"
+          iconType="info"
           title={i18n.translate('xpack.slo.compositeSloEdit.experimentalNotice', {
             defaultMessage:
               'Composite SLOs are experimental. The weighted average of member SLO error budgets determines the composite SLO status.',

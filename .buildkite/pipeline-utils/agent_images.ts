@@ -23,7 +23,7 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  diskSizeGb: 105,
+  diskSizeGb: 130,
 };
 
 const getFIPSImage = () => {
