@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
@@ -230,6 +230,48 @@ describe('EpisodeRuleCell', () => {
     const link = screen.getByTestId('episodeRuleCellNameLink');
     expect(link).toHaveTextContent('My Rule');
     expect(link).toHaveAttribute('href', '/app/alerting/rules/r1');
+  });
+
+  describe('with onRuleNameClick', () => {
+    const mockOnRuleNameClick = jest.fn();
+
+    const renderRuleNameLink = () => {
+      render(
+        <EpisodeRuleCell
+          {...ruleCellProps}
+          row={makeRow({ 'rule.id': 'r1' })}
+          rulesCache={{ r1: makeRule('My Rule') }}
+          isLoadingRules={false}
+          rowHeight={2}
+          onRuleNameClick={mockOnRuleNameClick}
+        />
+      );
+      return screen.getByTestId('episodeRuleCellNameLink');
+    };
+
+    beforeEach(() => {
+      mockOnRuleNameClick.mockClear();
+    });
+
+    it('keeps the rule details page href on the link', () => {
+      expect(renderRuleNameLink()).toHaveAttribute('href', '/app/alerting/rules/r1');
+    });
+
+    it('calls back with the rule id and prevents navigation on a plain click', () => {
+      // fireEvent returns false when the handler called preventDefault
+      expect(fireEvent.click(renderRuleNameLink())).toBe(false);
+      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1');
+    });
+
+    it('lets a modified click follow the link', () => {
+      expect(fireEvent.click(renderRuleNameLink(), { metaKey: true })).toBe(true);
+      expect(mockOnRuleNameClick).not.toHaveBeenCalled();
+    });
+
+    it('lets a middle click follow the link', () => {
+      expect(fireEvent.click(renderRuleNameLink(), { button: 1 })).toBe(true);
+      expect(mockOnRuleNameClick).not.toHaveBeenCalled();
+    });
   });
 
   it('renders data.rule_name without a link when the rule SO is missing', () => {
