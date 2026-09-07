@@ -189,7 +189,11 @@ export async function prefetchSharedTarballs(log) {
 
     // one request per package name => one lockfile entry per tarball => yarn
     // fetches each tarball exactly once, race-free. A temp .yarnrc scopes the
-    // offline mirror to the temp dir and shields the run from the repo config.
+    // offline mirror and cache to the temp dir and shields the run from the
+    // repo config. The temp cache-folder is required for correctness, not just
+    // isolation: yarn only writes a tarball into the offline mirror when it
+    // actually downloads it, so a warm global cache would satisfy the install
+    // without ever populating the temp mirror.
     await Fsp.writeFile(
       Path.resolve(tmpDir, 'package.json'),
       JSON.stringify({
@@ -201,7 +205,10 @@ export async function prefetchSharedTarballs(log) {
     );
     await Fsp.writeFile(
       Path.resolve(tmpDir, '.yarnrc'),
-      `yarn-offline-mirror "${tmpMirror}"\nignore-scripts true\n`
+      `yarn-offline-mirror "${tmpMirror}"\ncache-folder "${Path.resolve(
+        tmpDir,
+        'cache'
+      )}"\nignore-scripts true\n`
     );
 
     try {
@@ -222,7 +229,14 @@ export async function prefetchSharedTarballs(log) {
     for (const tarball of missing) {
       const filename = mirrorFilename(tarball);
       const src = Path.resolve(tmpMirror, filename);
-      const buffer = await Fsp.readFile(src);
+      const buffer = await Fsp.readFile(src).catch(() => null);
+      if (buffer === null) {
+        // defense in depth: if yarn did not materialize the tarball in the
+        // temp mirror (e.g. an unexpected cache interaction), skip it instead
+        // of crashing bootstrap — the main install will fetch it normally
+        log.warning(`prefetch did not produce ${filename}, continuing with regular install`);
+        continue;
+      }
       if (!isValid(buffer, tarball.integrity)) {
         // intentionally hard-fails bootstrap: the registry served content that
         // differs from what yarn.lock records — a supply-chain signal, and the
