@@ -149,6 +149,9 @@ export const useBulkAlertActionItems = ({
             query,
             signalIds: ids,
             reason,
+            // runtimeMappings is only used by the query path (select-all). When ids is
+            // defined the by-IDs path is taken and this prop is ignored — that path
+            // doesn't send a filter query, so runtime mappings aren't needed.
             runtimeMappings: bulkCloseRuntimeMappings,
           });
 

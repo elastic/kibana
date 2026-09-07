@@ -102,14 +102,17 @@ describe('mergeBulkCloseRuntimeMappings', () => {
     expect(scriptedField?.on_script_error).toBe('continue');
   });
 
-  it('passthrough entry without a script is forwarded with type only', () => {
+  it('passthrough entry without a script is forwarded with type only and no on_script_error', () => {
+    // on_script_error is only set when a script is present — omitting it for scriptless entries
+    // avoids sending a property that has no meaning (and may cause ES validation errors in
+    // future ES versions that enforce the constraint).
     const result = mergeBulkCloseRuntimeMappings(undefined, {
       process_risk_label: { type: 'keyword' },
     });
     const scriptlessField = asField(result?.process_risk_label);
     expect(scriptlessField?.type).toBe('keyword');
     expect(scriptlessField?.script).toBeUndefined();
-    expect(scriptlessField?.on_script_error).toBe('continue');
+    expect(scriptlessField?.on_script_error).toBeUndefined();
   });
 
   it('passthrough wins on key collision with synthesised entry', () => {
@@ -149,14 +152,18 @@ describe('mergeBulkCloseRuntimeMappings', () => {
     });
   });
 
-  it('does not expose a body-supplied on_script_error (always stamps continue)', () => {
-    // Callers should not be able to set on_script_error to 'fail' via the request body.
-    // The route schema rejects it, but defence-in-depth: the merge never reads
-    // on_script_error from the passthrough mapping.
+  it('stamps on_script_error: continue on scripted entries and omits it on scriptless entries', () => {
+    // on_script_error is set only when a script is present — callers cannot supply it
+    // (route schema rejects it), and it should not appear on scriptless entries.
     const result = mergeBulkCloseRuntimeMappings(undefined, {
-      my_field: { type: 'keyword' },
+      scripted_field: {
+        type: 'keyword',
+        script: { source: "emit(doc['x'].value)" },
+      },
+      scriptless_field: { type: 'keyword' },
     });
-    expect(asField(result?.my_field)?.on_script_error).toBe('continue');
+    expect(asField(result?.scripted_field)?.on_script_error).toBe('continue');
+    expect(asField(result?.scriptless_field)?.on_script_error).toBeUndefined();
   });
 
   it('carries format through from passthrough', () => {

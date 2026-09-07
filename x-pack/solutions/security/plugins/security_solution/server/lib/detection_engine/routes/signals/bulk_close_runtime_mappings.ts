@@ -133,8 +133,15 @@ export const mergeBulkCloseRuntimeMappings = (
     passthroughEntries.map(([name, mapping]) => {
       const field: estypes.MappingRuntimeField & { on_script_error?: 'fail' | 'continue' } = {
         type: mapping.type as estypes.MappingRuntimeFieldType,
-        on_script_error: 'continue',
-        ...(mapping.script ? { script: { source: mapping.script.source } } : {}),
+        // on_script_error is only meaningful (and safe to send) when a script is present.
+        // ES ignores it for scriptless fields in practice, but omitting it keeps the payload
+        // clean and avoids any future ES validation that might reject the property without a script.
+        ...(mapping.script
+          ? {
+              on_script_error: 'continue',
+              script: { source: mapping.script.source },
+            }
+          : {}),
         ...(mapping.format ? { format: mapping.format } : {}),
       };
       return [name, field];
