@@ -14,13 +14,7 @@ import { SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT } from '../../service_map/
 export function ServiceOverviewServiceMapSection() {
   const { serviceName, transactionType } = useApmServiceContext();
   const {
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      latencyAggregationType,
-    },
+    query: { environment, kuery, rangeFrom, rangeTo, latencyAggregationType },
   } = useApmParams('/services/{serviceName}/overview');
 
   // Seed the service flyout with the page's filters so its charts match the

@@ -45,13 +45,7 @@ export function ServiceFlyoutApmCharts({
   const {
     deps: { core },
     service,
-    filters: {
-      environment,
-      rangeFrom,
-      rangeTo,
-      transactionType,
-      setRange,
-    },
+    filters: { environment, rangeFrom, rangeTo, transactionType, setRange },
   } = useServiceFlyoutContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
