@@ -544,6 +544,17 @@ describe('JsonTreeViewer', () => {
 
       expect(noWrapClassName).not.toEqual(wrappingClassName);
     });
+
+    it('keeps a trailing comma inside the value so wrapping cannot push it to the row edge', () => {
+      render(<JsonTreeViewer json={{ message: 'hello', count: 1 }} wrapLines />);
+
+      expect(
+        screen.getByTestId(rowTestId('message')).querySelector('.jsonTreeViewerValue')
+      ).toHaveTextContent('"hello",');
+      expect(
+        screen.getByTestId(rowTestId('count')).querySelector('.jsonTreeViewerValue')
+      ).toHaveTextContent('1');
+    });
   });
 
   describe('defaultRenderedNodes', () => {

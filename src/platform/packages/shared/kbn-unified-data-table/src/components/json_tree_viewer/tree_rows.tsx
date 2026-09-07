@@ -250,22 +250,32 @@ const KeyPrefix = memo(function KeyPrefix({
   );
 });
 
+const Comma = memo(function Comma() {
+  const styles = useEuiMemoizedStyles(treeStyles);
+  return <span css={styles.punctuation}>,</span>;
+});
+
 const PrimitiveValue = memo(function PrimitiveValue({
   primitiveType,
   value,
   formatted,
+  trailingComma,
 }: {
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
   formatted?: React.ReactNode;
+  trailingComma: boolean;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
+  // Keep the comma in this box so wrap-mode flex layout cannot push it to the row's trailing edge.
+  const comma = trailingComma ? <Comma /> : null;
   if (primitiveType === 'string') {
     return (
       <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
+        {comma}
       </span>
     );
   }
@@ -273,19 +283,16 @@ const PrimitiveValue = memo(function PrimitiveValue({
     return (
       <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
         {formatted ?? String(value)}
+        {comma}
       </span>
     );
   }
   return (
     <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
       null
+      {comma}
     </span>
   );
-});
-
-const Comma = memo(function Comma() {
-  const styles = useEuiMemoizedStyles(treeStyles);
-  return <span css={styles.punctuation}>,</span>;
 });
 
 const COPIED_FEEDBACK_DURATION = 1200;
@@ -490,8 +497,8 @@ const NodeLabel = memo(function NodeLabel({
             primitiveType={node.primitiveType}
             value={node.value}
             formatted={formatValue?.({ value: node.value, path: node.path })}
+            trailingComma={trailingComma}
           />
-          {trailingComma && <Comma />}
         </span>
         <RowActions nodeId={node.id} show={showActions}>
           <ValueCopyButton nodeId={node.id} value={node.value} />
