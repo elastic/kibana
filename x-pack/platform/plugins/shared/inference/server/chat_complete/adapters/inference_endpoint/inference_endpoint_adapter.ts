@@ -177,6 +177,7 @@ const createEndpointRequest = ({
     const resolvedReasoning = resolveChatCompletionReasoning({
       reasoning,
       hasNativeTools: false,
+      model: endpointModelId ?? modelName,
     });
     return {
       ...temperatureOptions,
@@ -193,6 +194,7 @@ const createEndpointRequest = ({
   const resolvedReasoning = resolveChatCompletionReasoning({
     reasoning,
     hasNativeTools: hasTools,
+    model: endpointModelId ?? modelName,
   });
 
   return {

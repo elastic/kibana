@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import dedent from 'dedent';
+import { compressToEncodedURIComponent } from 'lz-string';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import type { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
-export interface UseRunQueryRulesetProps {
-  rulesetId: string;
-  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem' | 'tableActionItem';
-  content?: string;
-  color?: EuiButtonColor;
-  onClick?: () => void;
-  disabled?: boolean;
-}
 
-export const UseRunQueryRuleset = ({
-  rulesetId,
-  type = 'emptyButton',
-  content,
-  color,
-  onClick,
-  disabled = false,
-}: UseRunQueryRulesetProps) => {
-  const { application, share, console: consolePlugin } = useKibana().services;
-  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId, !disabled);
+const CONSOLE_APP_LOCATOR = 'CONSOLE_APP_LOCATOR';
+
+/**
+ * Builds the Console request snippet that tests a given ruleset. Shared by the
+ * `UseRunQueryRuleset` button and the imperative `useRunQueryRulesetAction` handler.
+ */
+const useQueryRulesetConsoleRequest = (rulesetId: string, enabled: boolean): string => {
+  const { data: queryRulesetData } = useFetchQueryRuleset(rulesetId, enabled);
 
   // Loop through all actions children to gather unique _index values
   const { indices, matchCriteria } = useMemo((): { indices: string; matchCriteria: string } => {
@@ -83,8 +74,10 @@ export const UseRunQueryRuleset = ({
           : `{\n         "user_query": "pugs"\n    }`,
     };
   }, [queryRulesetData]);
+
   // Example based on https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-rule-query#_example_request_2
-  const TEST_QUERY_RULESET_API_SNIPPET = dedent`
+  return useMemo(
+    () => dedent`
     # Get Query Ruleset
     GET _query_rules/${rulesetId}
 
@@ -110,7 +103,30 @@ export const UseRunQueryRuleset = ({
         }
       }
     }
-  `;
+  `,
+    [rulesetId, indices, matchCriteria]
+  );
+};
+
+export interface UseRunQueryRulesetProps {
+  rulesetId: string;
+  type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem' | 'tableActionItem';
+  content?: string;
+  color?: EuiButtonColor;
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+export const UseRunQueryRuleset = ({
+  rulesetId,
+  type = 'emptyButton',
+  content,
+  color,
+  onClick,
+  disabled = false,
+}: UseRunQueryRulesetProps) => {
+  const { application, share, console: consolePlugin } = useKibana().services;
+  const request = useQueryRulesetConsoleRequest(rulesetId, !disabled);
 
   return (
     <TryInConsoleButton
@@ -118,7 +134,7 @@ export const UseRunQueryRuleset = ({
       application={application}
       sharePlugin={share ?? undefined}
       consolePlugin={consolePlugin ?? undefined}
-      request={TEST_QUERY_RULESET_API_SNIPPET}
+      request={request}
       type={type}
       content={content}
       color={color}
@@ -126,4 +142,53 @@ export const UseRunQueryRuleset = ({
       onClick={onClick}
     />
   );
+};
+
+export interface UseRunQueryRulesetActionProps {
+  rulesetId: string;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+/**
+ * Imperative counterpart of `UseRunQueryRuleset` for contexts that render an action config
+ * instead of a component (e.g. the `AppHeader` menu). Mirrors `TryInConsoleButton`'s behavior:
+ * opens the embedded console when available, otherwise opens Console in a new tab. `isAvailable`
+ * reflects whether the dev tools capability and share URL service are present.
+ */
+export const useRunQueryRulesetAction = ({
+  rulesetId,
+  disabled = false,
+  onClick,
+}: UseRunQueryRulesetActionProps): { run: () => void; isAvailable: boolean } => {
+  const { application, share, console: consolePlugin } = useKibana().services;
+  const request = useQueryRulesetConsoleRequest(rulesetId, !disabled);
+
+  const url = share?.url;
+  const isAvailable = !!application?.capabilities?.dev_tools?.show && !!url;
+
+  const run = useCallback(() => {
+    if (!url) return;
+
+    const embeddedConsoleAvailable =
+      (consolePlugin?.openEmbeddedConsole !== undefined &&
+        consolePlugin?.isEmbeddedConsoleAvailable?.()) ??
+      false;
+
+    if (embeddedConsoleAvailable) {
+      consolePlugin!.openEmbeddedConsole!(request);
+    } else {
+      const devToolsDataUri = request ? compressToEncodedURIComponent(request) : null;
+      const consolePreviewLink = url.locators
+        .get(CONSOLE_APP_LOCATOR)
+        ?.getRedirectUrl(devToolsDataUri ? { loadFrom: `data:text/plain,${devToolsDataUri}` } : {});
+      if (consolePreviewLink) {
+        window.open(consolePreviewLink, '_blank', 'noreferrer');
+      }
+    }
+
+    onClick?.();
+  }, [url, consolePlugin, request, onClick]);
+
+  return { run, isAvailable };
 };

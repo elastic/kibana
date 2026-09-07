@@ -58,15 +58,10 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: {
-    sync?: boolean;
-    enabled?: boolean;
-    isExperimental?: boolean;
     read?: boolean;
     all?: boolean;
   };
   metrics: SingleCaseMetricsFeature[];
-  observables?: { enabled: boolean; autoExtract?: boolean };
-  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -94,6 +89,9 @@ export interface CasesUiConfigType {
     enabled: boolean;
   };
   templates: {
+    enabled: boolean;
+  };
+  runWorkflows: {
     enabled: boolean;
   };
   casesRedesign: {

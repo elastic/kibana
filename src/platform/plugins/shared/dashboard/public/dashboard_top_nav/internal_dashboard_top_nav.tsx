@@ -41,7 +41,7 @@ import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
 import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import type { SaveDashboardReturn } from '../dashboard_api/save_modal/types';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -154,9 +154,9 @@ export function InternalDashboardTopNav({
   //  - `inline`: next chrome, standalone -> we render `AppHeader`.
   //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
   //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome or next chrome disabled -> push through the imperative chrome APIs.
+  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
   const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = useIsNextChrome() && chromeStyle === 'project';
+  const isAppHeaderActive = chromeStyle === 'project';
   const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
 
   const { onAppLeave } = useDashboardMountContext();
@@ -377,6 +377,16 @@ export function InternalDashboardTopNav({
     };
   }, [embedSettings, forceHideUnifiedSearch, fullScreenMode, isChromeVisible, viewMode]);
 
+  // Disable the date picker when the dashboard has data views but none are time-based.
+  const showDatePicker = useMemo(() => {
+    if (!visibilityProps.showDatePicker) {
+      return false;
+    }
+    const disabled =
+      (allDataViews?.length ?? 0) > 0 && !allDataViews?.some((dv) => dv.isTimeBased());
+    return { disabled };
+  }, [visibilityProps.showDatePicker, allDataViews]);
+
   const maybeRedirect = useCallback(
     (result?: SaveDashboardReturn) => {
       if (!result) return;
@@ -511,6 +521,7 @@ export function InternalDashboardTopNav({
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
         <unifiedSearchService.ui.SearchBar
           {...visibilityProps}
+          showDatePicker={showDatePicker}
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}

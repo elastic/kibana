@@ -34,7 +34,6 @@ export {
 
 export {
   SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
-  SIGNIFICANT_EVENT_SML_TYPE,
   type SignificantEventAttachment,
   type PendingSignificantEventAttachment,
 } from './significant_event_attachment';
@@ -84,3 +83,13 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
+
+export type {
+  RunQuotaConsumeRequest,
+  RunQuotaConsumeResponse,
+  RunQuotaGroup,
+  RunQuotaSettings,
+  RunQuotaSettingsUpdate,
+  RunQuotaWindow,
+  RunQuotasResponse,
+} from './run_quotas';

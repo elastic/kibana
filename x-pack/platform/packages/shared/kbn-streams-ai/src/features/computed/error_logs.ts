@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { esql } from '@elastic/esql';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/significant-events-schema';
@@ -17,7 +17,7 @@ const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'] as const;
 const ERROR_KEYWORDS = ['error', 'exception'] as const;
 
-const ERROR_LOG_KEEP_FIELDS = new Set<string>([
+const ERROR_LOG_KEEP_FIELDS_LIST = [
   '@timestamp',
   ...LOG_MESSAGE_FIELDS,
   'log.level',
@@ -29,7 +29,9 @@ const ERROR_LOG_KEEP_FIELDS = new Set<string>([
   'exception.message',
   'event.outcome',
   'service.name',
-]);
+] as const;
+
+const ERROR_LOG_KEEP_FIELDS = new Set<string>(ERROR_LOG_KEEP_FIELDS_LIST);
 
 const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
 
@@ -61,7 +63,7 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient }) => {
+  generate: async ({ stream, start, end, esClient, signal }) => {
     const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: getStreamSamplingSource(stream),
@@ -69,13 +71,16 @@ This is useful for understanding error patterns, identifying recurring issues, a
       end,
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
-      requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+      abortSignal: signal,
     });
 
     return {
       samples: compact(
         hits.map((hit) => {
-          const fields = formatRawDocument({ hit })?.fields;
+          const fields = formatRawDocument({
+            hit,
+            priorityFields: ERROR_LOG_KEEP_FIELDS_LIST,
+          })?.fields;
           return fields ? pickErrorLogFields(fields) : undefined;
         })
       ),

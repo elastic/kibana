@@ -9,7 +9,6 @@ This directory contains functional tests for the Lens visualization editor.
 | group1-6 | Core Lens functionality tests | varies |
 | group7 | ES\|QL tests | ~10-15 min |
 | group8 | LogsDB upgrade scenarios | ~20 min |
-| group10 | LogsDB downgrade scenarios | ~20 min |
 
 ---
 

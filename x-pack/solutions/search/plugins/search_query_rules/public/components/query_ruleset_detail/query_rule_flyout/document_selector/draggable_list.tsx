@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiDragDropContext, EuiDroppable, EuiDraggable, EuiCallOut } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { FieldArrayWithId, FieldError, FieldErrors } from 'react-hook-form';
 import type { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
@@ -44,13 +45,7 @@ export const DraggableList: React.FC<DraggableListProps> = ({
       <EuiDroppable droppableId="queryRuleDroppable" spacing="m">
         <>
           {actionFields.length === 0 && actionIdsFields?.length === 0 && (
-            <EuiCallOut
-              announceOnMount
-              title="At least one document is required"
-              color="warning"
-              size="s"
-              iconType="info"
-            />
+            <KbnWarningCallout announceOnMount title="At least one document is required" size="s" />
           )}
           {isIdRule && actionIdsFields
             ? actionIdsFields.map((doc, index) => (

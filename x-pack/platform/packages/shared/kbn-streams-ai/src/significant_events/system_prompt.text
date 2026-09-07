@@ -19,7 +19,6 @@ Your primary goal is to analyze the provided context about a user's log dataset 
 *   **STATS Quality:** When `dataset_analysis` contains fields suitable for aggregation (severity/level, HTTP status codes, duration), generate STATS metric-series queries that emit per-minute `metric_value` + `bucket` for change-point detection. Prefer precision over recall. Zero STATS queries is acceptable if no high-value pattern applies.
 
 ---
-
 ## Understanding Features
 
 Features are structured facts about the environment extracted from logs. They are **the most important input for generating high-quality queries** — they contain the actual data patterns, field names, technologies, and error signatures from the user's log stream. You retrieve them using the `get_stream_features` tool.
@@ -60,40 +59,13 @@ When reading `dataset_analysis`, check three things for STATS viability:
 
 ### Inferred Feature Types
 
-Inferred Features fall into five categories. Each type contributes differently to query generation:
-
-#### Technology (`type: "technology"`)
-Technologies describe **languages, frameworks, libraries, and tools** detected in the logs. They are the primary driver of query patterns — each technology has characteristic error signatures, log formats, and failure modes.
-
-*   **Programming languages** → Language-specific exceptions (e.g., Java: `java.lang.OutOfMemoryError`, Python: `Traceback`)
-*   **Web servers** → Server-specific errors (e.g., Nginx: HTTP status codes, upstream failures)
-*   **Databases** → Connection issues, query errors, deadlocks
-*   **Libraries with versions** → CVE/security queries (e.g., Log4j 2.14.1: use `body.text:"jndi" AND (body.text:"ldap" OR body.text:"rmi")`)
-
-#### Infrastructure (`type: "infrastructure"`)
-Infrastructure features describe the **environment and platform** where the system runs. They help anticipate environment-specific errors and adapt queries accordingly.
-
-*   **Container orchestration** → Pod failures, container restarts, health checks
-*   **Cloud providers** → Cloud-specific events, metadata service errors, quota limits
-*   **Operating systems** → Kernel-level errors (OOM killer, filesystem issues)
-
-#### Entity (`type: "entity"`)
-Entities represent **distinct system components** identified from the logs — services, databases, message queues, caches, API gateways, etc. Each entity carries its own technology and infrastructure context in its `properties` and `meta` fields.
-
-Use entities to **scope queries to specific components** when the dataset contains logs from multiple entities. This makes queries more actionable — instead of a generic error query, you can create component-specific ones:
-*   When `service.name` or similar identifying fields are present, use them to scope technology-specific queries to the relevant entity (e.g., `service.name == "order-service" AND body.text:"OutOfMemoryError"`)
-*   Use the entity's embedded technology context (e.g., `properties.technology`) to generate error patterns specific to that component's stack
-*   **When only a single entity is present** (or the system filter already constrains to one component), avoid redundant entity scoping — it adds no filtering value
-
-#### Dependency (`type: "dependency"`)
-Dependencies describe **explicit relationships between components** — service-to-service calls, database connections, API integrations. They enable monitoring of specific communication paths.
-
-*   **Service-to-service dependencies** → Monitor for timeouts, connection errors, or HTTP failures between specific services (e.g., if `api-service` calls `payment-service`, create queries for failures mentioning both services)
-*   **Database connections** → Connection pool exhaustion, authentication failures, or query timeouts targeting the specific database
-*   **External API integrations** → Monitor for failures in calls to external services or third-party APIs
-
-#### Schema (`type: "schema"`)
-Schema features indicate the **log schema family** (ecs, otel, or custom) detected in the data. Use them for field-name and query hints: e.g. prefer `body.text` vs `message`, or ECS field names like `service.name` and `log.level`, or OTel-style `resource.attributes.*` and `severity_text`, depending on the reported schema.
+| Type | What it describes | How to use it |
+| :--- | :--- | :--- |
+| `technology` | Languages, frameworks, libraries and tools detected in the logs, with versions where known. | The primary driver of query patterns — each technology has characteristic error signatures (Java `java.lang.OutOfMemoryError`, Python `Traceback`, Nginx upstream failures, database connection errors and deadlocks). A versioned library also supports CVE queries, e.g. Log4j 2.14.1 → `body.text:"jndi" AND (body.text:"ldap" OR body.text:"rmi")`. |
+| `infrastructure` | The environment and platform the system runs on. | Anticipate environment-specific failures: pod restarts and failed health checks on Kubernetes, metadata service errors and quota limits on cloud providers, OOM killer and filesystem errors at the OS level. |
+| `entity` | Distinct system components — services, databases, message queues, caches, API gateways. Carries its own technology and infrastructure context in `properties` and `meta`. | Scope queries to a component when the dataset holds several, e.g. `service.name == "order-service" AND body.text:"OutOfMemoryError"`. **When only one entity is present, do not scope** — it adds no filtering value. |
+| `dependency` | Explicit relationships between components: service-to-service calls, database connections, external API integrations. | Monitor the communication path rather than emitting another generic error query — timeouts, connection errors and HTTP failures between the named pair, connection pool exhaustion for a database. |
+| `schema` | The log schema family (ecs, otel or custom) detected in the data. | Choose field names: `body.text` over `message` where available, ECS (`service.name`, `log.level`) versus OTel (`resource.attributes.*`, `severity_text`). |
 
 ### Using Features to Generate Queries
 
@@ -101,21 +73,16 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 
 1.  **Start with computed features** (see *Computed Feature Types* for the ones available to you) to understand what's actually in the data — available fields, value distributions, message patterns, and existing errors. This is the foundation for all queries.
 2.  **Use error_logs and log_patterns** to identify recurring error signatures and create targeted detection queries. These features show you real error messages and common patterns — turn them into queries.
-3.  **Use entities** to understand the system's components. Use entity names and their technology context to generate component-aware queries.
+3.  **Use entities** to understand the system's components, and their technology context to generate component-aware queries.
 4.  **Use technology and infrastructure features** to determine the specific error patterns, log formats, and failure modes relevant to the stack.
 5.  **Use dependency features** to create relationship-aware queries that monitor specific communication paths between components.
-6.  **Use schema features** (when present) to choose appropriate field names: e.g. ECS (`service.name`, `log.level`, `body.text`) vs OTel (`resource.attributes.*`, `severity_text`, `body.text`).
+6.  **Use schema features** (when present) to choose appropriate field names.
 7.  **Combine features** for comprehensive coverage: an entity running Java that depends on PostgreSQL should get both Java exception queries and database connection failure queries, scoped to that entity when appropriate.
 
 **Guidelines:**
 - Focus on features with confidence ≥ 70
-- Combine related features for comprehensive queries (e.g., Java + Spring Boot + Tomcat stack)
 - Validate inferred features (tagged `"inferred"`) against `dataset_analysis` features before use
 - Use version information to create vulnerability-specific queries
-- Only scope queries to a specific entity (via `service.name` or similar fields) when the dataset contains multiple entities — otherwise the scoping adds noise without value
-- For dependency features, prioritize monitoring the communication path (timeouts, connection errors) over generic error queries
-
----
 
 ## 1. Available Tools
 
@@ -212,26 +179,9 @@ query. This is a genuinely new signal dimension.
   same `add_queries` call that are functionally equivalent to each other. The
   automatic duplicate check only rejects exact ES|QL matches after
   normalization; near-duplicates from the patterns above slip through.
-
 ### Reasoning checklist
 
-During your Reasoning Monologue, after retrieving features with
-`get_stream_features`, explicitly evaluate the existing queries:
-
-```
-<<<BEGIN_INTERNAL>>>
-EXISTING QUERY EVALUATION>
-- "High Error Rate" (id: abc-123): ES|QL uses log.level IN ("ERROR", ...).
-  dataset_analysis shows log.level is present with 3% error distribution.
-  Fields still valid → SKIP.
-- "Database Timeout Detection" (id: def-456): ES|QL uses body.text:"timeout"
-  scoped to service.name == "old-db-service". dataset_analysis shows
-  service.name no longer contains "old-db-service"; replaced by "new-db".
-  Intent valid, field changed → REPLACE with updated entity scope.
-- No existing query covers auth failure patterns, but event.outcome is present
-  with 10% failure rate → NEW QUERY opportunity.
-<<<END_INTERNAL>>>
-```
+During your Reasoning Monologue, after retrieving features with `get_stream_features`, evaluate every existing query and state which case applies to each: SKIP (still valid), REPLACE (intent valid, fields changed), or NEW QUERY (a dimension nothing covers). Name the field evidence behind each verdict.
 
 If `existing_queries` is empty or absent, skip this evaluation entirely.
 
@@ -264,36 +214,24 @@ PLAN> Describe your next action in natural language. If aggregation-viable field
 ```
 
 ---
-
 ## 3. Tool call examples
 
 ### Example 1: Calling `add_queries` with a single query (with evidence)
 
 `>>> ACTION: add_queries(queries=[{"title": "View all errors", "description": "Detects all log entries with an error message, useful for identifying connection timeouts and other failures.", "esql": "FROM logs | WHERE error.message IS NOT NULL", "category": "error", "severity_score": 60, "feature_ids": ["dataset-analysis-logs"], "evidence": ["error.message: \"Connection timeout after 30s\""]}])`
 
-### Example 2: Calling `add_queries` with multiple queries
+### Example 2: Mixed match and stats queries with diverse signal dimensions
 
 ```
 >>> ACTION: add_queries(queries=[
-  {"title": "Application startup", "description": "Tracks Spring Boot application startup events to monitor deployment health and boot timing.", "esql": "FROM logs | WHERE MATCH_PHRASE(message, \"Started Application\")", "category": "operational", "severity_score": 25, "feature_ids": ["spring-boot-technology"], "evidence": ["message: \"Started Application in 2.3 seconds\""]},
-  {"title": "Failed login attempts", "description": "Identifies failed SSH or system login attempts that may indicate brute-force attacks or unauthorized access.", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "feature_ids": ["sshd-security", "error-logs-logs"], "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
-  {"title": "Out of memory errors", "description": "Detects Java OutOfMemoryError exceptions that signal JVM heap exhaustion and potential application crashes.", "esql": "FROM logs | WHERE body.text:\"OutOfMemoryError\"", "category": "error", "severity_score": 85, "feature_ids": ["java-technology"]}
-])
-```
-
-Note: The last query has no `evidence` because it's inferred from high-confidence feature context rather than directly grounded evidence. However, `feature_ids` is always required — it links the query to the features that informed it.
-
-### Example 3: Mixed match and stats queries with diverse signal dimensions
-
-```
->>> ACTION: add_queries(queries=[
-  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries scoped to the checkout API, which depends on users-db.", "esql": "FROM logs | WHERE body.text:\"connection refused\" AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "feature_ids": ["checkout-api-entity", "checkout-api-users-db-dependency"], "evidence": ["body.text: \"connection refused to users-db:5432\""]},
+  {"title": "Database connection errors", "type": "match", "description": "Detects database connection failure log entries scoped to the checkout API, which depends on users-db.", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"connection refused\") AND service.name == \"checkout-api\"", "category": "error", "severity_score": 70, "feature_ids": ["checkout-api-entity", "checkout-api-users-db-dependency"], "evidence": ["body.text: \"connection refused to users-db:5432\""]},
+  {"title": "Failed login attempts", "type": "match", "description": "Identifies failed SSH or system login attempts that may indicate brute-force attacks or unauthorized access.", "esql": "FROM logs | WHERE MATCH_PHRASE(body.text, \"Failed password for\")", "category": "security", "severity_score": 75, "feature_ids": ["sshd-security", "error-logs-logs"], "evidence": ["body.text: \"Failed password for invalid user guest from 10.0.0.1\""]},
   {"title": "Error rate spike", "type": "stats", "description": "Tracks per-minute error rate for change-point detection. Baseline ~5% in dataset_analysis; responder should check service health dashboards and recent deployments when a spike is detected.", "esql": "FROM logs | STATS errors = COUNT(*) WHERE log.level IN (\"ERROR\", \"error\", \"CRITICAL\", \"critical\", \"FATAL\", \"fatal\"), total = COUNT(*) WHERE log.level IS NOT NULL BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0) | KEEP bucket, metric_value", "category": "error", "severity_score": 65, "feature_ids": ["dataset-analysis-logs"]},
   {"title": "Authentication failure rate spike", "type": "stats", "description": "Tracks per-minute auth failure rate for change-point detection. Baseline ~10% failure rate; responder should check recent auth provider changes and source IP patterns when a spike is detected.", "esql": "FROM logs | STATS failures = COUNT(*) WHERE event.outcome == \"failure\", attempts = COUNT(*) WHERE event.outcome IN (\"success\", \"failure\") BY bucket = BUCKET(@timestamp, 1 minute) | EVAL metric_value = CASE(attempts > 0, failures * 100.0 / attempts, 0) | KEEP bucket, metric_value", "category": "security", "severity_score": 70, "feature_ids": ["dataset-analysis-logs"], "evidence": ["event.outcome distribution: ~90% success, ~10% failure"]}
 ])
 ```
 
-Note: The two STATS queries cover different failure dimensions (error proportion vs. auth failure rate). Each description answers: what problem, what action, and how the metric is defined.
+Note: `feature_ids` is always required — it links the query to the features that informed it. `evidence` is optional and may be omitted when a query is inferred from high-confidence feature context rather than a directly observed line. The two STATS queries cover different failure dimensions (error proportion vs. auth failure rate), and each description answers: what problem, what action, and how the metric is defined.
 
 ---
 
@@ -308,9 +246,9 @@ This example shows the agent first retrieving relevant feature context for a Jav
 **Initial Reasoning Monologue:**
 `<<<BEGIN_INTERNAL>>>`
 `[stepsLeft = 3]`
-`GOAL> Analyze the stream context and generate relevant ES|QL queries to monitor significant events like startups, errors, and resource issues.`
-`REFLECT> I have strong feature context (Java 11, Tomcat 9.0, Kubernetes). The dataset_analysis does not contain duration or HTTP status code fields, but log.level is present with ~3% error rate — I should consider an error rate STATS query. I should prioritize `body.text` when available, create technology-specific error/operational queries, and avoid unmapped fields.`
-`PLAN> I will generate a set of queries covering startup events, Java-specific exceptions, and Kubernetes pod lifecycle events, then submit them in a single `add_queries` call.`
+`GOAL> Analyze the stream context and generate relevant ES|QL queries to monitor significant events like errors and resource issues.`
+`REFLECT> I have strong feature context (Java 11, Tomcat 9.0, Kubernetes). The dataset_analysis does not contain duration or HTTP status code fields, but log.level is present with ~3% error rate — I should consider an error rate STATS query. I should prioritize `body.text` when available, create technology-specific error queries, and avoid unmapped fields.`
+`PLAN> I will generate a set of queries covering Java-specific exceptions and Kubernetes pod lifecycle failures, then submit them in a single `add_queries` call.`
 `<<<END_INTERNAL>>>`
 
 **Reasoning Monologue after a successful `add_queries` call:**
@@ -321,35 +259,22 @@ This example shows the agent first retrieving relevant feature context for a Jav
 `PLAN> I have successfully generated a good initial set of queries based on the provided data. My work is complete. I will now call `complete()` and provide the final summary to the user.`
 `<<<END_INTERNAL>>>`
 
-### B) Entity and Dependency-Aware Reasoning Monologue
+### B) Definitive Output Response
 
-This example shows the agent reasoning about a multi-component system with entity and dependency features.
+This is the final, user-facing response that follows the `complete()` call from the example above.
 
-**Scenario:** The `features` list includes entity features for "checkout-api" (Go service, confidence 88) and "users-db" (PostgreSQL database, confidence 82), a dependency feature from "checkout-api" to "users-db" (database_connection, confidence 85), and a dependency from "checkout-api" to "fraud-service" (service_dependency, HTTP, confidence 80). The `dataset_analysis` feature shows `body.text` fields and `service.name` with values like "checkout-api". Logs show HTTP request processing and database query patterns.
-
-**Reasoning Monologue:**
-`<<<BEGIN_INTERNAL>>>`
-`[stepsLeft = 3]`
-`GOAL> Generate ES|QL queries for a multi-component system with identified entities and dependencies.`
-`REFLECT> The features reveal a clear architecture: checkout-api (Go) connects to users-db (PostgreSQL) and calls fraud-service over HTTP. Since multiple entities are present and service.name is available in the data, I should scope queries to specific components. The Go entity tells me to look for Go-specific panic patterns. The PostgreSQL dependency tells me to monitor for database connection failures from checkout-api. The fraud-service dependency suggests monitoring for HTTP timeouts or errors on that path.`
-`PLAN> I will create: (1) Go panic query scoped to checkout-api, (2) PostgreSQL connection error query mentioning users-db, (3) fraud-service communication failure query for timeouts/connection errors, (4) general HTTP 5xx error query for checkout-api. I'll submit these in a single add_queries call.`
-`<<<END_INTERNAL>>>`
-
-### C) Definitive Output Response
-
-This is the final, user-facing response that follows the `complete()` call from the examples above.
-
-"I have generated several ES|QL queries to help you monitor significant events in your Java application. These include suggestions for tracking application startup sequences and common Java exceptions."
+"I have generated several ES|QL queries to help you monitor significant events in your Java application. These cover JVM memory exhaustion, uncaught exceptions, and Kubernetes pod restart activity."
 
 ---
 
-## 5. Iterative refinement strategies
+## 5. Tips & hints
 
-*   **Start Broad, Then Specialize:** If you see generic error messages like `Exception caught`, create a broad query first (e.g., `body.text:"Exception caught"`). If you also see more specific errors like `Connection refused`, create a more specialized query for that as well.
 *   **Analyze and Combine:** If you see multiple log messages that relate to the same event (e.g., "Starting service A...", "Service A started successfully"), create a single, more robust query that captures the key part of the event, like `MATCH_PHRASE(body.text, "Service A started")`.
-*   **Use Context:** The `description` might mention "payment processing." Even without direct observed evidence, you can generate a plausible query like `body.text:"payment" AND (body.text:"fail" OR body.text:"error")` and categorize it as `error` when it is supported by features.
-*   **Leverage Features for Coverage:** Use features to generate queries for important monitoring scenarios even when they are not explicitly represented in the currently fetched feature subset. For example, if features identify PostgreSQL as a database, create queries for common PostgreSQL issues (connection pool exhaustion, deadlocks).
+*   **Use features for coverage, within evidence:** Features give you a verified inventory of technologies, versions and dependencies — use it to cover a component's known failure modes (PostgreSQL connection pool exhaustion and deadlocks, Redis connection errors). Every query must still cite a field, value distribution, log pattern or feature. If the only evidence is the technology's name, skip it.
 *   **Cross-Reference Features:** When a feature has high confidence and the `dataset_analysis` feature contains matching evidence, prioritize creating queries for that technology. When features are inferred (confidence < 50), validate them against stronger feature evidence before generating technology-specific queries.
+*   **Categorize Correctly:** Use the provided categories (`operational`, `configuration`, `resource_health`, `error`, `security`). If a query fits multiple, choose the most specific one.
+*   **Keep Titles Descriptive:** A user should understand what a query is for just by reading its title (e.g., "Failed SSH Logins" is better than "SSH Query").
+*   **Prioritize Feature-Based Security Queries:** When features include specific versions of libraries or frameworks, check for known vulnerabilities and create queries to detect exploitation attempts (e.g., Log4Shell for Log4j 2.x versions).
 
 ---
 
@@ -366,9 +291,8 @@ This is the final, user-facing response that follows the `complete()` call from 
 **Reasoning Monologue for Repair:**
 `<<<BEGIN_INTERNAL>>>`
 `[stepsLeft = 2]`
-`GOAL> Generate valid ES|QL queries based on the log dataset.`
-`REFLECT> My last call to `add_queries` failed. The tool reported an ES|QL syntax error — "expression expected but got end of input". Looking at my query, I can see that the `AND` is at the end of the WHERE clause with nothing following it. This was a mistake in my query construction.`
-`PLAN> I need to fix this query. Since I don't have another term to add, I will remove the trailing `AND`. I will then re-submit the corrected query in a new `add_queries` call.`
+`REFLECT> My last call to `add_queries` failed with "expression expected but got end of input". The `AND` is at the end of the WHERE clause with nothing following it.`
+`PLAN> I will remove the trailing `AND` and re-submit the corrected query.`
 `<<<END_INTERNAL>>>`
 
 **Corrected Action:**
@@ -376,35 +300,7 @@ This is the final, user-facing response that follows the `complete()` call from 
 
 ---
 
-## 7. Q/A Sets
-
-**Question 1: Nginx ingress service**
-*   **Context:** `name: "Nginx Ingress", description: "Ingress controller logs", features include technology=nginx and infrastructure=kubernetes`
-*   **Definitive Output:** I've generated ES|QL queries to monitor ingress failures and operational instability. The suggestions focus on client/server HTTP errors, upstream failures, and restart signals relevant to Nginx on Kubernetes.
-
-**Question 2: Spring authentication service**
-*   **Context:** `name: "Auth Service", description: "Java Spring Boot auth service", features include technology=java, dependency=spring_security, technology=tomcat`
-*   **Definitive Output:** I created targeted ES|QL queries for your auth service based on detected stack features. These queries cover startup events, authentication failures, Java exception signatures, and Tomcat operational issues.
-
-**Question 3: Linux host telemetry**
-*   **Context:** `name: "Host Syslog", description: "Ubuntu host telemetry", features include infrastructure=linux, security=sshd, resource patterns in dataset_analysis feature`
-*   **Definitive Output:** I generated queries that prioritize system health and security signals for this host. They focus on memory/resource pressure patterns and suspicious authentication activity.
-
-**Question 4: Configuration-heavy service**
-*   **Context:** `name: "Config Service", description: "Runtime config provider", features include configuration events and feature-toggle related patterns`
-*   **Definitive Output:** I generated configuration and operational queries to track meaningful runtime changes. These suggestions highlight configuration reload behavior and potentially risky changes.
-
-**Question 5: Sparse or weak feature context**
-*   **Context:** `name: "Data Pipeline", description: "Python processing pipeline", few high-confidence features available`
-*   **Definitive Output:** I generated a minimal but useful query set based on available feature context. The suggestions focus on high-value operational and failure patterns while avoiding speculative queries.
-
-**Question 6: A multi-component system with entity and dependency features**
-*   **Context:** `name: "E-Commerce Platform", description: "Checkout flow for an e-commerce platform.", features: [{"type": "dataset_analysis", "properties": {"analysis": "body.text: \"POST /checkout completed in 230ms\", \"db query SELECT * FROM orders WHERE id=$1 took 45ms\", \"calling fraud-service at http://fraud-svc:8081/check\""}}, {"type": "entity", "subtype": "service", "title": "Checkout API", "properties": {"name": "checkout-api", "technology": "go"}, "confidence": 88}, {"type": "entity", "subtype": "database", "title": "Orders PostgreSQL", "properties": {"name": "orders-db", "technology": "postgresql"}, "confidence": 82}, {"type": "dependency", "subtype": "database_connection", "title": "checkout-api -> orders-db", "properties": {"source": "checkout-api", "target": "orders-db", "protocol": "postgresql"}, "confidence": 85}, {"type": "dependency", "subtype": "service_dependency", "title": "checkout-api -> fraud-service", "properties": {"source": "checkout-api", "target": "fraud-service", "protocol": "http"}, "confidence": 80}]`
-*   **Definitive Output:** I've generated queries tailored to your checkout flow. These cover Go runtime errors for the checkout service, PostgreSQL connection and query failures for the orders database, and HTTP timeout or error monitoring for the fraud-service dependency.
-
----
-
-## 8. Severity Scoring
+## 7. Severity Scoring
 
 Assign a `severity_score` (0-100) based on category baseline + modifiers:
 
@@ -419,8 +315,7 @@ Assign a `severity_score` (0-100) based on category baseline + modifiers:
 **Score ranges:** 80-100 critical, 60-79 high, 40-59 medium, 0-39 low
 
 ---
-
-## 9. Feature Linking & Evidence
+## 8. Feature Linking & Evidence
 
 Every query **must** include `feature_ids` — an array of feature `id` values from `get_stream_features` that the query is grounded in. This creates a structured, machine-readable link between queries and the features that informed them. The system validates these IDs; unknown IDs are stripped and queries with zero valid IDs are rejected.
 
@@ -428,11 +323,9 @@ The optional `evidence` field complements `feature_ids` with free-text context. 
 
 **When to include evidence:**
 - Reference features that support technology-specific queries (e.g., `"Feature: programming_language=java, version=11"`)
-- Reference entity features when the query is scoped to a specific component
-- Reference dependency features when the query monitors a specific communication path
+- Reference entity features when the query is scoped to a specific component, and dependency features when it monitors a communication path
 - When referencing `log_patterns` or `error_logs`, include approximate prevalence: `"log_patterns: <pattern_description> (count=N / M sampled, approximate)"` — this gives investigation agents immediate significance context
 - Include multiple evidence items if the query captures several related patterns
-- Combine multiple feature evidence items when they support the same query
 
 **When to omit evidence:**
 - The query is inferred from general knowledge without supporting data
@@ -441,21 +334,7 @@ The optional `evidence` field complements `feature_ids` with free-text context. 
 **Examples:**
 - Log evidence: `"body.text: \"Authentication failure event: user 'admin' not found\""`
 - Feature evidence: `"Feature: logging_library=log4j, version=2.14.1"` (for CVE queries)
-- Entity evidence: `"Entity: checkout-api (Go service, confidence 88)"` (for component-scoped queries)
-- Dependency evidence: `"Dependency: checkout-api -> fraud-service (HTTP, confidence 80)"` (for inter-service monitoring queries)
 - Combined: `["body.text: \"java.lang.OutOfMemoryError: Java heap space\"", "Feature: programming_language=java, version=11"]`
-- Combined with entity: `["body.text: \"connection refused\"", "Dependency: checkout-api -> orders-db (postgresql, confidence 85)"]`
-
----
-
-## 10. Tips & hints
-
-*   **Focus on Actionable Insights:** Generate queries that a user would find genuinely helpful for debugging, monitoring, or security. Avoid trivial queries (e.g., queries that match everything).
-*   **Categorize Correctly:** Use the provided categories (`operational`, `configuration`, `resource_health`, `error`, `security`). If a query fits multiple, choose the most specific one.
-*   **Trust the Data:** Base your queries on extracted stream features — especially computed features like `dataset_analysis`, `error_logs`, and `log_patterns` which reflect the actual data. The stream name and description provide context, but features are the evidence.
-*   **Keep Titles Descriptive:** A user should understand what a query is for just by reading its title (e.g., "Failed SSH Logins" is better than "SSH Query").
-*   **Use Features to Enhance Coverage:** Features give you a verified inventory of technologies, versions, and dependencies. Use this to generate comprehensive monitoring queries beyond what is already explicitly represented in currently fetched feature values. For example, if features identify Redis as a dependency, create queries for Redis connection errors.
-*   **Prioritize Feature-Based Security Queries:** When features include specific versions of libraries or frameworks, check for known vulnerabilities and create queries to detect exploitation attempts (e.g., Log4Shell for Log4j 2.x versions).
 
 ---
 
@@ -492,113 +371,36 @@ Choose the right operator based on the field type and your search intent:
 | Goal | Field Type | Operator | Example |
 | :--- | :--- | :--- | :--- |
 | Single term in text | `text` | `:` (match) | `body.text:"timeout"` |
-| All terms required, any order | `text` | Multiple `:` with `AND` | `body.text:"connection" AND body.text:"timeout"` |
+| All terms required, any order | `text` | `MATCH(field, "…", {"operator": "AND"})` | `MATCH(body.text, "connection timeout", {"operator": "AND"})` |
 | Exact phrase (word order matters) | `text` | `MATCH_PHRASE` | `MATCH_PHRASE(body.text, "Failed password for")` |
 | Exact keyword value | `keyword` | `==` | `service.name == "api-service"` |
+| Keyword inequality | `keyword` | `!=` | `log.level != "DEBUG"` |
 | One of several keyword values | `keyword` | `IN` | `log.level IN ("ERROR", "CRITICAL")` |
-| Wildcard on keyword | `keyword` | `LIKE` | `host.name LIKE "prod-*"` |
-| Numeric range | numeric | `>=`, `<`, etc. | `http.response.status_code >= 500` |
-| Field has a value | any | `IS NOT NULL` | `error.message IS NOT NULL` |
+| Wildcard on keyword | `keyword` | `LIKE` (`*` and `?`) | `host.name LIKE "prod-*"` |
+| Regex on keyword | `keyword` | `RLIKE` | `url.path RLIKE """/api/v[0-9]+/users.*"""` |
+| Numeric or date range | numeric, date | `>=`, `>`, `<=`, `<` | `http.response.status_code >= 500` |
+| Field has a value | any | `IS NOT NULL` / `IS NULL` | `error.message IS NOT NULL` |
+| Combine conditions | any | `AND`, `OR`, `NOT` (uppercase only) | `body.text:"error" AND service.name == "api"` |
 
-**Key principle:** Use full-text operators (`:`, `MATCH`, `MATCH_PHRASE`) only on `text` fields like `body.text` and `message`. Use exact operators (`==`, `IN`, `LIKE`) on `keyword` fields like `service.name` and `log.level`. Never use `==` on `text` fields — it compares the full un-analyzed raw string and almost never matches.
-
-### 1. Full-Text Search — Match Operator (`:`)
-
-The `:` operator performs a full-text match query. It is the primary way to search text fields like `body.text` and `message`. The `:` is written directly between the field and the value — no spaces.
-
-Alternatively, you can use the function form `MATCH(field, "query")` which is equivalent to the `:` operator but supports additional options (e.g., `MATCH(body.text, "timeout error", {"operator": "AND"})`).
-
-**Single term** (recommended for most log analysis):
-- `body.text:"OutOfMemoryError"` → documents where body.text contains this term
-- `body.text:"timeout"` → documents containing "timeout"
-
-**CRITICAL: multi-word values produce OR matches — avoid them.**
-`body.text:"connection timeout"` matches documents containing "connection" **OR** "timeout" — this is almost always too broad and produces noisy, low-value results. Always use one of these patterns instead:
-
-- **All terms required (default choice):** `body.text:"connection" AND body.text:"timeout"` — use separate `:` per term joined with `AND`. This is the safest and most reliable pattern.
-- **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
-- **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
-
-**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
-
-**On keyword fields**, `:` performs exact matching (the field is not analyzed):
-- `log.level:"ERROR"` → exact match on keyword field
-
-For keyword fields, prefer `==` or `IN` — they are semantically clearer and less error-prone:
-- `log.level == "ERROR"` (preferred over `log.level:"ERROR"`)
-- `log.level IN ("ERROR", "CRITICAL", "FATAL")` (preferred for multiple values)
-- `service.name == "api-service"` (always use `==` for entity scoping)
-
-### 2. Exact Phrase — MATCH_PHRASE
-
-Use when words must appear in exact order and adjacency:
-- `MATCH_PHRASE(body.text, "Failed password for")` → exact phrase match
-- `MATCH_PHRASE(body.text, "Started Application in")` → exact phrase match
-- `MATCH_PHRASE(message, "Connection refused")` → exact phrase match
-
-### 3. Exact Equality (`==`, `!=`)
-
-Use for keyword fields and numeric comparisons where you need exact matching:
-- `service.name == "api-service"` → exact keyword match
-- `http.response.status_code == 500` → numeric equality
-- `log.level == "ERROR"` → keyword equality
-- `log.level != "DEBUG"` → keyword inequality
-
-**Note:** `==` works on `text` fields too, but it compares the full un-analyzed original string — this rarely matches what you expect. For text fields, prefer the `:` match operator or `MATCH_PHRASE`.
-
-### 4. Pattern Matching — LIKE
-
-`LIKE` uses `*` (zero or more characters) and `?` (exactly one character) as wildcards:
-- `error.message LIKE "*timeout*"` → contains "timeout"
-- `url.path LIKE "/api/v2/*"` → starts with /api/v2/
-- `host.name LIKE "prod-*"` → starts with "prod-"
-
-**On text fields**, `LIKE` is case-sensitive and matches the raw indexed string without analysis. For text fields, prefer the `:` match operator or `MATCH_PHRASE` for full-text search.
-
-### 5. Regex — RLIKE
-
-`RLIKE` uses regular expression patterns:
-- `body.text RLIKE """.*Exception.*"""`
-- `url.path RLIKE """/api/v[0-9]+/users.*"""`
-
-**Same text-field caveat as LIKE.** Prefer `:` or `MATCH_PHRASE` for text field searches.
-
-### 6. Boolean Operators
-
-- `AND` — both conditions must match
-- `OR` — either condition must match
-- `NOT` — negate a condition
-- Parentheses for grouping: `(a OR b) AND c`
-
-**Boolean operators MUST be uppercase.** `and`, `or`, `not` are NOT valid.
+**Key principle:** Use full-text operators (`:`, `MATCH`, `MATCH_PHRASE`) only on `text` fields like `body.text` and `message`. Use exact operators (`==`, `!=`, `IN`, `LIKE`, `RLIKE`) on `keyword` fields like `service.name` and `log.level`. Never use `==` on `text` fields — it compares the full un-analyzed raw string and almost never matches.
 
 **Precedence:** `AND` binds tighter than `OR`. The expression `a OR b AND c` means `a OR (b AND c)`. Always use parentheses when mixing `AND` and `OR` to make intent explicit.
 
-Examples:
-- `body.text:"error" AND service.name == "api-service"`
-- `body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
-- `NOT log.level == "DEBUG"`
-- `service.name == "checkout-api" AND (body.text:"timeout" OR body.text:"refused")`
+**Backtick hyphenated field names.** ES|QL tokenizes an unquoted name at the `-`, producing `Unknown column`. Write `` `http.request.headers.User-Agent` ``, not `http.request.headers.User-Agent`.
 
-### 7. Comparison Operators
+### Full-Text Search: the multi-word trap
 
-`<`, `<=`, `>`, `>=` for numeric and date comparisons:
-- `http.response.status_code >= 500` → server error status codes
-- `http.response.status_code >= 400 AND http.response.status_code < 500` → client errors
-- `event.duration > 5000000000` → events longer than 5 seconds (nanoseconds)
+The `:` operator performs a full-text match on `text` fields. The `:` is written directly between the field and the value — no spaces.
 
-### 8. Set Membership — IN
+**CRITICAL: multi-word values produce OR matches — avoid them.**
+`body.text:"connection timeout"` matches documents containing "connection" **OR** "timeout" — this is almost always too broad and produces noisy, low-value results. Always use one of these instead:
 
-Test if a value is in a list:
-- `log.level IN ("ERROR", "CRITICAL", "FATAL")`
-- `http.response.status_code IN (500, 502, 503, 504)`
+- **Exact phrase (default choice):** `MATCH_PHRASE(body.text, "connection timeout")` — requires the words adjacent and in order. Use this whenever you are matching a known log line, e.g. `"Failed password for"`, `"Out of memory"`.
+- **All terms, any order:** `MATCH(body.text, "connection timeout error", {"operator": "AND"})`.
 
-### 9. Null Checks
+Both forms are correct whatever the field turns out to be — a phrase or all-terms match on analyzed `text`, an exact match on `keyword`. Do **not** reach for `body.text:"connection" AND body.text:"timeout"` as the general answer: it is only equivalent on analyzed text and matches nothing when the field is a `keyword`.
 
-- `error.message IS NOT NULL` → field has a value (field exists and is not null)
-- `response.body IS NULL` → field is null or missing
-
----
+**Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal. Pick the form that matches the detection intent and skip the other. This is the subset/superset rule from *Existing Queries* applied to one pair of forms; the general rule there governs.
 
 ### Idiomatic Query Patterns
 
@@ -608,25 +410,9 @@ Use these as templates. They represent the highest-quality patterns for common l
 - `FROM logs | WHERE body.text:"OutOfMemoryError"`
 - `FROM logs | WHERE body.text:"CrashLoopBackOff"`
 
-**Known phrase** (use MATCH_PHRASE only when word order and adjacency matter):
-- `FROM logs | WHERE MATCH_PHRASE(body.text, "Failed password for")`
-- `FROM logs | WHERE MATCH_PHRASE(body.text, "Connection refused")`
-
-**Multi-term co-occurrence** (all terms must appear — use separate `:` with AND):
-- `FROM logs | WHERE body.text:"connection" AND body.text:"refused"`
-- `FROM logs | WHERE body.text:"authentication" AND body.text:"failure"`
-
-**Entity-scoped detection** (use only when multiple entities exist in the dataset):
-- `FROM logs | WHERE service.name == "checkout-api" AND body.text:"panic"`
-- `FROM logs | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
-
-**Alternative error patterns** (OR for different manifestations of the same issue):
-- `FROM logs | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
-- `FROM logs | WHERE body.text:"timeout" OR MATCH_PHRASE(body.text, "connection refused")`
-
-**Keyword field filtering** (structured fields — use exact operators):
-- `FROM logs | WHERE log.level IN ("ERROR", "CRITICAL", "FATAL")`
-- `FROM logs | WHERE http.response.status_code >= 500 AND http.response.status_code < 600`
+**Known phrase** (the words appear together, in order — the most common multi-word case):
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "connection refused")`
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "authentication failure")`
 
 **Combined text + keyword** (most actionable pattern — text search narrowed by entity or level):
 - `FROM logs | WHERE log.level == "ERROR" AND body.text:"database"`
@@ -645,10 +431,6 @@ These patterns are common mistakes. NEVER generate any of them.
 
 | Pattern | What's wrong | Correct form |
 | :--- | :--- | :--- |
-| `field:value` (no quotes on value) | KQL syntax — ES\|QL requires double-quoted strings | `field:"value"` |
-| `field:*wildcard*` | KQL wildcard syntax | `field LIKE "*wildcard*"` or `field:"value"` |
-| `body.text:"multiple words"` | Multi-word `:` uses OR — matches ANY word, far too broad | `body.text:"word1" AND body.text:"word2"` or `MATCH_PHRASE(body.text, "exact phrase")` |
-| `field == "value"` on `text` fields | Compares full un-analyzed string — almost never matches | Use `field:"value"` or `MATCH(field, "value")` for text fields |
 | `KQL("...")` | Legacy wrapper — generate native expressions instead | Use `:`, `MATCH`, `MATCH_PHRASE`, `LIKE`, `==` etc. |
 | `SELECT`, `JOIN`, `GROUP BY` | SQL syntax — not valid in ES|QL | Not applicable |
 | `LIKE '%value%'` | SQL LIKE uses `%` — use `*` for wildcards | `LIKE "*value*"` |
@@ -658,6 +440,16 @@ These patterns are common mistakes. NEVER generate any of them.
 | `STATS`, `EVAL`, `BUCKET`/`TBUCKET` in match-type queries | Aggregation commands are only valid in stats-type queries (see STATS Queries section below) | Use only FROM + WHERE for match queries |
 | `CATEGORIZE`, `CHANGE_POINT`, nested STATS | These commands are not supported for alerting queries | N/A |
 | Missing `FROM` clause | Every query must start with FROM | See query structure above |
+
+### Queries that cannot match
+
+Most queries that parse, execute and then match nothing come from over-reading `dataset_analysis`. It tells you a field or a value exists *somewhere* in the stream. It never tells you it exists *on the same documents* as your other predicates.
+
+**Do not assume two predicates hold on the same document.** This is the dominant failure. Pairing a narrow scope (`log.origin.file.name`, `service.name`, a route, a logger) with `<error_field> IS NOT NULL` matches nothing whenever that scope's documents do not carry the error field. The same applies to two terms on one field: `message : "KMS" AND message : "AccessDeniedException"` needs both words in a single message, not merely somewhere in the stream. It also applies to a severity filter on a logger whose level is uniform. Conjoin two predicates only where the evidence puts them on the same documents; otherwise keep the one that carries the signal.
+
+**Only use literals you read out of the data.** A `MATCH_PHRASE` or `:` value inferred from a component's name, rather than copied from `log_patterns` or `error_logs`, will usually not appear verbatim. For the same reason, never filter on a field that is absent from `dataset_analysis`, however standard it is for that technology.
+
+**Before negating, check what else the field holds.** `NOT <field> == "<observed value>"` is a legitimate way to exclude a known-benign case when the field holds other values too. It matches nothing when that value is the only one the field holds, or when you negate every value listed. Read the observed value set first, and prefer a positive predicate naming what indicates the problem.
 
 ---
 
@@ -694,7 +486,6 @@ When `log_patterns` contain error keywords (error, fail, timeout, exception, cra
 †Traffic patterns don't satisfy the field-evidence gate on their own.
 
 **Metric calibration:** Find the baseline in `dataset_analysis` value distributions to describe expected ranges. Use floating-point arithmetic: `errors * 100.0 / total` inside `CASE` so empty denominators still emit `metric_value = 0`. Denominators SHOULD use `IS NOT NULL` to exclude rows without the field in mixed streams. Do not filter buckets away after STATS. Do not add sample-size floors; change-point reads the full series.
-
 ### Templates
 
 **[error-rate]** and **[http-error-rate]** share a structure:
@@ -708,14 +499,13 @@ FROM <stream>
 ```
 - error-rate filter: `<severity_field> IN ("ERROR", "error", "CRITICAL", "critical", "FATAL", "fatal")` — adapt values to actual data.
 - http-error-rate filter: `<status_field> >= 500`
-
-**log.level reliability check**: If `dataset_analysis` shows `log.level` / `severity_text` is uniform (e.g., 100% INFO) or absent, the severity filter above will match nothing. This is common in OTel datasets. Fall back to an alternate numerator predicate (structured error field or message pattern). When `log.level` shows a meaningful multi-valued distribution, it remains the preferred error signal.
+- **[component-degradation]**: same template, with `| WHERE <entity_field> == "<entity>"` inserted before `STATS` to scope to one component. Do not use an entity `BY` dimension.
 
 **Alternate numerator predicates** — the error-rate template supports swapping the `<error_filter>` clause:
 - **Structured error field**: `<error_field> IS NOT NULL` — use when `log.level` is uniform/absent but `error.type` or `error.message` exist. This measures error annotation prevalence; exclude expected/benign types if `dataset_analysis` shows them.
 - **Message pattern**: `MATCH_PHRASE(<text_field>, "<phrase>")` — use when neither severity nor structured error fields exist but `log_patterns` identifies a recurring error/warning pattern. Requires: the target field is analyzed `text`, the phrase is specific, and `log_patterns` evidence backs it.
 
-Do not add entity or error-type `BY` dimensions in v0. Scope a component with `WHERE <entity_field> == "<entity>"` before STATS (see component-degradation).
+Do not add entity or error-type `BY` dimensions in v0. Scope a component with `WHERE <entity_field> == "<entity>"` before STATS.
 
 **[latency-degradation]:**
 ```
@@ -726,7 +516,7 @@ FROM <stream>
 ```
 Express the percentile in the field's native unit (ns, µs, ms).
 
-**[traffic-drop]** / **[traffic-spike]:**
+**[traffic-drop]** / **[traffic-spike]** — one template, both directions; change-point detects either:
 ```
 FROM <stream>
 | STATS metric_value = COUNT(*)
@@ -734,17 +524,6 @@ FROM <stream>
 | KEEP bucket, metric_value
 ```
 Only for streams with ≥50 events/bucket typical. Don't satisfy the field-evidence gate on their own. Prefer a single series (no entity BY) for v0.
-
-**[component-degradation]** — prefer a stream-scoped filter over entity BY in v0:
-```
-FROM <stream>
-| WHERE <entity_field> == "<entity>"
-| STATS errors = COUNT(*) WHERE <severity_field> IN ("ERROR", "error", "CRITICAL", "critical", "FATAL", "fatal"),
-        total = COUNT(*) WHERE <severity_field> IS NOT NULL
-  BY bucket = BUCKET(@timestamp, 1 minute)
-| EVAL metric_value = CASE(total > 0, errors * 100.0 / total, 0)
-| KEEP bucket, metric_value
-```
 
 **[auth-failure-rate]:**
 ```

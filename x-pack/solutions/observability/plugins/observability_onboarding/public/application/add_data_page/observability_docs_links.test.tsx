@@ -19,6 +19,21 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: mockServices }),
 }));
 
+jest.mock('@elastic/eui-illustrations', () => {
+  const stub = (id: string, title: string) => ({
+    id,
+    title,
+    light: '<svg></svg>',
+    dark: '<svg></svg>',
+  });
+  return {
+    observabilityVideo: stub('observability-video', 'Observability video'),
+    globalPeopleNetwork: stub('global-people-network', 'Global people network'),
+    projectsGear: stub('projects-gear', 'Projects gear'),
+    supportLaptop: stub('support-laptop', 'Support laptop'),
+  };
+});
+
 const wrapper = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
 describe('useObservabilityDocsLinks', () => {
