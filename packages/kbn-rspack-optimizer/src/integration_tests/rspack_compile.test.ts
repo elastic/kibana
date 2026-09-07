@@ -40,7 +40,7 @@ function compileInWorker(options: {
       process.execPath,
       [
         '-r',
-        '@kbn/swc-register/install',
+        '@kbn/babel-register/install',
         COMPILE_WORKER_PATH,
         JSON.stringify({ repoRoot: REPO_ROOT, ...options }),
       ],

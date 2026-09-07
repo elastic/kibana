@@ -23,7 +23,7 @@ import type { ReactRefreshRspackPlugin } from '@rspack/plugin-react-refresh';
  * `Module` subclass whose `createRequire` is replaced with Jest's own
  * registry — so we reach the real builtin via `process.getBuiltinModule`,
  * which Jest cannot intercept. The same code path works in Jest tests, the
- * swc-register worker, and the dev CLI.
+ * babel-register worker, and the dev CLI.
  */
 const nativeRequire = process.getBuiltinModule('module').createRequire(__filename);
 

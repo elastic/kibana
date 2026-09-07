@@ -11,14 +11,14 @@
  * Compile worker for the rspack compile integration tests.
  *
  * Runs a real compilation in a clean Node process (loaded via
- * `@kbn/swc-register/install`, not Jest). This is required because
+ * `@kbn/babel-register/install`, not Jest). This is required because
  * `@rspack/core` is pure ESM and must be loaded natively (see
  * rspack_runtime.ts); under Jest it lands in a different vm realm than the
  * test file, and Rspack's config normalization uses `instanceof RegExp`
  * checks that fail for cross-realm RegExp objects (rule `test`/`include`/
  * `exclude` conditions, externals, ignoreWarnings...), silently miscompiling.
  *
- * Usage: node -r @kbn/swc-register/install compile_worker.ts '<json options>'
+ * Usage: node -r @kbn/babel-register/install compile_worker.ts '<json options>'
  *
  * Contract: the process ALWAYS exits 0 once it has written
  * `<outputDir>/.compile-result.json` — compile errors are data, not process
