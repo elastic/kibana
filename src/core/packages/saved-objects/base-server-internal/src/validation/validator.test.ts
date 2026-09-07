@@ -52,13 +52,13 @@ describe('Saved Objects type validator', () => {
 
     it('should log when a validation fails', () => {
       const data = createMockObject({ attributes: { foo: false } });
-      expect(() => validator.validate(data)).toThrowError();
+      expect(() => validator.validate(data)).toThrow();
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
     it('should work when given valid values', () => {
       const data = createMockObject({ attributes: { foo: 'hi' } });
-      expect(() => validator.validate(data)).not.toThrowError();
+      expect(() => validator.validate(data)).not.toThrow();
     });
 
     it('should throw an error when given invalid values', () => {
@@ -87,7 +87,7 @@ describe('Saved Objects type validator', () => {
       });
 
       const data = createMockObject({ attributes: { foo: 'hi' } });
-      expect(() => validator.validate(data)).not.toThrowError();
+      expect(() => validator.validate(data)).not.toThrow();
     });
 
     it('validates attributes for types without defined schemas', () => {
