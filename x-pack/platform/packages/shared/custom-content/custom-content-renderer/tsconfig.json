@@ -23,6 +23,7 @@
     "@kbn/i18n",
     "@kbn/search-types",
     "@kbn/shared-ux-ai-components",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core"
   ]
 }

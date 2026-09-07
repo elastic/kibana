@@ -13,8 +13,6 @@
     "@kbn/data-plugin",
     "@kbn/esql-utils",
     "@kbn/es-query",
-    "@kbn/es-types",
-    "@kbn/datemath",
     "@kbn/search-types",
     "@kbn/custom-content-common",
     "@kbn/custom-content-renderer",
