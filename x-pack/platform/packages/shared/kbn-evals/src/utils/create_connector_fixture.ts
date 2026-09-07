@@ -65,7 +65,7 @@ export async function createConnectorFixture({
       path: `/internal/_inference/_exists/${encodeURIComponent(inferenceId)}`,
       method: 'GET',
       // versioned internal route: requests without this header are rejected
-      headers: { 'elastic-api-version': '1' },
+      headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
     })) as { isEndpointExists?: boolean };
 
     return res?.isEndpointExists === true;
@@ -172,6 +172,7 @@ export async function createConnectorFixture({
         taskType: endpoint.taskType,
         providerConfig: endpoint.providerConfig ?? {},
         ...(endpoint.taskTypeConfig ? { taskTypeConfig: endpoint.taskTypeConfig } : {}),
+        ...(endpoint.headers ? { headers: endpoint.headers } : {}),
       },
       secrets: { providerSecrets: endpoint.secrets?.providerSecrets ?? {} },
     });

@@ -7,6 +7,7 @@
 
 import { v5 } from 'uuid';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 import type { StackConnectorDefinition } from './eval_connector';
 import { createConnectorFixture } from './create_connector_fixture';
@@ -121,7 +122,7 @@ describe('createConnectorFixture', () => {
           '.openai-gpt-4o-chat_completion'
         )}`,
         method: 'GET',
-        headers: { 'elastic-api-version': '1' },
+        headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
       });
 
       // No Actions API calls at all
@@ -229,7 +230,7 @@ describe('createConnectorFixture', () => {
       expect(mockFetch).toHaveBeenCalledWith({
         path: `/internal/_inference/_exists/${encodeURIComponent(openRouterEndpoint.inferenceId)}`,
         method: 'GET',
-        headers: { 'elastic-api-version': '1' },
+        headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
       });
 
       expectNoActionsCalls();
@@ -253,7 +254,7 @@ describe('createConnectorFixture', () => {
       expect(mockFetch).toHaveBeenNthCalledWith(2, {
         path: '/internal/_inference/_add',
         method: 'POST',
-        headers: { 'elastic-api-version': '1' },
+        headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
         body: JSON.stringify({
           config: {
             inferenceId: openRouterEndpoint.inferenceId,
@@ -269,6 +270,38 @@ describe('createConnectorFixture', () => {
       expect(mockUse).toHaveBeenCalledWith({
         ...openRouterEndpoint,
         id: openRouterEndpoint.inferenceId,
+      });
+    });
+
+    it('forwards optional headers on _add', async () => {
+      const endpointWithHeaders: InferenceEndpointDefinition = {
+        ...openRouterEndpoint,
+        headers: { 'HTTP-Referer': 'https://elastic.co' },
+      };
+
+      mockFetch.mockResolvedValueOnce({ isEndpointExists: false }).mockResolvedValueOnce(undefined);
+
+      await createConnectorFixture({
+        predefinedConnector: endpointWithHeaders,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      });
+
+      expect(mockFetch).toHaveBeenNthCalledWith(2, {
+        path: '/internal/_inference/_add',
+        method: 'POST',
+        headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
+        body: JSON.stringify({
+          config: {
+            inferenceId: endpointWithHeaders.inferenceId,
+            provider: endpointWithHeaders.provider,
+            taskType: endpointWithHeaders.taskType,
+            providerConfig: endpointWithHeaders.providerConfig,
+            headers: endpointWithHeaders.headers,
+          },
+          secrets: endpointWithHeaders.secrets,
+        }),
       });
     });
 
@@ -294,7 +327,7 @@ describe('createConnectorFixture', () => {
       expect(mockFetch).toHaveBeenNthCalledWith(2, {
         path: '/internal/_inference/_add',
         method: 'POST',
-        headers: { 'elastic-api-version': '1' },
+        headers: { 'elastic-api-version': INFERENCE_ENDPOINT_INTERNAL_API_VERSION },
         body: JSON.stringify({
           config: {
             inferenceId: minimalEndpoint.inferenceId,

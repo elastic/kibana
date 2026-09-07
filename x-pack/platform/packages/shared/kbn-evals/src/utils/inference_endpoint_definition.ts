@@ -11,7 +11,7 @@ type AddEndpointConfig = InferenceEndpointRequestBody['config'];
 
 export interface InferenceEndpointDefinition
   extends Pick<AddEndpointConfig, 'inferenceId' | 'provider' | 'taskType'>,
-    Partial<Pick<AddEndpointConfig, 'providerConfig' | 'taskTypeConfig'>> {
+    Partial<Pick<AddEndpointConfig, 'providerConfig' | 'taskTypeConfig' | 'headers'>> {
   type: 'inference_endpoint';
   id: string;
   name: string;

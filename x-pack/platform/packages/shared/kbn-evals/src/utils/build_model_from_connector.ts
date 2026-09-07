@@ -30,6 +30,9 @@ function providerStringToModel(
         if (id.includes('gemini')) {
           return { provider: ModelProvider.Elastic, family: ModelFamily.Gemini };
         }
+        if (id.includes('claude') || id.includes('anthropic')) {
+          return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
+        }
       }
       return { provider: ModelProvider.Elastic, family: ModelFamily.Claude };
     }

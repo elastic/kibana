@@ -24,6 +24,7 @@ export interface ConfigEntryView extends ConfigEntry {
 }
 
 export type { FieldsConfiguration, InferenceProvider } from '@kbn/inference-common';
+export { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '@kbn/inference-common';
 
 interface AdaptiveAllocations {
   max_number_of_allocations?: number;
@@ -51,8 +52,6 @@ export interface Config {
 export interface Secrets {
   providerSecrets?: Record<string, unknown>;
 }
-
-export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
 
 export interface InferenceEndpoint {
   config: Config;
