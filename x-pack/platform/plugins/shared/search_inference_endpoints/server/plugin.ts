@@ -228,7 +228,7 @@ export class SearchInferenceEndpointsPlugin
               }
             }
 
-            return getForFeatureFn(
+            const configured = await getForFeatureFn(
               featureRegistry,
               soClient,
               getConnectorById,
@@ -236,6 +236,13 @@ export class SearchInferenceEndpointsPlugin
               this.logger,
               opts
             );
+            return {
+              endpoints: configured.soEntryFound
+                ? configured.endpoints
+                : configured.endpoints.map((e) => ({ ...e, isRecommended: true })),
+              warnings: configured.warnings,
+              soEntryFound: configured.soEntryFound,
+            };
           }
 
           const resolveFeatureEndpoints = (fId: string) =>

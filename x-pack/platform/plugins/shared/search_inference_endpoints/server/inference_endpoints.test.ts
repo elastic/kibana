@@ -530,5 +530,27 @@ describe('getForFeature', () => {
         soEntryFound: true,
       });
     });
+
+    it('excludes unavailable connector from recommendedEndpoints and emits a warning', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: ['available', 'missing'],
+          taskType: 'chat_completion',
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['available']),
+        'f1',
+        logger,
+        { onlyReturnConfigured: true }
+      );
+      expect(result.endpoints).toEqual([createConnector('available')]);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('missing');
+      expect(result.soEntryFound).toBe(false);
+    });
   });
 });
