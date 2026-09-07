@@ -20,6 +20,7 @@ import { EventFiltersGenerator } from '../../../../common/endpoint/data_generato
 import { TrustedAppGenerator } from '../../../../common/endpoint/data_generators/trusted_app_generator';
 import {
   createBlocklist,
+  createCustomYaraSignature,
   createEventFilter,
   createHostIsolationException,
   createTrustedApp,
@@ -211,6 +212,54 @@ export const createBlocklists = async ({
         .catch((e) => {
           errorCount++;
           logError(log, 'BLocklist', e);
+        })
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount, errorCount });
+        });
+    });
+  });
+};
+
+export const createCustomYaraSignatures = async ({
+  kbnClient,
+  log,
+  count,
+  reportProgress,
+  throttler,
+  policyIds,
+  globalArtifactRatio,
+}: ArtifactCreationOptions): Promise<void> => {
+  const generate = new ExceptionsListItemGenerator();
+  const { global: globalCount, perPolicy } = calculateGlobalAndPerPolicyCounts(
+    count,
+    globalArtifactRatio
+  );
+  let globalDone = 0;
+  let doneCount = 0;
+  let errorCount = 0;
+
+  log.info(
+    `Custom YARA Signatures: Creating ${globalCount} global and ${perPolicy} per-policy artifacts`
+  );
+
+  loop(count, () => {
+    throttler.addToQueue(async () => {
+      let tags = [GLOBAL_ARTIFACT_TAG];
+
+      if (globalDone < globalCount) {
+        globalDone++;
+      } else {
+        tags = generatePerPolicyEffectiveScope(policyIds);
+      }
+
+      await createCustomYaraSignature(
+        kbnClient,
+        generate.generateCustomYaraSignatureForCreate({ tags })
+      )
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Custom YARA Signature', e);
         })
         .finally(() => {
           doneCount++;

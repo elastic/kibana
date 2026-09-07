@@ -24,6 +24,7 @@ import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/manageme
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
 import { BLOCKLISTS_LIST_DEFINITION } from '../../../public/management/pages/blocklist/constants';
 import { HOST_ISOLATION_EXCEPTIONS_LIST_DEFINITION } from '../../../public/management/pages/host_isolation_exceptions/constants';
+import { CUSTOM_YARA_SIGNATURES_LIST_DEFINITION } from '../../../public/management/pages/custom_yara_signatures/constants';
 import type { NewTrustedApp } from '../../../common/endpoint/types';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../common/endpoint/constants';
@@ -59,6 +60,10 @@ export const ensureArtifactListExists = memoize(
 
       case 'endpointExceptions':
         listDefinition = ENDPOINT_EXCEPTIONS_LIST_DEFINITION;
+        break;
+
+      case 'customYaraSignatures':
+        listDefinition = CUSTOM_YARA_SIGNATURES_LIST_DEFINITION;
         break;
 
       default:
@@ -136,6 +141,14 @@ export const createHostIsolationException = async (
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
   await ensureArtifactListExists(kbnClient, 'hostIsolationExceptions');
+  return createExceptionListItem(kbnClient, data);
+};
+
+export const createCustomYaraSignature = async (
+  kbnClient: KbnClient,
+  data: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'customYaraSignatures');
   return createExceptionListItem(kbnClient, data);
 };
 

@@ -87,7 +87,11 @@ describe('When using the ArtifactListPage component', () => {
         render(props);
 
         await waitFor(() => {
-          expect(renderResult.getByTestId('testPage-list')).toBeTruthy();
+          if (props?.showAsSimpleTable) {
+            expect(renderResult.getByTestId('testPage-simpleTable')).toBeInTheDocument();
+          } else {
+            expect(renderResult.getByTestId('testPage-list')).toBeInTheDocument();
+          }
           expect(mockedApi.responseProvider.trustedAppsList).toHaveBeenCalled();
         });
 
@@ -117,6 +121,57 @@ describe('When using the ArtifactListPage component', () => {
 
       await expect(findAllByTestId('testPage-card')).resolves.toHaveLength(10);
       expect(getByTestId('testPage-showCount').textContent).toBe('Showing 20 artifacts');
+    });
+
+    describe('and showAsSimpleTable is enabled', () => {
+      it('should render a table instead of cards', async () => {
+        const { getByTestId, queryByTestId, queryAllByTestId, getAllByRole } =
+          await renderWithListData({
+            showAsSimpleTable: true,
+          });
+
+        expect(queryAllByTestId('testPage-card')).toHaveLength(0);
+        expect(queryByTestId('testPage-list')).not.toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable')).toBeInTheDocument();
+        expect(getAllByRole('row')).toHaveLength(11); // header + 10 items
+      });
+
+      it('should show table row actions that open edit and delete', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+
+        expect(getByTestId('testPage-simpleTable-cardEditAction')).toBeInTheDocument();
+        expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
+      });
+
+      it('should display the Edit flyout when table edit action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardEditAction'));
+
+        expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should display the Delete modal when table delete action is clicked', async () => {
+        const { getByTestId, getAllByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-rowActions-button')[0]);
+        await userEvent.click(getByTestId('testPage-simpleTable-cardDeleteAction'), {
+          pointerEventsCheck: 0,
+        });
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeTruthy();
+        });
+      });
     });
 
     it('should show card actions', async () => {
