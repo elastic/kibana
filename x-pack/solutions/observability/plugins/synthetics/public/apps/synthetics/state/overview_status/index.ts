@@ -362,7 +362,7 @@ const applyMergedPaginated = (
     const merged = mergePaginatedStatus(existing, incoming);
     state.status = merged;
     allConfigs = merged.configs ?? [];
-    state.total = incoming.total;
+    state.total = incoming.total ?? allConfigs.length;
   }
   state.allConfigs = allConfigs;
   state.disabledConfigs = allConfigs.filter((monitor) => !monitor.isEnabled);
@@ -396,8 +396,11 @@ export const overviewStatusReducer = createReducer(initialState, (builder) => {
         state.refreshThrough = undefined;
       } else {
         state.refreshThrough = action.payload.refreshThrough;
-        state.fillThrough = undefined;
       }
+      // Always cleared, matching `fetchOverviewStatusAction.get` — otherwise a
+      // fillAll restarted (via a filter/sort/query change) while a previous
+      // fill's remainder pages are still in flight leaves a stale value.
+      state.fillThrough = undefined;
       state.lastRequest = toRequestContext(action.payload);
     })
     .addCase(fetchOverviewStatusAction.success, (state, action) => {

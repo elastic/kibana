@@ -20,10 +20,16 @@ export const getOverviewConfigKey = (
   config: Pick<OverviewStatusMetaData, 'configId' | 'origin' | 'remote' | 'locations'>
 ): string => {
   const locationId = config.locations[0]?.id;
-  if (config.remote?.remoteName && locationId) {
+  // A genuine CCS/CPS-only or Heartbeat row is always one location (per the
+  // contract above), so a `remote`/`heartbeat` tag on a config with more than
+  // one location means it's actually a local, SO-backed multi-location
+  // monitor whose winning ping for *one* location happened to resolve through
+  // a linked cluster — key it by plain `configId` like any other local
+  // monitor instead of the compound remote/heartbeat form.
+  if (config.remote?.remoteName && locationId && config.locations.length <= 1) {
     return `${config.remote.remoteName}-${config.configId}-${locationId}`;
   }
-  if (config.origin === 'heartbeat' && locationId) {
+  if (config.origin === 'heartbeat' && locationId && config.locations.length <= 1) {
     return `heartbeat-${config.configId}-${locationId}`;
   }
   return config.configId;

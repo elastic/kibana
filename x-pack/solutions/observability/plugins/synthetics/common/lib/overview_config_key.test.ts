@@ -52,4 +52,27 @@ describe('getOverviewConfigKey', () => {
       })
     ).toBe('heartbeat-auto-us-east');
   });
+
+  it('uses configId, not the remote key, for a multi-location local monitor with remote metadata on one location', () => {
+    // A local, SO-backed monitor can have `remote` attached when the winning
+    // ping for one of its locations happens to resolve through a linked
+    // cluster. A genuine CCS/CPS-only row is always a single location, so a
+    // config with more than one location is never that — it must use its
+    // plain configId regardless of the (spurious) remote/heartbeat tag.
+    expect(
+      getOverviewConfigKey({
+        configId: 'shared',
+        remote: { remoteName: 'cluster-east' },
+        locations: [loc, { id: 'eu-west', label: 'EU West', status: 'up' }],
+      })
+    ).toBe('shared');
+
+    expect(
+      getOverviewConfigKey({
+        configId: 'auto',
+        origin: 'heartbeat',
+        locations: [loc, { id: 'eu-west', label: 'EU West', status: 'up' }],
+      })
+    ).toBe('auto');
+  });
 });

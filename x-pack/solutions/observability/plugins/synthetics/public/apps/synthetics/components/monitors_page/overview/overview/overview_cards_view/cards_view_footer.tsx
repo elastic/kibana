@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux-v7';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
 import { selectOverviewGroupBy, selectOverviewPageState } from '../../../../../state';
+import { isOverviewGrouped } from '../../../../../state/overview_status/window_refresh';
 import type { OverviewStatusMetaData } from '../../types';
 
 const OVERVIEW_ROW_COUNT = 4;
@@ -24,7 +25,7 @@ export const CardsViewFooter = ({
 }) => {
   const { perPage } = useSelector(selectOverviewPageState);
   const { field: groupField } = useSelector(selectOverviewGroupBy);
-  const isUnGrouped = groupField === 'none';
+  const isUnGrouped = !isOverviewGrouped(groupField);
   const { allConfigs, total, loaded } = useOverviewStatusState();
 
   // Every server page has been pulled in — pagination is by monitor, so compare

@@ -70,8 +70,12 @@ describe('getNextOverviewAppendPage', () => {
     expect(getNextOverviewAppendPage(40, 20, 100)).toBe(3);
   });
 
-  it('does not stall when a refresh drops a monitor and loaded is no longer a multiple of perPage', () => {
-    expect(getNextOverviewAppendPage(39, 20, 100)).toBe(3);
+  it('re-covers the misaligned rank instead of skipping past it when loaded is no longer a multiple of perPage', () => {
+    // loaded=39 sits inside page 2 (ranks 21-40). Requesting page 3 (ranks
+    // 41-60) would skip rank 40 forever; page 2 re-fetches ranks 21-39
+    // (already loaded, harmlessly deduped by the merge) plus the missing
+    // rank 40.
+    expect(getNextOverviewAppendPage(39, 20, 100)).toBe(2);
   });
 
   it('returns null when the loaded window already covers total', () => {
@@ -79,8 +83,12 @@ describe('getNextOverviewAppendPage', () => {
     expect(getNextOverviewAppendPage(39, 20, 39)).toBeNull();
   });
 
-  it('returns null when the next page would start past total', () => {
-    expect(getNextOverviewAppendPage(39, 20, 40)).toBeNull();
+  it('still fetches the one remaining rank rather than treating a near-total window as done', () => {
+    // loaded=39 of total=40: exactly one rank (40) is still missing. The old
+    // ceil-based formula rounded this up to "next page starts at total" and
+    // returned null, silently dropping that last rank for the rest of the
+    // scroll session.
+    expect(getNextOverviewAppendPage(39, 20, 40)).toBe(2);
   });
 });
 

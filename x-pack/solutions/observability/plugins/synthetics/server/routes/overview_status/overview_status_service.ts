@@ -423,13 +423,20 @@ export class OverviewStatusService {
       case 'name.keyword':
         configs.sort((a, b) => dir * a.name.localeCompare(b.name));
         break;
-      case 'updated_at':
+      case 'updated_at': {
+        // Monitors with no `updated_at` (Heartbeat / CCS remote — no local saved
+        // object) sort as "now", matching the legacy client-side sort's
+        // `moment(undefined)` fallback, so they surface as most-recently-updated
+        // rather than sinking to the end of a large fleet. Computed once so the
+        // comparator stays a stable, deterministic total order.
+        const now = Date.now();
         configs.sort((a, b) => {
-          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : 0;
-          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+          const aTime = a.updated_at ? new Date(a.updated_at).getTime() : now;
+          const bTime = b.updated_at ? new Date(b.updated_at).getTime() : now;
           return dir * (aTime - bTime);
         });
         break;
+      }
       case 'urls': {
         const withUrl = configs.filter((m) => m.urls);
         const withoutUrl = configs.filter((m) => !m.urls);

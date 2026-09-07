@@ -41,9 +41,12 @@ export function getCardWindowRefreshPayload<T extends { page?: number; perPage?:
 
 /**
  * Next infinite-scroll page for the ungrouped card view, or `null` when there
- * is nothing more to fetch. Uses `ceil(loaded / perPage) + 1` so a silent
- * refresh that drops a monitor (loaded is no longer a multiple of `perPage`)
- * still advances instead of stalling.
+ * is nothing more to fetch. Uses `floor(loaded / perPage) + 1` (the page that
+ * *contains* the next unloaded rank) rather than `ceil` (the page *after*
+ * it) so a silent refresh that drops a monitor (loaded is no longer a
+ * multiple of `perPage`) still covers every rank: the fetch may re-request a
+ * few already-loaded rows, but the merge dedupes those by key, whereas
+ * skipping past the boundary would permanently drop the gap.
  */
 export function getNextOverviewAppendPage(
   loadedMonitors: number,
@@ -53,7 +56,7 @@ export function getNextOverviewAppendPage(
   if (perPage <= 0 || loadedMonitors <= 0 || loadedMonitors >= total) {
     return null;
   }
-  const nextPage = Math.ceil(loadedMonitors / perPage) + 1;
+  const nextPage = Math.floor(loadedMonitors / perPage) + 1;
   if ((nextPage - 1) * perPage >= total) {
     return null;
   }

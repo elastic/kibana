@@ -67,7 +67,9 @@ export function* fetchStaleStatusEffect() {
  * range there's no "before the window" to look back at.
  */
 export function* augmentStaleStatusWorker(
-  action: ReturnType<typeof fetchOverviewStatusAction.success>
+  action:
+    | ReturnType<typeof fetchOverviewStatusAction.success>
+    | ReturnType<typeof appendOverviewStatusAction.success>
 ) {
   const status = action.payload as OverviewStatus;
   const pendingConfigs = status?.pendingConfigs ?? {};
@@ -92,7 +94,10 @@ export function* augmentStaleStatusWorker(
  * as a follow-up update once the supplementary lookup resolves.
  */
 export function* augmentStaleStatusEffect() {
-  yield takeLatest(fetchOverviewStatusAction.success, augmentStaleStatusWorker);
+  yield takeLatest(
+    [fetchOverviewStatusAction.success, appendOverviewStatusAction.success],
+    augmentStaleStatusWorker
+  );
 }
 
 /**

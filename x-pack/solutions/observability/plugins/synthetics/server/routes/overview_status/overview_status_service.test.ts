@@ -3174,9 +3174,35 @@ describe('current status route', () => {
       const result = service.paginateConfigs(allBuckets);
 
       const names = result.configs.map((c: any) => c.name);
-      // Monitors without updated_at (0) sort first in asc, then by date
+      // Dated monitors sort in date order regardless of where the undated ones land
       expect(names.indexOf('Alpha')).toBeLessThan(names.indexOf('Beta'));
       expect(names.indexOf('Beta')).toBeLessThan(names.indexOf('Delta'));
+    });
+
+    it('treats a missing updated_at as "now", not epoch 0', () => {
+      // Zeta (pending) and Eta (disabled) have no updated_at.
+      const asc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'updated_at',
+        sortOrder: 'asc',
+      }).paginateConfigs(allBuckets);
+      const ascNames = asc.configs.map((c: any) => c.name);
+      // Undated monitors are treated as most-recent, so they sort after every
+      // dated monitor in ascending (oldest-first) order.
+      expect(ascNames.indexOf('Zeta')).toBeGreaterThan(ascNames.indexOf('Epsilon'));
+      expect(ascNames.indexOf('Eta')).toBeGreaterThan(ascNames.indexOf('Epsilon'));
+
+      const desc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      }).paginateConfigs(allBuckets);
+      const descNames = desc.configs.map((c: any) => c.name);
+      // ...and first in descending (most-recent-first) order.
+      expect(descNames.indexOf('Zeta')).toBeLessThan(descNames.indexOf('Epsilon'));
+      expect(descNames.indexOf('Eta')).toBeLessThan(descNames.indexOf('Epsilon'));
     });
 
     it('sorts by urls with empty urls last', () => {
