@@ -16,8 +16,7 @@ import {
   type AppHeaderTab,
 } from '@kbn/app-header';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
-import { PAGE_ROUTING_PATHS, pagePathGetters } from '../common/page_paths';
-import { useGoBack } from '../common/use_go_back';
+import { PAGE_ROUTING_PATHS } from '../common/page_paths';
 import { useOsqueryAppMenu } from './use_osquery_app_menu';
 import { useOsqueryPageHeaderTitle } from './osquery_page_header_context';
 import { getHistoryFilters } from '../actions/history_filter_storage';
@@ -27,19 +26,6 @@ enum Section {
   Packs = 'packs',
   SavedQueries = 'saved_queries',
 }
-
-const OSQUERY_TITLE = i18n.translate('xpack.osquery.appNavigation.title', {
-  defaultMessage: 'Osquery',
-});
-const HISTORY_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.historyLinkText', {
-  defaultMessage: 'History',
-});
-const PACKS_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.packsLinkText', {
-  defaultMessage: 'Packs',
-});
-const QUERIES_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.queriesLinkText', {
-  defaultMessage: 'Queries',
-});
 
 const matchExact = <Params extends { [K in keyof Params]?: string }>(
   pathname: string,
@@ -64,7 +50,18 @@ export const MainNavigation = () => {
       ),
     [location.pathname]
   );
-  const handleGoBackToHistory = useGoBack(pagePathGetters.history());
+  const osqueryTitle = i18n.translate('xpack.osquery.appNavigation.title', {
+    defaultMessage: 'Osquery',
+  });
+  const historyBackLabel = i18n.translate('xpack.osquery.appNavigation.historyLinkText', {
+    defaultMessage: 'History',
+  });
+  const packsBackLabel = i18n.translate('xpack.osquery.appNavigation.packsLinkText', {
+    defaultMessage: 'Packs',
+  });
+  const queriesBackLabel = i18n.translate('xpack.osquery.appNavigation.queriesLinkText', {
+    defaultMessage: 'Queries',
+  });
 
   const persistedHistoryQs = getHistoryFilters();
   const historyPath = persistedHistoryQs
@@ -107,37 +104,29 @@ export const MainNavigation = () => {
     () => [
       {
         id: Section.History,
-        label: HISTORY_BACK_LABEL,
+        label: historyBackLabel,
         isSelected: section === Section.History,
         href: historyNavProps.href,
-        onClick: () => {
-          history.push(historyPath);
-        },
       },
       {
         id: Section.Packs,
-        label: PACKS_BACK_LABEL,
+        label: packsBackLabel,
         isSelected: section === Section.Packs,
         href: packsNavProps.href,
-        onClick: () => {
-          history.push(Section.Packs);
-        },
       },
       {
         id: Section.SavedQueries,
-        label: QUERIES_BACK_LABEL,
+        label: queriesBackLabel,
         isSelected: section === Section.SavedQueries,
         href: savedQueriesNavProps.href,
-        onClick: () => {
-          history.push(Section.SavedQueries);
-        },
       },
     ],
     [
-      history,
+      historyBackLabel,
       historyNavProps.href,
-      historyPath,
+      packsBackLabel,
       packsNavProps.href,
+      queriesBackLabel,
       savedQueriesNavProps.href,
       section,
     ]
@@ -147,16 +136,15 @@ export const MainNavigation = () => {
     const { pathname } = location;
     const historyBack: AppHeaderBack = {
       href: historyNavProps.href,
-      label: HISTORY_BACK_LABEL,
-      onClick: handleGoBackToHistory,
+      label: historyBackLabel,
     };
     const packsBack: AppHeaderBack = {
       href: packsNavProps.href,
-      label: PACKS_BACK_LABEL,
+      label: packsBackLabel,
     };
     const queriesBack: AppHeaderBack = {
       href: savedQueriesNavProps.href,
-      label: QUERIES_BACK_LABEL,
+      label: queriesBackLabel,
     };
 
     if (matchExact(pathname, PAGE_ROUTING_PATHS.new_query)) {
@@ -224,10 +212,12 @@ export const MainNavigation = () => {
 
     return null;
   }, [
-    handleGoBackToHistory,
+    historyBackLabel,
     historyNavProps.href,
     location,
+    packsBackLabel,
     packsNavProps.href,
+    queriesBackLabel,
     savedQueriesNavProps.href,
     subpageTitle,
   ]);
@@ -246,7 +236,7 @@ export const MainNavigation = () => {
 
   return (
     <AppHeader
-      title={subpageHeader?.title ?? OSQUERY_TITLE}
+      title={subpageHeader?.title ?? osqueryTitle}
       back={subpageHeader?.back}
       tabs={subpageHeader ? undefined : tabs}
       menu={menu}
