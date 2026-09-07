@@ -165,14 +165,36 @@ Investigate the test failure(s) using the `flaky-test-investigator` skill (path:
 
 If the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, split the skills:
 
-- Investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). That skill owns the diagnosis and recommended action: root cause, Cypress environment tags, intercepts, skip/unskip, duplicate coverage, and whether to fix, delete, or migrate. If the two skills disagree, the doctor wins.
+- Investigate the failure using **only** the Security Solution `flaky-test-doctor` skill at `x-pack/solutions/security/plugins/security_solution/.agents/skills/flaky-test-doctor/` (same rule: read the files in that folder directly; do not invoke the skill). **Read `SKILL.md` and the references it requires before Classify, Fix proposal, labels, or the comment.** Listing the folder (`ls`) is not enough. That skill owns the diagnosis and recommended action. If the two skills disagree, the doctor wins.
 - Use the `flaky-test-investigator` skill only for everything else: CI artifact retrieval, pipeline context, this workflow's classification, labels, comment format, and fix guardrails. Do not follow the doctor's report template, feedback survey, or "open CI in the browser / ask the user to log in" guidance.
+
+Then apply [Security Cypress: doctor action](#security-cypress-doctor-action) **before** Classify. If you have not named exactly one doctor action, you have not finished the investigation.
 
 Use all of the data at your disposal to reach a conclusion (source code, logs, failure screenshots, etc.). Review the **issue timeline** as part of this — its reopen history and any prior fix PRs that referenced this issue tell you whether an earlier fix already tried and failed.
 
 Every conclusion must cite specific evidence. Do not guess.
 
 Before classifying a UI failure as test-side, read the application code that renders the awaited element and confirm the state the test waits for is actually reachable.
+
+## Security Cypress: doctor action
+
+When the failing test path is under `x-pack/solutions/security/test/security_solution_cypress/cypress/`, the doctor names **exactly one** action. State it before Classify. The comment's Proposed fix **is that action** — not an investigator Cypress wait.
+
+| Doctor action | Comment's Proposed fix | `failure:ai-fixable` / `ai:fix-flaky` |
+| --- | --- | --- |
+| `migrate`, or any action that requires writing a **new** Scout spec or page object | Migrate. Point at `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/` (plus `scout-ui-testing` / `scout-api-testing` as needed). | Neither. The fixer will not open that PR. |
+| `move-to-api-or-unit` when that test **already exists** and Cypress is duplicate | Treat as `delete`. | Yes — so the fixer can delete. |
+| `move-to-api-or-unit` when a **new** API/unit test would be needed | Same handoff as migrate; name the API/unit destination. | Neither. |
+| `delete` | Delete the case (and unused helpers). | Yes — so the fixer can delete. |
+| `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guardrails. | Unchanged (existing Automatic fix request). |
+| `none` (environment / no repo change) | No repo change. | Neither. |
+
+`test-needs-update` may still be the classification for a Cypress-layer flake. It does **not** mean "patch the `.cy.ts`."
+
+Hard bans:
+
+- Do not propose a Cypress code fix unless the doctor action is `cypress-fix` (`@serverlessQA` only) or `fix-app`.
+- Do not recommend reopening or duplicating a Cypress wait/spinner PR when the doctor said leave Cypress.
 
 ## Environment constraints
 
@@ -191,6 +213,8 @@ Set `classification` based on where the evidence points:
 Set `confidence` to `high` (direct evidence pins the cause), `medium` (strong inference from converging signals), or `low` (plausible but underspecified).
 
 ## Fix proposal
+
+For Security Cypress, skip this section's wait/`file:line` rules and use [Security Cypress: doctor action](#security-cypress-doctor-action) instead.
 
 - Propose a fix only when you can point to a likely file or code area.
 - Prefer the smallest change that resolves the root cause **and** brings the test in line with our best practices — not a narrower band-aid that leaves the anti-pattern in place. Best practices are the north star for the fix.
@@ -218,7 +242,7 @@ Add exactly one classification label to the issue that matches the chosen `class
 
 ### "Is the issue fixable?" label
 
-Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase).
+Add `failure:ai-fixable` to the issue if we are confident that a fix is available (it would imply opening a PR against the codebase). For Security Cypress, do **not** add `failure:ai-fixable` or `ai:fix-flaky` when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none` — the fixer will not implement those.
 
 ### Automatic fix request
 
@@ -228,7 +252,7 @@ Request an automatic fix immediately for a fixable **`application`** failure. Fo
 - **Any other classification that recurred (`failCount >= 2`), and you added `failure:ai-fixable`:** add `ai:fix-flaky` to request a fix — its `labeled` event triggers the Flaky Test Fixer workflow, which opens a draft fix PR. If this is a re-run whose verdict is unchanged, just add the label — don't repost the analysis (see "Comment format").
 - **Any other classification with a first-time failure (`failCount` is 1, no recurrence):** do **not** add `ai:fix-flaky` yet, even if a fix is available — a single failure is likely a one-off and not worth a fix run. Still add `failure:ai-fixable` if a fix exists (so the signal is recorded) and leave the issue open. When the test fails again the reporter reopens the issue or posts a new-failure comment; either re-triggers this investigation at `failCount` 2, which requests the fix then.
 
-**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate.
+**Skip** the `ai:fix-flaky` label — regardless of `failCount` — when a fix PR for this issue is already up (open, in draft, or in review) in the Kibana repository; you already check for one when writing the note block below, so don't request a duplicate. Also skip `ai:fix-flaky` (and `failure:ai-fixable`) for Security Cypress when the doctor action is `migrate`, a new Scout spec, a new API/unit test, or `none`.
 
 An engineer can still request a fix for any issue by adding `ai:fix-flaky` manually; that path does not go through this workflow and is unaffected by the recurrence gate.
 
@@ -282,7 +306,7 @@ When in doubt, leave the issue open.
 
 ## Comment format
 
-Post at most one comment on the issue. **On a re-run** — a reopen or a recurrence comment, where the issue already carries a prior investigation comment — read that latest comment first: if your fresh verdict agrees with it (same classification and root cause), **skip the comment entirely** and just apply the label changes the recurrence calls for — e.g. add `ai:fix-flaky`, plus add or remove any other labels as necessary. Post a comment only for the first investigation, or when your verdict genuinely differs (new evidence, a different root cause, or the prior verdict was inconclusive and now is not).
+Post at most one comment on the issue. **On a re-run** — a reopen or a recurrence comment, where the issue already carries a prior investigation comment — read that latest comment first: if your fresh verdict agrees with it (same classification and root cause), **skip the comment entirely** and just apply the label changes the recurrence calls for — e.g. add `ai:fix-flaky`, plus add or remove any other labels as necessary. For Security Cypress, also compare **doctor actions**: if the prior comment proposed a Cypress wait, intercept, toast, or reopening a Cypress PR, and the doctor now says leave Cypress (`migrate` / `delete` / `move-to-api-or-unit` / `none`), the verdict **differs** — post. Post a comment only for the first investigation, or when your verdict genuinely differs (new evidence, a different root cause, a different doctor action, or the prior verdict was inconclusive and now is not).
 
 When you do post, optimize for a reviewer who spends ~30 seconds on it: the visible header must carry the verdict on its own, and the collapsed details must be skimmable, not exhaustive.
 
@@ -337,6 +361,8 @@ A `###` heading followed by one summary sentence — nothing else, no standing m
 | `ci-environment`    | CI environment issue   |
 | `inconclusive`      | Inconclusive           |
 
+For Security Cypress `migrate` (or a new Scout spec), use `### Test needs an update — migrate to Scout`. For a new API/unit destination, use `### Test needs an update — move to API/unit`. Do not put a Cypress-wait reason in the heading.
+
 Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the _failure_, not the test.
 
 **Summary** — one sentence that _adds_ precision beyond the heading (the exact error, line, or step); never a paraphrase of it. No `**Summary:**` label.
@@ -368,6 +394,8 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 ```
 
 #### Proposed fix (required)
+
+For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action). Do not fill it with a Cypress wait/`file:line` unless the action is `cypress-fix` or `fix-app`.
 
 State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
