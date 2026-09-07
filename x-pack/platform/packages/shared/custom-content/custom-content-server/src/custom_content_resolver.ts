@@ -10,7 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery } from '@kbn/esql-utils';
+import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -54,6 +54,7 @@ LIQUID SYNTAX:
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
+const SAMPLE_TIME_RANGE = { from: 'now-5y', to: 'now' };
 
 const getEsErrorReason = (error: unknown): string => {
   const reason = (error as { body?: { error?: { reason?: string } } })?.body?.error?.reason;
@@ -178,7 +179,11 @@ export const createCustomContentTemplateResolver = ({
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const result = await esClient.asCurrentUser.esql.query({ query: sampledQuery });
+        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const result = await esClient.asCurrentUser.esql.query({
+          query: sampledQuery,
+          ...(params.length ? { params } : {}),
+        });
         columns = (result.columns ?? []) as Array<{ name: string; type: string }>;
         values = (result.values ?? []) as unknown[][];
       } catch (err) {
