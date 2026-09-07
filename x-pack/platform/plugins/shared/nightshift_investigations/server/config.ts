@@ -10,18 +10,13 @@ import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
 const sandboxConfigSchema = schema.object({
-  // ContainerManager address — allocates sandboxes and returns per-conversation certs.
-  containermanager_host: schema.string({ defaultValue: 'localhost' }),
-  containermanager_port: schema.number({ defaultValue: 50051 }),
-  // PEM-encoded TLS server cert for the ContainerManager (for cert pinning).
-  containermanager_server_cert: schema.maybe(schema.string()),
-  // Data-plane port the sandbox listens on (same for all sandboxes).
-  sandbox_port: schema.number({ defaultValue: 8080 }),
-  // Stable client identity reused across all sandboxes.
-  client_cert: schema.string(),
-  client_key: schema.string(),
-  // Optional org identifier forwarded to containermanager.
-  organization_id: schema.string({ defaultValue: 'default' }),
+  // sandbox-api address — gRPC proxy that allocates sandboxes and proxies RPCs.
+  sandbox_api_host: schema.string({ defaultValue: 'localhost' }),
+  sandbox_api_port: schema.number({ defaultValue: 9090 }),
+  // API key required by sandbox-api for authentication (ApiKey scheme).
+  sandbox_api_key: schema.string(),
+  // Optional PEM-encoded TLS CA cert for sandbox-api. Omit for insecure (dev).
+  sandbox_api_server_cert: schema.maybe(schema.string()),
   // S3/MinIO workspace persistence — optional. When set, sandbox /workspace is
   // snapshotted to S3 after each write tool call and restored on reconnect.
   sandbox_workspace_bucket: schema.maybe(schema.string()),

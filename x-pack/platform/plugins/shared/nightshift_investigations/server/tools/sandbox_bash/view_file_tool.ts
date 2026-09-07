@@ -76,7 +76,7 @@ export const createSandboxViewFileTool = ({
     );
 
     try {
-      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath]);
+      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath], context.request);
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -102,9 +102,11 @@ export const createSandboxViewFileTool = ({
         };
       }
 
-      const [readResult] = await connectionManager.readFiles(conversationId, [
-        { path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES },
-      ]);
+      const [readResult] = await connectionManager.readFiles(
+        conversationId,
+        [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
+        context.request
+      );
       if (!readResult.success) {
         return {
           results: [

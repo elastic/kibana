@@ -71,7 +71,7 @@ export const createSandboxStrReplaceTool = ({
     logger.debug(`sandbox_str_replace: ${resolvedPath}`);
 
     try {
-      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath]);
+      const [stat] = await connectionManager.statFiles(conversationId, [resolvedPath], context.request);
       if (!stat.exists || stat.is_dir) {
         return {
           results: [
@@ -97,9 +97,11 @@ export const createSandboxStrReplaceTool = ({
         };
       }
 
-      const [readResult] = await connectionManager.readFiles(conversationId, [
-        { path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES },
-      ]);
+      const [readResult] = await connectionManager.readFiles(
+        conversationId,
+        [{ path: resolvedPath, maxReadBytes: MAX_FILE_SIZE_BYTES }],
+        context.request
+      );
       if (!readResult.success) {
         return {
           results: [
@@ -187,9 +189,11 @@ export const createSandboxStrReplaceTool = ({
       const before = original.slice(0, idx);
       const startLine = before.split('\n').length;
 
-      const writeResult = await connectionManager.writeFiles(conversationId, [
-        { path: resolvedPath, content: Buffer.from(updated, 'utf8') },
-      ]);
+      const writeResult = await connectionManager.writeFiles(
+        conversationId,
+        [{ path: resolvedPath, content: Buffer.from(updated, 'utf8') }],
+        context.request
+      );
       if (!writeResult[0]?.success) {
         return {
           results: [

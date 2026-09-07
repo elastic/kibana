@@ -7,9 +7,10 @@
 
 import { promisify } from 'util';
 import * as grpc from '@grpc/grpc-js';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { NightshiftInvestigationsConfig } from '../../config';
-import { ContainerManagerClient } from './container_manager_client';
+import { seedSandbox } from './seed_sandbox';
+import type { ConnectorSource } from './connector_sources';
 
 // ---------------------------------------------------------------------------
 // Protobuf encode/decode for SandboxService RPCs
@@ -172,9 +173,6 @@ function deserializeRunCommandResponse(buf: Buffer): RunCommandResult {
 
 // ---------------------------------------------------------------------------
 // StatFiles
-// StatFilesRequest  { paths=1:repeated string }
-// StatFilesResponse { files=1:repeated FileMetadata }
-// FileMetadata      { path=1:string, size=2:int64, is_dir=3:bool, exists=4:bool, modified_time_sec=5:int64 }
 // ---------------------------------------------------------------------------
 
 export interface FileMetadata {
@@ -225,10 +223,6 @@ function deserializeStatFilesResponse(buf: Buffer): FileMetadata[] {
 
 // ---------------------------------------------------------------------------
 // ReadFiles
-// ReadFilesRequest   { requests=1:repeated ReadFileRequest }
-// ReadFileRequest    { path=1:string, max_read_bytes=2:int64 optional }
-// ReadFilesResponse  { responses=1:repeated ReadFileResponse }
-// ReadFileResponse   { path=1:string, content=2:bytes, success=3:bool }
 // ---------------------------------------------------------------------------
 
 export interface ReadFileResult {
@@ -285,10 +279,6 @@ function deserializeReadFilesResponse(buf: Buffer): ReadFileResult[] {
 
 // ---------------------------------------------------------------------------
 // WriteFiles
-// WriteFilesRequest  { requests=1:repeated WriteFileRequest }
-// WriteFileRequest   { path=1:string, chunk_data=2:bytes }
-// WriteFilesResponse { responses=1:repeated WriteFileResponse }
-// WriteFileResponse  { bytes_written=1:int32, success=2:bool }
 // ---------------------------------------------------------------------------
 
 export interface WriteFileResult {
@@ -340,10 +330,6 @@ function deserializeWriteFilesResponse(buf: Buffer): WriteFileResult[] {
 
 // ---------------------------------------------------------------------------
 // BackupState / RestoreState
-// BackupStateRequest  { destination_url=1:string, target_path=2:string }
-// BackupStateResponse { success=1:bool, error=2:string }
-// RestoreStateRequest { source_url=1:string, target_path=2:string }
-// RestoreStateResponse{ success=1:bool, error=2:string }
 // ---------------------------------------------------------------------------
 
 export interface StateOperationResult {
@@ -388,8 +374,6 @@ function deserializeStateOperationResponse(buf: Buffer): StateOperationResult {
 
 // ---------------------------------------------------------------------------
 // Mkdirs
-// MkdirsRequest  { paths=1:repeated string }
-// MkdirsResponse { success=1:repeated bool (packed) }
 // ---------------------------------------------------------------------------
 
 function serializeMkdirsRequest(paths: string[]): Buffer {
@@ -437,7 +421,8 @@ function deserializeMkdirsResponse(buf: Buffer): boolean[] {
 }
 
 // ---------------------------------------------------------------------------
-// Per-sandbox gRPC client (one per conversation)
+// SandboxApiClient — one shared gRPC connection to sandbox-api
+// Each method takes a conversationId injected as x-conversation-id metadata.
 // ---------------------------------------------------------------------------
 
 const sandboxServiceDef: grpc.ServiceDefinition<any> = {
@@ -512,104 +497,133 @@ const sandboxServiceDef: grpc.ServiceDefinition<any> = {
 
 const SandboxServiceConstructor = grpc.makeClientConstructor(sandboxServiceDef, 'SandboxService');
 
-class SandboxGrpcClient {
+export class SandboxApiClient {
   private readonly client: grpc.Client;
+  private readonly apiKey: string;
 
   constructor({
-    ip,
+    host,
     port,
-    clientCertPem,
-    clientKeyPem,
-    sandboxCertPem,
+    apiKey,
+    serverCertPem,
   }: {
-    ip: string;
+    host: string;
     port: number;
-    clientCertPem: Buffer;
-    clientKeyPem: Buffer;
-    sandboxCertPem: Buffer;
+    apiKey: string;
+    serverCertPem?: Buffer;
   }) {
-    const credentials = grpc.credentials.createSsl(sandboxCertPem, clientKeyPem, clientCertPem);
-    this.client = new SandboxServiceConstructor(`${ip}:${port}`, credentials, {
-      'grpc.ssl_target_name_override': 'sandbox.local',
-    });
+    const credentials = serverCertPem
+      ? grpc.credentials.createSsl(serverCertPem)
+      : grpc.credentials.createInsecure();
+    this.client = new SandboxServiceConstructor(`${host}:${port}`, credentials);
+    this.apiKey = apiKey;
   }
 
-  async runCommand(params: RunCommandParams): Promise<RunCommandResult> {
+  private metadata(conversationId: string): grpc.Metadata {
+    const md = new grpc.Metadata();
+    md.set('authorization', `ApiKey ${this.apiKey}`);
+    md.set('x-conversation-id', conversationId);
+    return md;
+  }
+
+  async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
     const call = promisify(
       (this.client as any).runCommand.bind(this.client) as (
         request: RunCommandRequestProto,
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: RunCommandResult) => void
       ) => void
     );
-    return call({
-      command: params.command,
-      directory: params.directory ?? '',
-      env: params.env ?? {},
-      timeout_seconds: params.timeout_seconds ?? 0,
-      task_group_id: '',
-    });
+    return call(
+      {
+        command: params.command,
+        directory: params.directory ?? '',
+        env: params.env ?? {},
+        timeout_seconds: params.timeout_seconds ?? 0,
+        task_group_id: '',
+      },
+      this.metadata(conversationId)
+    );
   }
 
-  async statFiles(paths: string[]): Promise<FileMetadata[]> {
+  async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {
     const call = promisify(
       (this.client as any).statFiles.bind(this.client) as (
         request: string[],
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: FileMetadata[]) => void
       ) => void
     );
-    return call(paths);
+    return call(paths, this.metadata(conversationId));
   }
 
   async readFiles(
+    conversationId: string,
     requests: Array<{ path: string; maxReadBytes?: number }>
   ): Promise<ReadFileResult[]> {
     const call = promisify(
       (this.client as any).readFiles.bind(this.client) as (
         request: Array<{ path: string; maxReadBytes?: number }>,
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: ReadFileResult[]) => void
       ) => void
     );
-    return call(requests);
+    return call(requests, this.metadata(conversationId));
   }
 
-  async writeFiles(requests: Array<{ path: string; content: Buffer }>): Promise<WriteFileResult[]> {
+  async writeFiles(
+    conversationId: string,
+    requests: Array<{ path: string; content: Buffer }>
+  ): Promise<WriteFileResult[]> {
     const call = promisify(
       (this.client as any).writeFiles.bind(this.client) as (
         request: Array<{ path: string; content: Buffer }>,
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: WriteFileResult[]) => void
       ) => void
     );
-    return call(requests);
+    return call(requests, this.metadata(conversationId));
   }
 
-  async mkdirs(paths: string[]): Promise<boolean[]> {
+  async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
     const call = promisify(
       (this.client as any).mkdirs.bind(this.client) as (
         request: string[],
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: boolean[]) => void
       ) => void
     );
-    return call(paths);
+    return call(paths, this.metadata(conversationId));
   }
 
-  async backupState(destinationUrl: string, targetPath: string): Promise<StateOperationResult> {
+  async backupState(
+    conversationId: string,
+    destinationUrl: string,
+    targetPath: string
+  ): Promise<StateOperationResult> {
     const call = promisify(
       (this.client as any).backupState.bind(this.client) as (
         request: { destinationUrl: string; targetPath: string },
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
       ) => void
     );
-    return call({ destinationUrl, targetPath });
+    return call({ destinationUrl, targetPath }, this.metadata(conversationId));
   }
 
-  async restoreState(sourceUrl: string, targetPath: string): Promise<StateOperationResult> {
+  async restoreState(
+    conversationId: string,
+    sourceUrl: string,
+    targetPath: string
+  ): Promise<StateOperationResult> {
     const call = promisify(
       (this.client as any).restoreState.bind(this.client) as (
         request: { sourceUrl: string; targetPath: string },
+        metadata: grpc.Metadata,
         callback: (err: grpc.ServiceError | null, response: StateOperationResult) => void
       ) => void
     );
-    return call({ sourceUrl, targetPath });
+    return call({ sourceUrl, targetPath }, this.metadata(conversationId));
   }
 
   close(): void {
@@ -618,65 +632,95 @@ class SandboxGrpcClient {
 }
 
 // ---------------------------------------------------------------------------
-// Connection manager — one SandboxGrpcClient per conversation
+// SandboxConnectionManager — wraps SandboxApiClient with per-conversation
+// initialization (workspace restore + connector credential seeding).
 // ---------------------------------------------------------------------------
 
 type SandboxConfig = NonNullable<NightshiftInvestigationsConfig['sandbox']>;
 
 export class SandboxConnectionManager {
-  private readonly config: SandboxConfig;
   private readonly logger: Logger;
-  private readonly containerManager: ContainerManagerClient;
-  private readonly clientCertPem: Buffer;
-  private readonly clientKeyPem: Buffer;
-  /** Pending or resolved per-conversation sandbox clients. */
-  private readonly pool = new Map<string, Promise<SandboxGrpcClient>>();
-  /** Called after a new sandbox is allocated so workspace can be restored. */
+  private readonly apiClient: SandboxApiClient;
+  private readonly getConnectors?: ConnectorSource;
+  /** Tracks conversations that have been initialized (restore + seed). */
+  private readonly initialized = new Map<string, Promise<void>>();
+  /** Called once per conversation so workspace can be restored before seeding. */
   private restoreCallback?: (conversationId: string) => Promise<void>;
 
-  constructor({ config, logger }: { config: SandboxConfig; logger: Logger }) {
-    this.config = config;
+  constructor({
+    config,
+    logger,
+    getConnectors,
+  }: {
+    config: SandboxConfig;
+    logger: Logger;
+    getConnectors?: ConnectorSource;
+  }) {
     this.logger = logger;
-    this.clientCertPem = Buffer.from(config.client_cert);
-    this.clientKeyPem = Buffer.from(config.client_key);
-    this.containerManager = new ContainerManagerClient({
-      host: config.containermanager_host,
-      port: config.containermanager_port,
-      serverCertPem: config.containermanager_server_cert
-        ? Buffer.from(config.containermanager_server_cert)
+    this.getConnectors = getConnectors;
+    this.apiClient = new SandboxApiClient({
+      host: config.sandbox_api_host,
+      port: config.sandbox_api_port,
+      apiKey: config.sandbox_api_key,
+      serverCertPem: config.sandbox_api_server_cert
+        ? Buffer.from(config.sandbox_api_server_cert)
         : undefined,
     });
   }
 
-  async runCommand(conversationId: string, params: RunCommandParams): Promise<RunCommandResult> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.runCommand(params);
+  async runCommand(
+    conversationId: string,
+    params: RunCommandParams,
+    request: KibanaRequest
+  ): Promise<RunCommandResult> {
+    await this.ensureInitialized(conversationId, request);
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.runCommand(conversationId, params)
+    );
   }
 
-  async statFiles(conversationId: string, paths: string[]): Promise<FileMetadata[]> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.statFiles(paths);
+  async statFiles(
+    conversationId: string,
+    paths: string[],
+    request: KibanaRequest
+  ): Promise<FileMetadata[]> {
+    await this.ensureInitialized(conversationId, request);
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.statFiles(conversationId, paths)
+    );
   }
 
   async readFiles(
     conversationId: string,
-    requests: Array<{ path: string; maxReadBytes?: number }>
+    requests: Array<{ path: string; maxReadBytes?: number }>,
+    request: KibanaRequest
   ): Promise<ReadFileResult[]> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.readFiles(requests);
+    await this.ensureInitialized(conversationId, request);
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.readFiles(conversationId, requests)
+    );
   }
 
   async writeFiles(
     conversationId: string,
-    requests: Array<{ path: string; content: Buffer }>
+    requests: Array<{ path: string; content: Buffer }>,
+    request: KibanaRequest
   ): Promise<WriteFileResult[]> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.writeFiles(requests);
+    await this.ensureInitialized(conversationId, request);
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.writeFiles(conversationId, requests)
+    );
   }
 
-  async mkdirs(conversationId: string, paths: string[]): Promise<boolean[]> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.mkdirs(paths);
+  async mkdirs(
+    conversationId: string,
+    paths: string[],
+    request: KibanaRequest
+  ): Promise<boolean[]> {
+    await this.ensureInitialized(conversationId, request);
+    return this.withUnavailableReset(conversationId, () =>
+      this.apiClient.mkdirs(conversationId, paths)
+    );
   }
 
   async backupState(
@@ -684,8 +728,7 @@ export class SandboxConnectionManager {
     destinationUrl: string,
     targetPath: string
   ): Promise<StateOperationResult> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.backupState(destinationUrl, targetPath);
+    return this.apiClient.backupState(conversationId, destinationUrl, targetPath);
   }
 
   async restoreState(
@@ -693,48 +736,47 @@ export class SandboxConnectionManager {
     sourceUrl: string,
     targetPath: string
   ): Promise<StateOperationResult> {
-    const client = await this.getOrCreateClient(conversationId);
-    return client.restoreState(sourceUrl, targetPath);
+    return this.apiClient.restoreState(conversationId, sourceUrl, targetPath);
   }
 
   setRestoreCallback(cb: (conversationId: string) => Promise<void>): void {
     this.restoreCallback = cb;
   }
 
-  private getOrCreateClient(conversationId: string): Promise<SandboxGrpcClient> {
-    const existing = this.pool.get(conversationId);
+  /** If the sandbox returns UNAVAILABLE (pod self-exited), clear initialized so the
+   *  next call triggers a fresh restore + seed before re-allocating via sandbox-api. */
+  private async withUnavailableReset<T>(conversationId: string, fn: () => Promise<T>): Promise<T> {
+    try {
+      return await fn();
+    } catch (err) {
+      const code: number | undefined = err?.code;
+      if (code === 14 /* UNAVAILABLE */) {
+        this.initialized.delete(conversationId);
+        this.logger.warn(
+          `Sandbox UNAVAILABLE for conversation ${conversationId} — cleared init state for re-initialization on next call`
+        );
+      }
+      throw err;
+    }
+  }
+
+  private ensureInitialized(conversationId: string, request: KibanaRequest): Promise<void> {
+    const existing = this.initialized.get(conversationId);
     if (existing) return existing;
 
-    const promise = this.allocateSandbox(conversationId).catch((err) => {
-      // Remove failed promise so the next call retries.
-      this.pool.delete(conversationId);
+    const promise = this.initializeConversation(conversationId, request).catch((err) => {
+      this.initialized.delete(conversationId);
       throw err;
     });
-
-    this.pool.set(conversationId, promise);
+    this.initialized.set(conversationId, promise);
     return promise;
   }
 
-  private async allocateSandbox(conversationId: string): Promise<SandboxGrpcClient> {
-    this.logger.debug(`Allocating sandbox for conversation ${conversationId}`);
-
-    const response = await this.containerManager.getContainer({
-      organizationId: this.config.organization_id,
-      messageThreadId: conversationId,
-      inferencePublicCert: this.clientCertPem,
-    });
-
-    this.logger.debug(
-      `Got sandbox ${response.container_name} at ${response.container_ip} for conversation ${conversationId}`
-    );
-
-    const client = new SandboxGrpcClient({
-      ip: response.container_ip,
-      port: response.container_port || this.config.sandbox_port,
-      clientCertPem: this.clientCertPem,
-      clientKeyPem: this.clientKeyPem,
-      sandboxCertPem: response.sandbox_public_cert,
-    });
+  private async initializeConversation(
+    conversationId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    this.logger.debug(`Initializing sandbox for conversation ${conversationId}`);
 
     if (this.restoreCallback) {
       await this.restoreCallback(conversationId).catch((err) => {
@@ -742,14 +784,21 @@ export class SandboxConnectionManager {
       });
     }
 
-    return client;
+    if (this.getConnectors) {
+      await seedSandbox({
+        conversationId,
+        apiClient: this.apiClient,
+        request,
+        getConnectors: this.getConnectors,
+        logger: this.logger,
+      }).catch((err) => {
+        this.logger.warn(`Sandbox seeding failed: ${err.message}`);
+      });
+    }
   }
 
   close(): void {
-    this.containerManager.close();
-    for (const promise of this.pool.values()) {
-      promise.then((client) => client.close()).catch(() => {});
-    }
-    this.pool.clear();
+    this.apiClient.close();
+    this.initialized.clear();
   }
 }

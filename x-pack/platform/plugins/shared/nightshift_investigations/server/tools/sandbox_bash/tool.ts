@@ -82,12 +82,22 @@ export const createSandboxBashTool = ({
         ...env,
       };
 
-      const result = await connectionManager.runCommand(conversationId, {
-        command,
-        directory: working_directory,
-        env: mergedEnv,
-        timeout_seconds,
-      });
+      // Source connector credentials before every command. The sandbox gRPC server does not
+      // propagate arbitrary env vars to the shell process, so BASH_ENV doesn't work; prepending
+      // the source is the reliable alternative. 2>/dev/null suppresses errors on a new sandbox
+      // where .env hasn't been written yet.
+      const prefixedCommand = `source /workspace/.env 2>/dev/null || true; ${command}`;
+
+      const result = await connectionManager.runCommand(
+        conversationId,
+        {
+          command: prefixedCommand,
+          directory: working_directory,
+          env: mergedEnv,
+          timeout_seconds,
+        },
+        context.request
+      );
 
       const { stdout, stderr, exit_code, timed_out } = result;
 
