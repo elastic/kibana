@@ -160,6 +160,7 @@ export {
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
   isConversationAccessControlRole,
+  isSharedConversation,
   normalizeConversationAccessControl,
   type RoundInput,
   type ConverseInput,

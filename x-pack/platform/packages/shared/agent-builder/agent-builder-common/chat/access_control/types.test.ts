@@ -10,6 +10,7 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isSharedConversation,
   normalizeConversationAccessControl,
 } from './types';
 
@@ -70,5 +71,46 @@ describe('normalizeConversationAccessControl', () => {
       access_mode: ConversationAccessControlMode.Public,
       entries: [entry],
     });
+  });
+});
+
+describe('isSharedConversation', () => {
+  it('is not shared when access control is undefined', () => {
+    expect(isSharedConversation(undefined)).toBe(false);
+  });
+
+  it('is not shared when private with no entries', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [],
+      })
+    ).toBe(false);
+  });
+
+  it('is shared when private with at least one entry', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Private,
+        entries: [entry],
+      })
+    ).toBe(true);
+  });
+
+  it('is shared when public with no entries', () => {
+    expect(
+      isSharedConversation({
+        access_mode: ConversationAccessControlMode.Public,
+        entries: [],
+      })
+    ).toBe(true);
+  });
+
+  it('is shared for legacy access control with entries and no access mode', () => {
+    expect(isSharedConversation({ entries: [entry] })).toBe(true);
+  });
+
+  it('is shared for legacy public access control with no entries', () => {
+    expect(isSharedConversation({ access_mode: ConversationAccessControlMode.Public })).toBe(true);
   });
 });

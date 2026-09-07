@@ -7,7 +7,11 @@
 
 import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import { ConversationRoundStatus, type Conversation } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isSharedConversation,
+  type Conversation,
+} from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
@@ -18,6 +22,8 @@ import { useAgentBuilderServices } from './use_agent_builder_service';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useLastAgentId } from './use_last_agent_id';
+
+const POLL_INTERVAL_MS = 30_000;
 
 export const useConversation = () => {
   const conversationId = useConversationId();
@@ -72,6 +78,14 @@ export const useConversation = () => {
     // Refetching an errored query (no cached success) resets status `error` → `loading`,
     // which would clear `errorType` and flip `Conversation`'s conditional rendering. Resulting in a loop of unmounts/remounts.
     retryOnMount: false,
+    // Shared conversations can be written to by other participants, so poll for their rounds.
+    // Reading `data` here keeps the decision consistent with what's rendered and self-correcting:
+    // once the owner unshares, the next payload flips the predicate and the timer is torn down.
+    // Hidden tabs don't poll (`refetchIntervalInBackground` defaults to false), and `enabled:
+    // false` tears the timer down, so the gates above already suppress polling in every window
+    // where the cache is authoritative — don't weaken them.
+    refetchInterval: (data) =>
+      isSharedConversation(data?.access_control) ? POLL_INTERVAL_MS : false,
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };

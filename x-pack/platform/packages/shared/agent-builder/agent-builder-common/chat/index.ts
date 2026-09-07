@@ -12,6 +12,7 @@ export {
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
   isConversationAccessControlRole,
+  isSharedConversation,
   normalizeConversationAccessControl,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,

@@ -44,6 +44,18 @@ export const normalizeConversationAccessControl = (
   };
 };
 
+/**
+ * True when someone other than the owner can read and converse in this conversation: it is
+ * public, or it is private with at least one member entry.
+ */
+export const isSharedConversation = (
+  accessControl: Partial<ConversationAccessControl> | undefined
+): boolean => {
+  const { access_mode: accessMode, entries } = normalizeConversationAccessControl(accessControl);
+
+  return accessMode === ConversationAccessControlMode.Public || entries.length > 0;
+};
+
 /** An access-control entry without the server-assigned `added_at` timestamp, for write operations. */
 export type ConversationAccessControlEntryInput = Omit<ConversationAccessControlEntry, 'added_at'>;
 
