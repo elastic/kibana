@@ -29,7 +29,9 @@ export {
   SHOW_FIELD_STATISTICS,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
+  VIEW_MODE,
   DataGridDensity,
+  DiscoverTabType,
   UnifiedHistogramSuggestionType,
   IgnoredReason,
   buildDataTableRecord,
@@ -97,6 +99,7 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  HistogramPercentileValue,
   METRICS_GRID_SETTINGS_DEFAULTS,
   METRICS_GRID_SORT_DEFAULTS,
 } from './src';

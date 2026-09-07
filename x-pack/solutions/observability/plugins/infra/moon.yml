@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/observability-get-padded-alert-time-range-util'
   - '@kbn/apm-data-access-plugin'
+  - '@kbn/ebt-click'
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
   - '@kbn/core-saved-objects-api-server'
@@ -147,6 +148,7 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query-constants'
   - '@kbn/cps'
+  - '@kbn/ml-cps-common'
   - '@kbn/core-spaces-common'
   - '@kbn/scout-oblt'
   - '@kbn/scout-synthtrace'
@@ -155,6 +157,7 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/tooling-log'
   - '@kbn/core-logging-server-mocks'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

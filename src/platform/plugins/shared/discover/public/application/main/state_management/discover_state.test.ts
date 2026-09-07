@@ -627,6 +627,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });
@@ -655,6 +656,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });
@@ -767,6 +769,7 @@ describe('Discover state', () => {
           "controlGroupJson": undefined,
           "density": undefined,
           "description": undefined,
+          "documentsDisplayMode": undefined,
           "grid": Object {},
           "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
@@ -774,6 +777,7 @@ describe('Discover state', () => {
           "hideTable": false,
           "id": undefined,
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": false,
           "references": undefined,
           "refreshInterval": undefined,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, type ReactNode } from 'react';
+import React, { useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,12 +24,16 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPickerList } from './blocks';
 import { ProjectPickerFrameBody, ProjectPickerFrameFooter } from './blocks/frame/partials';
 import { ProjectPickerFrameHeaderActions } from './blocks/frame/partials/header';
-import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
-import { type ProjectPickerProps } from './project_picker';
-import { ProjectPickerRoutingObserver } from './project_picker_routing_observer';
+import {
+  ProjectPickerStateProvider,
+  useProjectPickerState,
+  type ProjectPickerStateProviderProps,
+} from './state';
+import { areProjectRoutingsEquivalent } from './utils';
 
 const defaultTitle = i18n.translate('cpsUtils.projectPicker.flyout.title', {
   defaultMessage: 'Change project scope',
@@ -51,52 +55,149 @@ const defaultApplyButtonLabel = i18n.translate('cpsUtils.projectPicker.flyout.ap
 });
 
 export interface ProjectPickerFlyoutProps
-  extends Omit<ProjectPickerStateProviderProps, 'children' | 'initialProjectRouting'>,
-    Pick<ProjectPickerProps, 'onProjectRoutingChange' | 'projectRouting'> {
-  onApplyChanges: () => void;
+  extends Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'defaultProjectRoutingGetter'
+    | 'controlsState'
+    | 'originProjectId'
+    | 'fetchProjectsByRouting'
+    | 'projectRoutingStrategy'
+  > {
+  projectRouting: ProjectRouting;
+  onApplyChanges: (projectRouting: NonNullable<ProjectRouting>) => void;
   onClose: () => void;
-  onDiscardChanges: () => void;
   applyButtonLabel?: ReactNode;
   backButtonLabel?: string;
+  canApplyUnchangedProjectRouting?: boolean;
   discardButtonLabel?: ReactNode;
-  isApplyDisabled?: boolean;
   titleId?: string;
   title?: ReactNode;
+}
+
+interface ProjectPickerFlyoutFooterActionsProps {
+  applyButtonLabel: ReactNode;
+  canApplyUnchangedProjectRouting: boolean;
+  currentProjectRouting: ProjectRouting | undefined;
+  discardButtonLabel: ReactNode;
+  hasUnsavedChanges: boolean;
+  onApplyChanges: (projectRouting: NonNullable<ProjectRouting>) => void;
+  onDiscardChanges: () => void;
+}
+
+function ProjectPickerFlyoutFooterActions({
+  applyButtonLabel,
+  canApplyUnchangedProjectRouting,
+  currentProjectRouting,
+  discardButtonLabel,
+  hasUnsavedChanges,
+  onApplyChanges,
+  onDiscardChanges,
+}: ProjectPickerFlyoutFooterActionsProps) {
+  const { isFilterProposalPending } = useProjectPickerState();
+  const canApplyChanges =
+    !isFilterProposalPending && (hasUnsavedChanges || canApplyUnchangedProjectRouting);
+
+  const handleApplyChanges = useCallback(() => {
+    if (!canApplyChanges || currentProjectRouting === undefined) {
+      return;
+    }
+
+    onApplyChanges(currentProjectRouting);
+  }, [canApplyChanges, currentProjectRouting, onApplyChanges]);
+
+  return (
+    <>
+      <ProjectPickerFrameFooter />
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="projectPickerFlyoutDiscardButton"
+            disabled={!hasUnsavedChanges}
+            flush="left"
+            onClick={onDiscardChanges}
+          >
+            {discardButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="projectPickerFlyoutApplyButton"
+            fill
+            isDisabled={!canApplyChanges}
+            onClick={handleApplyChanges}
+          >
+            {applyButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
 }
 
 export function ProjectPickerFlyoutContent({
   applyButtonLabel = defaultApplyButtonLabel,
   availableProjects,
   backButtonLabel = defaultBackButtonLabel,
-  defaultProjectRouting,
+  canApplyUnchangedProjectRouting = false,
+  defaultProjectRoutingGetter,
   discardButtonLabel = defaultDiscardButtonLabel,
-  isApplyDisabled,
-  isReadOnly,
+  controlsState,
   onApplyChanges,
   onClose,
-  onDiscardChanges,
-  onProjectRoutingChange,
+  fetchProjectsByRouting,
   originProjectId,
   projectRouting,
+  projectRoutingStrategy,
   titleId: titleIdProp,
   title = defaultTitle,
 }: ProjectPickerFlyoutProps) {
   const generatedTitleId = useGeneratedHtmlId();
   const titleId = titleIdProp ?? generatedTitleId;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [stagedProjectRouting, setStagedProjectRouting] = useState<ProjectRouting | undefined>();
+  const [pickerResetCounter, setPickerResetCounter] = useState(0);
+
+  // `projectRouting` is the persisted value. Consumers may hydrate it after first paint
+  // (e.g. redux initialize-on-mount); keep the getter identity tied to the live draft so
+  // the provider re-ingests when that happens, before the user stages an edit.
+  const currentProjectRouting = stagedProjectRouting ?? projectRouting;
+  const currentProjectRoutingGetter = useCallback(
+    () => currentProjectRouting,
+    [currentProjectRouting]
+  );
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (stagedProjectRouting === undefined) {
+      return false;
+    }
+
+    return !areProjectRoutingsEquivalent(
+      stagedProjectRouting,
+      projectRouting,
+      availableProjects.map((project) => project._id),
+      originProjectId
+    );
+  }, [availableProjects, originProjectId, projectRouting, stagedProjectRouting]);
+
+  const handleDiscardChanges = useCallback(() => {
+    setStagedProjectRouting(undefined);
+    setPickerResetCounter((counter) => counter + 1);
+  }, []);
 
   return (
     <ProjectPickerStateProvider
+      key={pickerResetCounter}
       availableProjects={availableProjects}
-      defaultProjectRouting={defaultProjectRouting}
-      initialProjectRouting={projectRouting}
-      isReadOnly={isReadOnly}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      currentProjectRoutingGetter={currentProjectRoutingGetter}
+      controlsState={controlsState}
       originProjectId={originProjectId}
+      onProjectRoutingChange={setStagedProjectRouting}
+      fetchProjectsByRouting={fetchProjectsByRouting}
+      projectRoutingStrategy={projectRoutingStrategy}
     >
-      <ProjectPickerRoutingObserver
-        onProjectRoutingChange={onProjectRoutingChange}
-        projectRouting={projectRouting}
-      />
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -105,7 +206,7 @@ export function ProjectPickerFlyoutContent({
                 aria-label={backButtonLabel}
                 color="text"
                 data-test-subj="projectPickerFlyoutBackButton"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 onClick={onClose}
               />
             </EuiToolTip>
@@ -120,35 +221,26 @@ export function ProjectPickerFlyoutContent({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <ProjectPickerFrameBody scrollContainerRef={scrollContainerRef}>
+      <EuiFlyoutBody
+        css={{
+          '& .euiFlyoutBody__overflowContent': { padding: 0, height: 'inherit' },
+        }}
+        scrollContainerRef={scrollContainerRef}
+      >
+        <ProjectPickerFrameBody>
           <ProjectPickerList scrollContainerRef={scrollContainerRef} />
         </ProjectPickerFrameBody>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <ProjectPickerFrameFooter />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="projectPickerFlyoutDiscardButton"
-              flush="left"
-              onClick={onDiscardChanges}
-            >
-              {discardButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="projectPickerFlyoutApplyButton"
-              fill
-              isDisabled={isApplyDisabled}
-              onClick={onApplyChanges}
-            >
-              {applyButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ProjectPickerFlyoutFooterActions
+          applyButtonLabel={applyButtonLabel}
+          canApplyUnchangedProjectRouting={canApplyUnchangedProjectRouting}
+          currentProjectRouting={currentProjectRouting}
+          discardButtonLabel={discardButtonLabel}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onApplyChanges={onApplyChanges}
+          onDiscardChanges={handleDiscardChanges}
+        />
       </EuiFlyoutFooter>
     </ProjectPickerStateProvider>
   );
@@ -164,6 +256,7 @@ export function ProjectPickerFlyout(props: ProjectPickerFlyoutProps) {
       hideCloseButton
       onClose={props.onClose}
       size="m"
+      paddingSize="m"
     >
       <ProjectPickerFlyoutContent {...props} titleId={titleId} />
     </EuiFlyout>

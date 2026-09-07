@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { RulesClientFactoryOpts } from './rules_client_factory';
 import { RulesClientFactory } from './rules_client_factory';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -44,6 +45,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import type { ActionsAuthorizationMock } from '@kbn/actions-plugin/server/authorization/actions_authorization.mock';
 import type { BackfillClient } from './backfill_client/backfill_client';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 let savedObjectsService: ReturnType<typeof savedObjectsServiceMock.createInternalStartContract>;
@@ -130,7 +132,7 @@ describe('RulesClientFactory', () => {
     (
       rulesClientFactoryParams.actions as jest.Mocked<ActionsStartContract>
     ).getActionsAuthorizationWithRequest.mockReturnValue(actionsAuthorization);
-    rulesClientFactoryParams.getSpaceId.mockReturnValue('default');
+    rulesClientFactoryParams.getSpaceId.mockReturnValue(asSpaceId('default'));
     rulesClientFactoryParams.spaceIdToNamespace.mockReturnValue('default');
     rulesClientFactoryParams.uiSettings.asScopedToClient =
       uiSettingsServiceMock.createStartContract().asScopedToClient;
@@ -712,7 +714,7 @@ describe('RulesClientFactory', () => {
       alertingAuthorization as unknown as AlertingAuthorization
     );
 
-    await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+    await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('custom-space'));
 
     // getSpaceId should NOT be called when using createWithSpaceId
     expect(rulesClientFactoryParams.getSpaceId).not.toHaveBeenCalled();
@@ -773,7 +775,7 @@ describe('RulesClientFactory', () => {
       alertingAuthorization as unknown as AlertingAuthorization
     );
 
-    await factory.createWithSpaceId(request, savedObjectsService, 'custom-space');
+    await factory.createWithSpaceId(request, savedObjectsService, asSpaceId('custom-space'));
 
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
@@ -845,7 +847,7 @@ describe('RulesClientFactory', () => {
     );
   });
 
-  test('getAuthenticationAPIKey() throws a 400 when the request is authenticated with a raw organization-level UIAM API key', async () => {
+  test('getAuthenticationAPIKey() returns uiamResult without an id for a user-created Cloud API key presented as a raw essu_ secret', async () => {
     const factory = new RulesClientFactory();
     factory.initialize({
       ...rulesClientFactoryParams,
@@ -855,27 +857,94 @@ describe('RulesClientFactory', () => {
       shouldGrantUiam: true,
     });
 
-    // Organization-level keys are presented as the raw `essu_` secret, not `base64(id:key)`
+    // User-created Cloud API keys are presented as the raw `essu_` secret, not `base64(id:key)`
     const request = mockRouter.createKibanaRequest({
       headers: {
-        authorization: `ApiKey essu_raw_org_level_key`,
+        authorization: `ApiKey essu_user_created_key`,
       },
     });
 
     await factory.create(request, savedObjectsService);
     const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
 
-    let thrownError;
+    expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
+      apiKeysEnabled: true,
+      uiamResult: {
+        name: 'uiam-test',
+        api_key: 'essu_user_created_key',
+      },
+    });
+  });
+
+  test('getAuthenticationAPIKey() includes the external verdict when UIAM reports the key as external', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: true,
+    });
+
+    // UIAM reported the authenticated API key as external (`internal: false`).
+    securityService.authc.getCurrentUser.mockReturnValue({
+      username: 'cloud-user',
+      api_key: { id: '72kse5wBzbyj5dh9Iz13', name: 'org key', internal: false },
+    } as unknown as ReturnType<typeof securityService.authc.getCurrentUser>);
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey essu_user_created_key`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(constructorCall.getAuthenticationAPIKey('test')).toEqual({
+      apiKeysEnabled: true,
+      uiamResult: {
+        name: 'uiam-test',
+        api_key: 'essu_user_created_key',
+        external: true,
+      },
+    });
+  });
+
+  test('getAuthenticationAPIKey() throws for a raw essu_ secret in a non-serverless environment', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+      shouldGrantUiam: false,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: {
+        authorization: `ApiKey essu_user_created_key`,
+      },
+    });
+
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    expect(() =>
+      constructorCall.getAuthenticationAPIKey('test')
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Cannot use a Cloud API key to create or enable rule \\"test\\". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead."`
+    );
+
+    // A client error, so it has to surface as a 4xx rather than an opaque 500.
+    let thrown: Error | undefined;
     try {
       constructorCall.getAuthenticationAPIKey('test');
-    } catch (e) {
-      thrownError = e;
+    } catch (error) {
+      thrown = error;
     }
-    expect(thrownError.isBoom).toBe(true);
-    expect(thrownError.output.statusCode).toBe(400);
-    expect(thrownError.message).toMatchInlineSnapshot(
-      `"Cannot use an organization-level API key to create or enable rule \\"test\\". Organization-level API keys are not supported for rule operations; use a project-scoped Elasticsearch API key instead."`
-    );
+    expect(Boom.isBoom(thrown)).toBe(true);
+    expect((thrown as Boom.Boom).output.statusCode).toBe(400);
   });
 
   test('getAuthenticationAPIKey() returns uiamResult for a framework-granted UIAM API key encoded as base64(id:key)', async () => {

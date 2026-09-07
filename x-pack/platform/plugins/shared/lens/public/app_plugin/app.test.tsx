@@ -25,7 +25,6 @@ import {
   defaultDoc,
 } from '../mocks';
 import { createMemoryHistory } from 'history';
-import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
@@ -149,10 +148,6 @@ describe('Lens App', () => {
 
   describe('ChromeAppHeaderRegistration', () => {
     function enableChromeNextProjectHeader() {
-      Object.defineProperty(services.chrome.next, 'isEnabled', {
-        configurable: true,
-        get: () => true,
-      });
       (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
       (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
         new BehaviorSubject('project')
@@ -626,7 +621,7 @@ describe('Lens App', () => {
       const document = {
         savedObjectId: defaultSavedObjectId,
         state: {
-          query: 'fake query',
+          query: { query: 'fake query', language: 'kuery' },
           filters: [{ query: { match_phrase: { src: 'test' } } }],
         },
         references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
@@ -636,7 +631,7 @@ describe('Lens App', () => {
       act(() => {
         lensStore.dispatch(
           setState({
-            query: 'fake query' as unknown as Query,
+            query: { query: 'fake query', language: 'kuery' },
             persistedDoc: document,
           })
         );

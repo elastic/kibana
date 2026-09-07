@@ -49,7 +49,7 @@ export function buildCiStatsSources(args: {
   return [
     // try to get times from a recent successful job on this PR
     ...(prNumber ? [{ prId: prNumber, jobName: PIPELINES.PULL_REQUEST }] : []),
-    // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
+    // if we are running on an external job, try finding times that are specific to that job
     // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
     // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
     // of too many ftr groups instead of potential timeouts.

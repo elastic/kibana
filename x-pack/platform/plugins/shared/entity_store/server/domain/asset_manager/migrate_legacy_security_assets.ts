@@ -37,14 +37,20 @@ import { getLegacySecurityLatestIndexIngestPipelineId } from './latest_index_ing
 import { getLegacySecurityMetadataComponentTemplateName } from './metadata_component_templates';
 import { getLegacySecurityMetadataIndexTemplateId } from './metadata_index_template';
 import { getLegacySecurityMetadataIndexIngestPipelineId } from './metadata_index_ingest_pipeline';
-import { getLegacySecurityUpdatesIndexTemplateId } from './updates_index_template';
+import { getLegacySecurityUpdatesIndexTemplateId } from './updates_data_stream';
 import { getLegacySecurityHistorySnapshotIndexTemplateId } from './history_snapshot_index_template';
 import {
   getLegacySecurityHistorySnapshotIndexPattern,
   toNeutralHistorySnapshotIndexName,
 } from './history_snapshot_index';
-import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import {
+  getUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesEntitiesDataStreamName,
+} from './updates_data_stream';
+import {
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 
 interface MigrateLegacySecurityAssetsOptions {
   esClient: ElasticsearchClient;
@@ -55,20 +61,6 @@ interface MigrateLegacySecurityAssetsOptions {
 /** Poll intervals for async reindex — large latest indices can exceed HTTP request timeouts. */
 const REINDEX_POLL_MIN_INTERVAL_MS = 5 * 1000;
 const REINDEX_POLL_MAX_INTERVAL_MS = 30 * 1000;
-
-const getLegacyUpdatesDataStreamName = (namespace: string) =>
-  getLegacySecurityEntityIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-    dataset: ENTITY_UPDATES,
-    namespace,
-  });
-
-const getLegacyMetadataDataStreamName = (namespace: string) =>
-  getLegacySecurityEntityIndexPattern({
-    schemaVersion: ENTITY_SCHEMA_VERSION_V2,
-    dataset: ENTITY_METADATA,
-    namespace,
-  });
 
 const getLegacyLatestCompatibilityAlias = (namespace: string) =>
   getLegacySecurityEntityIndexPattern({
@@ -172,8 +164,8 @@ export async function hasLegacySecurityAssets(
 
   const candidates = [
     getLegacySecurityLatestEntitiesIndexName(namespace),
-    getLegacyUpdatesDataStreamName(namespace),
-    getLegacyMetadataDataStreamName(namespace),
+    getLegacySecurityUpdatesEntitiesDataStreamName(namespace),
+    getLegacySecurityMetadataEntitiesDataStreamName(namespace),
   ];
   for (const name of candidates) {
     if (await isConcreteIndexOrDataStream(esClient, name)) {
@@ -261,7 +253,7 @@ export async function ensureLegacyCompatibilityAliases({
   const legacyLatestAlias = getLegacyLatestCompatibilityAlias(namespace);
   const legacyLatestConcrete = getLegacySecurityLatestEntitiesIndexName(namespace);
   const newMetadata = getMetadataEntitiesDataStreamName(namespace);
-  const legacyMetadataAlias = getLegacyMetadataDataStreamName(namespace);
+  const legacyMetadataAlias = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
 
   try {
     if (
@@ -376,7 +368,7 @@ async function migrateUpdatesDataStream({
   logger,
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyStream = getLegacyUpdatesDataStreamName(namespace);
+  const legacyStream = getLegacySecurityUpdatesEntitiesDataStreamName(namespace);
   const newStream = getUpdatesEntitiesDataStreamName(namespace);
 
   if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {
@@ -396,7 +388,7 @@ async function migrateMetadataDataStream({
   logger,
   namespace,
 }: MigrateLegacySecurityAssetsOptions): Promise<void> {
-  const legacyStream = getLegacyMetadataDataStreamName(namespace);
+  const legacyStream = getLegacySecurityMetadataEntitiesDataStreamName(namespace);
   const newStream = getMetadataEntitiesDataStreamName(namespace);
 
   if (!(await isConcreteIndexOrDataStream(esClient, legacyStream))) {

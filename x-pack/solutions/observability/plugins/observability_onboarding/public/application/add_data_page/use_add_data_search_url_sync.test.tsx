@@ -68,6 +68,23 @@ describe('useAddDataSearchUrlSync', () => {
     expect(search).toContain('search=nginx');
   });
 
+  it('drops a pending collection chooser when the term changes', async () => {
+    const user = userEvent.setup();
+    renderProbe('/?search=nginx&collection=nginx');
+    await user.type(screen.getByTestId('probeInput'), 'x');
+    const search = screen.getByTestId('probeSearch').textContent ?? '';
+    expect(search).toContain('search=nginxx');
+    expect(search).not.toContain('collection');
+  });
+
+  it('keeps a pending collection chooser when only untrimmed whitespace changes', async () => {
+    const user = userEvent.setup();
+    renderProbe('/?search=nginx&collection=nginx');
+    await user.type(screen.getByTestId('probeInput'), ' ');
+    expect(screen.getByTestId('probeInput')).toHaveValue('nginx ');
+    expect(screen.getByTestId('probeSearch')).toHaveTextContent('collection=nginx');
+  });
+
   it('adopts external URL changes (back/forward, navigation)', async () => {
     const user = userEvent.setup();
     renderProbe('/?search=redis');

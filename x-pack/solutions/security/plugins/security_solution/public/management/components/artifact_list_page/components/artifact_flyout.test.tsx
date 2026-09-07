@@ -232,46 +232,50 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
     });
 
     describe('and submit fails', () => {
-      beforeEach(() => {
-        const _renderAndWaitForFlyout = render;
+      let releaseFailedApiUpdateResponse: () => void;
 
-        render = async (...args) => {
-          mockedApi.responseProvider.trustedAppCreate.mockRejectedValue(
-            new Error('oh oh. no good!') as never
-          );
-
-          await act(async () => {
-            await _renderAndWaitForFlyout(...args);
-          });
-
-          await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
-
-          await waitFor(() =>
-            expect(mockedApi.responseProvider.trustedAppCreate).toHaveBeenCalled()
-          );
-
-          return renderResult;
-        };
-      });
-
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should re-enable `Cancel` and `Submit` buttons', async () => {
+      beforeEach(async () => {
         await render();
 
-        expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+        const deferrable = getDeferred();
+        mockedApi.responseProvider.trustedAppCreate.mockDelay.mockReturnValue(deferrable.promise);
+        mockedApi.responseProvider.trustedAppCreate.mockRejectedValue(
+          new Error('oh oh. no good!') as never
+        );
+        releaseFailedApiUpdateResponse = deferrable.resolve;
 
-        expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        await userEvent.click(renderResult.getByTestId('testPage-flyout-submitButton'));
       });
 
-      // FIXME:PT investigate test failure
-      // (I don't understand why its failing... All assertions are successful -- HELP!)
-      it.skip('should pass error along to the Form component and reset disabled back to `false`', async () => {
-        await render();
-        const lastFormProps = getLastFormComponentProps();
+      afterEach(() => {
+        if (releaseFailedApiUpdateResponse) {
+          releaseFailedApiUpdateResponse();
+        }
+      });
 
-        expect(lastFormProps.error).toBeInstanceOf(Error);
-        expect(lastFormProps.disabled).toBe(false);
+      it('should re-enable `Cancel` and `Submit` buttons', async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).not.toBeEnabled();
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).not.toBeEnabled();
+        });
+
+        releaseFailedApiUpdateResponse();
+
+        await waitFor(() => {
+          expect(renderResult.getByTestId('testPage-flyout-cancelButton')).toBeEnabled();
+          expect(renderResult.getByTestId('testPage-flyout-submitButton')).toBeEnabled();
+        });
+      });
+
+      it('should pass error along to the Form component and reset disabled back to `false`', async () => {
+        releaseFailedApiUpdateResponse();
+
+        await waitFor(() => {
+          const lastFormProps = getLastFormComponentProps();
+
+          expect(lastFormProps.error).toBeInstanceOf(Error);
+          expect(lastFormProps.disabled).toBe(false);
+        });
       });
     });
 

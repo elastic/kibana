@@ -58,6 +58,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import {
+  DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
   type DateRangePickerSettings,
   type DateRangePickerOnChangeProps,
@@ -75,8 +76,6 @@ import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
-/** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
-const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
 const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
   'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 
@@ -683,6 +682,12 @@ export const QueryBarTopRow = React.memo(
     // only the auto-refresh play/pause button operable.
     const isAutoRefreshOnly = showAutoRefreshOnly && !showDatePicker;
 
+    const dateFormatSetting: string | undefined = uiSettings.get('dateFormat');
+    const inputDateFormats = useMemo(
+      () => (dateFormatSetting ? [dateFormatSetting] : undefined),
+      [dateFormatSetting]
+    );
+
     const dateRangePickerSettingsWithAutoRefresh = useMemo<DateRangePickerSettings>(
       () =>
         propsOnRefreshChange
@@ -924,7 +929,7 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
-              dateFormat={uiSettings.get('dateFormat')}
+              inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={

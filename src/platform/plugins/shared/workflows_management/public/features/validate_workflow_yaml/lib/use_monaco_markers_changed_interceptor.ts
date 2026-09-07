@@ -14,14 +14,10 @@ import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
+import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import type { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { getSeverityString } from '../../../widgets/workflow_yaml_editor/lib/utils';
-import {
-  BATCHED_CUSTOM_MARKER_OWNER,
-  isYamlValidationMarkerOwner,
-  validationResultFingerprint,
-  type YamlValidationResult,
-} from '../model/types';
+import { validationResultFingerprint, type YamlValidationResult } from '../model/types';
 
 export interface UseMonacoMarkersChangedInterceptorResult {
   transformMonacoMarkers: (
@@ -138,14 +134,11 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      const isBatched = owner === BATCHED_CUSTOM_MARKER_OWNER;
-      if (!isBatched && !isYamlValidationMarkerOwner(owner)) {
+      if (owner !== 'yaml') {
         return;
       }
 
       const errors: YamlValidationResult[] = markers.map((marker) => {
-        const effectiveOwner = isBatched && marker.source ? marker.source : owner;
-
         return {
           message: marker.message,
           severity: getSeverityString(marker.severity as MarkerSeverity),
@@ -153,29 +146,21 @@ export function useMonacoMarkersChangedInterceptor({
           startColumn: marker.startColumn,
           endLineNumber: marker.endLineNumber,
           endColumn: marker.endColumn,
-          id: `${effectiveOwner}-${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
-          owner: effectiveOwner,
+          id: `yaml-${marker.startLineNumber}-${marker.startColumn}-${marker.endLineNumber}-${marker.endColumn}`,
+          owner: 'yaml',
+          ruleId: getYamlMarkerRuleId(marker.source),
           source: marker.source,
           hoverMessage: null,
-        } as YamlValidationResult;
+        };
       });
 
       setValidationErrors((prevErrors) => {
-        let nextErrors: YamlValidationResult[];
-        if (isBatched) {
-          const prevYamlOnly = prevErrors?.filter((e) => e.owner === 'yaml');
-          nextErrors = [...(prevYamlOnly ?? []), ...errors];
-        } else {
-          const prevOtherOwners = prevErrors?.filter((e) => e.owner !== owner);
-          nextErrors = [...(prevOtherOwners ?? []), ...errors];
-        }
-
-        const fingerprint = nextErrors.map(validationResultFingerprint).sort().join('\n');
+        const fingerprint = errors.map(validationResultFingerprint).sort().join('\n');
         if (fingerprint === lastFingerprintRef.current) {
           return prevErrors;
         }
         lastFingerprintRef.current = fingerprint;
-        return nextErrors;
+        return errors;
       });
     },
     // the yamlDocumentRef is not needed here because it's a ref object and not a dependency

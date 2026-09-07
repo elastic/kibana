@@ -26,6 +26,8 @@
     "@eslint-community/eslint-plugin-eslint-comments",
     // @types/d3-color is used by @elastic/kibana-d3-color; knip can't trace this.
     "@types/d3-color",
+    // watchpack has no type declarations; knip cannot associate this package with its import.
+    "@types/watchpack",
     // used by our FTR; knip can't trace this.
     "geckodriver",
     // these are used as Cypress reporters via reporter_config.json; knip can't trace the
@@ -37,15 +39,15 @@
     "mocha-multi-reporters",
     "mochawesome",
     "mochawesome-merge",
-    // nyc is invoked from shell scripts (.buildkite/scripts/steps/code_coverage/)
-    // and osquery's package.json scripts; knip can't trace shell usage.
-    "nyc",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint",
     // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
-    "typescript-7"
+    "typescript-7",
+    // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
+    // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
+    "@rsdoctor/rspack-plugin"
   ],
   "workspaces": {
     ".": {
@@ -81,14 +83,7 @@
         "config": [
           "packages/kbn-babel-preset/common_preset.js",
           "packages/kbn-babel-preset/webpack_preset.js",
-          "packages/kbn-babel-preset/node_preset.js",
-          "packages/kbn-babel-preset/istanbul_preset.js"
-        ]
-      },
-      "nyc": {
-        "config": [
-          "src/dev/code_coverage/nyc_config/nyc.jest.config.js",
-          "x-pack/platform/plugins/shared/osquery/.nycrc"
+          "packages/kbn-babel-preset/node_preset.js"
         ]
       },
       "webpack": {

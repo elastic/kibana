@@ -6,7 +6,7 @@
  */
 
 /**
- * Action types for entries in {@link AttachmentViewObject.getActions}. Lives
+ * Action types for entries returned by `AttachmentCreationActivity.getActions`. Lives
  * in `common/` so solutions can reference the enum without pulling the cases
  * public barrel into their page-load bundle.
  */

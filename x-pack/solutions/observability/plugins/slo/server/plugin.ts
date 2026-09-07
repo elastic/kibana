@@ -206,15 +206,17 @@ export class SLOPlugin
             isDev: this.isDev,
           });
 
-          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
-            pluginsStart.dataViews.dataViewsServiceFactory(
-              soClient,
-              scopedClusterClient.asCurrentUser
-            ),
-            pluginsStart.alerting.getRulesClientWithRequest(request),
-            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
-            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-          ]);
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient, isCpsAvailable] =
+            await Promise.all([
+              pluginsStart.dataViews.dataViewsServiceFactory(
+                soClient,
+                scopedClusterClient.asCurrentUser
+              ),
+              pluginsStart.alerting.getRulesClientWithRequest(request),
+              pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
+              pluginsStart.ruleRegistry.getRacClientWithRequest(request),
+              this.isCpsEnabled ? plugins.cps?.isTierEligible() ?? false : false,
+            ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
@@ -222,17 +224,12 @@ export class SLOPlugin
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
           const transformManager = new DefaultTransformManager(
-            createTransformGenerators(
-              spaceId,
-              dataViewsService,
-              this.isServerless,
-              this.isCpsEnabled
-            ),
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
             scopedClusterClient,
             logger
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(this.isServerless, this.isCpsEnabled),
+            new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
             scopedClusterClient,
             logger
           );
@@ -244,6 +241,7 @@ export class SLOPlugin
             dataViewsService,
             rulesClient,
             spaceId,
+            isCpsAvailable,
             repository,
             compositeRepository,
             settingsRepository,
