@@ -23,7 +23,7 @@ export const SearchInputSchema = lazySchema(() =>
     query: z
       .record(z.string().max(200), z.unknown())
       .refine((v) => Object.keys(v).length <= 30, { message: 'At most 30 top-level query keys.' })
-      .default({})
+      .default({ match_all: {} })
       .describe('Elasticsearch Query DSL object. Defaults to match_all.'),
     size: z
       .number()
@@ -142,6 +142,7 @@ export const RequestInputSchema = lazySchema(() =>
       .string()
       .min(1)
       .max(2048)
+      .regex(/^\//, 'Path must start with "/".')
       .describe(
         'ES REST API path, starting with /. E.g. "/my-index/_doc/abc123", "/_aliases", "/_cat/health?v". The base cluster URL is prepended automatically — do not repeat it here.'
       ),

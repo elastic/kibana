@@ -9,7 +9,7 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { Elasticsearch } from './elasticsearch';
-import { SearchInputSchema } from './types';
+import { RequestInputSchema, SearchInputSchema } from './types';
 
 const CLUSTER_URL = 'https://my-deployment.es.us-east-1.aws.elastic.cloud';
 
@@ -376,6 +376,29 @@ describe('Elasticsearch connector', () => {
     it('accepts a valid single index string', () => {
       const result = SearchInputSchema.safeParse({ index: 'logs-*' });
       expect(result.success).toBe(true);
+    });
+
+    it('defaults query to match_all when omitted', () => {
+      const result = SearchInputSchema.safeParse({ index: 'logs-*' });
+      expect(result.success).toBe(true);
+      expect(result.success && result.data.query).toEqual({ match_all: {} });
+    });
+  });
+
+  describe('RequestInputSchema', () => {
+    it('accepts a path starting with /', () => {
+      const result = RequestInputSchema.safeParse({ path: '/_cluster/health' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a path not starting with /', () => {
+      const result = RequestInputSchema.safeParse({ path: 'cluster/health' });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a path that could redirect requests to another host', () => {
+      const result = RequestInputSchema.safeParse({ path: '@evil.com/_search' });
+      expect(result.success).toBe(false);
     });
   });
 });

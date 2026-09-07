@@ -95,6 +95,7 @@ toc:
           - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md
           - file: connectors-kibana/dynatrace-action-type.md
+          - file: connectors-kibana/elasticsearch-action-type.md
           - file: connectors-kibana/figma-action-type.md
           - file: connectors-kibana/firecrawl-action-type.md
           - file: connectors-kibana/gcp-iam-action-type.md
@@ -146,7 +147,6 @@ toc:
           - file: connectors-kibana/zabbix-action-type.md
           - file: connectors-kibana/zendesk-action-type.md
           - file: connectors-kibana/zoom-action-type.md
-          - file: connectors-kibana/elasticsearch-action-type.md
       - file: connectors-kibana/pre-configured-connectors.md
   - file: kibana-plugins.md
   - file: commands.md
