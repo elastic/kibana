@@ -261,7 +261,8 @@ export const useSendMessageMutation = ({
           isAborted: () => controller.signal.aborted,
         });
 
-        if (!isRegenerate) {
+        // Skip on cancel: the editor restores the pending message's image chips, so clearing attachments here would break them.
+        if (!isRegenerate && !controller.signal.aborted) {
           clearPendingMessage(vars.conversationId);
           vars.resetAttachments?.();
         }
