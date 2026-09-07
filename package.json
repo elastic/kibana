@@ -2253,7 +2253,7 @@
     "sharp": "0.35.2",
     "simple-git": "3.36.0",
     "sinon": "22.1.0",
-    "sort-package-json": "3.4.0",
+    "sort-package-json": "4.0.0",
     "storybook": "8.6.18",
     "style-loader": "4.0.0",
     "stylelint": "17.14.1",
