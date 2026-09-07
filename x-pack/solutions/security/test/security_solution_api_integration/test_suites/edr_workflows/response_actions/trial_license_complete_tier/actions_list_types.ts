@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     const fetchActions = async (
       query: Record<string, string | number | string[]> = {}
-    ): Promise<Pick<ActionListApiResponse, 'data' | 'total'>> => {
+    ): Promise<ActionListApiResponse['data']> => {
       const { body } = await adminSupertest
         .get(BASE_ENDPOINT_ACTION_ROUTE)
         .set('kbn-xsrf', 'true')
@@ -50,14 +50,14 @@ export default function ({ getService }: FtrProviderContext) {
         .on('error', createSupertestErrorLogger(log))
         .expect(200);
 
-      const data = (body as ActionListApiResponse).data.filter(belongsToSeededHost);
-
-      return { data, total: data.length };
+      return (body as ActionListApiResponse).data.filter(belongsToSeededHost);
     };
 
     before(async () => {
       adminSupertest = await utils.createSuperTest();
-      indexedData = await endpointTestResources.loadEndpointData();
+      indexedData = await endpointTestResources.loadEndpointData({
+        waitUntilTransformed: false,
+      });
       agentId = indexedData.hosts[0].agent.id;
       automatedActions = await indexEndpointAndFleetActionsForHost(
         es as Client,
@@ -85,34 +85,34 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns both manual and automated actions when types is omitted', async () => {
-      const { data, total } = await fetchActions();
+      const data = await fetchActions();
 
-      expect(total).to.be.greaterThan(1);
+      expect(data).to.have.length(2);
       expect(data.some(isAutomated)).to.eql(true);
       expect(data.some((action) => !isAutomated(action))).to.eql(true);
     });
 
     it('returns only automated actions when types is automated', async () => {
-      const { data, total } = await fetchActions({ types: 'automated' });
+      const data = await fetchActions({ types: 'automated' });
 
-      expect(total).to.eql(1);
       expect(data).to.have.length(1);
       expect(isAutomated(data[0])).to.eql(true);
       expect(data[0].alertIds).to.eql(['automated-alert-id']);
     });
 
     it('returns only manual actions when types is manual', async () => {
-      const { data, total } = await fetchActions({ types: 'manual' });
+      const data = await fetchActions({ types: 'manual' });
 
-      expect(total).to.be.greaterThan(0);
+      expect(data).to.have.length(1);
       expect(data.every((action) => !isAutomated(action))).to.eql(true);
     });
 
     it('returns both when types includes automated and manual', async () => {
       const unfiltered = await fetchActions();
-      const { data, total } = await fetchActions({ types: ['automated', 'manual'] });
+      const data = await fetchActions({ types: ['automated', 'manual'] });
 
-      expect(total).to.eql(unfiltered.total);
+      expect(data).to.have.length(2);
+      expect(data.length).to.eql(unfiltered.length);
       expect(data.some(isAutomated)).to.eql(true);
       expect(data.some((action) => !isAutomated(action))).to.eql(true);
     });
