@@ -63,7 +63,7 @@ export const getRuleDetailMenu = ({
     primaryActionItem: {
       id: 'editRule',
       label: i18n.translate('xpack.alertingV2.sections.ruleDetails.editRuleButtonLabel', {
-        defaultMessage: 'Edit Rule',
+        defaultMessage: 'Edit rule',
       }),
       iconType: 'pencil',
       run: onEdit,

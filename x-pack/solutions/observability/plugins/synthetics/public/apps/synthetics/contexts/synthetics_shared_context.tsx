@@ -62,6 +62,7 @@ export const SyntheticsSharedContext: React.FC<
         uiActions: startPlugins.uiActions,
         agentBuilder: startPlugins.agentBuilder,
         cps: startPlugins.cps,
+        licensing: startPlugins.licensing,
       }}
     >
       <EuiThemeProvider darkMode={darkMode}>

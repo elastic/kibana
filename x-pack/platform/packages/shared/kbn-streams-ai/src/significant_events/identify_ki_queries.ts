@@ -10,6 +10,7 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  extractReferencedColumns,
   findOverBroadMatchPredicates,
   renderOverBroadMatchError,
   getSourcesForStream,
@@ -18,6 +19,7 @@ import {
   replaceFromSources,
 } from '@kbn/streams-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
+import { getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
   ChatCompletionTokenCount,
@@ -263,12 +265,36 @@ export async function identifyKIQueries({
   });
   const targetSources = getSourcesForStream(stream);
 
-  const validationLookback = await computeValidationLookback({
-    esClient,
-    sources: targetSources,
-    signal,
-    logger,
-  });
+  const [validationLookback, mappingConflicts] = await Promise.all([
+    computeValidationLookback({
+      esClient,
+      sources: targetSources,
+      signal,
+      logger,
+    }),
+    // Best-effort source-wide probe; drives full-source validation below and must not fail generation.
+    getMappingConflicts({
+      esClient,
+      index: targetSources,
+      signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]),
+    }).catch((error) => {
+      logger.debug(
+        () =>
+          `Failed to probe mapping conflicts for [${targetSources.join(', ')}]: ${getErrorMessage(
+            error
+          )}`
+      );
+      return [];
+    }),
+  ]);
+
+  const conflictingFields = new Set(mappingConflicts.map(({ field }) => field));
+
+  // Relax the lookback filter only for candidates that actually reference a union field;
+  // a global toggle would force every validation to scan full history.
+  const validateOverFullSource = (esql: string): boolean =>
+    conflictingFields.size > 0 &&
+    extractReferencedColumns(esql).some((name) => conflictingFields.has(name));
 
   const existingQueriesList = existingQueries ?? [];
 
@@ -473,14 +499,21 @@ export async function identifyKIQueries({
                 await esClient.esql.query(
                   {
                     query: `${rewritten}\n| LIMIT 0`,
-                    filter: {
-                      range: {
-                        '@timestamp': {
-                          gte: validationLookback,
-                          lte: 'now',
-                        },
-                      },
-                    },
+                    // The lookback filter prunes older indices via can_match, hiding a
+                    // union field's conflicting type so a bare reference passes here yet
+                    // breaks when run unbounded.
+                    ...(validateOverFullSource(rewritten)
+                      ? {}
+                      : {
+                          filter: {
+                            range: {
+                              '@timestamp': {
+                                gte: validationLookback,
+                                lte: 'now',
+                              },
+                            },
+                          },
+                        }),
                     format: 'json',
                   },
                   { signal, requestTimeout: queryValidationTimeoutMs }

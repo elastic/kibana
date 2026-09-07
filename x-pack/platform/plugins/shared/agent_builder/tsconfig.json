@@ -17,6 +17,7 @@
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/alerting-plugin",
     "@kbn/logging",
     "@kbn/config-schema",
     "@kbn/inference-plugin",
@@ -94,6 +95,7 @@
     "@kbn/elastic-assistant",
     "@kbn/inference-connectors",
     "@kbn/react-query",
+    "@kbn/react-kibana-mount",
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",

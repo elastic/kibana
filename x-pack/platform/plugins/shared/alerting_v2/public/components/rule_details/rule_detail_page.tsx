@@ -225,7 +225,7 @@ export const RuleDetailPage: React.FunctionComponent = () => {
         badges={badges}
         metadata={headerMetadata}
         menu={menu}
-        spacing="flush"
+        spacing="bleed"
         sticky={false}
       />
       <KibanaPageTemplate.Section
