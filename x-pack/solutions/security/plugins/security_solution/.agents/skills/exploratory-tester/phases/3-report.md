@@ -217,3 +217,11 @@ required" when the session still owes a CCS restore, because restoring is a
 mutation and the cleanup that follows it cannot be previewed. That is a
 report on the session's state, not a failure of the preflight: run the command
 again without `--dry-run` to restore and clean up for real.
+
+---
+
+## Filing (human-started only)
+
+Do not file the report. Do not offer to file anything on your own initiative.
+If the human later names specific findings, stop this skill and follow
+`x-pack/solutions/security/plugins/security_solution/.agents/skills/security-file-bug/SKILL.md`.
