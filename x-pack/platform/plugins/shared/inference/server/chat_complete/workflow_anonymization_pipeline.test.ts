@@ -45,10 +45,14 @@ const createOptions = ({
   sessionId: 'session-a',
   agentId: 'agent-a',
   abortSignal,
-  saltPromise: Promise.resolve('server-managed-salt'),
   regexWorker: createPiiRegexWorkerServiceMock(),
   logger: loggerMock.create(),
-  workflowAnonymization: { provider, failureMode, preLLMTimeoutMs },
+  workflowAnonymization: {
+    provider,
+    failureMode,
+    preLLMTimeoutMs,
+    encryptionKey: 'server-managed-salt',
+  },
   invocationState: { connectorInvoked: false },
   invokeConnector,
 });
