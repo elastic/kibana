@@ -19,6 +19,22 @@ export const DATE_NESTED_KBN_ARCHIVE =
 export const DATE_NESTED_ES_ARCHIVE =
   'src/platform/test/functional/fixtures/es_archiver/date_nested';
 
+export const DATE_NANOS_MIXED_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/date_nanos_mixed';
+
+export const DATE_NANOS_MIXED_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/date_nanos_mixed.json';
+
+export const DATE_NANOS_MIXED_DATA_VIEW = 'timestamp-*';
+
+export const LONG_WINDOW_LOGSTASH_ES_ARCHIVE =
+  'src/platform/test/functional/fixtures/es_archiver/long_window_logstash';
+
+export const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
+
+export const LONG_WINDOW_LOGSTASH_DATA_VIEW = 'long-window-logstash-*';
+
 export const FLIGHTS_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 

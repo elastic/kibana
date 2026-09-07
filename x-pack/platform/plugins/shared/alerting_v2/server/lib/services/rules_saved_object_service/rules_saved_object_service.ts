@@ -8,7 +8,11 @@
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectReference,
+  SavedObjectsClientContract,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
@@ -52,12 +56,16 @@ interface MatchCountAggregationResult {
  */
 const MATCH_COUNT_AGG_FIELD = 'type';
 
+export interface RuleSavedObjectDoc {
+  id: string;
+  attributes: RuleSavedObjectAttributes;
+  version?: string;
+  /** Always populated by the real SO service; optional on test mocks. */
+  references?: SavedObjectReference[];
+}
+
 export type RulesSavedObjectsBulkGetResultItem =
-  | {
-      id: string;
-      attributes: RuleSavedObjectAttributes;
-      version?: string;
-    }
+  | RuleSavedObjectDoc
   | {
       id: string;
       error: SavedObjectError;
@@ -79,6 +87,8 @@ export interface RulesFindAllResultItem {
   id: string;
   attributes: RuleSavedObjectAttributes;
   namespaces?: string[];
+  /** Always populated by the real SO service; optional on test mocks. */
+  references?: SavedObjectReference[];
 }
 
 interface RuleWriteResult {
@@ -100,23 +110,34 @@ export interface CountByQueryParams {
 }
 
 export interface RulesSavedObjectServiceContract {
-  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<RuleWriteResult>;
-  get(
-    id: string,
-    spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+  create(params: {
+    attrs: RuleSavedObjectAttributes;
+    id?: string;
+    references?: SavedObjectReference[];
+  }): Promise<RuleWriteResult>;
+  get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
   update(params: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult>;
   bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkUpdateResultItem[]>;
   bulkCreate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkCreateResultItem[]>;
   delete(params: { id: string }): Promise<void>;
   bulkDelete(ids: string[]): Promise<BulkDeleteResult>;
@@ -128,10 +149,7 @@ export interface RulesSavedObjectServiceContract {
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }): Promise<{
-    saved_objects: Array<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
-    total: number;
-  }>;
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>>;
   getRuleIdsByQuery(params: GetRuleIdsByQueryParams): Promise<string[]>;
   countByQuery(params: CountByQueryParams): Promise<number>;
   findTags(params?: { search?: string; filter?: string; size?: number }): Promise<string[]>;
@@ -156,9 +174,11 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async create({
     attrs,
     id,
+    references,
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
     const result = await this.client.create<RuleSavedObjectAttributes>(
@@ -167,13 +187,18 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       {
         id: ruleId,
         overwrite: false,
+        ...(references ? { references } : {}),
       }
     );
     return { id: result.id, version: result.version };
   }
 
   public async bulkCreate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkCreateResultItem[]> {
     if (items.length === 0) {
       return [];
@@ -184,6 +209,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         type: RULE_SAVED_OBJECT_TYPE,
         id: item.id,
         attributes: item.attrs,
+        ...(item.references ? { references: item.references } : {}),
       })),
       { overwrite: false }
     );
@@ -196,17 +222,19 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     });
   }
 
-  public async get(
-    id: string,
-    spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }> {
+  public async get(id: string, spaceId?: string): Promise<RuleSavedObjectDoc> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    return {
+      id: doc.id,
+      attributes: doc.attributes,
+      version: doc.version,
+      references: doc.references ?? [],
+    };
   }
 
   public async bulkGetByIds(
@@ -227,7 +255,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       if (isSavedObjectErrorResult(doc)) {
         return { id: doc.id, error: doc.error };
       }
-      return { id: doc.id, attributes: doc.attributes, version: doc.version };
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
     });
   }
 
@@ -251,7 +284,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     const results: RulesFindAllResultItem[] = [];
     for await (const response of finder.find()) {
       for (const doc of response.saved_objects) {
-        results.push({ id: doc.id, attributes: doc.attributes, namespaces: doc.namespaces });
+        results.push({
+          id: doc.id,
+          attributes: doc.attributes,
+          namespaces: doc.namespaces,
+          references: doc.references ?? [],
+        });
       }
     }
     await finder.close();
@@ -262,10 +300,12 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<RuleWriteResult> {
     const result = await this.client.update<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
@@ -274,13 +314,19 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
       {
         ...(version ? { version } : {}),
         mergeAttributes: false,
+        ...(references ? { references } : {}),
       }
     );
     return { id: result.id, version: result.version };
   }
 
   public async bulkUpdate(
-    items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
+    items: Array<{
+      id: string;
+      attrs: RuleSavedObjectAttributes;
+      version?: string;
+      references?: SavedObjectReference[];
+    }>
   ): Promise<BulkUpdateResultItem[]> {
     if (items.length === 0) {
       return [];
@@ -292,6 +338,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
         id: item.id,
         attributes: item.attrs,
         ...(item.version ? { version: item.version } : {}),
+        ...(item.references ? { references: item.references } : {}),
       }))
     );
 
@@ -344,7 +391,7 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     searchFields?: string[];
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-  }) {
+  }): Promise<SavedObjectsFindResponse<RuleSavedObjectAttributes>> {
     return this.client.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page,

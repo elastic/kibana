@@ -24,6 +24,7 @@ import {
   SavedObjectsUtils,
   type KibanaRequest as CoreKibanaRequest,
   type PluginInitializerContext,
+  type SavedObjectReference,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
@@ -32,7 +33,12 @@ import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
-import { ArtifactTypeRegistry } from '../artifact_types';
+import {
+  ArtifactTypeRegistry,
+  extractArtifactReferences,
+  injectArtifactReferences,
+  rebuildArtifactReferences,
+} from '../artifact_types';
 import { ALERTING_ERROR_CODES, ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   getInvalidRuleDataMessage,
@@ -340,12 +346,19 @@ export class RulesClient {
     return parsed.data;
   }
 
-  private async getExistingRule(
-    id: string
-  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined }> {
+  private async getExistingRule(id: string): Promise<{
+    attrs: RuleSavedObjectAttributes;
+    version: string | undefined;
+    references: SavedObjectReference[];
+  }> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
-      return { attrs: doc.attributes, version: doc.version };
+      const references = doc.references ?? [];
+      return {
+        attrs: this.withResolvedArtifacts(doc.attributes, references),
+        version: doc.version,
+        references,
+      };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(getRuleNotFoundMessage(id), {
@@ -377,17 +390,59 @@ export class RulesClient {
     });
   }
 
-  private async writeRuleAttrs({
+  /**
+   * Resolves every registered artifact's reference fields from `references[]`.
+   * Import rewrites `references[].id` but leaves the stored `data` on the pre-import
+   * id, so both reads and read-modify-write paths must work from the resolved view —
+   * otherwise the next write would rebuild references from the stale id.
+   */
+  private withResolvedArtifacts(
+    attrs: RuleSavedObjectAttributes,
+    references: SavedObjectReference[] | undefined
+  ): RuleSavedObjectAttributes {
+    const artifacts = injectArtifactReferences(
+      attrs.artifacts,
+      references,
+      this.artifactTypeRegistry
+    );
+    return artifacts === undefined ? attrs : { ...attrs, artifacts };
+  }
+
+  /**
+   * `references` is required rather than optional: omitting it would silently
+   * skip artifact reference resolution, so a caller that has none has to say so.
+   */
+  private toRuleApiResponse({
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references: SavedObjectReference[] | undefined;
+  }): RuleResponse {
+    return transformRuleSoAttributesToRuleApiResponse(
+      id,
+      this.withResolvedArtifacts(attrs, references),
+      version
+    );
+  }
+
+  private async writeRuleAttrs({
+    id,
+    attrs,
+    version,
+    references,
+  }: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+    references?: SavedObjectReference[];
   }): Promise<{ id: string; version?: string }> {
     try {
-      return await this.rulesSavedObjectService.update({ id, attrs, version });
+      return await this.rulesSavedObjectService.update({ id, attrs, version, references });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(getRuleVersionConflictMessage(id), {
@@ -422,11 +477,17 @@ export class RulesClient {
     // A freshly created rule is always enabled, so it always counts towards the limit.
     await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
 
+    const references = extractArtifactReferences(
+      ruleAttributes.artifacts,
+      this.artifactTypeRegistry
+    );
+
     let created: { id: string; version?: string };
     try {
       created = await this.rulesSavedObjectService.create({
         attrs: ruleAttributes,
         id: params.options?.id,
+        references,
       });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
@@ -461,7 +522,7 @@ export class RulesClient {
       throw e;
     }
 
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, ruleAttributes, version);
+    const rule = this.toRuleApiResponse({ id, attrs: ruleAttributes, version, references });
     this.ruleEventPublisher.emitRuleCreated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
@@ -481,6 +542,7 @@ export class RulesClient {
       id: string;
       enabled: boolean;
       attrs: RuleSavedObjectAttributes;
+      references: SavedObjectReference[];
     }> = [];
 
     for (const item of parsed.rules) {
@@ -497,17 +559,19 @@ export class RulesClient {
       }
 
       const { enabled } = item;
+      const attrs = transformCreateRuleBodyToRuleSoAttributes(item, {
+        enabled,
+        createdBy: userProfileUid,
+        createdAt: nowIso,
+        updatedBy: userProfileUid,
+        updatedAt: nowIso,
+        version: ruleVersion,
+      });
       prepared.push({
         id,
         enabled,
-        attrs: transformCreateRuleBodyToRuleSoAttributes(item, {
-          enabled,
-          createdBy: userProfileUid,
-          createdAt: nowIso,
-          updatedBy: userProfileUid,
-          updatedAt: nowIso,
-          version: ruleVersion,
-        }),
+        attrs,
+        references: extractArtifactReferences(attrs.artifacts, this.artifactTypeRegistry),
       });
     }
 
@@ -577,7 +641,11 @@ export class RulesClient {
     let createResults: Awaited<ReturnType<RulesSavedObjectServiceContract['bulkCreate']>>;
     try {
       createResults = await this.rulesSavedObjectService.bulkCreate(
-        toPersist.map((item) => ({ id: item.id, attrs: item.attrs }))
+        toPersist.map((item) => ({
+          id: item.id,
+          attrs: item.attrs,
+          references: item.references,
+        }))
       );
     } catch (e) {
       await this.removeExecutorTasks({
@@ -612,11 +680,12 @@ export class RulesClient {
         continue;
       }
 
-      const rule = transformRuleSoAttributesToRuleApiResponse(
-        item.id,
-        item.attrs,
-        createResult.version
-      );
+      const rule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: item.attrs,
+        version: createResult.version,
+        references: item.references,
+      });
       rules.push(rule);
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
@@ -642,7 +711,11 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+    const {
+      attrs: existingAttrs,
+      version: existingVersion,
+      references: existingReferences,
+    } = await this.getExistingRule(id);
 
     if (
       !isStateTransitionAllowed({
@@ -684,13 +757,25 @@ export class RulesClient {
       });
     }
 
+    const references = rebuildArtifactReferences({
+      artifacts: nextAttrs.artifacts,
+      previousReferences: existingReferences,
+      registry: this.artifactTypeRegistry,
+    });
+
     const { version: newVersion } = await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: options?.version ?? existingVersion,
+      references,
     });
 
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = this.toRuleApiResponse({
+      id,
+      attrs: nextAttrs,
+      version: newVersion,
+      references,
+    });
 
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
@@ -701,8 +786,8 @@ export class RulesClient {
 
   @withApm
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { attrs, version } = await this.getExistingRule(id);
-    return transformRuleSoAttributesToRuleApiResponse(id, attrs, version);
+    const { attrs, version, references } = await this.getExistingRule(id);
+    return this.toRuleApiResponse({ id, attrs, version, references });
   }
 
   @withApm
@@ -715,7 +800,15 @@ export class RulesClient {
       if ('error' in doc) {
         throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
       }
-      rulesById.set(doc.id, transformRuleSoAttributesToRuleApiResponse(doc.id, doc.attributes));
+      rulesById.set(
+        doc.id,
+        this.toRuleApiResponse({
+          id: doc.id,
+          attrs: doc.attributes,
+          version: doc.version,
+          references: doc.references,
+        })
+      );
     }
 
     return ids.map((id) => rulesById.get(id)!).filter(Boolean);
@@ -741,7 +834,7 @@ export class RulesClient {
     // Assert the rule exists (surfaces an enriched RULE_NOT_FOUND 404) before
     // touching the task or emitting. The attributes are captured so the deleted
     // rule can be emitted as the change-history snapshot for the deletion.
-    const { attrs: existingAttrs } = await this.getExistingRule(id);
+    const { attrs: existingAttrs, references } = await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
@@ -750,12 +843,16 @@ export class RulesClient {
 
     // Nothing is persisted on delete, so stamp the bumped counter onto the
     // emitted rule so the deletion orders after the last change.
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, {
-      ...existingAttrs,
-      metadata: {
-        ...existingAttrs.metadata,
-        version: this.getNextVersion(existingAttrs.metadata.version),
+    const rule = this.toRuleApiResponse({
+      id,
+      attrs: {
+        ...existingAttrs,
+        metadata: {
+          ...existingAttrs.metadata,
+          version: this.getNextVersion(existingAttrs.metadata.version),
+        },
       },
+      references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.request, [
       { ruleId: id, spaceId: this.spaceId, rule },
@@ -816,7 +913,11 @@ export class RulesClient {
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+    const {
+      attrs: existingAttrs,
+      version: existingVersion,
+      references,
+    } = await this.getExistingRule(id);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -847,9 +948,15 @@ export class RulesClient {
       id,
       attrs: nextAttrs,
       version: existingVersion,
+      references,
     });
 
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = this.toRuleApiResponse({
+      id,
+      attrs: nextAttrs,
+      version: newVersion,
+      references,
+    });
     this.ruleEventPublisher.emitRuleEnabled(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
@@ -860,7 +967,11 @@ export class RulesClient {
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
     const { spaceId } = this.getSpaceContext();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+    const {
+      attrs: existingAttrs,
+      version: existingVersion,
+      references,
+    } = await this.getExistingRule(id);
 
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
@@ -884,9 +995,15 @@ export class RulesClient {
       id,
       attrs: nextAttrs,
       version: existingVersion,
+      references,
     });
 
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = this.toRuleApiResponse({
+      id,
+      attrs: nextAttrs,
+      version: newVersion,
+      references,
+    });
     this.ruleEventPublisher.emitRuleDisabled(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
@@ -925,7 +1042,12 @@ export class RulesClient {
 
     return {
       items: res.saved_objects.map((so) =>
-        transformRuleSoAttributesToRuleApiResponse(so.id, so.attributes, so.version)
+        this.toRuleApiResponse({
+          id: so.id,
+          attrs: so.attributes,
+          version: so.version,
+          references: so.references,
+        })
       ),
       total: res.total,
       page,
@@ -1029,10 +1151,13 @@ export class RulesClient {
 
     // Capture pre-delete state so the deleted rule can be emitted as the
     // change-history snapshot per deleted rule.
-    const attrsById = new Map<string, RuleSavedObjectAttributes>();
+    const docsById = new Map<
+      string,
+      { attrs: RuleSavedObjectAttributes; references: SavedObjectReference[] }
+    >();
     for (const doc of await this.rulesSavedObjectService.bulkGetByIds(ids)) {
       if (!('error' in doc)) {
-        attrsById.set(doc.id, doc.attributes);
+        docsById.set(doc.id, { attrs: doc.attributes, references: doc.references ?? [] });
       }
     }
 
@@ -1045,18 +1170,22 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      const attrs = attrsById.get(result.id);
+      const doc = docsById.get(result.id);
       deletedRules.push(
-        attrs
+        doc
           ? {
               ruleId: result.id,
               spaceId,
-              rule: transformRuleSoAttributesToRuleApiResponse(result.id, {
-                ...attrs,
-                metadata: {
-                  ...attrs.metadata,
-                  version: this.getNextVersion(attrs.metadata.version),
+              rule: this.toRuleApiResponse({
+                id: result.id,
+                attrs: {
+                  ...doc.attrs,
+                  metadata: {
+                    ...doc.attrs.metadata,
+                    version: this.getNextVersion(doc.attrs.metadata.version),
+                  },
                 },
+                references: doc.references,
               }),
             }
           : { ruleId: result.id, spaceId }
@@ -1091,6 +1220,7 @@ export class RulesClient {
       id: string;
       attrs: RuleSavedObjectAttributes;
       version?: string;
+      references: SavedObjectReference[];
     }> = [];
 
     for (const doc of fetchResults) {
@@ -1113,7 +1243,12 @@ export class RulesClient {
         metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+      itemsToUpdate.push({
+        id: doc.id,
+        attrs: nextAttrs,
+        version: doc.version,
+        references: doc.references ?? [],
+      });
     }
 
     if (itemsToUpdate.length > 0) {
@@ -1170,7 +1305,11 @@ export class RulesClient {
         }
 
         affectedCount += 1;
-        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+        const rule = this.toRuleApiResponse({
+          id: item.id,
+          attrs: item.attrs,
+          references: item.references,
+        });
         enabledRules.push({ ruleId: rule.id, spaceId, rule });
       }
 
@@ -1202,6 +1341,7 @@ export class RulesClient {
       id: string;
       attrs: RuleSavedObjectAttributes;
       version?: string;
+      references: SavedObjectReference[];
     }> = [];
 
     for (const doc of fetchResults) {
@@ -1224,7 +1364,12 @@ export class RulesClient {
         metadata: { ...doc.attributes.metadata, version: ruleVersion },
       };
 
-      itemsToUpdate.push({ id: doc.id, attrs: nextAttrs, version: doc.version });
+      itemsToUpdate.push({
+        id: doc.id,
+        attrs: nextAttrs,
+        version: doc.version,
+        references: doc.references ?? [],
+      });
     }
 
     const disabledRules: EventRule[] = [];
@@ -1241,7 +1386,11 @@ export class RulesClient {
           continue;
         }
 
-        const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+        const rule = this.toRuleApiResponse({
+          id: item.id,
+          attrs: item.attrs,
+          references: item.references,
+        });
         affectedCount += 1;
         disabledRules.push({ ruleId: rule.id, spaceId, rule });
       }
@@ -1314,6 +1463,7 @@ export class RulesClient {
         taskId: getRuleExecutorTaskId({ ruleId: doc.id, spaceId }),
         attrs: doc.attributes,
         version: doc.version,
+        references: doc.references ?? [],
       });
     }
 
@@ -1345,6 +1495,7 @@ export class RulesClient {
         updatedAt: nowIso,
       } satisfies RuleSavedObjectAttributes,
       version: candidate.version,
+      references: candidate.references,
     }));
 
     const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
@@ -1360,7 +1511,11 @@ export class RulesClient {
       }
 
       affectedCount += 1;
-      const rule = transformRuleSoAttributesToRuleApiResponse(item.id, item.attrs);
+      const rule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: item.attrs,
+        references: item.references,
+      });
       updatedRules.push({ ruleId: rule.id, spaceId, rule });
     }
 
@@ -1627,7 +1782,11 @@ export class RulesClient {
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
+    const {
+      attrs: existingAttrs,
+      version: existingVersion,
+      references: existingReferences,
+    } = await this.getExistingRule(id);
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
@@ -1653,13 +1812,25 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
+    const references = rebuildArtifactReferences({
+      artifacts: nextAttrs.artifacts,
+      previousReferences: existingReferences,
+      registry: this.artifactTypeRegistry,
+    });
+
     const { version: newVersion } = await this.writeRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
+      references,
     });
 
-    const rule = transformRuleSoAttributesToRuleApiResponse(id, nextAttrs, newVersion);
+    const rule = this.toRuleApiResponse({
+      id,
+      attrs: nextAttrs,
+      version: newVersion,
+      references,
+    });
     this.ruleEventPublisher.emitRuleUpdated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
