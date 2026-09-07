@@ -7,30 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const mockWithHeapProfileLabels = jest.fn((_labels: Record<string, string>, fn: () => unknown) =>
-  fn()
-);
+const mockSetHeapProfileLabels = jest.fn();
 
 jest.mock('v8', () => ({
-  withHeapProfileLabels: (labels: Record<string, string>, fn: () => unknown) =>
-    mockWithHeapProfileLabels(labels, fn),
+  setHeapProfileLabels: (labels: Record<string, string>) => mockSetHeapProfileLabels(labels),
 }));
 
 import {
   HEAP_PROFILE_LABELS_ENV,
   httpRouteLabelsFromHapiRequest,
-  withHttpRouteHeapProfileLabels,
+  setHttpRouteHeapProfileLabels,
 } from './heap_profile_labels';
 
-describe('withHttpRouteHeapProfileLabels', () => {
+describe('setHttpRouteHeapProfileLabels', () => {
   const previous = process.env[HEAP_PROFILE_LABELS_ENV];
-  const labels = {
-    'http.route': '/api/status',
-    'http.request.method': 'GET',
-  };
 
   afterEach(() => {
-    mockWithHeapProfileLabels.mockClear();
+    mockSetHeapProfileLabels.mockClear();
     if (previous === undefined) {
       delete process.env[HEAP_PROFILE_LABELS_ENV];
     } else {
@@ -38,11 +31,13 @@ describe('withHttpRouteHeapProfileLabels', () => {
     }
   });
 
-  test('applies labels when the API exists', async () => {
+  test('sets labels from the hapi request when the API exists', () => {
     delete process.env[HEAP_PROFILE_LABELS_ENV];
-    const result = await withHttpRouteHeapProfileLabels(labels, async () => 7);
-    expect(result).toBe(7);
-    expect(mockWithHeapProfileLabels).toHaveBeenCalledWith(labels, expect.any(Function));
+    setHttpRouteHeapProfileLabels({ method: 'get', route: { path: '/api/status' } });
+    expect(mockSetHeapProfileLabels).toHaveBeenCalledWith({
+      'http.route': '/api/status',
+      'http.request.method': 'GET',
+    });
   });
 
   test('httpRouteLabelsFromHapiRequest requires path and method', () => {
@@ -56,15 +51,20 @@ describe('withHttpRouteHeapProfileLabels', () => {
     });
   });
 
-  test('passthrough when KBN_HEAP_PROFILE_LABELS=0', async () => {
+  test('no-op when KBN_HEAP_PROFILE_LABELS=0', () => {
     process.env[HEAP_PROFILE_LABELS_ENV] = '0';
-    const result = await withHttpRouteHeapProfileLabels(labels, async () => 3);
-    expect(result).toBe(3);
-    expect(mockWithHeapProfileLabels).not.toHaveBeenCalled();
+    setHttpRouteHeapProfileLabels({ method: 'get', route: { path: '/api/status' } });
+    expect(mockSetHeapProfileLabels).not.toHaveBeenCalled();
+  });
+
+  test('no-op when path or method is missing', () => {
+    delete process.env[HEAP_PROFILE_LABELS_ENV];
+    setHttpRouteHeapProfileLabels({});
+    expect(mockSetHeapProfileLabels).not.toHaveBeenCalled();
   });
 });
 
-describe('withHttpRouteHeapProfileLabels without the API', () => {
+describe('setHttpRouteHeapProfileLabels without the API', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.doMock('v8', () => ({}));
@@ -75,12 +75,8 @@ describe('withHttpRouteHeapProfileLabels without the API', () => {
     jest.dontMock('v8');
   });
 
-  test('passthrough when the API is absent', async () => {
-    const { withHttpRouteHeapProfileLabels: wrap } = await import('./heap_profile_labels');
-    const result = await wrap(
-      { 'http.route': '/api/status', 'http.request.method': 'GET' },
-      async () => 9
-    );
-    expect(result).toBe(9);
+  test('no-op when the API is absent', async () => {
+    const { setHttpRouteHeapProfileLabels: setLabels } = await import('./heap_profile_labels');
+    expect(() => setLabels({ method: 'get', route: { path: '/api/status' } })).not.toThrow();
   });
 });

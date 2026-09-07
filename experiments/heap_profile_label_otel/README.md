@@ -109,12 +109,17 @@ global OTel meter (`metrics.getMeter('nodejs.heap_profile')`) and scrapes
 The standalone harness in this directory remains for local runs without
 booting Kibana.
 
-Core HTTP handlers run under `v8.withHeapProfileLabels({ 'http.route',
-'http.request.method' })` in
-`src/core/packages/http/router-server-internal/src/router.ts`. Those keys
-match `kibana.http.server` so the two datasets join. A label set with
-`http.route` is exported as a route row (no `task.type`). Sets with
-`task.type` stay as task rows. Sets with neither stay `task.type=_unlabeled`.
+Core HTTP requests set `v8.setHeapProfileLabels({ 'http.route',
+'http.request.method' })` from hapi extensions in
+`src/core/packages/http/server-internal/src/http_server.ts`. `onPreAuth`
+is the earliest point where `request.route.path` is the matched template
+and covers auth plus the handler. Hapi's `_execute` does not await
+`_reply()`, so marshalling (`JSON.stringify`) and the socket write run
+in a later resource; `onPreResponse` re-enters the same labels for those
+allocations. Those keys match `kibana.http.server` so the two datasets
+join. A label set with `http.route` is exported as a route row (no
+`task.type`). Sets with `task.type` stay as task rows. Sets with neither
+stay `task.type=_unlabeled`.
 
 ## Metrics
 

@@ -24,7 +24,11 @@ import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
+import {
+  CoreKibanaRequest,
+  isSafeMethod,
+  setHttpRouteHeapProfileLabels,
+} from '@kbn/core-http-router-server-internal';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -289,6 +293,20 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
 
     this.server = createServer(serverOptions);
+    // onRequest is too early: request.route.path is not the matched template.
+    // onPreAuth covers auth, onPreHandler, and the route handler. Hapi's
+    // `_execute` does not await `_reply()`, so enterWith from onPreAuth is
+    // bound to the `_execute` / `_lifecycle` resource and does not cover
+    // payload marshalling or the socket write. Re-enter on onPreResponse,
+    // which is the first work inside `_reply`.
+    this.server.ext('onPreAuth', (request, responseToolkit) => {
+      setHttpRouteHeapProfileLabels(request);
+      return responseToolkit.continue;
+    });
+    this.server.ext('onPreResponse', (request, responseToolkit) => {
+      setHttpRouteHeapProfileLabels(request);
+      return responseToolkit.continue;
+    });
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({

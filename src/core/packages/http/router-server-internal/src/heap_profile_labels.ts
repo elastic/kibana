@@ -8,8 +8,8 @@
  */
 
 /**
- * Attribute HTTP handler allocations via Node heap-profile labels.
- * On when `v8.withHeapProfileLabels` exists; opt out with KBN_HEAP_PROFILE_LABELS=0.
+ * Attribute HTTP request allocations via Node heap-profile labels.
+ * On when `v8.setHeapProfileLabels` exists; opt out with KBN_HEAP_PROFILE_LABELS=0.
  */
 
 import v8 from 'v8';
@@ -22,13 +22,13 @@ export interface HttpRouteHeapProfileLabels {
 }
 
 interface HeapProfileLabelsApi {
-  withHeapProfileLabels?: <T>(labels: Record<string, string>, fn: () => T) => T;
+  setHeapProfileLabels?: (labels: Record<string, string>) => void;
 }
 
 const heapProfileApi = v8 as unknown as HeapProfileLabelsApi;
 
 export function hasHeapProfileLabelsApi(): boolean {
-  return typeof heapProfileApi.withHeapProfileLabels === 'function';
+  return typeof heapProfileApi.setHeapProfileLabels === 'function';
 }
 
 export function isHeapProfileLabelsEnabled(): boolean {
@@ -50,13 +50,17 @@ export function httpRouteLabelsFromHapiRequest(request: {
   };
 }
 
-export function withHttpRouteHeapProfileLabels<T>(
-  labels: HttpRouteHeapProfileLabels,
-  run: () => T
-): T {
-  const wrap = heapProfileApi.withHeapProfileLabels;
-  if (!isHeapProfileLabelsEnabled() || typeof wrap !== 'function') {
-    return run();
+export function setHttpRouteHeapProfileLabels(request: {
+  method?: string;
+  route?: { path?: string };
+}): void {
+  const set = heapProfileApi.setHeapProfileLabels;
+  if (!isHeapProfileLabelsEnabled() || typeof set !== 'function') {
+    return;
   }
-  return wrap({ ...labels }, run);
+  const labels = httpRouteLabelsFromHapiRequest(request);
+  if (!labels) {
+    return;
+  }
+  set({ ...labels });
 }
