@@ -90,6 +90,88 @@ export const substituteWorkflowConnectorIdsWithUnresolved = (
   return { yaml: result, unresolved };
 };
 
+/**
+ * FLEET-012: carry forward values an operator already resolved.
+ *
+ * The archive always ships `REPLACE_WITH_*` placeholders. Package policy vars
+ * resolve them at install, but an operator can also resolve them out of band
+ * (deploy scripts, direct edits). Overwriting yaml wholesale on upgrade reverts
+ * those live workflows to placeholders and force-disables them, destroying
+ * policy-driven state the upgrade contract promises to preserve.
+ *
+ * For each placeholder still unresolved in the incoming yaml, reuse the value at
+ * the same key in the currently-installed workflow. Only placeholders are filled:
+ * every other line of the new version is applied as shipped, so genuine
+ * definition changes still land.
+ */
+export const carryForwardResolvedPlaceholders = (
+  incomingYaml: string,
+  existingYaml: string,
+  logger?: Logger
+): { yaml: string; carried: string[] } => {
+  const placeholderRegex = new RegExp(`${VAR_PLACEHOLDER_PREFIX}[A-Z0-9_]+`, 'g');
+  const unresolved = [...new Set([...incomingYaml.matchAll(placeholderRegex)].map((m) => m[0]))];
+  if (unresolved.length === 0 || !existingYaml) {
+    return { yaml: incomingYaml, carried: [] };
+  }
+  let result = incomingYaml;
+  const carried: string[] = [];
+  for (const placeholder of unresolved) {
+    // find `<key>: <placeholder>` in the incoming yaml, then read the same key
+    // from the installed yaml. Anchoring on the key avoids guessing at values.
+    const keyMatch = new RegExp(`^(\\s*)([\\w.-]+):\\s*["']?${placeholder}["']?\\s*$`, 'm').exec(
+      result
+    );
+    if (!keyMatch) {
+      continue;
+    }
+    const key = keyMatch[2];
+    const existingMatch = new RegExp(`^\\s*${key}:\\s*(.+)$`, 'm').exec(existingYaml);
+    const existingValue = existingMatch?.[1]?.trim().replace(/^["']|["']$/g, '');
+    if (!existingValue || existingValue.startsWith(VAR_PLACEHOLDER_PREFIX)) {
+      continue;
+    }
+    result = result.replaceAll(placeholder, existingValue);
+    carried.push(placeholder);
+  }
+  // A placeholder can also sit inline (inside a SOQL string, an expression, a URL)
+  // rather than as a `key: value` pair. There is no key to anchor on, so diff the
+  // two documents line by line: when the only difference between the shipped line
+  // and the installed line is the placeholder, the installed line already holds the
+  // operator-resolved value.
+  const stillUnresolved = [...new Set([...result.matchAll(placeholderRegex)].map((m) => m[0]))];
+  if (stillUnresolved.length) {
+    const existingLines = existingYaml.split('\n');
+    for (const placeholder of stillUnresolved) {
+      const shippedLines = result.split('\n');
+      let resolvedValue: string | undefined;
+      for (const shippedLine of shippedLines) {
+        if (!shippedLine.includes(placeholder)) {
+          continue;
+        }
+        const [prefix, suffix] = shippedLine.split(placeholder, 2);
+        const candidate = existingLines.find(
+          (line) => line.startsWith(prefix) && line.endsWith(suffix) && !line.includes(placeholder)
+        );
+        if (candidate) {
+          resolvedValue = candidate.slice(prefix.length, candidate.length - suffix.length);
+          break;
+        }
+      }
+      if (resolvedValue) {
+        result = result.replaceAll(placeholder, resolvedValue);
+        carried.push(placeholder);
+      }
+    }
+  }
+  if (carried.length && logger) {
+    logger.debug(
+      `Carried forward operator-resolved values for [${carried.join(', ')}] on upgrade`
+    );
+  }
+  return { yaml: result, carried };
+};
+
 export const resolvePackagePolicyConnectorVars = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string
@@ -365,12 +447,48 @@ export async function stepInstallWorkflowAssets(
           // FLEET-012: Preserve user-disabled state across upgrades.
           // If the user explicitly disabled a managed workflow, don't re-enable it.
           const existingYaml = existingWorkflow.yaml ?? '';
+          // FLEET-012: reuse values the operator already resolved, so an upgrade
+          // cannot revert a live workflow to REPLACE_WITH_* placeholders.
+          const { yaml: carriedYaml, carried } = carryForwardResolvedPlaceholders(
+            workflowYaml,
+            existingYaml,
+            logger
+          );
+          if (carried.length) {
+            workflowYaml = carriedYaml;
+            const carriedDefinition = parse(workflowYaml) as { enabled?: boolean };
+            // Re-resolving removes the unresolved-placeholder disable reason.
+            if (resolvedIntent !== undefined && carriedDefinition.enabled === false) {
+              carriedDefinition.enabled = resolvedIntent;
+              workflowYaml = stringify(carriedDefinition);
+            }
+            workflowDefinition.enabled = (parse(workflowYaml) as { enabled?: boolean }).enabled;
+          }
           const existingParsed = parse(existingYaml) as { enabled?: boolean };
           if (existingParsed.enabled === false && workflowDefinition.enabled !== false) {
             logger.debug(
               `Workflow ${workflowId} was disabled by user — preserving disabled state on upgrade`
             );
             workflowDefinition.enabled = false;
+            workflowYaml = stringify(workflowDefinition);
+          } else if (
+            existingParsed.enabled === true &&
+            workflowDefinition.enabled === false &&
+            resolvedIntent === undefined &&
+            allUnresolved.length === 0
+          ) {
+            // Preservation has to be symmetric. A package ships workflows disabled when
+            // it cannot know which connectors a deployment has; the operator enables the
+            // ones that work. Re-disabling those on upgrade silently stops live ingest
+            // while dashboards keep rendering stale data. Only honour the operator's
+            // enablement when every placeholder resolved — an unresolved workflow must
+            // still be forced off. An explicit manifest intent (`default_enabled`, or an
+            // allowlist entry) always wins: that is the package author deliberately
+            // setting policy, not an upgrade silently dropping operator state.
+            logger.debug(
+              `Workflow ${workflowId} was enabled by user — preserving enabled state on upgrade`
+            );
+            workflowDefinition.enabled = true;
             workflowYaml = stringify(workflowDefinition);
           }
 

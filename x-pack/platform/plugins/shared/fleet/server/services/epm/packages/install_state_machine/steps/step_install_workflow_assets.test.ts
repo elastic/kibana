@@ -593,6 +593,159 @@ describe('stepInstallWorkflowAssets', () => {
     );
   });
 
+  it('FLEET-012: carries forward a placeholder embedded inline, not as a key/value pair', async () => {
+    // Real case: the Salesforce workflow interpolates the field name inside a SOQL
+    // string, so there is no `key: value` line to anchor the carry-forward on.
+    const shipped =
+      `name: my-workflow\nenabled: true\nsteps:\n` +
+      `  - with:\n      soql: SELECT Id, REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD FROM Case\n`;
+    const installed =
+      `name: my-workflow\nenabled: true\nsteps:\n` +
+      `  - with:\n      soql: SELECT Id, Product_Area__c FROM Case\n`;
+
+    workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
+      id: workflowId,
+      managed: true,
+      name: workflowId,
+      enabled: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      createdBy: 'test-user',
+      lastUpdatedAt: '2024-01-01T00:00:00Z',
+      lastUpdatedBy: 'test-user',
+      definition: null,
+      yaml: installed,
+      valid: true,
+    });
+
+    const context = createContext({
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [`${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`, Buffer.from(shipped)],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    const updateCall =
+      workflowsManagementSetupMock.management.updateWorkflow.mock.calls.find(
+        (call: unknown[]) => (call[1] as { yaml?: string })?.yaml !== undefined
+      );
+    expect(updateCall).toBeDefined();
+    const updatedYaml = (updateCall![1] as { yaml: string }).yaml;
+    expect(updatedYaml).toContain('Product_Area__c');
+    expect(updatedYaml).not.toContain('REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD');
+  });
+
+  it('FLEET-012: preserves an operator-enabled workflow across a package upgrade', async () => {
+    // The package ships this workflow disabled (connectors absent by default), but the
+    // operator enabled it on their deployment. An upgrade must not silently disable it.
+    const shippedDisabled = `name: my-workflow\nenabled: false\nsteps: []`;
+    const operatorEnabled = `name: my-workflow\nenabled: true\nsteps: []`;
+
+    workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
+      id: workflowId,
+      managed: true,
+      name: workflowId,
+      enabled: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      createdBy: 'test-user',
+      lastUpdatedAt: '2024-01-01T00:00:00Z',
+      lastUpdatedBy: 'test-user',
+      definition: null,
+      yaml: operatorEnabled,
+      valid: true,
+    });
+
+    const context = createContext({
+      packageInstallContext: {
+        packageInfo: {
+          name: pkgName,
+          version: pkgVersion,
+        },
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+              Buffer.from(shippedDisabled),
+            ],
+          ])
+        ),
+      },
+    });
+
+    await stepInstallWorkflowAssets(context);
+
+    const updateCall =
+      workflowsManagementSetupMock.management.updateWorkflow.mock.calls.find(
+        (call: unknown[]) => (call[1] as { yaml?: string })?.yaml !== undefined
+      );
+    expect(updateCall).toBeDefined();
+    const updatedYaml = (updateCall![1] as { yaml: string }).yaml;
+    expect(updatedYaml).toContain('enabled: true');
+  });
+
+  it('FLEET-012: preserves an operator-resolved connector id across a package upgrade', async () => {
+    // The archive ships REPLACE_WITH_* placeholders. Once an operator resolves them
+    // (deploy, policy vars), that value is policy-driven state: an upgrade that
+    // overwrites yaml wholesale silently reverts live workflows to placeholders and
+    // force-disables them, which is what the DoD forbids.
+    const resolvedYaml = [
+      'name: my-workflow',
+      'enabled: true',
+      'connectorId: real-github-connector-id',
+      'steps: []',
+    ].join('\n');
+
+    workflowsManagementSetupMock.management.getWorkflow.mockResolvedValue({
+      id: workflowId,
+      managed: true,
+      name: workflowId,
+      enabled: true,
+      createdAt: '2024-01-01T00:00:00Z',
+      createdBy: 'test-user',
+      lastUpdatedAt: '2024-01-01T00:00:00Z',
+      lastUpdatedBy: 'test-user',
+      definition: null,
+      yaml: resolvedYaml,
+      valid: true,
+    });
+
+    // the archive ships the placeholder; no package policy var resolves it
+    const shippedYaml = `name: my-workflow\nenabled: true\nconnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID\nsteps: []`;
+    await stepInstallWorkflowAssets(
+      createContext({
+        packageInstallContext: {
+          packageInfo: {
+            name: pkgName,
+            version: pkgVersion,
+          },
+          archiveIterator: createArchiveIteratorFromMap(
+            new Map([
+              [
+                `${pkgName}-${pkgVersion}/kibana/workflow/${workflowFileName}`,
+                Buffer.from(shippedYaml),
+              ],
+            ])
+          ),
+        },
+      })
+    );
+
+    const updateCall =
+      workflowsManagementSetupMock.management.updateWorkflow.mock.calls.at(-1);
+    expect(updateCall).toBeDefined();
+    const updatedYaml = (updateCall![1] as { yaml: string }).yaml;
+    expect(updatedYaml).toContain('real-github-connector-id');
+    expect(updatedYaml).not.toContain('REPLACE_WITH');
+  });
+
   it('warns and forces disabled when unresolved placeholders exist and default_enabled is true', async () => {
     const logger = loggingSystemMock.createLogger();
     const unresolvedPlaceholder = 'REPLACE_WITH_JIRA_CONNECTOR_ID';
