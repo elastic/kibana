@@ -1,5 +1,5 @@
 {
-  "sha1": "d07f0590f3c06c292a2f9a7d675e3852e6d9a1cb",
+  "sha1": "7e980ff78ae4ff28cda153d3f20ccd32223d09e0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -783,19 +783,6 @@
       }
     },
     {
-      "id": "d8893df3b2e499c-2867e4a4bffc4e3",
-      "title": "Lens Convert to ES|QL button should not display button for inline visualizations when feature flag is set to false",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_conversion/button_hidden.spec.ts",
-        "line": 30,
-        "column": 5
-      }
-    },
-    {
       "id": "7d8101c6e65d69b-a2f17ede9b95bc3",
       "title": "Lens ESQL dashboard inline editing should keep the table type when the user adds a limit via Try ESQL",
       "expectedStatus": "passed",
@@ -845,19 +832,6 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
         "line": 113,
         "column": 31
-      }
-    },
-    {
-      "id": "77434e60a599e43-78f10f03c229085",
-      "title": "Lens legacy dual-written ES|QL slot self-heal (by-value inline editing) renders the layer query, self-heals the stale slot on save, and survives re-open",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_legacy_slot_self_heal.spec.ts",
-        "line": 137,
-        "column": 33
       }
     },
     {
@@ -1261,6 +1235,19 @@
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_secondary.spec.ts",
         "line": 133,
         "column": 9
+      }
+    },
+    {
+      "id": "a16fbb825b008d7-ebf2b94c7596db4",
+      "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
+        "line": 75,
+        "column": 24
       }
     },
     {
