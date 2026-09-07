@@ -24,6 +24,7 @@ import {
   getEuidDslFilterBasedOnDocument,
   getEuidNamespaceSourceFields,
   getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
 } from '@kbn/entity-store/common/domain/euid';
 import {
   getEntityFilterSpec,
@@ -36,6 +37,8 @@ import {
   removeFilter,
   buildNamespaceSourceFilters,
   buildEntityDslFilter,
+  buildFieldsDsl,
+  isEuidDslTranslatable,
   addEntityFilter,
   containsEntityFilter,
   removeEntityFilter,
@@ -48,6 +51,7 @@ const euidApi: EuidFilterApi = {
   dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
   getEuidNamespaceSourceFields,
   getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
 };
 
 const buildFilterMock = (key: string, value: string, controlledBy?: string) => ({
@@ -1048,6 +1052,136 @@ describe('search_filters', () => {
         // document has that field — the filter would return nothing at all.
         expect(JSON.stringify(withObserved)).toContain('entityanalytics_okta.user');
         expect(JSON.stringify(withoutObserved)).not.toContain('data_stream.dataset');
+      });
+    });
+  });
+
+  describe('condition-based namespaces (unmodeled clause shapes)', () => {
+    // Namespaces resolved by a whenClause condition rather than `sourceMatchesAny` go through
+    // streamlang's `conditionToQueryDsl`, which differs from the array-shaped DSL every other
+    // fixture here produces in two ways: `must_not` is a bare object, and the tree contains
+    // `match` / `terms` clauses that have no filter-bar operator.
+    it('normalises a bare-object must_not instead of throwing', () => {
+      // `conditionToQueryDsl` emits this for `neq` and for `exists: false`. Before normalising,
+      // the destructuring default did not apply (the value is not `undefined`) and `.map` threw
+      // `TypeError: mustNot.map is not a function`.
+      const dsl = {
+        bool: {
+          filter: [{ term: { 'user.name': 'jdoe' } }],
+          must_not: { exists: { field: 'user.email' } },
+        },
+      };
+
+      expect(() => buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).not.toThrow();
+      expect(buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).toBeDefined();
+    });
+
+    it('treats a bare-object must_not exists as a guard, exactly as the array form', () => {
+      const bare = buildEntityDslFilter(
+        'user:jdoe@local',
+        {
+          bool: {
+            filter: [{ term: { 'user.name': 'jdoe' } }],
+            must_not: { exists: { field: 'user.email' } },
+          },
+        },
+        dataViewId
+      );
+      const arrayed = buildEntityDslFilter(
+        'user:jdoe@local',
+        {
+          bool: {
+            filter: [{ term: { 'user.name': 'jdoe' } }],
+            must_not: [{ exists: { field: 'user.email' } }],
+          },
+        },
+        dataViewId
+      );
+
+      expect(bare).toEqual(arrayed);
+    });
+
+    it('fails closed on match/terms clauses rather than dropping them', () => {
+      // The `local` gate's real shape: a `match` constraint the filter bar cannot express. Emitting
+      // only the translatable part would produce a filter matching every `jdoe` on any host.
+      const dsl = {
+        bool: {
+          filter: [
+            { term: { 'user.name': 'jdoe' } },
+            { bool: { must: [{ match: { 'event.kind': 'asset' } }] } },
+          ],
+        },
+      };
+
+      expect(isEuidDslTranslatable(dsl)).toBe(false);
+      expect(buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).toBeUndefined();
+    });
+
+    it('accepts the fully-modeled shapes', () => {
+      expect(
+        isEuidDslTranslatable({
+          bool: {
+            filter: [{ term: { 'user.email': 'a@b.c' } }],
+            should: [{ prefix: { 'data_stream.dataset': 'okta' } }, { exists: { field: 'x' } }],
+            must_not: { exists: { field: 'user.id' } },
+          },
+        })
+      ).toBe(true);
+    });
+
+    it('falls back to identity sourceFields for a local-namespace user, rather than no filter', () => {
+      // End-to-end: a real local user resolved through the real builder. `getEntityFilterSpec` must
+      // hand back a `fields` spec, because a `dsl` spec here would translate to something wider
+      // than the entity — and `addEntityFilter` would drop it entirely, making the action dead.
+      const spec = getEntityFilterSpec(
+        'user:jdoe@host-abc123@local',
+        { 'user.name': 'jdoe', 'host.id': 'host-abc123' },
+        euidApi,
+        'actor'
+      );
+
+      expect(spec?.kind).toBe('fields');
+    });
+
+    it('fields fallback includes only the EUID identity fields, not collected attributes', () => {
+      // A local user entity record may carry user.id, user.domain etc. as collected attributes.
+      // Including them in an AND filter would drop events that lack those fields. Only the two
+      // fields the localNamespaceGate actually requires (user.name + host.id) should be emitted.
+      const spec = getEntityFilterSpec(
+        'user:jdoe@host-abc123@local',
+        {
+          'user.name': 'jdoe',
+          'host.id': 'host-abc123',
+          'user.id': 'S-1-5-19',
+          'user.domain': 'NT AUTHORITY',
+        },
+        euidApi,
+        'actor'
+      );
+
+      expect(spec?.kind).toBe('fields');
+      if (spec?.kind !== 'fields') return;
+      expect(Object.keys(spec.fields)).toEqual(['user.name', 'host.id']);
+    });
+
+    it('buildFieldsDsl ANDs all identity fields so the fields fallback is not over-broad', () => {
+      // The fields fallback path calls buildFieldsDsl before emitting through addEntityFilter.
+      // Verify the resulting DSL is a bool.filter (AND), not a bool.should (OR).
+      const dsl = buildFieldsDsl({ 'user.name': 'jdoe', 'host.id': 'host-abc123' });
+      const filter = buildEntityDslFilter('user:jdoe@host-abc123@local', dsl, dataViewId);
+
+      // Two identity fields → buildEntityDslFilter emits a combined AND filter (not OR).
+      // A combined OR chip would match every jdoe on any host, or every event from host-abc123.
+      expect(filter).toMatchObject({
+        meta: { type: 'combined', relation: BooleanRelation.AND },
+      });
+      const combined = filter as CombinedFilter;
+      expect(combined.meta.params).toHaveLength(2);
+      expect(combined.meta.params[0]).toMatchObject({
+        query: { match_phrase: { 'user.name': 'jdoe' } },
+      });
+      expect(combined.meta.params[1]).toMatchObject({
+        query: { match_phrase: { 'host.id': 'host-abc123' } },
       });
     });
   });

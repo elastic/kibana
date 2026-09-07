@@ -53,15 +53,54 @@ const buildSinglePhraseFilter = (
  */
 interface EuidDslClause {
   bool?: {
-    filter?: EuidDslClause[];
-    must?: EuidDslClause[];
-    must_not?: EuidDslClause[];
-    should?: EuidDslClause[];
+    filter?: EuidDslClause | EuidDslClause[];
+    must?: EuidDslClause | EuidDslClause[];
+    must_not?: EuidDslClause | EuidDslClause[];
+    should?: EuidDslClause | EuidDslClause[];
   };
   term?: Record<string, string>;
   prefix?: Record<string, string>;
   exists?: { field: string };
 }
+
+/**
+ * Elasticsearch accepts both a single clause and an array for every `bool` occurrence type, and the
+ * EUID builder emits both: `sourceMatchesAny` namespaces produce arrays, while condition-based ones
+ * go through streamlang's `conditionToQueryDsl`, which emits a bare object (`must_not: { match }`
+ * for `neq` and `exists: false`). A destructuring default only covers `undefined`, so normalise.
+ */
+const asClauseArray = (occurrence: EuidDslClause | EuidDslClause[] | undefined): EuidDslClause[] =>
+  ([] as EuidDslClause[]).concat(occurrence ?? []);
+
+/**
+ * Clause keys this translator knows how to turn into filter-bar operators. Anything else means the
+ * DSL has grown a shape we would silently drop, so `buildEntityDslFilter` fails closed instead —
+ * see `isFullyTranslatable`.
+ */
+const TRANSLATABLE_CLAUSE_KEYS = new Set(['bool', 'term', 'prefix', 'exists']);
+
+/**
+ * True when every clause in the tree is one this module models.
+ *
+ * Condition-based namespaces (the `local` gate, asset-discovery) reach us as `match`, `terms` and
+ * `range` clauses, none of which have a filter-bar equivalent here. Translating them partially
+ * would drop constraints and produce a filter that is *wider* than the entity it claims to
+ * describe — worse than no filter, because it looks authoritative. The caller falls back to the
+ * identity `sourceFields` instead.
+ */
+export const isEuidDslTranslatable = (dsl: object): boolean =>
+  isFullyTranslatable(dsl as EuidDslClause);
+
+const isFullyTranslatable = (clause: EuidDslClause): boolean => {
+  const keys = Object.keys(clause);
+  if (keys.length === 0) return true;
+  if (keys.some((key) => !TRANSLATABLE_CLAUSE_KEYS.has(key))) return false;
+  if (!clause.bool) return true;
+  const { filter, must, must_not: mustNot, should } = clause.bool;
+  return [filter, must, mustNot, should]
+    .flatMap(asClauseArray)
+    .every((sub) => isFullyTranslatable(sub));
+};
 
 /**
  * Reduces an observed namespace source value to the prefix the entity definition derives from it,
@@ -161,7 +200,10 @@ const euidDslClauseToFilters = (
   }
 
   if (clause.bool) {
-    const { filter = [], must = [], must_not: mustNot = [], should = [] } = clause.bool;
+    const filter = asClauseArray(clause.bool.filter);
+    const must = asClauseArray(clause.bool.must);
+    const mustNot = asClauseArray(clause.bool.must_not);
+    const should = asClauseArray(clause.bool.should);
 
     // `must_not: [{ exists }]` is a negated exists filter (an EUID higher-ranked-field guard).
     const negatedExists = mustNot
@@ -215,6 +257,10 @@ export const buildEntityDslFilter = (
   namespaceSourceValues?: Record<string, string | string[]>,
   getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver
 ): Filter | undefined => {
+  // Fail closed on any clause shape this module does not model, rather than emitting the subset it
+  // recognises — a partially translated filter under-constrains and would match other entities.
+  if (!isFullyTranslatable(dsl as EuidDslClause)) return undefined;
+
   const parts = euidDslClauseToFilters(
     dsl as EuidDslClause,
     dataViewId,
@@ -454,6 +500,19 @@ export const containsFilter = (
   const singleValue = Array.isArray(value) ? value[0] : value;
   return activeFilters.some((filter) => filterHasKeyAndValue(filter, key, singleValue));
 };
+
+/**
+ * Builds a `bool.filter` (AND) DSL clause from a flat map of identity field → value(s).
+ * Used by the fields fallback path so multiple identity fields are combined with AND rather
+ * than being emitted as independent OR'd phrase filters.
+ */
+export const buildFieldsDsl = (fields: Record<string, string | string[]>): object => ({
+  bool: {
+    filter: Object.entries(fields).flatMap(([field, value]) =>
+      ([] as string[]).concat(value).map((v) => ({ term: { [field]: v } }))
+    ),
+  },
+});
 
 /**
  * Adds a filter to the existing list of filters based on the provided key and value.

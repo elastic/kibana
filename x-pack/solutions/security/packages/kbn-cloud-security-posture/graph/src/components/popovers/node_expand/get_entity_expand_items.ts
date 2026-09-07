@@ -14,12 +14,12 @@ import type {
 import type { NodeViewModel } from '../../types';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 import {
-  emitFilterToggle,
   emitEntityFilterToggle,
   isFilterActiveForScope,
   isEntityFilterActiveForScope,
 } from '../../filters/filter_store';
 import type { NamespaceSourcePrefixResolver } from '../../filters/search_filters';
+import { isEuidDslTranslatable, buildFieldsDsl } from '../../filters/search_filters';
 import {
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
@@ -96,6 +96,15 @@ export interface EuidFilterApi {
     field: string,
     observedValue: string
   ) => string | undefined;
+  /**
+   * Returns only the field→value pairs that the entity store actually used to compose the EUID for
+   * this document (the winning identity arm). Collected attributes present in the entity record but
+   * not part of identity resolution (e.g. `user.id` on a `local` user) are excluded.
+   */
+  getEntityIdentifiersFromDocument: (
+    entityType: EntityType,
+    doc: unknown
+  ) => Record<string, string> | undefined;
 }
 
 /**
@@ -125,7 +134,7 @@ export type EntityFilterSpec =
  * Namespace source fields describe the event, not the entity, so they must never become phrase
  * filters in the fallback path — `event.module: gcp` would match every GCP event.
  */
-const NAMESPACE_SOURCE_FIELD_PREFIXES = ['event.', 'data_stream.', 'cloud.'];
+const NAMESPACE_SOURCE_FIELD_PREFIXES = ['event.', 'data_stream.', 'cloud.', 'entity.'];
 
 const isIdentitySourceField = (field: string): boolean =>
   !NAMESPACE_SOURCE_FIELD_PREFIXES.some((prefix) => field.startsWith(prefix));
@@ -159,7 +168,11 @@ export const getEntityFilterSpec = (
   if (!sourceFields || Object.keys(sourceFields).length === 0) return undefined;
 
   const dsl = buildEntityDsl(nodeId, sourceFields, euidApi, role);
-  if (dsl) {
+  // A DSL we cannot translate without dropping clauses is worse than none: the filter would be
+  // wider than the entity. Condition-based namespaces (a `local` user, asset discovery) produce
+  // `match` / `terms` clauses with no filter-bar equivalent, so fall through to the identity
+  // sourceFields, which are narrow and renderable.
+  if (dsl && isEuidDslTranslatable(dsl)) {
     // Ask the entity store which source fields are prefix-matched for this entity type so we
     // replace exactly those prefix clauses with observed exact values — no more, no less.
     const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
@@ -177,9 +190,27 @@ export const getEntityFilterSpec = (
     return { kind: 'dsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix };
   }
 
-  const identityFields = Object.fromEntries(
-    Object.entries(sourceFields).filter(([field]) => isIdentitySourceField(field))
-  );
+  // Use the entity store's own identifier resolution to get only the fields that compose the EUID
+  // for this document. Collected attributes (e.g. `user.id` on a `local` user that resolved via
+  // `user.name`) are excluded — including them in an AND filter would drop events that lack them.
+  const entityType = euidPrefixToEntityType(getEntityTypeFromNodeId(nodeId));
+  const doc = { ...sourceFields, 'entity.id': nodeId };
+  let rawIdentifiers: Record<string, string> | undefined;
+  try {
+    rawIdentifiers = euidApi?.getEntityIdentifiersFromDocument(entityType, doc);
+  } catch {
+    // Unknown entity type — fall through to the broad sourceFields filter below.
+  }
+
+  // `getEntityIdentifiersFromDocument` may include `entity.*` derived fields (e.g. `entity.namespace`)
+  // that don't exist in raw events. Strip them — only raw event fields are usable as phrase filters.
+  const identityFields = rawIdentifiers
+    ? Object.fromEntries(
+        Object.entries(rawIdentifiers).filter(([field]) => isIdentitySourceField(field))
+      )
+    : Object.fromEntries(
+        Object.entries(sourceFields).filter(([field]) => isIdentitySourceField(field))
+      );
   return Object.keys(identityFields).length > 0
     ? { kind: 'fields', fields: identityFields }
     : undefined;
@@ -260,12 +291,13 @@ export const toggleEntityFilterSpec = (
     );
     return;
   }
-  for (const [field, value] of Object.entries(spec.fields)) {
-    // Flatten string | string[] so each value gets its own OR'd phrase filter
-    for (const one of ([] as string[]).concat(value)) {
-      emitFilterToggle(scopeId, fieldForRole(field, role), one, action);
-    }
-  }
+  // Rewrite field names for the role, then AND all identity fields together in a single entity
+  // filter. Emitting one call per field would OR them (via addFilter's combine-with-first logic),
+  // producing a filter far broader than the entity.
+  const roleFields = Object.fromEntries(
+    Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
+  );
+  emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
 };
 
 /** True when the filter described by `spec` is currently active. */

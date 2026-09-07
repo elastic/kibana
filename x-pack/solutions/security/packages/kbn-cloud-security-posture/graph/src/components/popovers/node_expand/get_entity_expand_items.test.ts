@@ -9,6 +9,7 @@ import {
   getEuidDslFilterBasedOnDocument,
   getEuidNamespaceSourceFields,
   getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
 } from '@kbn/entity-store/common/domain/euid';
 import {
   getSourceFieldsFromNode,
@@ -27,6 +28,7 @@ const euidApi: EuidFilterApi = {
   dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
   getEuidNamespaceSourceFields,
   getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
 };
 
 describe('getSourceFieldsFromNode', () => {
