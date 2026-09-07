@@ -667,6 +667,10 @@ export const WorkflowYAMLEditor = ({
   const closeActionsPopover = useCallback(() => {
     setActionsPopoverOpen(false);
   }, []);
+  const dismissActionsPopover = useCallback(() => {
+    closeActionsPopover();
+    window.requestAnimationFrame(() => editorRef.current?.focus());
+  }, [closeActionsPopover, editorRef]);
 
   useEffect(() => {
     if (openActionsRef) {
@@ -894,7 +898,7 @@ export const WorkflowYAMLEditor = ({
     >
       <GlobalWorkflowEditorStyles />
       <ActionsMenuPopover
-        closePopover={closeActionsPopover}
+        closePopover={dismissActionsPopover}
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
         commands={editorCommands}
