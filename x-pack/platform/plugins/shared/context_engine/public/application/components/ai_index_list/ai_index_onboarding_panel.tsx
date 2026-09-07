@@ -33,7 +33,7 @@ export const AiIndexOnboardingPanel = () => (
               <p>
                 <FormattedMessage
                   id="xpack.contextEngine.landing.onboarding.body"
-                  defaultMessage="An AI Index turns your data into knowledge your agents can retrieve. Connect your sources once, and automations keep that knowledge fresh, so agents answer from curated knowledge instead of scanning raw data."
+                  defaultMessage="An AI Index stores precomputed, curated context derived from your source data. Agents retrieve this focused context instead of repeatedly scanning raw data, saving time and tokens. Add sources and Workflow automations to build and refresh the index."
                 />
               </p>
             </EuiText>
