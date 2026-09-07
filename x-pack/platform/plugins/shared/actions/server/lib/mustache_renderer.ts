@@ -86,14 +86,25 @@ function renderMustacheStringWithAugmentedVariables(
 export function renderMustacheObject<Params>(
   logger: Logger,
   params: Params,
-  variables: Variables
+  variables: Variables,
+  escape: Escape = 'none',
+  escapingFields?: readonly string[]
 ): Params {
   const augmentedVariables = augmentObjectVariables(variables);
-  const result = cloneDeepWith(params, (value: unknown) => {
+  const escapingFieldSet = escapingFields ? new Set(escapingFields) : undefined;
+  const result = cloneDeepWith(params, (value: unknown, key: string | number | undefined) => {
     if (!isString(value)) return;
 
-    // since we're rendering a JS object, no escaping needed
-    return renderMustacheStringWithAugmentedVariables(logger, value, augmentedVariables, 'none');
+    const fieldEscape =
+      escapingFieldSet === undefined || (typeof key === 'string' && escapingFieldSet.has(key))
+        ? escape
+        : 'none';
+    return renderMustacheStringWithAugmentedVariables(
+      logger,
+      value,
+      augmentedVariables,
+      fieldEscape
+    );
   });
 
   // The return type signature for `cloneDeep()` ends up taking the return

@@ -76,13 +76,47 @@ test.describe('Slack connector', { tag: tags.stateful.classic }, () => {
     await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
   });
 
-  test('shows only the Slack webhook card, not the Slack API card', async ({ page, kbnUrl }) => {
+  test('shows the Slack connectors that can be created', async ({ page, kbnUrl }) => {
     await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
 
     await page.testSubj.click('createConnectorButton');
 
+    await expect(page.testSubj.locator('.slack2-card')).toBeVisible();
     await expect(page.testSubj.locator('.slack-card')).toBeVisible();
     await expect(page.testSubj.locator('.slack_api-card')).toBeHidden();
+  });
+
+  test('creates a Slack connector with an incoming webhook', async ({
+    page,
+    apiServices,
+    kbnUrl,
+  }) => {
+    const connectorName = `scout-slack2-${Date.now()}`;
+    await page.goto(kbnUrl.get(CONNECTORS_APP_PATH));
+
+    await page.testSubj.click('createConnectorButton');
+    await page.testSubj.click('.slack2-card');
+
+    const nameInput = page.testSubj.locator('nameInput');
+    await nameInput.waitFor({ state: 'visible' });
+    await nameInput.fill(connectorName);
+    await page.testSubj.locator('form-generator-field-secrets-webhook').click();
+    await page.testSubj
+      .locator('generator-field-secrets-webhookUrl')
+      .fill('https://hooks.slack.com/services/test');
+
+    await page.testSubj.click('create-connector-flyout-save-btn');
+    await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
+      `Created '${connectorName}'`
+    );
+
+    const allConnectors = (await apiServices.alerting.connectors.getAll()) as Array<{
+      id: string;
+      name: string;
+    }>;
+    const created = allConnectors.find(({ name }) => name === connectorName);
+    expect(created).toBeDefined();
+    createdConnectorIds.push(created!.id);
   });
 
   test('creates a webhook Slack connector via the UI', async ({ page, apiServices, kbnUrl }) => {

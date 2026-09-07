@@ -255,6 +255,9 @@ auth: {
 }
 ```
 
+The shared `webhook` auth type stores a sensitive `webhookUrl` and validates it against the
+Actions allowed-host configuration. Connector actions send requests to this URL explicitly.
+
 ### Schema
 
 A single Zod schema containing all connector config fields and any secrets fields outside of the standard auth schemas

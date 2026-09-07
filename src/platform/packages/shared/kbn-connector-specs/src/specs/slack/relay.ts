@@ -88,26 +88,31 @@ export async function relaySendMessage(
   ctx: ActionContext,
   input: SlackSendMessageInput
 ): Promise<{ ok: true; channel: string; ts: string }> {
+  const { channel, text } = input;
+  if (!channel || !text) {
+    throw new Error('channel and text are required when sending through the Elastic Slack app');
+  }
+
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
     );
   }
 
-  ctx.log.debug(`Slack sendMessage request through relay: channel=${input.channel}`);
+  ctx.log.debug(`Slack sendMessage request through relay: channel=${channel}`);
 
   try {
     const { ref } = await client.trigger({
       tenantKey,
-      channel: input.channel,
-      message: input.text,
+      channel,
+      message: text,
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
-    return { ok: true, channel: input.channel, ts: ref };
+    return { ok: true, channel, ts: ref };
   } catch (error) {
     ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
-    throw toUserFacingError(error, input.channel);
+    throw toUserFacingError(error, channel);
   }
 }
 
