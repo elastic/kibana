@@ -34,6 +34,23 @@
  * like the models stopped invoking skills.
  */
 describe('evals_tracing config set', () => {
+  const ENV_KEYS = ['CI', 'TRACING_EXPORTERS'] as const;
+  let savedEnv: Record<string, string | undefined>;
+
+  beforeEach(() => {
+    savedEnv = Object.fromEntries(ENV_KEYS.map((k) => [k, process.env[k]]));
+  });
+
+  afterEach(() => {
+    for (const k of ENV_KEYS) {
+      if (savedEnv[k] === undefined) {
+        delete process.env[k];
+      } else {
+        process.env[k] = savedEnv[k];
+      }
+    }
+  });
+
   const loadServerArgs = (): string[] => {
     let servers: { kbnTestServer: { serverArgs: string[] } };
     jest.isolateModules(() => {
@@ -45,17 +62,18 @@ describe('evals_tracing config set', () => {
   };
 
   const TOOL_DETAILS_ARG = '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
+  const TRACING_ARG = '--telemetry.tracing.enabled=true';
 
-  describe('when tracing is enabled', () => {
+  // The config gates these args on `Boolean(TRACING_EXPORTERS) || !CI`, so the
+  // exporter case is the one that must hold ON CI -- where `!isCi` is false and
+  // an unset exporter would silently drop both args.
+  describe('on CI, with exporters configured', () => {
     let serverArgs: string[];
 
-    beforeAll(() => {
-      process.env.SCOUT_TRACING_ENABLED = 'true';
+    beforeEach(() => {
+      process.env.CI = 'true';
+      process.env.TRACING_EXPORTERS = JSON.stringify([{ type: 'console' }]);
       serverArgs = loadServerArgs();
-    });
-
-    afterAll(() => {
-      delete process.env.SCOUT_TRACING_ENABLED;
     });
 
     it('captures tool call arguments so trace-based evaluators can match on them', () => {
@@ -63,7 +81,22 @@ describe('evals_tracing config set', () => {
     });
 
     it('enables tracing itself, so the tool-details setting is not dead config', () => {
-      expect(serverArgs).toContain('--telemetry.tracing.enabled=true');
+      expect(serverArgs).toContain(TRACING_ARG);
+    });
+  });
+
+  describe('off CI, without exporters', () => {
+    let serverArgs: string[];
+
+    beforeEach(() => {
+      delete process.env.CI;
+      delete process.env.TRACING_EXPORTERS;
+      serverArgs = loadServerArgs();
+    });
+
+    it('still captures tool call arguments for local eval runs', () => {
+      expect(serverArgs).toContain(TOOL_DETAILS_ARG);
+      expect(serverArgs).toContain(TRACING_ARG);
     });
   });
 });
