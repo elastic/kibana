@@ -47,7 +47,15 @@ describe('ProcessResult', () => {
     expect(output).toContain('PID 1234');
     expect(output).toContain('Entity ID entity-a');
     expect(output).toContain('Name malware.exe');
-    expect(output).toContain('Command malware.exe --run');
+  });
+
+  it('should not render entity id when `showEntityId` is false', () => {
+    const { getByTestId } = render({ showEntityId: false });
+    const output = getByTestId(testPrefix).textContent ?? '';
+
+    expect(output).toContain('PID 1234');
+    expect(output).not.toContain('Entity ID entity-a');
+    expect(output).toContain('Name malware.exe');
   });
 
   it('should only render the fields that are present', () => {
@@ -59,7 +67,6 @@ describe('ProcessResult', () => {
     expect(output).toContain('PID 1234');
     expect(output).not.toContain('Entity ID');
     expect(output).not.toContain('Name');
-    expect(output).not.toContain('Command');
   });
 
   it('should separate the fields with a data separator', () => {

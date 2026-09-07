@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/** Default timeout for `page.waitForFunction` readiness waits. */
+export const WAIT_FOR_FUNCTION_TIMEOUT_MS = 10_000;
+
 /** Shared helper for reading computed colors off the DOM (metric / datatable). */
 export const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {

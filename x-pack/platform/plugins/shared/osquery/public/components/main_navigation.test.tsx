@@ -11,13 +11,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
-// --- Feature flag mock (controllable per test via jest.mocked) ---
-const mockUseIsExperimentalFeatureEnabled = jest.fn((flag: string) => false);
-jest.mock('../common/experimental_features_context', () => ({
-  useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
-    mockUseIsExperimentalFeatureEnabled(...(args as [string])),
-}));
-
 // --- Kibana services ---
 jest.mock('../common/lib/kibana', () => ({
   useKibana: () => ({
@@ -68,44 +61,36 @@ const renderNavigation = (path: string) =>
   );
 
 describe('MainNavigation', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  it('should display History, Packs, and Queries tabs', () => {
+    renderNavigation('/history');
+
+    expect(screen.getByText('History')).toBeInTheDocument();
+    expect(screen.getByText('Packs')).toBeInTheDocument();
+    expect(screen.getByText('Queries')).toBeInTheDocument();
+    expect(screen.getAllByRole('tab')).toHaveLength(3);
   });
 
-  describe('when queryHistoryRework is enabled', () => {
-    it('should display renamed tabs: History, Packs, Queries', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (flag: string) => flag === 'queryHistoryRework'
-      );
-      renderNavigation('/history');
+  it('should show "Run query" button', () => {
+    renderNavigation('/history');
 
-      expect(screen.getByText('History')).toBeInTheDocument();
-      expect(screen.getByText('Packs')).toBeInTheDocument();
-      expect(screen.getByText('Queries')).toBeInTheDocument();
-      expect(screen.queryByText('Live queries')).not.toBeInTheDocument();
-      expect(screen.queryByText('Saved queries')).not.toBeInTheDocument();
-    });
-
-    it('should show "Run query" button', () => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (flag: string) => flag === 'queryHistoryRework'
-      );
-      renderNavigation('/history');
-
-      expect(screen.getByText('Run query')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Run query')).toBeInTheDocument();
   });
 
-  describe('when queryHistoryRework is disabled', () => {
-    it('should display original tabs: Live queries, Packs, Saved queries', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      renderNavigation('/live_queries');
+  it('should hide the tab strip and title on a details page', () => {
+    // Only the exact list routes are "list views"; details pages render their own header.
+    renderNavigation('/history/abc-123');
 
-      expect(screen.getByText('Live queries')).toBeInTheDocument();
-      expect(screen.getByText('Packs')).toBeInTheDocument();
-      expect(screen.getByText('Saved queries')).toBeInTheDocument();
-      expect(screen.queryByText('History')).not.toBeInTheDocument();
-      expect(screen.queryByText('Queries')).not.toBeInTheDocument();
-    });
+    expect(screen.queryAllByRole('tab')).toHaveLength(0);
+    expect(screen.queryByText('Osquery')).not.toBeInTheDocument();
+    expect(screen.queryByText('Run query')).not.toBeInTheDocument();
   });
+
+  it.each(['/history', '/packs', '/saved_queries'])(
+    'should render the tab strip on the %s list route',
+    (path) => {
+      renderNavigation(path);
+
+      expect(screen.getAllByRole('tab')).toHaveLength(3);
+    }
+  );
 });

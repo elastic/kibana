@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/kql'
   - '@kbn/core-spaces-common'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

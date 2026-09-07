@@ -41,49 +41,18 @@ const outputCompat = getReversibleMappings<DurationOutputUnit, string>([
   ['y', 'asYears'],
 ]);
 
-/**
- * Legacy (pre-GA) API unit names mapped to their Lens state representation. Used only in the
- * API→state direction so that requests made while `asCode.useGASchemas` is disabled still
- * transform correctly. The state→API direction here always emits GA names; the Lens as-code route
- * boundary down-converts the response to legacy field-format names when the feature flag is
- * disabled (see `toLegacyDurationUnits`), so the builder itself stays canonical for all other
- * consumers.
- */
-const inputLegacyAliasToState: Record<string, string> = {
-  m: 'minutes',
-};
-
-const outputLegacyAliasToState: Record<string, string> = {
-  humanize: 'humanize',
-  humanizePrecise: 'humanizePrecise',
-  m: 'asMinutes',
-};
-
 export const durationInputUnitCompat = {
   /**
    * Converts an API input unit to the Lens state representation.
-   * Accepts both GA short-form enums (e.g. `'min'`) and legacy names (e.g. `'m'`).
    */
-  toState: (unit: string): string =>
-    inputCompat.toState(unit as DurationInputUnit) ?? inputLegacyAliasToState[unit] ?? unit,
+  toState: (unit: string): string => inputCompat.toState(unit as DurationInputUnit) ?? unit,
   toAPI: (unit?: string) => inputCompat.toAPI(unit) ?? LENS_DURATION_API_INPUT_UNIT_DEFAULT,
 };
 
 export const durationOutputUnitCompat = {
   /**
    * Converts an API output unit to the Lens state representation.
-   * Accepts both GA short-form enums (e.g. `'auto'`, `'auto-approximate'`, `'min'`)
-   * and legacy names (e.g. `'humanize'`, `'humanizePrecise'`, `'m'`).
    */
-  toState: (unit: string): string =>
-    outputCompat.toState(unit as DurationOutputUnit) ?? outputLegacyAliasToState[unit] ?? unit,
+  toState: (unit: string): string => outputCompat.toState(unit as DurationOutputUnit) ?? unit,
   toAPI: (unit?: string) => outputCompat.toAPI(unit) ?? LENS_DURATION_API_OUTPUT_UNIT_DEFAULT,
 };
-
-/** Converts a GA `from` unit to the legacy API field-format name (e.g. `s` → `seconds`). */
-export const gaDurationInputUnitToLegacyApi = (unit: string): string =>
-  durationInputUnitCompat.toState(unit);
-
-/** Converts a GA `to` unit to the legacy API field-format name (e.g. `s` → `asSeconds`). */
-export const gaDurationOutputUnitToLegacyApi = (unit: string): string =>
-  durationOutputUnitCompat.toState(unit);

@@ -37,7 +37,7 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
     await lens.switchToFormula();
     // getCurrentChartDebugState waits for chart render-complete internally, so a single read is stable.
     // Formula transition must preserve the terms grouping on the saved viz: 3 legend items (FTR parity).
-    const { legend } = await lens.getCurrentChartDebugState('xyVisChart');
+    const { legend } = await lens.workspace.getCurrentChartDebugState('xyVisChart');
     expect(legend?.items).toHaveLength(3);
 
     const { violations } = await page.checkA11y({
@@ -61,8 +61,8 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
     await lens.typeInFormula('*', { focus: false });
     await lens.waitForVisualization();
     // Exact archive counts → #280444. UI asserts autocomplete produced a positive count.
-    await expect(lens.getDatatableCellLocator(0, 0)).toHaveText(/\d/);
-    const count = Number((await lens.getDatatableCellText(0, 0)).replace(/,/g, ''));
+    await expect(lens.datatable.getCellLocator(0, 0)).toHaveText(/\d/);
+    const count = Number((await lens.datatable.getCellText(0, 0)).replace(/,/g, ''));
     expect(count).toBeGreaterThan(0);
   });
 
@@ -77,10 +77,14 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
       formula: `asdf`,
     });
 
-    await expect(lens.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText('asdf');
-    await lens.openMessageList();
-    await expect(lens.getMessageListItems('error')).toContainText('Field asdf was not found.');
-    await lens.closeMessageList();
+    await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_metrics')).toHaveText(
+      'asdf'
+    );
+    await lens.workspace.openMessageList();
+    await expect(lens.workspace.getMessageListItems('error')).toContainText(
+      'Field asdf was not found.'
+    );
+    await lens.workspace.closeMessageList();
   });
 
   spaceTest('keeps formula text when entering expanded mode', async ({ pageObjects }) => {
@@ -94,9 +98,9 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
       formula: `count()`,
       keepOpen: true,
     });
-    await lens.toggleFullscreen();
+    await lens.workspace.toggleFullscreen();
     // Monaco model value — no locator auto-wait for editor contents.
-    await expect.poll(async () => lens.getFormulaText()).toBe('count()');
+    await expect.poll(async () => lens.workspace.getFormulaText()).toBe('count()');
   });
 
   spaceTest('allows an empty formula combined with a valid formula', async ({ pageObjects }) => {
@@ -115,6 +119,6 @@ spaceTest.describe('Lens formula transition and CRUD', { tag: '@local-stateful-c
     });
 
     await lens.waitForVisualization();
-    expect(await lens.getWorkspaceErrorCount()).toBe(0);
+    expect(await lens.workspace.getErrorCount()).toBe(0);
   });
 });

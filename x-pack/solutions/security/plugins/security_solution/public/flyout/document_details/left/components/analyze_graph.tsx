@@ -31,6 +31,7 @@ import {
   ANALYZER_GRAPH_TEST_ID,
 } from './test_ids';
 import { Resolver } from '../../../../resolver/view';
+import { withDocumentIndex } from '../../../../flyout_v2/shared/utils/non_local_index';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';
@@ -74,6 +75,11 @@ export const AnalyzeGraph: FC = () => {
     [searchHit]
   );
   const isEnabled = useIsAnalyzerEnabled(hit);
+  const databaseDocumentTimestamp = useMemo(() => {
+    const value = hit.flattened?.['@timestamp'];
+    const ms = value ? Date.parse(String(value)) : NaN;
+    return Number.isFinite(ms) ? ms : undefined;
+  }, [hit]);
 
   const key = useWhichFlyout() ?? 'memory';
   const { from, to, shouldUpdate } = useTimelineDataFilters(isActiveTimeline(scopeId));
@@ -175,8 +181,9 @@ export const AnalyzeGraph: FC = () => {
       )}
       <Resolver
         databaseDocumentID={eventId}
+        databaseDocumentTimestamp={databaseDocumentTimestamp}
         resolverComponentInstanceID={`${key}-${scopeId}`}
-        indices={selectedPatterns}
+        indices={withDocumentIndex(selectedPatterns, searchHit._index)}
         shouldUpdate={shouldUpdate}
         filters={filters}
         renderCellActions={cellActionRenderer}

@@ -208,11 +208,15 @@ describe('step validation', () => {
           {
             id: 'runbook-id',
             type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'Investigate failed transactions\nCheck service logs',
+            data: { content: 'Investigate failed transactions\nCheck service logs' },
           },
         ],
         dashboardArtifacts: [
-          { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: DASHBOARD_ID },
+          {
+            id: 'dashboard-id',
+            type: DASHBOARD_ARTIFACT_TYPE,
+            data: { dashboardId: DASHBOARD_ID },
+          },
         ],
       });
 
@@ -228,9 +232,9 @@ describe('step validation', () => {
   });
 
   describe('step registry', () => {
-    it('recoveryCondition has no validate function', () => {
-      const recoveryStep = getSteps(true).steps.find((s) => s.id === 'recoveryCondition')!;
-      expect(recoveryStep.validate).toBeUndefined();
+    it('outcome has no validate function', () => {
+      const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
+      expect(outcomeStep.validate).toBeUndefined();
     });
 
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
@@ -275,7 +279,7 @@ describe('step validation', () => {
     });
 
     it('delegates to methods.trigger with notifications', async () => {
-      const state = createState({ mode: 'create' });
+      const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
       } as unknown as UseFormReturn<FormValues>;
@@ -287,7 +291,7 @@ describe('step validation', () => {
     });
 
     it('returns false when trigger rejects notifications validation', async () => {
-      const state = createState({ mode: 'create' });
+      const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
@@ -327,10 +331,14 @@ describe('step validation', () => {
   });
 
   it('includes the correct steps based on isAlert', () => {
-    expect(getSteps(false).steps.map((step) => step.id)).toEqual(['alertCondition', 'details']);
+    expect(getSteps(false).steps.map((step) => step.id)).toEqual([
+      'alertCondition',
+      'outcome',
+      'details',
+    ]);
     expect(getSteps(true).steps.map((step) => step.id)).toEqual([
       'alertCondition',
-      'recoveryCondition',
+      'outcome',
       'details',
       'notifications',
     ]);
@@ -340,7 +348,8 @@ describe('step validation', () => {
 describe('shell shared fields', () => {
   const renderShell = (
     stateOverrides: Partial<ComposeDiscoverState> = {},
-    formOverrides: Partial<FormValues> = {}
+    formOverrides: Partial<FormValues> = {},
+    isEditing = false
   ) => {
     const services = { ...createMockServices(), dashboard: mockDashboard };
     return render(
@@ -350,35 +359,43 @@ describe('shell shared fields', () => {
         services={services}
         onRecoveryTypeChange={jest.fn()}
         onKindChange={jest.fn()}
-        isEditing={false}
+        isEditing={isEditing}
       />,
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES, ...formOverrides }, services) }
     );
   };
 
-  it('renders ModeSelect, AlertDelayField, ScheduleField, and LookbackWindowField on alert condition step', () => {
+  it('renders ScheduleField and LookbackWindowField on alert condition step without kind or alert delay', () => {
     renderShell({ step: 0 }, { kind: 'alert' });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
-    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect')).not.toBeInTheDocument();
+    expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.getByText('Rule execution')).toBeInTheDocument();
-    expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
     expect(screen.getByText('Schedule')).toBeInTheDocument();
     expect(screen.getByText('Lookback Window')).toBeInTheDocument();
   });
 
-  it('does not render AlertDelayField when kind is signal', () => {
+  it('renders Outcome kind cards, AlertDelayField, and Recovery for alert kind', () => {
+    renderShell({ step: 1 }, { kind: 'alert' });
+
+    expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
+    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
+    expect(screen.getByTestId('alertDelayFormRow')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverRecoveryType')).toBeInTheDocument();
+    expect(screen.queryByText('Rule execution')).not.toBeInTheDocument();
+  });
+
+  it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
-      { step: 0 },
+      { step: 1 },
       { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
     );
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();
     expect(screen.queryByText('Alert conditions')).not.toBeInTheDocument();
-    expect(screen.getByText('Rule execution')).toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
-    expect(screen.getByText('Schedule')).toBeInTheDocument();
-    expect(screen.getByText('Lookback Window')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverRecoveryType')).not.toBeInTheDocument();
   });
 
   it('renders section titles on the threshold builder alert condition step', () => {
@@ -399,52 +416,56 @@ describe('shell shared fields', () => {
       { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
     );
 
-    expect(screen.getByText('Alert conditions')).toBeInTheDocument();
     expect(screen.getByText('Rule execution')).toBeInTheDocument();
   });
 
-  it('does not render shared fields on non-alert-condition steps', () => {
-    // step 2 = 'details' when isAlert=true (alertCondition -> recoveryCondition -> details)
+  it('does not render shared fields on details step', () => {
+    // step 2 = 'details' (alertCondition -> outcome -> details)
     renderShell({ step: 2 });
 
-    expect(screen.queryByTestId('composeDiscoverModeSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertDelayFormRow')).not.toBeInTheDocument();
     expect(screen.queryByText('Schedule')).not.toBeInTheDocument();
     expect(screen.queryByText('Lookback Window')).not.toBeInTheDocument();
   });
 
-  it('disables ModeSelect when query is not committed', () => {
-    renderShell({ step: 0, queryCommitted: false });
+  it('renders KindSelect as read-only in edit mode on Outcome', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('composeDiscoverKindSelect-alert')).toBeInTheDocument();
+    expect(screen.queryByTestId('composeDiscoverKindSelect-signal')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
+    ).toBeDisabled();
   });
 
-  it('disables ModeSelect in edit mode', () => {
-    const services = { ...createMockServices(), dashboard: mockDashboard };
-    render(
-      <ComposeDiscoverForm
-        state={createState({ queryCommitted: true, step: 0 })}
-        dispatch={jest.fn()}
-        services={services}
-        onRecoveryTypeChange={jest.fn()}
-        onKindChange={jest.fn()}
-        isEditing={true}
-      />,
-      { wrapper: createComposeFormWrapper({ ...BASE_COMPOSE_VALUES }, services) }
-    );
+  it('shows the read-only outcome info tooltip in edit mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false }, { kind: 'alert' }, true);
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(screen.getByTestId('composeDiscoverKindSelect-readOnlyTooltip')).toBeInTheDocument();
   });
 
-  it('enables ModeSelect in create mode when query is committed and sandbox is closed', () => {
-    renderShell({ step: 0, queryCommitted: true, childOpen: false });
+  it('enables KindSelect in create mode on Outcome when sandbox is closed', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).not.toBeDisabled();
+    expect(
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
+    ).not.toBeDisabled();
   });
 
-  it('disables ModeSelect when sandbox is open', () => {
-    renderShell({ step: 0, queryCommitted: true, childOpen: true });
+  it('does not show the read-only outcome info tooltip in create mode', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: false });
 
-    expect(screen.getByTestId('composeDiscoverModeSelect')).toBeDisabled();
+    expect(
+      screen.queryByTestId('composeDiscoverKindSelect-readOnlyTooltip')
+    ).not.toBeInTheDocument();
+  });
+
+  it('disables KindSelect when sandbox is open on Outcome', () => {
+    renderShell({ step: 1, queryCommitted: true, childOpen: true });
+
+    expect(
+      screen.getByTestId('composeDiscoverKindSelect-alert').querySelector('input')
+    ).toBeDisabled();
   });
 });

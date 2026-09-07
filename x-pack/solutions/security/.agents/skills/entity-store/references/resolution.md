@@ -33,16 +33,16 @@ Uses `updateByQuery` with Painless to set/remove `resolved_to` on LATEST index.
 
 ```esql
 -- Get target and its aliases
-FROM .entities.v2.latest.security_default
+FROM .entities.v2.latest.default
 | WHERE entity.id == "user:emily@okta"
    OR entity.relationships.resolution.resolved_to == "user:emily@okta"
 
 -- Get only target entities (for data grids — excludes aliases)
-FROM .entities.v2.latest.security_default
+FROM .entities.v2.latest.default
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 
 -- Get truly standalone entities (INLINESTATS pattern)
-FROM .entities.v2.latest.security_default
+FROM .entities.v2.latest.default
 | WHERE entity.EngineMetadata.Type == "user"
 | EVAL golden_id = COALESCE(entity.relationships.resolution.resolved_to, entity.id)
 | INLINESTATS group_size = COUNT(*) BY golden_id
@@ -68,7 +68,7 @@ LOOKUP JOIN + COALESCE ensures resolution fields survive extraction runs:
 FROM logs-*
 | WHERE user.name IS NOT NULL
 | STATS ...
-| LOOKUP JOIN .entities.v2.latest.security_default ON user.name
+| LOOKUP JOIN .entities.v2.latest.default ON user.name
 | EVAL entity.relationships.resolution.resolved_to = COALESCE(
     entity.relationships.resolution.resolved_to, null
   )

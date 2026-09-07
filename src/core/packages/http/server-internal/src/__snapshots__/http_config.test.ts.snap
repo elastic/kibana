@@ -104,6 +104,7 @@ Object {
     "xContentTypeOptions": "nosniff",
   },
   "selfHttp": Object {
+    "ssl": Object {},
     "target": "auto",
   },
   "serverTiming": false,

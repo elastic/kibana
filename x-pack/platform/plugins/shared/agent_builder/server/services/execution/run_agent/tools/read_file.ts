@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import {
   estimateTokens,
   truncateTokens,
@@ -26,7 +26,7 @@ export const createReadFileTool = ({
   filesystemService,
 }: {
   filesystemService: IFilesystemService;
-}): BuiltinToolDefinition<typeof schema> => {
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.readFile,
     description: 'Read the content of a file from the virtual file system (VFS).',

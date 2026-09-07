@@ -35,6 +35,12 @@ jest.mock('./services', () => ({
   RenderersService: jest.fn(() => ({ register: jest.fn() })),
   ChatService: jest.fn(),
   ConversationsService: jest.fn(),
+  ConversationTemplatesService: jest.fn(() => ({
+    registerTab: jest.fn(),
+    getTab: jest.fn(),
+    registerTemplateUIDefinition: jest.fn(),
+    getTemplateUIDefinition: jest.fn(),
+  })),
   DocLinksService: jest.fn(),
   NavigationService: jest.fn(),
   ToolsService: jest.fn(),
@@ -43,11 +49,16 @@ jest.mock('./services', () => ({
   OAuthClientsService: jest.fn(),
   PluginsService: jest.fn(),
   EventsService: jest.fn(),
+  SpaceSettingsService: jest.fn(),
   AgentBuilderAccessChecker: jest.fn(),
 }));
 
 jest.mock('./services/attachments', () => ({
   createPublicAttachmentContract: jest.fn(() => ({})),
+}));
+
+jest.mock('./services/conversation_templates', () => ({
+  createPublicConversationTemplatesContract: jest.fn(() => ({})),
 }));
 
 jest.mock('./services/renderers', () => ({
@@ -126,7 +137,6 @@ const createMockCoreStart = (sidebarApp: ReturnType<typeof createMockSidebarApp>
     },
     chrome: {
       sidebar: { getApp: jest.fn(() => sidebarApp) },
-      navControls: { registerRight: jest.fn() },
       next: { aiButton: { register: jest.fn() } },
     },
     uiSettings: {
@@ -169,6 +179,7 @@ const openSidebarAndRegisterCallbacks = (
     updateProps: mockUpdateProps,
     resetBrowserApiTools: jest.fn(),
     addAttachment: jest.fn(),
+    removeAttachmentById: jest.fn(),
   });
   return { mockUpdateProps };
 };

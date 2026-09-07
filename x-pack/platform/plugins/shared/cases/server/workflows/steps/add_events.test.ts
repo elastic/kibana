@@ -35,9 +35,9 @@ describe('addEventsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1'],
-          index: ['.ds-logs-*'],
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['.ds-logs-*'] },
           owner: createCaseResponseFixture.owner,
         },
       ],
@@ -67,9 +67,9 @@ describe('addEventsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1', 'event-2'],
-          index: ['.ds-logs-*', '.ds-logs-*'],
+          type: 'security.event',
+          attachmentId: ['event-1', 'event-2'],
+          metadata: { index: ['.ds-logs-*', '.ds-logs-*'] },
           owner: createCaseResponseFixture.owner,
         },
       ],
@@ -99,15 +99,15 @@ describe('addEventsStepDefinition', () => {
       caseId: 'case-1',
       attachments: [
         {
-          type: 'event',
-          eventId: ['event-1'],
-          index: ['idx-a'],
+          type: 'security.event',
+          attachmentId: ['event-1'],
+          metadata: { index: ['idx-a'] },
           owner: createCaseResponseFixture.owner,
         },
         {
-          type: 'event',
-          eventId: ['event-2'],
-          index: ['idx-b'],
+          type: 'security.event',
+          attachmentId: ['event-2'],
+          metadata: { index: ['idx-b'] },
           owner: createCaseResponseFixture.owner,
         },
       ],

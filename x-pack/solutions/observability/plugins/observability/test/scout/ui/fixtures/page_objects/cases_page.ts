@@ -44,7 +44,14 @@ export class CasesPage {
     );
     this.createCaseButton = this.page.testSubj.locator('createNewCaseBtn');
     this.createCaseForm = this.page.testSubj.locator('case-creation-form-steps');
-    this.readOnlyBadge = this.page.testSubj.locator('headerBadge');
+    // Classic chrome renders the legacy `chrome.setBadge()` read-only badge in the
+    // header (`headerBadge`); the Chrome Next AppHeader (serverless / cases redesign)
+    // renders it next to the page title as `appHeaderBadge`. Stateful renders both at
+    // once, so take the first match rather than requiring a unique one.
+    this.readOnlyBadge = this.page
+      .locator('[data-test-subj="headerBadge"],[data-test-subj="appHeaderBadge"]')
+      // eslint-disable-next-line playwright/no-nth-methods -- the two badges are equivalent; either one proves the read-only state
+      .first();
     this.noPrivilegesPrompt = this.page.getByRole('heading', { name: 'Privileges required' });
     this.caseViewTitle = this.page.locator(
       '[data-test-subj="case-view-title"],[data-test-subj="appHeaderTitle"]'

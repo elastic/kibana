@@ -48,6 +48,8 @@ const toRuleChangesHistorySnapshot = (rule: RuleResponse): RuleChangesHistorySna
 export class RuleChangesHistorySubscriber {
   #subscriptions: Subscription[] = [];
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
@@ -55,14 +57,15 @@ export class RuleChangesHistorySubscriber {
     private readonly changeHistory: RuleChangesHistoryServiceContract,
     @inject(CoreStart('userProfile'))
     private readonly userProfile: UserProfileServiceStart,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public start(): void {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
-        message: () =>
-          '[RuleChangesHistorySubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+        message: () => 'Subscriber start called more than once; ignoring',
       });
 
       return;
@@ -116,7 +119,7 @@ export class RuleChangesHistorySubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_LOG_CODES.RULE_CHANGES_HISTORY_SUBSCRIBER_FAILURE,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_CHANGES_HISTORY_SUBSCRIBER_FAILED,
         labels: {
           event_type: event.type,
           rule_id: ruleId,

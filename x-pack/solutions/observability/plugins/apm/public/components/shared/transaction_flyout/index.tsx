@@ -33,6 +33,7 @@ import type { SpanLinksCount } from '../span_links';
 import { DroppedSpansWarning } from './dropped_spans_warning';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 interface Props {
   transactionId: string;
@@ -142,10 +143,14 @@ function TransactionFlyoutBody({
     timestamp: transaction['@timestamp'],
   });
 
+  const { core } = useApmPluginContext();
+
   const genAiTabContent = getGenAiTabContent({
     isGenAiSpan,
     genAi,
     ebt: { element: TRANSACTION_FLYOUT_EBT_ELEMENTS.TABS },
+    reportEvent: core.analytics.reportEvent,
+    resourceId: transaction.transaction?.id,
   });
 
   const tabs = [

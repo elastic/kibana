@@ -15,6 +15,14 @@ export const ML_ALERT_TYPES = {
   AD_JOBS_HEALTH: 'xpack.ml.anomaly_detection_jobs_health',
 } as const;
 
+export const DELAYED_DATA_THRESHOLD_TYPE = {
+  COUNT: 'count',
+  PERCENTAGE: 'percentage',
+} as const;
+
+export type DelayedDataThresholdType =
+  (typeof DELAYED_DATA_THRESHOLD_TYPE)[keyof typeof DELAYED_DATA_THRESHOLD_TYPE];
+
 export type PreviewResultsKeys = 'record_results' | 'bucket_results' | 'influencer_results';
 export type TopHitsResultsKeys = 'top_record_hits' | 'top_bucket_hits' | 'top_influencer_hits';
 
@@ -174,6 +182,8 @@ export type MlAnomalyDetectionJobsHealthRuleParams = {
       | (CommonHealthCheckConfig & {
           docsCount?: number | null;
           timeInterval?: string | null;
+          thresholdType?: DelayedDataThresholdType;
+          docsCountPercentage?: number | null;
         })
       | null;
     behindRealtime?:

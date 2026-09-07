@@ -222,7 +222,7 @@ export function KnowledgeIndicatorsToolbar({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={activityBlockTooltip}>
               <EuiButtonEmpty
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 size="xs"
                 isDisabled={
                   blocksActivity ||
@@ -270,7 +270,7 @@ function BulkExcludeButton({
 }) {
   const button = (
     <EuiButtonEmpty
-      iconType="eyeClosed"
+      iconType="eyeSlash"
       color="warning"
       size="xs"
       aria-label={EXCLUDE_SELECTED_LABEL}

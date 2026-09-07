@@ -146,7 +146,7 @@ export const FieldDefinitionRow: React.FC<FieldDefinitionRowProps> = ({
           aria-label={i18n.REORDER_FIELD_HANDLE(fieldDefinition.name)}
           data-test-subj={`fieldDefinitionDragHandle-${fieldDefinition.name}`}
         >
-          <EuiIcon type="grabOmnidirectional" size="s" aria-hidden={true} />
+          <EuiIcon type="drag" size="s" aria-hidden={true} />
         </div>
       ) : (
         // Reserves the gutter on rows that carry no order, so the two groups share a left edge.

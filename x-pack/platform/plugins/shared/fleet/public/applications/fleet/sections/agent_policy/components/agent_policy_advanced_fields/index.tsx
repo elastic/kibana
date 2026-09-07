@@ -233,7 +233,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 >
                   <EuiButtonEmpty
                     size="s"
-                    iconType="console"
+                    iconType="commandLine"
                     onClick={() => {
                       setIsUninstallCommandFlyoutOpen(true);
                     }}

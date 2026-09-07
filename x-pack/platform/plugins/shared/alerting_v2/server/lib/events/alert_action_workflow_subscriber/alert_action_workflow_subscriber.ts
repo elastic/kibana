@@ -56,19 +56,22 @@ import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding 
 export class AlertActionWorkflowSubscriber {
   #subscriptions: Subscription[] = [];
 
+  private readonly logger: LoggerServiceContract;
+
   constructor(
     @inject(AlertingDomainEventBusToken)
     private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
+    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
+  ) {
+    this.logger = loggerService.forSubsystem('events');
+  }
 
   public start(): void {
     if (this.#subscriptions.length > 0) {
       this.logger.debug({
-        message: () =>
-          '[AlertActionWorkflowSubscriber] start() called more than once. Ignoring. Subscriptions already active.',
+        message: () => 'Subscriber start called more than once; ignoring',
       });
 
       return;
@@ -102,11 +105,11 @@ export class AlertActionWorkflowSubscriber {
     } catch (err) {
       this.logger.error({
         error: err,
-        code: ALERTING_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
+        code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         labels: {
           event_type: trigger.eventType,
           space_id: event.spaceId,
-          episode_id: event.episodeId,
+          episode_id: event.episodeId ?? undefined,
           ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
         },
       });

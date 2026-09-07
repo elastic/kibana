@@ -19,6 +19,7 @@ import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getEsqlColumns: jest.fn(async () => []),
 }));
 
@@ -149,13 +150,21 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
-    it('shows standalone query summary for signal kind', () => {
+    it('shows a unified query summary for signal kind without alert-condition messaging', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
+      expect(screen.getByText('Query')).toBeInTheDocument();
+      expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+      expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Base query defined — no separate alert condition')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
     });
 
     it('shows the success state with base and alert condition for alert kind', () => {
@@ -200,23 +209,6 @@ describe('AlertConditionStep', () => {
       ).toBeInTheDocument();
     });
 
-    it('shows the no-alert-condition state for an alert persisted as a standalone query', () => {
-      renderStep(
-        { queryCommitted: true },
-        {
-          formValueOverrides: {
-            kind: 'alert',
-            query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS c = COUNT(*)' } },
-          },
-        }
-      );
-
-      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
-      expect(screen.getByTestId('esqlSummaryNoAlertConditionCallout')).toBeInTheDocument();
-      // The standalone breach query is surfaced as the base query block.
-      expect(screen.getByText(/FROM logs-\* \| STATS c = COUNT/)).toBeInTheDocument();
-    });
-
     it('shows the empty-query callout when both base and alert condition are empty', () => {
       renderStep(
         { queryCommitted: true },
@@ -256,7 +248,7 @@ describe('AlertConditionStep', () => {
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeDisabled();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
     });
 
     it('disables the edit CTA when child flyout is open (alert committed)', () => {
@@ -300,6 +292,40 @@ describe('AlertConditionStep', () => {
       renderStep({ queryCommitted: true });
 
       expect(screen.getByTestId('composeDiscoverGroupFields')).toBeInTheDocument();
+    });
+  });
+
+  describe('query-dependent field gating', () => {
+    it('disables time field and group fields when no query is committed', () => {
+      renderStep({ queryCommitted: false });
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('disables time field and group fields when the committed query is empty', () => {
+      renderStep(
+        { queryCommitted: true },
+        {
+          formValueOverrides: {
+            kind: 'alert',
+            query: { format: 'composed', base: '', breach: { segment: '' } },
+          },
+        }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeDisabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeDisabled();
+    });
+
+    it('enables time field and group fields once a usable query is committed', () => {
+      renderStep(
+        { queryCommitted: true },
+        { formValueOverrides: { kind: 'alert', query: COMPOSED_QUERY } }
+      );
+
+      expect(screen.getByTestId('composeDiscoverTimeField')).toBeEnabled();
+      expect(screen.getByTestId('comboBoxSearchInput')).toBeEnabled();
     });
   });
 

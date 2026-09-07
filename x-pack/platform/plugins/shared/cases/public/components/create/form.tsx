@@ -45,6 +45,7 @@ export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsPr
   ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
   attachments?: CaseAttachmentsWithoutOwner;
+  getAttachments?: (owner: string) => CaseAttachmentsWithoutOwner;
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
 }
 
@@ -105,6 +106,7 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
           withSteps={withSteps}
           draftStorageKey={draftStorageKey}
           configuration={currentConfiguration}
+          selectedOwner={selectedOwner}
         />
       </>
     );
@@ -121,6 +123,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
     onSuccess,
     timelineIntegration,
     attachments,
+    getAttachments,
     initialValue,
   }) => {
     const { owner } = useCasesContext();
@@ -163,6 +166,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
 
     const { submitCase, isSubmitting } = useSubmitCase({
       attachments,
+      getAttachments,
       onSuccess: handleOnSuccess,
       afterCaseCreated,
     });

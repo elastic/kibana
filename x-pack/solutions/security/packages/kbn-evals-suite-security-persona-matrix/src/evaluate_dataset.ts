@@ -74,6 +74,7 @@ export const toDatasetExample = (ex: PersonaMatrixExample): PersonaMatrixDataset
 export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, expected, metadata }) => {
     // Try tool_sequence from expected output first, then expectedTools from metadata
     const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
@@ -161,6 +162,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
 }): Evaluator => ({
   name: 'SkillInvoked',
   kind: 'CODE',
+  direction: 'maximize',
   evaluate: async ({ output, metadata }) => {
     const meta = metadata as { expectedSkill?: string; allowSkills?: string[] } | undefined;
     const acceptedSkills = [meta?.expectedSkill, ...(meta?.allowSkills ?? [])].filter(
@@ -205,7 +207,7 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   ),
   skill_invoked = COUNT(
     CASE(
-      attributes.gen_ai.tool.name == "filestore.read" AND (${skillPredicate}),
+      attributes.gen_ai.tool.name IN ("load_skill", "filestore.read") AND (${skillPredicate}),
       1,
       NULL
     )

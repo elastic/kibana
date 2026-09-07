@@ -43,6 +43,9 @@ const pluginInitializerContextParams = {
     active_nodes_lookback: '30s',
     interval: 10000,
   },
+  execution_control: {
+    poll_interval: 5000,
+  },
   kibanas_per_partition: 2,
   monitored_aggregated_stats_refresh_rate: 5000,
   monitored_stats_health_verbose_log: {

@@ -32,7 +32,7 @@ export interface QueryRuleDraggableListItemProps {
   tourInfo?: {
     title: string;
     content: string;
-    tourTargetRef?: React.RefObject<HTMLDivElement>;
+    tourTargetRef?: React.Ref<HTMLDivElement>;
   };
 }
 
@@ -85,7 +85,7 @@ export interface QueryRuleDraggableListProps {
   tourInfo?: {
     title: string;
     content: string;
-    tourTargetRef?: React.RefObject<HTMLDivElement>;
+    tourTargetRef?: React.Ref<HTMLDivElement>;
   };
 }
 

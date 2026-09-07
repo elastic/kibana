@@ -27,5 +27,7 @@
     "@kbn/std",
     "@kbn/streamlang",
     "@kbn/significant-events-plugin",
+    "@kbn/repo-info",
+    "@kbn/test",
   ]
 }

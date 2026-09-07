@@ -1,21 +1,9 @@
 {
-  "sha1": "db8495f796ecf25f43819326b7f2a88d915ff9c1",
+  "sha1": "a8d526687b909582740731e068f3491e77f4ae8f",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "d7169ee3bc6bd51-7be94d09c2674e5",
-      "title": "Teardown surrounding docs tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
-        "line": 12,
-        "column": 19
-      }
-    },
     {
       "id": "75066322895708e-25b2b42030c54ba",
       "title": "Setup surrounding docs tests data",
@@ -23,21 +11,21 @@
       "tags": [],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.setup.ts",
-        "line": 12,
-        "column": 16
+        "line": 7,
+        "column": 1
       }
     },
     {
-      "id": "7d242f0d6878318-66666d295105cc2",
-      "title": "Discover context - accessibility should give focus to the Load link when Tab is pressed",
+      "id": "7d242f0d6878318-36e03d4985ea740",
+      "title": "Discover context - accessibility should tab from the Load link to the Columns control",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_accessibility.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 21,
+        "column": 45
       }
     },
     {
@@ -49,8 +37,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos_custom.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 32,
+        "column": 53
       }
     },
     {
@@ -62,8 +50,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 29,
+        "column": 51
       }
     },
     {
@@ -75,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_date_nanos.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 40,
+        "column": 14
       }
     },
     {
@@ -86,12 +74,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -101,8 +83,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
-        "line": 42,
-        "column": 14
+        "line": 44,
+        "column": 53
       }
     },
     {
@@ -112,12 +94,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -127,8 +103,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
-        "line": 59,
-        "column": 14
+        "line": 61,
+        "column": 47
       }
     },
     {
@@ -138,12 +114,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -153,8 +123,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
-        "line": 85,
-        "column": 14
+        "line": 86,
+        "column": 7
       }
     },
     {
@@ -164,12 +134,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -179,8 +143,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
-        "line": 102,
-        "column": 14
+        "line": 95,
+        "column": 81
       }
     },
     {
@@ -190,12 +154,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -205,8 +163,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_discover_navigation.spec.ts",
-        "line": 114,
-        "column": 14
+        "line": 105,
+        "column": 49
       }
     },
     {
@@ -216,12 +174,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -231,8 +183,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 50,
-        "column": 12
+        "line": 40,
+        "column": 23
       }
     },
     {
@@ -242,12 +194,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -257,8 +203,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 77,
-        "column": 12
+        "line": 53,
+        "column": 25
       }
     },
     {
@@ -268,12 +214,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -283,8 +223,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 101,
-        "column": 12
+        "line": 79,
+        "column": 14
       }
     },
     {
@@ -294,12 +234,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -309,8 +243,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 117,
-        "column": 12
+        "line": 90,
+        "column": 16
       }
     },
     {
@@ -320,12 +254,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -335,8 +263,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 157,
-        "column": 12
+        "line": 126,
+        "column": 18
       }
     },
     {
@@ -346,12 +274,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -361,8 +283,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 60,
+        "column": 22
       }
     },
     {
@@ -372,12 +294,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -387,8 +303,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 69,
+        "column": 23
       }
     },
     {
@@ -398,12 +314,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -413,8 +323,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
-        "line": 81,
-        "column": 12
+        "line": 74,
+        "column": 5
       }
     },
     {
@@ -424,12 +334,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -439,8 +343,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_navigation.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 79,
+        "column": 5
       }
     },
     {
@@ -450,12 +354,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -465,8 +363,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
-        "line": 41,
-        "column": 12
+        "line": 31,
+        "column": 64
       }
     },
     {
@@ -476,12 +374,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -491,8 +383,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 36,
+        "column": 13
       }
     },
     {
@@ -504,8 +396,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 25,
+        "column": 23
       }
     },
     {
@@ -517,8 +409,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
-        "line": 92,
-        "column": 12
+        "line": 80,
+        "column": 20
       }
     },
     {
@@ -530,8 +422,19 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 108,
+        "column": 20
+      }
+    },
+    {
+      "id": "d7169ee3bc6bd51-7be94d09c2674e5",
+      "title": "Teardown surrounding docs tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

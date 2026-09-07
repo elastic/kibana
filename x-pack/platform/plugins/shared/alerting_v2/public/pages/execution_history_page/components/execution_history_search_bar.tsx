@@ -38,6 +38,12 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyOutcomeFilter; text: string }> = [
       defaultMessage: 'Throttled',
     }),
   },
+  {
+    value: 'dispatch_failed' as const,
+    text: i18n.translate('xpack.alertingV2.executionHistory.searchBar.outcome.dispatchFailed', {
+      defaultMessage: 'Failed',
+    }),
+  },
 ];
 
 export interface RuleOption {

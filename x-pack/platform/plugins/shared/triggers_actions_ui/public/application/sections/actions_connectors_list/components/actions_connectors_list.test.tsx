@@ -131,7 +131,7 @@ describe('actions_connectors_list', () => {
       const createFirstActionButton = await screen.findByTestId('createFirstActionButton');
       await user.click(createFirstActionButton);
       await waitFor(() => {
-        expect(setAddFlyoutVisibility).toBeCalled();
+        expect(setAddFlyoutVisibility).toHaveBeenCalled();
       });
     });
   });
@@ -443,7 +443,10 @@ describe('actions_connectors_list', () => {
       );
 
       await waitFor(() => {
-        expect(mockedEditItem).toBeCalledWith(selectedConnector, EditConnectorTabs.Configuration);
+        expect(mockedEditItem).toHaveBeenCalledWith(
+          selectedConnector,
+          EditConnectorTabs.Configuration
+        );
       });
       expect(mockedCreateHref).toHaveBeenCalledWith({ pathname: '/connectors' });
       expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/connectors');

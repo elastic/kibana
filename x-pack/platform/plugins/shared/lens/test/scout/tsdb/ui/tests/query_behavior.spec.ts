@@ -8,26 +8,28 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
+  ES_ARCHIVE_PATHS,
+  KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
+  TSDB_IN_RANGE_DATES,
+} from '../../../common/fixtures/constants';
+import {
   ROLLED_UP_MEDIAN_WARNING,
   TSDB_DATA_VIEW_ID,
   TSDB_DOWNSAMPLED_DATA_VIEW_ID,
-  TSDB_ES_ARCHIVE,
-  TSDB_INDEX,
-  TSDB_TIME_RANGE,
   test,
 } from '../fixtures';
 
 test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnostic }, () => {
   let downsampledTargetIndex = '';
-  const downsampledDataViewTitle = `${TSDB_INDEX},${TSDB_INDEX}_downsampled`;
+  const downsampledDataViewTitle = `${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX},${KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX}_downsampled`;
   const createdDataViewIds: string[] = [];
 
   test.beforeAll(async ({ apiServices, esArchiver, tsdbHelper, uiSettings }) => {
-    await esArchiver.loadIfNeeded(TSDB_ES_ARCHIVE);
+    await esArchiver.loadIfNeeded(ES_ARCHIVE_PATHS.KIBANA_SAMPLE_DATA_LOGS_TSDB);
 
     const { data: tsdbDataView } = await apiServices.dataViews.create({
       id: TSDB_DATA_VIEW_ID,
-      title: TSDB_INDEX,
+      title: KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
       timeFieldName: '@timestamp',
       override: true,
     });
@@ -35,12 +37,13 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
 
     await uiSettings.set({
       'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': JSON.stringify(TSDB_TIME_RANGE),
+      'timepicker:timeDefaults': JSON.stringify(TSDB_IN_RANGE_DATES),
     });
 
-    downsampledTargetIndex = await tsdbHelper.downsampleTSDBIndex(TSDB_INDEX, {
-      isStream: false,
-    });
+    downsampledTargetIndex = await tsdbHelper.downsampleTSDBIndex(
+      KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX,
+      { isStream: false }
+    );
     const { data: downsampleDataView } = await apiServices.dataViews.create({
       id: TSDB_DOWNSAMPLED_DATA_VIEW_ID,
       title: downsampledDataViewTitle,
@@ -63,7 +66,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     if (downsampledTargetIndex) {
       await esClient.indices.delete({ index: downsampledTargetIndex }, { ignore: [404] });
     }
-    await esClient.indices.delete({ index: TSDB_INDEX }, { ignore: [404] });
+    await esClient.indices.delete({ index: KIBANA_SAMPLE_DATA_LOGS_TSDB_INDEX }, { ignore: [404] });
   });
 
   test('defaults to median without warnings for non-rolled-up metrics', async ({
@@ -72,7 +75,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     uiSettings,
   }) => {
     await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
 
     await test.step('defaults to median', async () => {
       const fieldLocator = page.testSubj.locator('lnsFieldListPanelField-bytes_gauge');
@@ -81,12 +84,12 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
       await expect
-        .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+        .poll(() => pageObjects.lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
         .toBe('Median of bytes_gauge');
     });
 
     await test.step('does not show warnings', async () => {
-      await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+      await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
       await expect(page.testSubj.locator('median-partial-warning')).toHaveCount(0);
       await expect(page.testSubj.locator('lens-editor-warning')).toHaveCount(0);
       await pageObjects.lens.closeDimensionEditor();
@@ -99,7 +102,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     uiSettings,
   }) => {
     await uiSettings.set({ defaultIndex: TSDB_DOWNSAMPLED_DATA_VIEW_ID });
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
     await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveAttribute(
       'title',
       downsampledDataViewTitle
@@ -110,27 +113,27 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     await fieldLocator.dragTo(page.testSubj.locator('workspace-drag-drop-prompt'));
 
     await expect
-      .poll(() => pageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel'))
+      .poll(() => pageObjects.lens.dimensions.getDimensionTriggerText('lnsXY_yDimensionPanel'))
       .toBe('Average of bytes_gauge');
 
-    await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+    await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
     await expect(page.testSubj.locator('median-partial-warning')).toBeVisible();
     await page.testSubj.locator('lns-indexPatternDimension-median').click();
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    await pageObjects.lens.openMessageList();
-    await expect(pageObjects.lens.getMessageListItems('warning')).toContainText(
+    await pageObjects.lens.workspace.openMessageList();
+    await expect(pageObjects.lens.workspace.getMessageListItems('warning')).toContainText(
       ROLLED_UP_MEDIAN_WARNING
     );
-    await pageObjects.lens.closeMessageList();
+    await pageObjects.lens.workspace.closeMessageList();
     await pageObjects.lens.closeDimensionEditor();
 
     await pageObjects.lens.save('New', { addToDashboard: 'new' });
     await pageObjects.dashboard.waitForRenderComplete();
-    await pageObjects.lens.openMessageList();
-    await expect(pageObjects.lens.getMessageListItems('warning')).toContainText(
+    await pageObjects.lens.workspace.openMessageList();
+    await expect(pageObjects.lens.workspace.getMessageListItems('warning')).toContainText(
       ROLLED_UP_MEDIAN_WARNING
     );
-    await pageObjects.lens.closeMessageList();
+    await pageObjects.lens.workspace.closeMessageList();
   });
 
   test('allows supported operations and rejects unsupported operations for time series fields', async ({
@@ -166,7 +169,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
 
       await test.step(`supported ${fieldType} operations`, async () => {
         // Reset editor for each field type to get empty dimension slots
-        await pageObjects.lens.openFullEditor();
+        await pageObjects.lens.workspace.openFullEditor();
 
         await pageObjects.lens.configureDimension({
           dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -197,7 +200,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       // Unsupported operations are always present for counter; empty for gauge
       await test.step(`unsupported ${fieldType} operations`, async () => {
         // Reuse the existing dimensions from the supported step — just reopen the y-axis
-        await pageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel');
+        await pageObjects.lens.dimensions.openDimensionEditor('lnsXY_yDimensionPanel');
         await pageObjects.lens.selectOperation('min');
 
         for (const operation of unsupportedOperations) {
@@ -222,7 +225,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     uiSettings,
   }) => {
     await uiSettings.set({ defaultIndex: TSDB_DATA_VIEW_ID });
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
@@ -248,7 +251,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
     ).toBeVisible();
     await pageObjects.lens.closeDimensionEditor();
 
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'min',
@@ -259,7 +262,7 @@ test.describe('Lens TSDB query and editor behavior', { tag: tags.deploymentAgnos
       operation: 'date_histogram',
       keepOpen: true,
     });
-    await pageObjects.lens.clearDimensionField();
+    await pageObjects.lens.dimensions.clearDimensionField();
     const fieldComboBox = page.components.comboBox('indexPattern-dimension-field');
     expect(await fieldComboBox.getAllVisibleOptions()).not.toHaveLength(0);
     const optionsList = page.getByRole('listbox');

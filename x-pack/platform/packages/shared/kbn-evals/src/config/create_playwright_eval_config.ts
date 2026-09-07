@@ -118,6 +118,9 @@ export function createPlaywrightEvalsConfig({
     globalSetup: require.resolve('./setup.js'),
     globalTeardown: require.resolve('./teardown.js'),
     timeout: timeout ?? 5 * 60_000,
+    // Playwright's default also matches `*.test.ts`, which would load Jest unit tests colocated
+    // with the specs and fail on `describe is not defined`. Evals are always `*.spec.ts`.
+    testMatch: '**/*.spec.ts',
     // Playwright 1.61 on Node >=23.5 registers a synchronous `module.registerHooks` load hook
     // that transforms all first-party TypeScript (anything not in node_modules) with its own
     // bundled Babel. Workspace `@kbn/*` symlinks resolve to real paths outside node_modules, so

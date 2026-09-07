@@ -44,6 +44,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
           type={iconType}
           size="m"
           aria-hidden={true}
+          data-test-subj={`${TOOLS_FLYOUT_HEADER_TITLE_TEST_ID}Icon`}
           css={{ flexShrink: 0, marginRight: euiTheme.size.xs }}
         />
         <span
@@ -63,7 +64,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
         {onTitleClick ? (
           <EuiButtonEmpty
             onClick={onTitleClick}
-            iconType="expand"
+            iconType="maximize"
             size="xs"
             flush="left"
             css={{ maxWidth: '100%', minWidth: 0 }}

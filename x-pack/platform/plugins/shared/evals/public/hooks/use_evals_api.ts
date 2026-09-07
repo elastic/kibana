@@ -33,6 +33,7 @@ import {
   type CreateEvaluationDatasetResponse,
   type UpdateEvaluationDatasetRequestBodyInput,
   type UpdateEvaluationDatasetResponse,
+  type DeleteEvaluationDatasetRequestQuery,
   type DeleteEvaluationDatasetResponse,
   type AddEvaluationDatasetExamplesRequestBodyInput,
   type AddEvaluationDatasetExamplesResponse,
@@ -102,6 +103,14 @@ interface UpdateDatasetVariables extends DatasetWithId {
 
 interface AddExamplesVariables extends DatasetWithId {
   body: AddEvaluationDatasetExamplesRequestBodyInput;
+}
+
+interface DeleteDatasetVariables extends DatasetWithId {
+  /**
+   * Which outcome the confirmation the user saw described, so the server can
+   * refuse the other one rather than perform it unannounced.
+   */
+  intent?: DeleteEvaluationDatasetRequestQuery['intent'];
 }
 
 interface ExampleWithDatasetId extends DatasetWithId {
@@ -243,15 +252,23 @@ export const useDeleteDataset = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ datasetId }: DatasetWithId): Promise<DeleteEvaluationDatasetResponse> => {
+    mutationFn: async ({
+      datasetId,
+      intent,
+    }: DeleteDatasetVariables): Promise<DeleteEvaluationDatasetResponse> => {
       return services.http!.delete<DeleteEvaluationDatasetResponse>(getDatasetUrl(datasetId), {
         version: API_VERSIONS.internal.v1,
+        ...(intent ? { query: { intent } } : {}),
       });
     },
-    onSuccess: async (_response, { datasetId }) => {
+    onSuccess: async () => {
+      // Invalidating `datasets.all` would cover both in one call, but it is a
+      // prefix of `datasets.detail`, so it would also refetch the dataset just
+      // deleted, from the detail page still on screen while it redirects away.
+      // That request 404s, so the stale detail entry is left to expire instead.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.lists }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.tagSuggestions() }),
       ]);
     },
   });
@@ -570,15 +587,20 @@ export const useExperimentDatasetExamples = (
   });
 };
 
-export const useExampleScores = (exampleId: string) => {
+export const useExampleScores = (exampleId: string, datasetId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.examples.scores(exampleId),
+    queryKey: queryKeys.examples.scores(exampleId, datasetId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
       const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
+      const query: Record<string, string> = {};
+      if (datasetId) {
+        query.dataset_id = datasetId;
+      }
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
+        query,
       });
     },
     enabled: exampleId.length > 0,

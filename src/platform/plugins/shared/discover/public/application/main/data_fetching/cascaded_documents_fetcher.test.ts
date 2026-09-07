@@ -99,7 +99,7 @@ const createFetchParams = (
     esqlVariables: undefined,
     dataView: dataViewWithTimefieldMock,
     timeRange: { from: 'now-15m', to: 'now' },
-    isApproximate: false,
+    esqlApproximation: false,
     ...overrides,
   };
 };
@@ -169,7 +169,7 @@ describe('CascadedDocumentsFetcher', () => {
     expect(stateManager.setCascadedDocuments).toHaveBeenCalledWith(params.nodeId, records);
   });
 
-  it('forwards isApproximate to fetchEsql so cascade drill-downs match the active search mode', async () => {
+  it('forwards esqlApproximation to fetchEsql so cascade drill-downs match the active search mode', async () => {
     const { fetcher } = createFetcher();
     const cascadeQuery: AggregateQuery = { esql: 'from logs' };
 
@@ -177,12 +177,12 @@ describe('CascadedDocumentsFetcher', () => {
     mockFetchEsql.mockResolvedValue({ records: [], esqlQueryColumns: [] });
 
     await fetcher.fetchCascadedDocuments(
-      createFetchParams({ nodeId: 'node-approx', isApproximate: true })
+      createFetchParams({ nodeId: 'node-approx', esqlApproximation: true })
     );
 
     expect(mockFetchEsql).toHaveBeenCalledWith(
       expect.objectContaining({
-        isApproximate: true,
+        esqlApproximation: true,
       })
     );
   });

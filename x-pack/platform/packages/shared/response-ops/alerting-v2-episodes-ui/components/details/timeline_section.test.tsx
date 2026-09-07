@@ -100,16 +100,24 @@ beforeEach(() => {
 });
 
 describe('AlertEpisodeTimelineSection', () => {
-  it('shows a spinner while loading actions', () => {
+  it('shows a skeleton while loading actions', () => {
     mockActions([], true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
-  it('shows a spinner while loading events', () => {
+  it('shows a skeleton while loading events', () => {
     mockEvents(mockEventRows, true);
     renderSection();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2EpisodeTimelineSectionLoading')
+        .querySelector('.euiSkeletonCircle')
+    ).not.toBeNull();
   });
 
   it('shows empty prompt when there are no events and no actions', () => {

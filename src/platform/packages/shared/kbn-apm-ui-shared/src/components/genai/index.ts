@@ -17,3 +17,10 @@ export {
 } from './get_genai_fields';
 export { getFieldFromSource, GEN_AI_LONG_MESSAGE_FIELDS } from './get_field_from_source';
 export { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
+export {
+  GenAiTabImpression,
+  GENAI_TAB_IMPRESSION_EVENT_TYPE,
+  registerGenAiTabImpressionEventType,
+  type GenAiTabImpressionEvent,
+  type GenAiTabImpressionProps,
+} from './genai_tab_impression';

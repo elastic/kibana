@@ -103,7 +103,7 @@ const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({
           <EuiButton
             size="s"
             color={isAttached ? 'success' : 'primary'}
-            iconType={isAttached ? 'check' : actionIconType ?? 'plusInCircle'}
+            iconType={isAttached ? 'check' : actionIconType ?? 'plusCircle'}
             isLoading={isAttachInFlight}
             isDisabled={isAttachingAny || isAttached}
             onClick={handleClick}

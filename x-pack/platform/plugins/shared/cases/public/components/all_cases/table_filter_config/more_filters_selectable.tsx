@@ -26,7 +26,7 @@ export const MoreFiltersSelectable = ({
       // `controlsHorizontal`, not a plus: this control both adds and removes which filters are
       // shown, so "add" describes only half of what it does. The sliders glyph reads as "adjust
       // which controls are here", which is exactly the job.
-      buttonIconType="controlsHorizontal"
+      buttonIconType="controls"
       // An icon-only control with no label had no accessible name at all, and nothing on screen
       // said what it was for — least obvious precisely when no filters are applied yet.
       buttonTooltip={i18n.EDIT_FILTERS_TOOLTIP}

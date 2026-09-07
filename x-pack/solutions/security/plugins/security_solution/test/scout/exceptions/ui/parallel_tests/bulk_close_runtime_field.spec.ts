@@ -42,6 +42,10 @@ spaceTest.describe(
     let runtimeFieldName: string;
     let alertsIndex: string;
 
+    // Cover the longest path (rule firing + UI flow) — Playwright's default
+    // per-test budget is too short for security_solution rule execution.
+    spaceTest.setTimeout(5 * 60_000);
+
     spaceTest.beforeEach(async ({ browserAuth, apiServices, esClient, scoutSpace }) => {
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_');
       sourceIndex = `${SOURCE_INDEX_PREFIX}-${idSegment.toLowerCase()}`;
@@ -115,7 +119,7 @@ spaceTest.describe(
           await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
           // Refresh the table so the new alert is visible.
           await page.reload();
-          await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
+          await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
         });
 
         await spaceTest.step('open the add-rule-exception flyout', async () => {
