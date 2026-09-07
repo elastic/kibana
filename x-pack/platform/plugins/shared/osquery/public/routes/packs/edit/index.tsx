@@ -7,14 +7,12 @@
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +21,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import { fullWidthFormContentCss } from '../../../components/layouts';
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useOsquerySubpageTitle } from '../../../components/osquery_page_header_context';
+import { useKibana } from '../../../common/lib/kibana';
 import { PackForm } from '../../../packs/form';
 import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
@@ -38,7 +37,6 @@ const EditPackPageComponent = () => {
   const canWritePacks = !!permissions.writePacks;
 
   const { packId } = useParams<{ packId: string }>();
-  const packsListLinkProps = useRouterNavigate('packs');
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
   const { isLoading, data, error } = usePack({ packId });
@@ -76,17 +74,23 @@ const EditPackPageComponent = () => {
     });
   }, [deletePackMutation, handleCloseDeleteConfirmationModal]);
 
-  const backLink = useMemo(
-    () => (
-      <EuiButtonEmpty iconType="chevronSingleLeft" {...packsListLinkProps} flush="left" size="xs">
-        <FormattedMessage
-          id="xpack.osquery.editPack.viewPackListTitle"
-          defaultMessage="View all packs"
-        />
-      </EuiButtonEmpty>
-    ),
-    [packsListLinkProps]
-  );
+  const pageTitle = useMemo(() => {
+    if (!data?.name) {
+      return undefined;
+    }
+
+    return isReadOnly
+      ? i18n.translate('xpack.osquery.viewPack.pageTitle', {
+          defaultMessage: 'View {queryName}',
+          values: { queryName: data.name },
+        })
+      : i18n.translate('xpack.osquery.editPack.pageTitle', {
+          defaultMessage: 'Edit {queryName}',
+          values: { queryName: data.name },
+        });
+  }, [data?.name, isReadOnly]);
+
+  useOsquerySubpageTitle(pageTitle);
 
   // Write actions (duplicate, delete) are only available to users with
   // writePacks. readPacks-only users see a fully read-only view.
@@ -204,9 +208,6 @@ const EditPackPageComponent = () => {
   if (error) {
     return (
       <div css={fullWidthFormContentCss}>
-        <EuiSpacer size="l" />
-        {backLink}
-        <EuiSpacer size="m" />
         <EuiCallOut
           announceOnMount
           title={i18n.translate('xpack.osquery.editPack.loadError.title', {
@@ -226,37 +227,11 @@ const EditPackPageComponent = () => {
 
   return (
     <div css={fullWidthFormContentCss}>
-      <EuiSpacer size="l" />
-      {backLink}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <h1>
-              {isReadOnly ? (
-                <FormattedMessage
-                  id="xpack.osquery.viewPack.pageTitle"
-                  defaultMessage="View {queryName}"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    queryName: data?.name,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.osquery.editPack.pageTitle"
-                  defaultMessage="Edit {queryName}"
-                  // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-                  values={{
-                    queryName: data?.name,
-                  }}
-                />
-              )}
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
-      </EuiFlexGroup>
+      {RightColumn && (
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>{RightColumn}</EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       {HeaderContent}
       <EuiSpacer size="l" />
       {formContent}
