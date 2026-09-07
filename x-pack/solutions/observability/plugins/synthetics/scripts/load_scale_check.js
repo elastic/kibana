@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TabPlaceholder } from '../tab_placeholder';
-
-export const PipelinesTab = () => (
-  <TabPlaceholder data-test-subj="streamsLayoutPipelinesPlaceholder" />
-);
+require('@kbn/swc-register').install();
+require('./tasks/load_scale_check')
+  .checkLoadScale()
+  .catch((e) => {
+    // eslint-disable-next-line no-console
+    console.error(e);
+    process.exitCode = 1;
+  });
