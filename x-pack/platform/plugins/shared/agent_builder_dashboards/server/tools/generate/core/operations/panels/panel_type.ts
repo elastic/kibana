@@ -27,26 +27,43 @@ export interface PanelTypeDefinition {
   /** Builds panel content from an already-resolved `source: 'config'` config. */
   readonly buildPanelContent: (config: AttachmentPanel['config']) => PanelContent;
   /**
-   * Validates that an existing panel may be replaced via a `source: 'config'`
-   * edit of this type. Omit for types that are not editable by config (e.g.
-   * `vis`, which edits through `source: 'request'` instead).
+   * Validates that an existing panel may be updated via a `source: 'config'`
+   * edit of this type. Omit for types that are not editable by config.
    */
-  readonly validateConfigEdit?: (existingPanel: AttachmentPanel) => ConfigEditValidation;
+  readonly validateConfigEdit?: (
+    existingPanel: AttachmentPanel,
+    patch?: AttachmentPanel['config']
+  ) => ConfigEditValidation;
+  /**
+   * Merges a `source: 'config'` edit onto the existing panel config. Omit to
+   * replace the config with the supplied patch.
+   */
+  readonly applyConfigEdit?: (
+    existingPanel: AttachmentPanel,
+    patch: AttachmentPanel['config']
+  ) => AttachmentPanel['config'];
 }
 
 /**
  * Builds a {@link PanelTypeDefinition} from a panel type's `embeddableType`,
  * keeping it the single source of truth: `buildPanelContent` defaults to passing
  * the config through to that embeddable, so a type only declares its embeddable
- * id (plus `validateConfigEdit` when editable by config). Pass `buildPanelContent`
+ * id (plus `validateConfigEdit` / `applyConfigEdit` when editable by config). Pass `buildPanelContent`
  * to override for a type that needs to transform its config.
  */
 export const definePanelType = ({
   embeddableType,
   buildPanelContent = (config) => ({ type: embeddableType, config }),
   validateConfigEdit,
+  applyConfigEdit,
 }: {
   embeddableType: string;
   buildPanelContent?: (config: AttachmentPanel['config']) => PanelContent;
-  validateConfigEdit?: (existingPanel: AttachmentPanel) => ConfigEditValidation;
-}): PanelTypeDefinition => ({ embeddableType, buildPanelContent, validateConfigEdit });
+  validateConfigEdit?: PanelTypeDefinition['validateConfigEdit'];
+  applyConfigEdit?: PanelTypeDefinition['applyConfigEdit'];
+}): PanelTypeDefinition => ({
+  embeddableType,
+  buildPanelContent,
+  validateConfigEdit,
+  applyConfigEdit,
+});

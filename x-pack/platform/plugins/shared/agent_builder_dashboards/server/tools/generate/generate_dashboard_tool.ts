@@ -14,6 +14,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
   isSection,
+  type AttachmentPanel,
   type DashboardAttachmentData,
 } from '@kbn/agent-builder-dashboards-common';
 
@@ -40,7 +41,7 @@ const generateDashboardSchema = z.object({
     .describe(
       '(optional) The id of the dashboard attachment to update. Omit to create a new dashboard. The tool reads the current dashboard payload from this reference, so you never have to pass the full payload back in.'
     ),
-  operations: z.array(dashboardOperationSchema).min(1),
+  operations: z.array(dashboardOperationSchema).min(1).max(100),
 });
 
 /**
@@ -54,6 +55,14 @@ const generateDashboardSchema = z.object({
  * authored in this run, keyed by panel id. Panels that were not authored now
  * (or whose engine returned no note) simply have no `authoring_note`.
  */
+const summarizePanel = (panel: AttachmentPanel, authoringNote?: string) => ({
+  type: panel.type,
+  id: panel.id,
+  grid: panel.grid,
+  ...(typeof panel.config.title === 'string' ? { title: panel.config.title } : {}),
+  authoring_note: authoringNote,
+});
+
 const summarizeDashboard = (
   dashboardData: DashboardAttachmentData,
   authoringNotesByPanelId: Map<string, string>
@@ -67,20 +76,12 @@ const summarizeDashboard = (
         title: widget.title,
         collapsed: widget.collapsed,
         grid: widget.grid,
-        panels: widget.panels.map((panel) => ({
-          type: panel.type,
-          id: panel.id,
-          grid: panel.grid,
-          authoring_note: authoringNotesByPanelId.get(panel.id),
-        })),
+        panels: widget.panels.map((panel) =>
+          summarizePanel(panel, authoringNotesByPanelId.get(panel.id))
+        ),
       };
     }
-    return {
-      type: widget.type,
-      id: widget.id,
-      grid: widget.grid,
-      authoring_note: authoringNotesByPanelId.get(widget.id),
-    };
+    return summarizePanel(widget, authoringNotesByPanelId.get(widget.id));
   }),
   controls: (dashboardData.pinned_panels ?? []).map((control) => {
     const c = control as { id?: string; type?: string; config?: { title?: string } };
@@ -113,8 +114,8 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 Use operations[] to:
 1. set metadata
 2. add panels (resolved panel configs, or Lens/Vega visualizations from a natural-language query — pick the engine with the panel "renderer" field; defaults to Lens)
-3. edit existing Lens, Vega, or markdown panel content
-4. update panel layouts without changing content
+3. edit existing Lens, Vega, or markdown panel content (request for query/chart-family changes; explicit set/remove changes for visualization presentation)
+4. update panel layouts without changing content, including wrapping existing panels in new sections
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
 7. add / remove controls (interactive filters pinned above the dashboard: dropdown, range slider, or time slider)
@@ -152,12 +153,14 @@ Use operations[] to:
           }),
         });
 
-        // Data-aware default time range computation
-        const finalDashboardData = await applyDefaultDashboardTimeRange({
-          dashboardData,
-          esClient,
-          logger,
-        });
+        // Only new dashboards need data-aware time range selection.
+        const finalDashboardData = isNewDashboard
+          ? await applyDefaultDashboardTimeRange({
+              dashboardData,
+              esClient,
+              logger,
+            })
+          : dashboardData;
 
         const description = `Dashboard: ${finalDashboardData.title}`;
         const attachment = isNewDashboard

@@ -7,7 +7,13 @@
 
 export { buildLensConfig } from './lens/build_lens_config';
 export {
-  getChartTypeReviewPromptContent,
+  editLensPresentation,
+  editVegaPresentation,
+  getLensPresentationEditGuidance,
+  lensPresentationEditSchema,
+} from './lens/presentation';
+export {
+  getChartStyleRulesPromptContent,
   getChartTypeSelectionPromptContent,
 } from './lens/chart_type_guidance';
 export { seriesStatisticsAgentGuidance } from './shared/series_statistics_prompt';

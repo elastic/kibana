@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/palettes'
   - '@kbn/zod'
+  - '@kbn/safer-lodash-set'
 tags:
   - shared-server
   - package

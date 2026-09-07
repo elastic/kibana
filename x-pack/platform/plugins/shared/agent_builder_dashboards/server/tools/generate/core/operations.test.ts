@@ -1121,6 +1121,222 @@ describe('executeDashboardOperations', () => {
         },
       ]);
     });
+
+    it('wraps existing panels into a new section without changing panel identity', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('kpi-1'), createLensPanel('kpi-2')],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            newSections: [{ key: 'overview', title: 'Overview', grid: { y: 0 } }],
+            panels: [
+              {
+                panelId: 'kpi-1',
+                newSectionKey: 'overview',
+                grid: { x: 0, y: 0, w: 12, h: 5 },
+              },
+              {
+                panelId: 'kpi-2',
+                newSectionKey: 'overview',
+                grid: { x: 12, y: 0, w: 12, h: 5 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+
+      const sections = getSections(result.dashboardData.panels);
+      expect(sections).toHaveLength(1);
+      expect(sections[0]).toEqual(
+        expect.objectContaining({
+          title: 'Overview',
+          collapsed: false,
+          grid: { y: 0 },
+        })
+      );
+      expect(sections[0].id).not.toBe('overview');
+      expect(sections[0].panels).toEqual([
+        expect.objectContaining({
+          id: 'kpi-1',
+          grid: { x: 0, y: 0, w: 12, h: 5 },
+          config: { type: 'metric' },
+        }),
+        expect.objectContaining({
+          id: 'kpi-2',
+          grid: { x: 12, y: 0, w: 12, h: 5 },
+          config: { type: 'metric' },
+        }),
+      ]);
+    });
+
+    it('creates multiple new sections and can also target an existing section', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [
+            createLensPanel('kpi-1'),
+            createLensPanel('trend-1'),
+            createLensPanel('existing-1'),
+            createSection('section-a', 'Section A', 2),
+          ],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            newSections: [
+              { key: 'overview', title: 'Overview', grid: { y: 0 } },
+              { key: 'trends', title: 'Trends', grid: { y: 1 } },
+            ],
+            panels: [
+              {
+                panelId: 'kpi-1',
+                newSectionKey: 'overview',
+                grid: { x: 0, y: 0, w: 24, h: 5 },
+              },
+              {
+                panelId: 'trend-1',
+                newSectionKey: 'trends',
+                grid: { x: 0, y: 0, w: 48, h: 10 },
+              },
+              {
+                panelId: 'existing-1',
+                sectionId: 'section-a',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+
+      const sections = getSections(result.dashboardData.panels);
+      expect(sections.map((section) => section.title)).toEqual(['Section A', 'Overview', 'Trends']);
+      expect(sections.find((section) => section.title === 'Overview')?.panels).toEqual([
+        expect.objectContaining({ id: 'kpi-1', grid: { x: 0, y: 0, w: 24, h: 5 } }),
+      ]);
+      expect(sections.find((section) => section.title === 'Trends')?.panels).toEqual([
+        expect.objectContaining({ id: 'trend-1', grid: { x: 0, y: 0, w: 48, h: 10 } }),
+      ]);
+      expect(sections.find((section) => section.id === 'section-a')?.panels).toEqual([
+        expect.objectContaining({ id: 'existing-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      ]);
+    });
+
+    it('records a failure when the target section is missing and leaves the panel in place', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('top-1')],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            panels: [
+              {
+                panelId: 'top-1',
+                sectionId: 'missing-section',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([
+        {
+          type: 'update_panel_layouts',
+          identifier: 'top-1',
+          error: 'Section "missing-section" not found.',
+        },
+      ]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({ id: 'top-1', grid: { x: 0, y: 0, w: 24, h: 9 } }),
+      ]);
+    });
+
+    it('records a failure when newSectionKey does not match newSections', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test dashboard',
+          description: 'Description',
+          panels: [createLensPanel('top-1')],
+        },
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            newSections: [{ key: 'overview', title: 'Overview', grid: { y: 0 } }],
+            panels: [
+              {
+                panelId: 'top-1',
+                newSectionKey: 'missing-key',
+                grid: { x: 0, y: 0, w: 24, h: 9 },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([
+        {
+          type: 'update_panel_layouts',
+          identifier: 'top-1',
+          error: 'New section key "missing-key" not found.',
+        },
+      ]);
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({ id: 'top-1' }),
+      ]);
+      expect(getSections(result.dashboardData.panels)).toEqual([
+        expect.objectContaining({ title: 'Overview', panels: [] }),
+      ]);
+    });
+
+    it('rejects a panel that sets both sectionId and newSectionKey', () => {
+      const result = dashboardOperationSchema.safeParse({
+        operation: 'update_panel_layouts',
+        newSections: [{ key: 'overview', title: 'Overview', grid: { y: 0 } }],
+        panels: [
+          {
+            panelId: 'top-1',
+            sectionId: 'section-a',
+            newSectionKey: 'overview',
+            grid: { x: 0, y: 0, w: 24, h: 9 },
+          },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects duplicate newSections keys', () => {
+      const result = dashboardOperationSchema.safeParse({
+        operation: 'update_panel_layouts',
+        newSections: [
+          { key: 'overview', title: 'Overview', grid: { y: 0 } },
+          { key: 'overview', title: 'Also overview', grid: { y: 1 } },
+        ],
+        panels: [
+          { panelId: 'top-1', newSectionKey: 'overview', grid: { x: 0, y: 0, w: 24, h: 9 } },
+        ],
+      });
+
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('inline visualization operations', () => {
@@ -1676,6 +1892,195 @@ describe('executeDashboardOperations', () => {
           grid: { x: 0, y: 0, w: 48, h: 5 },
         })
       );
+    });
+
+    it('edits a Lens API title and legend without replacing data or calling the resolver', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [
+            {
+              id: 'panel-1',
+              type: LENS_EMBEDDABLE_TYPE,
+              config: {
+                type: 'xy',
+                title: 'Errors',
+                legend: { visibility: 'visible' },
+                layers: [
+                  {
+                    type: 'line',
+                    data_source: { type: 'esql', query: 'ROW count=1' },
+                    y: [{ column: 'count' }],
+                  },
+                ],
+              },
+              grid: { x: 0, y: 5, w: 24, h: 9 },
+            },
+          ],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                panelId: 'panel-1',
+                config: {
+                  changes: [
+                    { operation: 'set', path: 'title', value: '' },
+                    { operation: 'set', path: 'legend.visibility', value: 'hidden' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual({
+        id: 'panel-1',
+        type: LENS_EMBEDDABLE_TYPE,
+        grid: { x: 0, y: 5, w: 24, h: 9 },
+        config: {
+          type: 'xy',
+          title: '',
+          legend: { visibility: 'hidden' },
+          layers: [
+            {
+              type: 'line',
+              data_source: { type: 'esql', query: 'ROW count=1' },
+              y: [{ column: 'count' }],
+            },
+          ],
+        },
+      });
+    });
+
+    it('patches a Vega panel title and keeps the existing spec', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [
+            {
+              id: 'vega-1',
+              type: VEGA_VIS_TYPE,
+              config: { spec: '{"mark":"line"}', title: 'Requests' },
+              grid: { x: 0, y: 0, w: 24, h: 10 },
+            },
+          ],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                panelId: 'vega-1',
+                config: {
+                  changes: [{ operation: 'set', path: 'title', value: 'Requests over time' }],
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([]);
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual({
+        id: 'vega-1',
+        type: VEGA_VIS_TYPE,
+        grid: { x: 0, y: 0, w: 24, h: 10 },
+        config: { spec: '{"mark":"line"}', title: 'Requests over time' },
+      });
+    });
+
+    it('records a failure when a vis config-source edit targets a markdown panel', async () => {
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createMarkdownPanel('md-1', 'old text')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                panelId: 'md-1',
+                config: { changes: [{ operation: 'set', path: 'title', value: '' }] },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([
+        expect.objectContaining({
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'md-1',
+        }),
+      ]);
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
+        expect.objectContaining({ id: 'md-1', config: { content: 'old text' } })
+      );
+    });
+
+    it('records a failure when a Lens panel is patched with a Vega spec', async () => {
+      const panel: AttachmentPanel = {
+        ...createLensPanel('panel-1'),
+        config: {
+          type: 'metric',
+          data_source: { type: 'esql', query: 'ROW count=1' },
+          metrics: [{ type: 'primary', column: 'count' }],
+        },
+      };
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [panel],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'vis',
+                panelId: 'panel-1',
+                config: { changes: [{ operation: 'set', path: 'spec', value: '{"mark":"bar"}' }] },
+              },
+            ],
+          },
+        ],
+        logger,
+      });
+
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: expect.stringContaining('Lens'),
+        },
+      ]);
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(panel);
     });
 
     it('records a failure when a markdown config-source edit targets a non-markdown panel', async () => {

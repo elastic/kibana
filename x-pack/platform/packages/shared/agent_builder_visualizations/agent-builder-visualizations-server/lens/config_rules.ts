@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-/**
- * Chart-agnostic Lens config quality rules, shared between the config-generation
- * prompt and (eventually) review-side prompts. Keep these declarative — they
- * describe what a good chart looks like, not how to emit the config JSON.
- */
-
+/** Title guidance shared by chart generation and dashboard Prettify. */
 export const titleRulesPromptContent = `TITLE RULES:
 - Omit the 'title' field when the chart already displays the information within itself (e.g. metric, gauge, tagcloud, waffle charts show their value and label directly).
 - When a title is needed, make it self-explanatory and exhaustive so that axis titles become unnecessary.

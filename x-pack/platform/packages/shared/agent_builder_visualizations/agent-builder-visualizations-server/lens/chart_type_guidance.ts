@@ -6,6 +6,9 @@
  */
 
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { CHART_STYLE_RULES } from './chart_style_rules';
+import { titleRulesPromptContent, numberFormatRulesPromptContent } from './config_rules';
+import { getSharedColorPalettesPromptContent } from './color_palettes';
 import { chartTypeRegistry } from './chart_type_registry';
 
 export const getChartTypeSelectionPromptContent = () =>
@@ -16,6 +19,7 @@ export const getChartTypeSelectionPromptContent = () =>
     ),
   ].join('\n');
 
+/** Generation-only data-binding rules for one chart type. */
 export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) => {
   const rules = chartTypeRegistry[chartType].prompt.config?.rules;
 
@@ -30,32 +34,21 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
 };
 
 /**
- * Compiles vis-author `config.rules` plus `review.critical` and
- * `review.suggestions` for every chart type that has any of them. Prettify
- * uses this so it can detect painted issues and describe the wanted edition;
- * the visualization author still sees only {@link getChartTypeConfigPromptContent}.
+ * Style rules shared by chart generation (one chart type) and dashboard Prettify (all
+ * chart types): titles, number formats, color policy, and per-chart-type rules.
  */
-export const getChartTypeReviewPromptContent = (): string => {
-  const sections = Object.entries(chartTypeRegistry).flatMap(([chartType, { prompt }]) => {
-    const configRules: string[] = prompt.config?.rules ?? [];
-    const critical: string[] = prompt.review?.critical ?? [];
-    const suggestions: string[] = prompt.review?.suggestions ?? [];
-
-    if (!configRules.length && !critical.length && !suggestions.length) {
-      return [];
-    }
-
-    return [
-      `### ${chartType}`,
-      ...configRules.map((rule) => `- ${rule}`),
-      ...(critical.length ? ['Critical:', ...critical.map((rule) => `- ${rule}`)] : []),
-      ...(suggestions.length ? ['Suggestions:', ...suggestions.map((rule) => `- ${rule}`)] : []),
-    ];
-  });
-
-  if (!sections.length) {
-    return '';
-  }
-
-  return ['CHART REVIEW RULES:', ...sections].join('\n');
+export const getChartStyleRulesPromptContent = (chartType?: SupportedChartType): string => {
+  const entries = chartType
+    ? [[chartType, CHART_STYLE_RULES[chartType]] as const]
+    : Object.entries(CHART_STYLE_RULES);
+  return [
+    'CHART STYLE RULES:',
+    'Apply these rules when creating or restyling charts. Judge conditional rules from the data and the user request; when an existing setting conflicts with a rule, follow the rule.',
+    titleRulesPromptContent,
+    numberFormatRulesPromptContent,
+    getSharedColorPalettesPromptContent(),
+    ...entries.flatMap(([type, styleRules]) =>
+      styleRules ? [`### ${type}`, ...styleRules.rules.map((rule) => `- ${rule}`)] : []
+    ),
+  ].join('\n');
 };

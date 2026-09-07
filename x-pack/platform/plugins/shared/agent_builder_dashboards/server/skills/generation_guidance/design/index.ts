@@ -6,13 +6,17 @@
  */
 
 import { dashboardCompositionPrompt } from './composition';
+import { dashboardControlsPrompt } from './controls';
 import { gridLayoutPrompt } from './grid_layout';
 
 /**
- * Dashboard design guidance (composition + panel layout) inlined directly into the dashboard
- * generation guidance so the agent always has the composition and layout rules available while
- * building or editing a dashboard.
+ * Dashboard design guidance (composition, panel layout, controls), inlined into the skill body
+ * so the agent always has it while building, editing, or prettifying a dashboard.
  */
-export const dashboardDesignGuidancePrompt = `${dashboardCompositionPrompt}
-
-${gridLayoutPrompt}`;
+export const dashboardDesignGuidancePrompt = [
+  dashboardCompositionPrompt,
+  gridLayoutPrompt,
+  dashboardControlsPrompt,
+]
+  .map((prompt) => prompt.trim())
+  .join('\n\n');
