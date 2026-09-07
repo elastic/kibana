@@ -27,6 +27,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
+import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -35,7 +36,6 @@ import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_wo
 import { getIconGlyphColor } from '../lib/get_action_options';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
 import type { ActionOptionData, JumpToStepEntry } from '../types';
-import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
