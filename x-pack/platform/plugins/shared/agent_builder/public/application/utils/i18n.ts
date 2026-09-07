@@ -2774,6 +2774,10 @@ export const labels = {
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }
     ),
+    postRoundWorkflowTitle: i18n.translate(
+      'xpack.agentBuilder.overview.customizations.postRoundWorkflowTitle',
+      { defaultMessage: 'Post-round workflows' }
+    ),
     editDetails: {
       successToast: i18n.translate('xpack.agentBuilder.overview.editDetails.successToast', {
         defaultMessage: 'Agent details updated',
@@ -2896,6 +2900,25 @@ export const labels = {
       workflowAdminOnlyReason: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.workflowAdminOnlyReason',
         { defaultMessage: 'Only administrators can configure pre-execution workflows.' }
+      ),
+      postRoundWorkflowTitle: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postRoundWorkflowTitle',
+        { defaultMessage: 'Post-round workflow' }
+      ),
+      postRoundWorkflowDescription: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postRoundWorkflowDescription',
+        {
+          defaultMessage:
+            'Runs once after the agent finishes responding. Cannot change the response.',
+        }
+      ),
+      postRoundWorkflowLabel: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postRoundWorkflowLabel',
+        { defaultMessage: 'Workflows' }
+      ),
+      postRoundWorkflowAdminOnlyReason: i18n.translate(
+        'xpack.agentBuilder.overview.editDetails.postRoundWorkflowAdminOnlyReason',
+        { defaultMessage: 'Only administrators can configure post-round workflows.' }
       ),
       instructionsTitle: i18n.translate(
         'xpack.agentBuilder.overview.editDetails.instructionsTitle',

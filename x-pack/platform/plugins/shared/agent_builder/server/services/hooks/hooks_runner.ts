@@ -25,7 +25,11 @@ import { orderBy } from 'lodash';
 const DEFAULT_HOOK_TIMEOUT_MS = 2 * 60 * 1000; // 2 minutes
 
 /** After hooks run in reverse order so they nest like LangChain (last before = first after). */
-const AFTER_EVENTS: HookLifecycle[] = [HookLifecycle.afterToolCall, HookLifecycle.afterAgent];
+const AFTER_EVENTS: HookLifecycle[] = [
+  HookLifecycle.afterToolCall,
+  HookLifecycle.afterAgent,
+  HookLifecycle.afterRound,
+];
 
 const isAfterEvent = (event: HookLifecycle): boolean => AFTER_EVENTS.includes(event);
 

@@ -105,6 +105,7 @@ export type {
   BeforeToolCallHookContext,
   AfterToolCallHookContext,
   AfterAgentHookContext,
+  AfterRoundHookContext,
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export {
@@ -113,6 +114,7 @@ export {
   applyBeforeToolCallResult,
   applyAfterToolCallResult,
   applyAfterAgentResult,
+  applyAfterRoundResult,
 } from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
 export type { AgentBuilderAnalytics, AgentBuilderTracking, SkillInvokedEvent } from './telemetry';
