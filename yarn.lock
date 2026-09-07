@@ -1923,7 +1923,7 @@
     "@elastic/esql-types" "^4.23.0"
     tslib "2.8.1"
 
-"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.22.0", "@elastic/esql-definitions@^4.23.0":
+"@elastic/esql-definitions@^4.14.0", "@elastic/esql-definitions@^4.23.0":
   version "4.23.0"
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.23.0.tgz#58906041d87b7e3070c9091066f5869b0fa68f33"
   integrity sha512-EJacEr+WVbmgi1IUZTt8UGEzLYeR1wlg/wb6LJj+QfCicXeSajoSkoyDO5Msu7aj3L1spGcYJVDUqR5I2FErdA==
@@ -2086,12 +2086,12 @@
   resolved "https://registry.yarnpkg.com/@elastic/micro-jq/-/micro-jq-2.0.2.tgz#c21d0bead514207c1791b77f7c40b3b70655595b"
   integrity sha512-w91RaO3VFa+hF7RS1OfduPgfNeP21G2fHqyfIm+Qdz7zY96VfHLZtWZrlu4s9Yc++qJx56DmR47bdA4EFgNPyA==
 
-"@elastic/monaco-esql@4.22.0":
-  version "4.22.0"
-  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.22.0.tgz#739d7d0d2a3e9dda5779d763f81d6e0c61c87c35"
-  integrity sha512-OXdHhwD/BEeW4OzgbpVa0lrrC3K6XJJKuFQj3h36L5Pda3usvweqeWmTBl4QXCr490qkaVVecv6RYG7wQNFiTw==
+"@elastic/monaco-esql@4.23.0":
+  version "4.23.0"
+  resolved "https://registry.yarnpkg.com/@elastic/monaco-esql/-/monaco-esql-4.23.0.tgz#d0e2030180f26d5555c615c1b8fc5fbfb64666a9"
+  integrity sha512-hw7R5zSifsjE2iwzvNJMsLQoxJcGSATQVG6e0irQc3F5ARno8MbRolza0uKAoewW/wQ21xpseEZuTHv+z9mSEg==
   dependencies:
-    "@elastic/esql-definitions" "^4.22.0"
+    "@elastic/esql-definitions" "^4.23.0"
 
 "@elastic/node-crypto@1.2.3", "@elastic/node-crypto@^1.2.3":
   version "1.2.3"
@@ -17710,10 +17710,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@152.0.0:
-  version "152.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-152.0.0.tgz#58fe4d4f2af8b9fa9e2ea112ed46b40ec3f2ba99"
-  integrity sha512-JBMT88W2bMGSytKcIy6A3F/0DrGJeKTO1ZSThSNICeexSY+xBAEuAvjzlsGkIMaebqNF0KkDUI203CJ+GTA12g==
+chromedriver@152.0.1:
+  version "152.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-152.0.1.tgz#565b2bd2ed5bc6a09a782dced3606a340b74d264"
+  integrity sha512-8zet2yPAFOSlYxUIcQ/1yOOC1xP4ooPZiKFRdlJhFawBKvlZIHDU6qv4LDOfPEw1yXbyu+tQTzbL0Vfb+vHdQQ==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     adm-zip "^0.6.0"
@@ -24526,10 +24526,10 @@ joi-to-json@5.0.0:
     combinations "^1.0.0"
     lodash "^4.17.21"
 
-joi@18.2.3:
-  version "18.2.3"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.3.tgz#efdd1311496cd585730633fc57253a45641a3e85"
-  integrity sha512-N5A3KTWQpPWT4ExxxPlUx7WmykGXRzhNidWhV41d6Abu9YfI2NyWCJuxdPnslJCPWtbRpSVOWSnSS6GakLM/Rg==
+joi@18.2.5:
+  version "18.2.5"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-18.2.5.tgz#aae38f2a7e056d88aaf5d62c6f414f5fd6516be0"
+  integrity sha512-+gEA7rLfaNWx9JzawWPrPetSZwT16NUqHtECDgjyAJreXcs4TM7tx2Pa+VVJJK0YHM83ybrVdaT6UekHH50FJQ==
   dependencies:
     "@hapi/address" "^5.1.1"
     "@hapi/formula" "^3.0.2"
@@ -24540,9 +24540,9 @@ joi@18.2.3:
     "@standard-schema/spec" "^1.1.0"
 
 joi@^17.7.0:
-  version "17.13.4"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-17.13.4.tgz#ad6153d97ce558eb3a3b593e0d43eab51df1c474"
-  integrity sha512-1RuuER6kmt8K8I3nIWvPZKi5RQCb568ZPyY4Pwjlua+yo+63ZTmIwxLZH0heBmiKN4uxjvCiarDrjaeH84xicQ==
+  version "17.13.7"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-17.13.7.tgz#92e212c50dbbbcb1a1592424f84083eb265cc778"
+  integrity sha512-MF80Dm5Y2veNy8QWVx9Bj3ui4mo7+VPSPsR1M+oaHXV0Gx6zGX9a2F+OZG3Blby9tOlzU9Rs5FUimlEhbKtfnQ==
   dependencies:
     "@hapi/hoek" "^9.3.0"
     "@hapi/topo" "^5.1.0"
