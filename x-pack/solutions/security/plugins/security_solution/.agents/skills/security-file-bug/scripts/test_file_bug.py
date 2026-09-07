@@ -11,6 +11,7 @@ os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from file_bug import (  # noqa: E402
+    CreateFailed,
     IssueMatch,
     compress_video,
     decide_write_path,
@@ -18,6 +19,7 @@ from file_bug import (  # noqa: E402
     render_bug_body,
     upload_evidence,
     validate_labels,
+    write_github,
 )
 
 FIXTURE = Path(__file__).resolve().parent / "__tests__" / "fixtures" / "domain_snippet.md"
@@ -225,6 +227,91 @@ class UploadEvidenceTest(unittest.TestCase):
         self.assertEqual(seen[0][0], "ffmpeg")
         self.assertIn("-fs", seen[0])
         self.assertIn("9M", seen[0])
+
+
+class WriteGithubTest(unittest.TestCase):
+    def test_create_failure_is_not_retried(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {"returncode": 1, "stdout": "", "stderr": "nope"}
+
+        with self.assertRaises(CreateFailed):
+            write_github(
+                action="create",
+                repo="elastic/kibana",
+                title="Bug",
+                body="body",
+                labels=["bug"],
+                number=None,
+                run_gh=run_gh,
+            )
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][0:3], ["gh", "issue", "create"])
+
+    def test_comment_retries_once(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            if len(calls) == 1:
+                return {"returncode": 1, "stdout": "", "stderr": "tmp"}
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/1#issuecomment-2",
+                "stderr": "",
+            }
+
+        result = write_github(
+            action="comment",
+            repo="elastic/kibana",
+            title=None,
+            body="evidence",
+            labels=[],
+            number=1,
+            run_gh=run_gh,
+        )
+        self.assertEqual(len(calls), 2)
+        self.assertIn("issues/1", result["url"])
+
+    def test_reopen_then_comment(self):
+        calls = []
+
+        def run_gh(argv):
+            calls.append(argv)
+            return {
+                "returncode": 0,
+                "stdout": "https://github.com/elastic/kibana/issues/9",
+                "stderr": "",
+            }
+
+        write_github(
+            action="reopen_comment",
+            repo="elastic/kibana",
+            title=None,
+            body="evidence",
+            labels=[],
+            number=9,
+            run_gh=run_gh,
+        )
+        self.assertEqual(calls[0][0:4], ["gh", "issue", "reopen", "9"])
+        self.assertEqual(calls[1][0:4], ["gh", "issue", "comment", "9"])
+
+    def test_ask_does_not_write(self):
+        def run_gh(argv):
+            raise AssertionError("must not write")
+
+        with self.assertRaises(ValueError):
+            write_github(
+                action="ask",
+                repo="elastic/kibana",
+                title=None,
+                body="x",
+                labels=[],
+                number=None,
+                run_gh=run_gh,
+            )
 
 
 if __name__ == "__main__":

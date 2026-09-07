@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -503,3 +504,137 @@ def upload_evidence(
             continue
         leftovers.append((str(path), reason))
     return UploadResult(tuple(uploaded), tuple(leftovers))
+
+
+GhRunner = Callable[[list], dict]
+
+_URL_RE = re.compile(r"https?://\S+")
+
+
+class CreateFailed(Exception):
+    """Raised when `gh issue create` fails; the create is never retried."""
+
+
+def _default_run_gh(argv: list) -> dict:
+    completed = subprocess.run(
+        argv,
+        check=False,
+        capture_output=True,
+        text=True,
+        env={**os.environ, "GH_PAGER": "cat"},
+    )
+    return {
+        "returncode": completed.returncode,
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+    }
+
+
+def _gh_result(value: object) -> tuple[int, str, str]:
+    payload = _as_mapping(value)
+    return (
+        int(payload.get("returncode") or 0),
+        str(payload.get("stdout") or ""),
+        str(payload.get("stderr") or ""),
+    )
+
+
+def _first_url(stdout: str) -> str:
+    match = _URL_RE.search(stdout)
+    return match.group(0) if match else stdout.strip()
+
+
+def _gh_failed(argv: list, stderr: str) -> str:
+    return f"`{' '.join(argv[:4])}` failed: {stderr.strip() or 'no stderr'}"
+
+
+def _gh_create(
+    *, repo: str, title: str, body_file: Path, labels: list, run_gh: GhRunner
+) -> str:
+    argv = [
+        "gh",
+        "issue",
+        "create",
+        "--repo",
+        repo,
+        "--title",
+        title,
+        "--body-file",
+        str(body_file),
+    ]
+    for label in labels:
+        argv += ["--label", str(label)]
+    returncode, stdout, stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        raise CreateFailed(_gh_failed(argv, stderr))
+    return _first_url(stdout)
+
+
+def _gh_reopen(*, repo: str, number: int, run_gh: GhRunner) -> None:
+    argv = ["gh", "issue", "reopen", str(number), "--repo", repo]
+    returncode, _, stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        raise RuntimeError(_gh_failed(argv, stderr))
+
+
+def _gh_comment(
+    *, repo: str, number: int, body_file: Path, run_gh: GhRunner
+) -> str:
+    argv = [
+        "gh",
+        "issue",
+        "comment",
+        str(number),
+        "--repo",
+        repo,
+        "--body-file",
+        str(body_file),
+    ]
+    returncode, stdout, stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        returncode, stdout, stderr = _gh_result(run_gh(argv))
+    if returncode != 0:
+        raise RuntimeError(_gh_failed(argv, stderr))
+    return _first_url(stdout)
+
+
+def write_github(
+    *,
+    action: WriteAction,
+    repo: str,
+    title: str | None,
+    body: str,
+    labels: list,
+    number: int | None,
+    run_gh: GhRunner = _default_run_gh,
+) -> dict:
+    """Run the `gh` write for `action`, never retrying a create that already failed."""
+    if action == "ask":
+        raise ValueError("action 'ask' must be resolved by the caller before writing")
+    if action == "create":
+        if not title:
+            raise ValueError("action 'create' needs a title")
+    elif number is None:
+        raise ValueError(f"action {action!r} needs an issue number")
+
+    workdir = Path(tempfile.mkdtemp(prefix="file_bug_body_"))
+    try:
+        body_file = workdir / "body.md"
+        body_file.write_text(body, encoding="utf-8")
+        if action == "create":
+            url = _gh_create(
+                repo=repo,
+                title=str(title),
+                body_file=body_file,
+                labels=labels,
+                run_gh=run_gh,
+            )
+        else:
+            if action == "reopen_comment":
+                _gh_reopen(repo=repo, number=number, run_gh=run_gh)
+            url = _gh_comment(
+                repo=repo, number=number, body_file=body_file, run_gh=run_gh
+            )
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+    return {"url": url}
