@@ -295,6 +295,7 @@ describe('score_base_entities', () => {
         logger,
         writer,
         idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
         ...baseParams,
       });
 
