@@ -22,6 +22,6 @@ describe('has user data view', () => {
       counterName: 'GET /path',
       usageCollection,
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

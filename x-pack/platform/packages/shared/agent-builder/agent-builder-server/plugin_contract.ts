@@ -19,6 +19,7 @@ import type {
   AgentTypeDefinition,
   AgentRegistry,
   AgentAvailabilityConfig,
+  AiIndexResolver,
 } from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
@@ -129,6 +130,11 @@ export interface AgentsSetup {
    * that type inherit at resolution time.
    */
   registerType: (definition: AgentTypeDefinition) => void;
+  /**
+   * Register the resolver used to look up details for the AI indices referenced by
+   * agent configurations.
+   */
+  registerAiIndexResolver: (resolver: AiIndexResolver) => void;
 }
 
 export interface AgentsStart {

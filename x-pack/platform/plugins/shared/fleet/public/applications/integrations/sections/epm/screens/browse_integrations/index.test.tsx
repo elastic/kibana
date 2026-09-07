@@ -54,6 +54,7 @@ jest.mock('./components/manage_integrations_table', () => ({
 }));
 jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
 
+import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
 import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
@@ -113,10 +114,9 @@ describe('BrowseIntegrationsPage', () => {
     it('sets both default categories as URL query params on first load in Observability projects', async () => {
       renderPage();
       await waitFor(() => {
-        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith(
-          ['opentelemetry', 'observability'],
-          { replace: true }
-        );
+        expect(mockSetUrlDefaultCategoriesFn).toHaveBeenCalledWith([...OBLT_DEFAULT_CATEGORIES], {
+          replace: true,
+        });
       });
     });
 

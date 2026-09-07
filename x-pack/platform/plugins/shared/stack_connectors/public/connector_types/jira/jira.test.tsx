@@ -93,6 +93,26 @@ describe('jira action params validation', () => {
     });
   });
 
+  test('params validation succeeds when otherFields contains mustache templates', async () => {
+    const actionParams = {
+      subActionParams: {
+        incident: {
+          summary: 'some title',
+          otherFields: '{ "u_raw_json": {{#context}}{{.}}{{/context}} }',
+        },
+        comments: [],
+      },
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
+      errors: {
+        'subActionParams.incident.summary': [],
+        'subActionParams.incident.labels': [],
+        'subActionParams.incident.otherFields': [],
+      },
+    });
+  });
+
   test(`params validation succeeds when its valid json and otherFields has ${MAX_OTHER_FIELDS_LENGTH} fields`, async () => {
     const longJSON: { [key in string]: string } = {};
     for (let i = 0; i < MAX_OTHER_FIELDS_LENGTH; i++) {

@@ -9,16 +9,9 @@
 
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
-import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
-
-const WithErrorBoundary: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <KibanaErrorBoundaryProvider>{children}</KibanaErrorBoundaryProvider>
-);
-
-const renderTemplate = (ui: React.ReactElement) => render(ui, { wrapper: WithErrorBoundary });
 
 describe('FlyoutTemplate header collapse on scroll', () => {
   let resizeObservers: Array<{
@@ -101,7 +94,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
 
   /** Flyout with a populated collapsible region; the body overflows once scroll state is set. */
   const renderCollapsibleFlyout = () =>
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Long title" description="A timestamp" />
         <FlyoutTemplate.Body>
@@ -278,7 +271,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
   });
 
   it('collapses a header whose only shrinking parts are the title row and spacer', () => {
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Bare title" />
         <FlyoutTemplate.Body>
@@ -392,7 +385,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   });
 
   const renderCollapsedHeader = () =>
-    renderTemplate(
+    render(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Compact title" description="A timestamp" collapsed />
         <FlyoutTemplate.Body>
@@ -443,7 +436,7 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   it('attaches a scroll listener when the header is not permanently collapsed', () => {
     // Positive control: proves the assertion above is not passing for an unrelated reason.
     const targets = trackScrollListenerTargets(() =>
-      renderTemplate(
+      render(
         <FlyoutTemplate onClose={noop} session="never">
           <FlyoutTemplate.Header title="Compact title" description="A timestamp" />
           <FlyoutTemplate.Body>

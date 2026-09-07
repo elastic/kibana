@@ -288,7 +288,11 @@ test.describe(
 
         await transform.confirmBulkProjectScopeUpdate();
 
+        await expect(page.testSubj.locator('transformBulkActionsMenuButton')).toBeHidden();
         for (const transformId of BULK_EDITED_TRANSFORM_IDS) {
+          await expect(
+            transform.getTransformRow(transformId).getByRole('checkbox')
+          ).not.toBeChecked();
           await expect(
             transform.getTransformRow(transformId).getByTestId('transformListProjectScopeButton')
           ).toHaveText('This project');

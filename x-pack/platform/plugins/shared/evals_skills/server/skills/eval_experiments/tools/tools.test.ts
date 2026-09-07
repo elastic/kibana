@@ -280,7 +280,7 @@ describe('runEvalExperimentTool', () => {
     });
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data.workflow_execution_ids).toEqual(['we-1']);
-    expect(result.data.results_url).toContain('/app/management/ai/evals/experiments/');
+    expect(result.data.results_url).toContain('/app/evals/experiments/');
   });
 
   it('fans out one execution per model for cross-model runs', async () => {
@@ -299,7 +299,7 @@ describe('runEvalExperimentTool', () => {
     expect(workflowsApi.executeWorkflow).toHaveBeenCalledTimes(2);
     expect(result.data.mode).toBe('cross-model');
     expect(result.data.workflow_execution_ids).toEqual(['we-1', 'we-2']);
-    expect(result.data.results_url).toContain('/app/management/ai/evals/runs');
+    expect(result.data.results_url).toContain('/app/evals/runs');
   });
 
   it('associates the run with a saved workflow id when provided', async () => {

@@ -50,19 +50,24 @@ test.describe(
       await expect(streams.getStreamsLayoutTab('canvas')).toHaveAttribute('aria-selected', 'true');
     });
 
-    test('shows a placeholder for the tabs that have no content yet', async ({
+    test('renders Sources and placeholders for tabs without content', async ({
       pageObjects: { streams },
     }) => {
       await streams.gotoStreamsLayout();
 
       await streams.clickStreamsLayoutTab('sources');
-      await expect(streams.streamsLayoutSourcesPlaceholder).toBeVisible();
+      await expect(streams.streamsSourcesTable).toBeVisible();
+      await expect(streams.streamsAddSourceButton).toBeVisible();
 
       await streams.clickStreamsLayoutTab('pipelines');
       await expect(streams.streamsLayoutPipelinesPlaceholder).toBeVisible();
+    });
 
-      await streams.clickStreamsLayoutTab('destinations');
-      await expect(streams.streamsLayoutDestinationsPlaceholder).toBeVisible();
+    test('renders the destinations table', async ({ pageObjects: { streams } }) => {
+      await streams.gotoStreamsLayoutTab('destinations');
+
+      await expect(streams.streamsDestinationsTable).toBeVisible();
+      await expect(streams.streamsDestinationsSearch).toBeVisible();
     });
   }
 );

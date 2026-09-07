@@ -246,7 +246,7 @@ describe('WebhookActionConnectorFields renders', () => {
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.webhook',
             name: 'webhook',
@@ -296,7 +296,7 @@ describe('WebhookActionConnectorFields renders', () => {
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.webhook',
             name: 'webhook',

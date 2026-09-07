@@ -53,9 +53,16 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
     await waitForLastSelectedSpaceId(apiClient, samlAuth, 'admin', TARGET_SPACE_ID);
 
-    await page.goto(kbnUrl.get('/'));
+    // Requesting the Kibana root triggers a server 302 into the remembered space's /spaces/enter,
+    // which then client-navigates on to the space's app. Resolve `goto` on 'commit' so it settles
+    // on that first navigation commit rather than waiting on a 'load' the subsequent hop supersedes
+    // (which surfaces as an "interrupted by another navigation" error or a goto timeout). The poll
+    // is the terminal readiness gate for the landed redirect.
+    await page.goto(kbnUrl.get('/'), { waitUntil: 'commit' });
 
-    await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${TARGET_SPACE_ID}`);
+    await expect
+      .poll(() => pageObjects.spaces.getCurrentUrl())
+      .toContain(`/s/${TARGET_SPACE_ID}/app/`);
     await expect(pageObjects.spaces.spaceSelectorLocator()).toBeHidden();
   });
 
@@ -76,6 +83,7 @@ test.describe('last selected space recollection', { tag: tags.stateful.classic }
     await pageObjects.spaces.navigateToHome();
     await pageObjects.spaces.openSpacesNav();
     await pageObjects.spaces.switchToSpaceFromNav(TARGET_SPACE_ID);
+    await expect.poll(() => pageObjects.spaces.getCurrentUrl()).toContain(`/s/${TARGET_SPACE_ID}`);
 
     await page.goto(kbnUrl.get('/'));
 
