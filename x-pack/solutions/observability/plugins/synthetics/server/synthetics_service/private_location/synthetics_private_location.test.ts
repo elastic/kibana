@@ -13,7 +13,10 @@ import {
   ScheduleUnit,
   SourceType,
 } from '../../../common/runtime_types';
-import { SyntheticsPrivateLocation } from './synthetics_private_location';
+import {
+  MAX_MOVES_PER_REBALANCE_CYCLE,
+  SyntheticsPrivateLocation,
+} from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
@@ -1165,6 +1168,62 @@ describe('SyntheticsPrivateLocation', () => {
       expect(listByAgentPolicy).not.toHaveBeenCalledWith({ agentPolicyId: 'ap-classic' });
       expect(result.cleared).toBe(0);
       expect(result.failed).toBe(0);
+    });
+  });
+
+  describe('rebalanceShards', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    const unplacedPolicies = (total: number) =>
+      Array.from({ length: total }, (_, i) => ({
+        id: `m${i}-loc-1`,
+        spaceIds: ['default'],
+        version: 'WzAsMV0=',
+        revision: 1,
+      })) as never;
+
+    it('caps writes at MAX_MOVES_PER_REBALANCE_CYCLE, leaving the rest for the next cycle', async () => {
+      const total = MAX_MOVES_PER_REBALANCE_CYCLE + 100;
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue(unplacedPolicies(total));
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a'],
+        signal: new AbortController().signal,
+      });
+
+      expect(bulkUpdateInSpace).toHaveBeenCalledTimes(1);
+      const [[{ policiesToUpdate }]] = bulkUpdateInSpace.mock.calls;
+      expect(policiesToUpdate).toHaveLength(MAX_MOVES_PER_REBALANCE_CYCLE);
+      expect(result).toEqual({ total, moved: MAX_MOVES_PER_REBALANCE_CYCLE });
+    });
+
+    it('applies every planned move when the plan is under the cap', async () => {
+      const total = 3;
+      jest
+        .spyOn(PackagePolicyService.prototype, 'listByAgentPolicy')
+        .mockResolvedValue(unplacedPolicies(total));
+      const bulkUpdateInSpace = jest
+        .spyOn(PackagePolicyService.prototype, 'bulkUpdateInSpace')
+        .mockResolvedValue([]);
+
+      const result = await new SyntheticsPrivateLocation(serverMock).rebalanceShards({
+        location: { id: 'loc-1', agentPolicyId: 'ap-1' },
+        healthyAgentIds: ['agent-a'],
+        signal: new AbortController().signal,
+      });
+
+      expect(bulkUpdateInSpace).toHaveBeenCalledTimes(1);
+      const [[{ policiesToUpdate }]] = bulkUpdateInSpace.mock.calls;
+      expect(policiesToUpdate).toHaveLength(total);
+      expect(result).toEqual({ total, moved: total });
     });
   });
 

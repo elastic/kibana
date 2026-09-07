@@ -62,6 +62,21 @@ interface EnrolledAgents {
   agentIds: string[];
 }
 
+/**
+ * Upper bound on condition-only writes {@link SyntheticsPrivateLocation.rebalanceShards}
+ * applies for one location in a single cycle.
+ *
+ * `rebalanceByCost` needs a location's complete monitor list to compute a
+ * correct plan, but nothing requires *applying* every move it produces in one
+ * pass: the plan is idempotent and re-derived from a fresh read every cycle
+ * (~1m), so writes beyond this cap are simply left for the next tick. This
+ * keeps one cycle's write phase — the part whose cost scales with monitors
+ * actually moving — bounded well inside the task's `10m` timeout even when a
+ * location's first rebalance (or a mass agent failover) needs to move far
+ * more monitors than fit in one run.
+ */
+export const MAX_MOVES_PER_REBALANCE_CYCLE = 500;
+
 export interface FailedPolicyUpdate {
   packagePolicy: NewPackagePolicyWithId;
   config?: HeartbeatConfig;
@@ -785,7 +800,11 @@ export class SyntheticsPrivateLocation {
    * conditions of monitors whose agent actually changed — reusing the existing
    * package-policy content and flipping only `condition`, never decrypting or
    * regenerating monitor configs like {@link editMonitors}. Steady state
-   * performs zero writes.
+   * performs zero writes. Applies at most {@link MAX_MOVES_PER_REBALANCE_CYCLE}
+   * of the planned moves per call; any remainder is left for the next cycle's
+   * fresh plan rather than risk the task's timeout on a location whose first
+   * rebalance (or a mass failover) needs to move far more monitors than fit in
+   * one run.
    *
    * The two agent sets serve opposite goals. `recoveryAgentIds` (a
    * stability-gated subset of `healthyAgentIds`) are the only agents eligible to
@@ -823,18 +842,28 @@ export class SyntheticsPrivateLocation {
     const monitors = toMonitorPlacements(pkgPolicies, location.id);
     const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
     const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+    const plannedMoves = [...updatesBySpace.values()].reduce((sum, u) => sum + u.length, 0);
 
     let moved = 0;
+    let attempted = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      if (attempted >= MAX_MOVES_PER_REBALANCE_CYCLE) {
+        break; // remaining moves are left for the next cycle's fresh plan
+      }
       signal.throwIfAborted();
+      const budget = MAX_MOVES_PER_REBALANCE_CYCLE - attempted;
+      const batch =
+        policiesToUpdate.length > budget ? policiesToUpdate.slice(0, budget) : policiesToUpdate;
+      attempted += batch.length;
+
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
       // not via the agent-policy-derived routing — see bulkUpdateInSpace.
       const failed = await this.packagePolicyService.bulkUpdateInSpace({
-        policiesToUpdate,
+        policiesToUpdate: batch,
         spaceId,
       });
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
-      moved += policiesToUpdate.length - failed.length;
+      moved += batch.length - failed.length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
         // the next run re-attempts these same moves. warn (not error) — no
@@ -845,6 +874,14 @@ export class SyntheticsPrivateLocation {
           }`
         );
       }
+    }
+
+    if (plannedMoves > attempted) {
+      this.server.logger.debug(
+        `[rebalanceShards] Capped at ${MAX_MOVES_PER_REBALANCE_CYCLE} move(s) for location ${
+          location.label ?? location.id
+        }; ${plannedMoves - attempted} more queued for the next cycle.`
+      );
     }
 
     return { total: pkgPolicies.length, moved };
