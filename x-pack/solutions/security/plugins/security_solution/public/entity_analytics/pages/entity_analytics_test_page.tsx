@@ -9,13 +9,18 @@ import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiProgress,
   EuiSpacer,
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
+import { DistributionBar } from '@kbn/security-solution-distribution-bar';
+import { getSeverityColor } from '../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { Global, css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
@@ -47,7 +52,7 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 const GRID_COLUMNS: EuiDataGridColumn[] = [
   { id: 'actions', displayAsText: 'Actions', initialWidth: 100, isSortable: false },
   { id: 'entity.name', displayAsText: 'Entity name', initialWidth: 200 },
-  { id: 'entity.record_count', displayAsText: 'Records', initialWidth: 100, isSortable: false },
+  { id: 'group_size', displayAsText: 'Records', initialWidth: 100, isSortable: true },
   { id: 'entity.EngineMetadata.Type', displayAsText: 'Entity type', initialWidth: 120 },
   { id: 'entity.risk.calculated_score_norm', displayAsText: 'Risk score', initialWidth: 120 },
   { id: 'risk_score_change', displayAsText: 'Risk score change', initialWidth: 140 },
@@ -56,7 +61,7 @@ const GRID_COLUMNS: EuiDataGridColumn[] = [
   { id: 'alert_count', displayAsText: 'Alerts', initialWidth: 100, isSortable: false },
   { id: 'last_seen_alert', displayAsText: 'Last alert', initialWidth: 180 },
   { id: 'anomaly_count', displayAsText: 'Anomalies', initialWidth: 120, isSortable: false },
-  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: false },
+  { id: 'case_count', displayAsText: 'Cases', initialWidth: 100, isSortable: true },
   {
     id: 'entity.attributes.watchlists',
     displayAsText: 'Watchlists',
@@ -222,6 +227,29 @@ export const EntityAnalyticsTestPage: React.FC = () => {
             </EuiTextColor>
           );
         return <>{'→ 0.0'}</>;
+      }
+      if (columnId === 'alert_count') {
+        const row = rows[relativeIndex];
+        const total = value as number;
+        if (total === 0) return <>{'—'}</>;
+        const severities = [
+          { key: 'Critical', count: (row?.alert_critical as number) ?? 0, color: getSeverityColor('critical', euiTheme) },
+          { key: 'High', count: (row?.alert_high as number) ?? 0, color: getSeverityColor('high', euiTheme) },
+          { key: 'Medium', count: (row?.alert_medium as number) ?? 0, color: getSeverityColor('medium', euiTheme) },
+          { key: 'Low', count: (row?.alert_low as number) ?? 0, color: getSeverityColor('low', euiTheme) },
+        ].filter((s) => s.count > 0);
+        return (
+          <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <DistributionBar stats={severities} hideLastTooltip />
+            </EuiFlexItem>
+            <EuiBadge color="hollow">{total}</EuiBadge>
+          </EuiFlexGroup>
+        );
+      }
+      if (columnId === 'case_count') {
+        if ((value as number) === 0) return <>{'—'}</>;
+        return <>{String(value)}</>;
       }
       if (columnId === 'entity.attributes.watchlists') {
         const ids = value as string[];
