@@ -111,5 +111,4 @@ export class InteractiveSetupPage {
   async waitForSetupToComplete(timeoutMs: number) {
     await this.progressIndicator.waitFor({ state: 'visible', timeout: timeoutMs });
   }
-
 }
