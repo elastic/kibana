@@ -128,12 +128,10 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsQualityIssuesExpandButton',
     datasetQualityDetailsDegradedFieldFlyout: 'datasetQualityDetailsDegradedFieldFlyout',
     datasetDetailsContainer: 'datasetDetailsContainer',
-    datasetQualityDetailsTitle: 'datasetQualityDetailsTitle',
     datasetQualityDetailsDegradedFieldTable: 'datasetQualityDetailsDegradedFieldTable',
     datasetQualityDetailsDegradedTableNoData: 'datasetQualityDetailsDegradedTableNoData',
     datasetQualitySparkPlot: 'datasetQualitySparkPlot',
     datasetQualityDetailsHeaderButton: 'datasetQualityDetailsHeaderButton',
-    datasetQualityDetailsIntegrationLoading: 'datasetQualityDetailsIntegrationLoading',
     datasetQualityDetailsIntegrationActionsButton: 'datasetQualityDetailsIntegrationActionsButton',
     datasetQualityDetailsIntegrationAction: (action: string) =>
       `datasetQualityDetailsIntegrationAction${action}`,

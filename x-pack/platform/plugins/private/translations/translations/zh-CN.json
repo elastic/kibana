@@ -18818,8 +18818,6 @@
     "xpack.datasetQuality.alerts.validation.error.requiredDataViewText": "需要数据视图。",
     "xpack.datasetQuality.alerts.validation.error.requiredSearchConfiguration": "搜索源配置必填。",
     "xpack.datasetQuality.alerts.validation.threshold": "需要一个有效的百分比阈值（0-100）。",
-    "xpack.datasetQuality.appDescription": "监测遵循 {dsNamingSchemeLink} 的 {types} 数据流的数据集质量。",
-    "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "数据流命名方案",
     "xpack.datasetQuality.appTitle": "数据集质量",
     "xpack.datasetQuality.betaBadgeDescription": "此功能当前为公测版。如果遇到任何错误或有任何反馈，我们乐于倾听您的意见。请报告支持问题和/或访问我们的讨论论坛。",
     "xpack.datasetQuality.betaBadgeLabel": "公测版",

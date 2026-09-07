@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -107,9 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should navigate to right dataset', async () => {
         await PageObjects.datasetQuality.navigateToDetails({ dataStream: regularDataStreamName });
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
-        );
+        await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.title);
       });
 
       it('should navigate to details page from a main page', async () => {
@@ -122,9 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await synthDataset.click();
 
-        await testSubjects.existOrFail(
-          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsTitle
-        );
+        await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.title);
       });
 
       it('should show an empty prompt with error message when the dataset is not found', async () => {
