@@ -65,7 +65,6 @@ interface CreateWorkflowAnonymizationPipelineOptions {
   readonly sessionId?: string;
   readonly agentId?: string;
   readonly abortSignal?: AbortSignal;
-  readonly saltPromise?: Promise<string | undefined>;
   readonly regexWorker: PiiRegexWorkerService;
   readonly logger: Logger;
   readonly workflowAnonymization: WorkflowAnonymizationOptions;
@@ -132,7 +131,6 @@ export const createWorkflowAnonymizationPipeline = ({
   sessionId,
   agentId,
   abortSignal,
-  saltPromise,
   regexWorker,
   logger,
   workflowAnonymization,
@@ -278,7 +276,7 @@ export const createWorkflowAnonymizationPipeline = ({
   };
 
   const around$ = defer(async () => {
-    const serverSalt = await saltPromise;
+    const serverSalt = workflowAnonymization.encryptionKey;
 
     let effectiveAbortSignal = abortSignal;
     if (workflowAnonymization.preLLMTimeoutMs > 0) {
