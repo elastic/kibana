@@ -208,15 +208,7 @@ export type GetFileRelationshipInput = z.infer<typeof GetFileRelationshipInputSc
 export const GetFileBehavioursInputSchema = lazySchema(() =>
   z.object({
     fileHash: FILE_HASH_SCHEMA,
-    limit: z
-      .number()
-      .int()
-      .min(0)
-      .max(40)
-      .default(1)
-      .describe(
-        'Maximum number of behavior reports to retrieve. Minimum 0, maximum 40. Defaults to 1.'
-      ),
+    limit: pagingLimitSchema('behavior reports'),
     cursor: CURSOR_SCHEMA,
   })
 );
