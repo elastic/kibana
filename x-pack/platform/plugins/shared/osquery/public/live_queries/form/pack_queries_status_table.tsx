@@ -169,6 +169,7 @@ interface PackQueriesStatusTableProps {
   startDate?: string;
   expirationDate?: string;
   showResultsHeader?: boolean;
+  hideResultsTitle?: boolean;
   addToTimeline?: AddToTimelineHandler;
   scheduleId?: string;
   executionCount?: number;
@@ -185,6 +186,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   startDate,
   expirationDate,
   showResultsHeader,
+  hideResultsTitle,
   addToTimeline,
   scheduleId,
   executionCount,
@@ -604,6 +606,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           scheduleId={scheduleId}
           executionCount={executionCount}
           onSaveQuery={onSaveQuery}
+          hideTitle={hideResultsTitle}
         />
       )}
       <EuiBasicTable
