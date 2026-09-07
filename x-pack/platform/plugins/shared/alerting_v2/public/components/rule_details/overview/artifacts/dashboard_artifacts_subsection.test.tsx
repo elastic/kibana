@@ -156,7 +156,8 @@ describe('DashboardArtifactsSubsection', () => {
       expect(screen.getByTestId('ruleDashboardArtifactsEmpty')).toBeInTheDocument();
     });
     expect(screen.getByText('No dashboards linked')).toBeInTheDocument();
-    expect(screen.getByTestId('ruleDashboardArtifactsEmptyAddButton')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleDashboardArtifactsAddButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('ruleDashboardArtifactsEmptyAddButton')).not.toBeInTheDocument();
   });
 
   it('renders loading state while dashboards are being resolved', () => {
@@ -224,18 +225,6 @@ describe('DashboardArtifactsSubsection', () => {
       expect(screen.getByTestId('ruleDashboardArtifactsSelectable')).toBeInTheDocument();
     });
     expect(screen.getByTestId('ruleDashboardArtifactsSearch')).toBeInTheDocument();
-  });
-
-  it('opens the manage popover from the empty-state CTA', async () => {
-    renderSubsection(baseRule);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleDashboardArtifactsEmptyAddButton')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByTestId('ruleDashboardArtifactsEmptyAddButton'));
-
-    expect(screen.getByTestId('ruleDashboardArtifactsManagePopover')).toBeInTheDocument();
   });
 
   it('keeps a long dashboard list inside a scrollable container', async () => {
@@ -415,14 +404,13 @@ describe('DashboardArtifactsSubsection', () => {
       mockCanWriteRules = false;
     });
 
-    it('hides the add dashboards affordance and empty CTA', async () => {
+    it('hides the add dashboards affordance', async () => {
       renderSubsection(baseRule);
 
       expect(screen.queryByTestId('ruleDashboardArtifactsAddButton')).not.toBeInTheDocument();
       await waitFor(() => {
         expect(screen.getByTestId('ruleDashboardArtifactsEmpty')).toBeInTheDocument();
       });
-      expect(screen.queryByTestId('ruleDashboardArtifactsEmptyAddButton')).not.toBeInTheDocument();
     });
 
     it('hides the remove (trash) affordance on resolved dashboard rows', async () => {

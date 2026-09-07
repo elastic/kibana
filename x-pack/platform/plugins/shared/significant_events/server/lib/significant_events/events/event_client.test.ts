@@ -353,6 +353,32 @@ describe('EventClient', () => {
     });
   });
 
+  describe('findLatestByCurrentStateBatch', () => {
+    it('uses an event ID keyset after latest-state reduction', async () => {
+      const event = createEvent();
+      const createdAt = '2025-12-31T00:00:00.000Z';
+      const { client, query } = createSearchClient({ hits: [event], total: 1, createdAt });
+
+      await expect(
+        client.findLatestByCurrentStateBatch({
+          status: ['open'],
+          afterEventId: 'agent-event-0',
+          batchSize: 100,
+        })
+      ).resolves.toEqual({ hits: [{ ...event, created_at: createdAt }] });
+
+      expect(query).toHaveBeenCalledTimes(1);
+      const dataQuery = (query.mock.calls[0][0] as { query: string }).query;
+      expect(dataQuery).toContain('event_id > "agent-event-0"');
+      expect(dataQuery.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery.indexOf('event_id >')
+      );
+      expect(dataQuery).toContain('SORT event_id ASC');
+      expect(dataQuery).toContain('LIMIT 100');
+      expect(dataQuery).not.toContain('STATS total');
+    });
+  });
+
   describe('findLatestActive', () => {
     it('filters to open status after latest-per-event reduction', async () => {
       const { client, query } = createSearchClient({
