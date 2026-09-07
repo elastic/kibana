@@ -13,7 +13,7 @@ import {
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
-  ENTITY_ANALYTICS_NEW_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_HOME_PATH,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { ENTITY_ANALYTICS, ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING } from '../app/translations';
@@ -112,10 +112,10 @@ export const entityAnalyticsLinks: LinkItem = {
   licenseType: 'platinum',
 };
 
-export const entityAnalyticsNewHomePageLink: LinkItem = {
-  id: SecurityPageName.entityAnalyticsNewHomePage,
+export const entityAnalyticsHomeLink: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHome,
   title: ENTITY_ANALYTICS,
-  path: ENTITY_ANALYTICS_NEW_HOME_PAGE_PATH,
+  path: ENTITY_ANALYTICS_HOME_PATH,
   hideTimeline: true,
   skipUrlState: true,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],

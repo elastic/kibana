@@ -13,12 +13,12 @@ import { SecurityPageName } from '../../app/types';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
 
-const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.newHomePage.pageTitle', {
+const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.home.pageTitle', {
   defaultMessage: 'Entity analytics',
 });
 
 const MANAGEMENT_LABEL = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.newHomePage.managementLink',
+  'xpack.securitySolution.entityAnalytics.home.managementLink',
   { defaultMessage: 'Management' }
 );
 
@@ -40,7 +40,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   return (
     <>
       <AppHeader title={PAGE_TITLE} menu={menu} />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsNewHomePage} />
+      <SpyRoute pageName={SecurityPageName.entityAnalyticsHome} />
     </>
   );
 };
