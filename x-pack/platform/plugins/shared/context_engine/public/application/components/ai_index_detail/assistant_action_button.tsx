@@ -16,7 +16,7 @@ interface AssistantActionButtonProps {
   onClick: () => void;
   /** Offered when this index has no conversation yet. */
   startLabel: string;
-  /** Offered once one exists, so the click reads as going back to it rather than starting over. */
+  /** Offered once a conversation exists. */
   continueLabel: string;
   /** Offered while the agent is still producing output. */
   workingLabel: string;
@@ -31,13 +31,7 @@ const WORKING_TOOLTIP = i18n.translate(
   }
 );
 
-/**
- * The assistant entry point on an AI index panel.
- *
- * A single conversation covers setting an index up and automating it, so the label has to say
- * whether pressing this starts one or returns to the one already going — otherwise a second press
- * looks like it lost the first.
- */
+/** The assistant entry point on an AI index panel. */
 export const AssistantActionButton = ({
   conversation,
   onClick,
@@ -48,14 +42,12 @@ export const AssistantActionButton = ({
 }: AssistantActionButtonProps) => {
   const { conversationId, isRunning } = conversation;
 
-  // Kept clickable while running: the run carries on after the sidebar is closed, and this is how
-  // the user gets back to watching it.
   const button = (
     <AiButton size="s" iconType="productAgent" onClick={onClick} data-test-subj={dataTestSubj}>
       {isRunning ? workingLabel : conversationId ? continueLabel : startLabel}
     </AiButton>
   );
 
-  // `AiButton`'s own tooltip prop is for its icon-only form, so the label variant is wrapped.
+  // `AiButton` supports a tooltip only in its icon-only form.
   return isRunning ? <EuiToolTip content={WORKING_TOOLTIP}>{button}</EuiToolTip> : button;
 };

@@ -69,7 +69,6 @@ const createProvider = ({
 };
 
 describe('createSuggestAutomationProvider', () => {
-  // The conversation binding is kept in localStorage, which outlives an individual provider.
   beforeEach(() => window.localStorage.clear());
 
   it('returns canSuggest false when agent builder is unavailable', () => {
@@ -133,15 +132,11 @@ describe('createSuggestAutomationProvider', () => {
 
     provider.startGuidedSetup({ aiIndex, onSaved: jest.fn() });
     activeConversation$.next({ id: 'conv-setup' });
-
-    // Setup and automation are one piece of work, so the second button lands in the same thread.
     provider.suggestAutomation({ aiIndex, onSaved: jest.fn() });
 
     const [options] = openChat.mock.calls[1];
     expect(options.conversationId).toBe('conv-setup');
-    // Re-issuing the brief would send the agent back over ground it has already covered.
     expect(options.initialMessage).toBeUndefined();
-    // The attachment still goes every time, so the agent sees the index as it is now.
     expect(options.attachments).toHaveLength(1);
   });
 

@@ -81,32 +81,18 @@ export interface SuggestAutomationProvider {
   startGuidedSetup: (params: SuggestAutomationParams) => void;
   /** Subscribe to successful save_automation tool results for an AI index. Returns unsubscribe. */
   subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
-  /**
-   * Subscribe to what this page's assistant buttons already have going for an AI index. Returns
-   * unsubscribe. Emits the current state immediately.
-   */
+  /** Subscribe to the conversation state for an AI index. Emits immediately; returns unsubscribe. */
   subscribeToConversationState: (
     aiIndexId: string,
     onChange: (state: AiIndexConversationState) => void
   ) => () => void;
 }
 
-/**
- * What the page knows about the conversation its own buttons opened for an AI index.
- *
- * Both fields are best-effort readings of the assistant, not a record it keeps for us. They exist
- * so the page can offer to continue rather than silently starting again.
- */
+/** What the page knows about the conversation its assistant buttons opened for an AI index. */
 export interface AiIndexConversationState {
-  /** The conversation these buttons last opened, once the user has sent something in it. */
+  /** The conversation last opened for this index, once a message has been sent in it. */
   conversationId?: string;
-  /**
-   * Whether the agent is producing output right now.
-   *
-   * Only observable while the sidebar is mounted — the event stream is torn down with it — so this
-   * goes false when the user closes the sidebar on a run that is still going, and after a reload.
-   * False therefore means "not known to be working", not "finished".
-   */
+  /** Whether the agent is producing output. Only observable while the sidebar is mounted. */
   isRunning: boolean;
 }
 

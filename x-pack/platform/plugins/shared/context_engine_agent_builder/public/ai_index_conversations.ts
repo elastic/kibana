@@ -10,38 +10,16 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AiIndexConversationState } from '@kbn/context-engine-plugin/public/types';
 import { BehaviorSubject, EMPTY, map, switchMap, type Observable } from 'rxjs';
 
-/**
- * One entry per AI index whose page has opened the assistant, so the page can say what is already
- * going rather than offering a button that quietly starts again.
- *
- * The conversation id is kept in `localStorage` because that is the same scope Agent Builder's own
- * `sessionTag` restoration uses — per user, per browser. Recording it on the AI index instead would
- * publish one person's conversation to everyone with access to that index.
- *
- * `isRunning` is deliberately not persisted. It is a live reading taken from the event stream, and
- * the stream only reaches us while the sidebar is mounted; after a reload we have no way to know
- * whether the run we last saw is still going, and claiming otherwise would be a guess.
- */
 const STORAGE_PREFIX = 'contextEngine.aiIndexConversation.';
 
-/**
- * How long a conversation may go without producing an event before it stops counting as running.
- *
- * Closing the sidebar tears the event stream down without a final event, so without this a run the
- * user walked away from would be reported as working forever. A model can legitimately think for a
- * while between events, hence minutes rather than seconds.
- */
+/** How long a conversation may go without producing an event before it stops counting as running. */
 export const CONVERSATION_IDLE_AFTER_MS = 2 * 60 * 1000;
 
 const IDLE: AiIndexConversationState = { isRunning: false };
 
+/** Tracks which conversation belongs to which AI index, and whether its agent is working. */
 export interface AiIndexConversationTracker {
-  /**
-   * Declares that the conversation the sidebar settles on next belongs to this AI index.
-   *
-   * Called as the sidebar is opened rather than resolved afterwards, because the id only appears
-   * once the user sends something, which can be much later — or never.
-   */
+  /** Declares that the conversation the sidebar settles on next belongs to this AI index. */
   bindNextConversation: (aiIndexId: string) => void;
   state$: (aiIndexId: string) => Observable<AiIndexConversationState>;
   getConversationId: (aiIndexId: string) => string | undefined;
@@ -65,8 +43,6 @@ export const createAiIndexConversationTracker = ({
     try {
       return storage?.getItem(`${STORAGE_PREFIX}${aiIndexId}`) ?? undefined;
     } catch {
-      // A browser with storage disabled loses the binding across reloads, which costs a resumed
-      // conversation and nothing else.
       return undefined;
     }
   };
@@ -121,15 +97,13 @@ export const createAiIndexConversationTracker = ({
     try {
       storage?.setItem(`${STORAGE_PREFIX}${aiIndexId}`, conversationId);
     } catch {
-      // See readStored: losing the binding is recoverable, failing the click is not.
+      // A browser with storage disabled keeps the binding for this page only.
     }
     patch(aiIndexId, { conversationId });
   };
 
   const subscriptions = agentBuilder?.events
     ? [
-        // Binding happens here rather than at open time: the conversation has no id until the
-        // user sends, and until then there is nothing to remember.
         agentBuilder.events.ui.activeConversation$.subscribe((conversation) => {
           const conversationId = conversation?.id;
           if (!conversationId || !pendingAiIndexId) {
@@ -161,8 +135,6 @@ export const createAiIndexConversationTracker = ({
               return;
             }
 
-            // Any other event means the agent is still producing. Which kind it is does not
-            // matter: the page only needs to know that something is happening.
             markRunning(aiIndexId);
           }),
       ]
@@ -171,7 +143,6 @@ export const createAiIndexConversationTracker = ({
   return {
     bindNextConversation: (aiIndexId) => {
       pendingAiIndexId = aiIndexId;
-      // Touch the entry so a stored id is loaded before the first subscriber asks for it.
       stateFor(aiIndexId);
     },
     state$: (aiIndexId) => stateFor(aiIndexId).asObservable(),

@@ -115,12 +115,6 @@ export const createSuggestAutomationProvider = ({
     const conversationId = tracker.getConversationId(aiIndex.id);
     tracker.bindNextConversation(aiIndex.id);
 
-    // Setting an index up and then automating it is one piece of work, so both buttons return to
-    // the same thread and the agent keeps what it learned in between. `conversationId` is passed
-    // when we have one because the session tag can only restore in the browser that started it.
-    //
-    // The brief is only sent on the first visit. Resending it into a thread that has already run
-    // would re-issue instructions the agent has since worked past.
     agentBuilder.openChat({
       autoSendInitialMessage: false,
       ...(conversationId ? { conversationId } : { initialMessage }),

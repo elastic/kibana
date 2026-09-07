@@ -70,7 +70,6 @@ describe('createAiIndexConversationTracker', () => {
   });
 
   it('ignores conversations the user opened for themselves', () => {
-    // Nothing asked for a binding, so an unrelated thread must not be recorded against an index.
     const { activeConversation$, observe } = createHarness();
     const state = observe('my-index');
 
@@ -114,7 +113,6 @@ describe('createAiIndexConversationTracker', () => {
   });
 
   it('stops reporting work once the events dry up, so closing the sidebar does not strand it', () => {
-    // The stream is torn down with the sidebar and no completion event ever arrives.
     const { tracker, activeConversation$, chatEvents$, observe } = createHarness();
     const state = observe('my-index');
 
@@ -164,7 +162,6 @@ describe('createAiIndexConversationTracker', () => {
     activeConversation$.next({ id: 'conv-1' });
     chatEvents$.next(working);
 
-    // A fresh tracker over the same storage stands in for the next page load.
     const reloaded = createAiIndexConversationTracker({
       agentBuilder: undefined,
       storage: {

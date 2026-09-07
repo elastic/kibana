@@ -20,7 +20,7 @@ interface UseSuggestAutomationResult {
   canSuggest: boolean;
   suggestAutomation: () => void;
   startGuidedSetup: () => void;
-  /** What these buttons already have going for this index, so the caller can offer to continue. */
+  /** The conversation these buttons have open for this index, if any. */
   conversation: AiIndexConversationState;
 }
 
@@ -64,7 +64,6 @@ export const useSuggestAutomation = ({
   useEffect(() => {
     const aiIndexId = aiIndex?.id;
     if (!canSuggest || !aiIndexId || !provider) {
-      // Reset rather than leaving the last index's conversation on screen while routing.
       setConversation(NO_CONVERSATION);
       return;
     }
