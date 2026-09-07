@@ -79,7 +79,8 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   },
   '5': {
     // Renames the dashboard artifact data key `dashboardId` -> `dashboard_id`
-    // to match the snake_case payload convention of the alerting v2 APIs.
+    // and the matching `artifact:dashboardId:*` reference names to match the
+    // snake_case payload convention of the alerting v2 APIs.
     changes: [
       {
         type: 'unsafe_transform',

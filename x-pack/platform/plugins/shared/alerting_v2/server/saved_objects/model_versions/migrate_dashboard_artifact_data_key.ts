@@ -9,10 +9,19 @@ import type { SavedObjectModelTransformationFn } from '@kbn/core-saved-objects-s
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { RuleSavedObjectAttributes } from '../schemas/rule_saved_object_attributes';
 
+// Reference names embed the registered field: `artifact:<field>:<artifactId>`.
+// Inlined (not imported from artifact_references) so this migration stays
+// frozen in time even if the live helpers change.
+const LEGACY_REF_PREFIX = 'artifact:dashboardId:';
+const MIGRATED_REF_PREFIX = 'artifact:dashboard_id:';
+
 /**
  * Renames the dashboard artifact data key `dashboardId` to `dashboard_id`,
  * aligning the artifact payload with the snake_case key convention of the
- * alerting v2 APIs.
+ * alerting v2 APIs. Matching saved-object references are renamed from
+ * `artifact:dashboardId:<artifactId>` to `artifact:dashboard_id:<artifactId>`
+ * so reference-id remapping (import / copy-to-space) keeps working for rules
+ * written before this model version.
  *
  * The legacy key is removed rather than kept for rollback: the artifact `data`
  * record is schema-free, so a rolled-back model version 4 node still reads
@@ -30,9 +39,16 @@ export const migrateDashboardArtifactDataKey: SavedObjectModelTransformationFn<
     return { document: doc };
   }
 
+  const references = (doc.references ?? []).map((ref) =>
+    ref.name.startsWith(LEGACY_REF_PREFIX)
+      ? { ...ref, name: `${MIGRATED_REF_PREFIX}${ref.name.slice(LEGACY_REF_PREFIX.length)}` }
+      : ref
+  );
+
   return {
     document: {
       ...doc,
+      references,
       attributes: {
         ...doc.attributes,
         artifacts: artifacts.map((artifact) => {

@@ -25,23 +25,40 @@ const baseAttributes = {
   updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
-const createDocument = (artifacts?: Array<Record<string, unknown>>) => ({
+interface SavedObjectReferenceLike {
+  name: string;
+  type: string;
+  id: string;
+}
+
+const createDocument = (
+  artifacts?: Array<Record<string, unknown>>,
+  references: SavedObjectReferenceLike[] = []
+) => ({
   id: 'rule-1',
   type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     ...baseAttributes,
     ...(artifacts ? { artifacts } : {}),
   },
-  references: [],
+  references,
 });
 
 type TransformArgs = Parameters<typeof migrateDashboardArtifactDataKey>;
 
-const migrate = (artifacts?: Array<Record<string, unknown>>) => {
-  const document = createDocument(artifacts);
+const migrateDocument = (
+  artifacts?: Array<Record<string, unknown>>,
+  references?: SavedObjectReferenceLike[]
+) => {
+  const document = createDocument(artifacts, references);
   return migrateDashboardArtifactDataKey(document as TransformArgs[0], {} as TransformArgs[1])
-    .document.attributes;
+    .document;
 };
+
+const migrate = (
+  artifacts?: Array<Record<string, unknown>>,
+  references?: SavedObjectReferenceLike[]
+) => migrateDocument(artifacts, references).attributes;
 
 describe('migrateDashboardArtifactDataKey', () => {
   it('renames data.dashboardId to data.dashboard_id on dashboard artifacts', () => {
@@ -142,5 +159,60 @@ describe('migrateDashboardArtifactDataKey', () => {
     expect(
       migrate([{ id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'x' } }])
     ).toMatchObject(baseAttributes);
+  });
+
+  describe('references', () => {
+    const dashboardArtifact = {
+      id: 'dashboard-1',
+      type: DASHBOARD_ARTIFACT_TYPE,
+      data: { dashboardId: 'dash-123' },
+    };
+
+    it('renames a legacy artifact:dashboardId reference so import remapping keeps working', () => {
+      const { references } = migrateDocument(
+        [dashboardArtifact],
+        [{ name: 'artifact:dashboardId:dashboard-1', type: 'dashboard', id: 'dash-123' }]
+      );
+
+      expect(references).toEqual([
+        { name: 'artifact:dashboard_id:dashboard-1', type: 'dashboard', id: 'dash-123' },
+      ]);
+    });
+
+    it('preserves an artifact id containing colons in the renamed reference', () => {
+      const { references } = migrateDocument(
+        [{ ...dashboardArtifact, id: 'a:b:c' }],
+        [{ name: 'artifact:dashboardId:a:b:c', type: 'dashboard', id: 'dash-123' }]
+      );
+
+      expect(references).toEqual([
+        { name: 'artifact:dashboard_id:a:b:c', type: 'dashboard', id: 'dash-123' },
+      ]);
+    });
+
+    it('leaves non-artifact and already-migrated references untouched', () => {
+      const untouched = [
+        { name: 'action_0', type: 'action', id: 'action-1' },
+        { name: 'artifact:dashboard_id:dashboard-1', type: 'dashboard', id: 'dash-123' },
+      ];
+
+      expect(migrateDocument([dashboardArtifact], untouched).references).toEqual(untouched);
+    });
+
+    it('does not touch references when the rule has no dashboard artifacts', () => {
+      const references = [
+        { name: 'artifact:dashboardId:custom-1', type: 'dashboard', id: 'not-ours' },
+      ];
+      const document = createDocument(
+        [{ id: 'custom-1', type: 'obs.custom', data: {} }],
+        references
+      );
+      const result = migrateDashboardArtifactDataKey(
+        document as TransformArgs[0],
+        {} as TransformArgs[1]
+      );
+
+      expect(result.document).toBe(document);
+    });
   });
 });
