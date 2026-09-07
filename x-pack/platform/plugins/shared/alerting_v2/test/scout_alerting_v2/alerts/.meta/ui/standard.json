@@ -1,5 +1,5 @@
 {
-  "sha1": "9b33e094894ae48f6dd038a5ef09ae685210ee3c",
+  "sha1": "77d5c45f6886c3da061980d45ef07e9d8a07511c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 134,
+        "line": 135,
         "column": 9
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 219,
+        "line": 220,
         "column": 9
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 284,
+        "line": 285,
         "column": 9
       }
     },
@@ -52,7 +52,33 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 342,
+        "line": 343,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-84edadaa6d859e7",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow: alert + standalone opens YAML-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 399,
+        "column": 9
+      }
+    },
+    {
+      "id": "0d4530450053d38-7dea9b4fe985f9a",
+      "title": "ComposeDiscoverFlyout — create and edit flows edit flow (YAML-only): removing all tags in the editor persists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 432,
         "column": 9
       }
     },
@@ -65,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 398,
+        "line": 483,
         "column": 9
       }
     },
@@ -78,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 450,
+        "line": 535,
         "column": 9
       }
     },
@@ -91,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 489,
+        "line": 574,
         "column": 9
       }
     },
@@ -104,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 532,
+        "line": 617,
         "column": 9
       }
     },
@@ -117,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 596,
+        "line": 681,
         "column": 9
       }
     },
@@ -130,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 626,
+        "line": 711,
         "column": 9
       }
     },
@@ -143,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 647,
+        "line": 732,
         "column": 9
       }
     },
@@ -156,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 676,
+        "line": 761,
         "column": 9
       }
     },
@@ -169,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 698,
+        "line": 783,
         "column": 9
       }
     },
