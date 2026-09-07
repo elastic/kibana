@@ -19,6 +19,7 @@ import type {
   ConversationRoundAuthor,
   ExecutionStatus,
   InteractivityConfig,
+  InteractivityConfigInput,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -202,7 +203,7 @@ interface ExecuteAgentBaseParams {
   /**
    * Interactivity configuration for this execution.
    */
-  interactive?: InteractivityConfig;
+  interactive?: InteractivityConfigInput;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

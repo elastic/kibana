@@ -1,5 +1,5 @@
 {
-  "sha1": "3d95fd57753b202e119d85c68b8ae33ae5602565",
+  "sha1": "81135e66d616883b60a982bcd807326a04715a9b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -250,6 +250,46 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hard_delete_race_condition.spec.ts",
         "line": 81,
         "column": 3
+      }
+    },
+    {
+      "id": "852fb4b9089c63d-f656cc23e02e8c9",
+      "title": "HITL waitForInput resume pauses for input and completes with the submitted response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
+        "line": 73,
+        "column": 13
+      }
+    },
+    {
+      "id": "852fb4b9089c63d-bcd51815a01c496",
+      "title": "HITL waitForInput resume only one of two concurrent responders claims the waiting step",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_wait_for_input.spec.ts",
+        "line": 110,
+        "column": 9
       }
     },
     {
