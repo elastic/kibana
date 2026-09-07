@@ -62,7 +62,7 @@ ${HORIZONTAL_LINE}
           trustedAppsCount: 10,
           eventFiltersCount: 10,
           blocklistsCount: 10,
-          customYaraSignaturesCount: 10,
+          customYaraSignaturesCount: 0,
           hostIsolationExceptionsCount: 10,
           endpointExceptionsCount: 10,
           globalArtifactRatio: 50,
@@ -78,7 +78,8 @@ ${HORIZONTAL_LINE}
         --trustedAppsCount              How many Trusted Applications to create (Default: 10)
         --eventFiltersCount             How many Event Filters to create (Default: 10)
         --blocklistsCount               How many Blocklists to create (Default: 10)
-        --customYaraSignaturesCount     How many Custom YARA Signatures to create (Default: 10)
+        --customYaraSignaturesCount     How many Custom YARA Signatures to create (Default: 0)
+                                        Requires xpack.securitySolution.enableExperimental.customYaraSignaturesEnabled feature flag to be enabled.
         --hostIsolationExceptionsCount  How many Host Isolation Exceptions to create (Default: 10)
         --endpointExceptionsCount       How many Endpoint Exceptions to create (Default: 10)
         --globalArtifactRatio           The percentage ratio of all artifacts that should be global

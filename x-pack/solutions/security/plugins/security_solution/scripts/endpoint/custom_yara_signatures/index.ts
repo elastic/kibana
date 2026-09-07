@@ -41,6 +41,8 @@ export const cli = () => {
           kibana: 'http://elastic:changeme@127.0.0.1:5601',
         },
         help: `
+        Requires xpack.securitySolution.enableExperimental.customYaraSignaturesEnabled feature flag to be enabled.
+
         --count            Number of custom YARA signatures to create. Default: 10
         --kibana           The URL to kibana including credentials. Default: http://elastic:changeme@127.0.0.1:5601
       `,
