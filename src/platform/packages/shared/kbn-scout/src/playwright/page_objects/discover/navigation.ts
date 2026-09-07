@@ -211,9 +211,12 @@ export abstract class NavigationMixin extends DiscoverAppBase {
     return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
   }
 
+  getEsqlHistoryPanel(): Locator {
+    return this.page.testSubj.locator('ESQLEditor-history-container');
+  }
+
   async isEsqlHistoryPanelOpen(): Promise<boolean> {
-    return this.page.testSubj
-      .locator('ESQLEditor-history-container')
+    return this.getEsqlHistoryPanel()
       .waitFor({ state: 'visible', timeout: 1_000 })
       .then(() => true)
       .catch(() => false);
@@ -222,9 +225,7 @@ export abstract class NavigationMixin extends DiscoverAppBase {
   async toggleEsqlHistoryPanel() {
     const wasOpen = await this.isEsqlHistoryPanelOpen();
     await this.page.testSubj.locator('ESQLEditor-toggle-query-history-icon').click();
-    await this.page.testSubj
-      .locator('ESQLEditor-history-container')
-      .waitFor({ state: wasOpen ? 'hidden' : 'visible' });
+    await this.getEsqlHistoryPanel().waitFor({ state: wasOpen ? 'hidden' : 'visible' });
   }
 
   async getEsqlEditorHeight(): Promise<number> {

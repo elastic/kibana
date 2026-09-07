@@ -845,6 +845,10 @@ export abstract class LayoutMixin extends SaveMixin {
     return this.page.testSubj.locator('refreshDataButton');
   }
 
+  getQueryInEsqlButton(): Locator {
+    return this.page.testSubj.locator('queryInEsqlButton');
+  }
+
   getQuerySubmitButton(): Locator {
     return this.page.testSubj.locator('querySubmitButton');
   }
