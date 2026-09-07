@@ -217,9 +217,9 @@ const EntityAnalyticsHomePageContent = () => {
     useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
   const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
     useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
-  const { count: watchlistedCount, isLoading: watchlistedLoading } =
+  const { count: watchlistedCount, entityIds: watchlistedEntityIds, isLoading: watchlistedLoading } =
     useWatchlistedCount({ spaceId: resolvedSpaceId });
-  const { count: newEntityCount, isLoading: newEntityLoading } =
+  const { count: newEntityCount, entityIds: newEntityEntityIds, isLoading: newEntityLoading } =
     useNewEntityCount({ spaceId: resolvedSpaceId });
   const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
     useRiskMoversCount({ spaceId: resolvedSpaceId });
@@ -246,10 +246,14 @@ const EntityAnalyticsHomePageContent = () => {
         return riskMoversEntityIds.length > 0 ? { terms: { 'entity.id': riskMoversEntityIds } } : null;
       case 'newlyHighCritical':
         return newlyHCEntityIds.length > 0 ? { terms: { 'entity.id': newlyHCEntityIds } } : null;
+      case 'watchlisted':
+        return watchlistedEntityIds.length > 0 ? { terms: { 'entity.id': watchlistedEntityIds } } : null;
+      case 'newEntity':
+        return newEntityEntityIds.length > 0 ? { terms: { 'entity.id': newEntityEntityIds } } : null;
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }
-  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, riskMoversEntityIds, newlyHCEntityIds]);
+  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, riskMoversEntityIds, newlyHCEntityIds, watchlistedEntityIds, newEntityEntityIds]);
 
   const signalCards = useMemo((): SignalCardData[] => [
     {

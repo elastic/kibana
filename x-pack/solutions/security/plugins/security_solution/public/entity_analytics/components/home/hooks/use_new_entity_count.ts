@@ -27,7 +27,7 @@ export const useNewEntityCount = ({
   const query = `FROM ${index}
 | WHERE entity.lifecycle.first_seen >= NOW() - 7 days AND entity.risk.calculated_score > 0
 | EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)
-| STATS value = COUNT_DISTINCT(effective_id)`;
+| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(effective_id)`;
 
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
@@ -51,7 +51,11 @@ export const useNewEntityCount = ({
       const rawResponse = searchResult.rawResponse as unknown as ESQLSearchResponse;
       const row = rawResponse.values?.[0];
       const valueIndex = rawResponse.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      return typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0;
+      const entityIdsIndex = rawResponse.columns?.findIndex((c) => c.name === 'entity_ids') ?? 1;
+      return {
+        count: typeof row?.[valueIndex] === 'number' ? (row[valueIndex] as number) : 0,
+        entityIds: Array.isArray(row?.[entityIdsIndex]) ? (row[entityIdsIndex] as string[]) : [],
+      };
     },
     {
       keepPreviousData: true,
@@ -61,7 +65,8 @@ export const useNewEntityCount = ({
   );
 
   return {
-    count: result ?? 0,
+    count: result?.count ?? 0,
+    entityIds: result?.entityIds ?? [],
     isLoading: isLoading || isRefetching || isStatusLoading,
     error,
   };

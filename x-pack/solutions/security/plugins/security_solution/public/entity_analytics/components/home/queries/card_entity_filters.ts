@@ -22,30 +22,12 @@ import type { SignalCardId } from '../facelift/v5/data';
  */
 export const getCardEntityFilter = (cardId: SignalCardId): QueryDslQueryContainer | null => {
   switch (cardId) {
-    case 'watchlisted':
-      return {
-        bool: {
-          must: [
-            { exists: { field: 'entity.attributes.watchlists' } },
-            { range: { 'entity.risk.calculated_score': { gt: 0 } } },
-          ],
-        },
-      };
-
-    case 'newEntity':
-      return {
-        bool: {
-          must: [
-            { range: { 'entity.lifecycle.first_seen': { gte: 'now-7d' } } },
-            { range: { 'entity.risk.calculated_score': { gt: 0 } } },
-          ],
-        },
-      };
-
     case 'entitiesWithAlerts':
     case 'entitiesWithAnomalies':
     case 'riskMovers':
     case 'newlyHighCritical':
+    case 'watchlisted':
+    case 'newEntity':
     default:
       return null;
   }
