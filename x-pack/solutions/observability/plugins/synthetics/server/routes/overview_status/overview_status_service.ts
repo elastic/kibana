@@ -41,6 +41,17 @@ import {
 } from '../../../common/constants/client_defaults';
 import { isRemoteIndexMetadataEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
 
+// Canonical rank for `sortField: 'status'`. Sorting by this rank (instead of a
+// fixed bucket concatenation) means `sortOrder: 'desc'` reverses the whole
+// order, not just the up/down pair.
+const STATUS_RANK: Record<string, number> = {
+  [MONITOR_STATUS_ENUM.DOWN]: 0,
+  [MONITOR_STATUS_ENUM.UP]: 1,
+  [MONITOR_STATUS_ENUM.DISABLED]: 2,
+  [MONITOR_STATUS_ENUM.PENDING]: 3,
+  [MONITOR_STATUS_ENUM.STALE]: 4,
+};
+
 interface LocationStatusEntry {
   status: string;
   locationId: string;
@@ -345,12 +356,14 @@ export class OverviewStatusService {
       [MONITOR_STATUS_ENUM.DISABLED]: disabledConfigs,
     };
 
-    // `sortField: 'status'` is expressed as this concatenation order — `sortConfigs` is a no-op for it.
+    // Base order is arbitrary — `sortConfigs` always re-sorts by `STATUS_RANK`
+    // for `sortField: 'status'` (the default), so `sortOrder` is honored as a
+    // true full reverse rather than a fixed bucket concatenation.
     const pageSource = statusFilter
       ? Object.values(buckets[statusFilter] ?? {})
       : [
-          ...Object.values(sortOrder === 'asc' ? downConfigs : upConfigs),
-          ...Object.values(sortOrder === 'asc' ? upConfigs : downConfigs),
+          ...Object.values(downConfigs),
+          ...Object.values(upConfigs),
           ...Object.values(disabledConfigs),
           ...Object.values(pendingConfigs),
           ...Object.values(staleConfigs),
@@ -430,6 +443,11 @@ export class OverviewStatusService {
         break;
       case 'status':
       default:
+        configs.sort((a, b) => {
+          const aRank = STATUS_RANK[a.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          const bRank = STATUS_RANK[b.overallStatus] ?? Number.MAX_SAFE_INTEGER;
+          return dir * (aRank - bRank);
+        });
         break;
     }
   }

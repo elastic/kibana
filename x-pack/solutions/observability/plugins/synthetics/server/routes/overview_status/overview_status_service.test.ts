@@ -3087,7 +3087,7 @@ describe('current status route', () => {
       expect(statuses).toEqual(['down', 'down', 'up', 'up', 'up', 'disabled', 'pending']);
     });
 
-    it('sorts by status desc: up first, then down, disabled, pending', () => {
+    it('sorts by status desc: a true full reverse of the asc rank order', () => {
       const service = createService({
         page: 1,
         perPage: 20,
@@ -3097,7 +3097,45 @@ describe('current status route', () => {
       const result = service.paginateConfigs(allBuckets);
 
       const statuses = result.configs.map((c: any) => c.overallStatus);
-      expect(statuses).toEqual(['up', 'up', 'up', 'down', 'down', 'disabled', 'pending']);
+      expect(statuses).toEqual(['pending', 'disabled', 'up', 'up', 'up', 'down', 'down']);
+    });
+
+    it('sorts by status using a fixed rank, not just an up/down swap (covers stale too)', () => {
+      const withStale = {
+        upConfigs: { u1: makeMeta('u1', { name: 'U' }) },
+        downConfigs: { d1: makeMeta('d1', { overallStatus: 'down', name: 'D' }) },
+        pendingConfigs: { p1: makeMeta('p1', { overallStatus: 'pending', name: 'P' }) },
+        disabledConfigs: { x1: makeMeta('x1', { overallStatus: 'disabled', name: 'X' }) },
+        staleConfigs: { s1: makeMeta('s1', { overallStatus: 'stale', name: 'S' }) },
+      };
+
+      const asc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'asc',
+      }).paginateConfigs(withStale);
+      expect(asc.configs.map((c: any) => c.overallStatus)).toEqual([
+        'down',
+        'up',
+        'disabled',
+        'pending',
+        'stale',
+      ]);
+
+      const desc = createService({
+        page: 1,
+        perPage: 20,
+        sortField: 'status',
+        sortOrder: 'desc',
+      }).paginateConfigs(withStale);
+      expect(desc.configs.map((c: any) => c.overallStatus)).toEqual([
+        'stale',
+        'pending',
+        'disabled',
+        'up',
+        'down',
+      ]);
     });
 
     it('sorts by name ascending', () => {
