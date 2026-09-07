@@ -100,8 +100,8 @@ const renderSummary = (report: FlakyTestReport, limit: number): string => {
   return lines.join('\n');
 };
 
-export const flakyTestReport: Command<void> = {
-  name: 'flaky-test-report',
+export const discoverFlakyTests: Command<void> = {
+  name: 'discover-flaky-tests',
   description:
     'Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a ' +
     'flaky test report written as JSON. Read-only.',
