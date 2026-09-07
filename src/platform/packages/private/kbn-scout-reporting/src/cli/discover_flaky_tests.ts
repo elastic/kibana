@@ -8,9 +8,12 @@
  */
 
 import path from 'node:path';
+import CliTable3 from 'cli-table3';
+import dedent from 'dedent';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
+import type { ToolingLog } from '@kbn/tooling-log';
 import {
   SCOUT_FLAKY_TESTS_PATH,
   SCOUT_REPORTER_ES_API_KEY,
@@ -71,32 +74,93 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-const formatEntry = (entry: FlakyTestEntry): string =>
-  `  ${entry.failedBuilds}/${entry.builds} builds (${(entry.buildFailRate * 100).toFixed(1)}%)` +
-  `  [${entry.framework}] ${entry.filePath}\n` +
-  `      ${entry.title}`;
+const OWNERS_COL_WIDTH = 36;
+const TEST_COL_WIDTH = 72;
 
-const renderSummary = (report: FlakyTestReport, limit: number): string => {
-  const lines = [
-    `Window: ${report.window.from.toISOString()} to ${report.window.to.toISOString()} (${
-      report.window.lookbackDays
-    }d)`,
-    `Pipelines: ${report.scope.pipelines.join(', ') || 'any'}` +
-      `  Branches: ${report.scope.branches.join(', ') || 'any'}` +
-      `  Frameworks: ${report.scope.frameworks.join(', ')}`,
-    `Flaky tests: ${report.summary.totalFlaky}` +
-      ` (${Object.entries(report.summary.flakyByFramework)
-        .map(([framework, count]) => `${framework}: ${count}`)
-        .join(', ')})`,
-    `Consistently failing tests: ${report.summary.totalConsistentlyFailing}`,
-  ];
+// cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
+const wrapPath = (filePath: string, width: number): string => {
+  const lines: string[] = [];
+  let current = '';
+  for (const segment of filePath.split('/')) {
+    const candidate = current ? `${current}/${segment}` : segment;
+    if (candidate.length > width && current) {
+      lines.push(`${current}/`);
+      current = segment;
+    } else {
+      current = candidate;
+    }
+  }
+  lines.push(current);
+  return lines.join('\n');
+};
 
-  if (report.flaky.length > 0) {
-    lines.push('', `Top ${Math.min(limit, report.flaky.length)} flaky tests by failed builds:`);
-    lines.push(...report.flaky.slice(0, limit).map(formatEntry));
+const buildTopFlakyTable = (entries: readonly FlakyTestEntry[]): CliTable3.Table => {
+  const table = new CliTable3({
+    head: ['#', 'Framework', 'Failed builds', 'Fail rate', 'Owners', 'Test'],
+    colWidths: [null, null, null, null, OWNERS_COL_WIDTH, TEST_COL_WIDTH],
+    wordWrap: true,
+  });
+
+  entries.forEach((entry) => {
+    table.push([
+      table.length + 1,
+      entry.framework,
+      `${entry.failedBuilds}/${entry.builds}`,
+      `${(entry.buildFailRate * 100).toFixed(1)}%`,
+      entry.owners.join('\n') || '-',
+      // cell padding takes 2 columns and a broken line ends in `/`
+      `${wrapPath(entry.filePath, TEST_COL_WIDTH - 3)}\n${entry.title}`,
+    ]);
+  });
+
+  return table;
+};
+
+const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog): void => {
+  const { window, scope, summary, flaky } = report;
+  const flakyByFramework = Object.entries(summary.flakyByFramework)
+    .map(([framework, count]) => `${framework}: ${count}`)
+    .join(', ');
+
+  const panel = new CliTable3();
+  panel.push(
+    [{ content: 'Flaky tests summary', hAlign: 'center' }],
+    [
+      dedent(`\
+        Window
+          From     : ${window.from.toISOString()}
+          To       : ${window.to.toISOString()}
+          Lookback : ${window.lookbackDays}d
+        `),
+    ],
+    [
+      dedent(`\
+        Scope
+          Pipelines  : ${scope.pipelines.join(', ') || 'any'}
+          Branches   : ${scope.branches.join(', ') || 'any'}
+          Frameworks : ${scope.frameworks.join(', ')}
+        `),
+    ],
+    [
+      dedent(`\
+        Results
+          Flaky                : ${summary.totalFlaky}${
+        flakyByFramework ? ` (${flakyByFramework})` : ''
+      }
+          Consistently failing : ${summary.totalConsistentlyFailing}
+        `),
+    ]
+  );
+
+  if (flaky.length > 0) {
+    const top = flaky.slice(0, limit);
+    panel.push([
+      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(top).toString()}`,
+    ]);
   }
 
-  return lines.join('\n');
+  log.write('\n');
+  log.write(panel.toString());
 };
 
 export const discoverFlakyTests: Command<void> = {
@@ -209,9 +273,7 @@ export const discoverFlakyTests: Command<void> = {
 
     // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
     if (!flagsReader.boolean('quiet')) {
-      log.write('');
-      log.write(renderSummary(report, 10));
-      log.write('');
+      displaySummary(report, 10, log);
     }
 
     log.success(`Finished in ${(performance.now() / 1000).toFixed(2)}s`);
