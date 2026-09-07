@@ -20,11 +20,8 @@ interface VisualizationAttachmentDataBase {
 }
 
 /**
- * A chart payload rendered by Lens or Vega. `renderer` is optional because
- * attachments created before the discriminator existed are implicitly Lens.
- *
- * `esql` is required here rather than on the union: a chart is always backed by a
- * query, and only custom content can legitimately be static.
+ * A chart payload rendered by Lens or Vega. `esql` is required here rather than on the
+ * union: a chart is always query-backed, and only custom content can be static.
  */
 export interface ChartVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer?: 'lens' | 'vega';
@@ -37,18 +34,13 @@ export interface ChartVisualizationAttachmentData extends VisualizationAttachmen
 }
 
 /**
- * A custom content payload: an LLM-authored HTML/Liquid template rendered in a
- * sandboxed iframe. Unlike the chart renderers this is untrusted markup rather
+ * A custom content payload: an LLM-authored HTML/Liquid template. Untrusted markup rather
  * than a structured config, so consumers must reach it through the `renderer`
  * discriminator and never through a generic "render the payload" path.
  */
 export interface CustomContentVisualizationAttachmentData extends VisualizationAttachmentDataBase {
   renderer: 'custom_content';
-  /**
-   * `height` is the size the generating model declared for the template. The panel
-   * cannot measure itself (no scripting in the sandbox) and the host cannot read
-   * across the opaque origin, so this estimate is the only sizing signal available.
-   */
+  /** `height` is the model's own estimate — see the height constants for why. */
   visualization: { template: string; title?: string; height?: number };
   /** Optional: a custom content panel with no query renders static content. */
   esql?: string;
@@ -59,11 +51,9 @@ export type VisualizationAttachmentData =
   | CustomContentVisualizationAttachmentData;
 
 /**
- * The renderer an attachment actually renders with.
- *
- * `renderer` is absent on attachments created before the field existed, and those are
- * Lens. Callers should resolve through this rather than defaulting inline, so the rule
- * lives in one place and a new renderer cannot be mistaken for the legacy case.
+ * The renderer an attachment actually renders with. `renderer` is absent on attachments
+ * created before the field existed, and those are Lens. Resolve through this rather than
+ * defaulting inline, so a new renderer cannot be mistaken for the legacy case.
  */
 export const getEffectiveRenderer = (data: VisualizationAttachmentData): VisualizationRenderer =>
   data.renderer ?? 'lens';

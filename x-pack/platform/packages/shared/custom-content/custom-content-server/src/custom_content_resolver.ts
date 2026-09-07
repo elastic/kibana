@@ -36,20 +36,26 @@ const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to t
 
 const HEIGHT_DECLARATION_GUIDANCE = `HEIGHT DECLARATION — the FIRST line of your output must be exactly:
 <!-- cc-height: N -->
-where N is the height in CSS pixels your content occupies.
+where N is the height in CSS pixels your content occupies. Anything after N is ignored, so append your arithmetic there.
 
 The panel renders in a frame of exactly this height. It cannot measure itself and the host cannot measure it, so this number is the only sizing information anyone gets. Too small and the panel scrolls; too large and the content sits above a large empty gap, which looks broken. Aim to be accurate, not generous.
 
-Add it up from the markup you actually wrote, top to bottom:
+Add it up from the markup you actually wrote, top to bottom, and show the arithmetic after the number so every term corresponds to something you wrote:
 - body padding: 32 (top and bottom together)
 - a heading row: 60
 - one row of KPI / status cards: 130 (a row, not a card — count rows as ceil(cards / columns))
-- one compact table or list row: 24, plus 30 for a header row
-- a drawn chart or diagram: whatever height you gave it
+- one compact table or list row: 30, plus 30 for a header row
+- a section container (a card wrapping other content): 32 for its own padding
 - a paragraph of text: 24 per line you expect it to wrap to
+- a drawn chart or diagram: the height you actually gave it — this applies ONLY to something drawn at a fixed size, like an SVG with a set height or a CSS box with a height in pixels. A "bar chart" built by looping rows and drawing a coloured div per row is a TABLE: count it per row, not as a chart. Mis-classifying a row list as a chart is the most common way this number comes out far too large.
+
+Count only the spacing you actually wrote between sections. Do not add slack "to be safe" — the gap under the content is as visible as a scrollbar.
 
 Worked example — a heading plus four status cards in a two-column grid:
-32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 -->\`.
+32 + 60 + (2 rows x 130) = 352, so emit \`<!-- cc-height: 352 = 32 + 60 + 2x130 -->\`.
+
+Second example — a row of 4 KPI cards, then a 4-row bar list inside a card, then a footer line:
+32 + 130 + (32 + 30 + 4x30) + 24 = 368.
 
 Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between ${CUSTOM_CONTENT_MIN_HEIGHT} and ${CUSTOM_CONTENT_MAX_HEIGHT}.
 
@@ -190,7 +196,9 @@ CONTENT RULES:
 export const extractDeclaredHeight = (
   rawTemplate: string
 ): { template: string; height: number } => {
-  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d+)\s*-->\s*/i);
+  // Anything after the number is the model's own arithmetic, which it is asked to show so
+  // each term has to correspond to something it wrote. Only the leading number is read.
+  const match = rawTemplate.match(/^\s*<!--\s*cc-height:\s*(\d+)[^>]*-->\s*/i);
   if (!match) {
     return { template: rawTemplate, height: CUSTOM_CONTENT_DEFAULT_HEIGHT };
   }

@@ -149,17 +149,13 @@ export interface ChartVisualizationResultData extends VisualizationResultDataBas
 }
 
 /**
- * A custom content result.
- *
- * The generated HTML template is deliberately absent: it lives in the attachment,
- * and echoing several KB of markup back through the model on every create and
- * update would be expensive and invites the model to mangle it. The agent works
- * with `attachment_id` instead.
+ * A custom content result. The HTML template is deliberately absent — it lives in the
+ * attachment, and round-tripping KBs of markup through the model invites corruption.
  */
 export interface CustomContentVisualizationResultData extends VisualizationResultDataBase {
   renderer: 'custom_content';
   esql?: string;
-  /** Non-template payload — the prompt the template was generated from. */
+  /** The prompt the template was generated from. */
   visualization: { prompt: string };
 }
 

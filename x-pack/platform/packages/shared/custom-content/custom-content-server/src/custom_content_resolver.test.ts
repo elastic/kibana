@@ -151,6 +151,17 @@ describe('createCustomContentTemplateResolver — output validation', () => {
     expect(result.template).toBe('<div>hello</div>');
   });
 
+  it('reads the height and strips the arithmetic the model shows after it', async () => {
+    mockChatComplete.mockResolvedValue({
+      content: '<!-- cc-height: 368 = 32 + 130 + 4x30 -->\n<div>hello</div>',
+    });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.height).toBe(368);
+    expect(result.template).toBe('<div>hello</div>');
+  });
+
   it('falls back to the default height when none is declared', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 

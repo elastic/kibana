@@ -137,8 +137,8 @@ export const VisualizeCustomContent = ({
     [template, esql, embeddable]
   );
 
-  // The tool-result / markdown surface has no attachment header to host buttons,
-  // so fall back to rendering them locally (matching the other renderers).
+  // `registerActionButtons` is optional in the render contract; without it there is no
+  // header to host the buttons, so draw them over the panel instead.
   const [localActionButtons, setLocalActionButtons] = useState<ActionButton[]>([]);
   const registerLocalActionButtons = useCallback(
     (buttons: ActionButton[]) => setLocalActionButtons(buttons),
@@ -147,29 +147,28 @@ export const VisualizeCustomContent = ({
   const register = registerActionButtons ?? registerLocalActionButtons;
   const shouldRenderLocalActionButtons = !registerActionButtons && localActionButtons.length > 0;
 
+  // Nothing to save before a template exists.
   const actionButtons = useMemo<ActionButton[]>(
-    () => [
-      {
-        label: saveButtonLabel,
-        icon: 'save',
-        type: ActionButtonType.PRIMARY,
-        disabled: !canWriteDashboards,
-        disabledReason: canWriteDashboards ? undefined : dashboardWriteControlsDisabledReason,
-        handler: openSaveModal,
-      },
-    ],
-    [canWriteDashboards, openSaveModal]
+    () =>
+      template
+        ? [
+            {
+              label: saveButtonLabel,
+              icon: 'save',
+              type: ActionButtonType.PRIMARY,
+              disabled: !canWriteDashboards,
+              disabledReason: canWriteDashboards ? undefined : dashboardWriteControlsDisabledReason,
+              handler: openSaveModal,
+            },
+          ]
+        : [],
+    [canWriteDashboards, openSaveModal, template]
   );
 
   useEffect(() => {
-    // Nothing to save before a template exists.
-    if (!template) {
-      register([]);
-      return;
-    }
     register(actionButtons);
     return () => register([]);
-  }, [actionButtons, register, template]);
+  }, [actionButtons, register]);
 
   return (
     <div data-test-subj="agentBuilderCustomContentVisualization" css={visualizationWrapperStyles}>
