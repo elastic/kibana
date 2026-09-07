@@ -7,8 +7,11 @@
 
 import assert from 'assert';
 
-import type { EntityType } from './entity_schema';
-import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
+import {
+  EntityType,
+  type EntityDefinitionWithoutId,
+  type ManagedEntityDefinition,
+} from './entity_schema';
 import { hostEntityDefinition } from './host';
 import { buildUserEntityDefinition, userEntityDefinition } from './user';
 import { serviceEntityDefinition } from './service';
@@ -46,7 +49,7 @@ export function getEntityDefinitionWithoutId(
   type: EntityType,
   options?: EntityDefinitionOptions
 ): EntityDefinitionWithoutId {
-  if (type === 'user' && options?.excludedUserNames?.length) {
+  if (type === EntityType.enum.user && options?.excludedUserNames?.length) {
     return buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames });
   }
   const definition = entitiesDefinitionRegistry[type];
