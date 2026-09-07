@@ -17,8 +17,16 @@ const START_MS = Date.parse('2026-09-04T15:00:00.000Z');
 const BASELINE_START_MS = Date.parse('2026-09-04T14:00:00.000Z');
 const INTERVAL_MS = 300_000;
 
+const EMPTY_HISTOGRAM: LogExplorationHistogram = {
+  intervalMs: INTERVAL_MS,
+  startMs: START_MS,
+  baselineStartMs: BASELINE_START_MS,
+  current: [],
+  baseline: [],
+};
+
 const formatValue = async (data: LogExplorationData): Promise<string> => {
-  const attachment = { data } as Attachment<TypeId, LogExplorationData>;
+  const attachment = { id: 'LiDoF1', data } as Attachment<TypeId, LogExplorationData>;
   const formatted = await createLogExplorationAttachmentType().format(
     attachment,
     {} as AttachmentFormatContext
@@ -75,7 +83,55 @@ describe('log exploration attachment format()', () => {
       const value = await formatValue(patternTableData(['noisy-one', 'noisy-two']));
 
       expect(value).toContain('The 3 patterns below are the ONLY ones you may discuss');
-      expect(value).toContain('- alpha (count: 100)');
+      // The subtraction it is forbidden from making is the one it was observed making.
+      expect(value).toContain('minus the number of muted patterns');
+      // 100 of the 297 documents in the cut, and [1, 2] rises by one between the halves.
+      expect(value).toContain('- alpha (count: 100, 34% of this cut, trend +1)');
+    });
+
+    it('describes the cut over the un-muted rows only', async () => {
+      const value = await formatValue(patternTableData(['noisy-one', 'noisy-two']));
+
+      expect(value).toContain('Documents across these patterns: 297');
+      expect(value).toContain(`Largest pattern's share of that total: 34% ("alpha")`);
+      expect(value).toContain('Trend within the window: 3 rising, 0 falling, 0 flat');
+      expect(value).toContain('Steepest rise: "alpha" (+1)');
+      expect(value).not.toContain('Steepest fall');
+    });
+
+    it('picks the steepest mover in each direction', async () => {
+      const value = await formatValue({
+        ...patternTableData([]),
+        result: {
+          type: 'pattern-table',
+          generatedAt: '2026-09-04T18:00:00.000Z',
+          patterns: [
+            { pattern: 'flat', count: 100, sparkline: [10, 10] },
+            { pattern: 'up-a-lot', count: 50, sparkline: [1, 1, 40, 40] },
+            { pattern: 'up-a-little', count: 40, sparkline: [1, 3] },
+            { pattern: 'down', count: 10, sparkline: [30, 5] },
+          ],
+        },
+      });
+
+      expect(value).toContain('Trend within the window: 2 rising, 1 falling, 1 flat');
+      // The odd middle bucket is dropped, so [1, 1, 40, 40] compares 1+1 against 40+40.
+      expect(value).toContain('Steepest rise: "up-a-lot" (+78)');
+      expect(value).toContain('Steepest fall: "down" (-25)');
+    });
+
+    it('omits the trend for a sparkline too short to have halves', async () => {
+      const value = await formatValue({
+        ...patternTableData([]),
+        result: {
+          type: 'pattern-table',
+          generatedAt: '2026-09-04T18:00:00.000Z',
+          patterns: [{ pattern: 'single-bucket', count: 10, sparkline: [10] }],
+        },
+      });
+
+      expect(value).toContain('- single-bucket (count: 10, 100% of this cut)');
+      expect(value).not.toContain('Trend within the window');
     });
 
     it('keeps muted patterns out of the discussable list', async () => {
@@ -101,6 +157,47 @@ describe('log exploration attachment format()', () => {
 
       expect(value).toContain('The 0 patterns below are the ONLY ones you may discuss');
       expect(value).toContain('every pattern in the current cut has been muted');
+      expect(value).not.toContain('Shape of this cut');
+    });
+  });
+
+  describe('mutable state', () => {
+    it('suppresses the parameters only in a message that renders the view', async () => {
+      const value = await formatValue(volumeComparisonData(EMPTY_HISTOGRAM));
+
+      // Still stated, so the model can reason and answer a direct question about them.
+      expect(value).toContain('Active time range: now-3h to now');
+      expect(value).toContain('Baseline epoch: now-4h to now-1h');
+      expect(value).toContain('A MESSAGE THAT ONLY RENDERS THE VIEW');
+      expect(value).toContain(
+        'Do not state the time range, the baseline epoch or the filter list.'
+      );
+      expect(value).toContain('durations mentioned in passing');
+      expect(value).toContain('A PROSE-ONLY REPLY');
+      expect(value).toContain(
+        'Say which range, baseline and filters the answer was computed from.'
+      );
+      expect(value).toContain('If the user asks outright');
+      expect(value).toContain('a reading taken now, not a standing fact');
+    });
+
+    it('allows attribution above a re-render and forbids it below', async () => {
+      const value = await formatValue(volumeComparisonData(EMPTY_HISTOGRAM));
+
+      expect(value).toContain(
+        'A REPLY THAT ANALYSES AN EARLIER RESULT AND THEN RE-RENDERS THE VIEW'
+      );
+      expect(value).toContain('Name the parameters only BEFORE the <render_attachment ... /> tag');
+      expect(value).toContain('After the tag, name no range, baseline or filter at all.');
+    });
+
+    it('hands the model the tag to re-render with, so it cannot invent an id', async () => {
+      const value = await formatValue(volumeComparisonData(EMPTY_HISTOGRAM));
+
+      expect(value).toContain('<render_attachment id="LiDoF1" />');
+      expect(value).toContain(
+        'Do not re-render when your reply recommends nothing the view can act'
+      );
     });
   });
 

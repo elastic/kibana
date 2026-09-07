@@ -104,7 +104,9 @@ When to use:
 How it works:
 Runs an ES|QL query using CATEGORIZE and SPARKLINE, then emits the result as an interactive attachment. The full table is NOT returned to you — the result contains only attachment_ids. Render it with <render_attachment id="..." />.
 
-The query is LIMIT ${MAX_PATTERNS}, so the table is a top-N cut by document count, not the complete set of patterns in the logs. Say so when you describe it, and do not present these counts as covering every document.`,
+The query is LIMIT ${MAX_PATTERNS}, so the table is a top-N cut by document count, not the complete set of patterns in the logs. Say so when you describe it, and do not present these counts as covering every document.
+
+The user re-runs this view themselves by changing the range or the filters in it, so the message that renders it must not restate the time range or the filters — say "the selected window". The table is displayed to the user; do not read its rows back to them. A later reply may name the range and filters it was computed from, but only above a re-render of the view, never below one.`,
     schema: getLogPatternsSchema,
     tags: ['observability', 'logs'],
     availability: {

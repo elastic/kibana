@@ -38,8 +38,14 @@ Three things follow, and they are the reason for the shape:
   replaces two hand-written ones that had already drifted apart.
 
 `format()` still writes a hand-written sentence per kind despite the uniform storage. The muting
-wording in particular — "never mention, summarize, count or investigate" — is what makes the
-Summarize criterion pass, and is not worth flattening into a generic list of narrowings.
+wording in particular — never _name_ a muted pattern, never include it in a summary, count or
+comparison, but you may say how many are muted — is what makes the Summarize criterion pass, and is
+not worth flattening into a generic list of narrowings. `format()` also carries the rules for what
+the agent may say about state the user can change without a turn. They are conditional on the shape
+of the round: a message that renders the view must not restate the window, the baseline or the
+filters, because the live controls sit directly beneath it; a prose-only reply, with nothing beside
+it that can move, should name them. Either way a quoted number is framed as a reading taken at that
+moment.
 
 Journey _history_ is deliberately not modelled: the attachment version chain already is the journey.
 The payload describes the current position only.
@@ -134,6 +140,23 @@ Consequences of skipping it:
   else will correct it, so that path is load-bearing rather than defensive.
 - An agent write to the attachment is not visible until the next natural refetch. Since agent writes
   only happen during a round, and round completion refetches anyway, this is near-theoretical.
+
+### Two live renders of one attachment lose writes
+
+`format()` asks the agent to re-render this view at the end of an analysis, so a recommendation to
+mute or investigate is one click away. That puts two renders of the same attachment in the
+conversation, and both are writable: `resolveAttachmentVersion` falls back to the latest version when
+a round has no ref of its own, so neither resolves to an older one. Nothing tells the earlier render
+it has been superseded — props stay frozen for the loop, and content writes deliberately do not
+invalidate the conversation.
+
+Measured: mute in the newer render, then mute a different row in the older one, and the first mute is
+gone after a reload — the older render derived its payload from the version it mounted with. The
+framework's one-writable-render guard (`version < versionCount`) only separates renders that resolve
+to _different_ versions, which these do not.
+
+Accepted for the PoC, not fixed. The real fix is delta writes (`{ mute: pattern }`) rather than
+full-payload PUTs — see LX-3, which exists for this reason.
 
 ## Why agent-turn handlers await `flushPendingWrites()`
 

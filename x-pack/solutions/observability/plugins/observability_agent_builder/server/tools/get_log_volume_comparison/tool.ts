@@ -104,7 +104,9 @@ When to use:
 - The user asks whether log volume is unusual, higher or lower than before, or wants to compare now against an earlier period.
 
 How it works:
-Runs two ES|QL BUCKET queries over a shared interval so the epochs are directly comparable, then emits the result as an interactive attachment. The series are NOT returned to you — the result contains only attachment_ids. Render it with <render_attachment id="..." />.`,
+Runs two ES|QL BUCKET queries over a shared interval so the epochs are directly comparable, then emits the result as an interactive attachment. The series are NOT returned to you — the result contains only attachment_ids. Render it with <render_attachment id="..." />.
+
+The user changes the range and re-baselines the chart themselves, so the message that renders it must not restate the time range or the baseline — say "the selected window", "the chosen baseline". The chart is displayed to the user; spend the message on what it does not state. A later reply may name the range and baseline it was computed from, but only above a re-render of the view, never below one.`,
     schema: getLogVolumeComparisonSchema,
     tags: ['observability', 'logs'],
     availability: {

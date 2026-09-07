@@ -92,7 +92,8 @@ export const LogExplorationAttachment: React.FC<LogExplorationAttachmentProps> =
               'xpack.observabilityAgentBuilder.logExploration.summarizePatternsLabel',
               { defaultMessage: 'Summarize top patterns' }
             ),
-            message: 'Summarize the remaining un-muted log patterns with their current counts.',
+            message:
+              'Summarize what the un-muted log patterns show: which ones dominate the cut, which are rising or falling, which look related, and what is worth investigating or muting next. Do not include muted patterns, and do not simply list the rows back.',
           }
         : {
             label: i18n.translate(

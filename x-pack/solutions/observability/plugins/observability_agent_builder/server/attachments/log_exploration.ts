@@ -9,6 +9,7 @@ import dedent from 'dedent';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type {
   LogExplorationData,
+  LogExplorationPattern,
   LogExplorationRefinement,
   LogExplorationResult,
 } from '../../common/log_exploration';
@@ -19,15 +20,92 @@ import {
 } from '../../common/log_exploration';
 import { OBSERVABILITY_LOG_EXPLORATION_ATTACHMENT_TYPE_ID } from '../../common';
 
+const total = (values: number[]): number => values.reduce((sum, value) => sum + value, 0);
+
+const signed = (value: number): string => (value > 0 ? `+${value}` : `${value}`);
+
+/**
+ * Change between the first and second half of a pattern's sparkline. The user sees that series as a
+ * ~30px picture and cannot read values off it, so this is the one thing about a row the view shows
+ * but does not state. An odd middle bucket is dropped so the halves stay the same width.
+ */
+const halfOverHalfDelta = (sparkline: number[]): number | undefined => {
+  if (sparkline.length < 2) {
+    return undefined;
+  }
+  const half = Math.floor(sparkline.length / 2);
+  return total(sparkline.slice(sparkline.length - half)) - total(sparkline.slice(0, half));
+};
+
+const share = (count: number, cutTotal: number): number =>
+  cutTotal === 0 ? 0 : Math.round((count / cutTotal) * 100);
+
+/**
+ * What the table draws but never states: how concentrated the cut is, and which rows are moving.
+ * Without this the only honest summary of the table is the table, which the user is already reading.
+ */
+const formatCutShape = (patterns: LogExplorationPattern[]): string => {
+  const cutTotal = total(patterns.map((p) => p.count));
+  const largest = patterns.reduce((best, p) => (p.count > best.count ? p : best), patterns[0]);
+  const deltas = patterns.flatMap((p) => {
+    const delta = halfOverHalfDelta(p.sparkline);
+    return delta === undefined ? [] : [{ pattern: p.pattern, delta }];
+  });
+
+  const lines = [
+    `Documents across these patterns: ${cutTotal} — the total for these rows only. Never present it`,
+    `as the document count for the time range; patterns below the cut are not in it.`,
+    `Largest pattern's share of that total: ${share(largest.count, cutTotal)}% ("${
+      largest.pattern
+    }")`,
+  ];
+
+  if (deltas.length) {
+    const rising = deltas.filter(({ delta }) => delta > 0);
+    const falling = deltas.filter(({ delta }) => delta < 0);
+    lines.push(
+      `Trend within the window: ${rising.length} rising, ${falling.length} falling, ${
+        deltas.length - rising.length - falling.length
+      } flat`
+    );
+    const steepestRise = rising.reduce(
+      (best, entry) => (best === undefined || entry.delta > best.delta ? entry : best),
+      undefined as { pattern: string; delta: number } | undefined
+    );
+    const steepestFall = falling.reduce(
+      (best, entry) => (best === undefined || entry.delta < best.delta ? entry : best),
+      undefined as { pattern: string; delta: number } | undefined
+    );
+    if (steepestRise) {
+      lines.push(`Steepest rise: "${steepestRise.pattern}" (${signed(steepestRise.delta)})`);
+    }
+    if (steepestFall) {
+      lines.push(`Steepest fall: "${steepestFall.pattern}" (${signed(steepestFall.delta)})`);
+    }
+  }
+
+  return `Shape of this cut, computed from the rows above:\n${lines.join('\n')}`;
+};
+
 const formatPatternTable = (
   result: Extract<LogExplorationResult, { type: 'pattern-table' }>,
   excluded: string[]
 ): string => {
   const isExcluded = new Set(excluded);
   const remaining = result.patterns.filter((p) => !isExcluded.has(p.pattern));
+  const cutTotal = total(remaining.map((p) => p.count));
 
   const rows = remaining.length
-    ? remaining.map((p) => `- ${p.pattern} (count: ${p.count})`).join('\n')
+    ? remaining
+        .map((p) => {
+          const delta = halfOverHalfDelta(p.sparkline);
+          const trend = delta === undefined ? '' : `, trend ${signed(delta)}`;
+          return `- ${p.pattern} (count: ${p.count}, ${share(
+            p.count,
+            cutTotal
+          )}% of this cut${trend})`;
+        })
+        .join('\n')
     : '(none remaining — every pattern in the current cut has been muted)';
 
   return (
@@ -37,15 +115,18 @@ const formatPatternTable = (
     query is a top-N cut, so more patterns almost certainly exist below it. Never say or imply that
     the logs contain only these, and never total these counts and present the result as the total
     document count. Muting a pattern promotes the next largest one into the cut.
-    The ${remaining.length} patterns below are the ONLY ones you may discuss. Use that number as the
-    count of un-muted patterns rather than counting or subtracting yourself:
-  `) + `\n${rows}`
+    "trend" is the change between the first and second half of the window, read from that pattern's
+    sparkline. The user sees the sparkline only as a small picture, so the trend and the share are
+    yours to state; the name and the count are already in front of them.
+    The ${remaining.length} patterns below are the ONLY ones you may discuss. That is the count of
+    un-muted patterns — use it as written. Do NOT count the rows yourself, and do NOT compute it as
+    ${MAX_PATTERNS} minus the number of muted patterns; muting refills the cut, so that subtraction
+    is wrong:
+  `) +
+    `\n${rows}\n` +
+    (remaining.length ? `\n${formatCutShape(remaining)}` : '')
   );
 };
-
-const total = (values: number[]): number => values.reduce((sum, value) => sum + value, 0);
-
-const signed = (value: number): string => (value > 0 ? `+${value}` : `${value}`);
 
 /** Index of the largest value, or -1 for an empty series. */
 const peakIndex = (values: number[]): number =>
@@ -216,6 +297,47 @@ export function createLogExplorationAttachmentType(): AttachmentTypeDefinition<
                 : '(not set)'
             }
 
+            HOW TO WRITE ABOUT THIS VIEW. The user changes the range, the baseline and the filters in
+            the view itself, with no turn from you, and the view refetches. Your message cannot
+            follow it. What that costs you depends on the shape of the message you are writing.
+
+            A MESSAGE THAT ONLY RENDERS THE VIEW (a tool just produced it and you are presenting it):
+            - Do not state the time range, the baseline epoch or the filter list. Write "over the
+              selected window", "against the chosen baseline", "with the current filters". This
+              covers durations mentioned in passing too: not "80 events in six hours", not "over the
+              past day". The live picker, baseline selector and filter chips sit directly beneath
+              your sentence, and will disagree with it the moment the user clicks.
+
+            A PROSE-ONLY REPLY (no <render_attachment ... /> tag anywhere in it):
+            - Say which range, baseline and filters the answer was computed from. Nothing beside
+              that text can move, so naming them is what makes it a readable record later rather
+              than an unattributed claim.
+
+            A REPLY THAT ANALYSES AN EARLIER RESULT AND THEN RE-RENDERS THE VIEW:
+            - Name the parameters only BEFORE the <render_attachment ... /> tag, and only as what
+              your analysis was computed from — past tense, about the analysis, never about the
+              view: "computed from the selected window, now-24h to now, as of this reading".
+            - After the tag, name no range, baseline or filter at all. Anything below the view reads
+              as a description of the live view above it, and the live view can move.
+
+            IN EVERY CASE:
+            - If the user asks outright what window, baseline or filters are in effect, answer with
+              the literal values above.
+            - The values above and the numbers below are a reading taken now, not a standing fact.
+              Frame them that way ("as of this reading", "at the time of this summary"), and never
+              promise they still match the view.
+            - Prefer saying what the user cannot already see. Repeating a row, a count or a bar back
+              to them is not an answer.
+
+            WHEN TO RE-RENDER THIS VIEW. If your reply recommends something the user can do in the
+            view — mute a pattern, investigate one, compare one against the baseline — end the reply
+            by rendering it again, so the recommendation is one click away instead of a scroll away:
+
+            <render_attachment id="${attachment.id}" />
+
+            Do not re-render when your reply recommends nothing the view can act on. A second copy
+            of a chart the user has just read is noise, and the re-render supersedes the earlier one.
+
             ${formatRefinements(data.refinements)}
 
             ${formatView(data)}
@@ -236,6 +358,19 @@ export function createLogExplorationAttachmentType(): AttachmentTypeDefinition<
         in the view, without asking you. Every filter listed in the attachment narrows every view it
         offers. Always read the attachment's current state before answering questions about log
         patterns, and treat muted patterns as though they do not exist.
+
+        Because the user changes those things without a turn from you, a message that renders the
+        view must not restate the time range, the baseline epoch or the filters — say "the selected
+        window", "the chosen baseline". The live values sit right below that sentence, so repeating
+        them can only go stale. In a prose-only reply, where nothing beside the text can move, name
+        the range, baseline and filters the answer came from. If a reply does both — analyses an
+        earlier result and then re-renders the view — name them only above the render, as what the
+        analysis was computed from. Either way, treat a number you quote from the view as a reading
+        taken at that moment, and spend the message on what the view does not already say.
+
+        When a reply recommends something the view can do — mute a pattern, investigate one, compare
+        one against the baseline — end it by rendering the view again so the recommendation is one
+        click away. Do not re-render when nothing you suggested is actionable there.
       `),
   };
 }
