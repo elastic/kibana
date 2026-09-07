@@ -41,7 +41,11 @@ interface FleetPackageAgentYaml {
   configuration: AgentCreateRequest['configuration'];
 }
 
-export const parseFleetAgentYaml = (yamlContent: string, agentId: string): AgentCreateRequest => {
+export const parseFleetAgentYaml = (
+  yamlContent: string,
+  agentId: string,
+  options?: { pkgName?: string }
+): AgentCreateRequest => {
   const parsed = parseYaml(yamlContent) as FleetPackageAgentYaml;
 
   if (!parsed.name || !parsed.description || !parsed.configuration?.tools?.length) {
@@ -56,7 +60,17 @@ export const parseFleetAgentYaml = (yamlContent: string, agentId: string): Agent
     description: parsed.description,
     // AB-004: package-managed governance metadata — UI shows the managed badge
     // and warns/blocks instruction edits; upgrades overwrite (createOrUpdate).
-    labels: [...new Set([...(parsed.labels ?? []), 'managed_by_package', `fleet-package:${agentId.split('-').slice(0, 3).join('-')}`])],
+    labels: [
+      ...new Set([
+        ...(parsed.labels ?? []),
+        'managed_by_package',
+        // Identify the owning package by name. Deriving it by slicing the agent
+        // id is wrong: the id is `fleet-<space>-<pkg>-<file>`, so a positional
+        // slice yields the id prefix (and breaks outright for hyphenated
+        // package names), leaving upgrades unable to match agent to package.
+        ...(options?.pkgName ? [`fleet-package:${options.pkgName}`] : []),
+      ]),
+    ],
     readonly: true,
     avatar_color: parsed.avatar_color,
     avatar_symbol: parsed.avatar_symbol,
@@ -122,7 +136,7 @@ export async function stepInstallAgentAssets(
       async ({ fileName, yaml }) => {
         const agentId = getFleetPackageAgentId({ pkgName, spaceId, fileName });
         const agentYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
-        const definition = parseFleetAgentYaml(agentYaml, agentId);
+        const definition = parseFleetAgentYaml(agentYaml, agentId, { pkgName });
 
         await agentBuilderApi.createOrUpdateAgent(definition, context.request!);
 

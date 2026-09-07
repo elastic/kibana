@@ -81,6 +81,42 @@ configuration:
     expect(req.labels).toContain('custom');
     expect(req.readonly).toBe(true);
   });
+
+  it('identifies the owning package by name, not by id prefix (AB-004)', () => {
+    const yaml = `
+name: Coverage analysis
+description: analyses coverage
+configuration:
+  tools:
+    - tool_ids: [platform.core.integration_knowledge]
+`;
+
+    // The live instance stamped "fleet-package:fleet-default-sdlc" here: the
+    // package name sdlc_intel was unrecoverable, because the label was built by
+    // slicing the agent id rather than from pkgName.
+    const req = parseFleetAgentYaml(yaml, 'fleet-default-sdlc-intel-sdlc-coverage-analysis', {
+      pkgName: 'sdlc_intel',
+    });
+
+    expect(req.labels).toContain('fleet-package:sdlc_intel');
+    expect(req.labels).not.toContain('fleet-package:fleet-default-sdlc');
+  });
+
+  it('keeps the package label correct when the package name contains a hyphen (AB-004)', () => {
+    const yaml = `
+name: Agent
+description: d
+configuration:
+  tools:
+    - tool_ids: [platform.core.integration_knowledge]
+`;
+
+    const req = parseFleetAgentYaml(yaml, 'fleet-default-my-pkg-some-agent', {
+      pkgName: 'my-pkg',
+    });
+
+    expect(req.labels).toContain('fleet-package:my-pkg');
+  });
 });
 
 describe('substituteFleetAgentIdsWithUnresolved (AB-006 collision + validation policy)', () => {

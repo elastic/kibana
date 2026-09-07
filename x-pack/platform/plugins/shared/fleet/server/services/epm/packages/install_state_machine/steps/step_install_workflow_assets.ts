@@ -299,7 +299,12 @@ export async function stepInstallWorkflowAssets(
     const installedAgentIds: string[] = [];
     await packageInstallContext.archiveIterator.traverseEntries(
       async (entry) => {
+        // Directory entries carry no file segment; skip them rather than
+        // deriving an id from undefined.
         const { file: fileName } = getPathParts(entry.path);
+        if (!fileName) {
+          return;
+        }
         installedAgentIds.push(getFleetPackageWorkflowId({ pkgName, spaceId, fileName }));
       },
       (entryPath) => {
