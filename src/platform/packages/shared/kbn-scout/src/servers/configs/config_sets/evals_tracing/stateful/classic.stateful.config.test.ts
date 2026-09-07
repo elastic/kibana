@@ -99,4 +99,26 @@ describe('evals_tracing config set', () => {
       expect(serverArgs).toContain(TRACING_ARG);
     });
   });
+
+  // The regression case: on CI with no exporters configured, `shouldEnableTracing`
+  // is false. The tool-details setting used to live inside that block, so it
+  // silently disappeared here -- SkillInvoked then scores 0 for every model and
+  // reads as model failure. It must hold regardless of whether tracing is on.
+  describe('on CI, without exporters', () => {
+    let serverArgs: string[];
+
+    beforeEach(() => {
+      process.env.CI = 'true';
+      delete process.env.TRACING_EXPORTERS;
+      serverArgs = loadServerArgs();
+    });
+
+    it('still captures tool call arguments when tracing is disabled', () => {
+      expect(serverArgs).toContain(TOOL_DETAILS_ARG);
+    });
+
+    it('does not enable tracing in this configuration', () => {
+      expect(serverArgs).not.toContain(TRACING_ARG);
+    });
+  });
 });
