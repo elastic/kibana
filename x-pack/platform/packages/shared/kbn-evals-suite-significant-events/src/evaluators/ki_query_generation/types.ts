@@ -8,6 +8,7 @@
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
 import type { SignificantEventType } from '@kbn/streams-ai/src/significant_events/types';
 import type { QueryAttempt, SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { ReasoningPromptDiagnostics } from '@kbn/inference-prompt-utils';
 import {
   SIGNIFICANT_EVENT_TYPE_CONFIGURATION,
   SIGNIFICANT_EVENT_TYPE_ERROR,
@@ -45,6 +46,8 @@ export interface KIQueryGenerationEvaluationExample {
   output: {
     expected_categories?: string[];
     expect_stats?: boolean;
+    /** Eval-only deterministic outcome contract, e.g. expect_queries: false for an empty stream. */
+    expect_queries?: boolean;
   } & Record<string, unknown>;
   metadata: Record<string, unknown> | null;
 }
@@ -53,6 +56,11 @@ interface KIQueryGenerationTaskOutput {
   queries: Query[];
   toolUsage?: SignificantEventsToolUsage;
   traceId?: string | null;
+  /** Resolved KI source and grounding mode for this task's run. */
+  ki_source?: 'canonical' | 'snapshot' | 'auto' | 'none';
+  grounding_mode?: 'baseline' | 'grounded';
+  /** Reasoning-loop diagnostics from the shared agent, for treatment verification. */
+  reasoning_diagnostics?: ReasoningPromptDiagnostics;
   sample_logs?: string[];
   sample_docs?: Array<Record<string, unknown>>;
   query_attempts?: QueryAttempt[];
@@ -67,6 +75,11 @@ export const getQueriesFromOutput = (output: KIQueryGenerationOutput | undefined
   }
   return Array.isArray(output) ? output : output.queries ?? [];
 };
+
+export const getToolUsageFromOutput = (
+  output: KIQueryGenerationOutput | undefined
+): SignificantEventsToolUsage | undefined =>
+  output && !Array.isArray(output) ? output.toolUsage : undefined;
 
 /**
  * Reads the attempt diagnostics a task returns when `collectQueryAttempts` is on.

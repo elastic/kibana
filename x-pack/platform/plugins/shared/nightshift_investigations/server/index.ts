@@ -7,6 +7,9 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
+export { config } from './config';
+export type { NightshiftInvestigationsConfig } from './config';
+
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { NightshiftInvestigationsPlugin } = await import('./plugin');
   return new NightshiftInvestigationsPlugin(initializerContext);
@@ -17,6 +20,8 @@ export type {
   NightshiftInvestigationsServerStart,
 } from './types';
 
-export { InvestigationUnavailableError } from './client/investigation_unavailable_error';
+export { alertSnapshotSchema, type AlertSnapshot } from '../common';
+
+export { InvestigationUnavailableError } from './client/errors';
 
 export type { NightshiftInvestigationsRouteRepository } from './routes';

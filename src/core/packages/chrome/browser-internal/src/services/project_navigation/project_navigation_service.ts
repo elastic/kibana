@@ -108,8 +108,7 @@ export class ProjectNavigationService {
           this.customization$,
         ]).pipe(
           map(([def, deepLinks, links, customization]) =>
-            // Home is a regular, customizable sidebar item in the project shell.
-            applyCustomization(source.id, def, deepLinks, links, customization, true)
+            applyCustomization(source.id, def, deepLinks, links, customization)
           ),
           catchError((err) => {
             logger.error(err);
@@ -165,11 +164,7 @@ export class ProjectNavigationService {
     return {
       getProjectHome$: () => {
         return parsedNavigation$.pipe(
-          map((parsed) => {
-            const defaultRoute = getUiSettingsHomeRoute();
-            const navRoute = parsed?.tree.find((n) => n.renderAs === 'home')?.href;
-            return defaultRoute ?? navRoute;
-          }),
+          map(() => getUiSettingsHomeRoute()),
           filter((home): home is string => home !== undefined),
           distinctUntilChanged()
         );

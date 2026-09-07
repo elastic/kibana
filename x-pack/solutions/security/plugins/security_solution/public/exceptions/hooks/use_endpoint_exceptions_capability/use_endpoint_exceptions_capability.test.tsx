@@ -66,7 +66,7 @@ describe('useEndpointExceptionsCapability()', () => {
 
   it('should call the opt-in API when checking write privilege', () => {
     renderHook('crudEndpointExceptions');
-    expect(useGetEndpointExceptionsPerPolicyOptIn).toBeCalledWith({ enabled: true });
+    expect(useGetEndpointExceptionsPerPolicyOptIn).toHaveBeenCalledWith({ enabled: true });
   });
 
   it(`should return 'true' if capability 'showEndpointExceptions' is allowed and manage global artifact is not allowed`, () => {
@@ -75,6 +75,6 @@ describe('useEndpointExceptionsCapability()', () => {
 
   it('should not call the opt-in API when checking read privilege', () => {
     renderHook('showEndpointExceptions');
-    expect(useGetEndpointExceptionsPerPolicyOptIn).toBeCalledWith({ enabled: false });
+    expect(useGetEndpointExceptionsPerPolicyOptIn).toHaveBeenCalledWith({ enabled: false });
   });
 });

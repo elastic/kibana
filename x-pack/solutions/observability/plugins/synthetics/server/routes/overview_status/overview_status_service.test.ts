@@ -1291,13 +1291,11 @@ describe('current status route', () => {
                     metrics: {
                       'monitor.status': 'up',
                       kibanaUrl: 'https://west.kibana.example.com',
+                      _index: 'cluster-west:synthetics-browser-default',
                     },
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-west:synthetics-browser-default', doc_count: 1 }],
               },
             },
             {
@@ -1316,9 +1314,6 @@ describe('current status route', () => {
                   },
                 ],
               },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
-              },
             },
             {
               key: {
@@ -1335,9 +1330,6 @@ describe('current status route', () => {
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1395,9 +1387,6 @@ describe('current status route', () => {
                   },
                 ],
               },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
-              },
             },
             // Remote-only monitor (NO local saved object)
             {
@@ -1415,13 +1404,11 @@ describe('current status route', () => {
                       'monitor.name': 'Remote API Check',
                       'monitor.type': 'http',
                       config_id: 'remote-config-1',
+                      _index: 'cluster-east:synthetics-browser-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1463,6 +1450,121 @@ describe('current status route', () => {
       expect(result.up).toBe(1);
     });
 
+    it('discovers CPS linked-project monitors that have no local saved object', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(
+        getEsResponse({
+          buckets: [
+            {
+              key: {
+                monitorId: 'linked-monitor-1',
+                locationId: 'us-west-1',
+              },
+              status: {
+                key: 'us-west-1',
+                top: [
+                  {
+                    metrics: {
+                      'monitor.status': 'up',
+                      'monitor.name': 'Linked HTTP check',
+                      'monitor.type': 'http',
+                      config_id: 'linked-config-1',
+                      _index: 'obs-prod:.ds-synthetics-http-default-2026.01.01-000001',
+                    },
+                    sort: ['2022-09-15T16:20:00.000Z'],
+                  },
+                ],
+              },
+            },
+          ],
+        })
+      );
+
+      const routeContext: any = {
+        request: { query: {} },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      const result = await overviewStatusService.getOverviewStatus();
+
+      const linked = result.upConfigs['obs-prod-linked-config-1-us-west-1'];
+      expect(linked).toBeDefined();
+      expect(linked.name).toBe('Linked HTTP check');
+      expect(linked.remote).toEqual({ remoteName: 'obs-prod' });
+      expect(result.up).toBe(1);
+    });
+
+    it('collects _index and applies remoteNames on serverless when CPS is on', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+          isCpsEnabled: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const metricFields = searchCall.aggs.monitors.aggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).toContain('_index');
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
+      const filters = searchCall.query.bool.filter;
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeDefined();
+    });
+
+    it('does not collect _index or apply remoteNames on serverless when CPS is off', async () => {
+      const { esClient, syntheticsEsClient } = getUptimeESMockClient();
+
+      esClient.search.mockResponseOnce(getEsResponse({ buckets: [] }));
+
+      const routeContext: any = {
+        request: { query: { remoteNames: ['obs-prod'] } },
+        syntheticsEsClient,
+        server: {
+          isElasticsearchServerless: true,
+        },
+      };
+
+      const overviewStatusService = new OverviewStatusService(routeContext);
+      overviewStatusService.getMonitorConfigs = jest.fn().mockResolvedValue([]);
+
+      await overviewStatusService.getOverviewStatus();
+
+      const searchCall = esClient.search.mock.calls[0][0] as any;
+      const metricFields = searchCall.aggs.monitors.aggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).not.toContain('_index');
+      expect(searchCall.aggs.monitors.aggs.index_name).toBeUndefined();
+      const filters = searchCall.query.bool.filter ?? [];
+      const remoteFilter = filters.find((f: any) =>
+        f.bool?.should?.some((s: any) => s.wildcard?._index === 'obs-prod:*')
+      );
+      expect(remoteFilter).toBeUndefined();
+    });
+
     it('keeps two remote monitors with the same configId+locationId from different clusters', async () => {
       // Regression: two remote clusters can host the same imported monitor in
       // the same locationId. Before keying the bucket by remoteName the second
@@ -1487,13 +1589,11 @@ describe('current status route', () => {
                       'monitor.name': 'Shared Remote Check',
                       'monitor.type': 'http',
                       config_id: 'shared-config',
+                      _index: 'cluster-east:synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-http-default', doc_count: 1 }],
               },
             },
             {
@@ -1511,13 +1611,11 @@ describe('current status route', () => {
                       'monitor.name': 'Shared Remote Check',
                       'monitor.type': 'http',
                       config_id: 'shared-config',
+                      _index: 'cluster-west:synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:21:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-west:synthetics-http-default', doc_count: 1 }],
               },
             },
           ],
@@ -1579,13 +1677,11 @@ describe('current status route', () => {
                       'monitor.status': 'down',
                       'monitor.name': 'Local No SO Monitor',
                       'monitor.type': 'http',
+                      _index: 'synthetics-http-default',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-http-default', doc_count: 1 }],
               },
             },
           ],
@@ -1635,9 +1731,6 @@ describe('current status route', () => {
                     sort: ['2022-09-15T16:19:16.724Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'synthetics-browser-default', doc_count: 1 }],
               },
             },
           ],
@@ -1807,13 +1900,11 @@ describe('current status route', () => {
                       'monitor.name': 'Remote Prod Check',
                       'monitor.type': 'http',
                       config_id: 'remote-prod-config',
+                      _index: 'cluster-east:synthetics-http-production',
                     },
                     sort: ['2022-09-15T16:20:00.000Z'],
                   },
                 ],
-              },
-              index_name: {
-                buckets: [{ key: 'cluster-east:synthetics-http-production', doc_count: 1 }],
               },
             },
           ],
@@ -2024,8 +2115,8 @@ describe('current status route', () => {
 
       const result = await overviewStatusService.getOverviewStatus();
 
-      // Active-space filter is still applied (single-space view) and the request
-      // omits the CCS-only `index_name` sub-agg.
+      // Active-space filter is still applied (single-space view). `_index`
+      // collection is CPS-gated, so it stays off when `isCpsEnabled` is unset.
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
       const spaceFilter = filters.find((f: any) =>
@@ -2036,12 +2127,16 @@ describe('current status route', () => {
       expect(spaceTerms.terms['meta.space_id']).toContain('default');
 
       const monitorAggs = searchCall.aggs.monitors.aggs;
+      const metricFields = monitorAggs.status.top_metrics.metrics.map(
+        (m: { field: string }) => m.field
+      );
+      expect(metricFields).not.toContain('_index');
       expect(monitorAggs.index_name).toBeUndefined();
       // `location_name` resolves the human-readable observer.geo.name label for
       // external monitors (remote CCS + local Heartbeat) that carry a location.
       // Heartbeat detection is always-on, so it runs even on serverless (unlike
-      // the CCS-gated `index_name`). Location-less pings don't rely on it — they
-      // fall back to the placeholder label.
+      // CCS/CPS-gated `_index` on top_metrics). Location-less pings don't rely
+      // on it — they fall back to the placeholder label.
       expect(monitorAggs.location_name).toBeDefined();
       // `space_id` presence tells a deleted Kibana monitor's leftover pings
       // (always stamped with `meta.space_id`) apart from autodiscovery pings.

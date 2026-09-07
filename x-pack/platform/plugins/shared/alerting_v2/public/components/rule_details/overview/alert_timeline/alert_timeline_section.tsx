@@ -34,7 +34,6 @@ import { AlertTimelineChart } from './alert_timeline_chart';
 import { AlertTimelineStatsRow } from './alert_timeline_stats_row';
 import { AlertTimelineViewAllButton } from './alert_timeline_view_all_button';
 import { useAlertTimelineUrlState } from './use_alert_timeline_url_state';
-import { DEFAULT_ACTIVITY_TIME_RANGE } from '../time_range';
 import { useResolvedActivityWindow } from '../use_resolved_activity_window';
 
 export const AlertTimelineSection: React.FC = () => {
@@ -50,7 +49,7 @@ export const AlertTimelineSection: React.FC = () => {
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
   const timeZone = uiSettings.get<string>('dateFormat:tz', 'Browser');
 
-  const [timeRange, setTimeRange] = useAlertTimelineUrlState(DEFAULT_ACTIVITY_TIME_RANGE);
+  const [timeRange, setTimeRange] = useAlertTimelineUrlState();
   const { windowStartMs, windowEndMs, applyRefresh } = useResolvedActivityWindow(
     timeRange.from,
     timeRange.to

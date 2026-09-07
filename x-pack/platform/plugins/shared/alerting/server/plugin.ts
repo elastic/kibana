@@ -21,7 +21,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   KibanaRequest,
@@ -190,7 +190,7 @@ export interface AlertingServerStart {
    */
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: string,
+    spaceId: SpaceId,
     options?: RulesClientCreateOptions
   ): Promise<RulesClientApi>;
   getAlertingAuthorizationWithRequest(
@@ -742,7 +742,7 @@ export class AlertingPlugin {
 
     const getRulesClientWithRequestInSpace = async (
       request: KibanaRequest,
-      spaceId: string,
+      spaceId: SpaceId,
       options?: RulesClientCreateOptions
     ) => {
       if (isESOCanEncrypt !== true) {
