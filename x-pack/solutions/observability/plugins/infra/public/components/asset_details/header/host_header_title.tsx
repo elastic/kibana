@@ -14,18 +14,20 @@ import { PageTitleWithPopover } from './page_title_with_popover';
 export const HostHeaderTitle = ({
   title,
   schema,
+  includeTitle = true,
 }: {
   title?: string;
   schema?: DataSchemaFormat | null;
+  includeTitle?: boolean;
 }) => {
   return schema === 'semconv' ? (
     <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+      {includeTitle ? <EuiFlexItem grow={false}>{title}</EuiFlexItem> : null}
       <EuiFlexItem grow={false}>
         <AgentIcon agentName="opentelemetry" role="presentation" />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <PageTitleWithPopover name={title ?? ''} />
+    <PageTitleWithPopover name={title ?? ''} includeTitle={includeTitle} />
   );
 };

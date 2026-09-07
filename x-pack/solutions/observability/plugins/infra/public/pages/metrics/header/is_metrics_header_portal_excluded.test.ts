@@ -9,11 +9,12 @@ import { isMetricsHeaderPortalExcluded } from './is_metrics_header_portal_exclud
 import { METRICS_INVENTORY_PATH, METRICS_DETAIL_PATH } from './metrics_header_paths';
 
 describe('isMetricsHeaderPortalExcluded', () => {
-  it('excludes Inventory once that route consumes AppHeader', () => {
+  it('excludes Inventory and detail once those routes consume AppHeader', () => {
     expect(isMetricsHeaderPortalExcluded('/inventory')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/inventory/extra')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
-    expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(false);
+    expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/detail/pod/p1')).toBe(true);
   });
 
   it('excludes Inventory redirect aliases so the portal does not flash', () => {
