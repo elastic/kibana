@@ -30,8 +30,6 @@ export const getCreateProposalStepDefinition = ({
         const proposal = await getProposalsService().create(
           {
             conversationId: context.input.conversationId,
-            // Blank strings arriving from unrendered templates are normalized
-            // to absent by the service.
             comment: context.input.comment,
             actionWorkflowId: context.input.actionWorkflowId,
             actionInput: context.input.actionInput,

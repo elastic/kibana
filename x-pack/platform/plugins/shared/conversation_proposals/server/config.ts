@@ -9,6 +9,14 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
+/**
+ * `enabled` looks redundant but is load-bearing: `ConfigService.isEnabledAtPath`
+ * throws when `kibana.yml` sets `enabled` for a namespace whose schema does not
+ * declare it, so without this key `xpack.conversationProposals.enabled: false`
+ * would be a startup failure rather than a way to disable the plugin. No
+ * plugin-side gate is needed — when the flag is `false` core never adds the
+ * plugin to the plugin system, so `setup` is never called.
+ */
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });

@@ -62,8 +62,13 @@ export class ConversationProposalsPlugin
     features.registerKibanaFeature({
       id: CONVERSATION_PROPOSALS_PLUGIN_ID,
       name: CONVERSATION_PROPOSALS_PLUGIN_NAME,
-      order: 1200,
-      category: DEFAULT_APP_CATEGORIES.management,
+      minimumLicense: 'enterprise',
+      // Sits just after Workflows (3000), whose platform it builds on, and
+      // after Agent Builder (1000). The category drives placement in the Roles
+      // and Spaces feature pickers; `app` stays empty because this plugin
+      // contributes no navigation of its own.
+      order: 3100,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: [],
       privileges: {
         all: {

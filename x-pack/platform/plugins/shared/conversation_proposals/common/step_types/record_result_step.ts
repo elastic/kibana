@@ -9,13 +9,14 @@ import { i18n } from '@kbn/i18n';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
+import { optionalStepInput } from './optional_step_input';
 
 export const RecordProposalResultStepId = 'proposals.recordResult' as const;
 
 export const recordProposalResultStepInputSchema = z.object({
   proposalId: z.string().describe('Proposal whose outcome is being recorded.'),
   status: z.enum(['executing', 'succeeded', 'failed']).describe('Outcome of the action execution.'),
-  executionError: z.string().optional().describe('Failure detail, when the action failed.'),
+  executionError: optionalStepInput(z.string()).describe('Failure detail, when the action failed.'),
 });
 
 export const recordProposalResultStepOutputSchema = z.object({

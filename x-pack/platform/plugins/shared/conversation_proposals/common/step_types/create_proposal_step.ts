@@ -10,35 +10,35 @@ import type { BaseStepDefinition } from '@kbn/workflows';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { proposalConfidenceSchema, proposalImpactSchema, proposalOriginSchema } from '../proposal';
+import { optionalStepInput } from './optional_step_input';
 
 export const CreateProposalStepId = 'proposals.create' as const;
 
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
-  comment: z
-    .string()
-    .optional()
-    .describe('Explains what is being proposed. The only content a non-action proposal carries.'),
-  actionWorkflowId: z
-    .string()
-    .optional()
-    .describe('Managed action workflow to run once approved. Omit for a non-action proposal.'),
-  actionInput: z
-    .record(z.string(), z.unknown())
-    .optional()
-    .describe('Inputs passed to the action workflow.'),
-  impact: proposalImpactSchema.optional().describe('Impact snapshotted at creation.'),
-  confidence: proposalConfidenceSchema.optional().describe('Confidence in the recommendation.'),
-  targetEntities: z
-    .array(z.string())
-    .optional()
-    .describe('Typed entity references, e.g. `host.name:web-01`, used by the queue filter.'),
-  origin: proposalOriginSchema.optional().describe('Whether a worker or an analyst proposed this.'),
-  expiresAt: z.string().optional().describe('ISO 8601 decision deadline.'),
-  supersedesProposalId: z
-    .string()
-    .optional()
-    .describe('Proposal this one replaces, when an action was changed rather than tuned.'),
+  comment: optionalStepInput(z.string()).describe(
+    'Explains what is being proposed. The only content a non-action proposal carries.'
+  ),
+  actionWorkflowId: optionalStepInput(z.string()).describe(
+    'Managed action workflow to run once approved. Omit for a non-action proposal.'
+  ),
+  actionInput: optionalStepInput(z.record(z.string(), z.unknown())).describe(
+    'Inputs passed to the action workflow.'
+  ),
+  impact: optionalStepInput(proposalImpactSchema).describe('Impact snapshotted at creation.'),
+  confidence: optionalStepInput(proposalConfidenceSchema).describe(
+    'Confidence in the recommendation.'
+  ),
+  targetEntities: optionalStepInput(z.array(z.string())).describe(
+    'Typed entity references, e.g. `host.name:web-01`, used by the queue filter.'
+  ),
+  origin: optionalStepInput(proposalOriginSchema).describe(
+    'Whether a worker or an analyst proposed this.'
+  ),
+  expiresAt: optionalStepInput(z.string()).describe('ISO 8601 decision deadline.'),
+  supersedesProposalId: optionalStepInput(z.string()).describe(
+    'Proposal this one replaces, when an action was changed rather than tuned.'
+  ),
 });
 
 export const createProposalStepOutputSchema = z.object({

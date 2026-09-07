@@ -6,11 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  ALERT_ZERO_ACTION_WORKFLOW_IDS,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
-  PND_RULE_WORKFLOW_IDS,
-} from '@kbn/workflows/managed';
+import { ALERT_ZERO_ACTION_WORKFLOW_IDS, PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -30,13 +26,9 @@ export const initializeManagedWorkflows = async ({
   );
   let canReconcile = true;
 
-  // AlertZero action catalog entries and the temporary PoC worker install
-  // alongside the rule workflows: both are global and static.
-  const globalWorkflowIds = [
-    ...PND_RULE_WORKFLOW_IDS,
-    ...ALERT_ZERO_ACTION_WORKFLOW_IDS,
-    ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
-  ] as const;
+  // AlertZero action catalog entries install alongside the rule workflows:
+  // both are global and static.
+  const globalWorkflowIds = [...PND_RULE_WORKFLOW_IDS, ...ALERT_ZERO_ACTION_WORKFLOW_IDS] as const;
 
   const globalWorkflowInstalls = await Promise.allSettled(
     globalWorkflowIds.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))

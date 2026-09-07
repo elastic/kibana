@@ -6,11 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  ALERT_ZERO_ACTION_WORKFLOW_IDS,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
-  PND_RULE_WORKFLOW_IDS,
-} from '@kbn/workflows/managed';
+import { ALERT_ZERO_ACTION_WORKFLOW_IDS, PND_RULE_WORKFLOW_IDS } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { initializeManagedWorkflows } from './initialize_managed_workflows';
@@ -49,7 +45,6 @@ describe('initializeManagedWorkflows', () => {
     expect(client.install.mock.calls.map(([id]) => id)).toEqual([
       ...PND_RULE_WORKFLOW_IDS,
       ...ALERT_ZERO_ACTION_WORKFLOW_IDS,
-      ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
     ]);
     expect(client.install).not.toHaveBeenCalledWith(
       expect.anything(),

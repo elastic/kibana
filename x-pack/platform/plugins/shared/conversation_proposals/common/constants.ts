@@ -9,9 +9,10 @@ export const CONVERSATION_PROPOSALS_PLUGIN_ID = 'conversationProposals' as const
 export const CONVERSATION_PROPOSALS_PLUGIN_NAME = 'Conversation proposals' as const;
 
 /**
- * Proof-of-concept index name. `.kibana*` is already granted to the
- * `kibana_system` role, so this needs no Elasticsearch-side system index
- * registration; the intended final name (`.conversation-proposals`) does.
+ * The `.kibana-` prefix is deliberate and permanent: `.kibana*` is already
+ * granted to the `kibana_system` role, so this index needs no Elasticsearch-side
+ * system index registration. `anonymization` ships
+ * `.kibana-anonymization-profiles` on the same reasoning.
  */
 export const PROPOSALS_INDEX_NAME = '.kibana-conversation-proposals' as const;
 

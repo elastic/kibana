@@ -21,7 +21,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
   conversationId: 'conv-1',
   comment: 'Tune the noisy rule',
   actionWorkflowId: 'system-alertzero-action-create-rule',
-  actionInput: { name: 'PoC rule' },
+  actionInput: { name: 'Suspicious PowerShell' },
   status: 'pending',
   impact: 'low',
   confidence: 'medium',
@@ -117,7 +117,7 @@ describe('ProposalsService', () => {
           conversationId: 'conv-1',
           comment: 'Tune the noisy rule',
           actionWorkflowId: 'system-alertzero-action-create-rule',
-          actionInput: { name: 'PoC rule' },
+          actionInput: { name: 'Suspicious PowerShell' },
           impact: 'high',
           confidence: 'high',
           origin: 'worker',
@@ -221,7 +221,7 @@ describe('ProposalsService', () => {
 
       const proposal = await service.approve(
         'proposal-1',
-        { actionInput: { name: 'PoC rule' } },
+        { actionInput: { name: 'Suspicious PowerShell' } },
         decisionContext()
       );
 

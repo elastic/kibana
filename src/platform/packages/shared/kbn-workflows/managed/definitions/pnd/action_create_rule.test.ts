@@ -8,9 +8,7 @@
  */
 
 import { parse } from 'yaml';
-import { ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID } from './action_create_rule';
 import ACTION_CREATE_RULE_YAML from './action_create_rule.yaml';
-import POC_ACTION_WORKER_YAML from './poc_action_worker.yaml';
 
 /** Local shape: the parsed YAML is untyped, and only these fields are asserted on. */
 interface WorkflowStep {
@@ -23,12 +21,14 @@ interface ParsedWorkflow {
   enabled: boolean;
   tags?: string[];
   consts?: Record<string, unknown>;
-  triggers: Array<{ type: string; inputs?: { properties?: Record<string, unknown> } }>;
+  triggers: Array<{
+    type: string;
+    inputs?: { properties?: Record<string, unknown>; required?: string[] };
+  }>;
   steps: WorkflowStep[];
 }
 
 const actionWorkflow = parse(ACTION_CREATE_RULE_YAML) as ParsedWorkflow;
-const workerWorkflow = parse(POC_ACTION_WORKER_YAML) as ParsedWorkflow;
 
 describe('AlertZero create-rule action workflow', () => {
   it('carries the generic action tag so the catalog can be discovered by tag', () => {
@@ -54,8 +54,25 @@ describe('AlertZero create-rule action workflow', () => {
     expect(Object.keys(properties ?? {})).toEqual(['actionInput']);
   });
 
+  it('requires the scope-defining rule fields rather than defaulting them', () => {
+    const actionInput = actionWorkflow.triggers.find(({ type }) => type === 'manual')?.inputs
+      ?.properties?.actionInput as { required?: string[] };
+
+    expect(actionInput.required).toEqual(['name', 'description', 'query', 'index']);
+  });
+
   it('creates the rule through the registered security step rather than a raw request', () => {
     expect(actionWorkflow.steps.map(({ type }) => type)).toContain('security.createRule');
+  });
+
+  it('does not default the query or the index, which would widen the rule silently', () => {
+    const createRule = actionWorkflow.steps.find(
+      ({ type }) => type === 'security.createRule'
+    ) as WorkflowStep;
+    const { rule } = (createRule.with ?? {}) as { rule: Record<string, string> };
+
+    expect(rule.query).not.toContain('default:');
+    expect(rule.index).not.toContain('default:');
   });
 
   it('emits an explicit output, since workflow.execute cannot type the child result', () => {
@@ -64,40 +81,5 @@ describe('AlertZero create-rule action workflow', () => {
     };
 
     expect(Object.keys(output.with ?? {})).toEqual(expect.arrayContaining(['ruleId', 'ruleName']));
-  });
-});
-
-describe('AlertZero PoC action worker', () => {
-  it('ships disabled so it never runs unless someone turns it on', () => {
-    expect(workerWorkflow.enabled).toBe(false);
-  });
-
-  it('constrains the agent to the known action workflow id', () => {
-    const agentStep = workerWorkflow.steps.find(({ type }) => type === 'ai.agent') as {
-      with?: { schema?: { properties?: { actionWorkflowId?: { enum?: string[] } } } };
-    };
-
-    expect(agentStep.with?.schema?.properties?.actionWorkflowId?.enum).toEqual([
-      ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
-    ]);
-  });
-
-  it('delegates to the generic proposal gate, passing the conversation it created', () => {
-    const execute = workerWorkflow.steps.find(({ type }) => type === 'workflow.execute') as {
-      with?: { 'workflow-id'?: string; inputs?: Record<string, string> };
-    };
-
-    expect(execute.with?.['workflow-id']).toBe('system-create-conversation-proposal');
-    expect(execute.with?.inputs?.conversationId).toContain(
-      'steps.suggest_action.output.conversation_id'
-    );
-  });
-
-  it('does not pass autoApprove, so the gate always runs', () => {
-    const execute = workerWorkflow.steps.find(({ type }) => type === 'workflow.execute') as {
-      with?: { inputs?: Record<string, string> };
-    };
-
-    expect(execute.with?.inputs?.autoApprove).toBeUndefined();
   });
 });

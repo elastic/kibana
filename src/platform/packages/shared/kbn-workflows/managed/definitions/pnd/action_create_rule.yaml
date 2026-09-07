@@ -54,6 +54,8 @@ triggers:
           required:
             - name
             - description
+            - query
+            - index
       required:
         - actionInput
       additionalProperties: false
@@ -73,8 +75,8 @@ steps:
         language: kuery
         name: "{{ inputs.actionInput.name }}"
         description: "{{ inputs.actionInput.description }}"
-        query: "{{ inputs.actionInput.query | default: '*:*' }}"
-        index: "${{ inputs.actionInput.index | default: ['logs-*'] }}"
+        query: "{{ inputs.actionInput.query }}"
+        index: "${{ inputs.actionInput.index }}"
         severity: "{{ inputs.actionInput.severity | default: 'low' }}"
         risk_score: "${{ inputs.actionInput.risk_score | default: 21 }}"
 

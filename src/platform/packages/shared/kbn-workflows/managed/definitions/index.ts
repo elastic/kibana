@@ -21,7 +21,6 @@ import {
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW } from './nightshift_investigations/investigation';
 import {
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
@@ -101,7 +100,6 @@ export { CREATE_CONVERSATION_PROPOSAL_WORKFLOW_ID } from './conversation_proposa
 export {
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERT_ZERO_ACTION_WORKFLOW_IDS,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
   PND_MANAGED_WORKER_WORKFLOW_IDS,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
@@ -166,9 +164,8 @@ export const managedWorkflowDefinitions = [
   PND_RULE_CREATION_WORKFLOW,
   // Generic proposal gate, owned by the conversationProposals plugin.
   CREATE_CONVERSATION_PROPOSAL_WORKFLOW,
-  // AlertZero action catalog + the temporary PoC worker that exercises it.
+  // AlertZero action catalog.
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only
   // makes a definition discoverable by id. security_solution installs them
   // in start() only when `threatIntelSupplyEnabled` is on.

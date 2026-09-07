@@ -6,6 +6,9 @@
  */
 
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
+import { createProposalStepInputSchema } from '../../common/step_types/create_proposal_step';
+import { recordProposalResultStepInputSchema } from '../../common/step_types/record_result_step';
 import type { ProposalsService } from '../services/proposals_service';
 import { getCreateProposalStepDefinition } from './create_proposal_step';
 import { getRecordProposalResultStepDefinition } from './record_result_step';
@@ -33,6 +36,82 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     stepId: 'create_proposal',
     stepType: 'proposals.create',
   } as unknown as StepHandlerContext<never, never>);
+
+describe('proposals.create input schema', () => {
+  // Liquid renders a template for an absent workflow input as `''`, so the
+  // schema — not just the service — has to treat a blank as an omission.
+  it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      actionInput: blank,
+      targetEntities: blank,
+      expiresAt: blank,
+    });
+
+    expect(parsed).toEqual({ conversationId: 'conv-1' });
+  });
+
+  it.each(['', null])('should treat %p as absent for the enum inputs', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      impact: blank,
+      confidence: blank,
+      origin: blank,
+    });
+
+    expect(parsed).toEqual({ conversationId: 'conv-1' });
+  });
+
+  it('should still reject a value the optional input does not allow', () => {
+    expect(
+      createProposalStepInputSchema.safeParse({ conversationId: 'conv-1', impact: 'nope' }).success
+    ).toBe(false);
+  });
+
+  it('should still pass real values through', () => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      actionInput: { name: 'Suspicious PowerShell' },
+      targetEntities: ['host.name:web-01'],
+      expiresAt: '2026-01-01T00:00:00.000Z',
+      impact: 'high',
+    });
+
+    expect(parsed).toEqual({
+      conversationId: 'conv-1',
+      actionInput: { name: 'Suspicious PowerShell' },
+      targetEntities: ['host.name:web-01'],
+      expiresAt: '2026-01-01T00:00:00.000Z',
+      impact: 'high',
+    });
+  });
+
+  it('should still convert to a JSON schema the YAML editor can use', () => {
+    const jsonSchema = z.toJSONSchema(createProposalStepInputSchema, {
+      target: 'draft-7',
+      unrepresentable: 'any',
+      reused: 'ref',
+    }) as { properties: Record<string, unknown>; required?: string[] };
+
+    // Both the step definition hash and the editor schema derive from this.
+    expect(Object.keys(jsonSchema.properties)).toEqual(
+      Object.keys(createProposalStepInputSchema.shape)
+    );
+    expect(jsonSchema.required).toEqual(['conversationId']);
+  });
+});
+
+describe('proposals.recordResult input schema', () => {
+  it.each(['', null])('should treat %p as an absent executionError', (blank) => {
+    const parsed = recordProposalResultStepInputSchema.parse({
+      proposalId: 'proposal-1',
+      status: 'succeeded',
+      executionError: blank,
+    });
+
+    expect(parsed).toEqual({ proposalId: 'proposal-1', status: 'succeeded' });
+  });
+});
 
 describe('proposals.create step', () => {
   beforeEach(() => {

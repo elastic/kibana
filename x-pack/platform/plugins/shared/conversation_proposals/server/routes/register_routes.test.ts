@@ -102,14 +102,14 @@ describe('conversation proposals routes', () => {
       {},
       httpServerMock.createKibanaRequest({
         params: { id: 'proposal-1' },
-        body: { actionInput: { name: 'PoC rule' }, decidedBy: 'someone-else' },
+        body: { actionInput: { name: 'Suspicious PowerShell' }, decidedBy: 'someone-else' },
       }),
       response
     );
 
     expect(approve).toHaveBeenCalledWith(
       'proposal-1',
-      expect.objectContaining({ actionInput: { name: 'PoC rule' } }),
+      expect.objectContaining({ actionInput: { name: 'Suspicious PowerShell' } }),
       expect.objectContaining({ username: 'analyst', spaceId: 'default' })
     );
     expect(response.ok).toHaveBeenCalled();

@@ -71,6 +71,15 @@ triggers:
         - conversationId
       additionalProperties: false
 
+# The contract a caller gets back from `workflow.execute`. `workflow.execute`
+# declares its output as unknown, so this is documentation for the caller; the
+# `workflow.output` steps below emit the values.
+outputs:
+  - name: proposalId
+    type: string
+  - name: status
+    type: string
+
 steps:
   - name: create_proposal
     type: proposals.create

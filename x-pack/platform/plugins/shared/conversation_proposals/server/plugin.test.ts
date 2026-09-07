@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -82,6 +83,17 @@ describe('ConversationProposalsPlugin', () => {
             }),
             read: expect.objectContaining({ api: [PROPOSALS_API_PRIVILEGE_READ] }),
           }),
+        })
+      );
+    });
+
+    it('registers the feature under Analytics at enterprise, matching Workflows', () => {
+      const { features } = setupPlugin();
+
+      expect(features.registerKibanaFeature).toHaveBeenCalledWith(
+        expect.objectContaining({
+          category: DEFAULT_APP_CATEGORIES.kibana,
+          minimumLicense: 'enterprise',
         })
       );
     });

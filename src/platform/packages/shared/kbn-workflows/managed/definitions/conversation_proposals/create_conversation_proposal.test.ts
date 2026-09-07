@@ -27,6 +27,7 @@ interface ParsedWorkflow {
     'on-failure'?: { fallback?: WorkflowStep[] };
   };
   triggers: Array<{ type: string; inputs?: { properties?: Record<string, unknown> } }>;
+  outputs?: Array<{ name: string; type: string }>;
   steps: WorkflowStep[];
 }
 
@@ -79,6 +80,10 @@ describe('create-conversation-proposal workflow', () => {
 
     expect(actionInput.type).toBe('object');
     expect(actionInput.additionalProperties).toBe(true);
+  });
+
+  it('declares the outputs a caller gets back from workflow.execute', () => {
+    expect(workflow.outputs?.map(({ name }) => name)).toEqual(['proposalId', 'status']);
   });
 
   it('gates on waitForApproval so the release signal is fail-closed', () => {

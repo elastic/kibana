@@ -18,6 +18,8 @@ xpack.features.overrides:
   contextEngine:
     category: "security"
     order: 1103
+  ### Conversation proposals should be moved from Analytics category to the Security one.
+  conversationProposals.category: "security"
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

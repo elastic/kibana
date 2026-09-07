@@ -30,6 +30,8 @@ xpack.features.overrides:
   agentBuilderSml.category: 'observability'
   ### Context Engine should match Agent Builder for role management (avoid orphan Kibana category).
   contextEngine.category: 'observability'
+  ### Conversation proposals should be moved from Analytics category to the Observability one.
+  conversationProposals.category: 'observability'
   
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

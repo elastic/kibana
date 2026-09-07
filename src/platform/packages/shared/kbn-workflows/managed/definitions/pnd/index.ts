@@ -32,10 +32,6 @@ export {
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
 } from './action_create_rule';
 export {
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW,
-  ALERT_ZERO_POC_ACTION_WORKER_WORKFLOW_ID,
-} from './poc_action_worker';
-export {
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW,
   PND_WORKER_DARK_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
 } from './dark_continuous_threat_hunt';
