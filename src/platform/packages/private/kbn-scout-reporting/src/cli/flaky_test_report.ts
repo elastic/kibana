@@ -8,7 +8,7 @@
  */
 
 import path from 'node:path';
-import { run, type FlagsReader } from '@kbn/dev-cli-runner';
+import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -100,107 +100,104 @@ const renderSummary = (report: FlakyTestReport, limit: number): string => {
   return lines.join('\n');
 };
 
-export async function flakyTestReportCLI(): Promise<void> {
-  await run(
-    async ({ flagsReader, log }) => {
-      const esURL = flagsReader.requiredString('esURL');
-      const esAPIKey = flagsReader.requiredString('esAPIKey');
-      const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('output'));
-      const frameworks = readFrameworks(flagsReader);
-      const lookbackDays = flagsReader.requiredNumber('lookbackDays');
-      if (!Number.isInteger(lookbackDays) || lookbackDays < 1 || lookbackDays > MAX_DAYS) {
-        throw createFlagError(`--lookbackDays must be an integer between 1 and ${MAX_DAYS}`);
-      }
-
-      log.info(`Connecting to Elasticsearch at ${esURL}`);
-      const es = await getValidatedESClient(
-        {
-          node: esURL,
-          auth: { apiKey: esAPIKey },
-          tls: { rejectUnauthorized: flagsReader.boolean('verifyTLSCerts') },
-          requestTimeout: ES_REQUEST_TIMEOUT_MS,
-          maxRetries: 1,
-        },
-        { log, cli: true }
-      );
-
-      const report = await buildFlakyTestReport(
-        es,
-        {
-          lookbackDays,
-          pipelines: readList(flagsReader, 'pipelines'),
-          branches: readList(flagsReader, 'branches'),
-          frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
-          thresholds: {
-            minBuilds: flagsReader.requiredNumber('minBuilds'),
-            minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
-            maxTests: flagsReader.requiredNumber('maxTests'),
-          },
-          samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
-        },
-        log
-      );
-
-      writeFlakyTestReport(report, outputPath);
-
-      // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
-      if (!flagsReader.boolean('quiet')) {
-        log.write('');
-        log.write(renderSummary(report, 10));
-        log.write('');
-      }
-
-      log.success(
-        `Wrote ${report.summary.totalFlaky} flaky and ${report.summary.totalConsistentlyFailing}` +
-          ` consistently failing tests to ${outputPath}`
-      );
+export const flakyTestReport: Command<void> = {
+  name: 'flaky-test-report',
+  description:
+    'Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a ' +
+    'flaky test report written as JSON. Read-only.',
+  flags: {
+    string: [
+      'esURL',
+      'esAPIKey',
+      'lookbackDays',
+      'pipelines',
+      'branches',
+      'frameworks',
+      'minBuilds',
+      'minFailedBuilds',
+      'maxTests',
+      'samplesPerTest',
+      'output',
+    ],
+    boolean: ['verifyTLSCerts'],
+    default: {
+      esURL: SCOUT_REPORTER_ES_URL,
+      esAPIKey: SCOUT_REPORTER_ES_API_KEY,
+      verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
+      lookbackDays: String(defaults.lookbackDays),
+      pipelines: defaults.pipelines.join(','),
+      minBuilds: String(defaults.thresholds.minBuilds),
+      minFailedBuilds: String(defaults.thresholds.minFailedBuilds),
+      maxTests: String(defaults.thresholds.maxTests),
+      samplesPerTest: String(defaults.samplesPerTest),
+      output: DEFAULT_OUTPUT_PATH,
     },
-    {
-      description:
-        'Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a ' +
-        'flaky test report written as JSON. Read-only.',
-      flags: {
-        string: [
-          'esURL',
-          'esAPIKey',
-          'lookbackDays',
-          'pipelines',
-          'branches',
-          'frameworks',
-          'minBuilds',
-          'minFailedBuilds',
-          'maxTests',
-          'samplesPerTest',
-          'output',
-        ],
-        boolean: ['verifyTLSCerts'],
-        default: {
-          esURL: SCOUT_REPORTER_ES_URL,
-          esAPIKey: SCOUT_REPORTER_ES_API_KEY,
-          verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
-          lookbackDays: String(defaults.lookbackDays),
-          pipelines: defaults.pipelines.join(','),
-          minBuilds: String(defaults.thresholds.minBuilds),
-          minFailedBuilds: String(defaults.thresholds.minFailedBuilds),
-          maxTests: String(defaults.thresholds.maxTests),
-          samplesPerTest: String(defaults.samplesPerTest),
-          output: DEFAULT_OUTPUT_PATH,
-        },
-        help: `
-        --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
-        --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-        --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-        --lookbackDays     (optional)  Days to aggregate, at most ${MAX_DAYS} (default: ${DEF_DAYS})
-        --pipelines        (optional)  Comma-separated Buildkite pipeline slugs (default: ${DEF_PIPELINES})
-        --branches         (optional)  Comma-separated branches; no filter when omitted
-        --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} (default: all)
-        --minBuilds        (optional)  Ignore tests seen in fewer builds (default: ${DEF_MIN_BUILDS})
-        --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds (default: ${DEF_MIN_FAILED})
-        --maxTests         (optional)  Maximum tests per list in the report (default: ${DEF_MAX_TESTS})
-        --samplesPerTest   (optional)  Recent failure messages per test (default: ${DEF_SAMPLES})
-        --output           (optional)  Report path, relative to repo root (default: ${DEFAULT_OUTPUT_PATH})
-        `,
-      },
+    help: `
+    --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
+    --lookbackDays     (optional)  Days to aggregate, at most ${MAX_DAYS} (default: ${DEF_DAYS})
+    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs (default: ${DEF_PIPELINES})
+    --branches         (optional)  Comma-separated branches; no filter when omitted
+    --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} (default: all)
+    --minBuilds        (optional)  Ignore tests seen in fewer builds (default: ${DEF_MIN_BUILDS})
+    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds (default: ${DEF_MIN_FAILED})
+    --maxTests         (optional)  Maximum tests per list in the report (default: ${DEF_MAX_TESTS})
+    --samplesPerTest   (optional)  Recent failure messages per test (default: ${DEF_SAMPLES})
+    --output           (optional)  Report path, relative to repo root (default: ${DEFAULT_OUTPUT_PATH})
+    `,
+  },
+  run: async ({ flagsReader, log }) => {
+    const esURL = flagsReader.requiredString('esURL');
+    const esAPIKey = flagsReader.requiredString('esAPIKey');
+    const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('output'));
+    const frameworks = readFrameworks(flagsReader);
+    const lookbackDays = flagsReader.requiredNumber('lookbackDays');
+    if (!Number.isInteger(lookbackDays) || lookbackDays < 1 || lookbackDays > MAX_DAYS) {
+      throw createFlagError(`--lookbackDays must be an integer between 1 and ${MAX_DAYS}`);
     }
-  );
-}
+
+    log.info(`Connecting to Elasticsearch at ${esURL}`);
+    const es = await getValidatedESClient(
+      {
+        node: esURL,
+        auth: { apiKey: esAPIKey },
+        tls: { rejectUnauthorized: flagsReader.boolean('verifyTLSCerts') },
+        requestTimeout: ES_REQUEST_TIMEOUT_MS,
+        maxRetries: 1,
+      },
+      { log, cli: true }
+    );
+
+    const report = await buildFlakyTestReport(
+      es,
+      {
+        lookbackDays,
+        pipelines: readList(flagsReader, 'pipelines'),
+        branches: readList(flagsReader, 'branches'),
+        frameworks: frameworks.length > 0 ? frameworks : defaults.frameworks,
+        thresholds: {
+          minBuilds: flagsReader.requiredNumber('minBuilds'),
+          minFailedBuilds: flagsReader.requiredNumber('minFailedBuilds'),
+          maxTests: flagsReader.requiredNumber('maxTests'),
+        },
+        samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
+      },
+      log
+    );
+
+    writeFlakyTestReport(report, outputPath);
+
+    // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
+    if (!flagsReader.boolean('quiet')) {
+      log.write('');
+      log.write(renderSummary(report, 10));
+      log.write('');
+    }
+
+    log.success(
+      `Wrote ${report.summary.totalFlaky} flaky and ${report.summary.totalConsistentlyFailing}` +
+        ` consistently failing tests to ${outputPath}`
+    );
+  },
+};

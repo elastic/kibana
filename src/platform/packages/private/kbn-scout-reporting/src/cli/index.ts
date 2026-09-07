@@ -8,7 +8,7 @@
  */
 
 export { checkTestCodeOwnersCLI } from './check_test_code_owners';
-export { flakyTestReportCLI } from './flaky_test_report';
+export { flakyTestReport } from './flaky_test_report';
 export { initializeReportDatastream } from './initialize_report_datastream';
 export { uploadEvents } from './upload_events';
 export { updateTestConfigStats } from './update_test_config_stats';
