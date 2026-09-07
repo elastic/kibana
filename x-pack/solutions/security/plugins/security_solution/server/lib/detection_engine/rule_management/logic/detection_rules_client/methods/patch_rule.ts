@@ -65,13 +65,10 @@ export const patchRule = async ({
     throw new ClientError(error.message, error.statusCode);
   }
 
-  // A patch body may name the rule type, and it has to match the existing rule - `applyRulePatch`
-  // below rejects one that does not. The ML license gate runs first though, so that patching a
-  // rule to `machine_learning` without an ML license keeps failing with a 403 rather than a 400.
-  await validateMlAuth(
-    mlAuthz,
-    rulePatch.type === 'machine_learning' ? 'machine_learning' : existingRule.type
-  );
+  // PATCH cannot change a rule's type, so the rule being modified is what the ML license gate
+  // applies to. A `type` in the patch body either matches the existing rule or is rejected by
+  // `applyRulePatch` below, so it cannot widen what this request is authorized to touch.
+  await validateMlAuth(mlAuthz, existingRule.type);
   validateNonCustomizablePatchFields(rulePatch, existingRule);
   // A PATCH payload only carries the fields the client sent, so presence of a
   // restricted field key (even set to null) means the user is editing it.
