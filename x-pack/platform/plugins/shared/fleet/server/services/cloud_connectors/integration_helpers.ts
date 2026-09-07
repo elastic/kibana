@@ -228,7 +228,7 @@ export function injectConnectorVarsIntoPolicy(
     if (awsVars.role_arn?.value) {
       const roleArnKeys = getAllVarKeys(schema.fields.roleArn);
       for (const key of roleArnKeys) {
-        if (key in updatedVars && !updatedVars[key]) {
+        if (key in updatedVars && !updatedVars[key]?.value) {
           updatedVars[key] = awsVars.role_arn;
           break;
         }

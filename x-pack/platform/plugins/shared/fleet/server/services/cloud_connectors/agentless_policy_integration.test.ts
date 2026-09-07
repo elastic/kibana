@@ -232,7 +232,7 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
       } as any);
 
       const result = await createAndIntegrateCloudConnector({
-        packagePolicy: buildPolicyWithStreamVars({ role_arn: undefined }),
+        packagePolicy: buildPolicyWithStreamVars({ role_arn: { type: 'text', value: undefined } }),
         agentPolicy: buildAgentPolicy(),
         policyName: 'test-policy',
         packageInfo: buildPackageInfo('aws_securityhub'),
@@ -282,7 +282,7 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
       } as any);
 
       const result = await createAndIntegrateCloudConnector({
-        packagePolicy: buildPolicyWithStreamVars({ role_arn: undefined }),
+        packagePolicy: buildPolicyWithStreamVars({ role_arn: { type: 'text', value: undefined } }),
         agentPolicy: buildAgentPolicy(),
         policyName: 'test-policy',
         packageInfo: buildPackageInfo('aws_securityhub'),
@@ -291,7 +291,7 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
         logger,
       });
 
-      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn).toBeUndefined();
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn?.value).toBeUndefined();
     });
   });
 });
