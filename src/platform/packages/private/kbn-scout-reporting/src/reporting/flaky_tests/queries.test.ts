@@ -14,7 +14,6 @@ import {
   buildTestStatsQuery,
   fetchBranchStats,
   fetchFailingFiles,
-  fetchLatestRuns,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
@@ -103,15 +102,43 @@ describe('buildTestStatsQuery', () => {
 });
 
 describe('buildBranchStatsQuery', () => {
-  it('counts builds per test and branch for the given tests only', () => {
+  it('counts executions and reads the latest run per test and branch for the given tests only', () => {
     const query = buildBranchStatsQuery(scope, ['jest', 'ftr'], ['t1', 't2']);
 
+    // every run document is scanned, whatever its status, so that the latest run can be a skipped one...
     expect(query).toContain(
-      'event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")'
+      '(event.action == "test-end" AND reporter.type IN ("jest", "ftr")) AND test.id IN ("t1", "t2")'
     );
-    expect(query).toContain('test.id IN ("t1", "t2")');
+    // ...while only executions count towards builds
+    expect(query).toContain(
+      'EVAL is_execution = CASE((event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")), 1, 0)'
+    );
+    expect(query).toContain(
+      'failed = CASE(is_execution == 1 AND CASE(test.status IN ("failed", "timedOut"), 1, 0) == 1, 1, 0)'
+    );
+    expect(query).toContain(
+      'status = CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)'
+    );
+    expect(query).toContain(
+      'builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL))'
+    );
+    expect(query).toContain(
+      'latest_status = LAST(status, @timestamp), latest_at = MAX(@timestamp)'
+    );
     expect(query).toContain('BY test.id, buildkite.branch');
     expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
+  });
+
+  it('scans only per-run outcome documents for Playwright', () => {
+    const query = buildBranchStatsQuery(scope, ['playwright'], ['p1']);
+
+    expect(query).toContain(
+      '(event.action == "test-outcome" AND reporter.type IN ("playwright")) AND test.id IN ("p1")'
+    );
+    expect(query).toContain(
+      'is_execution = CASE((event.action == "test-outcome" AND reporter.type IN ("playwright") AND test.outcome IN ("expected", "unexpected", "flaky")), 1, 0)'
+    );
+    expect(query).not.toContain('test-end');
   });
 });
 
@@ -125,6 +152,11 @@ describe('fetchBranchStats', () => {
 
   it('queries once per execution model and sorts branches by failed builds', async () => {
     const { client, esql } = mockEs([]);
+    const latest = (status: string | null, at: string | null, url: string | null = null) => ({
+      latest_status: status,
+      latest_at: at,
+      latest_build_url: url,
+    });
     const attemptRows = [
       {
         test_id: 'j1',
@@ -132,6 +164,7 @@ describe('fetchBranchStats', () => {
         builds: 40,
         failed_builds: 2,
         last_failed_at: '2026-09-05T00:00:00.000Z',
+        ...latest('skipped', '2026-09-06T12:00:00.000Z', 'https://b/9'),
       },
       {
         test_id: 'j1',
@@ -139,9 +172,24 @@ describe('fetchBranchStats', () => {
         builds: 8,
         failed_builds: 3,
         last_failed_at: '2026-09-06T00:00:00.000Z',
+        ...latest('passed', '2026-09-06T06:00:00.000Z', ''),
       },
-      { test_id: 'j1', branch: '9.4', builds: 5, failed_builds: 0, last_failed_at: null },
-      { test_id: 'j1', branch: null, builds: 1, failed_builds: 1, last_failed_at: null },
+      {
+        test_id: 'j1',
+        branch: '9.4',
+        builds: 5,
+        failed_builds: 0,
+        last_failed_at: null,
+        ...latest(null, null),
+      },
+      {
+        test_id: 'j1',
+        branch: null,
+        builds: 1,
+        failed_builds: 1,
+        last_failed_at: null,
+        ...latest('failed', '2026-09-06T00:00:00.000Z'),
+      },
     ];
     const outcomeRows = [
       {
@@ -150,6 +198,7 @@ describe('fetchBranchStats', () => {
         builds: 10,
         failed_builds: 5,
         last_failed_at: '2026-09-06T00:00:00.000Z',
+        ...latest('flaky', '2026-09-06T00:00:00.000Z', 'https://b/1'),
       },
     ];
     esql
@@ -169,7 +218,7 @@ describe('fetchBranchStats', () => {
     expect(queries[1]).toContain('reporter.type IN ("playwright")');
     expect(queries[1]).toContain('test.id IN ("p1")');
 
-    // rows without a branch are dropped
+    // rows without a branch are dropped; a branch without a latest status has no latest run
     expect(stats.get('j1')).toEqual([
       {
         branch: '9.5',
@@ -177,6 +226,11 @@ describe('fetchBranchStats', () => {
         failedBuilds: 3,
         buildFailRate: 0.375,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        latestRun: {
+          status: 'passed',
+          timestamp: new Date('2026-09-06T06:00:00.000Z'),
+          buildUrl: undefined,
+        },
       },
       {
         branch: 'main',
@@ -184,8 +238,20 @@ describe('fetchBranchStats', () => {
         failedBuilds: 2,
         buildFailRate: 0.05,
         lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
+        latestRun: {
+          status: 'skipped',
+          timestamp: new Date('2026-09-06T12:00:00.000Z'),
+          buildUrl: 'https://b/9',
+        },
       },
-      { branch: '9.4', builds: 5, failedBuilds: 0, buildFailRate: 0, lastFailedAt: undefined },
+      {
+        branch: '9.4',
+        builds: 5,
+        failedBuilds: 0,
+        buildFailRate: 0,
+        lastFailedAt: undefined,
+        latestRun: undefined,
+      },
     ]);
     expect(stats.get('p1')).toEqual([
       {
@@ -194,6 +260,11 @@ describe('fetchBranchStats', () => {
         failedBuilds: 5,
         buildFailRate: 0.5,
         lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+        latestRun: {
+          status: 'flaky',
+          timestamp: new Date('2026-09-06T00:00:00.000Z'),
+          buildUrl: 'https://b/1',
+        },
       },
     ]);
     expect(stats.has('f1')).toBe(false);
@@ -359,115 +430,5 @@ describe('fetchSampleFailures', () => {
     );
     expect(request.aggs.by_test.terms.size).toBe(2);
     expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(3);
-  });
-});
-
-describe('fetchLatestRuns', () => {
-  const bucket = (key: string, source: object) => ({
-    key,
-    latest: { hits: { hits: [{ _source: source }] } },
-  });
-
-  it('returns an empty map without a search when there are no tests', async () => {
-    const { client, search } = mockEs([]);
-
-    await expect(fetchLatestRuns(client, scope, [])).resolves.toEqual(new Map());
-    expect(search).not.toHaveBeenCalled();
-  });
-
-  it('reports the newest verdict per test, mapping Playwright retry passes to flaky', async () => {
-    const { client, search } = mockEs([]);
-    search.mockResolvedValue({
-      aggregations: {
-        by_test: {
-          buckets: [
-            bucket('skipped', {
-              '@timestamp': '2026-09-07T10:00:00.000Z',
-              test: { status: 'skipped', outcome: 'skipped' },
-              buildkite: { branch: 'main', build: { url: 'https://buildkite.com/b/1' } },
-            }),
-            bucket('retried', {
-              '@timestamp': '2026-09-07T09:00:00.000Z',
-              test: { status: 'passed', outcome: 'flaky' },
-            }),
-            bucket('jest', {
-              '@timestamp': '2026-09-07T08:00:00.000Z',
-              test: { status: 'failed' },
-            }),
-          ],
-        },
-      },
-    });
-
-    // every test is found in the trailing day, so there is no fallback search
-    const latest = await fetchLatestRuns(client, scope, ['skipped', 'retried', 'jest']);
-
-    expect(latest.get('skipped')).toEqual({
-      status: 'skipped',
-      timestamp: new Date('2026-09-07T10:00:00.000Z'),
-      branch: 'main',
-      buildUrl: 'https://buildkite.com/b/1',
-    });
-    expect(latest.get('retried')).toMatchObject({ status: 'flaky', branch: undefined });
-    expect(latest.get('jest')).toMatchObject({ status: 'failed' });
-
-    expect(search).toHaveBeenCalledTimes(1);
-    const [request] = search.mock.calls[0];
-    expect(request.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        {
-          range: { '@timestamp': { gte: '2026-09-06T00:00:00.000Z', lt: scope.to.toISOString() } },
-        },
-        { terms: { 'event.action': ['test-end', 'test-outcome'] } },
-        { terms: { 'buildkite.pipeline.slug': ['kibana-on-merge'] } },
-      ])
-    );
-    expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(1);
-  });
-
-  it('falls back to the full window for tests without a run in the trailing day', async () => {
-    const { client, search } = mockEs([]);
-    search
-      .mockResolvedValueOnce({
-        aggregations: {
-          by_test: {
-            buckets: [
-              bucket('recent', {
-                '@timestamp': '2026-09-07T10:00:00.000Z',
-                test: { status: 'passed' },
-              }),
-              bucket('no-status', { '@timestamp': '2026-09-07T09:00:00.000Z' }),
-            ],
-          },
-        },
-      })
-      .mockResolvedValueOnce({
-        aggregations: {
-          by_test: {
-            buckets: [
-              bucket('stale', {
-                '@timestamp': '2026-09-02T10:00:00.000Z',
-                test: { status: 'skipped' },
-              }),
-            ],
-          },
-        },
-      });
-
-    const latest = await fetchLatestRuns(client, scope, ['recent', 'stale', 'no-status', 'gone']);
-
-    expect(latest.get('recent')).toMatchObject({ status: 'passed' });
-    expect(latest.get('stale')).toMatchObject({ status: 'skipped' });
-    expect(latest.has('no-status')).toBe(false);
-    expect(latest.has('gone')).toBe(false);
-
-    expect(search).toHaveBeenCalledTimes(2);
-    const [, [fallback]] = search.mock.calls;
-    expect(fallback.query.bool.filter).toEqual(
-      expect.arrayContaining([
-        { range: { '@timestamp': { gte: scope.from.toISOString(), lt: scope.to.toISOString() } } },
-        { terms: { 'test.id': ['stale', 'no-status', 'gone'] } },
-      ])
-    );
   });
 });

@@ -73,8 +73,8 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-// #, failed builds, flakiest branch, failed builds by branch, latest, test title
-const TEST_COL_WIDTHS = [5, 15, 18, 26, 10, 60] as const;
+// #, failed builds, flakiest branch, latest run on that branch, test title
+const TEST_COL_WIDTHS = [5, 15, 18, 10, 60] as const;
 /** Content width of a cell spanning every column: widths plus inner borders minus padding. */
 const FILE_ROW_WIDTH =
   TEST_COL_WIDTHS.reduce<number>((sum, width) => sum + width, 0) + TEST_COL_WIDTHS.length - 1 - 3;
@@ -106,13 +106,7 @@ const formatAge = (from: Date, to: Date): string => {
   return `${Math.round(minutes / (24 * 60))}d ago`;
 };
 
-const formatLatestRun = (entry: FlakyTestEntry, now: Date): string =>
-  entry.latestRun ? `${entry.latestRun.status}\n${formatAge(entry.latestRun.timestamp, now)}` : '-';
-
 const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
-
-/** PR pipelines have a branch per PR; keep the cell to the branches that matter. */
-const MAX_BRANCH_LINES = 5;
 
 /**
  * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
@@ -128,22 +122,17 @@ const flakiestBranch = (
   )[0];
 };
 
-const formatFlakiestBranch = (entry: FlakyTestEntry, minBuilds: number): string => {
-  const flakiest = flakiestBranch(entry.byBranch, minBuilds);
-  return flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-';
-};
+const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
+  flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-';
 
-/** `branch: failed/total` for every branch the test failed on (already sorted by failed builds). */
-const formatFailedBuildsByBranch = (entry: FlakyTestEntry): string => {
-  const failing = entry.byBranch.filter((stats) => stats.failedBuilds > 0);
-  const shown = failing.slice(0, MAX_BRANCH_LINES);
-  const notShown = failing.length - shown.length;
-  return (
-    [
-      ...shown.map((stats) => `${stats.branch}: ${stats.failedBuilds}/${stats.builds}`),
-      ...(notShown > 0 ? [`+${notShown} more branches`] : []),
-    ].join('\n') || '-'
-  );
+/** Latest run on the flakiest branch, falling back to the latest run on any branch. */
+const formatLatestRun = (
+  entry: FlakyTestEntry,
+  flakiest: FlakyTestBranchStats | undefined,
+  now: Date
+): string => {
+  const latestRun = flakiest?.latestRun ?? entry.latestRun;
+  return latestRun ? `${latestRun.status}\n${formatAge(latestRun.timestamp, now)}` : '-';
 };
 
 const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
@@ -155,9 +144,9 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests of one framework one per row, grouped under a full-width header
- * row per test file (in order of first appearance) carrying the path and owners, so whole-suite
- * failures stand out and the path is never repeated.
+ * Renders the top-ranked tests one per row, grouped under a full-width header row per test file
+ * (in order of first appearance) carrying the path, framework and owners, so whole-suite failures
+ * stand out and the path is never repeated.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
@@ -166,7 +155,7 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Flakiest branch', 'Failed builds by branch', 'Latest', 'Test'],
+    head: ['#', 'Failed builds', 'Flakiest branch', 'Latest', 'Test'],
     colWidths: [...TEST_COL_WIDTHS],
     wordWrap: true,
   });
@@ -174,12 +163,12 @@ const buildTopFlakyTable = (
 
   let rank = 0;
   for (const [filePath, entries] of groupByFile(top)) {
-    const [{ owners }] = entries;
+    const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
     const fileHeader = [
       chalk.yellow(wrapOn(filePath, '/', FILE_ROW_WIDTH)),
       notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      owners.join(', ') || 'no owners',
+      `${framework} · ${owners.join(', ') || 'no owners'}`,
     ]
       .filter(Boolean)
       .join('\n');
@@ -187,12 +176,12 @@ const buildTopFlakyTable = (
 
     for (const entry of entries) {
       rank += 1;
+      const flakiest = flakiestBranch(entry.byBranch, minBuilds);
       table.push([
         rank,
         `${entry.failedBuilds}/${entry.builds}\n${formatRate(entry.buildFailRate)}`,
-        formatFlakiestBranch(entry, minBuilds),
-        formatFailedBuildsByBranch(entry),
-        formatLatestRun(entry, now),
+        formatFlakiestBranch(flakiest),
+        formatLatestRun(entry, flakiest, now),
         entry.title,
       ]);
     }
@@ -237,18 +226,12 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
     ]
   );
 
-  // one table per framework in scope, in the canonical framework order
-  for (const framework of TEST_FRAMEWORKS.filter((fw) => scope.frameworks.includes(fw))) {
-    const frameworkFlaky = flaky.filter((entry) => entry.framework === framework);
-    if (frameworkFlaky.length === 0) {
-      panel.push([`No flaky ${framework} tests`]);
-      continue;
-    }
-    const top = frameworkFlaky.slice(0, limit);
+  if (flaky.length > 0) {
+    const top = flaky.slice(0, limit);
     panel.push([
-      `Top ${top.length} flaky ${framework} tests by failed builds\n${buildTopFlakyTable(
+      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
         top,
-        frameworkFlaky,
+        flaky,
         report.thresholds.minBuilds,
         report.generatedAt
       ).toString()}`,

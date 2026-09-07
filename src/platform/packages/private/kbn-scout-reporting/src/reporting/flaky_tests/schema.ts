@@ -27,15 +27,20 @@ export const FlakyTestSampleFailureSchema = z.object({
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
 /**
- * Most recent execution of the test within the report window, regardless of result. `status` is
- * the framework's own verdict (`passed`, `failed`, `timedOut`, `skipped`, `todo`, ...); Playwright
- * runs that passed on retry report `flaky`.
+ * Most recent run of the test on one branch within the report window, regardless of result.
+ * `status` is the framework's own verdict (`passed`, `failed`, `timedOut`, `skipped`, `todo`,
+ * ...); Playwright runs that passed on retry report `flaky`.
  */
-export const FlakyTestLatestRunSchema = z.object({
+export const FlakyTestBranchLatestRunSchema = z.object({
   status: z.string(),
   timestamp: z.coerce.date(),
-  branch: z.optional(z.string()),
   buildUrl: z.optional(z.string()),
+});
+export type FlakyTestBranchLatestRun = z.infer<typeof FlakyTestBranchLatestRunSchema>;
+
+/** Most recent run of the test across all branches in scope. */
+export const FlakyTestLatestRunSchema = FlakyTestBranchLatestRunSchema.extend({
+  branch: z.string(),
 });
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
@@ -48,6 +53,7 @@ export const FlakyTestBranchStatsSchema = z.object({
   buildFailRate: z.number(),
   /** Absent when the test never failed on this branch. */
   lastFailedAt: z.optional(z.coerce.date()),
+  latestRun: z.optional(FlakyTestBranchLatestRunSchema),
 });
 export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
 

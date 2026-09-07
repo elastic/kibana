@@ -15,7 +15,6 @@ import {
   ESQL_ROW_LIMIT,
   fetchBranchStats,
   fetchFailingFiles,
-  fetchLatestRuns,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
@@ -50,6 +49,19 @@ export interface FlakyTestReportOptions {
 
 /** Statuses meaning the test did not run: mocha/Playwright `skipped`, Jest `todo`/`disabled`. */
 const SKIPPED_STATUSES: ReadonlySet<string> = new Set(['skipped', 'todo', 'disabled']);
+
+/** The newest of the per-branch latest runs, tagged with its branch. */
+export const latestRunAcrossBranches = (
+  byBranch: readonly FlakyTestBranchStats[] | undefined
+): FlakyTestLatestRun | undefined => {
+  let latest: FlakyTestLatestRun | undefined;
+  for (const { branch, latestRun } of byBranch ?? []) {
+    if (latestRun && (!latest || latestRun.timestamp > latest.timestamp)) {
+      latest = { ...latestRun, branch };
+    }
+  }
+  return latest;
+};
 
 export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
   lookbackDays: 7,
@@ -215,20 +227,19 @@ const buildReport = async (
   let rankedFlaky = capBeforeLookup(rankTests(flaky));
   let rankedConsistentlyFailing = capBeforeLookup(rankTests(consistentlyFailing));
 
-  let latestRuns = new Map<string, FlakyTestLatestRun>();
+  let branchStats = new Map<string, FlakyTestBranchStats[]>();
   const lookupCount = rankedFlaky.length + rankedConsistentlyFailing.length;
   if (lookupCount > 0) {
     startedAt = performance.now();
-    latestRuns = await fetchLatestRuns(es, scope, [
-      ...testIds(rankedFlaky),
-      ...testIds(rankedConsistentlyFailing),
-    ]);
-    log.info(`Fetched latest runs for ${lookupCount} tests in ${elapsed(startedAt)}`);
+    branchStats = await fetchBranchStats(es, scope, [...rankedFlaky, ...rankedConsistentlyFailing]);
+    log.info(`Fetched per-branch stats for ${lookupCount} tests in ${elapsed(startedAt)}`);
   }
+  const latestRunOf = (entry: AggregatedEntry) =>
+    latestRunAcrossBranches(branchStats.get(entry.testId));
 
   if (options.excludeSkipped) {
     const isRunning = (entry: AggregatedEntry) =>
-      !SKIPPED_STATUSES.has(latestRuns.get(entry.testId)?.status ?? '');
+      !SKIPPED_STATUSES.has(latestRunOf(entry)?.status ?? '');
     const runningFlaky = rankedFlaky.filter(isRunning);
     const runningConsistentlyFailing = rankedConsistentlyFailing.filter(isRunning);
     log.info(
@@ -241,24 +252,16 @@ const buildReport = async (
   }
 
   const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
-  let branchStats = new Map<string, FlakyTestBranchStats[]>();
   let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
   if (admitted.length > 0) {
     startedAt = performance.now();
-    [branchStats, samples] = await Promise.all([
-      fetchBranchStats(es, scope, admitted),
-      fetchSampleFailures(es, scope, testIds(admitted), options.samplesPerTest),
-    ]);
-    log.info(
-      `Fetched per-branch stats and failure samples for ${admitted.length} tests in ${elapsed(
-        startedAt
-      )}`
-    );
+    samples = await fetchSampleFailures(es, scope, testIds(admitted), options.samplesPerTest);
+    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
   }
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
-    latestRun: latestRuns.get(entry.testId),
+    latestRun: latestRunOf(entry),
     byBranch: branchStats.get(entry.testId) ?? [],
     sampleFailures: samples.get(entry.testId) ?? [],
   });

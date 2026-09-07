@@ -14,6 +14,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import {
   classifyTest,
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
+  latestRunAcrossBranches,
   rankTests,
   ScoutFlakyTests,
 } from './report';
@@ -71,6 +72,35 @@ describe('rankTests', () => {
 
     expect(rankTests(entries).map((entry) => entry.id)).toEqual(['b', 'd', 'c', 'a']);
     expect(entries.map((entry) => entry.id)).toEqual(['a', 'b', 'c', 'd']);
+  });
+});
+
+describe('latestRunAcrossBranches', () => {
+  const branch = (name: string, latestRun?: { status: string; timestamp: Date }) => ({
+    branch: name,
+    builds: 10,
+    failedBuilds: 1,
+    buildFailRate: 0.1,
+    latestRun,
+  });
+
+  it('returns the newest per-branch run tagged with its branch', () => {
+    expect(
+      latestRunAcrossBranches([
+        branch('main', { status: 'passed', timestamp: new Date('2026-09-06T00:00:00.000Z') }),
+        branch('9.4'),
+        branch('9.5', { status: 'failed', timestamp: new Date('2026-09-06T12:00:00.000Z') }),
+      ])
+    ).toEqual({
+      status: 'failed',
+      timestamp: new Date('2026-09-06T12:00:00.000Z'),
+      branch: '9.5',
+    });
+  });
+
+  it('is undefined without any run', () => {
+    expect(latestRunAcrossBranches(undefined)).toBeUndefined();
+    expect(latestRunAcrossBranches([branch('main')])).toBeUndefined();
   });
 });
 
@@ -159,23 +189,25 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
           ],
         ])
       );
-    const fetchLatestRuns = jest
-      .spyOn(queries, 'fetchLatestRuns')
-      .mockResolvedValue(
-        new Map([
-          [
-            'jest-flaky-high',
-            { status: 'skipped', timestamp: new Date('2026-09-06T12:00:00.000Z'), branch: 'main' },
-          ],
-        ])
-      );
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
         [
           'jest-flaky-high',
           [
-            { branch: 'main', builds: 90, failedBuilds: 30, buildFailRate: 30 / 90 },
-            { branch: '9.5', builds: 10, failedBuilds: 0, buildFailRate: 0 },
+            {
+              branch: 'main',
+              builds: 90,
+              failedBuilds: 30,
+              buildFailRate: 30 / 90,
+              latestRun: { status: 'passed', timestamp: new Date('2026-09-06T06:00:00.000Z') },
+            },
+            {
+              branch: '9.5',
+              builds: 10,
+              failedBuilds: 0,
+              buildFailRate: 0,
+              latestRun: { status: 'skipped', timestamp: new Date('2026-09-06T12:00:00.000Z') },
+            },
           ],
         ],
       ])
@@ -211,10 +243,11 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       owners: ['elastic/team'],
       passes: 90,
       buildFailRate: 0.3,
-      latestRun: { status: 'skipped', branch: 'main' },
+      // the newest run across branches
+      latestRun: { status: 'skipped', branch: '9.5' },
       byBranch: [
-        { branch: 'main', builds: 90, failedBuilds: 30 },
-        { branch: '9.5', builds: 10, failedBuilds: 0 },
+        { branch: 'main', builds: 90, failedBuilds: 30, latestRun: { status: 'passed' } },
+        { branch: '9.5', builds: 10, failedBuilds: 0, latestRun: { status: 'skipped' } },
       ],
       sampleFailures: [{ message: 'boom', buildUrl: 'https://b/1' }],
     });
@@ -231,7 +264,6 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
 
     // per-test lookups only run for admitted tests
     const admittedIds = ['jest-flaky-high', 'jest-broken'];
-    expect(fetchLatestRuns).toHaveBeenCalledWith(es, expect.anything(), admittedIds);
     expect(fetchBranchStats).toHaveBeenCalledWith(
       es,
       expect.anything(),
@@ -257,17 +289,25 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
         statsRow({ testId: 'todo-mid', failedBuilds: 10 }),
       ]);
     jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
-    const fetchLatestRuns = jest.spyOn(queries, 'fetchLatestRuns').mockResolvedValue(
+    const onMain = (status: string) => [
+      {
+        branch: 'main',
+        builds: 100,
+        failedBuilds: 10,
+        buildFailRate: 0.1,
+        latestRun: { status, timestamp: new Date('2026-09-06') },
+      },
+    ];
+    const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(
       new Map([
-        ['skipped-high', { status: 'skipped', timestamp: new Date('2026-09-06') }],
-        ['todo-mid', { status: 'todo', timestamp: new Date('2026-09-06') }],
-        ['running-low', { status: 'passed', timestamp: new Date('2026-09-06') }],
+        ['skipped-high', onMain('skipped')],
+        ['todo-mid', onMain('todo')],
+        ['running-low', onMain('passed')],
       ])
     );
     const fetchSampleFailures = jest
       .spyOn(queries, 'fetchSampleFailures')
       .mockResolvedValue(new Map());
-    jest.spyOn(queries, 'fetchBranchStats').mockResolvedValue(new Map());
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(
       es,
@@ -278,11 +318,14 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     // the cap (maxTests = 1) is applied after the skipped tests are removed
     expect(report.flaky.map((entry) => entry.testId)).toEqual(['running-low']);
     expect(report.scope.excludeSkipped).toBe(true);
-    expect(fetchLatestRuns).toHaveBeenCalledWith(es, expect.anything(), [
-      'skipped-high',
-      'todo-mid',
-      'running-low',
-    ]);
+    // the lookup covers every candidate, not just the capped list
+    expect(fetchBranchStats).toHaveBeenCalledWith(
+      es,
+      expect.anything(),
+      ['skipped-high', 'todo-mid', 'running-low'].map((testId) =>
+        expect.objectContaining({ testId })
+      )
+    );
     expect(fetchSampleFailures).toHaveBeenCalledWith(
       es,
       expect.anything(),
@@ -291,11 +334,10 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     );
   });
 
-  it('skips metadata, latest run and sample queries when nothing qualifies', async () => {
+  it('skips metadata, branch stats and sample queries when nothing qualifies', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
     const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
-    const fetchLatestRuns = jest.spyOn(queries, 'fetchLatestRuns');
     const fetchBranchStats = jest.spyOn(queries, 'fetchBranchStats');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
 
@@ -305,7 +347,6 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(report.consistentlyFailing).toEqual([]);
     expect(fetchTestStats).not.toHaveBeenCalled();
     expect(fetchTestMetadata).not.toHaveBeenCalled();
-    expect(fetchLatestRuns).not.toHaveBeenCalled();
     expect(fetchBranchStats).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();
   });

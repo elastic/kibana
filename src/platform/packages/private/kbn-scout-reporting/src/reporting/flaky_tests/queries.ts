@@ -9,12 +9,7 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
-import type {
-  FlakyTestBranchStats,
-  FlakyTestLatestRun,
-  FlakyTestSampleFailure,
-  TestFramework,
-} from './schema';
+import type { FlakyTestBranchStats, FlakyTestSampleFailure, TestFramework } from './schema';
 
 /**
  * Elasticsearch silently truncates ES|QL results at this row count; callers warn when a query
@@ -80,6 +75,8 @@ const asArray = (value: string | string[] | null | undefined): string[] => {
  */
 interface ExecutionModel {
   frameworks: readonly TestFramework[];
+  /** Filter selecting exactly one document per run, including runs where the test was skipped. */
+  runFilter: string;
   /** Filter selecting exactly one document per execution. */
   executionFilter: string;
   /** Filter selecting only failed executions. */
@@ -101,6 +98,7 @@ const buildExecutionModels = (frameworks: readonly TestFramework[]): ExecutionMo
     const reporterFilter = `reporter.type IN (${inList(attemptFrameworks)})`;
     models.push({
       frameworks: attemptFrameworks,
+      runFilter: `(event.action == "test-end" AND ${reporterFilter})`,
       executionFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("passed", "failed", "timedOut"))`,
       failureFilter: `(event.action == "test-end" AND ${reporterFilter} AND test.status IN ("failed", "timedOut"))`,
       failedExpression: 'CASE(test.status IN ("failed", "timedOut"), 1, 0)',
@@ -113,6 +111,7 @@ const buildExecutionModels = (frameworks: readonly TestFramework[]): ExecutionMo
     const reporterFilter = `reporter.type IN (${inList(outcomeFrameworks)})`;
     models.push({
       frameworks: outcomeFrameworks,
+      runFilter: `(event.action == "test-outcome" AND ${reporterFilter})`,
       executionFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("expected", "unexpected", "flaky"))`,
       failureFilter: `(event.action == "test-outcome" AND ${reporterFilter} AND test.outcome IN ("unexpected", "flaky"))`,
       failedExpression: 'CASE(test.outcome IN ("unexpected", "flaky"), 1, 0)',
@@ -195,8 +194,11 @@ export const buildTestStatsQuery = (
 };
 
 /**
- * Per-branch build counts for the given tests of one execution model. Only ever run for the
- * tests admitted to the report, so the `test.id` filter keeps it small.
+ * Per-branch build counts and latest run for the given tests of one execution model. Counts only
+ * consider executions, while the latest run is the newest run document of any status so that
+ * skipped tests are reported as such. Only ever run for a few hundred tests, so the `test.id`
+ * filter keeps it affordable; `LAST` is the expensive part, which is why Playwright attempts are
+ * left out and only its per-run `test-outcome` documents are scanned.
  */
 export const buildBranchStatsQuery = (
   scope: FlakyTestQueryScope,
@@ -207,15 +209,19 @@ export const buildBranchStatsQuery = (
 
   return [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
-    `WHERE ${[
-      ...scopeClauses(scope),
-      model.executionFilter,
-      `test.id IN (${inList(testIds)})`,
-    ].join(' AND ')}`,
-    `EVAL failed = ${model.failedExpression}`,
-    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+    `WHERE ${[...scopeClauses(scope), model.runFilter, `test.id IN (${inList(testIds)})`].join(
+      ' AND '
+    )}`,
+    `EVAL is_execution = CASE(${model.executionFilter}, 1, 0),` +
+      ` failed = CASE(is_execution == 1 AND ${model.failedExpression} == 1, 1, 0),` +
+      // skipped Playwright runs may carry no status at all
+      ' status = CASE(test.outcome == "flaky", "flaky", test.outcome == "skipped", "skipped", test.status)',
+    'STATS builds = COUNT_DISTINCT(CASE(is_execution == 1, buildkite.build.id, NULL)),' +
       ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
-      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
+      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL)),' +
+      ' latest_status = LAST(status, @timestamp),' +
+      ' latest_at = MAX(@timestamp),' +
+      ' latest_build_url = LAST(buildkite.build.url, @timestamp)' +
       ' BY test.id, buildkite.branch',
     'RENAME test.id AS test_id, buildkite.branch AS branch',
     `LIMIT ${ESQL_ROW_LIMIT}`,
@@ -333,8 +339,8 @@ export const fetchTestMetadata = async (
 };
 
 /**
- * Per-branch build counts for the given tests, most failed builds first. Tests are grouped by
- * execution model so that each one is counted the way its framework requires.
+ * Per-branch build counts and latest run for the given tests, most failed builds first. Tests are
+ * grouped by execution model so that each one is counted the way its framework requires.
  */
 export const fetchBranchStats = async (
   es: ESClient,
@@ -358,6 +364,9 @@ export const fetchBranchStats = async (
         builds: number;
         failed_builds: number;
         last_failed_at: string | null;
+        latest_status: string | null;
+        latest_at: string | null;
+        latest_build_url: string | null;
       }>(es, buildBranchStatsQuery(scope, frameworks, testIds))
     )
   );
@@ -372,6 +381,14 @@ export const fetchBranchStats = async (
       failedBuilds: record.failed_builds,
       buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
       lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+      latestRun:
+        record.latest_status && record.latest_at
+          ? {
+              status: record.latest_status,
+              timestamp: new Date(record.latest_at),
+              buildUrl: record.latest_build_url || undefined,
+            }
+          : undefined,
     });
     byTest.set(record.test_id, stats);
   }
@@ -433,77 +450,6 @@ const searchLatestPerTest = async <TSource>(
       bucket.latest.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
     ])
   );
-};
-
-interface LatestRunSource {
-  '@timestamp': string;
-  test?: { status?: string; outcome?: string };
-  buildkite?: { branch?: string; build?: { url?: string } };
-}
-
-const LATEST_RUN_RECENT_SLICE_MS = 24 * 60 * 60 * 1000;
-
-const searchLatestRuns = async (
-  es: ESClient,
-  scope: FlakyTestQueryScope,
-  testIds: readonly string[]
-): Promise<Map<string, FlakyTestLatestRun>> => {
-  const hits = await searchLatestPerTest<LatestRunSource>(
-    es,
-    [
-      ...scopeFilter(scope),
-      { terms: { 'event.action': ['test-end', 'test-outcome'] } },
-      { terms: { 'test.id': testIds } },
-    ],
-    testIds,
-    1,
-    ['@timestamp', 'test.status', 'test.outcome', 'buildkite.branch', 'buildkite.build.url']
-  );
-
-  const latestRuns = new Map<string, FlakyTestLatestRun>();
-  for (const [testId, [latest]] of hits) {
-    const status = latest?.test?.outcome === 'flaky' ? 'flaky' : latest?.test?.status;
-    if (!latest || !status) continue;
-    latestRuns.set(testId, {
-      status,
-      timestamp: new Date(latest['@timestamp']),
-      branch: latest.buildkite?.branch || undefined,
-      buildUrl: latest.buildkite?.build?.url || undefined,
-    });
-  }
-  return latestRuns;
-};
-
-/**
- * Most recent execution per test, whatever its result, so the report can tell whether a test is
- * currently passing, failing or skipped. Playwright emits its `test-outcome` after the last
- * attempt's `test-end`, so the newest of the two is the run verdict for every framework.
- *
- * Scanning every (mostly passing) event of a test over the whole window is the expensive part, so
- * the trailing day is tried first and only tests without a run there fall back to the full window.
- */
-export const fetchLatestRuns = async (
-  es: ESClient,
-  scope: FlakyTestQueryScope,
-  testIds: readonly string[]
-): Promise<Map<string, FlakyTestLatestRun>> => {
-  if (testIds.length === 0) {
-    return new Map();
-  }
-
-  const recentFrom = new Date(scope.to.getTime() - LATEST_RUN_RECENT_SLICE_MS);
-  if (recentFrom <= scope.from) {
-    return searchLatestRuns(es, scope, testIds);
-  }
-
-  const latestRuns = await searchLatestRuns(es, { ...scope, from: recentFrom }, testIds);
-  const missing = testIds.filter((testId) => !latestRuns.has(testId));
-  if (missing.length > 0) {
-    for (const [testId, run] of await searchLatestRuns(es, scope, missing)) {
-      latestRuns.set(testId, run);
-    }
-  }
-  return latestRuns;
 };
 
 interface SampleFailureSource {
