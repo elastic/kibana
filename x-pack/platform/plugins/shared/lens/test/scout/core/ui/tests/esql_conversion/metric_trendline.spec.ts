@@ -10,25 +10,27 @@ import {
   applyLensInlineEditorAndWaitClosed,
   convertToEsqlViaModal,
   openInlineEditorAndWaitVisible,
-  spaceTest,
+  test,
   testData,
-} from '../fixtures';
+} from '../../fixtures';
 
-spaceTest.describe(
+test.describe(
   'Lens metric trendline conversion to ES|QL',
   { tag: '@local-stateful-classic' },
   () => {
     let dashboardId: string;
     let panelId: string;
 
-    spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+    test.beforeAll(async ({ esArchiver, uiSettings, apiServices }) => {
       await apiServices.core.settings({
         'feature_flags.overrides': {
           'lens.enable_esql_conversion': true,
         },
       });
 
-      await scoutSpace.uiSettings.set({
+      await esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH);
+
+      await uiSettings.set({
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
         'dateFormat:tz': 'UTC',
         'timepicker:timeDefaults': JSON.stringify({
@@ -65,45 +67,50 @@ spaceTest.describe(
         ],
       };
 
-      const result = await apiServices.dashboard.createWithPanelId(body, scoutSpace.id);
+      const result = await apiServices.dashboard.createWithPanelId(body);
       dashboardId = result.dashboardId;
       panelId = result.panelId;
     });
 
-    spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-      await scoutSpace.savedObjects.cleanStandardList();
-      await apiServices.core.settings({ 'feature_flags.overrides': {} });
+    test.afterAll(async ({ uiSettings, kbnClient, apiServices }) => {
+      await uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
+      await kbnClient.savedObjects.cleanStandardList();
+      await apiServices.core.settings({
+        'feature_flags.overrides': {
+          'lens.enable_esql_conversion': null,
+        },
+      });
     });
 
-    spaceTest(
-      'trendline persists after converting form-based metric to ES|QL',
-      async ({ browserAuth, page, pageObjects }) => {
-        const { dashboard, lens } = pageObjects;
+    test('trendline persists after converting form-based metric to ES|QL', async ({
+      browserAuth,
+      page,
+      pageObjects,
+    }) => {
+      const { dashboard, lens } = pageObjects;
 
-        await spaceTest.step('open dashboard and verify initial trendline', async () => {
-          await browserAuth.loginAsPrivilegedUser();
-          await dashboard.openDashboardWithId(dashboardId);
-          await expect(page.getByTestId('mtrVis')).toBeVisible();
-          await expect(lens.metric.trendline).toBeVisible();
-        });
+      await test.step('open dashboard and verify initial trendline', async () => {
+        await browserAuth.loginAsPrivilegedUser();
+        await dashboard.openDashboardWithId(dashboardId);
+        await expect(page.getByTestId('mtrVis')).toBeVisible();
+        await expect(lens.metric.trendline).toBeVisible();
+      });
 
-        await spaceTest.step('convert to ES|QL via inline editor', async () => {
-          await dashboard.switchToEditMode();
-          await openInlineEditorAndWaitVisible(pageObjects, panelId);
-          await convertToEsqlViaModal({ pageObjects, page });
-        });
+      await test.step('convert to ES|QL via inline editor', async () => {
+        await dashboard.switchToEditMode();
+        await openInlineEditorAndWaitVisible(pageObjects, panelId);
+        await convertToEsqlViaModal({ pageObjects, page });
+      });
 
-        await spaceTest.step('verify trendline renders after conversion', async () => {
-          await expect(page.getByTestId('ESQLEditor')).toBeVisible();
-          await expect(lens.metric.trendline).toBeVisible();
-        });
+      await test.step('verify trendline renders after conversion', async () => {
+        await expect(page.getByTestId('ESQLEditor')).toBeVisible();
+        await expect(lens.metric.trendline).toBeVisible();
+      });
 
-        await spaceTest.step('apply changes and verify trendline persists', async () => {
-          await applyLensInlineEditorAndWaitClosed({ lens });
-          await expect(lens.metric.trendline).toBeVisible();
-        });
-      }
-    );
+      await test.step('apply changes and verify trendline persists', async () => {
+        await applyLensInlineEditorAndWaitClosed({ lens });
+        await expect(lens.metric.trendline).toBeVisible();
+      });
+    });
   }
 );
