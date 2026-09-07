@@ -13,3 +13,18 @@ export enum YaraMetaKeyOfInterest {
   ARCH = 'arch',
   SCAN_TYPE = 'scan_type',
 }
+
+export enum MetaArchValue {
+  X86 = 'x86',
+  ARM64 = 'arm64',
+}
+
+export enum MetaScanTypeValue {
+  MEMORY = 'Memory',
+}
+
+export enum MetaOsValue {
+  WINDOWS = 'Windows',
+  LINUX = 'Linux',
+  MACOS = 'MacOS',
+}

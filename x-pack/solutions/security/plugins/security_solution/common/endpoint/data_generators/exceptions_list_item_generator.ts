@@ -19,7 +19,7 @@ import {
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
-import { YaraMetaKeyOfInterest } from '../types';
+import { MetaOsValue, MetaArchValue, MetaScanTypeValue, YaraMetaKeyOfInterest } from '../types';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
 import {
@@ -424,8 +424,12 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     };
   }
 
-  generateYaraRuleText(osMeta: ('Windows' | 'Linux' | 'MacOS')[]): string {
-    const metaArch = this.randomChoice(['x86', 'arm64', 'x86, arm64'] as const);
+  generateYaraRuleText(osMeta: MetaOsValue[]): string {
+    const metaArch = this.randomChoice([
+      MetaArchValue.X86,
+      MetaArchValue.ARM64,
+      `${MetaArchValue.X86}, ${MetaArchValue.ARM64}`,
+    ]);
 
     const condition = this.randomChoice([
       'condition: true',
@@ -438,7 +442,11 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       rule Generated_Yara_Rule_${this.randomString(5)} {
         meta:
           description = "Generated test YARA rule"
-          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "Memory"` : ''}
+          ${
+            this.randomBoolean()
+              ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "${MetaScanTypeValue.MEMORY}"`
+              : ''
+          }
           ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch}"` : ''}
           ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.OS} = "${osMeta.join(', ')}"` : ''}
 
@@ -448,19 +456,19 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
 
   generateMatchingOsTypesAndYaraOsMeta(): {
     osTypes: OsTypeArray;
-    osMeta: ('Windows' | 'Linux' | 'MacOS')[];
+    osMeta: MetaOsValue[];
   } {
-    const possibleOsMetaVariations: ('Windows' | 'Linux' | 'MacOS')[][] = [
-      ['Windows'],
-      ['Linux'],
-      ['MacOS'],
-      ['Windows', 'Linux'],
-      ['Windows', 'MacOS'],
-      ['Linux', 'MacOS'],
-      ['Windows', 'Linux', 'MacOS'],
+    const possibleOsMetaVariations: MetaOsValue[][] = [
+      [MetaOsValue.WINDOWS],
+      [MetaOsValue.LINUX],
+      [MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX],
+      [MetaOsValue.WINDOWS, MetaOsValue.MACOS],
+      [MetaOsValue.LINUX, MetaOsValue.MACOS],
+      [MetaOsValue.WINDOWS, MetaOsValue.LINUX, MetaOsValue.MACOS],
     ];
 
-    const osMeta: ('Windows' | 'Linux' | 'MacOS')[] = this.randomChoice(possibleOsMetaVariations);
+    const osMeta: MetaOsValue[] = this.randomChoice(possibleOsMetaVariations);
     const osTypes: OsTypeArray = osMeta.map<OsType>((os) => os.toLowerCase() as OsType);
 
     return { osTypes, osMeta };
