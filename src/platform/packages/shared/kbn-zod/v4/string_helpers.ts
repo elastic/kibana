@@ -1,0 +1,107 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from 'zod/v4';
+import {
+  assertUnboundedStringReason,
+  getStringHelperLimits,
+  reportStringLengthViolation,
+} from '@kbn/schema-string-helpers';
+import type { StringHelperLimits, StringHelperName } from '@kbn/schema-string-helpers';
+
+export type ZodStringOptions = Exclude<NonNullable<Parameters<typeof z.string>[0]>, string> &
+  Partial<StringHelperLimits>;
+
+export type ZodStringWarnOptions = ZodStringOptions & {
+  /** Static field identifier, never a value derived from request input. */
+  label?: string;
+};
+
+export interface ZodStringHelper {
+  (options?: ZodStringOptions): z.ZodString;
+  warn(options?: ZodStringWarnOptions): z.ZodString;
+}
+
+// Bind Zod's fluent return types to ZodString: cloned schemas do not retain warn.
+export type ZodStringHelperSchema = Pick<z.ZodString, keyof z.ZodString> &
+  Pick<ZodStringHelper, 'warn'>;
+
+const makeHelper = (helper: StringHelperName): ZodStringHelper => {
+  const strict = (options: ZodStringOptions = {}): z.ZodString => {
+    const { minLength, maxLength } = getStringHelperLimits(helper, options);
+    const { minLength: _min, maxLength: _max, ...params } = options;
+    return z.string(params).min(minLength).max(maxLength);
+  };
+
+  const warn = ({ label, ...options }: ZodStringWarnOptions = {}): z.ZodString => {
+    const { minLength, maxLength } = getStringHelperLimits(helper, options);
+    const { minLength: _min, maxLength: _max, ...params } = options;
+    return z
+      .string(params)
+      .min(minLength)
+      .superRefine((value) => {
+        if (value.length > maxLength) {
+          reportStringLengthViolation({ helper, library: 'zod', maxLength, label });
+        }
+      });
+  };
+
+  return Object.assign(strict, { warn });
+};
+
+export const savedObjectId = makeHelper('savedObjectId');
+export const savedObjectType = makeHelper('savedObjectType');
+export const savedObjectVersion = makeHelper('savedObjectVersion');
+export const spaceId = makeHelper('spaceId');
+export const displayName = makeHelper('displayName');
+export const description = makeHelper('description');
+export const searchFilter = makeHelper('searchFilter');
+export const aggregation = makeHelper('aggregation');
+export const querySortField = makeHelper('querySortField');
+
+export const savedObjectIdSchema: ZodStringHelperSchema = Object.assign(savedObjectId(), {
+  warn: savedObjectId.warn,
+});
+export const savedObjectTypeSchema: ZodStringHelperSchema = Object.assign(savedObjectType(), {
+  warn: savedObjectType.warn,
+});
+export const savedObjectVersionSchema: ZodStringHelperSchema = Object.assign(savedObjectVersion(), {
+  warn: savedObjectVersion.warn,
+});
+export const spaceIdSchema: ZodStringHelperSchema = Object.assign(spaceId(), {
+  warn: spaceId.warn,
+});
+export const displayNameSchema: ZodStringHelperSchema = Object.assign(displayName(), {
+  warn: displayName.warn,
+});
+export const descriptionSchema: ZodStringHelperSchema = Object.assign(description(), {
+  warn: description.warn,
+});
+export const searchFilterSchema: ZodStringHelperSchema = Object.assign(searchFilter(), {
+  warn: searchFilter.warn,
+});
+export const aggregationSchema: ZodStringHelperSchema = Object.assign(aggregation(), {
+  warn: aggregation.warn,
+});
+export const querySortFieldSchema: ZodStringHelperSchema = Object.assign(querySortField(), {
+  warn: querySortField.warn,
+});
+
+export type UnboundedStringOptions = Omit<ZodStringOptions, 'maxLength'> & { reason: string };
+
+/** Creates an intentionally unbounded string with a required explanation. */
+export const unboundedString = ({
+  reason,
+  minLength,
+  ...params
+}: UnboundedStringOptions): z.ZodString => {
+  assertUnboundedStringReason(reason);
+  const stringSchema = z.string(params);
+  return minLength === undefined ? stringSchema : stringSchema.min(minLength);
+};

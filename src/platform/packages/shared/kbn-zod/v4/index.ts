@@ -16,3 +16,32 @@ export { isZod } from './utils';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
 export type { ZodObjectType } from './types';
 export type { OasMetaExtensions, OasMetaAvailability } from './openapi';
+
+export {
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  unboundedString,
+  savedObjectIdSchema,
+  savedObjectTypeSchema,
+  savedObjectVersionSchema,
+  spaceIdSchema,
+  displayNameSchema,
+  descriptionSchema,
+  searchFilterSchema,
+  aggregationSchema,
+  querySortFieldSchema,
+} from './string_helpers';
+export type {
+  ZodStringOptions,
+  ZodStringWarnOptions,
+  ZodStringHelper,
+  ZodStringHelperSchema,
+  UnboundedStringOptions,
+} from './string_helpers';
