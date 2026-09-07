@@ -192,30 +192,6 @@ describe('useInstalledContent', () => {
     expect(queryKey).not.toContain('kb-1');
   });
 
-  it('renders an unrecognised type with its raw type string as title', () => {
-    mockUseQuery.mockReturnValue({
-      data: {
-        items: [{ id: 'x-1', type: 'some_future_type', attributes: { title: 'X' }, appLink: '' }],
-      },
-      isLoading: false,
-    });
-
-    renderHook(() =>
-      useInstalledContent({
-        // force it into the allowlist check by pretending it's a displayed type
-        // (this tests the title fallback path when AssetTitleMap has no entry)
-        installedKibana: [],
-        installedEs: [],
-      })
-    );
-
-    // The hook returns an empty categories array when installedKibana is empty,
-    // so we test the fallback path via a category that has a type absent from AssetTitleMap.
-    // We simulate by checking AssetTitleMap fallback in isolation:
-    const title = (AssetTitleMap as Record<string, string>).some_future_type ?? 'some_future_type';
-    expect(title).toBe('some_future_type');
-  });
-
   it('enriches esAssets with appLink from the bulk-assets response', () => {
     mockUseQuery.mockReturnValue({
       data: {
