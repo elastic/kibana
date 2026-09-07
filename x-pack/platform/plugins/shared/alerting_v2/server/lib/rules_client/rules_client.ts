@@ -46,7 +46,6 @@ import {
 } from '../errors/rule_error_messages';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
-import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -1012,7 +1011,7 @@ export class RulesClient {
         id: string;
         taskType: string;
         schedule: { interval: string };
-        params: RuleExecutorTaskParams;
+        params: { ruleId: string; spaceId: string };
         state: Record<string, unknown>;
         scope: string[];
         enabled: boolean;
