@@ -987,7 +987,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
+        createScopeRuntime: jest.fn().mockReturnValue({
           stepExecutionExists: jest.fn().mockReturnValue(true),
           finishStep: jest.fn(),
         }),
@@ -995,9 +995,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       underTest.unwindScopes(mockFactory as any);
 
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(2);
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenNthCalledWith(1, {
-        nodeId: 'n2',
+      expect(mockFactory.createScopeRuntime).toHaveBeenCalledTimes(2);
+      expect(mockFactory.createScopeRuntime).toHaveBeenNthCalledWith(1, {
+        scope: { nodeId: 'n2', nodeType: 'enter-if', stepId: 'step2' },
         stackFrames: [
           {
             stepId: 'step1',
@@ -1005,8 +1005,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
           },
         ],
       });
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenNthCalledWith(2, {
-        nodeId: 'n1',
+      expect(mockFactory.createScopeRuntime).toHaveBeenNthCalledWith(2, {
+        scope: { nodeId: 'n1', nodeType: 'enter-foreach', stepId: 'step1' },
         stackFrames: [],
       });
       expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();
@@ -1025,7 +1025,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
+        createScopeRuntime: jest.fn().mockReturnValue({
           stepExecutionExists: jest.fn().mockReturnValue(false),
           finishStep: jest.fn(),
         }),
@@ -1033,9 +1033,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       underTest.unwindScopes(mockFactory as any, (scope) => scope.nodeType === 'enter-foreach');
 
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(1);
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledWith({
-        nodeId: 'inner',
+      expect(mockFactory.createScopeRuntime).toHaveBeenCalledTimes(1);
+      expect(mockFactory.createScopeRuntime).toHaveBeenCalledWith({
+        scope: { nodeId: 'inner', nodeType: 'enter-if', stepId: 'innerStep' },
         stackFrames: [
           {
             stepId: 'loopStep',
@@ -1055,7 +1055,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       ]);
 
       const mockFactory = {
-        createStepExecutionRuntime: jest.fn().mockReturnValue({
+        createScopeRuntime: jest.fn().mockReturnValue({
           stepExecutionExists: jest.fn().mockReturnValue(true),
           finishStep: jest.fn(),
         }),
@@ -1065,9 +1065,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
         inclusive: true,
       });
 
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledTimes(1);
-      expect(mockFactory.createStepExecutionRuntime).toHaveBeenCalledWith({
-        nodeId: 'loop',
+      expect(mockFactory.createScopeRuntime).toHaveBeenCalledTimes(1);
+      expect(mockFactory.createScopeRuntime).toHaveBeenCalledWith({
+        scope: { nodeId: 'loop', nodeType: 'enter-foreach', stepId: 'loopStep' },
         stackFrames: [],
       });
       expect(workflowExecutionState.updateWorkflowExecution).not.toHaveBeenCalled();

@@ -85,6 +85,36 @@ describe('StepExecutionRuntimeFactory', () => {
     expect(runtime).toBeDefined();
   });
 
+  it('builds a synthetic runtime from a scope when the node is not in the graph', () => {
+    const params = createParams();
+    (params.workflowExecutionGraph.getNode as jest.Mock).mockReturnValue(undefined);
+    const factory = new StepExecutionRuntimeFactory(params as any);
+    const stackFrames = [
+      {
+        stepId: 'owner',
+        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+      },
+      {
+        stepId: 'a',
+        nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+      },
+    ];
+
+    const runtime = factory.createScopeRuntime({
+      scope: {
+        nodeId: 'synthetic:a',
+        nodeType: 'synthetic',
+        stepId: 'a',
+        scopeId: 'a',
+      },
+      stackFrames,
+    });
+
+    expect(runtime.node.stepId).toBe('a');
+    expect(runtime.node.stepType).toBe('synthetic');
+    expect(runtime.scopeStack.stackFrames).toEqual([stackFrames[0]]);
+  });
+
   it('preserves stack frames when current node is not on top', () => {
     const params = createParams();
     const factory = new StepExecutionRuntimeFactory(params as any);

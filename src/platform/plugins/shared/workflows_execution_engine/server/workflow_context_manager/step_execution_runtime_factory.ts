@@ -10,12 +10,13 @@
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame } from '@kbn/workflows';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { StepExecutionRuntime } from './step_execution_runtime';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
@@ -105,20 +106,65 @@ export class StepExecutionRuntimeFactory {
     stackFrames: StackFrame[];
   }): StepExecutionRuntime {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
-    const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
 
-    // Guard against duplicate node entries in stack frames by removing self-references.
-    // During workflow execution, a node may call enterScope() for itself before executing,
-    // causing the node to appear on top of its own stack frames. This removes such self-references
-    // to prevent context resolution issues during step execution.
+    if (!node) {
+      throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
+    }
+
     const modifiedStackFrames = removeCurrentNodeFromStackFrames(nodeId, stackFrames);
-
+    const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
     const stepExecutionId = buildStepExecutionId(
       workflowExecution.id,
       node.stepId,
       modifiedStackFrames
     );
+    return this.buildRuntime(node, modifiedStackFrames, stepExecutionId);
+  }
 
+  createStepExecutionRuntimeForNode({
+    node,
+    stackFrames,
+  }: {
+    node: GraphNodeUnion;
+    stackFrames: StackFrame[];
+  }): StepExecutionRuntime {
+    const modifiedStackFrames = removeCurrentNodeFromStackFrames(node.id, stackFrames);
+    const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
+    const stepExecutionId = buildStepExecutionId(
+      workflowExecution.id,
+      node.stepId,
+      modifiedStackFrames
+    );
+    return this.buildRuntime(node, modifiedStackFrames, stepExecutionId);
+  }
+
+  /**
+   * Runtime for a scope frame: compiled graph node, or a cursor-owned synthetic.
+   */
+  createScopeRuntime({
+    scope,
+    stackFrames,
+  }: {
+    scope: ScopeData;
+    stackFrames: StackFrame[];
+  }): StepExecutionRuntime {
+    return this.createStepExecutionRuntimeForNode({
+      node: {
+        id: scope.nodeId,
+        type: scope.nodeType,
+        stepId: scope.stepId,
+        stepType: scope.nodeType,
+      } as GraphNodeUnion,
+      stackFrames,
+    });
+  }
+
+  private buildRuntime(
+    node: GraphNodeUnion,
+    stackFrames: StackFrame[],
+    stepExecutionId: string
+  ): StepExecutionRuntime {
+    const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
     const stepLogger = this.params.workflowLogger.createStepLogger(
       stepExecutionId,
       node.stepId,
@@ -133,7 +179,7 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionState: this.params.workflowExecutionState,
       stepIoService: this.params.stepIoService,
       node,
-      stackFrames: modifiedStackFrames,
+      stackFrames,
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
@@ -145,7 +191,7 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionState: this.params.workflowExecutionState,
       stepIoService: this.params.stepIoService,
       stepLogger,
-      stackFrames: modifiedStackFrames,
+      stackFrames,
       node,
       contextManager,
     });

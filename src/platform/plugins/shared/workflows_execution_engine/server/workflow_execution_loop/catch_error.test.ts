@@ -51,17 +51,10 @@ const createParams = (error?: Error) => {
       updateWorkflowExecution: jest.fn(),
     },
     stepExecutionRuntimeFactory: {
-      createStepExecutionRuntime: jest
-        .fn()
-        .mockReturnValueOnce({
-          stepExecutionExists: jest.fn(() => true),
-          failStep: jest.fn(),
-        })
-        .mockReturnValueOnce({
-          stepExecutionExists: jest.fn(() => true),
-          failStep: jest.fn(),
-          abortController: new AbortController(),
-        }),
+      createScopeRuntime: jest.fn().mockReturnValue({
+        stepExecutionExists: jest.fn(() => true),
+        failStep: jest.fn(),
+      }),
     },
     nodesFactory: {
       create: jest.fn(() => stepErrorCatcher),
@@ -121,7 +114,11 @@ describe('catchError', () => {
     const workflowExecutionCursor = createMockWorkflowExecutionCursor({
       error: ExecutionError.fromError(new Error('boom')),
       currentStackFrames: scopeStack,
-      currentNode: { id: 'current-node' } as GraphNodeUnion,
+      currentNode: {
+        id: 'current-node',
+        type: 'atomic',
+        stepId: 'current-step',
+      } as GraphNodeUnion,
     });
     const stepRuntime = {
       stepExecutionExists: jest.fn(() => true),
@@ -131,17 +128,10 @@ describe('catchError', () => {
       abortController: new AbortController(),
     };
     const stepErrorCatcher = { catchError: jest.fn() };
-    const createStepExecutionRuntime = jest
-      .fn()
-      .mockReturnValueOnce({
-        stepExecutionExists: jest.fn(() => true),
-        failStep: jest.fn(),
-      })
-      .mockReturnValueOnce({
-        stepExecutionExists: jest.fn(() => true),
-        failStep: jest.fn(),
-        abortController: new AbortController(),
-      });
+    const createScopeRuntime = jest.fn().mockReturnValue({
+      stepExecutionExists: jest.fn(() => true),
+      failStep: jest.fn(),
+    });
     const params = {
       workflowExecutionCursor,
       workflowRuntime: {
@@ -151,19 +141,21 @@ describe('catchError', () => {
         getWorkflowExecution: jest.fn(),
         updateWorkflowExecution: jest.fn(),
       },
-      stepExecutionRuntimeFactory: { createStepExecutionRuntime },
+      stepExecutionRuntimeFactory: {
+        createScopeRuntime,
+      },
       nodesFactory: { create: jest.fn(() => stepErrorCatcher) },
       workflowLogger: { logError: jest.fn() },
     };
 
     await catchError(params as any, stepRuntime as any);
 
-    expect(createStepExecutionRuntime).toHaveBeenNthCalledWith(1, {
-      nodeId: 'scope-node',
+    expect(createScopeRuntime).toHaveBeenNthCalledWith(1, {
+      scope: { nodeId: 'scope-node', nodeType: 'atomic', stepId: 'step-1' },
       stackFrames: [],
     });
-    expect(createStepExecutionRuntime).toHaveBeenNthCalledWith(2, {
-      nodeId: 'current-node',
+    expect(createScopeRuntime).toHaveBeenNthCalledWith(2, {
+      scope: { nodeId: 'current-node', nodeType: 'atomic', stepId: 'current-step' },
       stackFrames: scopeStack,
     });
   });

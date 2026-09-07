@@ -137,6 +137,15 @@ export class WorkflowExecutionRuntimeManager {
     this.workflowExecutionCursor.navigateToAfterNode(nodeId);
   }
 
+  public navigateToSynthetic(params: {
+    stepId: string;
+    nodeType: string;
+    nodeId?: string;
+    scopeId?: string;
+  }): void {
+    this.workflowExecutionCursor.navigateToSynthetic(params);
+  }
+
   public getCurrentNodeScope(): StackFrame[] {
     return this.workflowExecutionCursor.currentStackFrames;
   }
@@ -238,8 +247,8 @@ export class WorkflowExecutionRuntimeManager {
 
       scopeStack = scopeStack.exitScope();
 
-      const scopeStepRuntime = stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        nodeId: currentScope.nodeId,
+      const scopeStepRuntime = stepExecutionRuntimeFactory.createScopeRuntime({
+        scope: currentScope,
         stackFrames: scopeStack.stackFrames,
       });
       if (scopeStepRuntime.stepExecutionExists()) {

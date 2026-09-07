@@ -117,3 +117,130 @@ describe('WorkflowExecutionCursor', () => {
     });
   });
 });
+
+describe('WorkflowExecutionCursor synthetic scope', () => {
+  const graphNodes: Record<string, GraphNodeUnion> = {
+    'enter-owner': {
+      id: 'enter-owner',
+      stepId: 'owner',
+      type: 'enter-scope',
+      stepType: 'scope',
+    } as GraphNodeUnion,
+    body: { id: 'body', stepId: 'body', type: 'atomic', stepType: 'slack' } as GraphNodeUnion,
+    'exit-owner': {
+      id: 'exit-owner',
+      stepId: 'owner',
+      type: 'exit-scope',
+      stepType: 'scope',
+    } as GraphNodeUnion,
+  };
+
+  let workflowExecutionGraph: WorkflowGraph;
+  let cursor: WorkflowExecutionCursor;
+
+  beforeEach(() => {
+    workflowExecutionGraph = {
+      topologicalOrder: ['enter-owner', 'body', 'exit-owner'],
+      getNode: jest.fn((nodeId: string) => graphNodes[nodeId]),
+      getNodeStack: jest.fn((nodeId: string) => {
+        if (nodeId === 'body') {
+          return ['enter-owner'];
+        }
+        return [];
+      }),
+    } as unknown as WorkflowGraph;
+
+    cursor = new WorkflowExecutionCursor({
+      nodeId: 'enter-owner',
+      workflowExecutionGraph,
+    });
+  });
+
+  it('keeps currentNode on the compiled enter until commit', () => {
+    cursor.navigateToSynthetic({
+      stepId: 'a',
+      nodeType: 'synthetic',
+      nodeId: 'synthetic:a',
+    });
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'enter-owner' }));
+    expect(cursor.nextNode).toEqual(
+      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic', stepId: 'a' })
+    );
+    expect(cursor.currentStackFrames).toEqual([
+      {
+        stepId: 'owner',
+        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+      },
+    ]);
+  });
+
+  it('sits on the synthetic node after commit without calling getNodeStack', () => {
+    cursor.navigateToSynthetic({
+      stepId: 'a',
+      nodeType: 'synthetic',
+      nodeId: 'synthetic:a',
+    });
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(
+      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic' })
+    );
+    expect(workflowExecutionGraph.getNodeStack).not.toHaveBeenCalled();
+    expect(cursor.currentStackFrames).toEqual([
+      {
+        stepId: 'owner',
+        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+      },
+      {
+        stepId: 'a',
+        nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+      },
+    ]);
+  });
+
+  it('reattaches the synthetic frame when committing to a compiled body node', () => {
+    cursor.navigateToSynthetic({
+      stepId: 'a',
+      nodeType: 'synthetic',
+      nodeId: 'synthetic:a',
+    });
+    cursor.commitPendingNavigation();
+    cursor.navigateToAfterNode('enter-owner');
+    cursor.commitPendingNavigation();
+
+    expect(cursor.currentNode).toEqual(expect.objectContaining({ id: 'body' }));
+    expect(cursor.currentStackFrames).toEqual([
+      {
+        stepId: 'owner',
+        nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+      },
+      {
+        stepId: 'a',
+        nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+      },
+    ]);
+  });
+
+  it('hydrates a live synthetic from persisted stack frames on resume', () => {
+    const resumed = new WorkflowExecutionCursor({
+      nodeId: 'synthetic:a',
+      stackFrames: [
+        {
+          stepId: 'owner',
+          nestedScopes: [{ nodeId: 'enter-owner', nodeType: 'enter-scope' }],
+        },
+        {
+          stepId: 'a',
+          nestedScopes: [{ nodeId: 'synthetic:a', nodeType: 'synthetic', scopeId: 'a' }],
+        },
+      ],
+      workflowExecutionGraph,
+    });
+
+    expect(resumed.currentNode).toEqual(
+      expect.objectContaining({ id: 'synthetic:a', type: 'synthetic' })
+    );
+    expect(() => resumed.navigateToNode('synthetic:a')).not.toThrow();
+  });
+});

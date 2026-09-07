@@ -35,12 +35,10 @@ export async function processNodeStackMonitoring(
   while (!nodeStack.isEmpty()) {
     const scopeData = nodeStack.getCurrentScope();
     nodeStack = nodeStack.exitScope();
-    const scopeStepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime(
-      {
-        nodeId: scopeData.nodeId,
-        stackFrames: nodeStack.stackFrames,
-      }
-    );
+    const scopeStepExecutionRuntime = params.stepExecutionRuntimeFactory.createScopeRuntime({
+      scope: scopeData,
+      stackFrames: nodeStack.stackFrames,
+    });
 
     const nodeImplementation = params.nodesFactory.create(scopeStepExecutionRuntime);
 

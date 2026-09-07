@@ -46,8 +46,8 @@ export class WorkflowOutputStepImpl implements NodeImplementation {
     while (!stack.isEmpty()) {
       const currentScope = stack.getCurrentScope();
       stack = stack.exitScope();
-      const scopeStepRuntime = this.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-        nodeId: currentScope.nodeId,
+      const scopeStepRuntime = this.stepExecutionRuntimeFactory.createScopeRuntime({
+        scope: currentScope,
         stackFrames: stack.stackFrames,
       });
       if (scopeStepRuntime.stepExecutionExists()) {
