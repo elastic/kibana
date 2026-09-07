@@ -59,7 +59,7 @@ export const toBulkCloseRuntimeMappings = (
 
   const entries = Object.entries(runtimeMappings)
     .filter(([, field]) => SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type))
-    .map(([name, field]) => {
+    .flatMap(([name, field]) => {
       const mapping: BulkCloseRuntimeMappings[string] = {
         type: field.type as BulkCloseRuntimeMappings[string]['type'],
       };
@@ -71,17 +71,22 @@ export const toBulkCloseRuntimeMappings = (
         const source =
           typeof field.script === 'string'
             ? field.script
-            : (field.script as { source: string }).source;
-        if (source) {
-          mapping.script = { source };
+            : (field.script as { source?: string }).source;
+
+        if (!source) {
+          // Non-inline script (e.g. stored script by id). Forwarding only {type}
+          // would silently change semantics to a _source reader, which can match
+          // a different set of alerts. Drop the entry entirely instead.
+          return [];
         }
+        mapping.script = { source };
       }
 
       if ('format' in field && field.format) {
         mapping.format = field.format;
       }
 
-      return [name, mapping] as const;
+      return [[name, mapping] as const];
     });
 
   return entries.length > 0 ? Object.fromEntries(entries) : undefined;

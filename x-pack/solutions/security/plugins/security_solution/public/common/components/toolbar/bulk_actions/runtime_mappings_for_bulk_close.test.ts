@@ -57,6 +57,19 @@ describe('toBulkCloseRuntimeMappings', () => {
     expect(result?.my_field?.script?.source).toBe("emit(doc['x'].value)");
   });
 
+  it('drops an entry whose script is a non-inline object (e.g. stored-script id)', () => {
+    // A stored-script object { id, params } has no source property. Forwarding
+    // only { type } would silently change semantics to a _source reader; drop
+    // the entire entry instead so the caller can see 0 docs rather than a wrong set.
+    const mappings = {
+      stored_rt: { type: 'keyword', script: { id: 'my-stored-script', params: {} } },
+      valid_rt: { type: 'keyword', script: { source: "emit('ok')" } },
+    } as unknown as MappingRuntimeFields;
+    const result = toBulkCloseRuntimeMappings(mappings);
+    expect(result).not.toHaveProperty('stored_rt');
+    expect(result?.valid_rt?.script?.source).toBe("emit('ok')");
+  });
+
   it('preserves format for date fields', () => {
     const result = toBulkCloseRuntimeMappings({
       event_date: { type: 'date', format: 'strict_date_optional_time' },
