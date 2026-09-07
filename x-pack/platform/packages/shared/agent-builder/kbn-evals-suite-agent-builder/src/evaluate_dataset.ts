@@ -16,6 +16,7 @@ import {
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
   createSkillInvocationEvaluator,
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
@@ -160,18 +161,17 @@ function configureExperiment({
   };
 
   const irConfig = {
-    k: [10],
     relevanceThreshold: 1,
     extractRetrievedDocs: extractSearchRetrievedDocs,
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   };
-  const irEvaluators = [
-    createPrecisionAtKEvaluator(irConfig),
-    createRecallAtKEvaluator(irConfig),
-    createF1AtKEvaluator(irConfig),
-    createHitRateAtKEvaluator(irConfig),
-  ];
+  const irEvaluators = getEffectiveK([10]).flatMap((k) => [
+    createPrecisionAtKEvaluator({ ...irConfig, k }),
+    createRecallAtKEvaluator({ ...irConfig, k }),
+    createF1AtKEvaluator({ ...irConfig, k }),
+    createHitRateAtKEvaluator({ ...irConfig, k }),
+  ]);
 
   const selectedEvaluators = selectEvaluators([
     {

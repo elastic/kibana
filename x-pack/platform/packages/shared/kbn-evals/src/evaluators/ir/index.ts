@@ -62,7 +62,7 @@ function parseIrEvalKEnvVar(envK: string, envVarName: string): number[] {
 }
 
 /** Returns K values from the IR_EVAL_K env var (falling back to the deprecated RAG_EVAL_K) or config. */
-function getEffectiveK(configK: number | number[]): number[] {
+export function getEffectiveK(configK: number | number[]): number[] {
   if (process.env.IR_EVAL_K !== undefined) {
     return parseIrEvalKEnvVar(process.env.IR_EVAL_K, 'IR_EVAL_K');
   }

@@ -155,6 +155,7 @@ export {
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 
 export {
+  getEffectiveK,
   createPrecisionAtKEvaluator,
   createRecallAtKEvaluator,
   createF1AtKEvaluator,
