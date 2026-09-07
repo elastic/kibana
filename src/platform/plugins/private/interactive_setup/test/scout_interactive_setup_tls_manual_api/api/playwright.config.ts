@@ -7,15 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createPlaywrightConfig, defineConfig } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-/**
- * Interactive setup consumes a one-shot server state: the "happy path" spec configures Kibana,
- * which reboots it out of the `preboot` stage for good. A Playwright retry would re-run that spec
- * against an already-booted Kibana and fail on the `204`, so retries are disabled here — Scout
- * otherwise defaults to 1 retry on CI.
- */
-export default defineConfig({
-  ...createPlaywrightConfig({ testDir: './tests' }),
-  retries: 0,
-});
+export default createPlaywrightConfig({ testDir: './tests', retries: 0 });

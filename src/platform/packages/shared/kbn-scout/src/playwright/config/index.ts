@@ -8,4 +8,3 @@
  */
 
 export { createPlaywrightConfig } from './create_config';
-export { defineConfig } from '@playwright/test';

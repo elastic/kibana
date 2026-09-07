@@ -11,7 +11,7 @@
 import './peggy_setup';
 
 // Config and utilities
-export { createPlaywrightConfig, defineConfig } from './config';
+export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
 export { extendPlaywrightPage } from './fixtures/scope/test/scout_page/single_thread';
 
