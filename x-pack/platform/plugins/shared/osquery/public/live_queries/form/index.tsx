@@ -8,11 +8,15 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy, isNumber } from 'lodash';
 
 import { QUERY_TIMEOUT } from '../../../common/constants';
+import {
+  containsDynamicQuery,
+  replaceParamsQuery,
+} from '../../../common/utils/replace_params_query';
 import { QueryPackSelectable } from './query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
 import { usePacks } from '../../packs/use_packs';
@@ -23,6 +27,7 @@ import type { AddToTimelineHandler } from '../../types';
 import LiveQueryQueryField from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
+import { AlertAttachmentContext } from '../../common/contexts';
 import { PackQueriesStatusTable } from './pack_queries_status_table';
 
 export interface LiveQueryFormFields {
@@ -70,6 +75,8 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   hideAgentsField = false,
   addToTimeline,
 }) => {
+  const alertAttachmentContext = useContext(AlertAttachmentContext);
+
   const { application } = useKibana().services;
   const permissions = application.capabilities.osquery;
   const canRunPacks = useMemo(
@@ -114,11 +121,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
   const onSubmit = useCallback(
     async (values: LiveQueryFormFields) => {
-      // Parameter substitution is the server's job. Substituting here too would break
-      // `runSavedQueries` users: the client sees the ECS-shaped alert while the server
-      // re-substitutes the same template from the flattened technical fields, and authorization
-      // requires the two strings to be equal. Send the template and let the route resolve it
-      // against `alert_ids`.
+      // Temporary, frontend solution for params substitution. To be removed once alert_ids refactored in create_live_query_route
+      const query =
+        values.query && containsDynamicQuery(values.query) && alertAttachmentContext
+          ? replaceParamsQuery(values.query, alertAttachmentContext).result
+          : values.query;
+
       const serializedData = {
         ...pickBy(
           {
@@ -127,7 +135,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
             // the reset effect below, so a saved query picked before switching to Pack would
             // otherwise still be posted and get compared against the pack's queries server-side.
             saved_query_id: queryType === 'query' ? values.savedQueryId : undefined,
-            query: queryType === 'query' ? values.query : undefined,
+            query: queryType === 'query' ? query : undefined,
             alert_ids: values.alertIds,
             pack_id: queryType === 'pack' && values?.packId?.length ? values?.packId[0] : undefined,
             ecs_mapping: queryType === 'query' ? values.ecs_mapping : undefined,
@@ -138,7 +146,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       } as unknown as LiveQueryFormFields;
       await mutateAsync(serializedData);
     },
-    [mutateAsync, queryType]
+    [alertAttachmentContext, mutateAsync, queryType]
   );
 
   const { data: packsData, isFetched: isPackDataFetched } = usePacks({});
