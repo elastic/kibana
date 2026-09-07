@@ -1164,6 +1164,14 @@ def self_test() -> int:
         _gate_src = inspect.getsource(check_golden)
         check("gate builds the shard's own execution id",
               'shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)' in _gate_src, True)
+        # The gate's own count query must not use .keyword either. The guard below
+        # only covers the resume probe, so this trap shipped here undetected and
+        # failed a complete 98-doc shard as docs=0/98.
+        _gate_code = "\n".join(
+            l for l in _gate_src.splitlines() if not l.lstrip().startswith("#")
+        )
+        check("gate count does not use the .keyword suffix",
+              "metadata.execution_id.keyword" not in _gate_code, True)
         # The field has no usable partial matching: a .keyword prefix and a
         # match_phrase on the run id both returned 0 docs against golden while
         # the full id returned 154. Never reintroduce a partial match here.
@@ -1449,7 +1457,11 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
         except Exception:
             return {"count": -1, "error": f"cannot resolve latest execution id: {out[:200]}"}
 
-    q = json.dumps({"query": {"term": {"metadata.execution_id.keyword": exec_id}}})
+    # metadata.execution_id is keyword-mapped already: a .keyword subfield does
+    # not exist and a term on it silently returns 0, which the gate cannot tell
+    # apart from "no docs written" (2026-09-07: a complete 98-doc shard failed as
+    # docs=0/98). Query the field directly.
+    q = json.dumps({"query": {"term": {"metadata.execution_id": exec_id}}})
     out = ssh(
         ip,
         f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
