@@ -184,6 +184,18 @@ describe('ChangePointSummaryCell', () => {
 
     expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
+    expect(screen.getByText('-')).toBeInTheDocument();
+    expect(screen.getByLabelText('No change point')).toBeInTheDocument();
+  });
+
+  it('shows a loading indicator when the table has no columns', () => {
+    renderCell({ flattened: CHANGE_POINT_ROW, table: makeTable([CHANGE_POINT_ROW], []) });
+
+    expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
+    expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    expect(screen.queryByText('-')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('No change point')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
   });
 
   it('subscribes for every row when type and pvalue columns are absent from the table', () => {
@@ -193,13 +205,27 @@ describe('ChangePointSummaryCell', () => {
     expect(mockUseChangePointSummarySeries).toHaveBeenCalled();
   });
 
-  it('renders nothing when the shared series is idle', () => {
+  it('shows a loading indicator when the shared series is idle', () => {
     renderCell({
       flattened: CHANGE_POINT_ROW,
       table: makeTable([CHANGE_POINT_ROW]),
       seriesState: { status: 'idle' },
     });
 
+    expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
+  });
+
+  it('renders an error icon when the shared series is unavailable', () => {
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      table: makeTable([CHANGE_POINT_ROW]),
+      seriesState: { status: 'unavailable' },
+    });
+
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+    expect(screen.getByText('Unable to load change point sparkline')).toBeInTheDocument();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
     expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
   });
@@ -233,8 +259,9 @@ describe('ChangePointSummaryCell', () => {
     });
 
     expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
-    expect(screen.getByText('Unable to load change point sparkline')).toBeInTheDocument();
-    expect(screen.queryByText('esql failed')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('Unable to load change point sparkline: esql failed')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
     expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
   });
@@ -316,6 +343,50 @@ describe('ChangePointSummaryCell', () => {
     );
 
     expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
+    expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
+  });
+
+  it('renders an error icon while loading if no matching card is found', () => {
+    const cardRow = { host: 'a', ...CHANGE_POINT_ROW };
+    const row = { host: 'b', ...CHANGE_POINT_ROW };
+    const table = makeTable(
+      [cardRow],
+      [{ id: 'host', name: 'host', meta: { type: 'string' } }, ...COLUMNS_NO_BY]
+    );
+    renderCell({
+      flattened: row,
+      table,
+      esql: ESQL_WITH_HOST_BY,
+      seriesState: {
+        status: 'loading',
+        cards: buildChangePointCards({ table, esql: ESQL_WITH_HOST_BY }),
+      },
+    });
+
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+    expect(screen.getByText('No sparkline data for this change point')).toBeInTheDocument();
+    expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
+  });
+
+  it('renders an error icon when ready without sparkline series', () => {
+    const table = makeTable([CHANGE_POINT_ROW]);
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      table,
+      seriesState: {
+        status: 'ready',
+        entityColumnIds: [],
+        timeColumn: 'bucket',
+        valueColumn: 'avg_bytes',
+        seriesByEntity: new Map(),
+        cards: buildChangePointCards({ table, esql: ESQL_NO_BY }),
+      },
+    });
+
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+    expect(screen.getByText('No sparkline data for this change point')).toBeInTheDocument();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
   });
 });

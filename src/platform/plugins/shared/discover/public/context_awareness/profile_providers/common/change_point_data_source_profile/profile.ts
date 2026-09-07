@@ -36,7 +36,6 @@ import { ChangePointDocViewerPanel } from './change_point_doc_viewer_panel';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 const CHANGE_POINT_CHART_LOCAL_STORAGE_KEY = 'discover:changePointExperience';
-const CHANGE_POINT_SUMMARY_COLUMN_WIDTH = 200;
 
 /**
  * Extends the p-value cell context with the chart section props subject needed
@@ -62,7 +61,7 @@ export const createChangePointDataSourceProfileProvider = (
         ...prev(params),
         columns: [
           { name: context.typeColumnId },
-          { name: SOURCE_COLUMN, width: CHANGE_POINT_SUMMARY_COLUMN_WIDTH },
+          { name: SOURCE_COLUMN },
           { name: context.pvalueColumnId },
         ],
       }),
@@ -89,12 +88,7 @@ export const createChangePointDataSourceProfileProvider = (
           ...base,
           [SOURCE_COLUMN]: ({ column }: CustomGridColumnProps) => ({
             ...column,
-            // Keep a default width so Summary is not the last unconstrained column
-            // (EUI's resize handle belongs to the column on the left of the divider).
-            // Do not overwrite a width the user already set.
-            initialWidth: column.initialWidth ?? CHANGE_POINT_SUMMARY_COLUMN_WIDTH,
             isExpandable: false,
-            cellActions: [],
           }),
         };
 

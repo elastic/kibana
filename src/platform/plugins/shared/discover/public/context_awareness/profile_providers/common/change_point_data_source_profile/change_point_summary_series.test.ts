@@ -94,7 +94,7 @@ const waitForTerminalState = (
   new Promise((resolve, reject) => {
     getChangePointSummarySeries$(fetchParams, data).subscribe({
       next: (s) => {
-        if (s.status === 'ready' || s.status === 'error' || s.status === 'idle') {
+        if (s.status === 'ready' || s.status === 'error' || s.status === 'unavailable') {
           resolve(s);
         }
       },
@@ -224,11 +224,11 @@ describe('change_point_summary_series', () => {
       jest.mocked(getTime).mockReturnValue(undefined);
     });
 
-    it('stays idle when the table is missing', async () => {
+    it('is unavailable when the table is missing', async () => {
       const { esql, load } = setupLineSearch({ columns: [], rows: [] });
-      const idle = await load();
+      const unavailable = await load();
 
-      expect(idle.status).toBe('idle');
+      expect(unavailable.status).toBe('unavailable');
       expect(esql).not.toHaveBeenCalled();
     });
 

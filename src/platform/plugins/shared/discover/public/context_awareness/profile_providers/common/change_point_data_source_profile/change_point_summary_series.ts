@@ -34,14 +34,23 @@ import {
 
 type ChangePointFetchParams = UnifiedChangePointGridProps['fetchParams'];
 
+export const SUMMARY_SERIES_STATUS = {
+  IDLE: 'idle',
+  UNAVAILABLE: 'unavailable',
+  LOADING: 'loading',
+  READY: 'ready',
+  ERROR: 'error',
+} as const;
+
 export type ChangePointSummarySeriesState =
-  | { status: 'idle' }
+  | { status: typeof SUMMARY_SERIES_STATUS.IDLE }
+  | { status: typeof SUMMARY_SERIES_STATUS.UNAVAILABLE }
   | {
-      status: 'loading';
+      status: typeof SUMMARY_SERIES_STATUS.LOADING;
       cards: ChangePointCardModel[] | undefined;
     }
   | {
-      status: 'ready';
+      status: typeof SUMMARY_SERIES_STATUS.READY;
       seriesByEntity: ChangePointSeriesByEntity;
       entityColumnIds: string[];
       timeColumn: string;
@@ -49,7 +58,7 @@ export type ChangePointSummarySeriesState =
       cards: ChangePointCardModel[] | undefined;
     }
   | {
-      status: 'error';
+      status: typeof SUMMARY_SERIES_STATUS.ERROR;
       error: Error;
       entityColumnIds: string[];
       cards: ChangePointCardModel[] | undefined;
@@ -128,7 +137,7 @@ const loadLineSeries = async ({
 }): Promise<ChangePointSummarySeriesState> => {
   const table = fetchParams.table;
   if (!seriesColumns || !baseLineEsql || !table?.columns?.length) {
-    return { status: 'idle' };
+    return { status: SUMMARY_SERIES_STATUS.UNAVAILABLE };
   }
 
   const { timeColumn, valueColumn } = seriesColumns;
@@ -178,7 +187,7 @@ const loadLineSeries = async ({
 
   const rows = esqlResponseToRows(rawResponse);
   return {
-    status: 'ready',
+    status: SUMMARY_SERIES_STATUS.READY,
     seriesByEntity: downsampleSeriesByEntity(
       partitionLineRows(rows, timeColumn, valueColumn, entityColumnIds)
     ),
@@ -226,7 +235,7 @@ export const getChangePointSummarySeries$ = (
     complete: () => void;
   }>();
   let current: ChangePointSummarySeriesState = {
-    status: 'loading',
+    status: SUMMARY_SERIES_STATUS.LOADING,
     cards,
   };
 
@@ -272,7 +281,7 @@ export const getChangePointSummarySeries$ = (
         return;
       }
       finish({
-        status: 'error',
+        status: SUMMARY_SERIES_STATUS.ERROR,
         error: err instanceof Error ? err : new Error(String(err)),
         entityColumnIds,
         cards,
@@ -287,11 +296,14 @@ export const useChangePointSummarySeries = (
   fetchParams: ChangePointFetchParams | undefined,
   data: DataPublicPluginStart | undefined
 ): ChangePointSummarySeriesState => {
-  const [state, setState] = useState<ChangePointSummarySeriesState>({ status: 'idle' });
+  const [state, setState] = useState<ChangePointSummarySeriesState>({
+    status: SUMMARY_SERIES_STATUS.LOADING,
+    cards: undefined,
+  });
 
   useEffect(() => {
     if (!fetchParams || !data) {
-      setState({ status: 'idle' });
+      setState({ status: SUMMARY_SERIES_STATUS.IDLE });
       return;
     }
 

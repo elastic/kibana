@@ -10,13 +10,7 @@
 import React, { useMemo } from 'react';
 import type { FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import {
-  EuiIcon,
-  EuiLoadingChart,
-  EuiScreenReaderOnly,
-  mathWithUnits,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiIconTip, EuiLoadingChart, mathWithUnits, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   getCardForRow,
@@ -29,7 +23,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { ChangePointSummaryChart } from './change_point_summary_chart';
 import type { ChangePointChartSectionProps$ } from './change_point_context';
-import { useChangePointSummarySeries } from './change_point_summary_series';
+import { SUMMARY_SERIES_STATUS, useChangePointSummarySeries } from './change_point_summary_series';
 
 export interface ChangePointSummaryCellContext {
   chartSectionProps$: ChangePointChartSectionProps$;
@@ -42,13 +36,14 @@ interface ChangePointSummaryCellProps extends DataGridCellValueElementProps {
   charts: ChartsPluginStart;
 }
 
+const EMPTY_CELL_VALUE = '-';
+
 const shouldRenderChangePointChart = (
   row: Readonly<Record<string, unknown>>,
-  columnIds: ReadonlySet<string> | undefined,
+  columnIds: ReadonlySet<string>,
   typeColumnId: string,
   pvalueColumnId: string
 ): boolean => {
-  if (!columnIds?.size) return false;
   const hasTypedColumns = columnIds.has(typeColumnId) && columnIds.has(pvalueColumnId);
   return hasTypedColumns ? isChangePointTableRow(row, typeColumnId, pvalueColumnId) : true;
 };
@@ -60,11 +55,50 @@ interface ChangePointSummaryCellInnerProps {
   data: UnifiedChangePointGridProps['services']['data'];
 }
 
-const errorLabel = i18n.translate(
+const seriesLoadErrorMessage = i18n.translate(
   'discover.contextAwareness.changePointSummaryCell.seriesLoadErrorMessage',
   {
     defaultMessage: 'Unable to load change point sparkline',
   }
+);
+
+const noSparklineDataErrorMessage = i18n.translate(
+  'discover.contextAwareness.changePointSummaryCell.noSparklineDataErrorMessage',
+  {
+    defaultMessage: 'No sparkline data for this change point',
+  }
+);
+
+const noChangePointAriaLabel = i18n.translate(
+  'discover.contextAwareness.changePointSummaryCell.noChangePointAriaLabel',
+  {
+    defaultMessage: 'No change point',
+  }
+);
+
+const getSeriesLoadErrorMessage = (reason?: string): string =>
+  reason
+    ? i18n.translate(
+        'discover.contextAwareness.changePointSummaryCell.seriesLoadWithReasonErrorMessage',
+        {
+          defaultMessage: 'Unable to load change point sparkline: {reason}',
+          values: { reason },
+        }
+      )
+    : seriesLoadErrorMessage;
+
+const ChangePointSummaryErrorIcon: FC<{ message: string }> = ({ message }) => (
+  <EuiIconTip
+    type="warning"
+    color="danger"
+    content={message}
+    aria-label={message}
+    iconProps={{ 'data-test-subj': 'changePointSummarySeriesError' }}
+  />
+);
+
+const ChangePointSummaryEmptyValue: FC = () => (
+  <span aria-label={noChangePointAriaLabel}>{EMPTY_CELL_VALUE}</span>
 );
 
 /**
@@ -78,14 +112,19 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
 }) => {
   const seriesState = useChangePointSummarySeries(fetchParams, data);
 
-  const cards = seriesState.status === 'idle' ? undefined : seriesState.cards;
+  const cards =
+    seriesState.status === SUMMARY_SERIES_STATUS.IDLE ||
+    seriesState.status === SUMMARY_SERIES_STATUS.UNAVAILABLE
+      ? undefined
+      : seriesState.cards;
   const card = useMemo(
     () => (cards?.length ? getCardForRow(cards, row.flattened) : undefined),
     [cards, row.flattened]
   );
 
   const annotationTime = useMemo(() => {
-    if (!card || seriesState.status !== 'ready' || !fetchParams.table) return undefined;
+    if (!card || seriesState.status !== SUMMARY_SERIES_STATUS.READY || !fetchParams.table)
+      return undefined;
     const iso = getChangePointRowTimestamp(
       row.flattened,
       seriesState.timeColumn,
@@ -98,37 +137,31 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
   }, [card, fetchParams.table, row.flattened, seriesState]);
 
   const points = useMemo(() => {
-    if (!card || seriesState.status !== 'ready') return undefined;
+    if (!card || seriesState.status !== SUMMARY_SERIES_STATUS.READY) return undefined;
     const entityKey = getEntityKey(row.flattened, seriesState.entityColumnIds);
     return seriesState.seriesByEntity.get(entityKey);
   }, [card, row.flattened, seriesState]);
 
-  if (seriesState.status === 'idle') {
-    return null;
+  if (seriesState.status === SUMMARY_SERIES_STATUS.IDLE) {
+    return <EuiLoadingChart size="m" />;
   }
 
-  if (seriesState.status === 'error') {
-    return (
-      <>
-        <EuiIcon
-          type="warning"
-          color="danger"
-          title={errorLabel}
-          aria-hidden
-          data-test-subj="changePointSummarySeriesError"
-        />
-        <EuiScreenReaderOnly>
-          <span>{errorLabel}</span>
-        </EuiScreenReaderOnly>
-      </>
+  if (seriesState.status === SUMMARY_SERIES_STATUS.LOADING) {
+    return cards !== undefined && !card ? (
+      <ChangePointSummaryErrorIcon message={noSparklineDataErrorMessage} />
+    ) : (
+      <EuiLoadingChart size="m" />
     );
   }
 
-  if (seriesState.status === 'loading') {
-    if (cards !== undefined && !card) {
-      return null;
-    }
-    return <EuiLoadingChart size="m" />;
+  if (seriesState.status === SUMMARY_SERIES_STATUS.UNAVAILABLE) {
+    return <ChangePointSummaryErrorIcon message={seriesLoadErrorMessage} />;
+  }
+
+  if (seriesState.status === SUMMARY_SERIES_STATUS.ERROR) {
+    return (
+      <ChangePointSummaryErrorIcon message={getSeriesLoadErrorMessage(seriesState.error.message)} />
+    );
   }
 
   if (card && points && points.length > 0) {
@@ -137,7 +170,7 @@ const ChangePointSummaryCellInner: FC<ChangePointSummaryCellInnerProps> = ({
     );
   }
 
-  return null;
+  return <ChangePointSummaryErrorIcon message={noSparklineDataErrorMessage} />;
 };
 
 /**
@@ -168,12 +201,30 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
         : undefined,
     [fetchParams?.table]
   );
-  const showChart = shouldRenderChangePointChart(
-    row.flattened,
-    columnIds,
-    context.typeColumnId,
-    context.pvalueColumnId
-  );
+  let content: React.ReactNode;
+  if (!fetchParams || !columnIds) {
+    content = <EuiLoadingChart size="m" />;
+  } else if (
+    !shouldRenderChangePointChart(
+      row.flattened,
+      columnIds,
+      context.typeColumnId,
+      context.pvalueColumnId
+    )
+  ) {
+    content = <ChangePointSummaryEmptyValue />;
+  } else if (!chartSectionProps?.services.data) {
+    content = <ChangePointSummaryErrorIcon message={seriesLoadErrorMessage} />;
+  } else {
+    content = (
+      <ChangePointSummaryCellInner
+        row={row}
+        charts={charts}
+        fetchParams={fetchParams}
+        data={chartSectionProps.services.data}
+      />
+    );
+  }
 
   return (
     <div
@@ -185,14 +236,7 @@ export const ChangePointSummaryCell: FC<ChangePointSummaryCellProps> = ({
         overflow: 'hidden',
       }}
     >
-      {showChart && fetchParams && chartSectionProps?.services.data ? (
-        <ChangePointSummaryCellInner
-          row={row}
-          charts={charts}
-          fetchParams={fetchParams}
-          data={chartSectionProps.services.data}
-        />
-      ) : null}
+      {content}
     </div>
   );
 };

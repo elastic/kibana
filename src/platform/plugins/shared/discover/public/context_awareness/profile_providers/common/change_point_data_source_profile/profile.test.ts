@@ -169,7 +169,7 @@ describe('createChangePointDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
-        columns: [{ name: 'type' }, { name: SOURCE_COLUMN, width: 200 }, { name: 'pvalue' }],
+        columns: [{ name: 'type' }, { name: SOURCE_COLUMN }, { name: 'pvalue' }],
       });
     });
 
@@ -179,17 +179,14 @@ describe('createChangePointDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       expect(getDefaultAppState({ dataView: {} as DataView })).toEqual({
-        columns: [
-          { name: 'change_type' },
-          { name: SOURCE_COLUMN, width: 200 },
-          { name: 'p_value' },
-        ],
+        columns: [{ name: 'change_type' }, { name: SOURCE_COLUMN }, { name: 'p_value' }],
       });
     });
   });
 
   describe('getColumnsConfiguration', () => {
-    it('customises the pvalue header and Summary column width', () => {
+    it('customises the pvalue header and keeps Summary non-expandable', () => {
+      const cellAction = jest.fn();
       const getColumns = provider.profile.getColumnsConfiguration!(() => ({}), {
         context: buildContext({ pvalueColumnId: 'my_pvalue' }),
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
@@ -198,24 +195,13 @@ describe('createChangePointDataSourceProfileProvider', () => {
       expect(config).toHaveProperty('my_pvalue');
       expect(
         config[SOURCE_COLUMN]!({
-          column: { id: SOURCE_COLUMN } as never,
-          headerRowHeight: 1,
-        }).initialWidth
-      ).toBe(200);
-      expect(
-        config[SOURCE_COLUMN]!({
-          column: { id: SOURCE_COLUMN, initialWidth: 400 } as never,
-          headerRowHeight: 1,
-        }).initialWidth
-      ).toBe(400);
-      expect(
-        config[SOURCE_COLUMN]!({
-          column: { id: SOURCE_COLUMN, cellActions: [jest.fn()] } as never,
+          column: { id: SOURCE_COLUMN, cellActions: [cellAction] } as never,
           headerRowHeight: 1,
         })
       ).toEqual(
         expect.objectContaining({
           isExpandable: false,
+          cellActions: [cellAction],
         })
       );
     });
