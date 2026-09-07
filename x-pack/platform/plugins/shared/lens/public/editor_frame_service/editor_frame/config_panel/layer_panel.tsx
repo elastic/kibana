@@ -343,7 +343,7 @@ export function LayerPanel(props: LayerPanelProps) {
   const textBasedDatasourceState = isSelectedDatasourceTextBased
     ? (layerDatasourceState as TextBasedPrivateState | undefined)
     : undefined;
-  const layerQuery = textBasedDatasourceState?.layers[layerId]?.query;
+  const layerQuery = textBasedDatasourceState?.layers?.[layerId]?.query;
   const usesLayerScopedQuery =
     textBasedDatasourceState !== undefined &&
     activeVisualization.getLayerIds(visualizationState).length > 1;
@@ -352,7 +352,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const updateLayerQuery = useCallback(
     async (newQuery: AggregateQuery, columns: DatatableColumn[]) => {
-      const layer = textBasedDatasourceState?.layers[layerId];
+      const layer = textBasedDatasourceState?.layers?.[layerId];
       if (!textBasedDatasourceState || !layer) {
         return;
       }
