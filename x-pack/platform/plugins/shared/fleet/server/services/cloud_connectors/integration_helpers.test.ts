@@ -319,9 +319,9 @@ describe('cloud connector integration helpers', () => {
       const azureVars = {
         tenant_id: { type: 'password' as const, value: { id: 'secret-1', isSecretRef: true } },
       } as any;
-      const policy = makeInputPolicy({ tenant_id: undefined });
+      const policy = makeInputPolicy({ tenant_id: { type: 'text' as const, value: undefined } });
       const result = injectConnectorVarsIntoPolicy(policy, azureVars, 'azure', mockPackageInfo);
-      expect(result.inputs[0].streams[0].vars?.tenant_id).toBeUndefined();
+      expect(result.inputs[0].streams[0].vars?.tenant_id?.value).toBeUndefined();
     });
   });
 });
