@@ -2,6 +2,10 @@
 
 How the Kibana chrome layout is assembled, configured, and sized.
 
+`@kbn/core-chrome-layout` is the Kibana plugin API: layout service, constants, and utilities. Plugins that need scroll helpers or layout CSS variables should import this package.
+
+`@kbn/ui-chrome-layout` is the portable React layout primitive. It is a platform implementation, not a plugin dependency.
+
 ![Chrome layout overview](layout_overview.png)
 
 ## Key packages

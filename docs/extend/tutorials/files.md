@@ -31,7 +31,9 @@ Add `files` to `requiredPlugins` in `kibana.jsonc`.
 
 ### Declare a file kind
 
-A file kind is one use case (for example user avatars). Register the full kind on the **server** — that is where HTTP privilege tags and size limits are enforced. Register a browser subset (`id`, `allowedMimeTypes`, and `maxSizeBytes`) on the **client**. The upload UI uses the browser `maxSizeBytes`; if you omit it, the picker defaults to 4 MiB even when the server allows more.
+A file kind is one use case (for example user avatars). Register the full kind on the **server** — that is where HTTP privilege tags and size limits are enforced. Register a browser subset (`id`, `allowedMimeTypes`, and `maxSizeBytes`) on the **client**.
+
+If the server omits `maxSizeBytes`, it enforces a 4 MiB limit. The upload UI only checks size when the browser registration includes `maxSizeBytes`; it does not apply that server default itself.
 
 ```ts
 import type { FileKind } from '@kbn/files-plugin/common';
@@ -78,7 +80,7 @@ public setup(core: CoreSetup, { files }: { files: FilesSetup }) {
 
 ### Use the file client
 
-Browser start uses `filesClientFactory`. The HTTP client is scoped to one kind:
+Browser start uses `filesClientFactory`. The HTTP client is scoped to one kind. Pass a `contentType` from `allowedMimeTypes` on upload — the client defaults to `application/octet-stream`, which the server rejects when that type is not allowed:
 
 ```ts
 const client = files.filesClientFactory.asScoped('filesExample');
@@ -90,7 +92,11 @@ const { file } = await client.create({
   mimeType: 'image/png',
 });
 
-await client.upload({ id: file.id, body: blob });
+await client.upload({
+  id: file.id,
+  body: blob,
+  contentType: 'image/png',
+});
 ```
 
 Server start uses `fileServiceFactory`. `asInternal()` does not go through HTTP ACLs and has unrestricted access to that kind:
@@ -120,7 +126,7 @@ import { FileImage as Image } from '@kbn/shared-ux-file-image';
 const client = files.filesClientFactory.asUnscoped();
 
 <FilesContext client={client}>
-  <FilePicker kind="filesExample" onDone={onDone} />
+  <FilePicker kind="filesExample" onDone={onDone} onClose={onClose} />
   <FileUpload kind="filesExample" onDone={onDone} />
   <Image src={client.getDownloadHref({ id, fileKind: 'filesExample' })} alt="..." />
 </FilesContext>

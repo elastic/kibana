@@ -74,6 +74,13 @@ src/platform/kbn-ui/
 
 Packages use the `@kbn/ui-<component>` naming convention and are owned by `@elastic/appex-sharedux`.
 
+## Component guides
+
+These pages are for people composing the components. A guide does not make a private package a supported plugin dependency.
+
+- [Feedback](feedback.md) — One Feedback trigger, form, and success toast
+- [Side navigation](side-navigation.md) — adaptive side navigation. Not a supported app dependency; app code uses chrome navigation APIs.
+
 ## Package visibility [kbn-ui-package-visibility]
 
 `@kbn/ui-*` packages come in two kinds. The kind decides whether app code may import the package.

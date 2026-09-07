@@ -162,7 +162,7 @@ export class MyPlugin implements Plugin {
 
 ## Client-side usage [client-side-usage]
 
-On the browser, read settings through `core.settings.client`. `core.uiSettings` is the same client and is deprecated.
+On the browser, use `core.settings.client` for reads, writes, and subscriptions. `core.uiSettings` is a separate, deprecated client with its own cache — not an alias of `core.settings.client`. Mixing the two can miss updates. Migrate `get`, `set`, and `getUpdate$()` together.
 
 The [browser contract](https://github.com/elastic/kibana/blob/main/src/core/packages/ui-settings/browser) provides plugins access to the `config` entries stored in {{es}}.
 

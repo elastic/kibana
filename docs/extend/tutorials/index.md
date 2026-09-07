@@ -23,6 +23,7 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 ## Building UIs
 
 - [Register an application](./registering-an-application.md) — register a top-level application in {{kib}}
+- [Kibana Page Template](./kibana-page-template.md) — page layout, empty content, and no-data states
 - [Expressions service](./kibana-expressions-service.md) — build and execute expression pipelines
 - [Lens Config Builder API](./lens-config-builder-api-examples.md) — embed Lens visualizations using the config builder API
 - [Add data tutorials](./home-tutorials.md) — register data ingestion tutorials in the {{kib}} home screen
