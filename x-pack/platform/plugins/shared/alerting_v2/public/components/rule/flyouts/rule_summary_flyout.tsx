@@ -47,6 +47,7 @@ export interface RuleSummaryFlyoutProps {
   onUpdateApiKey?: (rule: RuleApiResponse) => void;
   onViewChangeHistory?: (rule: RuleApiResponse) => void;
   canWrite?: boolean;
+  type?: EuiFlyoutProps['type'];
   session?: EuiFlyoutProps['session'];
   ownFocus?: EuiFlyoutProps['ownFocus'];
   hasAnimation?: EuiFlyoutProps['hasAnimation'];
@@ -63,6 +64,7 @@ export const RuleSummaryFlyout = ({
   onUpdateApiKey,
   onViewChangeHistory,
   canWrite = true,
+  type = 'push',
   session,
   ownFocus = true,
   hasAnimation = true,
@@ -74,7 +76,7 @@ export const RuleSummaryFlyout = ({
   return (
     <RuleProvider rule={rule}>
       <EuiFlyout
-        type="push"
+        type={type}
         hasAnimation={hasAnimation}
         size="s"
         ownFocus={ownFocus}
