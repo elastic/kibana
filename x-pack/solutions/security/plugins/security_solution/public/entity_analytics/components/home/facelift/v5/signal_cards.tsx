@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import { AreaSeries, Chart, CurveType, ScaleType, Settings } from '@elastic/charts';
+import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
 import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
@@ -43,19 +41,13 @@ const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
 const VALUE_FONT_SIZE = 36;
 const TITLE_FONT_SIZE = 16;
 const SUBTITLE_FONT_SIZE = 14;
-const BODY_FONT_SIZE = 14;
 const TITLE_SUBTITLE_GAP = 5;
 /** Metric `primaryAdjacentGap` for bottom value + extra is 0. */
 const DELTA_VALUE_GAP = 0;
 const METRIC_LINE_HEIGHT = 1.2;
 const DIMMED_OPACITY = 0.7;
-const SPARKLINE_HEIGHT_RATIO = 0.5;
 /** Metric `panelPadding` (small spacing). */
 const CARD_PADDING = 8;
-/** Default sparkline fill: #2B394F at 8% opacity. */
-const SPARKLINE_FILL = 'rgba(43, 57, 79, 0.08)';
-/** Active-state sparkline fill: #002D80 at 12% opacity. */
-const SPARKLINE_FILL_ACTIVE = 'rgba(0, 45, 128, 0.12)';
 
 /** v.5 title overrides (tooltip uses the same string). */
 const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
@@ -82,11 +74,6 @@ const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id
 const displayDescriptionFor = (card: SignalCardData): string =>
   V5_CARD_DESCRIPTIONS[card.id] ?? card.description;
 
-const VS_YESTERDAY = i18n.translate(
-  'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsYesterday',
-  { defaultMessage: 'vs yesterday' }
-);
-
 const filterTableTooltip = (title: string) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.filterTableTooltip', {
     defaultMessage: 'Filter table: {title}',
@@ -101,38 +88,6 @@ const unfilterTableTooltip = (title: string) =>
       values: { title },
     }
   );
-
-/**
- * Delta under the description. These six metrics count "bad things", so the
- * polarity is inverted vs typical KPIs: an increase is danger (worse), a
- * decrease is success (better).
- */
-const DeltaCaption: React.FC<{ delta: number }> = ({ delta }) => {
-  const { euiTheme } = useEuiTheme();
-  const increased = delta > 0;
-  const tone = increased ? euiTheme.colors.textDanger : euiTheme.colors.textSuccess;
-  const sign = increased ? '+' : '';
-
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={increased ? 'sortUp' : 'sortDown'} size="s" color={tone} aria-hidden />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText
-          color={tone}
-          css={css`
-            font-size: ${BODY_FONT_SIZE}px;
-            line-height: ${METRIC_LINE_HEIGHT};
-          `}
-        >
-          {sign}
-          {delta} {VS_YESTERDAY}
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
 
 const CornerControl: React.FC<{
   selected: boolean;
@@ -218,46 +173,6 @@ const CornerControl: React.FC<{
   return icon;
 };
 
-/** Decorative area sparkline behind the value — fill only, no stroke. */
-const Sparkline: React.FC<{ values: number[]; fill: string }> = ({ values, fill }) => {
-  const chartBaseTheme = useElasticChartsTheme();
-  const data = useMemo(() => values.map((y, x) => ({ x, y })), [values]);
-
-  if (values.length < 2) {
-    return null;
-  }
-
-  return (
-    <Chart size={['100%', '100%']}>
-      <Settings
-        baseTheme={chartBaseTheme}
-        locale={i18n.getLocale()}
-        showLegend={false}
-        theme={{
-          background: { color: 'transparent' },
-          chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
-          chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
-        }}
-      />
-      <AreaSeries
-        id="trend"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        xAccessor="x"
-        yAccessors={['y']}
-        data={data}
-        curve={CurveType.CURVE_MONOTONE_X}
-        color={fill}
-        areaSeriesStyle={{
-          area: { opacity: 1, visible: true },
-          line: { strokeWidth: 0, visible: false },
-          point: { visible: 'never' },
-        }}
-      />
-    </Chart>
-  );
-};
-
 interface SignalMetricCardProps {
   card: SignalCardData;
   selected: boolean;
@@ -292,8 +207,6 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   // Active keeps a white tile; only the border (and sparkline tint) mark selection.
   const tileBackground = selected ? defaultBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
-  const showDelta = false;
-  const showTrend = false;
   const displayTitle = displayTitleFor(card);
   const displayDescription = displayDescriptionFor(card);
 
@@ -352,22 +265,6 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         }
       `}
     >
-      {showTrend ? (
-        <div
-          aria-hidden
-          css={css`
-            position: absolute;
-            inset-inline: 0;
-            inset-block-end: 0;
-            block-size: ${SPARKLINE_HEIGHT_RATIO * 100}%;
-            pointer-events: none;
-            z-index: 0;
-          `}
-        >
-          <Sparkline values={trendKeyframes!} fill={sparklineFill} />
-        </div>
-      ) : null}
-
       <div
         css={css`
           position: relative;
@@ -442,7 +339,6 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                 gap: ${DELTA_VALUE_GAP}px;
               `}
             >
-              {showDelta ? <DeltaCaption delta={delta!} /> : null}
               <EuiText
                 css={css`
                   font-size: ${VALUE_FONT_SIZE}px;

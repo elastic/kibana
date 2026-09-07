@@ -64,7 +64,7 @@ export const useEntitiesWithAnomaliesCount = ({
     ['entitiesWithAnomaliesCount', query],
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
-      const raw = await esqlSearch(data.search, query, signal!);
+      const raw = await esqlSearch(data.search, query, signal);
       const row = raw.values?.[0];
       const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
       const entityIdsIndex = raw.columns?.findIndex((c) => c.name === 'entity_ids') ?? -1;

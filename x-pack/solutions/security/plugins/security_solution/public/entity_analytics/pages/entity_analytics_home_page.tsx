@@ -574,10 +574,12 @@ const EntityAnalyticsEntitiesTableContent = ({
   });
 
   const state = useMemo(() => {
-    const extraFilters = [
-      watchlistId ? { term: { 'entity.attributes.watchlists': watchlistId } } : null,
-      cardFilter ?? null,
-    ].filter((f): f is QueryDslQueryContainer => f !== null);
+    const extraFilters = (
+      [
+        watchlistId ? { term: { 'entity.attributes.watchlists': watchlistId } } : null,
+        cardFilter ?? null,
+      ] as Array<QueryDslQueryContainer | null>
+    ).filter((f): f is QueryDslQueryContainer => f !== null);
 
     if (!extraFilters.length) return urlState;
 
