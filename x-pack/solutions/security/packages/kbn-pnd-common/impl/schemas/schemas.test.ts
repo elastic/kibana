@@ -21,6 +21,8 @@ import {
   ListWatchesResponse,
   WatchSkill,
   WatchWorker,
+  Worker,
+  WorkerSettings,
 } from '.';
 
 describe('PND schema smoke tests', () => {
@@ -35,7 +37,7 @@ describe('PND schema smoke tests', () => {
 
   it('parses individual seed watches through GetWatchResponse', () => {
     for (const watch of WATCHES_SEED) {
-      const result = GetWatchResponse.parse({ watch, settingsRevision: null });
+      const result = GetWatchResponse.parse({ watch });
       expect(result.watch.id).toBe(watch.id);
     }
   });
@@ -48,6 +50,28 @@ describe('PND schema smoke tests', () => {
       });
       expect(result.watchIds.length).toBeGreaterThan(0);
     }
+  });
+
+  it('parses a live Worker without Worker-specific settings', () => {
+    const worker = Worker.parse({
+      id: 'system-security-dark-continuous-threat-hunt',
+      name: 'Continuous Threat Hunt',
+      watchIds: ['system-security-watch-dark'],
+      enabled: false,
+      lastRun: null,
+      state: 'paused',
+      settings: {
+        workerId: 'system-security-dark-continuous-threat-hunt',
+        autonomy: 'manual',
+      },
+      settingsRevision: null,
+    });
+
+    expect(WorkerSettings.parse(worker.settings)).toEqual(worker.settings);
+    expect(worker.settings).toEqual({
+      workerId: 'system-security-dark-continuous-threat-hunt',
+      autonomy: 'manual',
+    });
   });
 
   it('parses seed skills through WatchSkill', () => {

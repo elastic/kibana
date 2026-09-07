@@ -258,10 +258,7 @@ export function registerInternalConversationRoutes({
       const { pinned } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.update(
-        { id: conversationId, pinned },
-        { access: 'converse', retryOnConflict: true }
-      );
+      const updatedConversation = await client.setPinned(conversationId, pinned);
 
       return response.ok<MarkPinnedConversationResponse>({
         body: {

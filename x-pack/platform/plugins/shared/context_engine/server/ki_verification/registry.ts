@@ -17,6 +17,10 @@ export class KiVerifierRegistry {
     this.verifiers.set(verifier.id, verifier);
   }
 
+  get(id: string): KiVerifier | undefined {
+    return this.verifiers.get(id);
+  }
+
   getAll(): KiVerifier[] {
     return [...this.verifiers.values()];
   }
