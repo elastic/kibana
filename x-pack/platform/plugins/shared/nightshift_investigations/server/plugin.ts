@@ -12,7 +12,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -42,6 +41,7 @@ import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
 import { writeConnectorManifest } from './tools/sandbox_bash/connector_manifest';
 import { createConnectorCallbackHandler } from './tools/sandbox_bash/connector_callbacks';
+import { preconfiguredConnectorSource } from './tools/sandbox_bash/connector_sources';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -69,9 +69,9 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private actionsStart?: NightshiftInvestigationsStartDeps['actions'];
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
-  private actionsStart?: ActionsPluginStart;
 
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
@@ -130,6 +130,13 @@ export class NightshiftInvestigationsPlugin
                 : undefined,
               logger: this.logger.get('sandbox_bash_tool'),
             })(callContext, cb),
+          // this.actionsStart is set in start(); the source is invoked at seed time, so the
+          // reference is populated before any tool handler fires.
+          // Returns [] when the actions plugin is absent — seedSandbox no-ops on an empty list.
+          getConnectors: preconfiguredConnectorSource(
+            () => this.actionsStart,
+            (req) => this.actionsStart!.getActionsClientWithRequest(req)
+          ),
         });
         this.sandboxConnectionManager = connectionManager;
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
@@ -217,8 +224,8 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
-    this.savedObjects = coreStart.savedObjects;
     this.actionsStart = plugins.actions;
+    this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
     // agent exists wherever an investigation runs. This narrower install exists so the agent is

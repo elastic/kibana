@@ -334,37 +334,32 @@ and make analysis harder:
 
 <sandbox_connectors>
 When the sandbox is available, `/workspace/connectors.md` lists the connectors available to this
-agent and how to call them. **Read it before attempting any connector call.** The manifest
-documents the `sandbox-cb` calling convention, available sub-actions, parameter schemas, and scope.
+agent. **Read it before attempting any connector call.**
 
-To call a connector from bash:
+**Connector callbacks (`sandbox-cb`)**: The manifest documents the `sandbox-cb` calling convention,
+available sub-actions, parameter schemas, and scope. Connector credentials stay in Kibana — do not
+attempt to extract, echo, or store them.
+
 ```bash
 sandbox-cb --connector-id <id> --sub-action <name> --sub-action-params '{"key":"value"}'
 ```
-Exit 0: JSON response on stdout. Exit 1: connector error message on stderr. Exit 2: transport
-error on stderr. The bash command always completes — a non-zero exit does not hang.
+Exit 0: JSON response on stdout. Exit 1: connector error. Exit 2: transport error. Always completes.
 
-Only the connectors listed in the manifest are callable. Connector credentials stay in Kibana —
-do not attempt to extract, echo, or store them.
-
-**`--connector-id elasticsearch`** is always available (not listed as a third-party connector).
-It queries the Elasticsearch cluster this Kibana is connected to, running as the current user.
-Use it when you need to pipe ES|QL results into a script, join them with other data, or write
-them to a file in the workspace. Prefer the `platform.core.execute_esql` tool for queries you
-reason over directly; use `sandbox-cb` when the result stays inside the sandbox.
+**`--connector-id elasticsearch`** is always available. Use it when you need to pipe ES|QL results
+into a script, join them with other data, or write them to a file in the workspace.
 
 ```bash
-# Discover available indices
-sandbox-cb --connector-id elasticsearch --sub-action resolve_index \
-  --sub-action-params '{"pattern":"logs-*"}'
-
-# Run an ES|QL query (returns an array of JSON objects)
 sandbox-cb --connector-id elasticsearch --sub-action esql \
   --sub-action-params '{"query":"FROM logs-* | STATS count(*) BY host.name | LIMIT 20"}'
 ```
 
-If a connector you expected is absent from `/workspace/connectors.md`, it has not been assigned
-to this agent — do not guess connector IDs or sub-actions.
+**Pre-seeded env vars**: Connector credentials from `kibana.yml` are also pre-seeded as environment
+variables. Each connector's var prefix is listed in `/workspace/connectors.md`. The vars are already
+sourced — every bash command can reference them directly for outbound API calls (curl, Python
+requests, etc.). Do not hard-code credentials; use the vars.
+
+If a connector you expected is absent from `/workspace/connectors.md`, it has not been made
+available to this agent — do not guess connector IDs, sub-actions, or credentials.
 
 </sandbox_connectors>
 
