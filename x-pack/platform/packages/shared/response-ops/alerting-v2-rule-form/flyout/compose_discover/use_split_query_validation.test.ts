@@ -120,9 +120,7 @@ describe('useSplitQueryValidation', () => {
   });
 
   it('validates the block verbatim when there is no base query', async () => {
-    const { result } = renderHook(() =>
-      useSplitQueryValidation({ baseQuery: '', callbacks })
-    );
+    const { result } = renderHook(() => useSplitQueryValidation({ baseQuery: '', callbacks }));
 
     result.current.onEditorMount(editor as unknown as monaco.editor.IStandaloneCodeEditor);
     await flushDebounce();
