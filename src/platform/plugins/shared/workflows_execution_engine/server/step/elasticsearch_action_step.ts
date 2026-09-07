@@ -74,7 +74,11 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
         },
       });
 
-      return { input: stepWith, output: result, error: undefined };
+      // HEAD requests (e.g. elasticsearch.indices.exists) resolve to a scalar boolean, which
+      // cannot be stored in the object-mapped `output` field of the step execution document.
+      const normalizedResult = result !== null && typeof result !== 'object' ? { result } : result;
+
+      return { input: stepWith, output: normalizedResult, error: undefined };
     } catch (error) {
       const stepType = this.node.configuration.type;
       const stepWith = withInputs || this.node.configuration.with;

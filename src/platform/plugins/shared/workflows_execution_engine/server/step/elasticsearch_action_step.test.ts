@@ -310,6 +310,63 @@ describe('ElasticsearchActionStepImpl', () => {
     });
   });
 
+  describe('output normalization', () => {
+    const buildExistsStep = () => {
+      const stepWith = { index: 'my-index' };
+      const step = {
+        id: 'check_index',
+        type: 'elasticsearch.indices.exists',
+        stepId: 'check_index',
+        stepType: 'elasticsearch.indices.exists',
+        configuration: {
+          name: 'check_index',
+          type: 'elasticsearch.indices.exists',
+          with: stepWith,
+        },
+      } as unknown as ElasticsearchGraphNode;
+
+      return {
+        stepWith,
+        esStep: new ElasticsearchActionStepImpl(
+          step,
+          mockStepExecutionRuntime,
+          mockWorkflowRuntime,
+          mockWorkflowLogger
+        ),
+      };
+    };
+
+    it('should wrap a scalar response in an object', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(true);
+
+      const { stepWith, esStep } = buildExistsStep();
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(result.output).toEqual({ result: true });
+    });
+
+    it('should leave object responses untouched', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue({ acknowledged: true });
+
+      const { stepWith, esStep } = buildExistsStep();
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(result.output).toEqual({ acknowledged: true });
+    });
+
+    it('should leave a null response untouched', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue(null);
+
+      const { stepWith, esStep } = buildExistsStep();
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(result.output).toBeNull();
+    });
+  });
+
   describe('response size limit enforcement (Layer 1)', () => {
     it('should map RequestAbortedError with size message to StepSizeLimitExceeded', async () => {
       const sizeError = new errors.RequestAbortedError(
