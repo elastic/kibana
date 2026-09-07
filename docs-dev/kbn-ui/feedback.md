@@ -64,7 +64,7 @@ import { FeedbackTriggerButton } from '@kbn/ui-feedback';
 | `showToast` | Surfaces success and error toasts to the user. |
 | `checkTelemetryOptIn` | Resolves whether usage collection is opted in (`FeedbackTriggerButton` only). |
 
-Questions are defined per application in `@kbn/feedback-registry`. See that package [README](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/private/feedback-registry/README.md) to register questions.
+Questions are defined per application in `@kbn/feedback-registry`. See [Register application feedback questions](../feedback/index.md) for instructions.
 
 ## Development [kbn-ui-feedback-development]
 

@@ -11,3 +11,4 @@ Internal developer documentation for the Kibana repository. Content here is publ
 
 - [Kibana UI (`@kbn/ui`)](kbn-ui/index.md) — reusable, opinionated UI components built on EUI.
 - [Chrome](chrome/index.md) — plugin-facing chrome APIs (sidebar, recently viewed, headers, menus).
+- [Feedback](feedback/index.md) — register application-specific feedback questions.
