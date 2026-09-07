@@ -10,7 +10,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
-import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared/agent_builder/add_to_chat/auto/use_rule_auto_attach';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 
 jest.mock('../../../agent_builder/use_rule_auto_attach', () => ({
   useRuleAutoAttach: jest.fn(),

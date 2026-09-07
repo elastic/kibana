@@ -26,7 +26,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared/agent_builder/add_to_chat/auto/use_rule_auto_attach';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { paths } from '../../../constants';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { TakeActionButton } from './take_action_button';

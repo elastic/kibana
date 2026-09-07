@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
-import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared/agent_builder/add_to_chat/auto/use_action_policy_auto_attach';
+import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
