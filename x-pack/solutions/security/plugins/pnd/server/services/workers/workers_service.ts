@@ -139,7 +139,7 @@ export class WorkersService {
       return { outcome: 'not-found' };
     }
 
-    const touchesSettings = patch.autonomyLevel != null;
+    const touchesSettings = patch.autonomyLevel != null || patch.scheduleInterval != null;
     const managedWorkflows = await this.requireManagedWorkflows();
     const management = this.requireManagement();
     let status = await managedWorkflows.getWorkflowStatus(registration.id, {

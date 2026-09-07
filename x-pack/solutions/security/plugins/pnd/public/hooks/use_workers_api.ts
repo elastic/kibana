@@ -63,12 +63,13 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
   toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
 };
 
-const touchesSettings = ({ autonomyLevel }: UpdateWorkerRequestBody): boolean =>
-  autonomyLevel != null;
+const touchesSettings = ({ autonomyLevel, scheduleInterval }: UpdateWorkerRequestBody): boolean =>
+  autonomyLevel != null || scheduleInterval != null;
 
 const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worker => {
   const enabled = patch.enabled ?? worker.enabled;
   const autonomy = patch.autonomyLevel ?? worker.settings.autonomy;
+  const scheduleInterval = patch.scheduleInterval ?? worker.settings.scheduleInterval;
   return {
     ...worker,
     enabled,
@@ -76,6 +77,7 @@ const applyWorkerPatch = (worker: Worker, patch: UpdateWorkerRequestBody): Worke
     settings: {
       ...worker.settings,
       autonomy,
+      ...(scheduleInterval === undefined ? {} : { scheduleInterval }),
     },
   };
 };
