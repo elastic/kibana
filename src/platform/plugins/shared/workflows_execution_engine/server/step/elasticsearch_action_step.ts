@@ -74,11 +74,13 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
         },
       });
 
-      // HEAD requests (e.g. elasticsearch.indices.exists) resolve to a scalar boolean, which
-      // cannot be stored in the object-mapped `output` field of the step execution document.
-      const normalizedResult = result !== null && typeof result !== 'object' ? { result } : result;
+      // `elasticsearch.indices.exists` is a HEAD request, which the ES transport resolves to the
+      // scalar `true`. Wrap it so the step output stays object-shaped, matching the storage
+      // mapping and letting workflows branch on `output.result`.
+      const isScalar = result !== null && typeof result !== 'object';
+      const output = stepType === 'elasticsearch.indices.exists' && isScalar ? { result } : result;
 
-      return { input: stepWith, output: normalizedResult, error: undefined };
+      return { input: stepWith, output, error: undefined };
     } catch (error) {
       const stepType = this.node.configuration.type;
       const stepWith = withInputs || this.node.configuration.with;

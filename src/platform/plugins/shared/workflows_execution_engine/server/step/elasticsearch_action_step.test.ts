@@ -311,59 +311,66 @@ describe('ElasticsearchActionStepImpl', () => {
   });
 
   describe('output normalization', () => {
-    const buildExistsStep = () => {
-      const stepWith = { index: 'my-index' };
+    const buildStep = (stepType: string, stepWith: Record<string, unknown>) => {
       const step = {
         id: 'check_index',
-        type: 'elasticsearch.indices.exists',
+        type: stepType,
         stepId: 'check_index',
-        stepType: 'elasticsearch.indices.exists',
-        configuration: {
-          name: 'check_index',
-          type: 'elasticsearch.indices.exists',
-          with: stepWith,
-        },
+        stepType,
+        configuration: { name: 'check_index', type: stepType, with: stepWith },
       } as unknown as ElasticsearchGraphNode;
 
-      return {
-        stepWith,
-        esStep: new ElasticsearchActionStepImpl(
-          step,
-          mockStepExecutionRuntime,
-          mockWorkflowRuntime,
-          mockWorkflowLogger
-        ),
-      };
+      return new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
     };
 
-    it('should wrap a scalar response in an object', async () => {
+    it('should wrap the scalar HEAD response of indices.exists in an object', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
       (mockEsClient.transport.request as jest.Mock).mockResolvedValue(true);
 
-      const { stepWith, esStep } = buildExistsStep();
-      const result = await (esStep as any)._run(stepWith);
+      const stepWith = { index: 'my-index' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
 
       expect(result.output).toEqual({ result: true });
     });
 
-    it('should leave object responses untouched', async () => {
-      mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
-      (mockEsClient.transport.request as jest.Mock).mockResolvedValue({ acknowledged: true });
+    it('should leave an object response of indices.exists untouched', async () => {
+      mockedBuildRequest.mockReturnValue({ method: 'GET', path: '/my-index' });
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue({ 'my-index': {} });
 
-      const { stepWith, esStep } = buildExistsStep();
-      const result = await (esStep as any)._run(stepWith);
+      const stepWith = { index: 'my-index', method: 'GET' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
 
-      expect(result.output).toEqual({ acknowledged: true });
+      expect(result.output).toEqual({ 'my-index': {} });
     });
 
-    it('should leave a null response untouched', async () => {
+    it('should leave a null response of indices.exists untouched', async () => {
       mockedBuildRequest.mockReturnValue({ method: 'HEAD', path: '/my-index' });
       (mockEsClient.transport.request as jest.Mock).mockResolvedValue(null);
 
-      const { stepWith, esStep } = buildExistsStep();
-      const result = await (esStep as any)._run(stepWith);
+      const stepWith = { index: 'my-index' };
+      const result = await (buildStep('elasticsearch.indices.exists', stepWith) as any)._run(
+        stepWith
+      );
 
       expect(result.output).toBeNull();
+    });
+
+    it('should NOT wrap scalar responses of other step types', async () => {
+      (mockEsClient.transport.request as jest.Mock).mockResolvedValue('green open my-index');
+
+      const stepWith = { method: 'GET', path: '/_cat/indices' };
+      const result = await (buildStep('elasticsearch.request', stepWith) as any)._run(stepWith);
+
+      expect(result.output).toBe('green open my-index');
     });
   });
 
