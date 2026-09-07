@@ -54,7 +54,10 @@ export function createPlaywrightEvalsConfig({
 
   const stackConnectors: StackConnectorDefinition[] = loadStackConnectors();
 
-  const allConnectors: EvalConnector[] = [...inferenceEndpoints, ...stackConnectors];
+  const inferenceEndpointIds = new Set(inferenceEndpoints.map((c) => c.id));
+  const uniqueStackConnectors = stackConnectors.filter((c) => !inferenceEndpointIds.has(c.id));
+
+  const allConnectors: EvalConnector[] = [...inferenceEndpoints, ...uniqueStackConnectors];
 
   const evaluationConnectorId = process.env.EVAL_CONNECTOR_ID
     ? String(process.env.EVAL_CONNECTOR_ID)
