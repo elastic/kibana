@@ -1,5 +1,5 @@
 {
-  "sha1": "c3e74f04ac43b73e7fdf8675bb4e64424df51fc3",
+  "sha1": "de9d732f7b57eebf296edd8fb538c5f014a37cf1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -598,8 +598,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 117,
-        "column": 60
+        "line": 142,
+        "column": 25
       }
     },
     {
@@ -612,8 +612,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 134,
-        "column": 90
+        "line": 165,
+        "column": 86
       }
     },
     {
@@ -626,8 +626,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 165,
-        "column": 20
+        "line": 202,
+        "column": 19
       }
     },
     {
@@ -640,22 +640,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 206,
-        "column": 9
+        "line": 251,
+        "column": 17
       }
     },
     {
       "id": "a4060127e236200-80232182fc1d771",
       "title": "MigrateLegacyPolicies should migrate legacy policies to new format when cleanup runs",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 235,
-        "column": 18
+        "line": 292,
+        "column": 15
       }
     },
     {
@@ -668,8 +668,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 266,
-        "column": 18
+        "line": 333,
+        "column": 17
       }
     },
     {
@@ -682,8 +682,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
-        "line": 291,
-        "column": 20
+        "line": 359,
+        "column": 11
       }
     },
     {
