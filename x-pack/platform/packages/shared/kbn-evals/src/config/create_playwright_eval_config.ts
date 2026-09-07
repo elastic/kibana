@@ -9,13 +9,12 @@ import type { ScoutTestOptions } from '@kbn/scout';
 import { createPlaywrightConfig } from '@kbn/scout';
 import type { PlaywrightTestConfig } from '@playwright/test';
 import { defineConfig } from '@playwright/test';
-import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import {
   loadInferenceEndpoints,
   type InferenceEndpointDefinition,
 } from '../utils/inference_endpoint_definition';
 import {
-  toStackConnectorDefinition,
+  loadStackConnectors,
   type EvalConnector,
   type StackConnectorDefinition,
 } from '../utils/eval_connector';
@@ -53,9 +52,7 @@ export function createPlaywrightEvalsConfig({
 
   const inferenceEndpoints: InferenceEndpointDefinition[] = loadInferenceEndpoints();
 
-  const stackConnectors: StackConnectorDefinition[] = getAvailableConnectors().map(
-    toStackConnectorDefinition
-  );
+  const stackConnectors: StackConnectorDefinition[] = loadStackConnectors();
 
   const allConnectors: EvalConnector[] = [...inferenceEndpoints, ...stackConnectors];
 

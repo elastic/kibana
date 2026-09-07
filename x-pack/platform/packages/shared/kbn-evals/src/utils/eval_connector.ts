@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 
@@ -22,6 +23,16 @@ export type EvalConnector = StackConnectorDefinition | InferenceEndpointDefiniti
 export const toStackConnectorDefinition = (
   connector: AvailableConnectorWithId
 ): StackConnectorDefinition => ({ ...connector, type: 'stack_connector' });
+
+/**
+ * Stack connectors for Playwright eval projects.
+ */
+export const loadStackConnectors = (): StackConnectorDefinition[] => {
+  if (process.env.CI && !process.env.KIBANA_TESTING_AI_CONNECTORS) {
+    return [];
+  }
+  return getAvailableConnectors().map(toStackConnectorDefinition);
+};
 
 export const isInferenceEndpointDefinition = (
   connector: EvalConnector

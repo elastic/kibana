@@ -6,12 +6,22 @@
  */
 
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import type { InferenceEndpointDefinition } from './inference_endpoint_definition';
 import {
   isInferenceEndpointDefinition,
+  loadStackConnectors,
   toStackConnectorDefinition,
   type StackConnectorDefinition,
 } from './eval_connector';
+
+jest.mock('@kbn/gen-ai-functional-testing', () => ({
+  getAvailableConnectors: jest.fn(),
+}));
+
+const getAvailableConnectorsMock = getAvailableConnectors as jest.MockedFunction<
+  typeof getAvailableConnectors
+>;
 
 const endpoint: InferenceEndpointDefinition = {
   type: 'inference_endpoint',
@@ -36,6 +46,60 @@ describe('toStackConnectorDefinition', () => {
       ...connector,
       type: 'stack_connector',
     });
+  });
+});
+
+describe('loadStackConnectors', () => {
+  const originalCi = process.env.CI;
+  const originalConnectors = process.env.KIBANA_TESTING_AI_CONNECTORS;
+
+  afterEach(() => {
+    if (originalCi === undefined) {
+      delete process.env.CI;
+    } else {
+      process.env.CI = originalCi;
+    }
+    if (originalConnectors === undefined) {
+      delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+    } else {
+      process.env.KIBANA_TESTING_AI_CONNECTORS = originalConnectors;
+    }
+    getAvailableConnectorsMock.mockReset();
+  });
+
+  it('returns an empty list on CI when KIBANA_TESTING_AI_CONNECTORS is unset', () => {
+    process.env.CI = 'true';
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+
+    expect(loadStackConnectors()).toEqual([]);
+    expect(getAvailableConnectorsMock).not.toHaveBeenCalled();
+  });
+
+  it('loads stack connectors on CI when KIBANA_TESTING_AI_CONNECTORS is set', () => {
+    process.env.CI = 'true';
+    process.env.KIBANA_TESTING_AI_CONNECTORS = 'e30=';
+    getAvailableConnectorsMock.mockReturnValue([
+      { id: 'c1', name: 'C1', actionTypeId: '.gen-ai', config: {} },
+    ]);
+
+    expect(loadStackConnectors()).toEqual([
+      {
+        id: 'c1',
+        name: 'C1',
+        actionTypeId: '.gen-ai',
+        config: {},
+        type: 'stack_connector',
+      },
+    ]);
+  });
+
+  it('loads stack connectors locally even when KIBANA_TESTING_AI_CONNECTORS is unset', () => {
+    delete process.env.CI;
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+    getAvailableConnectorsMock.mockReturnValue([]);
+
+    expect(loadStackConnectors()).toEqual([]);
+    expect(getAvailableConnectorsMock).toHaveBeenCalled();
   });
 });
 
