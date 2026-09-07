@@ -121,7 +121,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 5,
-      abortSignal: expect.any(AbortSignal),
+      requestTimeout: 30_000,
     });
     expect(getDiverseSampleDocumentsMock).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual(['random-1']);
@@ -174,7 +174,7 @@ describe('fetchSampleDocuments', () => {
         end: 200,
         sampleSize: 4,
         unmappedFields: 'LOAD',
-        abortSignal: expect.any(AbortSignal),
+        requestTimeout: 30_000,
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(
@@ -196,7 +196,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       sampleSize: 10,
-      abortSignal: expect.any(AbortSignal),
+      requestTimeout: 30_000,
     });
     expect(esClient.fieldCaps).not.toHaveBeenCalled();
     expect(result.documents.map((document) => document._id)).toEqual([

@@ -10,7 +10,7 @@ import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   EXPANDABLE_KEY,
@@ -44,7 +44,7 @@ const describeSchema = z.object({
     ),
 });
 
-export const createDescribeApiTool = (): InternalBuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = (): BuiltinToolDefinition<typeof describeSchema> => {
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,

@@ -43,10 +43,9 @@ export const resolveCpsData = async (
       })
       .then((res) => res.expression ?? PROJECT_ROUTING_ALL)
       .catch((error: { statusCode?: number }) => {
-        // A missing routing expression (404) or unknown route (400, e.g. local dev ES that does
-        // not implement /_project_routing) is a legitimate "no routing configured" case: fall
+        // A missing routing expression (404) is a legitimate "no routing configured" case: fall
         // back to the default "all projects" scope silently.
-        if (error?.statusCode === 404 || error?.statusCode === 400) {
+        if (error?.statusCode === 404) {
           return PROJECT_ROUTING_ALL;
         }
         // The internal user should always be authorized for this operator-only endpoint, so a 403

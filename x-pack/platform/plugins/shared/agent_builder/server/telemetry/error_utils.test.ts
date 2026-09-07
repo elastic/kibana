@@ -117,6 +117,7 @@ describe('error_utils', () => {
         AgentExecutionErrorCode.emptyResponse,
         AgentExecutionErrorCode.unknownError,
         AgentExecutionErrorCode.invalidState,
+        AgentExecutionErrorCode.schemaViolation,
       ];
 
       for (const code of executionErrorCodes) {

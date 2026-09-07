@@ -26,6 +26,7 @@ describe('generateAllComputedFeatures', () => {
 
   afterEach(() => jest.restoreAllMocks());
 
+  // A single failure must not lose the other generators' features.
   it('logs and skips a rejected generator while keeping the successful ones', async () => {
     [datasetAnalysisGenerator, logPatternsGenerator, codeAnalysisGenerator].forEach((generator) =>
       jest.spyOn(generator, 'generate').mockResolvedValue(undefined)
@@ -40,6 +41,7 @@ describe('generateAllComputedFeatures', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(errorLogsGenerator.type));
   });
 
+  // A skipped generator (undefined) must not mask a total failure of the rest.
   it('throws when failures leave no features, alongside a skipped generator', async () => {
     [
       datasetAnalysisGenerator,
@@ -56,53 +58,7 @@ describe('generateAllComputedFeatures', () => {
     );
   });
 
-  it('passes a single request+timeout signal to every generator', async () => {
-    const seen: AbortSignal[] = [];
-    [
-      datasetAnalysisGenerator,
-      logSamplesGenerator,
-      logPatternsGenerator,
-      errorLogsGenerator,
-      codeAnalysisGenerator,
-    ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
-        seen.push(signal);
-        return undefined;
-      })
-    );
-
-    const controller = new AbortController();
-    await generateAllComputedFeatures({ ...options, requestSignal: controller.signal });
-
-    expect(seen).toHaveLength(5);
-    expect(new Set(seen).size).toBe(1);
-    controller.abort();
-    expect(seen[0].aborted).toBe(true);
-  });
-
-  it('logs all generators as failed when the shared signal is already aborted', async () => {
-    const aborted = AbortSignal.abort(new DOMException('signal timed out', 'TimeoutError'));
-
-    [
-      datasetAnalysisGenerator,
-      logSamplesGenerator,
-      logPatternsGenerator,
-      errorLogsGenerator,
-      codeAnalysisGenerator,
-    ].forEach((generator) =>
-      jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
-        if (signal.aborted) throw signal.reason;
-        return undefined;
-      })
-    );
-
-    await expect(
-      generateAllComputedFeatures({ ...options, requestSignal: aborted })
-    ).rejects.toThrow('All computed feature generators failed');
-
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/"[^"]+" failed:/));
-  });
-
+  // Nothing produced with no failures is legitimate, not an error.
   it('returns empty without throwing when all generators skip and none fail', async () => {
     [
       datasetAnalysisGenerator,

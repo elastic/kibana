@@ -43,11 +43,6 @@ spec:
         build_tags: false
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: false
-        build_merge_group_checks_requested: true
-        cancel_when_merge_group_destroyed: true
-        use_merge_group_base_commit_for_git_diff_base: true
-      webhook_events:
-        - merge_group
       teams:
         everyone:
           access_level: BUILD_AND_READ

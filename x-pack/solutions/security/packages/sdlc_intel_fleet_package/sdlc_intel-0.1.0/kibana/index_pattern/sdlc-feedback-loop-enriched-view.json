@@ -1,0 +1,14 @@
+{
+  "attributes": {
+    "fieldAttrs": "{}",
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "name": "sdlc-feedback-loop-enriched-view",
+    "runtimeFieldMap": "{}",
+    "sourceFilters": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "sdlc-feedback-loop-enriched-view"
+  },
+  "id": "sdlc-feedback-loop-enriched-view",
+  "type": "index-pattern"
+}

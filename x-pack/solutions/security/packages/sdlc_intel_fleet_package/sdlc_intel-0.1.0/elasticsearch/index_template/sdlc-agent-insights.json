@@ -1,0 +1,108 @@
+{
+  "index_patterns": [
+    "sdlc-agent-insights"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "workflow": {
+          "properties": {
+            "execution_id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "analysis": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "summary": {
+              "type": "text"
+            },
+            "confidence": {
+              "type": "float"
+            }
+          }
+        },
+        "findings": {
+          "type": "nested",
+          "properties": {
+            "category": {
+              "type": "keyword"
+            },
+            "severity": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 256
+                }
+              }
+            },
+            "detail": {
+              "type": "text"
+            },
+            "entity_url": {
+              "type": "keyword"
+            },
+            "recommended_action": {
+              "type": "text"
+            }
+          }
+        },
+        "misalignments": {
+          "type": "nested",
+          "properties": {
+            "pr_url": {
+              "type": "keyword"
+            },
+            "verdict": {
+              "type": "keyword"
+            },
+            "alignment_score": {
+              "type": "float"
+            },
+            "rationale": {
+              "type": "text"
+            }
+          }
+        },
+        "scope_claim": {
+          "type": "object",
+          "enabled": true
+        },
+        "payload": {
+          "type": "object",
+          "enabled": true
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

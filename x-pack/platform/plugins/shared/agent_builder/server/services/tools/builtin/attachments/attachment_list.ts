@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
@@ -25,7 +25,7 @@ const attachmentListSchema = z.object({
  */
 export const createAttachmentListTool = ({
   attachmentManager,
-}: AttachmentToolsOptions): InternalBuiltinToolDefinition<typeof attachmentListSchema> => ({
+}: AttachmentToolsOptions): BuiltinToolDefinition<typeof attachmentListSchema> => ({
   id: attachmentTools.list,
   type: ToolType.builtin,
   description:

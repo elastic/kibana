@@ -1,0 +1,39 @@
+{
+  "id": "sdlc-pr-missing-related-issue",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC PR missing related issue",
+    "tags": [
+      "SDLC Intelligence",
+      "pull-request",
+      "planning",
+      "related-issue"
+    ],
+    "ruleTypeId": ".index-threshold",
+    "schedule": {
+      "interval": "1h"
+    },
+    "params": {
+      "index": [
+        "sdlc-pr-missing-related-issue"
+      ],
+      "timeField": "@timestamp",
+      "aggType": "count",
+      "groupBy": "all",
+      "termSize": 0,
+      "thresholdComparator": ">",
+      "threshold": [
+        0
+      ],
+      "timeWindowSize": 2,
+      "timeWindowUnit": "h",
+      "filterKuery": "sdlc.finding.type: pr_missing_related_issue and event.kind: event"
+    },
+    "alertDelay": {
+      "active": 1
+    },
+    "description": "Detects open GitHub pull requests that have no closing-issue link (Fixes/Closes). Source events are written by the SDLC agent-pr-missing-related-issue workflow into sdlc-pr-missing-related-issue; this rule creates Security detection alerts."
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0"
+}

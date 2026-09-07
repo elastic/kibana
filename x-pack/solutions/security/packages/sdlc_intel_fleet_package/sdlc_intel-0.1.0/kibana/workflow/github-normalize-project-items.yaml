@@ -1,0 +1,297 @@
+version: '1'
+name: SDLC GitHub normalize project items
+description: >
+  Tier-2 projection workflow. Parses Project v2 fieldValues from github-intel-project-items.payload
+  into hierarchy, roadmap, team_attribution, and epic_anchor fields expected by dashboards and
+  sdlc-project-items-enriched-view. Run github-catalog-project-items first. Pages catalog-sourced
+  items until none remain so a full backfill can complete in one run. Catalog must merge-update
+  (not replace) documents so these fields are not wiped.
+enabled: true
+tags:
+  - sdlc
+  - github
+  - normalize
+  - project
+  - ingest
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  syncStateIndex: github-intel-sync-state
+  projectItemsIndex: github-intel-project-items
+  syncSource: github-normalize-project-items
+  entityType: project_item_normalize
+  batchSize: 200
+
+settings:
+  timeout: 3h
+  concurrency:
+    key: sdlc-github-normalize-project-items
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 6h
+  - type: manual
+
+steps:
+  - name: init_state
+    type: data.set
+    with:
+      runStartedAt: '{{ execution.startedAt }}'
+      itemsProcessed: 0
+      continuePaging: true
+
+  - name: paginate_normalize
+    type: while
+    condition: 'variables.continuePaging : true'
+    max-iterations: 80
+    steps:
+      - name: load_items_batch
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.projectItemsIndex }}'
+          size: '{{ consts.batchSize }}'
+          ignore_unavailable: true
+          allow_no_indices: true
+          query:
+            bool:
+              must:
+                - term:
+                    org.login: '{{ consts.orgLogin }}'
+                - term:
+                    sync.source: github-catalog-project-items
+
+      - name: stop_if_batch_empty
+        type: data.set
+        if: '${{ steps.load_items_batch.output.hits.hits.size == 0 }}'
+        with:
+          continuePaging: false
+
+      - name: normalize_items
+        type: foreach
+        if: '${{ steps.load_items_batch.output.hits.hits.size > 0 }}'
+        foreach: '${{ steps.load_items_batch.output.hits.hits | json }}'
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: init_item_context
+            type: data.set
+            with:
+              itemId: '${{ foreach.item._source.entity.id }}'
+              ticketType: ''
+              epicName: ''
+              parentIssue: ''
+              projectTeam: ''
+              productInitiative: ''
+              roadmapStage: ''
+              releaseMilestone: ''
+              coverageStatus: ''
+              issueOwner: '${{ foreach.item._source.payload.content.author.login ?? foreach.item._source.people.author ?? "" }}'
+
+          - name: parse_field_values
+            type: foreach
+            foreach: '${{ foreach.item._source.payload.fieldValues.nodes | json }}'
+            steps:
+              - name: capture_type
+                type: data.set
+                if: '${{ foreach.item.field.name == "Type" or foreach.item.field.name == "Ticket Type" or foreach.item.field.name == "Issue Type" or foreach.item.field.name == "Item Type" or foreach.item.field.name == "Item type" or foreach.item.field.name == "Work type" or foreach.item.field.name == "Hierarchy" }}'
+                with:
+                  ticketType: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_epic
+                type: data.set
+                if: '${{ foreach.item.field.name == "Epic" }}'
+                with:
+                  epicName: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_parent
+                type: data.set
+                if: '${{ foreach.item.field.name == "Parent issue" or foreach.item.field.name == "Parent Issue" }}'
+                with:
+                  parentIssue: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_team
+                type: data.set
+                if: '${{ foreach.item.field.name == "Team" or foreach.item.field.name == "Owning Team" }}'
+                with:
+                  projectTeam: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_team_fallback
+                type: data.set
+                if: '${{ variables.projectTeam == "" and (foreach.item.field.name == "Component" or foreach.item.field.name == "Area") }}'
+                with:
+                  projectTeam: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_team_workstream_fallback
+                type: data.set
+                if: '${{ variables.projectTeam == "" and foreach.item.field.name == "Workstream" }}'
+                with:
+                  projectTeam: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_initiative
+                type: data.set
+                if: '${{ foreach.item.field.name == "Product Initiative" }}'
+                with:
+                  productInitiative: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_roadmap_stage
+                type: data.set
+                if: '${{ foreach.item.field.name == "Product Roadmap Stage" or foreach.item.field.name == "Stage" or foreach.item.field.name == "Pipeline Stage" }}'
+                with:
+                  roadmapStage: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_roadmap_phase_fallback
+                type: data.set
+                if: '${{ variables.roadmapStage == "" and foreach.item.field.name == "Phase" }}'
+                with:
+                  roadmapStage: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_release_milestone
+                type: data.set
+                if: '${{ foreach.item.field.name == "Release Milestone" or foreach.item.field.name == "Stack Release Target" or foreach.item.field.name == "Target Milestone" or foreach.item.field.name == "Stack Milestone" }}'
+                with:
+                  releaseMilestone: '${{ foreach.item.name ?? foreach.item.text ?? foreach.item.date ?? foreach.item.milestone.title ?? foreach.item.title ?? "" }}'
+
+              - name: capture_release_milestone_fallback
+                type: data.set
+                if: '${{ variables.releaseMilestone == "" and (foreach.item.field.name == "Program Milestone" or foreach.item.field.name == "Launch Milestone" or foreach.item.field.name == "Milestones") }}'
+                with:
+                  releaseMilestone: '${{ foreach.item.name ?? foreach.item.text ?? foreach.item.date ?? foreach.item.milestone.title ?? foreach.item.title ?? "" }}'
+
+              - name: capture_release_quarter
+                type: data.set
+                if: '${{ variables.releaseMilestone == "" and (foreach.item.field.name == "Expected Delivery Quarter" or foreach.item.field.name == "Quarter" or foreach.item.field.name == "Target Quarter") }}'
+                with:
+                  releaseMilestone: '${{ foreach.item.name ?? foreach.item.text ?? foreach.item.date ?? "" }}'
+
+              - name: capture_assignees
+                type: data.set
+                if: '${{ variables.issueOwner == "" and (foreach.item.field.name == "Assignees" or foreach.item.field.name == "Assignee" or foreach.item.field.name == "Owner") }}'
+                with:
+                  issueOwner: '${{ foreach.item.users.nodes[0].login ?? foreach.item.name ?? foreach.item.text ?? "" }}'
+
+              - name: capture_status
+                type: data.set
+                if: '${{ foreach.item.field.name == "Status" }}'
+                with:
+                  coverageStatus: '${{ foreach.item.name ?? foreach.item.text ?? "" }}'
+
+          - name: canonicalize_epic_type
+            type: data.set
+            if: '${{ variables.ticketType contains "Epic" or variables.ticketType contains "epic" }}'
+            with:
+              ticketType: Epic
+
+          - name: upsert_normalized_item
+            type: elasticsearch.update
+            with:
+              index: '{{ consts.projectItemsIndex }}'
+              id: '${{ variables.itemId }}'
+              retry_on_conflict: 3
+              doc:
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                fields:
+                  - name: Type
+                    type: single_select
+                    value: '${{ variables.ticketType }}'
+                  - name: Epic
+                    type: single_select
+                    value: '${{ variables.epicName }}'
+                  - name: Parent issue
+                    type: text
+                    value: '${{ variables.parentIssue }}'
+                  - name: Team
+                    type: single_select
+                    value: '${{ variables.projectTeam }}'
+                  - name: Product Initiative
+                    type: single_select
+                    value: '${{ variables.productInitiative }}'
+                  - name: Product Roadmap Stage
+                    type: single_select
+                    value: '${{ variables.roadmapStage }}'
+                  - name: Release Milestone
+                    type: single_select
+                    value: '${{ variables.releaseMilestone }}'
+                  - name: Status
+                    type: single_select
+                    value: '${{ variables.coverageStatus }}'
+                hierarchy:
+                  ticket_type: '${{ variables.ticketType }}'
+                  epic: '${{ variables.epicName }}'
+                  parent_issue: '${{ variables.parentIssue }}'
+                roadmap:
+                  initiative: '${{ variables.productInitiative }}'
+                  stage: '${{ variables.roadmapStage }}'
+                  release_milestone: '${{ variables.releaseMilestone }}'
+                epic_anchor:
+                  title: '{% if foreach.item._source.content_ref.type == "Issue" %}{{ foreach.item._source.payload.content.title }}{% endif %}'
+                  team: '${{ variables.projectTeam }}'
+                  initiative: '${{ variables.productInitiative }}'
+                  roadmap_stage: '${{ variables.roadmapStage }}'
+                  release_milestone: '${{ variables.releaseMilestone }}'
+                  owner: '${{ variables.issueOwner }}'
+                  epic_issue_number: '${{ foreach.item._source.entity.number }}'
+                  roadmap_id: '${{ foreach.item._source.project.id }}'
+                team_attribution:
+                  engineering_team: '${{ variables.projectTeam }}'
+                  org_teams: '${{ variables.projectTeam }}'
+                  attribution_source: project_field
+                people:
+                  author: '${{ variables.issueOwner }}'
+                delivery:
+                  coverage_status: '${{ variables.coverageStatus }}'
+                  coverage_pct: '{% if variables.coverageStatus == "Done" %}100{% elsif variables.coverageStatus == "In Progress" %}50{% else %}0{% endif %}'
+
+          - name: track_batch_progress
+            type: data.set
+            with:
+              itemsProcessed: '${{ variables.itemsProcessed | plus: 1 }}'
+
+          - name: checkpoint_page
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.syncStateIndex }}'
+              id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity_type: '{{ consts.entityType }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                last_run_at: '{{ execution.startedAt }}'
+                last_run_status: in_progress
+                stats:
+                  items_processed: '${{ variables.itemsProcessed }}'
+                  batch_size: '${{ steps.load_items_batch.output.hits.hits.size }}'
+                  has_next_page: '${{ variables.continuePaging }}'
+      - name: stop_if_last_batch
+        type: data.set
+        if: '${{ steps.load_items_batch.output.hits.hits.size < 200 }}'
+        with:
+          continuePaging: false
+
+      - name: write_checkpoint
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: success
+            stats:
+              items_processed: '${{ variables.itemsProcessed }}'
+              batch_size: '${{ steps.load_items_batch.output.hits.hits.size }}'
+              has_next_page: '${{ variables.continuePaging }}'

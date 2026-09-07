@@ -13,7 +13,7 @@ import {
   type MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ScopedRunner } from '@kbn/agent-builder-server/runner';
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
@@ -106,7 +106,7 @@ export const registerInternalTools = async ({
   const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone && !parentExecutionId;
   const interactive = interactivity.enabled;
 
-  const tools: Array<InternalBuiltinToolDefinition<any>> = [];
+  const tools: Array<BuiltinToolDefinition<any>> = [];
 
   // Filesystem — read_file and list_files are always on; bash is FF-gated.
   tools.push(createReadFileTool({ filesystemService }));

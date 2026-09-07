@@ -114,15 +114,9 @@ describe('GET /internal/evals/experiments', () => {
               task_model_id: { buckets: [{ key: 'gpt-4' }] },
               task_model_family: { buckets: [{ key: 'gpt-4' }] },
               task_model_provider: { buckets: [{ key: 'openai' }] },
-              evaluator_models: {
-                buckets: [
-                  {
-                    key: 'claude-3',
-                    family: { buckets: [{ key: 'claude-3' }] },
-                    provider: { buckets: [{ key: 'anthropic' }] },
-                  },
-                ],
-              },
+              evaluator_model_id: { buckets: [{ key: 'claude-3' }] },
+              evaluator_model_family: { buckets: [{ key: 'claude-3' }] },
+              evaluator_model_provider: { buckets: [{ key: 'anthropic' }] },
               git_branch: { buckets: [{ key: 'main' }] },
               git_commit_sha: { buckets: [{ key: 'def456' }] },
               total_repetitions: { value: 2 },
@@ -147,7 +141,6 @@ describe('GET /internal/evals/experiments', () => {
     expect(response.payload.experiments[0].experiment_id).toBe('experiment-abc');
     expect(response.payload.experiments[0].execution_id).toBe('experiment-abc');
     expect(response.payload.experiments[0].task_model.id).toBe('gpt-4');
-    expect(response.payload.experiments[0].evaluator_model.id).toBe('claude-3');
   });
 
   it('returns 500 when evaluationScoreService.search throws', async () => {

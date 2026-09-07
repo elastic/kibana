@@ -146,9 +146,7 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityDelegate(
-      buildSecurityApi({ authc: this.authc, config: this.config })
-    );
+    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
     );

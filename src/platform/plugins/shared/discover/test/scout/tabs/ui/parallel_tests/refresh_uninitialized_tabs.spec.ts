@@ -8,7 +8,6 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, testData } from '../fixtures';
 
 const FIRST_TAB_LABEL = 'Persisted data view';
@@ -36,53 +35,50 @@ spaceTest.describe(
 
     spaceTest(
       'saves and reloads tabs that were not re-initialized after refresh',
-      async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
+      async ({ discoverScoutSpace, page, pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
         const sessionName = `Uninitialized tabs session ${Date.now()}`;
         const esqlQuery = 'FROM logstash-* | LIMIT 100';
 
         await spaceTest.step('create and load data view and ESQL tabs', async () => {
-          await apiServices.discover.create(
-            {
-              title: sessionName,
-              tabs: [
-                {
-                  id: 'persisted-data-view',
-                  label: FIRST_TAB_LABEL,
-                  data_source: {
-                    type: 'data_view_reference',
-                    ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
-                  },
+          await discoverScoutSpace.createDiscoverSession({
+            title: sessionName,
+            tabs: [
+              {
+                id: 'persisted-data-view',
+                label: FIRST_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_reference',
+                  ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
                 },
-                {
-                  id: 'flights-data-view',
-                  label: SECOND_TAB_LABEL,
-                  data_source: {
-                    type: 'data_view_reference',
-                    ref_id: discoverScoutSpace.getDataViewId(FLIGHTS_DATA_VIEW),
-                  },
+              },
+              {
+                id: 'flights-data-view',
+                label: SECOND_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_reference',
+                  ref_id: discoverScoutSpace.getDataViewId(FLIGHTS_DATA_VIEW),
                 },
-                {
-                  id: 'ad-hoc-data-view',
-                  label: THIRD_TAB_LABEL,
-                  data_source: {
-                    type: 'data_view_spec',
-                    index_pattern: 'logst*',
-                    time_field: '@timestamp',
-                  },
+              },
+              {
+                id: 'ad-hoc-data-view',
+                label: THIRD_TAB_LABEL,
+                data_source: {
+                  type: 'data_view_spec',
+                  index_pattern: 'logst*',
+                  time_field: '@timestamp',
                 },
-                {
-                  id: 'esql',
-                  label: 'ES|QL',
-                  data_source: {
-                    type: 'esql',
-                    query: esqlQuery,
-                  },
+              },
+              {
+                id: 'esql',
+                label: 'ES|QL',
+                data_source: {
+                  type: 'esql',
+                  query: esqlQuery,
                 },
-              ],
-            } satisfies DiscoverSessionApiDataInput,
-            discoverScoutSpace.id
-          );
+              },
+            ],
+          });
 
           await discover.loadSavedSearch(sessionName);
           await unifiedTabs.selectTab(3);

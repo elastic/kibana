@@ -69,6 +69,7 @@ describe('ElasticsearchActionStepImpl', () => {
 
     mockWorkflowLogger = {
       logInfo: jest.fn(),
+      logWarn: jest.fn(),
       logError: jest.fn(),
       logDebug: jest.fn(),
     } as unknown as jest.Mocked<IWorkflowEventLogger>;
@@ -162,6 +163,184 @@ describe('ElasticsearchActionStepImpl', () => {
           bulkBody: bulkOperations,
         },
         expect.objectContaining({ maxResponseSize: expect.any(Number) })
+      );
+    });
+
+    it('should return a no-op response and skip the ES call when bulk operations is empty', async () => {
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: [],
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: [],
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(stepWith);
+
+      // An empty operations array must not hit ES (ES rejects empty _bulk bodies)
+      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect((result as any).output).toEqual({ errors: false, items: [] });
+    });
+
+    it('should return a no-op response when bulkBody is not an array', async () => {
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: 'not-an-array' as unknown as Array<Record<string, unknown>>,
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: 'not-an-array',
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect((result as any).output).toEqual({ errors: false, items: [] });
+    });
+
+    it('should log a warning and keep returning the full response when bulk has partial failures', async () => {
+      const bulkResponse = {
+        took: 1,
+        errors: true,
+        items: [
+          { index: { _index: 'my-test', _id: 'doc1', status: 201 } },
+          {
+            index: {
+              _index: 'my-test',
+              _id: 'doc2',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'failed' },
+            },
+          },
+          {
+            index: {
+              _index: 'my-test',
+              _id: 'doc3',
+              status: 500,
+              error: { type: 'exception', reason: 'timeout' },
+            },
+          },
+        ],
+      };
+      mockEsClient.transport.request = jest.fn().mockResolvedValue(bulkResponse);
+
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: [{ index: { _id: 'doc1' } }, { field: 'value1' }],
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: [{ index: { _id: 'doc1' } }, { field: 'value1' }],
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(mockWorkflowLogger.logWarn).toHaveBeenCalledTimes(1);
+      expect(mockWorkflowLogger.logWarn).toHaveBeenCalledWith(
+        'Elasticsearch action completed with 2 partial failures out of 3 items',
+        expect.objectContaining({
+          event: { action: 'elasticsearch-action', outcome: 'failure' },
+          tags: ['elasticsearch', 'internal-action', 'partial-failure'],
+        })
+      );
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual(bulkResponse);
+    });
+
+    it('should keep the success path when bulk response has errors: false', async () => {
+      const bulkResponse = {
+        took: 1,
+        errors: false,
+        items: [
+          { index: { _index: 'my-test', _id: 'doc1', status: 201 } },
+          { index: { _index: 'my-test', _id: 'doc2', status: 201 } },
+        ],
+      };
+      mockEsClient.transport.request = jest.fn().mockResolvedValue(bulkResponse);
+
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: [{ index: { _id: 'doc1' } }, { field: 'value1' }],
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: [{ index: { _id: 'doc1' } }, { field: 'value1' }],
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (esStep as any)._run(stepWith);
+
+      expect(mockWorkflowLogger.logWarn).not.toHaveBeenCalled();
+      expect(mockWorkflowLogger.logInfo).toHaveBeenCalledWith(
+        'Elasticsearch action completed: elasticsearch.bulk',
+        expect.objectContaining({
+          event: { action: 'elasticsearch-action', outcome: 'success' },
+          tags: ['elasticsearch', 'internal-action'],
+        })
       );
     });
 

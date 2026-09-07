@@ -14,14 +14,12 @@ import { useRegionPolicy } from '../../hooks/use_region_policy';
 import { useSaveRegionPolicy } from '../../hooks/use_save_region_policy';
 import { useDeleteRegionPolicy } from '../../hooks/use_delete_region_policy';
 import { useEisModels } from '../../hooks/use_eis_models';
-import { useRegionPreferencesRedesignEnabled } from '../../hooks/use_region_preferences_redesign_enabled';
 import * as eisUtils from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_region_policy');
 jest.mock('../../hooks/use_save_region_policy');
 jest.mock('../../hooks/use_delete_region_policy');
 jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_region_preferences_redesign_enabled');
 jest.mock('../../utils/eis_utils', () => ({
   ...jest.requireActual('../../utils/eis_utils'),
   getAvailableRegions: jest.fn(),
@@ -34,7 +32,6 @@ const mockUseRegionPolicy = jest.mocked(useRegionPolicy);
 const mockUseSaveRegionPolicy = jest.mocked(useSaveRegionPolicy);
 const mockUseDeleteRegionPolicy = jest.mocked(useDeleteRegionPolicy);
 const mockUseEisModels = jest.mocked(useEisModels);
-const mockUseRegionPreferencesRedesignEnabled = jest.mocked(useRegionPreferencesRedesignEnabled);
 
 const mockSaveMutate = jest.fn();
 const mockDeleteMutate = jest.fn();
@@ -71,7 +68,6 @@ describe('ManageRegionsModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRegionPreferencesRedesignEnabled.mockReturnValue(false);
 
     // Default: return the two test regions (real zone mappings apply via jest.requireActual)
     mockGetAvailableRegions.mockReturnValue(twoTestRegions);
@@ -813,7 +809,7 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        { body: { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] } },
+        { allowed_regions: [{ csp: 'gcp', region: 'europe-west1' }] },
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
     });
@@ -947,54 +943,13 @@ describe('ManageRegionsModal', () => {
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
       expect(mockSaveMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ body: expect.objectContaining({ allowed_geos: ['us'] }) }),
+        expect.objectContaining({ allowed_geos: ['us'] }),
         expect.objectContaining({ onSuccess: expect.any(Function) })
       );
       expect(mockSaveMutate).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({ allowed_regions: expect.anything() }),
-        }),
+        expect.objectContaining({ allowed_regions: expect.anything() }),
         expect.anything()
       );
-    });
-  });
-
-  describe('redesign confirmation modal', () => {
-    it('opens Confirm region selection instead of the legacy confirm modal when the flag is on', async () => {
-      mockUseRegionPreferencesRedesignEnabled.mockReturnValue(true);
-      mockGetAvailableGeos.mockReturnValue(['eu', 'us']);
-      mockUseRegionPolicy.mockReturnValue({
-        data: { region_policy: { allowed_geos: ['eu', 'us'] }, created_at: '2024-01-01T00:00:00Z' },
-        isLoading: false,
-        isError: false,
-      } as unknown as ReturnType<typeof useRegionPolicy>);
-
-      render(
-        <Wrapper>
-          <ManageRegionsModal onClose={onClose} />
-        </Wrapper>
-      );
-
-      await waitFor(() => {
-        expect(screen.getByTestId('geoZoneCheckbox-eu')).toBeInTheDocument();
-      });
-      fireEvent.click(screen.getByTestId('geoZoneCheckbox-eu'));
-      await waitFor(() => {
-        expect(screen.getByTestId('manageRegionsSaveButton')).not.toBeDisabled();
-      });
-      fireEvent.click(screen.getByTestId('manageRegionsSaveButton'));
-
-      await waitFor(() => {
-        expect(screen.getByTestId('confirmRegionSelectionModal')).toBeInTheDocument();
-      });
-      expect(screen.queryByTestId('confirmRegionChangeModal')).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByTestId('confirmRegionSelectionSaveButton'));
-      expect(mockSaveMutate).toHaveBeenCalledWith(
-        expect.objectContaining({ body: expect.objectContaining({ allowed_geos: ['us'] }) }),
-        expect.objectContaining({ onSuccess: expect.any(Function) })
-      );
-      expect(mockSaveMutate.mock.calls[0][0]).not.toHaveProperty('force');
     });
   });
 

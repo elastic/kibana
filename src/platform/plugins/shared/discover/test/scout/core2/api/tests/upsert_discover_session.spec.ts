@@ -9,7 +9,6 @@
 
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import {
   COMMON_HEADERS,
   DISCOVER_SESSION_API_BASE_PATH,
@@ -103,7 +102,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       id,
     });
 
-    const replacementBody: DiscoverSessionApiDataInput = {
+    const replacementBody = {
       title: 'Replacement session',
       tags: ['tag-1', 'tag-2'],
       tabs: [
@@ -111,7 +110,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
           id: 'replacement',
           label: 'Replacement',
           data_source: {
-            type: 'data_view_reference',
+            type: 'data_view_reference' as const,
             ref_id: 'replacement-data-view',
           },
         },

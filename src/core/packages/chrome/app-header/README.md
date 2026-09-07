@@ -47,9 +47,6 @@ do not add new consumers.
 See the [AppHeader migration guide](https://github.com/elastic/kibana/issues/283673) for migration
 steps, examples, and tracking.
 
-Keep title and back visible at the top while route content scrolls. They replace always-visible
-breadcrumbs. Scroll to verify; see [Sticky positioning](#sticky-positioning) if they move away.
-
 ## Back navigation
 
 The header chevron is "up", not history. It points at the page's single IA parent — the same
@@ -262,23 +259,10 @@ standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
 
-In Chrome Next project layout, title and back replace always-visible breadcrumbs and must remain at
-the top while the page scrolls.
-
-- Inline `AppHeader`: omit `sticky` (defaults to `true`) to use CSS `position: sticky`.
-- `ChromeAppHeaderRegistration`: Chrome pins the header in the layout top-bar and renders the view
-  with `sticky={false}`.
-- Set `sticky={false}` only when the surrounding layout already pins the header in the correct
-  scroll container.
-
-`sticky={false}` does not make the header full-width. `flush` and bleed modes control inset.
-
-CSS sticky fails when:
-
-- A wrapper is only as tall as the header, so sticky is confined to that containing block.
-- An `overflow: hidden`, `auto`, or `scroll` ancestor sits between the header and the page scroller.
-
-Scroll the page. If title or back moves away, the migration is not done.
+`sticky` defaults to `true` and should normally be omitted. Use `sticky={false}` only when the
+full-page layout has its own mechanism that keeps the app header sticky within the correct scrolling
+container. Rendering an inline or full-width header is not by itself a reason to disable sticky
+positioning.
 
 ## Testing
 

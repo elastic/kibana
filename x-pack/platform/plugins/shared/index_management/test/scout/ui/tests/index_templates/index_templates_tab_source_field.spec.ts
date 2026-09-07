@@ -40,11 +40,6 @@ test.describe('Index templates tab - source field', { tag: tags.stateful.classic
     // Navigate to Mappings > Advanced options and disable _source
     await page.testSubj.locator('formWizardStep-3').click();
     await page.testSubj.locator('advancedOptionsTab').click();
-
-    // The form defaults `_source` to synthetic once the synthetic source status request resolves,
-    // discarding any option selected before that. Wait for it, or the selection below is lost.
-    await expect(page.testSubj.locator('sourceValueField')).toContainText('Synthetic _source');
-
     await page.testSubj.locator('sourceValueField').click();
     await page.testSubj.locator('disabledSourceFieldOption').click();
 

@@ -67,12 +67,6 @@ export const DISPATCHER_TASK_TIMEOUT_MS = 60_000;
 export const TICK_DEADLINE_MS = Math.round(DISPATCHER_TASK_TIMEOUT_MS * 0.7);
 
 /**
- * Max workflow schedule items per `bulkScheduleWorkflow` call. Sized so a tick
- * can abort between chunks before `TICK_DEADLINE_MS`.
- */
-export const DISPATCH_CHUNK_SIZE = 250;
-
-/**
  * Task manager task type and singleton task id used to schedule dispatcher
  * ticks.
  *

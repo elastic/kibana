@@ -23,6 +23,7 @@ import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { reportingMock } from '@kbn/reporting-plugin/server/mocks';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
@@ -309,7 +310,6 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
-    bumpRevision: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicies: jest.fn().mockReturnValue(Promise.resolve()),
     fetchAllAgentPolicyIds: jest.fn().mockReturnValue(Promise.resolve()),
@@ -427,4 +427,25 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
   };
 
   return startContract;
+};
+
+/**
+ * Mock of the workflows_management plugin setup contract, as consumed by Fleet
+ * via `appContextService.setWorkflowsManagementSetup()`. Only the management
+ * methods exercised by the package workflow-asset install steps are stubbed.
+ */
+export const createWorkflowsManagementSetupMock = () => {
+  return {
+    management: {
+      createWorkflow: jest.fn(),
+      updateWorkflow: jest.fn(),
+      getWorkflow: jest.fn().mockResolvedValue(null),
+    },
+  } as unknown as WorkflowsServerPluginSetup & {
+    management: {
+      createWorkflow: jest.Mock;
+      updateWorkflow: jest.Mock;
+      getWorkflow: jest.Mock;
+    };
+  };
 };

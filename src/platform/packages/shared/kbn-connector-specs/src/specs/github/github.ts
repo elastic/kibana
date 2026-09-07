@@ -8,17 +8,20 @@
  */
 
 /**
- * GitHub MCP Connector (v2)
+ * GitHub Connector (v2)
  *
- * An MCP-native v2 connector that connects to the GitHub Copilot MCP server.
+ * Dual transport:
+ * - MCP plane (Agent Builder): GitHub Copilot MCP server for interactive discovery
+ * - GraphQL ingest plane (Workflows): GitHub GraphQL API for org-scale read-only ingest
  *
  * Auth: Bearer token (PAT or OAuth token)
  */
 
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { UISchemas, type ConnectorSpec } from '../../connector_spec';
+import { RETRY_RATE_LIMIT, UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
+import { executeGitHubGraphQL, getGitHubQueryTemplate, listGitHubQueryTemplates } from './graphql';
 import type {
   AddAssigneeInput,
   AddIssueCommentInput,
@@ -33,6 +36,7 @@ import type {
   GetIssueCommentsInput,
   GetIssueInput,
   GetLatestReleaseInput,
+  GraphqlQueryInput,
   ListBranchesInput,
   ListCommitsInput,
   ListIssuesInput,
@@ -42,6 +46,7 @@ import type {
   MergePullRequestInput,
   PullRequestReadInput,
   RequestReviewersInput,
+  RunQueryTemplateInput,
   SearchCodeInput,
   SearchIssuesInput,
   SearchPullRequestsInput,
@@ -84,11 +89,45 @@ import {
   TriggerWorkflowInputSchema,
   UpdateIssueInputSchema,
   UpdatePullRequestInputSchema,
+  GraphqlQueryInputSchema,
+  RunQueryTemplateInputSchema,
+  ListQueryTemplatesInputSchema,
 } from './types';
 
 const GITHUB_MCP_SERVER_URL = 'https://api.githubcopilot.com/mcp/';
 const GITHUB_API_BASE = 'https://api.github.com';
 const GITHUB_API_VERSION_HEADER = { 'X-GitHub-Api-Version': '2022-11-28' } as const;
+const GITHUB_INGEST_OAUTH_SCOPE = 'read:org read:project repo';
+
+/** Coerce Liquid-stringified ints (e.g. number: '{{ entity.number }}') for GraphQL Int! vars. */
+const coerceIntVariable = (value: unknown): unknown => {
+  if (typeof value === 'number' && Number.isInteger(value)) {
+    return value;
+  }
+  if (typeof value === 'string' && /^-?\d+$/.test(value.trim())) {
+    return Number.parseInt(value, 10);
+  }
+  return value;
+};
+
+const mergeTemplateVariables = (
+  input: RunQueryTemplateInput
+): Record<string, unknown> | undefined => {
+  const variables = { ...(input.variables ?? {}) };
+  if (input.first !== undefined) {
+    variables.first = input.first;
+  }
+  if (input.after !== undefined) {
+    variables.after = input.after;
+  }
+  // Workflow templates often stringify ints; GraphQL Int! rejects strings.
+  for (const key of ['number', 'first'] as const) {
+    if (key in variables) {
+      variables[key] = coerceIntVariable(variables[key]);
+    }
+  }
+  return Object.keys(variables).length > 0 ? variables : undefined;
+};
 
 export const GithubConnector: ConnectorSpec = {
   metadata: {
@@ -110,7 +149,7 @@ export const GithubConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
-          scope: 'repo',
+          scope: GITHUB_INGEST_OAUTH_SCOPE,
         },
         overrides: {
           meta: {
@@ -151,11 +190,40 @@ export const GithubConnector: ConnectorSpec = {
             defaultMessage: 'The URL of the GitHub Copilot MCP server.',
           }),
         }),
+      graphqlApiUrl: UISchemas.url()
+        .default('https://api.github.com/graphql')
+        .describe('GitHub GraphQL API URL used by workflow ingest actions')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://api.github.com/graphql',
+          label: i18n.translate('connectorSpecs.github.config.graphqlApiUrl.label', {
+            defaultMessage: 'GraphQL API URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.github.config.graphqlApiUrl.helpText', {
+            defaultMessage:
+              'GitHub GraphQL endpoint for read-only ingest actions (graphqlQuery, runQueryTemplate).',
+          }),
+        }),
     })
   ),
 
   validateUrls: {
-    fields: ['serverUrl'],
+    fields: ['serverUrl', 'graphqlApiUrl'],
+  },
+
+  policies: {
+    rateLimit: {
+      strategy: 'header',
+      remainingHeader: 'x-ratelimit-remaining',
+      resetHeader: 'x-ratelimit-reset',
+      codes: [...RETRY_RATE_LIMIT, 403],
+    },
+    retry: {
+      retryOnStatusCodes: [...RETRY_RATE_LIMIT, 403, 502, 503, 504],
+      maxRetries: 5,
+      backoffStrategy: 'exponential',
+      initialDelay: 1000,
+    },
   },
 
   actions: {
@@ -253,6 +321,7 @@ export const GithubConnector: ConnectorSpec = {
           owner: input.owner,
           repo: input.repo,
           state: input.state,
+          since: input.updatedSince,
           first: input.first,
           after: input.after,
         });
@@ -269,6 +338,7 @@ export const GithubConnector: ConnectorSpec = {
           owner: input.owner,
           repo: input.repo,
           state: input.state,
+          since: input.updatedSince,
           first: input.first,
           after: input.after,
         });
@@ -706,19 +776,81 @@ export const GithubConnector: ConnectorSpec = {
         return callToolContent(ctx, input.name, input.arguments);
       },
     },
+
+    graphqlQuery: {
+      isTool: false,
+      description:
+        'Execute a read-only GitHub GraphQL query for workflow ingest. Mutations and subscriptions are rejected. Returns data, pageInfo (when present), rateLimit, and shouldBackoff.',
+      input: GraphqlQueryInputSchema,
+      handler: async (ctx, input: GraphqlQueryInput) => {
+        return executeGitHubGraphQL({
+          ctx,
+          body: {
+            query: input.query,
+            variables: input.variables,
+            operationName: input.operationName,
+          },
+        });
+      },
+    },
+
+    runQueryTemplate: {
+      isTool: false,
+      description:
+        'Run a named read-only GitHub GraphQL query template for workflow ingest. Use listQueryTemplates to discover templates such as orgCatalog.repos and activity.searchIssues.',
+      input: RunQueryTemplateInputSchema,
+      handler: async (ctx, input: RunQueryTemplateInput) => {
+        const template = getGitHubQueryTemplate(input.templateId);
+        return executeGitHubGraphQL({
+          ctx,
+          body: {
+            query: template.query,
+            variables: mergeTemplateVariables(input),
+          },
+          pageInfoPath: template.pageInfoPath,
+          templateId: template.id,
+        });
+      },
+    },
+
+    listQueryTemplates: {
+      isTool: false,
+      description:
+        'List read-only GitHub GraphQL query templates available for runQueryTemplate ingest workflows.',
+      input: ListQueryTemplatesInputSchema,
+      handler: async () => {
+        return { templates: listGitHubQueryTemplates() };
+      },
+    },
   },
 
   test: {
     enabled: true,
     description: i18n.translate('connectorSpecs.github.test.description', {
       defaultMessage:
-        'Verifies connection to the GitHub Copilot MCP server by listing available tools.',
+        'Verifies MCP connectivity and GitHub GraphQL API access for ingest workflows.',
     }),
     handler: async (ctx) => {
-      return withMcpClient(ctx, async (mcp) => {
-        await mcp.listTools();
-        return {};
+      const mcpResult = await withMcpClient(ctx, async (mcp) => {
+        const { tools } = await mcp.listTools();
+        return tools.length;
       });
+
+      const graphqlResult = await executeGitHubGraphQL<{ viewer?: { login?: string } }>({
+        ctx,
+        body: {
+          query: 'query GitHubConnectorTest { viewer { login } }',
+        },
+      });
+
+      const login = graphqlResult.data.viewer?.login ?? 'unknown';
+
+      return {
+        message: `Connected to GitHub MCP (${mcpResult} tools) and GraphQL API (viewer: ${login}).`,
+        mcpToolCount: mcpResult,
+        graphqlViewer: login,
+        rateLimit: graphqlResult.rateLimit,
+      };
     },
   },
 
@@ -727,8 +859,9 @@ export const GithubConnector: ConnectorSpec = {
     '- Parameter names are camelCase. Use the exact names shown (e.g. issueNumber, pullNumber, workflowId) — never snake_case equivalents like issue_number or pull_number.',
     '- Start with getMe to identify the authenticated user.',
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
-    '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
-    '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after". Optional updatedSince filters incremental list* calls.',
+    '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents). pullRequestRead supports get_reviews for submitted reviews.',
+    '- For workflow ingest at org scale: use runQueryTemplate (orgCatalog.*, activity.*, graph.*) or graphqlQuery for custom read-only GraphQL. These actions are not exposed to agents.',
     '- Write actions (require write permission on the repo):',
     '  - Issues: createIssue, updateIssue, addIssueComment, addLabels, addAssignee.',
     '  - Pull requests: createPullRequest, updatePullRequest, mergePullRequest, requestReviewers.',

@@ -1,0 +1,291 @@
+version: '1'
+name: SDLC GitHub catalog project items (GraphQL)
+description: >
+  Tier-1 catalog workflow. Loads projects from github-intel-projects, pages project items via
+  GitHub GraphQL (orgCatalog.projectItems), and upserts github-intel-project-items. Run
+  github-catalog-projects first. Per-project cursor checkpoints in github-intel-sync-state.
+  Each run skips projects already fully paged (stats.has_next_page: false), processes at most
+  projectsPerRun remaining projects, and writes checkpoints after every GraphQL page so a 60m
+  timeout cannot stall the catalog. When a project is fully paged from the start, stale items
+  and raw pages are deleted. When every project is complete, checkpoints are cleared so the
+  next run can refresh items.
+enabled: false
+tags:
+  - sdlc
+  - github
+  - catalog
+  - ingest
+  - graphql
+  - projects
+
+consts:
+  orgLogin: REPLACE_WITH_ORG_LOGIN
+  githubConnectorId: REPLACE_WITH_GITHUB_CONNECTOR_ID
+  syncStateIndex: github-intel-sync-state
+  projectsIndex: github-intel-projects
+  projectItemsIndex: github-intel-project-items
+  rawPagesIndex: github-intel-raw-project-pages
+  syncSource: github-catalog-project-items
+  entityType: project_item
+  pageSize: 50
+  projectsPageSize: 1000
+  projectsPerRun: 20
+
+settings:
+  timeout: 60m
+  concurrency:
+    key: sdlc-github-catalog-project-items
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1d
+  - type: manual
+
+steps:
+  - name: init_run_budget
+    type: data.set
+    with:
+      projectsProcessed: 0
+
+  - name: load_projects
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.projectsIndex }}'
+      ignore_unavailable: true
+      allow_no_indices: true
+      size: '{{ consts.projectsPageSize }}'
+      sort:
+        - project.number: asc
+      query:
+        match_all: {}
+
+  - name: sync_project_items
+    type: foreach
+    foreach: '{{ steps.load_projects.output.hits.hits | json }}'
+    steps:
+      - name: init_project_context
+        type: data.set
+        with:
+          projectId: '{{ foreach.item._source.project.id }}'
+          projectNumber: '{{ foreach.item._source.project.number }}'
+          projectTitle: '{{ foreach.item._source.project.title }}'
+          itemCursor: ''
+          itemPagesFetched: 0
+          startedFromBeginning: false
+
+      - name: read_project_checkpoint
+        type: elasticsearch.search
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          size: 1
+          ignore_unavailable: true
+          allow_no_indices: true
+          query:
+            ids:
+              values:
+                - '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.projectNumber }}'
+
+      - name: skip_if_project_complete
+        type: loop.continue
+        if: '${{ steps.read_project_checkpoint.output.hits.hits[0]._source.stats.has_next_page == false or steps.read_project_checkpoint.output.hits.hits[0]._source.stats.has_next_page == "false" }}'
+
+      - name: stop_if_run_budget_exhausted
+        type: loop.break
+        if: '${{ variables.projectsProcessed >= consts.projectsPerRun }}'
+
+      - name: restore_project_cursor
+        type: data.set
+        with:
+          itemCursor: '{{ steps.read_project_checkpoint.output.hits.hits.0._source.cursor }}'
+          itemPagesFetched: 0
+
+      - name: mark_refresh_start
+        type: data.set
+        if: '${{ variables.itemCursor == "" or variables.itemCursor == null }}'
+        with:
+          startedFromBeginning: true
+
+      - name: paginate_project_items
+        type: while
+        condition: 'steps.fetch_project_items.output.pageInfo.hasNextPage : true'
+        max-iterations: 15
+        steps:
+          - name: fetch_project_items
+            type: github.runQueryTemplate
+            connector-id: '{{ consts.githubConnectorId }}'
+            with:
+              templateId: orgCatalog.projectItems
+              variables:
+                projectId: '{{ variables.projectId }}'
+              first: '{{ consts.pageSize }}'
+              after: '{{ variables.itemCursor }}'
+
+          - name: backoff_if_needed
+            type: wait
+            if: '{{ steps.fetch_project_items.output.shouldBackoff }}'
+            with:
+              duration: 60s
+
+          - name: index_raw_project_page
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.rawPagesIndex }}'
+              id: '{{ consts.syncSource }}-{{ variables.projectNumber }}-{{ variables.itemPagesFetched | plus: 1 }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                project:
+                  id: '{{ variables.projectId }}'
+                  number: '{{ variables.projectNumber }}'
+                  title: '{{ variables.projectTitle }}'
+                cursor: '{{ variables.itemCursor }}'
+                item_count: '${{ steps.fetch_project_items.output.data.node.items.nodes.size }}'
+                page_info:
+                  has_next_page: '${{ steps.fetch_project_items.output.pageInfo.hasNextPage }}'
+                  end_cursor: '${{ steps.fetch_project_items.output.pageInfo.endCursor }}'
+                payload: '${{ steps.fetch_project_items.output.data.node.items }}'
+
+          - name: index_project_items
+            type: foreach
+            foreach: '{{ steps.fetch_project_items.output.data.node.items.nodes | json }}'
+            steps:
+              - name: upsert_project_item
+                type: elasticsearch.update
+                with:
+                  index: '{{ consts.projectItemsIndex }}'
+                  id: '{{ foreach.item.id }}'
+                  doc_as_upsert: true
+                  retry_on_conflict: 3
+                  doc:
+                    '@timestamp': '{{ execution.startedAt }}'
+                    sync:
+                      run_id: '{{ execution.id }}'
+                      source: '{{ consts.syncSource }}'
+                    entity:
+                      type: project_item
+                      id: '{{ foreach.item.id }}'
+                      subtype: '${{ foreach.item.content.__typename }}'
+                      number: '${{ foreach.item.content.number }}'
+                      url: '${{ foreach.item.content.url }}'
+                    org:
+                      login: '{{ consts.orgLogin }}'
+                    project:
+                      id: '${{ variables.projectId }}'
+                      number: '${{ variables.projectNumber }}'
+                      title: '${{ variables.projectTitle }}'
+                    repository:
+                      name: '${{ foreach.item.content.repository.name }}'
+                      full_name: '${{ foreach.item.content.repository.nameWithOwner }}'
+                    github:
+                      created_at: '${{ foreach.item.createdAt }}'
+                      updated_at: '${{ foreach.item.updatedAt }}'
+                      state: '${{ foreach.item.content.state }}'
+                    content_ref:
+                      type: '${{ foreach.item.content.__typename }}'
+                      id: '${{ foreach.item.content.id }}'
+                      repo: '${{ foreach.item.content.repository.nameWithOwner }}'
+                      number: '${{ foreach.item.content.number }}'
+                      url: '${{ foreach.item.content.url }}'
+                    payload: '${{ foreach.item }}'
+
+          - name: advance_project_item_cursor
+            type: data.set
+            with:
+              itemCursor: '{{ steps.fetch_project_items.output.pageInfo.endCursor }}'
+              itemPagesFetched: '{{ variables.itemPagesFetched | plus: 1 }}'
+
+          - name: write_project_checkpoint
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.syncStateIndex }}'
+              id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ variables.projectNumber }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity_type: '{{ consts.entityType }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                project:
+                  number: '{{ variables.projectNumber }}'
+                cursor: '{{ variables.itemCursor }}'
+                last_run_at: '{{ execution.startedAt }}'
+                last_run_status: success
+                stats:
+                  project_id: '{{ variables.projectId }}'
+                  project_title: '{{ variables.projectTitle }}'
+                  pages_fetched: '{{ variables.itemPagesFetched }}'
+                  has_next_page: '${{ steps.fetch_project_items.output.pageInfo.hasNextPage }}'
+                  rate_limit_remaining: '{{ steps.fetch_project_items.output.rateLimit.remaining }}'
+
+      - name: cleanup_stale_project_items
+        type: elasticsearch.request
+        if: '${{ variables.startedFromBeginning == true and (steps.fetch_project_items.output.pageInfo.hasNextPage == false or steps.fetch_project_items.output.pageInfo.hasNextPage == "false") }}'
+        with:
+          method: POST
+          path: '/{{ consts.projectItemsIndex }}/_delete_by_query?conflicts=proceed&refresh=true&ignore_unavailable=true'
+          body:
+            query:
+              bool:
+                must:
+                  - term:
+                      project.number: '{{ variables.projectNumber }}'
+                  - term:
+                      org.login: '{{ consts.orgLogin }}'
+                must_not:
+                  - term:
+                      sync.run_id: '{{ execution.id }}'
+        on-failure:
+          continue: true
+
+      - name: cleanup_stale_raw_pages
+        type: elasticsearch.request
+        if: '${{ variables.startedFromBeginning == true and (steps.fetch_project_items.output.pageInfo.hasNextPage == false or steps.fetch_project_items.output.pageInfo.hasNextPage == "false") }}'
+        with:
+          method: POST
+          path: '/{{ consts.rawPagesIndex }}/_delete_by_query?conflicts=proceed&refresh=true&ignore_unavailable=true'
+          body:
+            query:
+              bool:
+                must:
+                  - term:
+                      project.number: '{{ variables.projectNumber }}'
+                  - term:
+                      org.login: '{{ consts.orgLogin }}'
+                must_not:
+                  - term:
+                      sync.run_id: '{{ execution.id }}'
+        on-failure:
+          continue: true
+
+      - name: count_processed_project
+        type: data.set
+        with:
+          projectsProcessed: '{{ variables.projectsProcessed | plus: 1 }}'
+
+  - name: reset_checkpoints_for_next_cycle
+    type: elasticsearch.request
+    if: '${{ variables.projectsProcessed == 0 }}'
+    with:
+      method: POST
+      path: '/{{ consts.syncStateIndex }}/_delete_by_query?conflicts=proceed&refresh=true&ignore_unavailable=true'
+      body:
+        query:
+          bool:
+            must:
+              - term:
+                  sync.source: '{{ consts.syncSource }}'
+              - term:
+                  entity_type: '{{ consts.entityType }}'
+              - term:
+                  org.login: '{{ consts.orgLogin }}'
+    on-failure:
+      continue: true

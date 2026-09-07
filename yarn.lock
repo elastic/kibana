@@ -8654,6 +8654,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sdlc-data-layer@link:x-pack/solutions/security/packages/kbn-sdlc-data-layer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sdlc-intel-plugin@link:x-pack/solutions/security/plugins/sdlc_intel":
+  version "0.0.0"
+  uid ""
+
 "@kbn/search-agent@link:src/platform/packages/shared/kbn-search-agent":
   version "0.0.0"
   uid ""

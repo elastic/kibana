@@ -74,6 +74,13 @@ export interface PackageSpecManifest {
   agent?: {
     privileges?: { root?: boolean };
   };
+  workflows?: {
+    default_enabled?: boolean | string[];
+    /** Workflow file dependencies. Each value must be installed before its key. */
+    dependencies?: Record<string, string[]>;
+  };
+  /** When true, shipped alerting_rule_template assets are materialized as real (disabled) alerting rules on install. Default: false. */
+  create_alerting_rules?: boolean;
   asset_tags?: PackageSpecTags[];
   discovery?: {
     fields?: Array<{

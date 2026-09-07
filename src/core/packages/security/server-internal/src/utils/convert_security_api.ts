@@ -20,6 +20,5 @@ export const convertSecurityApi = (
       apiKeys: privateApi.authc.apiKeys,
     },
     audit: privateApi.audit,
-    serviceAccounts: privateApi.serviceAccounts,
   };
 };

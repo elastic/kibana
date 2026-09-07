@@ -67,6 +67,7 @@ export const createConversation$ = ({
         read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
+        read: false,
         rounds: [roundCompletedEvent.data.round],
         ...(isPersistentSubagentCreate && hasResolvedParentUser ? { user: conversation.user } : {}),
         ...(conversation.parent_conversation

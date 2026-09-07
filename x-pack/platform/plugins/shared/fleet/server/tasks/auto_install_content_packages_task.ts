@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import pMap from 'p-map';
 import semverGt from 'semver/functions/gt';
-import type { CoreSetup, ElasticsearchClient, Logger, LoggerFactory } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -19,6 +20,7 @@ import type { DiscoveryDataset } from '../../common/types';
 
 import type { PackageClient } from '../services';
 import { appContextService, dataStreamService } from '../services';
+import { createFleetInternalRequest } from '../services/security';
 import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
@@ -74,10 +76,16 @@ export class AutoInstallContentPackagesTask {
       [TYPE]: {
         title: TITLE,
         timeout: TIMEOUT,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+        createTaskRunner: ({
+          taskInstance,
+          fakeRequest,
+        }: {
+          taskInstance: ConcreteTaskInstance;
+          fakeRequest?: KibanaRequest;
+        }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              return this.runTask(taskInstance, core, fakeRequest);
             },
             cancel: async () => {},
           };
@@ -124,7 +132,11 @@ export class AutoInstallContentPackagesTask {
     this.logger.debug(`[AutoInstallContentPackagesTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    fakeRequest?: KibanaRequest
+  ) => {
     if (!appContextService.getExperimentalFeatures().enableAutoInstallContentPackages) {
       this.logger.debug(
         '[AutoInstallContentPackagesTask] Aborting runTask: auto install content packages feature is disabled'
@@ -149,6 +161,7 @@ export class AutoInstallContentPackagesTask {
     const packageClient = packageService.asInternalUser;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+    const request = fakeRequest ?? createFleetInternalRequest();
 
     const prerelease = await getPrereleaseFromSettings(soClient);
 
@@ -205,7 +218,7 @@ export class AutoInstallContentPackagesTask {
             .join(', ')}`
         );
 
-        await this.installPackages(packageClient, packagesToInstall);
+        await this.installPackages(packageClient, packagesToInstall, request);
       }
 
       this.endRun('success');
@@ -222,7 +235,8 @@ export class AutoInstallContentPackagesTask {
 
   private async installPackages(
     packageClient: PackageClient,
-    packagesToInstall: Array<{ name: string; version: string }>
+    packagesToInstall: Array<{ name: string; version: string }>,
+    request: KibanaRequest
   ) {
     await pMap(
       packagesToInstall,
@@ -233,6 +247,7 @@ export class AutoInstallContentPackagesTask {
             pkgVersion: version,
             useStreaming: true, // Use streaming for content packages
             automaticInstall: true,
+            request,
           });
         } catch (error) {
           this.logger.warn(

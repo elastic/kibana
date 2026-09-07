@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { ToolType, internalTools } from '@kbn/agent-builder-common';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createOtherResult } from '@kbn/agent-builder-server';
 
 export const SleepToolName = internalTools.sleep;
@@ -26,7 +26,7 @@ const description = `Wait for a specified duration.
 - **NEVER** sleep for more than 2 minutes (120s)
 `;
 
-export const createSleepTool = (): InternalBuiltinToolDefinition<typeof schema> => {
+export const createSleepTool = (): BuiltinToolDefinition<typeof schema> => {
   return {
     id: SleepToolName,
     description,

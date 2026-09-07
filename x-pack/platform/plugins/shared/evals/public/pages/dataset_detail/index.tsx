@@ -70,7 +70,6 @@ import {
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
 import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
-import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import {
   DatasetSharedNotice,
   DatasetSpacesBadge,
@@ -527,11 +526,9 @@ export const DatasetDetailPage: React.FC = () => {
         render: (timestamp: string) => formatDate(timestamp),
       },
       {
-        field: 'evaluator_models',
+        field: 'evaluator_model',
         name: i18n.COLUMN_RUN_EVALUATOR_MODEL,
-        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
-          <EvaluatorModelsBadge models={models} />
-        ),
+        render: (value: EvaluationExperimentSummary['evaluator_model']) => value?.id ?? '-',
       },
       {
         field: 'git_branch',

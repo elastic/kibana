@@ -113,37 +113,31 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     [euid, name, value, scopeId]
   );
 
-  const onEntityClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      // Prevent the click from bubbling up to parent interactive elements (e.g. accordion buttons).
-      event.stopPropagation();
+  const onEntityClick = useCallback(() => {
+    if (flyoutPanelProps == null) {
+      return;
+    }
 
-      if (flyoutPanelProps == null) {
-        return;
-      }
-
-      if (enableNewFlyout) {
-        if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
-          openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
-        } else {
-          openUserFlyout({ userName: value as string, entityId: euid, scopeId });
-        }
+    if (enableNewFlyout) {
+      if (ENTITY_TYPE_BY_FIELD[name] === 'host') {
+        openHostFlyout({ hostName: value as string, entityId: euid, scopeId });
       } else {
-        openRightPanel(flyoutPanelProps);
+        openUserFlyout({ userName: value as string, entityId: euid, scopeId });
       }
-    },
-    [
-      flyoutPanelProps,
-      openRightPanel,
-      openHostFlyout,
-      openUserFlyout,
-      enableNewFlyout,
-      name,
-      value,
-      euid,
-      scopeId,
-    ]
-  );
+    } else {
+      openRightPanel(flyoutPanelProps);
+    }
+  }, [
+    flyoutPanelProps,
+    openRightPanel,
+    openHostFlyout,
+    openUserFlyout,
+    enableNewFlyout,
+    name,
+    value,
+    euid,
+    scopeId,
+  ]);
 
   const entityButton: React.ReactElement | null = useMemo(
     () =>

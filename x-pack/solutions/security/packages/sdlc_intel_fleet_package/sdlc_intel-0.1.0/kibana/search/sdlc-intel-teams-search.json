@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "columns": [
+      "org_team.name",
+      "org_team.key",
+      "org_team.members_count"
+    ],
+    "description": "GitHub org teams from sdlc-team-dimension",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["org_team.members_count", "desc"]],
+    "title": "SDLC org teams",
+    "version": 1
+  },
+  "id": "sdlc-intel-teams-search",
+  "references": [
+    {
+      "id": "sdlc-team-dimension",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search"
+}

@@ -39,6 +39,7 @@ import {
   stepInstallIndexTemplatePipelines,
   stepRemoveLegacyTemplates,
   stepUpdateCurrentWriteIndices,
+  stepCreateIndices,
   stepInstallTransforms,
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
@@ -62,7 +63,13 @@ import {
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
 import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
+import { stepInstallWorkflowAssets } from './steps/step_install_workflow_assets';
+import { stepInstallAgentAssets } from './steps/step_install_agent_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
+import {
+  cleanupIndexAliasesStep,
+  stepInstallIndexAliases,
+} from './steps/step_install_index_aliases';
 import { stepResolveDependencies } from './steps/step_resolve_dependencies';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -112,6 +119,12 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   install_esql_views: {
     onPreTransition: cleanupEsqlViewsStep,
     onTransition: stepInstallEsqlViews,
+    nextState: INSTALL_STATES.INSTALL_INDEX_ALIASES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_index_aliases: {
+    onPreTransition: cleanupIndexAliasesStep,
+    onTransition: stepInstallIndexAliases,
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
@@ -146,6 +159,11 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   update_current_write_indices: {
     onTransition: stepUpdateCurrentWriteIndices,
+    nextState: INSTALL_STATES.CREATE_INDICES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_indices: {
+    onTransition: stepCreateIndices,
     nextState: INSTALL_STATES.INSTALL_TRANSFORMS,
     onPostTransition: updateLatestExecutedState,
   },
@@ -180,6 +198,16 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   },
   create_alerting_assets: {
     onTransition: stepCreateAlertingAssets,
+    nextState: INSTALL_STATES.CREATE_AGENT_ASSETS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_agent_assets: {
+    onTransition: stepInstallAgentAssets,
+    nextState: INSTALL_STATES.CREATE_WORKFLOW_ASSETS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_workflow_assets: {
+    onTransition: stepInstallWorkflowAssets,
     nextState: INSTALL_STATES.VERIFY_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },

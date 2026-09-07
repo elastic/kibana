@@ -77,7 +77,6 @@ describe('createCodeAnalysisProvider', () => {
       end: 1,
       esClient,
       logger,
-      signal: new AbortController().signal,
     });
 
   const lastOutcome = (): CodeAnalysisOutcome => onOutcome.mock.calls.at(-1)![0];

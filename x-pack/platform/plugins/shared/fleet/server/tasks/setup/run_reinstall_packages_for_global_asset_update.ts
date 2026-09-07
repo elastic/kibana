@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import pMap from 'p-map';
@@ -16,6 +17,7 @@ import { getInstallations, reinstallPackageForInstallation } from '../../service
 interface RunReinstallPackagesParams {
   signal: AbortSignal;
   logger: Logger;
+  request: KibanaRequest;
 }
 
 /**
@@ -28,6 +30,7 @@ interface RunReinstallPackagesParams {
 export async function runReinstallPackagesForGlobalAssetUpdate({
   signal,
   logger,
+  request,
 }: RunReinstallPackagesParams): Promise<void> {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
@@ -64,6 +67,7 @@ export async function runReinstallPackagesForGlobalAssetUpdate({
           soClient,
           esClient,
           installation,
+          request,
         });
         successCount++;
         logger.debug(`Successfully reinstalled package ${installation.name}`);

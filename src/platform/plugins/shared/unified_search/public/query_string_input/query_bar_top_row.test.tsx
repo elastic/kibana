@@ -43,7 +43,6 @@ import userEvent from '@testing-library/user-event';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { SearchSessionState } from '@kbn/data-plugin/public';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
-import { DATE_RANGE_PICKER_FEATURE_FLAG } from '@kbn/date-range-picker';
 
 const mockUseDateRangePickerPresets = useDateRangePickerPresets as jest.Mock;
 
@@ -88,7 +87,7 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
 });
 
 startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback: boolean) => {
-  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
+  if (key === 'unifiedSearch.newDateRangePickerEnabled') {
     return useNewDateRangePickerFlag;
   }
   if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {
@@ -98,7 +97,7 @@ startMock.featureFlags.getBooleanValue.mockImplementation((key: string, fallback
 });
 
 startMock.featureFlags.getBooleanValue$.mockImplementation((key: string, fallback: boolean) => {
-  if (key === DATE_RANGE_PICKER_FEATURE_FLAG) {
+  if (key === 'unifiedSearch.newDateRangePickerEnabled') {
     return of(useNewDateRangePickerFlag);
   }
   if (key === 'unifiedSearch.dateRangePickerPresetsPersistenceEnabled') {

@@ -58,7 +58,6 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import {
-  DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
   type DateRangePickerSettings,
   type DateRangePickerOnChangeProps,
@@ -76,6 +75,8 @@ import { FilterBarToggleButton } from '../filter_bar/filter_bar_toggle_button';
 import { FilterBarContextProvider } from '../filter_bar/filter_bar_context';
 import { QuerySubmitTrigger } from '../search_bar/query_submit_metadata';
 
+/** Feature flag key for the new DateRangePicker. Falls back to `true` (new picker). */
+const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
 const DATE_RANGE_PICKER_PRESETS_PERSISTENCE_FEATURE_FLAG =
   'unifiedSearch.dateRangePickerPresetsPersistenceEnabled';
 

@@ -84553,6 +84553,7 @@ paths:
               - status
               - executedBy
               - triggeredBy
+              - workflowId
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Field to sort executions by.
@@ -84934,6 +84935,7 @@ paths:
               - status
               - executedBy
               - triggeredBy
+              - workflowId
             type: string
         - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
           in: query

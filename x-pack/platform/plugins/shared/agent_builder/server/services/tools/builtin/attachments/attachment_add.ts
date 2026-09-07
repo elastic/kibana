@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { attachmentTools, ToolType } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { AttachmentToolsOptions } from './types';
 
@@ -32,7 +32,7 @@ type AttachmentAddSchema = ReturnType<typeof buildAttachmentAddSchema>;
 export const createAttachmentAddTool = ({
   attachmentManager,
   attachmentsService,
-}: AttachmentToolsOptions): InternalBuiltinToolDefinition<AttachmentAddSchema> => {
+}: AttachmentToolsOptions): BuiltinToolDefinition<AttachmentAddSchema> => {
   const registeredTypes = (attachmentsService?.getRegisteredTypeIds?.() ?? []).filter(
     (type) => !attachmentsService?.getTypeDefinition(type)?.isReadonly
   );

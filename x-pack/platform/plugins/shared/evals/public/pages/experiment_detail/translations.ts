@@ -23,12 +23,6 @@ export const STAT_EVALUATOR_MODEL = i18n.translate(
   }
 );
 
-export const getEvaluatorModelsDifferLabel = (count: number) =>
-  i18n.translate('xpack.evals.experimentDetail.stat.evaluatorModelsDiffer', {
-    defaultMessage: '{count} models',
-    values: { count },
-  });
-
 export const STAT_REPETITIONS = i18n.translate('xpack.evals.experimentDetail.stat.repetitions', {
   defaultMessage: 'Repetitions',
 });
@@ -94,27 +88,6 @@ export const SECTION_EXAMPLE_SCORES = i18n.translate(
 export const COLUMN_EVALUATOR = i18n.translate('xpack.evals.experimentDetail.columns.evaluator', {
   defaultMessage: 'Evaluator',
 });
-
-export const COLUMN_EVALUATOR_MODEL = i18n.translate(
-  'xpack.evals.experimentDetail.columns.evaluatorModel',
-  {
-    defaultMessage: 'Judge model',
-  }
-);
-
-export const EVALUATOR_MODEL_NOT_APPLICABLE = i18n.translate(
-  'xpack.evals.experimentDetail.evaluatorModelNotApplicable',
-  {
-    defaultMessage: 'n/a',
-  }
-);
-
-export const EVALUATOR_MODEL_NOT_APPLICABLE_TOOLTIP = i18n.translate(
-  'xpack.evals.experimentDetail.evaluatorModelNotApplicableTooltip',
-  {
-    defaultMessage: 'This evaluator is computed in code and does not use a model.',
-  }
-);
 
 export const COLUMN_MEAN = i18n.translate('xpack.evals.experimentDetail.columns.mean', {
   defaultMessage: 'Mean',

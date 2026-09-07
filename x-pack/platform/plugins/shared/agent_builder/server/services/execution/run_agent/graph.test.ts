@@ -7,7 +7,6 @@
 
 import { AIMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
-import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -23,23 +22,12 @@ jest.mock('@langchain/langgraph/prebuilt', () => ({
   })),
 }));
 
-const createTestGraph = ({
-  structuredOutput = false,
-  sessionId,
-  cacheControl,
-}: {
-  structuredOutput?: boolean;
-  sessionId?: string;
-  cacheControl?: ChatCompleteCacheControl;
-} = {}) => {
+const createTestGraph = ({ structuredOutput = false }: { structuredOutput?: boolean } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
-  const researchWithConfig = jest.fn((_config: Record<string, unknown>) => ({
-    invoke: researchInvoke,
-  }));
   const chatModel = {
     bindTools: jest.fn(() => ({
-      withConfig: researchWithConfig,
+      withConfig: jest.fn(() => ({ invoke: researchInvoke })),
     })),
     withStructuredOutput: jest.fn(() => ({
       withConfig: jest.fn(() => ({ invoke: structuredInvoke })),
@@ -64,11 +52,9 @@ const createTestGraph = ({
     processedConversation: {} as ProcessedConversation,
     promptFactory,
     roundId: 'test-round',
-    sessionId,
-    cacheControl,
   });
 
-  return { graph, researchInvoke, structuredInvoke, toolManager, researchWithConfig };
+  return { graph, researchInvoke, structuredInvoke, toolManager };
 };
 
 describe('createAgentGraph', () => {
@@ -116,7 +102,7 @@ describe('createAgentGraph', () => {
     expect(result.errorCount).toBe(0);
   });
 
-  it('stops after two retries and surfaces emptyResponse for empty structured answers', async () => {
+  it('stops after two retries and surfaces schemaViolation for empty structured answers', async () => {
     const { graph, researchInvoke, structuredInvoke } = createTestGraph({
       structuredOutput: true,
     });
@@ -124,7 +110,7 @@ describe('createAgentGraph', () => {
     structuredInvoke.mockResolvedValue({});
 
     await expect(graph.invoke({ cycleLimit: 10 }, { recursionLimit: 20 })).rejects.toMatchObject({
-      meta: { errCode: AgentExecutionErrorCode.emptyResponse },
+      meta: { errCode: AgentExecutionErrorCode.schemaViolation },
     });
     expect(researchInvoke).toHaveBeenCalledTimes(1);
     expect(structuredInvoke).toHaveBeenCalledTimes(3);
@@ -147,48 +133,5 @@ describe('createAgentGraph', () => {
       AgentActionType.Error,
       AgentActionType.StructuredAnswer,
     ]);
-  });
-
-  it('passes sessionId and cacheControl to the research model when sessionId is provided', async () => {
-    const { graph, researchInvoke, researchWithConfig } = createTestGraph({
-      sessionId: 'round-42',
-      cacheControl: { type: 'ephemeral' },
-    });
-    researchInvoke.mockResolvedValue(new AIMessage({ content: 'answer' }));
-
-    await graph.invoke({ cycleLimit: 10 });
-
-    expect(researchWithConfig).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sessionId: 'round-42',
-        cacheControl: { type: 'ephemeral' },
-      })
-    );
-  });
-
-  it('passes cacheControl independently when sessionId is not provided', async () => {
-    const { graph, researchInvoke, researchWithConfig } = createTestGraph({
-      cacheControl: { type: 'ephemeral' },
-    });
-    researchInvoke.mockResolvedValue(new AIMessage({ content: 'answer' }));
-
-    await graph.invoke({ cycleLimit: 10 });
-
-    expect(researchWithConfig).toHaveBeenCalled();
-    const config = researchWithConfig.mock.calls[0][0];
-    expect(config.sessionId).toBeUndefined();
-    expect(config.cacheControl).toEqual({ type: 'ephemeral' });
-  });
-
-  it('omits cacheControl when not provided', async () => {
-    const { graph, researchInvoke, researchWithConfig } = createTestGraph();
-    researchInvoke.mockResolvedValue(new AIMessage({ content: 'answer' }));
-
-    await graph.invoke({ cycleLimit: 10 });
-
-    expect(researchWithConfig).toHaveBeenCalled();
-    const config = researchWithConfig.mock.calls[0][0];
-    expect(config.sessionId).toBeUndefined();
-    expect(config.cacheControl).toBeUndefined();
   });
 });

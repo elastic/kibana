@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
@@ -16,6 +18,33 @@ const ESQL_MULTI_VALUE_QUERY =
   'FROM logstash-* | WHERE MV_CONTAINS( ?values, geo.dest ) | KEEP geo.dest';
 
 const createSessionName = (prefix: string, spaceId: string) => `${prefix}-${spaceId}-${Date.now()}`;
+
+const createEsqlControl = async (
+  page: ScoutPage,
+  query: string,
+  { values }: { values?: string[] } = {}
+) => {
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  await codeEditor.setCodeEditorValue(query);
+  await codeEditor.triggerSuggest(query);
+
+  const suggestionWidget = codeEditor.getCodeEditorSuggestWidget();
+  await suggestionWidget.waitFor({ state: 'visible' });
+  await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+  await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'visible' });
+
+  if (values) {
+    const valuesComboBox = page.components.comboBox('esqlValuesOptions');
+    for (const value of values) {
+      await valuesComboBox.setCustomSelectedOptions([value]);
+    }
+  }
+
+  await page.testSubj.locator('saveEsqlControlsFlyoutButton').waitFor({ state: 'visible' });
+  await page.testSubj.locator('saveEsqlControlsFlyoutButton').click();
+  await page.testSubj.locator('create_esql_control_flyout').waitFor({ state: 'hidden' });
+  await page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
+};
 
 const expectOnlyRowsContaining = (rows: string[][], values: string[]) => {
   expect(rows.length).toBeGreaterThan(0);
@@ -47,7 +76,7 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
     async ({ page, pageObjects }) => {
       const { dashboard, discover } = pageObjects;
 
-      await discover.createEsqlControl(LOGSTASH_QUERY_START);
+      await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
 
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
@@ -65,10 +94,10 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
   spaceTest(
     'creates an ES|QL multi-value control and filters grid rows',
-    async ({ pageObjects }) => {
+    async ({ page, pageObjects }) => {
       const { dashboard, dataGrid, discover } = pageObjects;
 
-      await discover.createEsqlControl(ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
+      await createEsqlControl(page, ESQL_MULTI_VALUE_QUERY_START, { values: ['IN', 'US'] });
       await discover.waitUntilTabIsLoaded();
 
       await expect(dashboard.getControlsGroupLocator()).toBeVisible();
@@ -97,11 +126,11 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
   spaceTest(
     'persists controls through saved sessions and unsaved-change revert',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects, scoutSpace }) => {
       const { dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-session', scoutSpace.id);
 
-      await discover.createEsqlControl(LOGSTASH_QUERY_START);
+      await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
@@ -125,12 +154,12 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
   spaceTest(
     'carries controls into Dashboard panels and saved visualizations',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects, scoutSpace }) => {
       const { dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-dashboard-session', scoutSpace.id);
       const savedChart = createSessionName('esql-control-chart', scoutSpace.id);
 
-      await discover.createEsqlControl(LOGSTASH_QUERY_START);
+      await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
       await discover.saveSearch(savedSession);
       await discover.waitUntilTabIsLoaded();
@@ -152,11 +181,11 @@ spaceTest.describe('Discover tabs - ES|QL controls', { tag: '@local-stateful-cla
 
   spaceTest(
     'persists saved sessions after removing controls',
-    async ({ pageObjects, scoutSpace }) => {
+    async ({ page, pageObjects, scoutSpace }) => {
       const { dashboard, discover } = pageObjects;
       const savedSession = createSessionName('esql-control-removed-session', scoutSpace.id);
 
-      await discover.createEsqlControl(LOGSTASH_QUERY_START);
+      await createEsqlControl(page, LOGSTASH_QUERY_START);
       await discover.waitUntilTabIsLoaded();
       await expect(dashboard.getControlFramesLocator()).toHaveCount(1);
 

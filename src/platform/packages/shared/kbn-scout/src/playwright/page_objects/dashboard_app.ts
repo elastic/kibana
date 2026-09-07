@@ -586,20 +586,6 @@ export class DashboardApp {
   }
 
   /**
-   * Id of the dashboard's control, including one that is not in a control group, such as an
-   * ES|QL control saved as a top-level `esql_control` panel. Expects a single control, so
-   * assert the count in the test first.
-   */
-  async getDashboardControlId(): Promise<string> {
-    const controlId = await this.getDashboardControlsLocator().getAttribute('data-control-id');
-    if (!controlId) {
-      throw new Error('Dashboard control is rendered but has an empty data-control-id');
-    }
-
-    return controlId;
-  }
-
-  /**
    * Gets the count of dashboard controls
    */
   async getControlCount(): Promise<number> {
@@ -628,30 +614,6 @@ export class DashboardApp {
 
     const option = this.page.testSubj.locator(`optionsList-control-selection-${availableOption}`);
     await option.click();
-  }
-
-  /**
-   * Closes the options-list popover if it is open, and waits for it to disappear.
-   *
-   * Dismisses with Escape rather than by toggling the control button: selecting an option
-   * re-renders the control, so a click aimed at the button can land on a detached node and
-   * leave the popover open.
-   */
-  async optionsListEnsurePopoverIsClosed() {
-    if (await this.optionsListControlSearchInput.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await this.optionsListControlSearchInput.waitFor({ state: 'hidden' });
-    }
-  }
-
-  /**
-   * Locator for the selected-options label of an options-list control, e.g. `AE`
-   * for a single selection or `AE, CN` for multiple.
-   */
-  getOptionsListSelectionsLocator(controlId: string) {
-    return this.page.testSubj
-      .locator(`optionsList-control-${controlId}`)
-      .getByTestId('optionsListSelections');
   }
 
   async getSavedSearchRowCount(): Promise<number> {

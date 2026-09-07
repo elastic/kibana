@@ -56,7 +56,7 @@ const getRulesListMenu = ({
     testId: 'createRuleButton',
     popoverTestId: 'createRulePopoverPanel',
     splitButtonProps: {
-      iconType: 'chevronSingleDown',
+      iconType: 'arrowDown',
       secondaryButtonAriaLabel: i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
         defaultMessage: 'More create options',
       }),

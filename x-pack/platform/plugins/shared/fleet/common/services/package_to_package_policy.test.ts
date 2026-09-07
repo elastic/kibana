@@ -65,6 +65,8 @@ describe('Fleet - packageToPackagePolicy', () => {
     path: '',
     assets: {
       kibana: {
+        workflow: [],
+        agent: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],
@@ -91,6 +93,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         ml_model: [],
         knowledge_base: [],
         esql_view: [],
+        index_alias: [],
       },
     },
     status: 'not_installed',

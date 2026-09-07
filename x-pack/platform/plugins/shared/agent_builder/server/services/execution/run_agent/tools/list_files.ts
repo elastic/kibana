@@ -10,7 +10,7 @@ import type { IFileSystem } from 'just-bash';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
-import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { IFilesystemService } from '@kbn/agent-builder-server/runner';
 
 const MAX_DEPTH = 5;
@@ -32,7 +32,7 @@ export const createListFilesTool = ({
   filesystemService,
 }: {
   filesystemService: IFilesystemService;
-}): InternalBuiltinToolDefinition<typeof schema> => {
+}): BuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.listFiles,
     description: `List the entries of a directory in the virtual file system (VFS).`,

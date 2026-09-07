@@ -62,16 +62,6 @@ paths:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                   evaluator_model:
                     $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
-                  evaluator_models:
-                    type: array
-                    maxItems: 20
-                    items:
-                      $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
-                    description: >-
-                      The distinct models this experiment's evaluators judged with, the one that
-                      produced the most scores first, so consumers can tell that they differ.
-                      `evaluator_model` is the first. Capped at 20, which no realistic experiment
-                      reaches. Empty when only code evaluators scored the experiment.
                   execution_id:
                     type: string
                     maxLength: 1024

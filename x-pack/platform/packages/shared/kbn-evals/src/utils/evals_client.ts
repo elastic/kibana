@@ -54,8 +54,7 @@ export interface EvaluatorStats {
 export interface ExperimentStats {
   stats: EvaluatorStats[];
   taskModel: EvalsModel;
-  /** The judge most evaluators used, absent when only code evaluators scored the experiment. */
-  evaluatorModel?: EvalsModel;
+  evaluatorModel: EvalsModel;
   totalRepetitions: number;
 }
 
@@ -152,7 +151,7 @@ const mapStatsResponse = (
   response: ReturnType<typeof GetEvaluationExperimentResponse.parse>
 ): ExperimentStats => {
   const { task_model: taskModel, evaluator_model: evaluatorModel } = response;
-  if (!taskModel) {
+  if (!taskModel || !evaluatorModel) {
     throw new Error('Evaluation experiment is missing model metadata');
   }
 

@@ -20,7 +20,7 @@ FOLDER_NAME=$(dirname "$ABSOLUTE_PATH")
 # docker inspect docker.elastic.co/ci-agent-images/pipelib:latest --format '{{index .RepoDigests 0}}'
 docker run \
  --mount type=bind,source="$FOLDER_NAME",target=/home/app/ \
-  docker.elastic.co/ci-agent-images/pipelib@sha256:d79a2f81e8679788e314bdb69c074388dbc9b5d6d30f9e2e90cd40b867911bf7 \
+  docker.elastic.co/ci-agent-images/pipelib@sha256:d1713778d27e0b6208f59ba8761f04ef033af4c4237cb2614a09d38584c5ff88 \
   rre validate --backstage-entity-aware "/home/app/$FILE_NAME"
 
 if [ $? -ne 0 ]; then

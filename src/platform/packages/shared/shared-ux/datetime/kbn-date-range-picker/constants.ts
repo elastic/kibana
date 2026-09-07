@@ -40,9 +40,6 @@ export const DATE_RANGE_INPUT_DELIMITER = 'to';
 /** Delimiter used in the display text between start and end (e.g. "Feb 3 → Feb 10") */
 export const DATE_RANGE_DISPLAY_DELIMITER = '→';
 
-/** Feature flag key controlling adoption of the new date range picker. */
-export const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
-
 /**
  * Maps date-math units to their display abbreviations.
  * Most units use the datemath symbol as-is; month uses "mo" instead of "M".

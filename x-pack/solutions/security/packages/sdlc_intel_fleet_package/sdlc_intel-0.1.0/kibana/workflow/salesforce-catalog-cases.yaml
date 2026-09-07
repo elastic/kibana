@@ -1,0 +1,176 @@
+version: '1'
+name: SDLC Salesforce catalog cases (SOQL)
+description: >
+  Tier-1 Salesforce catalog workflow. Incrementally ingests Case records via salesforce.soqlIngest,
+  upserts salesforce-intel-cases, and maintains salesforce-intel-sync-state checkpoints. Uses the
+  custom GitHub URL field (default Engineering_Issue_URL__c) for feedback-loop cross-linking.
+enabled: false
+tags:
+  - sdlc
+  - salesforce
+  - catalog
+  - ingest
+  - cases
+  - feedback
+
+consts:
+  salesforceConnectorId: REPLACE_WITH_SALESFORCE_CONNECTOR_ID
+  caseGithubField: REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD
+  syncStateIndex: salesforce-intel-sync-state
+  casesIndex: salesforce-intel-cases
+  syncSource: salesforce-catalog-cases
+  entityType: case
+  initialWatermark: '2024-01-01T00:00:00.000Z'
+
+settings:
+  timeout: 30m
+  concurrency:
+    key: sdlc-salesforce-catalog-cases
+    strategy: drop
+    max: 1
+
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+
+steps:
+  - name: read_checkpoint
+    type: elasticsearch.search
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      size: 1
+      ignore_unavailable: true
+      allow_no_indices: true
+      query:
+        bool:
+          must:
+            - term:
+                sync.source: '{{ consts.syncSource }}'
+            - term:
+                entity_type: '{{ consts.entityType }}'
+
+  - name: init_state
+    type: data.set
+    with:
+      watermark: '${{ steps.read_checkpoint.output.hits.hits[0]._source.watermark ?? "" }}'
+      runStartedAt: '{{ execution.startedAt }}'
+      nextRecordsUrl: ''
+      pagesFetched: 0
+      recordsIndexed: 0
+
+  - name: ensure_watermark
+    type: data.set
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
+    with:
+      watermark: '{{ consts.initialWatermark }}'
+
+  - name: build_soql
+    type: data.set
+    with:
+      baseSoql: >-
+        SELECT Id, CaseNumber, Subject, Status, Priority, CreatedDate, ClosedDate,
+        LastModifiedDate, AccountId, Account.Name, REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD,
+        REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD
+        FROM Case WHERE LastModifiedDate > {{ variables.watermark }}
+        ORDER BY LastModifiedDate ASC
+
+  - name: paginate_cases
+    type: while
+    condition: 'steps.fetch_cases.output.hasMore : true'
+    max-iterations: 20
+    steps:
+      - name: fetch_cases
+        type: salesforce.soqlIngest
+        connector-id: '{{ consts.salesforceConnectorId }}'
+        with:
+          soql: "{% if variables.nextRecordsUrl == null or variables.nextRecordsUrl == \"\" %}{{ variables.baseSoql }}{% else %}{% endif %}"
+          nextRecordsUrl: '${{ variables.nextRecordsUrl }}'
+
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_cases.output.records %}
+            [
+            {%- for node in items -%}
+              {
+                "Id": "{{ node.Id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "case": {
+                  "id": "{{ node.Id }}",
+                  "number": "{{ node.CaseNumber }}",
+                  "subject": "{{ node.Subject }}",
+                  "status": "{{ node.Status }}",
+                  "priority": "{{ node.Priority }}",
+                  "created_at": "{{ node.CreatedDate }}",
+                  "closed_at": "{{ node.ClosedDate }}",
+                  "last_modified_at": "{{ node.LastModifiedDate }}"
+                },
+                "account": {
+                  "id": "{{ node.AccountId }}",
+                  "name": "{{ node.Account?.Name ?? "" }}"
+                },
+                "product": {"area": "{{ node.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}"},
+                "links": {
+                  "github_issue_url": "{{ node.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}",
+                  "link_source": "salesforce_field"
+                },
+                "feedback": {"is_escalated": false, "linked_to_sdh": false},
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.casesIndex }}'
+          id_field: Id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
+
+      - name: advance_pagination
+        type: data.set
+        with:
+          nextRecordsUrl: '${{ steps.fetch_cases.output.nextRecordsUrl ?? "" }}'
+          pagesFetched: '${{ variables.pagesFetched | plus: 1 }}'
+          recordsIndexed: '${{ variables.recordsIndexed | plus: steps.fetch_cases.output.records.size }}'
+
+      - name: checkpoint_page
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            watermark: '{{ variables.runStartedAt }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '${{ variables.pagesFetched }}'
+              records_indexed: '${{ variables.recordsIndexed }}'
+              has_more: '${{ steps.fetch_cases.output.hasMore ?? false }}'
+  - name: write_checkpoint
+    type: elasticsearch.index
+    with:
+      index: '{{ consts.syncStateIndex }}'
+      id: '{{ consts.syncSource }}-{{ consts.entityType }}'
+      document:
+        '@timestamp': '{{ execution.startedAt }}'
+        sync:
+          run_id: '{{ execution.id }}'
+          source: '{{ consts.syncSource }}'
+        entity_type: '{{ consts.entityType }}'
+        watermark: '{{ variables.runStartedAt }}'
+        last_run_at: '{{ execution.startedAt }}'
+        last_run_status: success
+        stats:
+          pages_fetched: '${{ variables.pagesFetched }}'
+          records_indexed: '${{ variables.recordsIndexed }}'
+          has_more: '${{ steps.fetch_cases.output.hasMore ?? false }}'

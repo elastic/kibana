@@ -8,12 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/public';
 import { ContextEnginePlugin } from './plugin';
 
-export type {
-  AgentBuilderIntegration,
-  ContextEnginePluginSetup,
-  ContextEnginePluginStart,
-  SuggestAutomationParams,
-  SuggestAutomationProvider,
-} from './types';
+export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
 
 export const plugin = (context: PluginInitializerContext) => new ContextEnginePlugin(context);

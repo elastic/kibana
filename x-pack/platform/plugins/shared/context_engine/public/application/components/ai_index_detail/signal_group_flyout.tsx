@@ -166,7 +166,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           size="s"
-                          iconType="chevronSingleDown"
+                          iconType="arrowDown"
                           isLoading={isLoading}
                           onClick={loadMore}
                           data-test-subj="contextSignalsGroupLoadMore"

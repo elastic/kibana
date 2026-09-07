@@ -13,7 +13,6 @@ const createBufferedTaskStoreMock = () => {
     update: jest.fn(),
     partialUpdate: jest.fn(),
     remove: jest.fn(),
-    get: jest.fn(),
   };
   return mocked;
 };

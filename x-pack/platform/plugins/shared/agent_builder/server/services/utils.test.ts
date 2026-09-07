@@ -130,7 +130,6 @@ describe('getUserFromRequest', () => {
   beforeEach(() => {
     security = securityServiceMock.createStart();
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false } as never);
   });
 
   it('returns user id and username from a real request when getCurrentUser succeeds', async () => {
@@ -143,7 +142,7 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'testuser', isAdmin: false });
+    expect(result).toEqual({ id: 'profile-123', username: 'testuser' });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -162,7 +161,6 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'realm:["file","file1","shareduser"]',
       username: 'shareduser',
-      isAdmin: false,
     });
   });
 
@@ -188,7 +186,6 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'profile-from-api-key',
       username: 'shareduser',
-      isAdmin: false,
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -206,7 +203,6 @@ describe('getUserFromRequest', () => {
 
     security.authc.getCurrentUser.mockReturnValue({
       username: 'shareduser',
-      isAdmin: false,
       authentication_type: 'api_key',
       authentication_realm: { type: '_es_api_key', name: '_es_api_key' },
     } as any);
@@ -217,9 +213,7 @@ describe('getUserFromRequest', () => {
     const result = await getUserFromRequest({ request, security, esClient });
 
     expect(result).toEqual({
-      id: undefined,
       username: 'shareduser',
-      isAdmin: false,
     });
     expect(esClient.security.getApiKey).toHaveBeenCalledWith({
       with_profile_uid: true,
@@ -253,9 +247,7 @@ describe('getUserFromRequest', () => {
     const result = await getUserFromRequest({ request, security, esClient });
 
     expect(result).toEqual({
-      id: undefined,
       username: 'shareduser',
-      isAdmin: false,
     });
   });
 
@@ -300,7 +292,6 @@ describe('getUserFromRequest', () => {
     expect(result).toEqual({
       id: 'profile-123',
       username: 'shareduser',
-      isAdmin: false,
     });
     expect(esClient.security.getApiKey).not.toHaveBeenCalled();
   });
@@ -311,7 +302,6 @@ describe('getUserFromRequest', () => {
     security.authc.getCurrentUser.mockReturnValue(null);
     esClient.security.authenticate.mockResolvedValue({
       username: 'api-key-user',
-      isAdmin: false,
       authentication_realm: { type: 'native', name: 'native1' },
     } as any);
 
@@ -320,9 +310,7 @@ describe('getUserFromRequest', () => {
     // Leaving id undefined preserves username ownership fallback for un-enriched paths;
     // a realm id from authenticate would mismatch profile_uid-backed agents.
     expect(result).toEqual({
-      id: undefined,
       username: 'api-key-user',
-      isAdmin: false,
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
@@ -338,7 +326,7 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-123', username: 'originating-user', isAdmin: false });
+    expect(result).toEqual({ id: 'profile-123', username: 'originating-user' });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).not.toHaveBeenCalled();
   });
@@ -353,7 +341,7 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ username: 'task-manager-user', isAdmin: false });
+    expect(result).toEqual({ username: 'task-manager-user' });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
@@ -369,7 +357,7 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
-    expect(result).toEqual({ id: 'profile-456', username: 'some-user', isAdmin: false });
+    expect(result).toEqual({ id: 'profile-456', username: 'some-user' });
     expect(esClient.security.authenticate).toHaveBeenCalledTimes(1);
   });
 });

@@ -19,7 +19,6 @@ const baseOptions = (
   end: 1,
   esClient: {} as ElasticsearchClient,
   logger: { debug: jest.fn() } as unknown as Logger,
-  signal: new AbortController().signal,
   ...overrides,
 });
 

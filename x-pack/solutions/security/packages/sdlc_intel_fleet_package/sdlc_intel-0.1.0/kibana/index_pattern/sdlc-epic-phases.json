@@ -1,0 +1,12 @@
+{
+  "attributes": {
+    "fieldFormatMap": "{}",
+    "fields": "[]",
+    "runtimeFieldMap": "{}",
+    "title": "sdlc-epic-phases"
+  },
+  "id": "sdlc-epic-phases",
+  "type": "index-pattern",
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "8.0.0"
+}

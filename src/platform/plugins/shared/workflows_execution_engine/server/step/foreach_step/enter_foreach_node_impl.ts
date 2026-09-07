@@ -118,17 +118,18 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       }
     }
 
+    // Missing nested paths (e.g. payload.closingIssuesReferences.nodes) often
+    // resolve to null/undefined. Treat as an empty list so the loop is skipped.
+    if (resolvedValue === null || resolvedValue === undefined) {
+      return [];
+    }
+
     if (!Array.isArray(resolvedValue)) {
       throw new Error(
         `Foreach expression must evaluate to an array. ` +
-          `Expression "${expression}" resolved to ${typeof resolvedValue}${
-            resolvedValue === null
-              ? ' (null)'
-              : resolvedValue === undefined
-              ? ' (undefined)'
-              : `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
-                  JSON.stringify(resolvedValue).length > 100 ? '...' : ''
-                }`
+          `Expression "${expression}" resolved to ${typeof resolvedValue}` +
+          `: ${JSON.stringify(resolvedValue).substring(0, 100)}${
+            JSON.stringify(resolvedValue).length > 100 ? '...' : ''
           }. `
       );
     }

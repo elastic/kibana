@@ -26,7 +26,6 @@ import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
-import { registerGetWorkflowTool } from './tools/get_workflow_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
 import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
 import { getWorkflowExecutionStatusTool } from './tools/get_workflow_execution_status';
@@ -68,7 +67,6 @@ export class AgentBuilderWorkflowsPlugin
 
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
-    registerGetWorkflowTool(agentBuilder, api, getSecurity);
     registerGetStepDefinitionsTool(agentBuilder, api);
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);

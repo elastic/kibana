@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import { createReasoningEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import { wrapJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { Logger } from '@kbn/logging';
+import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
+import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { convertError, isRecoverableError } from './utils/errors';
 import { errorAction, isAgentErrorAction } from './actions';
 import type { PromptFactory } from './prompts';
@@ -80,8 +83,33 @@ export const createAnswerAgentStructured = ({
 
       let response = await structuredModel.invoke(prompt);
       // unwrap response if schema was wrapped
-      if (wrapped && response[wrappedSchemaProp]) {
+      if (
+        wrapped &&
+        typeof response === 'object' &&
+        response !== null &&
+        wrappedSchemaProp in response
+      ) {
         response = response[wrappedSchemaProp];
+      }
+
+      const schemaToValidate = outputSchema ?? structuredOutputSchema;
+      const validationSchema = fromJSONSchema(schemaToValidate);
+      if (validationSchema) {
+        const validationResult = validationSchema.safeParse(response);
+        if (!validationResult.success) {
+          return {
+            answerActions: [
+              errorAction(
+                createAgentExecutionError(
+                  `agent response does not conform to the configured output schema: ${validationResult.error.message}`,
+                  AgentExecutionErrorCode.schemaViolation,
+                  {}
+                )
+              ),
+            ],
+            errorCount: state.errorCount + 1,
+          };
+        }
       }
 
       const action = processStructuredAnswerResponse(response);

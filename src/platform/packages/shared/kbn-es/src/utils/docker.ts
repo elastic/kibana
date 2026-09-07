@@ -1342,11 +1342,7 @@ export function teardownServerlessClusterSync(log: ToolingLog, options: Serverle
   if (runningNodes.length) {
     log.info('Killing running serverless containers.');
 
-    try {
-      execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
-    } catch {
-      log.debug('Some containers had already stopped before kill completed.');
-    }
+    execa.commandSync(`docker kill ${runningNodes.join(' ')}`);
   }
 }
 

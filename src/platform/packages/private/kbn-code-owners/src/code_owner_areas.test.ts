@@ -78,7 +78,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
   security: [
     'elastic/contextual-security-apps',
     'elastic/core-analysis',
-    'elastic/siem-conduit',
+    'elastic/cloud-services',
     'elastic/kibana-cases',
     'elastic/security-data-engineering',
     'elastic/security-defend-workflows',

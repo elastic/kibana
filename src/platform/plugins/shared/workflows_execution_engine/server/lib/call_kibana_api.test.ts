@@ -41,14 +41,21 @@ function createMockResponse({
   body,
   status = 200,
   contentType = 'application/json',
+  headers: additionalHeaders,
 }: {
   body: unknown;
   status?: number;
   contentType?: string | null;
+  headers?: Record<string, string>;
 }): Response {
   const headers = new Headers();
   if (contentType !== null) {
     headers.set('content-type', contentType);
+  }
+  if (additionalHeaders) {
+    for (const [key, value] of Object.entries(additionalHeaders)) {
+      headers.set(key, value);
+    }
   }
   let payload: Uint8Array;
   if (body instanceof Uint8Array) {
@@ -561,12 +568,13 @@ describe('callKibanaApi', () => {
     ).rejects.toBeInstanceOf(CallKibanaApiResponseTooLargeError);
   });
 
-  it('normalizes to type/message/details:{status} via toExecutionError, never body/headers (ES guard)', async () => {
+  it('normalizes to type/message/details:{status,retryAfterMs?} via toExecutionError, never body/headers (ES guard)', async () => {
     mockSelfFetch.mockResolvedValue(
       mockSelfResponse(
         createMockResponse({
           body: { secret: 'do-not-persist', big: 'x'.repeat(100) },
-          status: 500,
+          status: 429,
+          headers: { 'retry-after': '47' },
         })
       )
     );
@@ -579,10 +587,10 @@ describe('callKibanaApi', () => {
       );
     } catch (err) {
       // The engine normalizes a thrown KibanaApiCallError via `toExecutionError` (not the generic
-      // `fromError`), lifting only the safe scalar `status` into `details`.
+      // `fromError`), lifting only safe scalars (`status` and an optional `retryAfterMs`) into `details`.
       const serialized = toExecutionError(err as Error).toSerializableObject();
       expect(serialized.type).toBe('KibanaApiCallError');
-      expect(serialized.details).toEqual({ status: 500 });
+      expect(serialized.details).toEqual({ status: 429, retryAfterMs: 47000 });
       expect(serialized as Record<string, unknown>).not.toHaveProperty('body');
       expect(serialized as Record<string, unknown>).not.toHaveProperty('headers');
       // The raw body must not leak into the persisted `details`.

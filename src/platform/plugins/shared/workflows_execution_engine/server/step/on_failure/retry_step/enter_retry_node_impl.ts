@@ -17,6 +17,19 @@ import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 import type { NodeImplementation, NodeWithErrorCatching } from '../../node_implementation';
 
+function getRetryAfterMsFromStepError(failedContext: StepExecutionRuntime): number | undefined {
+  const errorDetails = failedContext.getCurrentStepResult()?.error?.details;
+  if (
+    typeof errorDetails === 'object' &&
+    errorDetails !== null &&
+    'retryAfterMs' in errorDetails &&
+    typeof errorDetails.retryAfterMs === 'number'
+  ) {
+    return errorDetails.retryAfterMs;
+  }
+  return undefined;
+}
+
 export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatching {
   constructor(
     private node: EnterRetryNode,
@@ -112,6 +125,25 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     const config = this.node.configuration;
     const strategy = config.strategy ?? 'fixed';
 
+    // Server-supplied retry hint takes precedence over both fixed and exponential curves when
+    // opted in. This must happen before the fixed-strategy early return, otherwise the hint is
+    // silently ignored for the default strategy. The hint is clamped to max-delay or a hard
+    // ceiling inside computeRetryDelayMs, so we reuse that value rather than the raw hint.
+    const retryAfterMs = config['respect-retry-after']
+      ? getRetryAfterMsFromStepError(this.stepExecutionRuntime)
+      : undefined;
+    const serverHintDelayMs = computeRetryDelayMs(config, currentAttempt, retryAfterMs);
+    if (config['respect-retry-after'] && serverHintDelayMs > 0 && retryAfterMs != null) {
+      if (this.stepExecutionRuntime.tryEnterWaitUntil(new Date(Date.now() + serverHintDelayMs))) {
+        this.workflowLogger.logDebug(
+          `Delaying retry for ${serverHintDelayMs}ms (server Retry-After hint, attempt ${
+            currentAttempt + 1
+          }).`
+        );
+        return;
+      }
+    }
+
     // Fixed strategy with delay string: use tryEnterDelay for backward compatibility (same behavior as before).
     const fixedDelayStr =
       strategy === 'fixed' && config.delay != null && config.delay.length > 0
@@ -124,7 +156,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     }
 
     if (strategy === 'exponential') {
-      const delayMs = computeRetryDelayMs(config, currentAttempt);
+      const delayMs = computeRetryDelayMs(config, currentAttempt, retryAfterMs);
       if (
         delayMs > 0 &&
         this.stepExecutionRuntime.tryEnterWaitUntil(new Date(Date.now() + delayMs))

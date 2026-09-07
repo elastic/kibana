@@ -101,6 +101,8 @@ steps:
 
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
+    env:
+      CLEAR_YARN_CACHE: '1'
     soft_fail:
       - exit_status: 255
       - exit_status: -1
@@ -127,6 +129,8 @@ steps:
 
   - command: KIBANA_MEMORY_SIZE=8192 .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment - 8GB Kibana Node'
+    env:
+      CLEAR_YARN_CACHE: '1'
     soft_fail:
       - exit_status: 255
       - exit_status: -1

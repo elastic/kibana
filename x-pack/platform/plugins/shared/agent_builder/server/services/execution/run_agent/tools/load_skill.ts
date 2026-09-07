@@ -11,7 +11,7 @@ import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server'
 import type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
-  InternalBuiltinToolDefinition,
+  BuiltinToolDefinition,
   ToolReturnSummarizerFn,
 } from '@kbn/agent-builder-server';
 import { loadSkillTools } from '../../../skills/load_skill_tools';
@@ -38,7 +38,7 @@ export const createLoadSkillTool = ({
 }: {
   analyticsService?: AgentBuilderAnalytics;
   trackingService?: AgentBuilderTracking;
-} = {}): InternalBuiltinToolDefinition<typeof schema> => ({
+} = {}): BuiltinToolDefinition<typeof schema> => ({
   id: internalTools.loadSkill,
   description: `Load a skill.
 

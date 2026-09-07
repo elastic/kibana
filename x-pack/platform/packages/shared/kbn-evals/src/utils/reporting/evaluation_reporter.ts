@@ -19,14 +19,11 @@ export type EvaluationReporter = (
   options?: { taskModelId?: string; suiteId?: string; executionId?: string }
 ) => Promise<void>;
 
-function buildReportHeader(taskModel: Model, evaluatorModel: Model | undefined): string[] {
+function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
   const lines = [`Model: ${taskModel.id} (${taskModel.family}/${taskModel.provider})`];
-  // Experiments scored only by code evaluators invoke no judge, so there is no line to print.
-  if (evaluatorModel) {
-    lines.push(
-      `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
-    );
-  }
+  lines.push(
+    `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
+  );
   return lines;
 }
 

@@ -1,0 +1,67 @@
+{
+  "id": "sdlc-ingest-stalled",
+  "type": "alerting_rule_template",
+  "attributes": {
+    "name": "SDLC ingest stalled (schedule-aware)",
+    "tags": [
+      "SDLC Intelligence",
+      "pipeline",
+      "health",
+      "sync",
+      "freshness"
+    ],
+    "ruleTypeId": ".es-query",
+    "schedule": {
+      "interval": "30m"
+    },
+    "params": {
+      "searchType": "esqlQuery",
+      "esqlQuery": {
+        "esql": "FROM vp-ingest-freshness\n| WHERE source NOT IN (\"salesforce-catalog-cases\", \"slack-channel-history\", \"slack-thread-replies\", \"slack-catalog-users\", \"cross-link-sdh-product\", \"github-catalog-sdh-labeled-issues\", \"github-catalog-sdh-issues\", \"github-extract-drive-links\", \"gdrive-catalog-roadmap-docs\")\n| EVAL max_age_hours = CASE(\n    source IN (\"github-activity-issues\", \"github-activity-pull-requests\", \"github-enrich-issues-graph\", \"github-enrich-pull-requests-graph\", \"agent-pr-missing-related-issue\"), 3,\n    source IN (\"cross-link-feedback-loop\", \"github-cross-link-entities\", \"github-enrich-epic-phases\", \"github-normalize-project-items\", \"github-project-epic-phases\"), 18,\n    30)\n| EVAL age_hours = DATE_DIFF(\"hours\", last_write, NOW())\n| WHERE age_hours > max_age_hours\n| KEEP source, doc_count_total, last_write, age_hours, max_age_hours\n| SORT age_hours DESC"
+      },
+      "timeField": "last_write",
+      "timeWindowSize": 48,
+      "timeWindowUnit": "h",
+      "size": 0,
+      "thresholdComparator": ">",
+      "threshold": [
+        0
+      ],
+      "excludeHitsFromPreviousRun": false,
+      "aggType": "count",
+      "groupBy": "all"
+    },
+    "alertDelay": {
+      "active": 1
+    },
+    "description": "Fires when a sync source has not written documents for longer than its own schedule allows. Thresholds are per-source (3h for 30m/1h workflows, 18h for 2h/6h, 30h for 12h/1d) at roughly 2.5x the interval, so one missed run is tolerated and two consecutive misses alert. A flat threshold cannot work here: the catalog workflows run every: 1d, so a 6h rule reported them stalled for 18 hours of every day and buried genuine stalls in permanent noise. Sources owned by workflows that ship disabled (Salesforce, Slack, Drive, SDH) are excluded: a source nobody enabled is not a stall, and alerting on it trains people to ignore the rule.",
+    "actions": [
+      {
+        "group": "query matched",
+        "params": {
+          "subaction": "sendMessage",
+          "subActionParams": {
+            "channel": "{{alert_slack_channel_id}}",
+            "text": ":rotating_light: SDLC-intel ingest stalled - {{context.message}} | value: {{context.value}} | {{context.date}} | rule: {{rule.name}}"
+          }
+        },
+        "frequency": {
+          "summary": false,
+          "notify_when": "onActiveAlert",
+          "throttle": null
+        },
+        "ref": "alert-slack-connector"
+      }
+    ]
+  },
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.1.0",
+  "references": [
+    {
+      "id": "{{alert_slack_connector_id}}",
+      "name": "alert-slack-connector",
+      "type": "action",
+      "required": false
+    }
+  ]
+}

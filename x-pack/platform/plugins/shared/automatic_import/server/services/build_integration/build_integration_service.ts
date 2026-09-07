@@ -144,7 +144,7 @@ const createManifest = (
     },
     policy_templates: policyTemplates,
     owner: {
-      github: '@elastic/siem-conduit',
+      github: '@elastic/cloud-services',
       type: 'community',
     },
   };

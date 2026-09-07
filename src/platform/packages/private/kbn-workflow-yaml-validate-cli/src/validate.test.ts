@@ -11,6 +11,8 @@ import type { ErrorObject } from 'ajv';
 import { validateWorkflowYaml } from './validate';
 import type { SchemaValidateFn } from './create_schema_validator';
 
+const passFn: SchemaValidateFn = async () => ({ errors: [], overflowed: false });
+
 const failFn =
   (errors: ErrorObject[]): SchemaValidateFn =>
   async () => ({ errors, overflowed: false });
@@ -50,6 +52,92 @@ describe('validateWorkflowYaml', () => {
     expect(outcome.ok).toBe(true);
     expect(outcome.issues.some((issue) => issue.severity === 'warning')).toBe(true);
     expect(outcome.issues.some((issue) => issue.severity !== 'warning')).toBe(false);
+  });
+
+  it('fails packaged templates that reference product-owned custom steps', async () => {
+    const yaml = [
+      'template-metadata:',
+      '  slug: packaged-workflow',
+      '  version: 1.0.0',
+      '  availability: ">=9.5.0"',
+      '  name: Packaged workflow',
+      '  description: Package asset',
+      '  categories: [ops]',
+      'version: "1"',
+      'name: wf',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: product-step',
+      '    type: security.sendResponseAction',
+      '',
+    ].join('\n');
+
+    const outcome = await validateWorkflowYaml({
+      file: '/tmp/sdlc_intel-1.0.0/kibana/workflow/packaged.yaml',
+      yaml,
+      validateSchema: passFn,
+      variantMode: 'auto',
+    });
+
+    expect(outcome.ok).toBe(false);
+    expect(outcome.issues).toContainEqual(
+      expect.objectContaining({ source: 'stock-step', path: 'steps.0.type' })
+    );
+  });
+
+  it('does not apply the packaged stock-step contract to ordinary authored workflows', async () => {
+    const yaml = [
+      'version: "1"',
+      'name: wf',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: product-step',
+      '    type: security.sendResponseAction',
+      '',
+    ].join('\n');
+
+    const outcome = await validateWorkflowYaml({
+      file: '/tmp/authored.yaml',
+      yaml,
+      validateSchema: passFn,
+      variantMode: 'strict',
+    });
+
+    expect(outcome.issues.filter((issue) => issue.source === 'stock-step')).toEqual([]);
+  });
+
+  it('does not confuse workflow-library templates with Elastic package assets', async () => {
+    const yaml = [
+      'template-metadata:',
+      '  slug: library-template',
+      '  version: 1.0.0',
+      '  availability: ">=9.5.0"',
+      '  name: Library template',
+      '  description: Uses an approved custom connector',
+      '  categories: [ops]',
+      'version: "1"',
+      'name: wf',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: check',
+      '    type: abuseipdb.checkIp',
+      '',
+    ].join('\n');
+
+    const outcome = await validateWorkflowYaml({
+      file: '/tmp/workflow-library/templates/ip-check.yaml',
+      yaml,
+      validateSchema: passFn,
+      variantMode: 'auto',
+    });
+
+    expect(outcome.issues.filter((issue) => issue.source === 'stock-step')).toEqual([]);
   });
 
   it('fails the run for a genuine (non-template) schema error', async () => {

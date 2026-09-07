@@ -24,6 +24,11 @@ export type {
 } from './src/create_schema_validator';
 export { validateFile } from './src/validate_file';
 export { validateSemantics } from './src/validate_semantics';
+export {
+  isPackageWorkflowPath,
+  isStockWorkflowStepType,
+  validateStockWorkflowSteps,
+} from './src/validate_stock_steps';
 export { validateLiquid } from './src/validate_liquid';
 export { validateWorkflowYaml } from './src/validate';
 export type {

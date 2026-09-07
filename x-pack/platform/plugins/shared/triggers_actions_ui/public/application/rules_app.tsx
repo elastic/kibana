@@ -67,7 +67,7 @@ const RuleFormRoute = lazy(() => import('./sections/rule_form/rule_form_route'))
 export interface TriggersAndActionsUiServices extends CoreStart {
   actions: ActionsPublicPluginSetup;
   getCasesPlugin?: () => Promise<CasesService | undefined>;
-  security: CoreStart['security'] & SecurityPluginStart;
+  security: SecurityPluginStart;
   cloud?: CloudSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

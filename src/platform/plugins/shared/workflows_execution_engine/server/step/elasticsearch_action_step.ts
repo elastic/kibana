@@ -64,15 +64,35 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
       // Generic approach like Dev Console - just forward the request to ES
       const result = await this.executeElasticsearchRequest(esClient, stepType, stepWith);
 
-      this.workflowLogger.logInfo(`Elasticsearch action completed: ${stepType}`, {
-        event: { action: 'elasticsearch-action', outcome: 'success' },
-        tags: ['elasticsearch', 'internal-action'],
-        labels: {
-          step_type: stepType,
-          connector_type: stepType,
-          action_type: 'elasticsearch',
-        },
-      });
+      // ES _bulk returns HTTP 200 with errors:true for per-item failures; log them but keep running
+      if (result?.errors === true && Array.isArray(result?.items)) {
+        const failedCount = result.items.filter((item: any) =>
+          Object.values(item).some((op: any) => op?.error != null)
+        ).length;
+
+        this.workflowLogger.logWarn(
+          `Elasticsearch action completed with ${failedCount} partial failures out of ${result.items.length} items`,
+          {
+            event: { action: 'elasticsearch-action', outcome: 'failure' },
+            tags: ['elasticsearch', 'internal-action', 'partial-failure'],
+            labels: {
+              step_type: stepType,
+              connector_type: stepType,
+              action_type: 'elasticsearch',
+            },
+          }
+        );
+      } else {
+        this.workflowLogger.logInfo(`Elasticsearch action completed: ${stepType}`, {
+          event: { action: 'elasticsearch-action', outcome: 'success' },
+          tags: ['elasticsearch', 'internal-action'],
+          labels: {
+            step_type: stepType,
+            connector_type: stepType,
+            action_type: 'elasticsearch',
+          },
+        });
+      }
 
       return { input: stepWith, output: result, error: undefined };
     } catch (error) {
@@ -215,6 +235,14 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
       if (queryParams && Object.keys(queryParams).length > 0) {
         const queryString = new URLSearchParams(queryParams).toString();
         finalPath = `${path}?${queryString}`;
+      }
+
+      // An empty bulk body is a no-op: ES rejects a zero-operation _bulk request
+      // with `parse_exception: request body is required`, but an empty operations
+      // array is a legitimate result of Liquid templates over empty pages (e.g. a
+      // checkpointed pagination loop that has nothing left to index).
+      if (bulkBody !== undefined && (!Array.isArray(bulkBody) || bulkBody.length === 0)) {
+        return { errors: false, items: [] };
       }
 
       const requestOptions = {

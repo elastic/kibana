@@ -162,33 +162,6 @@ describe('buildSecurityApi', () => {
     });
   });
 
-  describe('serviceAccounts.isEnabled', () => {
-    const buildApiWithConfig = (config: Parameters<typeof buildSecurityApi>[0]['config']) =>
-      buildSecurityApi({
-        getAuthc: () => authc,
-        getSession: () => session,
-        audit: auditService,
-        config,
-        logger,
-      });
-
-    it('returns true when service accounts are enabled', () => {
-      expect(
-        buildApiWithConfig({ serviceAccounts: { enabled: true } }).serviceAccounts.isEnabled()
-      ).toBe(true);
-    });
-
-    it('returns false when service accounts are disabled', () => {
-      expect(
-        buildApiWithConfig({ serviceAccounts: { enabled: false } }).serviceAccounts.isEnabled()
-      ).toBe(false);
-    });
-
-    it('returns false when the setting is not available, as is the case outside of serverless', () => {
-      expect(buildApiWithConfig({}).serviceAccounts.isEnabled()).toBe(false);
-    });
-  });
-
   describe('config.uiam', () => {
     describe('when uiam is enabled', () => {
       beforeEach(() => {

@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "columns": [
+      "case_number",
+      "case_status",
+      "case_subject",
+      "github_issue_url",
+      "linked_to_sdh",
+      "link_source",
+      "last_modified_at"
+    ],
+    "description": "Salesforce Case feedback-loop fields from sdlc-salesforce-feedback-view.",
+    "hits": 0,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"filter\":[],\"highlightAll\":true,\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\",\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"version\":true}"
+    },
+    "sort": [["last_modified_at", "desc"]],
+    "title": "SDLC Salesforce feedback loop",
+    "version": 1
+  },
+  "id": "sdlc-intel-salesforce-feedback-search",
+  "references": [
+    { "id": "sdlc-salesforce-feedback-view", "name": "kibanaSavedObjectMeta.searchSourceJSON.index", "type": "index-pattern" }
+  ],
+  "type": "search"
+}

@@ -9,7 +9,6 @@
 
 import type { CoreAuthenticationService } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
-import type { CoreServiceAccountsService } from './service_accounts';
 
 /**
  * Setup contract for Core's security service.
@@ -35,8 +34,4 @@ export interface SecurityServiceStart {
    * The {@link CoreAuthenticationService | authentication service}
    */
   authc: CoreAuthenticationService;
-  /**
-   * The {@link CoreServiceAccountsService | service accounts service}
-   */
-  serviceAccounts: CoreServiceAccountsService;
 }

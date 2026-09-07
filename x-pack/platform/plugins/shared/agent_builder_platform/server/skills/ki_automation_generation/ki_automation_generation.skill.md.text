@@ -122,36 +122,11 @@ Do **not** hand-write or persist workflow YAML yourself. Use these tools:
 - **platform.core.generate_esql** — author or repair a single ES|QL query. Use it to hand-craft
   a tricky access pattern template, or re-write queries that failed to execute.
 - **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
-- **platform.workflows.get_workflow** — read a saved workflow's metadata (name, description) or,
-  when needed, its full YAML (`includeYaml: true`, tool result only). Pass `attach: true` to load
-  a saved workflow into a `workflow.yaml` conversation attachment before editing with
-  `generate_workflow`. Defaults to metadata only.
 - **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
   a step's `with` params or find a pattern.
 - **platform.workflows.get_connectors** — list configured connectors and their types.
-- **platform.context_engine.save_automation** — save a generated workflow and attach it to the AI
-  index. Only available when an `ai_index` attachment is present. After every successful
-  `generate_workflow`, show the diff first, then call this in the **same assistant turn**. See
-  **Turn discipline** in Phase 4.
 
 For deep workflow YAML syntax, Liquid templating, and debugging, defer to the `workflow-authoring` skill.
-
-### User interaction (HITL)
-
-When the user must choose among a **fixed set of options** (edit vs create, confirm a strategy,
-what to change in an existing workflow, etc.), call `ask_user_question` — never paraphrase those
-choices as chat text. **Saving workflows** is different: after `generate_workflow`, show the diff
-in chat first, then **always call** `platform.context_engine.save_automation` in the same turn
-(platform confirmation replaces `ask_user_question` for save). Format each `ask_user_question` call like this:
-
-**Question:** "<short question>"
-
-**Options:**
-- `<label>` — optional description of what happens if picked
-- `<label>`
-
-Use free text in chat only for **open-ended** questions (e.g. Phase 1 use-case discovery) where
-there is no predefined option list.
 
 A reference workflow YAML for the Index Metadata strategy is available in the
 `index-selection-reference-workflow` resource file attached to this skill.
@@ -159,65 +134,6 @@ A reference workflow YAML for the Index Metadata strategy is available in the
 ## Phased workflow
 
 Follow these phases in order. Do not skip ahead.
-
-### When an `ai_index` attachment is present
-
-If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phase 1
-only** — the attachment is the source of truth for destination, sources, and existing
-automations. Do not call `platform.core.list_indices`, run open-ended discovery, or re-ask the
-user to pick sources/destination unless the attachment is clearly incomplete.
-
-**Still run Phases 2 and 3** when they add value:
-
-- **Phase 2 (strategy):** After sampling sources, pick a KI strategy per configured source from
-  the strategy catalog. If the attachment description and source types already make the strategy
-  obvious, state your recommendation briefly and proceed. If multiple strategies fit, or the
-  description is thin, call `ask_user_question` with one option per plausible strategy before
-  drafting.
-- **Phase 3 (corpus filter):** Before calling `generate_workflow`, agree on a corpus filter
-  (time window, status/condition, or numeric cap) per **Phase 3** below. Do not skip this just
-  because the attachment lists sources — encourage a filter even when the user might accept
-  "no filter" after you note the cost/bloat risk.
-
-Then continue to Phase 4.
-
-**Sample sources** (referenced below): ES|QL sources via `platform.core.execute_esql` against the
-configured query; connector sources via `platform.workflows.get_connectors` for the listed
-connector ids only.
-
-#### Existing automations on the AI index
-
-When `Existing automations` in the attachment is non-empty, resolve this **before** sampling
-sources or calling `generate_workflow`:
-
-1. Call `platform.workflows.get_workflow` per listed id, metadata only (`includeYaml` omitted),
-   to get name/description for the user-facing list — don't load YAML up front.
-2. Call `ask_user_question`: "This AI index already has workflow automations. What would you like
-   to do?" — one option per workflow (`Edit: {name}` / `{id}`) plus `Create a new automation`. Do
-   not call `generate_workflow` until the user picks.
-3. **Edit:**
-   a. Call `platform.workflows.get_workflow(id, attach: true)` to load it as a `workflow.yaml`
-      attachment (workflow ids are **not** attachment ids until attached this way).
-   b. Call `ask_user_question`: "What should change in this workflow?" — e.g. adjust KI
-      prompt/granularity, change source query or filter, update access patterns, or other (describe
-      in chat). Do **not** call `generate_workflow` until the user answers.
-   c. Re-sample sources with `platform.core.execute_esql` only if the edit needs fresh data.
-   d. Call `platform.core.generate_workflow` with the workflow `attachmentId` and the user's edit
-      intent. Continue to Phase 4, updating the existing workflow rather than creating a duplicate.
-4. **Create new:** sample sources, run **Phase 2** (strategy per source — confirm via
-   `ask_user_question` when unclear), then **Phase 3** (corpus filter), then propose something
-   materially different from the existing automations (different strategy/source/granularity)
-   based on their name + description — only load an existing workflow's YAML (`includeYaml: true`,
-   no `attach`) if the user asks to compare. If your pilot still overlaps, confirm with the user
-   before calling `generate_workflow`. Continue to Phase 4.
-
-#### No existing automations on the AI index
-
-1. Sample sources.
-2. **Phase 2:** Propose a KI strategy per source from the strategy catalog; call
-   `ask_user_question` when the attachment description does not make the choice obvious.
-3. **Phase 3:** Agree on a corpus filter before drafting (see Phase 3 below).
-4. Continue to Phase 4.
 
 ### Phase 1 — Discover
 
@@ -264,28 +180,8 @@ to draft a pilot workflow. Important constraints:
 - Use `ai.prompt` instead of `ai.agent` wherever possible.
 - Set `triggers: [{type: manual}]`.
 
-**Turn discipline (critical):** After `generate_workflow` returns, the user must **see the diff
-before** the platform save confirmation. Do not call `save_automation` in the same model message as
-`generate_workflow` — that shows save before the diff. Required order in one assistant turn:
-
-1. `platform.core.generate_workflow` — call this alone; do not batch other tools in the same message.
-2. Write a short summary and render the diff: `<render_attachment id="{diff_attachment_id}" />`
-   (use `diff_attachment_id` from step 1, not `attachment_id`). End this message with text only — no
-   tool calls.
-3. `platform.context_engine.save_automation` with `workflowAttachmentId` set to `attachment_id` from
-   step 1 (platform shows save confirmation — not `ask_user_question`).
-
-If you already posted a diff in a prior turn without calling save, re-render
-`<render_attachment id="{diff_attachment_id}" />` in chat before calling `save_automation` — never
-call save alone in a new turn without showing the diff again.
-
-If the user cancels the save confirmation dialog, stop and do not call `execute_workflow` until they
-save. The save tool is only available when a `platform.context_engine.ai_index` attachment is
-present. Do not call `execute_workflow` until the workflow is saved.
-
-If the user saved manually from the diff card instead of confirming the platform save dialog, call
-`platform.context_engine.save_automation` with `workflowId` set to the saved workflow id (from the
-attachment `origin` or `workflowId`) before continuing.
+Present the generated diff card and summarize what the workflow does in 2–3 sentences. Tell the
+user to review and Save from the card — saving is a UI action you cannot perform.
 
 **Approval gate:** Only call `platform.core.execute_workflow` when the user gives an unambiguous
 affirmative ("yes", "looks good", "run it") with no change requests. Handle edits first by
