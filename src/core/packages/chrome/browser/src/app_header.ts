@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ChromeNext } from './chrome_next';
-export type { ChromeAiButton, GlobalSearchConfig } from '../controls';
+import type { DistributiveOmit } from '@elastic/eui';
+import type { AppHeaderBack, AppHeaderConfig } from '@kbn/ui-app-header';
+
+/**
+ * Presentation types owned by `@kbn/ui-app-header`. Re-exported so existing
+ * `@kbn/core-chrome-browser` imports stay valid.
+ *
+ * @public
+ */
 export type {
   AppHeaderBack,
   AppHeaderBadge,
@@ -32,5 +39,14 @@ export type {
   AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,
-  ChromeAppHeaderConfig,
-} from '../app_header';
+} from '@kbn/ui-app-header';
+
+/**
+ * Chrome-owned registration config. Unlike {@link AppHeaderConfig}, `back` may be `false` to
+ * suppress the breadcrumb-derived fallback.
+ *
+ * @public
+ */
+export type ChromeAppHeaderConfig = DistributiveOmit<AppHeaderConfig, 'back'> & {
+  back?: AppHeaderBack | false;
+};
