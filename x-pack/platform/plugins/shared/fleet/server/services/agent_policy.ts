@@ -184,6 +184,8 @@ import {
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
+const MAX_AGENT_POLICY_REVISION_BUMP_ATTEMPTS = 5;
+
 function normalizeKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE) {
     return _normalizeKuery(
@@ -299,24 +301,55 @@ class AgentPolicyService {
         getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
-    await soClient
-      .update<AgentPolicySOAttributes>(savedObjectType, id, {
-        ...agentPolicy,
-        ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
-        ...(options.removeProtection
-          ? { is_protected: false }
-          : { is_protected: agentPolicy.is_protected }),
-        updated_at: new Date().toISOString(),
-        updated_by: user ? user.username : 'system',
-        has_agent_version_conditions: options.hasAgentVersionConditions,
-        ...(options.minAgentVersion !== undefined
-          ? { min_agent_version: options.minAgentVersion }
-          : {}),
-        ...(options.packageAgentVersionConditions !== undefined
-          ? { package_agent_version_conditions: options.packageAgentVersionConditions }
-          : {}),
-      })
-      .catch(catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`));
+    // Optimistic concurrency on revision bumps: the default SO retryOnConflict path
+    // re-merges the stale `revision: n+1` onto a newer document and can drop increments.
+    let revisionBase = existingAgentPolicy;
+    const revisionBumpAttempts = options.bumpRevision ? MAX_AGENT_POLICY_REVISION_BUMP_ATTEMPTS : 1;
+
+    for (let attempt = 1; attempt <= revisionBumpAttempts; attempt++) {
+      try {
+        await soClient.update<AgentPolicySOAttributes>(
+          savedObjectType,
+          id,
+          {
+            ...agentPolicy,
+            ...(options.bumpRevision ? { revision: revisionBase.revision + 1 } : {}),
+            ...(options.removeProtection
+              ? { is_protected: false }
+              : { is_protected: agentPolicy.is_protected }),
+            updated_at: new Date().toISOString(),
+            updated_by: user ? user.username : 'system',
+            has_agent_version_conditions: options.hasAgentVersionConditions,
+            ...(options.minAgentVersion !== undefined
+              ? { min_agent_version: options.minAgentVersion }
+              : {}),
+            ...(options.packageAgentVersionConditions !== undefined
+              ? { package_agent_version_conditions: options.packageAgentVersionConditions }
+              : {}),
+          },
+          options.bumpRevision ? { version: revisionBase.version, retryOnConflict: 0 } : undefined
+        );
+        break;
+      } catch (error) {
+        const canRetryRevisionBump =
+          options.bumpRevision &&
+          SavedObjectsErrorHelpers.isConflictError(error) &&
+          attempt < revisionBumpAttempts;
+        if (!canRetryRevisionBump) {
+          await catchAndSetErrorStackTrace.withMessage(`SO update to agent policy [${id}] failed`)(
+            error as Error
+          );
+        }
+        logger.debug(
+          `Retrying agent policy [${id}] revision bump after conflict (attempt ${attempt}/${revisionBumpAttempts})`
+        );
+        const refreshedAgentPolicy = await this.get(soClient, id, false);
+        if (!refreshedAgentPolicy) {
+          throw new AgentPolicyNotFoundError('Agent policy not found');
+        }
+        revisionBase = refreshedAgentPolicy;
+      }
+    }
 
     const newAgentPolicy = await this.get(soClient, id, false);
 
@@ -372,7 +405,7 @@ class AgentPolicyService {
 
     logger.debug(
       `Agent policy ${id} update completed, revision: ${
-        options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
+        options.bumpRevision ? revisionBase.revision + 1 : revisionBase.revision
       }`
     );
 
@@ -2126,6 +2159,41 @@ class AgentPolicyService {
               `Policy [${policyId}] has mismatched revisions after deploy: ` +
                 `.kibana_ingest revision [${soRevision}], ` +
                 `.fleet-policies revision_idx [${latestRevisionIdx}]`
+            );
+          }
+        }
+
+        // Coalesced single-policy deploy tasks no-op when a run is already in flight.
+        // If the SO revision moved while this run compiled/wrote, schedule a unique
+        // follow-up so the newer revision is not dropped.
+        const deployedRevisionByPolicyId = new Map<string, number>();
+        for (const fleetServerPolicy of fleetServerPolicies) {
+          if (!hasVersionSuffix(fleetServerPolicy.policy_id)) {
+            deployedRevisionByPolicyId.set(
+              fleetServerPolicy.policy_id,
+              fleetServerPolicy.revision_idx
+            );
+          }
+        }
+        if (deployedRevisionByPolicyId.size > 0) {
+          const currentPolicies = await this.getByIds(soClient, [
+            ...deployedRevisionByPolicyId.keys(),
+          ]);
+          const stalePolicies = currentPolicies.filter((policy) => {
+            const deployedRevision = deployedRevisionByPolicyId.get(policy.id);
+            return deployedRevision !== undefined && policy.revision !== deployedRevision;
+          });
+          if (stalePolicies.length > 0) {
+            logger.debug(
+              `Scheduling follow-up deploy for ${stalePolicies.length} policies bumped during deploy`
+            );
+            await scheduleDeployAgentPoliciesTask(
+              appContextService.getTaskManagerStart()!,
+              stalePolicies.map((policy) => ({
+                id: policy.id,
+                spaceId: soClient.getCurrentNamespace(),
+              })),
+              { coalesce: false }
             );
           }
         }
