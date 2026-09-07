@@ -115,18 +115,25 @@ export abstract class LayoutMixin extends SaveMixin {
     const title = name.endsWith('*') ? name : `${name}*`;
     const timestampCombo = this.page.components.comboBox('timestampField');
 
-    // Retry: title validation can race its debounced index lookup and get stuck
-    // invalid even after a match is found (see FTR's `settings_page.ts` for the same fix).
-    // Re-submitting also covers serverless, where the form's submission re-validation can
-    // transiently report "no matching indices" even though the matching sources panel already
-    // shows results, leaving the flyout open with its submit buttons disabled.
-    const maxAttempts = 3;
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const isLastAttempt = attempt === maxAttempts;
+    // The editor renders a skeleton until it has loaded the index sources and the existing
+    // data view names, so a visible flyout does not mean the fields exist yet. Outside the
+    // retry below because the skeleton is one-way, and waiting for it on every attempt put
+    // a 30s floor under each retry.
+    await titleInput.waitFor({ state: 'visible', timeout: 30_000 });
 
-      if (attempt > 1) {
-        await titleInput.fill(''); // force a real value change to re-trigger validation
-      }
+    // Submitting can silently no-op: the title's async validation races a separately
+    // debounced index lookup and can latch invalid even once matches exist, and the form
+    // only re-validates fields it has not already validated (#283967). Re-filling the title
+    // forces fresh validation, so the whole sequence is retried, not just the click.
+    //
+    // The exit condition is the new data view being selected, which only ever becomes true.
+    // The flyout closing is a transition, so a deadline on it made a slow save look like a
+    // rejected submit, and the retry then drove an editor that had already closed (#274530).
+    //
+    // `toPass` cannot abort an attempt already running, so a caller's test budget has to
+    // cover this window plus one whole attempt (#274869).
+    await expect(async () => {
+      await titleInput.fill(''); // a real value change, so a latched validation runs again
       await titleInput.fill(title);
       // wait for async title validation to settle before continuing.
       await form
@@ -138,6 +145,9 @@ export abstract class LayoutMixin extends SaveMixin {
       // "loading has not started". Submitting too early still passes validation, but creates
       // the data view with no time field, so no time filter is applied and hit counts include
       // documents outside the selected range.
+      //
+      // Stays inside the retry because clearing the title empties the matched indices, which
+      // resets any selection an earlier attempt made.
       await expect
         .poll(
           async () => {
@@ -151,26 +161,14 @@ export abstract class LayoutMixin extends SaveMixin {
         )
         .toBe(true);
 
-      if (adHoc) {
-        await this.page.testSubj.click('exploreIndexPatternButton');
-      } else {
-        await this.page.testSubj.click('saveIndexPatternButton');
-      }
+      await this.page.testSubj.click(
+        adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton'
+      );
 
-      const flyoutClosed = await flyout
-        .waitFor({ state: 'hidden', timeout: isLastAttempt ? 10_000 : 3_000 })
-        .then(() => true)
-        .catch(() => false);
-
-      if (flyoutClosed) {
-        break;
-      }
-      if (isLastAttempt) {
-        throw new Error(
-          `indexPatternEditorFlyout did not close after ${maxAttempts} attempts to submit "${title}"`
-        );
-      }
-    }
+      // Saving writes a saved object and refreshes the data view list. Keep this generous: a
+      // deadline short enough to expire on a slow save sends the retry to a closed flyout.
+      await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
+    }).toPass({ timeout: 30_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
