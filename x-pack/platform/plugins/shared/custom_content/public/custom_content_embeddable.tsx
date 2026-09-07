@@ -69,6 +69,9 @@ import { registerPanelPreviewHandler } from './utils/panel_preview_registry';
 import { readPanelContextData } from '../common/read_panel_context_data';
 import type { CustomContentEmbeddableState } from '../server';
 
+/** Keep in sync with the `panel_height` bound in `panel_context_attachment.ts`. */
+const MAX_MEASURED_PANEL_HEIGHT = 4000;
+
 const panelMeasureCss = css({
   display: 'flex',
   flexDirection: 'column',
@@ -102,7 +105,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const panelElement: { current: HTMLDivElement | null } = { current: null };
     const measurePanelHeight = () => {
       const measured = panelElement.current?.getBoundingClientRect().height;
-      return measured ? Math.round(measured) : undefined;
+      // Clamped to the attachment's bound rather than left to fail validation: a zoomed-out
+      // browser or a very tall panel must not stop the panel reaching chat at all.
+      return measured ? Math.min(MAX_MEASURED_PANEL_HEIGHT, Math.round(measured)) : undefined;
     };
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
@@ -228,7 +233,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                     uuid,
                     titleManager.api.title$.getValue() ?? undefined,
                     effectiveTimeRange$.getValue(),
-                    measurePanelHeight()
+                    measurePanelHeight(),
+                    esqlVariables$.getValue()
                   ),
                 ],
               });
@@ -454,7 +460,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                 uuid,
                 panelTitle ?? undefined,
                 effectiveTimeRange$.getValue(),
-                measurePanelHeight()
+                measurePanelHeight(),
+                esqlVariables$.getValue()
               ),
             ],
           });

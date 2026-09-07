@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
@@ -25,7 +26,8 @@ export const buildCustomContentContextAttachment = (
   embeddableId: string,
   panelTitle?: string,
   timeRange?: { from: string; to: string },
-  panelHeight?: number
+  panelHeight?: number,
+  esqlVariables?: ESQLControlVariable[]
 ): AttachmentInput<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData
@@ -39,5 +41,6 @@ export const buildCustomContentContextAttachment = (
     embeddable_id: embeddableId,
     ...(timeRange ? { time_range: timeRange } : {}),
     ...(panelHeight ? { panel_height: panelHeight } : {}),
+    ...(esqlVariables?.length ? { esql_variables: esqlVariables } : {}),
   },
 });

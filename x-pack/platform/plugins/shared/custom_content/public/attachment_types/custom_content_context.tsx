@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser/attachments';
@@ -14,7 +15,15 @@ import type {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
-import { RenderPanelContext } from './render_panel_context';
+
+/**
+ * Lazy for the same reason `handle_panel_preview` is: `plugin.ts` imports this module at
+ * page load, and the renderer brings dompurify, liquidjs and esql-utils with it. A static
+ * import would put all of that in the page-load bundle for every user, chat or not.
+ */
+const LazyRenderPanelContext = React.lazy(() =>
+  import('./render_panel_context').then((module) => ({ default: module.RenderPanelContext }))
+);
 
 export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
   Attachment<typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE, CustomContentContextAttachmentData>
@@ -25,7 +34,11 @@ export const customContentContextAttachmentUiDefinition: AttachmentUIDefinition<
       defaultMessage: 'Custom panel',
     }),
   getIcon: () => 'sparkles',
-  renderInlineContent: ({ attachment }) => <RenderPanelContext data={attachment.data} />,
+  renderInlineContent: ({ attachment }) => (
+    <Suspense fallback={<EuiLoadingSpinner />}>
+      <LazyRenderPanelContext data={attachment.data} />
+    </Suspense>
+  ),
   getActionButtons: ({ attachment, isCanvas }) => {
     if (isCanvas) return [];
 

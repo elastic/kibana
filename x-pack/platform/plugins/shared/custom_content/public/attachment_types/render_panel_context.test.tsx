@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type { CustomContentContextAttachmentData } from '../../common/panel_context_attachment';
 import { RenderPanelContext, resolvePreviewHeight } from './render_panel_context';
 
@@ -76,6 +77,22 @@ describe('RenderPanelContext', () => {
 
     expect(mockComponentProps).toHaveBeenCalledWith(
       expect.objectContaining({ timeRange: { from: 'now-7d', to: 'now' } })
+    );
+  });
+
+  it('renders against the captured ES|QL control variables', () => {
+    render(
+      <RenderPanelContext
+        data={makeData({
+          esql_variables: [{ key: 'host', value: 'host-1', type: ESQLVariableType.VALUES }],
+        })}
+      />
+    );
+
+    expect(mockComponentProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esqlVariables: [{ key: 'host', value: 'host-1', type: ESQLVariableType.VALUES }],
+      })
     );
   });
 

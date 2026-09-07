@@ -52,6 +52,9 @@ const containerCss = (height: number) =>
  * only a title, and the user has to apply a version to the dashboard to see it.
  */
 export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachmentData }) => {
+  // "Generate with chat" on an empty panel pushes a blank template. The renderer would show
+  // its own empty prompt — dashboard copy, with an action that does nothing here.
+  const hasTemplate = Boolean(data.panel_template?.trim());
   const { core, search } = getServices();
 
   const services = useMemo<CustomContentRendererServices>(
@@ -62,7 +65,11 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
   // The conversation has no render-completion contract to satisfy.
   const onLoadingChange = useCallback(() => {}, []);
 
-  const height = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, data.panel_height ?? FALLBACK_HEIGHT));
+  const height = resolvePreviewHeight(data.panel_height);
+
+  if (!hasTemplate) {
+    return null;
+  }
 
   return (
     <div css={containerCss(height)}>
@@ -79,7 +86,7 @@ export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachm
         projectRouting={undefined}
         query={undefined}
         filters={undefined}
-        esqlVariables={undefined}
+        esqlVariables={data.esql_variables}
         previewHtml={null}
         onLoadingChange={onLoadingChange}
       />

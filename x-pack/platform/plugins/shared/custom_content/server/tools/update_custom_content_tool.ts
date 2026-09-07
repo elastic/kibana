@@ -142,6 +142,9 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
       // sent with, rather than silently reverting to the default.
       ...(currentData?.time_range ? { time_range: currentData.time_range } : {}),
       ...(currentData?.panel_height ? { panel_height: currentData.panel_height } : {}),
+      ...(currentData?.esql_variables?.length
+        ? { esql_variables: currentData.esql_variables }
+        : {}),
     };
 
     const updated = await attachments.update(

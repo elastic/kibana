@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 import { buildCustomContentContextAttachment } from './chat_integration';
 
@@ -78,5 +79,37 @@ describe('buildCustomContentContextAttachment', () => {
     const attachment = buildCustomContentContextAttachment('<div>hi</div>', 'FROM logs', 'panel-1');
 
     expect(attachment.data).not.toHaveProperty('panel_height');
+  });
+
+  // An unresolved `?variable` makes Elasticsearch reject the query, so without these the
+  // preview renders an error card rather than merely different numbers.
+  it('carries ES|QL control variables', () => {
+    const attachment = buildCustomContentContextAttachment(
+      '<div>hi</div>',
+      'FROM logs | WHERE host.name == ?host',
+      'panel-1',
+      'My panel',
+      undefined,
+      undefined,
+      [{ key: 'host', value: 'host-1', type: ESQLVariableType.VALUES }]
+    );
+
+    expect(attachment.data?.esql_variables).toEqual([
+      { key: 'host', value: 'host-1', type: ESQLVariableType.VALUES },
+    ]);
+  });
+
+  it('omits esql_variables when the panel has none', () => {
+    const attachment = buildCustomContentContextAttachment(
+      '<div>hi</div>',
+      'FROM logs',
+      'panel-1',
+      undefined,
+      undefined,
+      undefined,
+      []
+    );
+
+    expect(attachment.data).not.toHaveProperty('esql_variables');
   });
 });

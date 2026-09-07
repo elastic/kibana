@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ESQLVariableType } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
@@ -18,23 +19,32 @@ export const customContentContextAttachmentDataSchema = z.object({
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
   panel_title: z.string().max(256).optional(),
   embeddable_id: z.string().max(256),
-  /**
-   * The range the panel was rendering with when it was sent to chat. A snapshot, not a
-   * mirror: it lets the chat preview show what the user was looking at instead of a
-   * default range, but it does not follow later changes to the dashboard's picker.
-   */
+  // The fields below snapshot how the panel was rendering when it was sent to chat. A
+  // snapshot, not a mirror — none of them follow the dashboard afterwards. Filters and the
+  // KQL query are deliberately absent: they only change the numbers, while an unresolved
+  // `?variable` makes Elasticsearch reject the query outright.
   time_range: z
     .object({
       from: z.string().max(256),
       to: z.string().max(256),
     })
     .optional(),
-  /**
-   * The panel's rendered height in pixels when it was sent to chat. Measured from the
-   * panel's own container, which is outside the sandboxed iframe and therefore readable —
-   * unlike the content inside it. Bounded because it is written by the browser.
-   */
+  /** Measured from the panel's own container, which is outside the sandboxed iframe. */
   panel_height: z.number().int().min(1).max(4000).optional(),
+  esql_variables: z
+    .array(
+      z.object({
+        key: z.string().max(256),
+        value: z.union([
+          z.string().max(1024),
+          z.number(),
+          z.array(z.union([z.string().max(1024), z.number()])).max(100),
+        ]),
+        type: z.nativeEnum(ESQLVariableType),
+      })
+    )
+    .max(50)
+    .optional(),
 });
 
 export type CustomContentContextAttachmentData = z.infer<
