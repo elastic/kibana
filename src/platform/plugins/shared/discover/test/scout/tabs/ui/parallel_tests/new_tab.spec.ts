@@ -12,10 +12,25 @@
  * and stability when many tabs are opened quickly.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
+const ESQL_ASYNC_ENDPOINT = '/internal/search/esql_async';
+// Long enough that a tab's fetch is still in flight when the next tab opens, which keeps
+// the race window independent of dataset size and CI load.
+const ESQL_RESPONSE_DELAY_MS = 1_000;
+// Only the request that starts a search. Polls and cancels target the same path with a
+// search id appended, and delaying those inflates `pollSearch`'s elapsed-time back-off.
+const isEsqlSearchStart = (url: URL) => url.pathname.endsWith(ESQL_ASYNC_ENDPOINT);
+
 spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-classic' }, () => {
+  // Every test here drives several tabs through full data fetches, and creating a data view
+  // adds an index-sources lookup on top. The budget also has to cover a data view creation
+  // that retries, since that helper cannot abort an attempt already in flight: at 90s the
+  // test budget expired first and hid the underlying failure (#274869).
+  spaceTest.setTimeout(150_000);
+
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults();
   });
@@ -124,21 +139,31 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
   });
 
   // TODO should be removed/modified after empty canvas is implemented #255686
-  spaceTest('should be able to complete all quickly opened tabs', async ({ pageObjects }) => {
-    const { discover, datePicker, unifiedTabs } = pageObjects;
+  spaceTest('should be able to complete all quickly opened tabs', async ({ page, pageObjects }) => {
+    const { discover, unifiedTabs } = pageObjects;
 
-    await spaceTest.step(
-      'set up an ES|QL query over all indices and a wide time range',
-      async () => {
-        await discover.writeAndSubmitEsqlQuery('FROM *');
-        await discover.waitUntilTabIsLoaded();
-        await datePicker.setAbsoluteRange({
-          from: 'Jan 10, 2000 @ 00:00:00.000',
-          to: 'Dec 10, 2025 @ 00:00:00.000',
-        });
-        await discover.waitUntilTabIsLoaded();
+    // Each new tab clones the current one and refetches, so holding back the start of every
+    // search keeps a fetch in flight whenever the next tab opens. Delaying the response is
+    // what opens the race window; an expensive query used to do it, which tied the window
+    // and the runtime to dataset size and CI load (#274834).
+    let holdSearches = true;
+
+    // Gated by the flag rather than `page.unroute`, which does not wait for handlers still
+    // sleeping: it resolves the requests they hold, and their later `route.continue()` then
+    // fails with `Route is already handled!`.
+    await page.route(isEsqlSearchStart, async (route) => {
+      if (holdSearches) {
+        await delay(ESQL_RESPONSE_DELAY_MS);
       }
-    );
+      await route.continue();
+    });
+
+    await spaceTest.step('set up an ES|QL query', async () => {
+      // A single index pattern rather than `FROM *`: every tab's fetch resolves the pattern
+      // to a data view, and resolving all indices costs about a second each under CI load.
+      await discover.writeAndSubmitEsqlQuery('FROM logstash-*');
+      await discover.waitUntilTabIsLoaded();
+    });
 
     await spaceTest.step('open many tabs rapidly, then confirm each one loads', async () => {
       const newTabCount = 7;
@@ -148,6 +173,10 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
         await unifiedTabs.clickNewTabButton();
       }
       await discover.waitUntilTabIsLoaded();
+
+      // The race window has been created, so stop holding searches back: the walk below only
+      // checks that every tab settles, and paying the delay again there wastes the budget.
+      holdSearches = false;
 
       // The initial tab plus every rapidly-opened tab should be present.
       await expect(unifiedTabs.getTabs()).toHaveCount(newTabCount + 1);
