@@ -37,7 +37,6 @@ const ES_REQUEST_TIMEOUT_MS = 300_000;
 const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
 // Short names for the help text so its lines stay readable
-const DEFAULT_OUTPUT_PATH = path.relative(REPO_ROOT, SCOUT_FLAKY_TESTS_PATH);
 const DEF_DAYS = defaults.lookbackDays;
 const DEF_PIPELINES = defaults.pipelines.join(',');
 const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
@@ -229,7 +228,7 @@ export const discoverFlakyTests: Command<void> = {
   name: 'discover-flaky-tests',
   description: `
   Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
-  flaky test report and store it locally under ${DEFAULT_OUTPUT_PATH}. Read-only.
+  flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
   Examples:
     # Last ${DEF_DAYS} days of ${DEF_PIPELINES}, all frameworks
@@ -239,7 +238,7 @@ export const discoverFlakyTests: Command<void> = {
     node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
 
     # Only Jest and FTR, custom output path, summary suppressed
-    node scripts/scout discover-flaky-tests --frameworks jest,ftr --output target/flaky.json --quiet
+    node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
   `,
   flags: {
     string: [
@@ -254,7 +253,7 @@ export const discoverFlakyTests: Command<void> = {
       'minFailedBuilds',
       'maxTests',
       'samplesPerTest',
-      'output',
+      'outputPath',
     ],
     boolean: ['verifyTLSCerts'],
     default: {
@@ -268,28 +267,28 @@ export const discoverFlakyTests: Command<void> = {
       minFailedBuilds: String(defaults.thresholds.minFailedBuilds),
       maxTests: String(defaults.thresholds.maxTests),
       samplesPerTest: String(defaults.samplesPerTest),
-      output: DEFAULT_OUTPUT_PATH,
+      outputPath: SCOUT_FLAKY_TESTS_PATH,
     },
     help: `
     --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
-    --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried (default: 1)
+    --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried [default: 1]
     --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --lookbackDays     (optional)  How many days to look back when aggregating (default: ${DEF_DAYS})
-    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs (default: ${DEF_PIPELINES})
+    --lookbackDays     (optional)  How many days to look back when aggregating [default: ${DEF_DAYS}]
+    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEF_PIPELINES}]
     --branches         (optional)  Comma-separated branches; no filter when omitted
-    --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} (default: all)
-    --minBuilds        (optional)  Ignore tests seen in fewer builds (default: ${DEF_MIN_BUILDS})
-    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds (default: ${DEF_MIN_FAILED})
-    --maxTests         (optional)  Maximum tests per list in the report (default: ${DEF_MAX_TESTS})
-    --samplesPerTest   (optional)  Recent failure messages per test (default: ${DEF_SAMPLES})
-    --output           (optional)  Report path, relative to repo root (default: ${DEFAULT_OUTPUT_PATH})
+    --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
+    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEF_MIN_BUILDS}]
+    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEF_MIN_FAILED}]
+    --maxTests         (optional)  Maximum tests per list in the report [default: ${DEF_MAX_TESTS}]
+    --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEF_SAMPLES}]
+    --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     `,
   },
   run: async ({ flagsReader, log }) => {
     const esURL = flagsReader.requiredString('esURL');
     const esAPIKey = flagsReader.requiredString('esAPIKey');
-    const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('output'));
+    const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('outputPath'));
     const frameworks = readFrameworks(flagsReader);
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
     if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
