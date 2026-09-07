@@ -14,6 +14,7 @@ import type {
 import type { NodeViewModel } from '../../types';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 import {
+  emitFilterToggle,
   emitEntityFilterToggle,
   isFilterActiveForScope,
   isEntityFilterActiveForScope,
@@ -115,9 +116,16 @@ const euidPrefixToEntityType = (prefix: string): EntityType =>
   (prefix === 'entity' ? 'generic' : prefix) as EntityType;
 
 /**
- * The filter to emit for an entity role. `kql` is the precise form built from the Entity Store's
- * EUID logic; `fields` is the legacy fallback used until the EUID API's lazy chunk has loaded,
- * where each field/value pair becomes an OR'd phrase filter.
+ * The filter to emit for an entity role. `dsl` is the precise form built from the Entity Store's
+ * EUID logic; the two `fields` forms are fallbacks, and they are not interchangeable:
+ *
+ * - `resolvedIdentity`: exactly the fields the entity store used to compose the EUID, for entities
+ *   whose DSL cannot be translated into filter-bar operators (a `local` user, asset discovery).
+ *   Every field is required, so they are ANDed — `user.name` alone would match other hosts.
+ * - `candidateFields`: all identity `sourceFields`, used until the EUID API's lazy chunk has
+ *   loaded. We do not know which of them resolved the EUID, so they are OR'd: the winning field is
+ *   always one of the arms, making this a superset of the entity rather than a guess at it.
+ *   ANDing them would drop events that carry only the winning field.
  */
 export type EntityFilterSpec =
   | {
@@ -128,16 +136,37 @@ export type EntityFilterSpec =
       /** Entity-type-bound resolver reducing an observed value to its derived namespace prefix. */
       getNamespaceSourcePrefix?: NamespaceSourcePrefixResolver;
     }
-  | { kind: 'fields'; fields: Record<string, string | string[]> };
+  | { kind: 'resolvedIdentity'; fields: Record<string, string | string[]> }
+  | { kind: 'candidateFields'; fields: Record<string, string | string[]> };
 
 /**
  * Namespace source fields describe the event, not the entity, so they must never become phrase
  * filters in the fallback path — `event.module: gcp` would match every GCP event.
  */
-const NAMESPACE_SOURCE_FIELD_PREFIXES = ['event.', 'data_stream.', 'cloud.', 'entity.'];
+const NAMESPACE_SOURCE_FIELD_PREFIXES = ['event.', 'data_stream.', 'cloud.'];
 
+/**
+ * True for fields naming the entity itself, which are therefore role-rewritable.
+ *
+ * `entity.id` must qualify: it is the singleField identity of a generic entity, and
+ * `rewriteDslFieldsForTargetRole` uses this predicate to decide what to hand to `fieldForRole`.
+ * Excluding it left "show actions on this entity" filtering `entity.id` instead of
+ * `entity.target.id`, i.e. the actor direction.
+ */
 const isIdentitySourceField = (field: string): boolean =>
   !NAMESPACE_SOURCE_FIELD_PREFIXES.some((prefix) => field.startsWith(prefix));
+
+/**
+ * Fields the entity store derives rather than reads from a document: they appear on entity records
+ * but in no raw event, so a phrase filter on one matches nothing.
+ * `getEntityIdentifiersFromDocument` returns `entity.namespace` beside the real identity fields,
+ * and it must not reach the filter bar. Unlike the namespace *source* fields above, this is not a
+ * prefix rule — `entity.id` is a genuine identity field.
+ */
+const DERIVED_ENTITY_FIELDS = new Set(['entity.namespace']);
+
+const isFilterableIdentityField = (field: string): boolean =>
+  isIdentitySourceField(field) && !DERIVED_ENTITY_FIELDS.has(field);
 
 /**
  * Builds the filter matching events that resolve to the same entity as this node.
@@ -202,17 +231,20 @@ export const getEntityFilterSpec = (
     // Unknown entity type — fall through to the broad sourceFields filter below.
   }
 
-  // `getEntityIdentifiersFromDocument` may include `entity.*` derived fields (e.g. `entity.namespace`)
-  // that don't exist in raw events. Strip them — only raw event fields are usable as phrase filters.
-  const identityFields = rawIdentifiers
-    ? Object.fromEntries(
-        Object.entries(rawIdentifiers).filter(([field]) => isIdentitySourceField(field))
-      )
-    : Object.fromEntries(
-        Object.entries(sourceFields).filter(([field]) => isIdentitySourceField(field))
-      );
-  return Object.keys(identityFields).length > 0
-    ? { kind: 'fields', fields: identityFields }
+  // `getEntityIdentifiersFromDocument` also returns `entity.namespace`, which the entity store
+  // derives and no raw event carries, so it is stripped — see `isFilterableIdentityField`.
+  const resolvedIdentity = Object.fromEntries(
+    Object.entries(rawIdentifiers ?? {}).filter(([field]) => isFilterableIdentityField(field))
+  );
+  if (Object.keys(resolvedIdentity).length > 0) {
+    return { kind: 'resolvedIdentity', fields: resolvedIdentity };
+  }
+
+  const candidateFields = Object.fromEntries(
+    Object.entries(sourceFields).filter(([field]) => isFilterableIdentityField(field))
+  );
+  return Object.keys(candidateFields).length > 0
+    ? { kind: 'candidateFields', fields: candidateFields }
     : undefined;
 };
 
@@ -291,13 +323,23 @@ export const toggleEntityFilterSpec = (
     );
     return;
   }
-  // Rewrite field names for the role, then AND all identity fields together in a single entity
-  // filter. Emitting one call per field would OR them (via addFilter's combine-with-first logic),
-  // producing a filter far broader than the entity.
-  const roleFields = Object.fromEntries(
-    Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
-  );
-  emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
+  if (spec.kind === 'resolvedIdentity') {
+    // Every field is required, so emit one entity filter ANDing them. Calling `emitFilterToggle`
+    // per field instead would OR them (`addFilter` combines with the first filter), giving a
+    // filter broader than the entity — `user.name` alone matches the same user on other hosts.
+    const roleFields = Object.fromEntries(
+      Object.entries(spec.fields).map(([field, value]) => [fieldForRole(field, role), value])
+    );
+    emitEntityFilterToggle(scopeId, filterKey, buildFieldsDsl(roleFields), action);
+    return;
+  }
+
+  for (const [field, value] of Object.entries(spec.fields)) {
+    // Flatten string | string[] so each value gets its own OR'd phrase filter
+    for (const one of ([] as string[]).concat(value)) {
+      emitFilterToggle(scopeId, fieldForRole(field, role), one, action);
+    }
+  }
 };
 
 /** True when the filter described by `spec` is currently active. */
@@ -307,7 +349,8 @@ export const isEntityFilterSpecActive = (
   spec: EntityFilterSpec,
   role: 'actor' | 'target'
 ): boolean => {
-  if (spec.kind === 'dsl') {
+  // Both forms that emit a single keyed entity filter are looked up the same way.
+  if (spec.kind === 'dsl' || spec.kind === 'resolvedIdentity') {
     return isEntityFilterActiveForScope(scopeId, filterKey);
   }
   return Object.entries(spec.fields).some(([field, value]) =>

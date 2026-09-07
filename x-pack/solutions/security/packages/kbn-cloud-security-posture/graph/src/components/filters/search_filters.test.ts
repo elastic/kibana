@@ -1129,10 +1129,10 @@ describe('search_filters', () => {
       ).toBe(true);
     });
 
-    it('falls back to identity sourceFields for a local-namespace user, rather than no filter', () => {
+    it('falls back to the resolved identity for a local-namespace user, rather than no filter', () => {
       // End-to-end: a real local user resolved through the real builder. `getEntityFilterSpec` must
-      // hand back a `fields` spec, because a `dsl` spec here would translate to something wider
-      // than the entity — and `addEntityFilter` would drop it entirely, making the action dead.
+      // hand back a `resolvedIdentity` spec, because a `dsl` spec here would translate to something
+      // wider than the entity — and `addEntityFilter` would drop it, making the action dead.
       const spec = getEntityFilterSpec(
         'user:jdoe@host-abc123@local',
         { 'user.name': 'jdoe', 'host.id': 'host-abc123' },
@@ -1140,10 +1140,10 @@ describe('search_filters', () => {
         'actor'
       );
 
-      expect(spec?.kind).toBe('fields');
+      expect(spec?.kind).toBe('resolvedIdentity');
     });
 
-    it('fields fallback includes only the EUID identity fields, not collected attributes', () => {
+    it('resolved identity includes only the EUID identity fields, not collected attributes', () => {
       // A local user entity record may carry user.id, user.domain etc. as collected attributes.
       // Including them in an AND filter would drop events that lack those fields. Only the two
       // fields the localNamespaceGate actually requires (user.name + host.id) should be emitted.
@@ -1159,13 +1159,13 @@ describe('search_filters', () => {
         'actor'
       );
 
-      expect(spec?.kind).toBe('fields');
-      if (spec?.kind !== 'fields') return;
+      expect(spec?.kind).toBe('resolvedIdentity');
+      if (spec?.kind !== 'resolvedIdentity') return;
       expect(Object.keys(spec.fields)).toEqual(['user.name', 'host.id']);
     });
 
-    it('buildFieldsDsl ANDs all identity fields so the fields fallback is not over-broad', () => {
-      // The fields fallback path calls buildFieldsDsl before emitting through addEntityFilter.
+    it('buildFieldsDsl ANDs all identity fields so the resolved identity is not over-broad', () => {
+      // The resolvedIdentity path calls buildFieldsDsl before emitting through addEntityFilter.
       // Verify the resulting DSL is a bool.filter (AND), not a bool.should (OR).
       const dsl = buildFieldsDsl({ 'user.name': 'jdoe', 'host.id': 'host-abc123' });
       const filter = buildEntityDslFilter('user:jdoe@host-abc123@local', dsl, dataViewId);

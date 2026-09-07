@@ -456,7 +456,7 @@ describe('getEntityFilterSpec', () => {
 
     // Namespace source fields are excluded: `event.module: gcp` would match every GCP event.
     expect(spec).toEqual({
-      kind: 'fields',
+      kind: 'candidateFields',
       fields: {
         'user.email': 'multi-actor-1@example.com',
         'user.id': 'multi-actor-1@example.com',
@@ -472,7 +472,7 @@ describe('getEntityFilterSpec', () => {
       'actor'
     );
 
-    expect(spec).toEqual({ kind: 'fields', fields: { 'user.email': 'a@b.com' } });
+    expect(spec).toEqual({ kind: 'candidateFields', fields: { 'user.email': 'a@b.com' } });
   });
 
   it('returns undefined when there are no sourceFields', () => {
