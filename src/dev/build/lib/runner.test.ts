@@ -10,7 +10,7 @@
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
-import { createRunner } from './runner';
+import { createRunner, runTaskGroupsInParallel } from './runner';
 import { Build } from './build';
 import { isErrorLogged, markErrorLogged } from './errors';
 
@@ -96,6 +96,89 @@ describe('default dist', () => {
 
     expect(mock).toHaveBeenCalledTimes(1);
     expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
+  });
+});
+
+describe('parallel task groups', () => {
+  it('runs groups concurrently and flushes each group without interleaving', async () => {
+    const { config } = await setup();
+    const firstTaskBlocked = Promise.withResolvers<void>();
+    const secondTaskStart = Promise.withResolvers<void>();
+
+    const runPromise = runTaskGroupsInParallel({
+      config,
+      log,
+      taskGroups: [
+        [
+          {
+            description: 'first task',
+            async run(_config, taskLog) {
+              taskLog.info('first task started');
+              await firstTaskBlocked.promise;
+              taskLog.info('first task finished');
+            },
+          },
+        ],
+        [
+          {
+            description: 'second task',
+            async run(_config, taskLog) {
+              taskLog.info('second task started');
+              secondTaskStart.resolve();
+              taskLog.info('second task finished');
+            },
+          },
+        ],
+      ],
+    });
+
+    await secondTaskStart.promise;
+    expect(testWriter.messages.join('\n')).toContain('first task started');
+    expect(testWriter.messages.join('\n')).not.toContain('second task started');
+
+    firstTaskBlocked.resolve();
+    await runPromise;
+
+    const output = testWriter.messages.join('\n');
+    expect(output.indexOf('first task finished')).toBeLessThan(
+      output.indexOf('second task started')
+    );
+  });
+
+  it('flushes complete group logs before propagating a failure', async () => {
+    const { config } = await setup();
+    const error = new Error('first task failed');
+
+    const runPromise = runTaskGroupsInParallel({
+      config,
+      log,
+      taskGroups: [
+        [
+          {
+            description: 'failing task',
+            async run(_config, taskLog) {
+              taskLog.info('failure context');
+              throw error;
+            },
+          },
+        ],
+        [
+          {
+            description: 'successful task',
+            async run(_config, taskLog) {
+              taskLog.info('successful task output');
+            },
+          },
+        ],
+      ],
+    });
+
+    await expect(runPromise).rejects.toBe(error);
+
+    const output = testWriter.messages.join('\n');
+    expect(output).toContain('failure context');
+    expect(output).toContain('Error: first task failed');
+    expect(output).toContain('successful task output');
   });
 });
 

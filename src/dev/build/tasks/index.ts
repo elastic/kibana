@@ -9,6 +9,7 @@
 
 export * from './bin';
 export * from './build_kibana_platform_plugins';
+export * from './build_package_webpack_bundles_task';
 export * from './build_rspack_bundles_task';
 export * from './build_packages_task';
 export * from './clean_tasks';
