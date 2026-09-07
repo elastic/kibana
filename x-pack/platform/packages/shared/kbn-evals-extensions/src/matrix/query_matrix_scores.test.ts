@@ -949,9 +949,7 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
       ['alert-analysis']
     );
 
-    expect(datasets[0].erroredOutEvaluators).toEqual(
-      expect.arrayContaining(['SkillInvoked'])
-    );
+    expect(datasets[0].erroredOutEvaluators).toEqual(expect.arrayContaining(['SkillInvoked']));
   });
 
   it('does not flag an evaluator that errored once but recovered', () => {

@@ -1,6 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "Elastic License 2.0, Server Side Public License v 1", and the
  * "Server Side Public License v 1" ("SSPL") - as separate files with distinct
  * license terms. Your choice of license determines the rights and obligations
@@ -35,8 +44,7 @@ describe('evals_tracing config set', () => {
     return servers.kbnTestServer.serverArgs;
   };
 
-  const TOOL_DETAILS_ARG =
-    '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
+  const TOOL_DETAILS_ARG = '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
 
   describe('when tracing is enabled', () => {
     let serverArgs: string[];
