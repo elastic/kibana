@@ -7,7 +7,7 @@
 
 import assert from 'assert';
 
-import { EXTRACTION_MODE, type EntityType, type ExtractionMode } from './entity_schema';
+import { EXTRACTION_MODE, EntityType, type ExtractionMode } from './entity_schema';
 import {
   type EntityDefinitionWithoutId,
   type GatedEntityDefinition,
@@ -100,7 +100,7 @@ export function getEntityDefinitionWithoutId(
   options?: EntityDefinitionOptions
 ): GatedEntityDefinition<EntityDefinitionWithoutId> {
   const definition =
-    type === 'user' && options?.excludedUserNames?.length
+    type === EntityType.enum.user && options?.excludedUserNames?.length
       ? buildUserEntityDefinition({ excludedUserNames: options.excludedUserNames })
       : getRegisteredDefinition(type);
 
