@@ -201,24 +201,25 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
   });
 
   describe('credential injection on connector reuse', () => {
-    const buildPolicyWithStreamVars = (streamVars: Record<string, unknown>): NewPackagePolicy => ({
-      name: 'test-policy',
-      namespace: 'default',
-      cloud_connector_id: 'connector-1',
-      inputs: [
-        {
-          type: 'aws/metrics',
-          enabled: true,
-          streams: [
-            {
-              enabled: true,
-              data_stream: { type: 'metrics', dataset: 'aws.s3' },
-              vars: streamVars,
-            },
-          ],
-        },
-      ],
-    } as any);
+    const buildPolicyWithStreamVars = (streamVars: Record<string, unknown>): NewPackagePolicy =>
+      ({
+        name: 'test-policy',
+        namespace: 'default',
+        cloud_connector_id: 'connector-1',
+        inputs: [
+          {
+            type: 'aws/metrics',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: { type: 'metrics', dataset: 'aws.s3' },
+                vars: streamVars,
+              },
+            ],
+          },
+        ],
+      } as any);
 
     it('injects role_arn from connector vars into stream vars when not already set', async () => {
       const soClient = savedObjectsClientMock.create();
