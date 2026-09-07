@@ -333,11 +333,14 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         tableId,
         groupBucket,
         closePopover,
+        // Forward the page-scoped data view runtime mappings so the group-level
+        // status update can resolve fields not natively mapped on the alerts index.
+        runtimeMappings,
       };
 
       return groupTakeActionItems?.(takeActionParams);
     },
-    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId]
+    [defaultFilters, getGlobalQuery, groupTakeActionItems, selectedGroup, tableId, runtimeMappings]
   );
 
   const onChangeGroupsItemsPerPage = useCallback(
