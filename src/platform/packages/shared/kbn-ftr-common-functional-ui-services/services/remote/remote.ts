@@ -87,9 +87,6 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
-    if (lifecycle.isAborting) {
-      return;
-    }
     // a `beforeunload` dialog leaked by the previous suite blocks `getRect` below (#289092)
     await dismissOpenDialog(driver, log);
     windowSizeStack.unshift(await driver.manage().window().getRect());
