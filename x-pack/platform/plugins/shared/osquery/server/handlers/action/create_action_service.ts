@@ -12,6 +12,8 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { OsqueryActiveLicenses } from './validate_license';
 import { validateLicense } from './validate_license';
 import { createActionHandler } from './create_action_handler';
+import { containsDynamicQuery } from '../../../common/utils/replace_params_query';
+import { resolveQueryReference } from '../../lib/resolve_query_reference';
 
 export interface CreateActionOptions {
   alertData?: ParsedTechnicalFields & { _index: string };
@@ -27,6 +29,54 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
   });
 
   const logger = osqueryContext.logFactory.get('createActionService');
+
+  /**
+   * Reports whether dispatching `params` would substitute `{{...}}` parameters.
+   *
+   * A rule run dispatches the *stored* saved query / pack content, but the caller only has the
+   * copy persisted on the rule, which drifts as soon as the referenced object is edited. Editing
+   * a saved query needs only `writeSavedQueries` — a lower bar than editing the rule — so a
+   * template added there would otherwise leave the stale persisted copy looking static, the run
+   * would take the non-parameterized branch, and nothing would be dispatched at all. Resolve the
+   * stored content so the decision matches what actually runs.
+   */
+  const containsDynamicQueries = async (
+    params: CreateLiveQueryRequestBodySchema,
+    options?: { space?: { id: string } }
+  ): Promise<boolean> => {
+    const persisted = params.queries?.length
+      ? params.queries.map(({ query }) => query)
+      : [params.query];
+
+    if (persisted.some((query) => query && containsDynamicQuery(query))) {
+      return true;
+    }
+
+    if (!params.saved_query_id?.trim() && !params.pack_id?.trim()) {
+      return false;
+    }
+
+    const [coreStart] = await osqueryContext.getStartServices();
+
+    try {
+      const resolved = await resolveQueryReference(coreStart, options?.space?.id, {
+        saved_query_id: params.saved_query_id,
+        pack_id: params.pack_id,
+      });
+
+      const stored = resolved?.queries ?? (resolved?.query ? [resolved.query] : []);
+
+      return stored.some((query) => query && containsDynamicQuery(query));
+    } catch (error) {
+      // Unresolvable stored content is reported on the action document by the dispatch path.
+      // Fall back to the persisted copy's verdict rather than failing the whole rule run here.
+      logger.warn(
+        `Unable to resolve stored osquery content to determine parameterization: ${error.message}`
+      );
+
+      return false;
+    }
+  };
 
   const create = async (
     params: CreateLiveQueryRequestBodySchema,
@@ -55,6 +105,7 @@ export const createActionService = (osqueryContext: OsqueryAppContext) => {
 
   return {
     create,
+    containsDynamicQueries,
     stop,
     logger,
   };

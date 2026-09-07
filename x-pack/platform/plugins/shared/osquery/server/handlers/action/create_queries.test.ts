@@ -177,6 +177,88 @@ describe('create queries', () => {
       expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
     });
 
+    it('dispatches the stored ecs_mapping when the caller sent an empty one', async () => {
+      // The rule-action form defaults `ecs_mapping` to `{}`, so an empty caller mapping must not
+      // shadow the saved query's own — otherwise a stored mapping never reaches the agent from a
+      // rule. This is also what stops `{}` being a way to strip the stored mapping, now that
+      // authz treats an empty mapping as asserting nothing.
+      const get = jest.fn().mockResolvedValue({
+        attributes: {
+          query: 'select 1;',
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
+
+      const queries = await createDynamicQueries({
+        params: { saved_query_id: 'sq-1', ecs_mapping: {}, agent_ids: [TEST_AGENT] },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+      });
+
+      expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
+    });
+
+    it('prefers the stored ecs_mapping over a caller mapping when stored SQL is dispatched', async () => {
+      // A mapping describes how that query's columns map to ECS, so stored SQL paired with an
+      // unrelated caller mapping would yield mis-shaped results.
+      const get = jest.fn().mockResolvedValue({
+        attributes: {
+          query: 'select 1;',
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          ecs_mapping: { 'process.name': { field: 'name' } },
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+        useStoredQuery: true,
+      });
+
+      expect(queries[0].ecs_mapping).toEqual({ 'host.name': { field: 'name' } });
+    });
+
+    it('keeps the caller ecs_mapping for ad-hoc dispatch', async () => {
+      // `writeLiveQueries` running its own SQL is entitled to its own mapping.
+      const get = jest.fn().mockResolvedValue({
+        attributes: {
+          query: 'select 1;',
+          ecs_mapping: [{ key: 'host.name', value: { field: 'name' } }],
+        },
+      });
+
+      const queries = await createDynamicQueries({
+        params: {
+          saved_query_id: 'sq-1',
+          query: 'select 42 as custom;',
+          ecs_mapping: { 'process.name': { field: 'name' } },
+          agent_ids: [TEST_AGENT],
+        },
+        agents: [TEST_AGENT],
+        osqueryContext: {
+          service: { getPackageService: jest.fn().mockReturnValue(undefined) },
+        } as unknown as OsqueryAppContext,
+        spaceId,
+        spaceScopedClient: soClientWithGet(get),
+      });
+
+      expect(queries[0].query).toBe('select 42 as custom;');
+      expect(queries[0].ecs_mapping).toEqual({ 'process.name': { field: 'name' } });
+    });
+
     it('dispatches stored SQL when useStoredQuery is set, even if the caller supplied a query', async () => {
       const get = jest.fn().mockResolvedValue({
         attributes: { query: 'select 1;' },

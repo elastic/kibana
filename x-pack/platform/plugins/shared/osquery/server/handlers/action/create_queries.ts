@@ -92,10 +92,16 @@ export const createDynamicQueries = async ({
     : params.query ?? storedSavedQuery?.query;
   // True when the SQL below came from the saved object rather than the caller.
   const isStoredQueryDispatched = Boolean(useStoredQuery && storedSavedQuery?.query);
-  // Only the SQL has to come from the saved object — that is what authz vouched for. A mapping
-  // deliberately set on the rule action is the caller's own configuration and is not a way to
-  // widen what runs on the host, so it keeps precedence over the saved query's default.
-  const ecsMapping = params.ecs_mapping ?? storedSavedQuery?.ecs_mapping;
+  // When the stored SQL is what gets dispatched, the stored mapping has to travel with it: a
+  // mapping describes how that query's columns map to ECS, so pairing stored SQL with an
+  // unrelated caller mapping yields mis-shaped results. The rule-action form defaults
+  // `ecs_mapping` to `{}`, which is not `undefined`, so an empty caller mapping must be treated
+  // as "not set" rather than as an intentional override or the saved query's own mapping would
+  // never reach the agent from a rule.
+  const suppliedEcsMapping = isEmpty(params.ecs_mapping) ? undefined : params.ecs_mapping;
+  const ecsMapping = isStoredQueryDispatched
+    ? storedSavedQuery?.ecs_mapping ?? suppliedEcsMapping
+    : suppliedEcsMapping ?? storedSavedQuery?.ecs_mapping;
   const prebuiltId = storedSavedQuery?.savedObjectId ?? savedQueryId;
 
   if (params.queries?.length && !enforceStoredSavedQuery) {

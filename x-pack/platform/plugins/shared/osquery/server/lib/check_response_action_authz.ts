@@ -139,6 +139,26 @@ const callerSuppliedQueryMatches = (
     return false;
   }
 
+  // A pack action persists a copy of the pack's queries. Dispatch rebuilds the query set from the
+  // pack itself, so an unvouched-for copy cannot change what SQL runs — but it is still persisted
+  // on the rule and is read to decide whether to dispatch per alert with parameter substitution.
+  // Require every persisted entry to match a stored pack query so that decision cannot be steered.
+  if (actionParams.queries?.length && actionParams.pack_id?.trim()) {
+    const storedQueries = resolved.queries ?? [];
+
+    const everyQueryMatchesPack = actionParams.queries.every(
+      (suppliedQuery) =>
+        suppliedQuery.query === undefined ||
+        storedQueries.some((stored) =>
+          queriesMatch(suppliedQuery.query as string, stored, alertData)
+        )
+    );
+
+    if (!everyQueryMatchesPack) {
+      return false;
+    }
+  }
+
   if (actionParams.query !== undefined) {
     const storedQueries = resolved.queries ?? (resolved.query ? [resolved.query] : []);
 
@@ -149,14 +169,17 @@ const callerSuppliedQueryMatches = (
     }
   }
 
-  if (actionParams.ecs_mapping !== undefined) {
-    const suppliedMapping = toEcsMappingRecord(actionParams.ecs_mapping);
+  const suppliedMapping = toEcsMappingRecord(actionParams.ecs_mapping);
 
+  // An absent or empty mapping asserts nothing. The rule-action form defaults `ecs_mapping` to
+  // `{}`, so treating empty as an assertion of emptiness would deny every unrelated edit to an
+  // action whose mapping does not match the referenced object, leaving removal as the only
+  // possible change. A mapping cannot widen what SQL runs on the host, and dispatch derives the
+  // stored mapping for stored content anyway, so there is nothing to vouch for here.
+  if (suppliedMapping !== undefined) {
     // Packs carry `ecs_mapping` per query rather than at the top level, so `resolved.ecs_mapping`
     // is always undefined for them and a top-level mapping could never be satisfied. Match
     // against the pack's per-query mappings instead; a mapping matching none of them still fails.
-    // Saved queries keep the plain comparison, including the deny when the caller sends an empty
-    // mapping for a saved query that has one.
     const storedMappings = resolved.isPack
       ? resolved.queryEcsMappings ?? []
       : [toEcsMappingRecord(resolved.ecs_mapping)];

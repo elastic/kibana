@@ -282,7 +282,10 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
-    it('should authorize a pack_id when the copied queries[] do not match the pack', async () => {
+    it('should reject a pack_id when the copied queries[] do not match the pack', async () => {
+      // Dispatch rebuilds the query set from the pack, so an unvouched-for copy cannot change
+      // what SQL runs — but it is persisted on the rule and read to decide whether to dispatch
+      // per alert with substitution. Requiring a match keeps that decision unsteerable.
       const coreStart = withSavedQuery({ writeLiveQueries: false, runSavedQueries: true });
 
       await expect(
@@ -290,7 +293,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
           pack_id: PACK_ID,
           queries: [{ query: 'select 42 as custom;' }],
         })
-      ).resolves.toBe(true);
+      ).resolves.toBe(false);
     });
 
     it('should reject a mismatched ecs_mapping on a resolvable saved query', async () => {
@@ -345,9 +348,10 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
-    it('should reject an empty ecs_mapping for a saved query that has one', async () => {
-      // Guards the pack carve-out below from loosening saved queries: sending `{}` must not
-      // become a way to strip the saved query's stored mapping from the dispatched action.
+    it('should authorize an empty ecs_mapping for a saved query that has one', async () => {
+      // An absent or empty mapping asserts nothing, so it cannot deny. Sending `{}` is still not
+      // a way to strip the stored mapping: dispatch derives it from the saved object whenever the
+      // stored SQL is what runs (see `create_queries.test.ts`).
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
         {
@@ -364,7 +368,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
           query: STORED_QUERY,
           ecs_mapping: {},
         })
-      ).resolves.toBe(false);
+      ).resolves.toBe(true);
     });
 
     it('should authorize an ecs_mapping that matches one of the pack queries', async () => {
@@ -423,7 +427,10 @@ describe('isOsqueryResponseActionAuthorized', () => {
       ).resolves.toBe(true);
     });
 
-    it('should reject an empty ecs_mapping for a pack whose query has one', async () => {
+    it('should authorize an empty ecs_mapping for a pack whose query has one', async () => {
+      // As above: empty asserts nothing. Pack dispatch always rebuilds per-query mappings from
+      // the pack saved object, so the caller's empty mapping never reaches the agent.
+
       const coreStart = createMockCoreStart(
         { writeLiveQueries: false, runSavedQueries: true },
         {
@@ -441,7 +448,7 @@ describe('isOsqueryResponseActionAuthorized', () => {
           query: STORED_PACK_QUERY,
           ecs_mapping: {},
         })
-      ).resolves.toBe(false);
+      ).resolves.toBe(true);
     });
 
     it('should authorize a client-substituted query when it matches server-side substitution', async () => {
