@@ -196,7 +196,9 @@ export function FailedTransactionChart({
   return (
     <EuiFlexItem>
       <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {/* wrap moves the controls onto their own line in narrow hosts (e.g. the
+            service flyout) instead of shrinking the title below its own width */}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
               <h2>

@@ -24,6 +24,7 @@ export function MobileServiceOverviewServiceMapSection() {
       osVersion,
       appVersion,
       netConnectionType,
+      latencyAggregationType,
       comparisonEnabled,
       offset,
     },
@@ -42,10 +43,11 @@ export function MobileServiceOverviewServiceMapSection() {
   const flyoutOptions = useMemo(
     () => ({
       transactionType,
+      latencyAggregationType,
       comparisonEnabled,
       offset,
     }),
-    [transactionType, comparisonEnabled, offset]
+    [transactionType, latencyAggregationType, comparisonEnabled, offset]
   );
 
   if (!serviceName || !rangeFrom || !rangeTo) {

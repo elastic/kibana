@@ -204,12 +204,12 @@ export function LatencyChart({
   return (
     <EuiFlexItem>
       <AnomalyChartPanel anomalyScore={anomaly?.score} paddingSize={panelPaddingSize}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {/* wrap moves the controls onto their own line in narrow hosts (e.g. the
+            service flyout) instead of shrinking the title below its own width */}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              {/* nowrap keeps the short title on one line in narrow hosts instead
-                  of letting the flex row shrink it below its own width */}
-              <h2 css={{ whiteSpace: 'nowrap' }}>
+              <h2>
                 {i18n.translate('xpack.apm.dependencyLatencyChart.chartTitle', {
                   defaultMessage: 'Latency',
                 })}
