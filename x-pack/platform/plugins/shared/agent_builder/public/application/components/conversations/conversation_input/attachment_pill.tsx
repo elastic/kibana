@@ -38,6 +38,8 @@ export const AttachmentPill: React.FC<AttachmentPillProps> = ({
     analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
       ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.REMOVE_ATTACHMENT,
+      ebt_detail: 'conversation',
+      element_kind: 'button',
     });
     onRemoveAttachment?.();
   }, [analytics, onRemoveAttachment]);
