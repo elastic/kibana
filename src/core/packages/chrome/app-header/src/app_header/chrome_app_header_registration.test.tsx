@@ -29,9 +29,7 @@ describe('useChromeAppHeaderRegistration', () => {
 
     const firstUnregister = jest.fn();
     const secondUnregister = jest.fn();
-    chrome.appHeader.set
-      .mockReturnValueOnce(firstUnregister)
-      .mockReturnValueOnce(secondUnregister);
+    chrome.appHeader.set.mockReturnValueOnce(firstUnregister).mockReturnValueOnce(secondUnregister);
 
     const { rerender, unmount } = render(
       <ChromeServiceProvider value={{ chrome }}>
