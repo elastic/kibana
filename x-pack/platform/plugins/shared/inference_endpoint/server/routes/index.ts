@@ -13,7 +13,7 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { inferenceEndpointSchema } from '@kbn/inference-common';
+import { inferenceEndpointSchema } from '@kbn/inference-common/src/inference_endpoint_schema';
 
 import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';

@@ -165,10 +165,7 @@ export {
   type CspRegion,
 } from './src/inference_endpoints';
 
-export {
-  inferenceEndpointSchema,
-  type InferenceEndpointRequestBody,
-} from './src/inference_endpoint_schema';
+export { type InferenceEndpointRequestBody } from './src/inference_endpoint_schema';
 
 export {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
