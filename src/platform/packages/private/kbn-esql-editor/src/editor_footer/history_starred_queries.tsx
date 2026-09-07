@@ -102,7 +102,7 @@ export const getTableColumns = (
   actions: Array<CustomItemAction<QueryHistoryItem>>,
   isStarredTab = false
 ): Array<EuiBasicTableColumn<QueryHistoryItem>> => {
-  const columnsArray = [
+  const columnsArray: Array<EuiBasicTableColumn<QueryHistoryItem>> = [
     {
       field: 'status',
       name: i18n.translate('esqlEditor.query.querieshistory.statusColumnHeader', {
@@ -160,7 +160,8 @@ export const getTableColumns = (
             );
         }
       },
-      width: isOnReducedSpaceLayout ? 'auto' : '40px',
+      width: isOnReducedSpaceLayout ? 'auto' : '80px',
+      align: 'center',
       css: { height: '100%' }, // Vertically align icon
     },
     {

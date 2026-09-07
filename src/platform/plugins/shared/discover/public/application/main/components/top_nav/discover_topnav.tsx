@@ -401,9 +401,7 @@ export const DiscoverTopNav = ({
         onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorInitialState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
-        closeHistoryOnSubmit={
-          isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED
-        }
+        closeHistoryOnSubmit={isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED}
         esqlVariablesConfig={
           isEsqlMode
             ? {

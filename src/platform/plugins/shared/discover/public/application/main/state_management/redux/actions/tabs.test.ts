@@ -255,9 +255,9 @@ describe('tabs actions', () => {
         })
       );
 
-      expect(selectTab(internalState.getState(), duplicatedTab.id).globalState.refreshInterval).toEqual(
-        activeRefreshInterval
-      );
+      expect(
+        selectTab(internalState.getState(), duplicatedTab.id).globalState.refreshInterval
+      ).toEqual(activeRefreshInterval);
       expect(selectTab(internalState.getState(), duplicatedTab.id).skipInitialFetch).toBeFalsy();
     });
 
@@ -282,12 +282,12 @@ describe('tabs actions', () => {
         pause: true,
       });
       expect(selectTab(internalState.getState(), freshTab.id).skipInitialFetch).toBe(true);
-      expect(selectTab(internalState.getState(), sourceTabId).globalState.refreshInterval).not.toEqual(
-        {
-          ...activeRefreshInterval,
-          pause: true,
-        }
-      );
+      expect(
+        selectTab(internalState.getState(), sourceTabId).globalState.refreshInterval
+      ).not.toEqual({
+        ...activeRefreshInterval,
+        pause: true,
+      });
     });
 
     it('replaces profile URL state when switching selected tabs', async () => {
