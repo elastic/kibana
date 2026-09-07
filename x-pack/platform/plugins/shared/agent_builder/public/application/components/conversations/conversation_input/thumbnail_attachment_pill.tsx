@@ -31,8 +31,6 @@ export interface ThumbnailAttachmentPillProps {
   label: string;
   onRemoveAttachment?: () => void;
   isHighlighted?: boolean;
-  onHoverStart?: () => void;
-  onHoverEnd?: () => void;
 }
 
 export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = ({
@@ -41,8 +39,6 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
   label,
   onRemoveAttachment,
   isHighlighted = false,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isHovered, setIsHovered] = useState(false);
@@ -74,14 +70,8 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
           opacity: 1;
         }
       `}
-      onMouseEnter={() => {
-        setIsHovered(true);
-        onHoverStart?.();
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        onHoverEnd?.();
-      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       data-test-subj={`agentBuilderAttachmentPill-${attachmentId}`}
     >
       <img
