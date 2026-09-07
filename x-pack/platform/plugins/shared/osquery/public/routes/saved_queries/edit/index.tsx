@@ -6,14 +6,12 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiButton,
   EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
@@ -23,17 +21,14 @@ import { useParams } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
-import { useKibana, useRouterNavigate } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { fullWidthFormContentCss } from '../../../components/layouts';
+import { useOsquerySubpageTitle } from '../../../components/osquery_page_header_context';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 import { useDuplicateGuard } from '../../../common/hooks/use_duplicate_guard';
 import { EditSavedQueryForm } from './form';
 import { useDeleteSavedQuery, useUpdateSavedQuery, useSavedQuery } from '../../../saved_queries';
 import { useCopySavedQuery } from '../../../saved_queries/use_copy_saved_query';
-
-const euiCalloutCss = {
-  margin: '10px',
-};
 
 const EditSavedQueryPageComponent = () => {
   const confirmModalTitleId = useGeneratedHtmlId();
@@ -42,7 +37,6 @@ const EditSavedQueryPageComponent = () => {
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const { savedQueryId } = useParams<{ savedQueryId: string }>();
-  const savedQueryListProps = useRouterNavigate('saved_queries');
 
   const { isLoading, data: savedQueryDetails, error } = useSavedQuery({ savedQueryId });
   const updateSavedQueryMutation = useUpdateSavedQuery({ savedQueryId });
@@ -76,53 +70,25 @@ const EditSavedQueryPageComponent = () => {
     resourceType: 'query',
   });
 
-  const backLink = useMemo(
-    () => (
-      <EuiButtonEmpty iconType="chevronSingleLeft" {...savedQueryListProps} flush="left" size="xs">
-        <FormattedMessage
-          id="xpack.osquery.editSavedQuery.viewSavedQueriesListTitle"
-          defaultMessage="View all saved queries"
-        />
-      </EuiButtonEmpty>
-    ),
-    [savedQueryListProps]
-  );
-
-  const titleContent = useMemo(() => {
-    if (viewMode) {
-      return (
-        <>
-          <FormattedMessage
-            id="xpack.osquery.viewSavedQuery.pageTitle"
-            defaultMessage='"{savedQueryId}" details'
-            // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-            values={{
-              savedQueryId: savedQueryDetails?.id ?? '',
-            }}
-          />
-          {elasticPrebuiltQuery && (
-            <EuiCallOut announceOnMount css={euiCalloutCss} size="s">
-              <FormattedMessage
-                id="xpack.osquery.viewSavedQuery.prebuiltInfo"
-                defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
-              />
-            </EuiCallOut>
-          )}
-        </>
-      );
+  const pageTitle = useMemo(() => {
+    if (!savedQueryDetails?.id) {
+      return undefined;
     }
 
-    return (
-      <FormattedMessage
-        id="xpack.osquery.editSavedQuery.pageTitle"
-        defaultMessage='Edit "{savedQueryId}"'
-        // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-        values={{
-          savedQueryId: savedQueryDetails?.id ?? '',
-        }}
-      />
-    );
-  }, [elasticPrebuiltQuery, savedQueryDetails?.id, viewMode]);
+    if (viewMode) {
+      return i18n.translate('xpack.osquery.viewSavedQuery.pageTitle', {
+        defaultMessage: '"{savedQueryId}" details',
+        values: { savedQueryId: savedQueryDetails.id },
+      });
+    }
+
+    return i18n.translate('xpack.osquery.editSavedQuery.pageTitle', {
+      defaultMessage: 'Edit "{savedQueryId}"',
+      values: { savedQueryId: savedQueryDetails.id },
+    });
+  }, [savedQueryDetails?.id, viewMode]);
+
+  useOsquerySubpageTitle(pageTitle);
 
   const actionButtons = useMemo(
     () => (
@@ -221,9 +187,6 @@ const EditSavedQueryPageComponent = () => {
   if (error) {
     return (
       <div css={fullWidthFormContentCss}>
-        <EuiSpacer size="l" />
-        {backLink}
-        <EuiSpacer size="m" />
         <EuiCallOut
           announceOnMount
           title={i18n.translate('xpack.osquery.editSavedQuery.loadError.title', {
@@ -243,18 +206,25 @@ const EditSavedQueryPageComponent = () => {
 
   return (
     <div css={fullWidthFormContentCss}>
-      <EuiSpacer size="l" />
-      {backLink}
-      <EuiSpacer size="m" />
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <h1>{titleContent}</h1>
-          </EuiText>
-        </EuiFlexItem>
-        {permissions.writeSavedQueries && <EuiFlexItem grow={false}>{actionButtons}</EuiFlexItem>}
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      {permissions.writeSavedQueries && (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>{actionButtons}</EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {elasticPrebuiltQuery && (
+        <>
+          <EuiCallOut announceOnMount size="s">
+            <FormattedMessage
+              id="xpack.osquery.viewSavedQuery.prebuiltInfo"
+              defaultMessage="This is a prebuilt Elastic query, and it cannot be edited."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {formContent}
       {deleteModal}
       {duplicateModal}
