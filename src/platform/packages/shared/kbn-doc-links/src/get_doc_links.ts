@@ -208,7 +208,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       vectorSearchDenseVector: `${ELASTIC_DOCS}solutions/search/vector/dense-vector`,
       jinaEmbeddingModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-jina`,
       vectorSearchBringOwnVectors: `${ELASTIC_DOCS}solutions/search/vector/bring-own-vectors`,
-      vectorDatabaseGetStarted: `${ELASTIC_DOCS}solutions/vector-database/get-started`,
+      vectorDatabaseFullTextSearch: `${ELASTIC_DOCS}solutions/vector-database/vector-full-text-search`,
       start: `${ENTERPRISE_SEARCH_DOCS}start.html`,
       supportedNlpModels: `${ELASTIC_DOCS}explore-analyze/machine-learning/nlp/ml-nlp-model-ref`,
       syncRules: `${ELASTIC_DOCS}reference/search-connectors/es-sync-rules`,
