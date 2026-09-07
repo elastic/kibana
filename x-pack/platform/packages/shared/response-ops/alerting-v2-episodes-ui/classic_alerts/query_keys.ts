@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TabPlaceholder } from '../tab_placeholder';
+import { queryKeys } from '../query_keys';
 
-export const PipelinesTab = () => (
-  <TabPlaceholder data-test-subj="streamsLayoutPipelinesPlaceholder" />
-);
+export const classicAlertQueryKeys = {
+  all: () => [...queryKeys.all, 'classic-alert'] as const,
+  alert: (alertId: string) => [...classicAlertQueryKeys.all(), alertId] as const,
+};
