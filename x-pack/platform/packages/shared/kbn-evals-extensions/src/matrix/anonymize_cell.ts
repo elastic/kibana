@@ -92,5 +92,12 @@ export function anonymizeCell(cell: ReplayCell, aliases: Map<string, string>): R
     question: scrub(cell.question, cell.modelId),
     expected: scrub(cell.expected, cell.modelId),
     agentResponse: scrub(cell.agentResponse, cell.modelId),
+    // The tool-call history reaches the groundedness judge as
+    // `tool_call_history`, so it is judge-visible and must be scrubbed too.
+    // Steps are arbitrary nested JSON, so scrub the serialized form rather
+    // than walking a shape that varies per tool.
+    steps: cell.steps.length
+      ? JSON.parse(scrub(JSON.stringify(cell.steps), cell.modelId))
+      : cell.steps,
   };
 }

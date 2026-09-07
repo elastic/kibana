@@ -20,6 +20,26 @@ const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
   ...overrides,
 });
 
+describe('anonymizeCell steps', () => {
+  it('scrubs model identity from the tool-call history', () => {
+    // steps reach the groundedness judge as `tool_call_history`. Leaving them
+    // unscrubbed defeats --blind: the judge can read the model's identity out
+    // of the trajectory even though every other field was redacted.
+    const c = anonymizeCell(
+      cell({
+        modelId: 'anthropic-claude-4.6-sonnet',
+        steps: [{ type: 'tool_call', note: 'run by anthropic-claude-4.6-sonnet' }],
+      }),
+      new Map([['anthropic-claude-4.6-sonnet', 'A']])
+    );
+    expect(JSON.stringify(c.steps)).not.toContain('claude-4.6-sonnet');
+  });
+
+  it('leaves a trajectory without steps alone', () => {
+    expect(anonymizeCell(cell(), new Map()).steps).toEqual([]);
+  });
+});
+
 describe('buildAliasMap', () => {
   it('assigns a stable alias per model, ordered by model id', () => {
     // Aliases must not depend on cell order: two runs of the same replay have
