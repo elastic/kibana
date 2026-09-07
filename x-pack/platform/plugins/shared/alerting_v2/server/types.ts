@@ -43,9 +43,9 @@ export type AlertEventsClientApi = PublicMethodsOf<AlertEventsClient>;
 
 export interface AlertingServerSetup {
   /**
-   * Registers an artifact type owned by the calling plugin. Its `dataSchema` is
-   * enforced for this type on rule create and update. Unregistered types pass
-   * through unchanged.
+   * Registers an artifact type owned by the calling plugin. Validation and
+   * declarative SO references are applied for this type on rule create/update/read.
+   * Unregistered types pass through unchanged.
    */
   registerArtifactType(definition: ArtifactTypeDefinition): void;
 }

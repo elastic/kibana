@@ -81,7 +81,6 @@ enabled:
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql_2/config.ts
-  - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group10/config.ts
   - src/platform/test/functional/apps/discover/context_awareness/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
@@ -213,7 +212,6 @@ enabled:
   - x-pack/platform/test/functional/apps/aiops/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
-  - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
