@@ -9,8 +9,10 @@
 
 import React, { Suspense } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiText } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentDataView } from '../../state_management/redux';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 const LazyKeyboardShortcuts = React.lazy(async () => {
   const { KeyboardShortcuts } = await import('@kbn/esql-editor');
@@ -23,6 +25,11 @@ interface Props {
 
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const isEsqlMode = useIsEsqlMode();
+  const currentDataView = useCurrentDataView();
+  const { canSwitchLanguageMode, isDataViewMode, switchLanguageMode } = useCurrentTabMenuActions({
+    currentDataView,
+    switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
+  });
 
   const startSearchingPrompt = (
     <EuiEmptyPrompt
@@ -43,12 +50,38 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
         </EuiText>
       }
       actions={
-        <EuiButton color="primary" fill onClick={onRefresh} data-test-subj="refreshDataButton">
-          <FormattedMessage
-            id="discover.uninitializedRefreshButtonText"
-            defaultMessage="Refresh data"
-          />
-        </EuiButton>
+        <EuiFlexGroup responsive={false} alignItems="center" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiButton color="primary" fill onClick={onRefresh} data-test-subj="refreshDataButton">
+              <FormattedMessage
+                id="discover.uninitializedRefreshButtonText"
+                defaultMessage="Refresh data"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          {canSwitchLanguageMode && isDataViewMode && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiText component="span" size="s" color="subdued">
+                  <FormattedMessage id="discover.uninitializedActionsOrText" defaultMessage="or" />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  iconType="code"
+                  onClick={switchLanguageMode}
+                  data-test-subj="queryInEsqlButton"
+                >
+                  <FormattedMessage
+                    id="discover.uninitializedQueryInEsqlButtonText"
+                    defaultMessage="Query in ES|QL"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
       }
     />
   );
