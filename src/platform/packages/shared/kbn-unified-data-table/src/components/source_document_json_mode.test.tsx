@@ -187,10 +187,14 @@ describe('SourceDocumentJsonMode', () => {
 
     it('filters on the exact clicked element of a multi-value field', async () => {
       const onFilter = jest.fn();
-      renderCell({ _id: '1', _index: 'test', _source: { bytes: [100, 200] } }, { onFilter });
+      renderCell(
+        { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
+        { onFilter, jsonModeSettings: { defaultRenderedNodes: 0 } }
+      );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 200, '+');
     });
@@ -199,11 +203,12 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell(
         { _id: '1', _index: 'test', _source: { bytes: [100, 200] } },
-        { onFilter, isPlainRecord: true }
+        { onFilter, isPlainRecord: true, jsonModeSettings: { defaultRenderedNodes: 0 } }
       );
 
       await userEvent.click(screen.getByTestId(rowTestId('bytes')));
 
+      await userEvent.hover(screen.getByTestId(rowTestId('bytes.1')));
       await userEvent.click(screen.getByTestId(filterForTestId('bytes.1')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), [200], '+');
     });
