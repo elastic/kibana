@@ -798,6 +798,10 @@ def deploy(ip: str) -> None:
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
         f"grep -q MAX_PAYLOAD_BYTES ~/{PATCHED_SCOUT_CONFIG_REMOTE}",
         f"grep -q FinalAnswerPresent ~/{PATCHED_EVALUATOR_REMOTE}",
+        # Without this forward every stored answer looks like a real closing
+        # turn, even when it is the fallback to an interior reasoning step:
+        # 0 of 2422 Sep-4+ detection-rule-edit docs carried the tag (2026-09-07).
+        f"grep -q 'messageSource: response.messageSource' ~/{PATCHED_EVALUATOR_REMOTE}",
         f"grep -q 'NEVER finish the turn' ~/{PATCHED_RULE_SKILL_REMOTE}",
     ]
     checks = infra_checks + (persona_checks if persona_only else [])
