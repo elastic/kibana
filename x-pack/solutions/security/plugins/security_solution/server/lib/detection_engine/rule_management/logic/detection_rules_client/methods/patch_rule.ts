@@ -66,8 +66,7 @@ export const patchRule = async ({
   }
 
   // PATCH cannot change a rule's type, so the rule being modified is what the ML license gate
-  // applies to. A `type` in the patch body either matches the existing rule or is rejected by
-  // `applyRulePatch` below, so it cannot widen what this request is authorized to touch.
+  // applies to.
   await validateMlAuth(mlAuthz, existingRule.type);
   validateNonCustomizablePatchFields(rulePatch, existingRule);
   // A PATCH payload only carries the fields the client sent, so presence of a

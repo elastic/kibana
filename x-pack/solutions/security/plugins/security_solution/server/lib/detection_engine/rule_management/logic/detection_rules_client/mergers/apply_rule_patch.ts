@@ -282,10 +282,6 @@ export const patchTypeSpecificParams = (
   // is a union of types where everything is optional, it's hard to do the validation before we know the rule type -
   // a patch request that defines `event_category_override` as a number would not be assignable to the EQL patch schema,
   // but would be assignable to the other rule types since they don't specify `event_category_override`.
-  // The `type` literal of each type specific schema also rejects a patch body whose `type`
-  // contradicts the existing rule: PATCH cannot change a rule's type.
-  // Validation that a schema cannot express runs here too, on the patched values, so that it
-  // applies to patch bodies that omit the optional `type` as well.
   switch (existingRule.type) {
     case 'eql': {
       const result = EqlRulePatchFields.safeParse(params);

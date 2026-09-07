@@ -58,7 +58,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             // Only the type-independent props are validated here: `type` is optional in patch
             // bodies, so the type-specific union cannot be resolved until the existing rule is
             // fetched. Type-specific fields are preserved and validated further down the stack,
-            // in `patchTypeSpecificParams`, once the rule type is known.
+            // once the rule type is known.
             body: buildRouteValidationWithZod(SharedPatchRuleRequestBody),
           },
         },

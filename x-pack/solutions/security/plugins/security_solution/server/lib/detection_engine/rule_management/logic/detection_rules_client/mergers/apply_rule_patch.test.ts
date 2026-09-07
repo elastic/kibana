@@ -184,8 +184,6 @@ describe('applyRulePatch', () => {
     expect(patchedRule).toEqual(expect.objectContaining({ threat_mapping: threatMapping }));
   });
 
-  // The semantic threat_mapping checks below run on parsed values only, so a malformed value
-  // has to come back as a schema error rather than blowing up while walking the entries.
   test('should reject a threat_mapping that is not an array', async () => {
     const rulePatch = { threat_mapping: 'nonsense' };
     const existingRule = getThreatMatchingSchemaMock();

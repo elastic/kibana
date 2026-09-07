@@ -8,9 +8,7 @@
 import type { SharedPatchRuleRequestBody } from './patch_rule_request_body';
 
 /**
- * Additional validation of the type-independent props that is implemented outside of the schema
- * itself. Type-specific validation happens in `patchTypeSpecificParams`, once the existing rule's
- * type is known and the type-specific fields have been validated against it.
+ * Additional validation that is implemented outside of the schema itself.
  */
 export const validatePatchRuleRequestBody = (rule: SharedPatchRuleRequestBody): string[] => {
   return [...validateId(rule), ...validateTimelineId(rule), ...validateTimelineTitle(rule)];

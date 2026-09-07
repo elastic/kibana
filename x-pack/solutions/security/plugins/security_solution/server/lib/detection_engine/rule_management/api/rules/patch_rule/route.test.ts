@@ -207,12 +207,6 @@ describe('Patch rule route', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    // Regression test: the boundary used to validate the body against the `RulePatchProps`
-    // union. A body without the optional `type` matched the union's first branch (EQL), whose
-    // strip-mode parsing dropped type-specific fields, turning the request into a 200 no-op.
-    // `type` is resolved from the existing rule further down the stack, so the boundary must
-    // preserve those fields. Rejecting an unknown or contradicting `type` happens there too and
-    // is covered by `apply_rule_patch.test.ts`.
     test('preserves type-specific fields when "type" is omitted', async () => {
       const threshold = { field: ['host.name'], value: 200 };
       const request = requestMock.create({

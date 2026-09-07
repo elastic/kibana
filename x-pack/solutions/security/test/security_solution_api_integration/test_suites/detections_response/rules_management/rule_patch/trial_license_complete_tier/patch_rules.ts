@@ -131,10 +131,6 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.threshold).to.eql({ field: ['host.name'], value: 200 });
       });
 
-      // Regression test: `type` is optional on PATCH and the endpoint resolves it from the
-      // existing rule. The body used to be validated against the first branch of the
-      // RulePatchProps union (EQL), which silently stripped type-specific fields like
-      // `threshold`, turning this request into a 200 no-op.
       it("should patch a threshold rule's threshold when `type` is omitted from the body", async () => {
         await createRule(supertest, log, getThresholdRuleParams({ rule_id: 'rule-1' }));
 
