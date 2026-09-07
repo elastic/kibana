@@ -346,7 +346,7 @@ function createInferenceJudge({
   return async (cell) => {
     const args = {
       input: { question: cell.question },
-      output: { messages: [{ message: cell.agentResponse }] },
+      output: { messages: [{ message: cell.agentResponse }], steps: cell.steps },
       expected: { expected: cell.expected },
       metadata: {},
     };

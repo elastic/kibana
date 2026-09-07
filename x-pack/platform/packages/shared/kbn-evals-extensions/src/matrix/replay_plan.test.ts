@@ -6,7 +6,13 @@
  */
 
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
-import { lastAgentMessage, planReplay, replayExecutionId, summarizePlan } from './replay_plan';
+import {
+  agentSteps,
+  lastAgentMessage,
+  planReplay,
+  replayExecutionId,
+  summarizePlan,
+} from './replay_plan';
 
 /**
  * Shaped after a real golden document (run sweep-1788679175-gj): the judge
@@ -70,6 +76,19 @@ describe('lastAgentMessage', () => {
   });
 });
 
+describe('agentSteps', () => {
+  it('returns the tool-call history the groundedness judge grades against', () => {
+    const steps = [{ type: 'tool_call', name: 'search' }, { type: 'relevant_skills' }];
+    expect(agentSteps({ messages: [], steps })).toEqual(steps);
+  });
+
+  it('returns an empty array when a trajectory recorded no steps', () => {
+    expect(agentSteps({ messages: [] })).toEqual([]);
+    expect(agentSteps(undefined)).toEqual([]);
+    expect(agentSteps({ steps: 'not-an-array' })).toEqual([]);
+  });
+});
+
 describe('planReplay', () => {
   it('builds one cell carrying the judge inputs', () => {
     const plan = planReplay([doc()], refs);
@@ -84,6 +103,30 @@ describe('planReplay', () => {
         modelId: 'eis-openai-gpt-5-4-nano',
       })
     );
+  });
+
+  it('carries the tool-call history so grounding is graded against evidence', () => {
+    // The groundedness judge reads output.steps as `tool_call_history` and
+    // verifies each claim against it. Dropping steps on replay left that
+    // history empty, so a row the judge had scored 0.86 grounded came back
+    // 0.25 with 17/21 cells labelled MAJOR_HALLUCINATIONS -- a harness
+    // artifact that reads exactly like a model regression.
+    const steps = [{ type: 'tool_call', name: 'search', result: 'host-42' }];
+    const plan = planReplay(
+      [
+        doc({
+          task: {
+            model: { id: 'eis-openai-gpt-5-4-nano' },
+            output: {
+              messages: [{ message: { content: 'host-42 triggered the alert.' } }],
+              steps,
+            },
+          },
+        }),
+      ],
+      refs
+    );
+    expect(plan.cells[0].steps).toEqual(steps);
   });
 
   it('dedupes the evaluator documents that share one trajectory', () => {

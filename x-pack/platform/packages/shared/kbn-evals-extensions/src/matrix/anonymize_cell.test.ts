@@ -15,6 +15,7 @@ const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
   question: 'Take a look at this alert.',
   expected: 'The alert is a true positive.',
   agentResponse: 'This is a true positive.',
+  steps: [],
   recordedAt: '2026-08-22T16:24:55.232Z',
   ...overrides,
 });

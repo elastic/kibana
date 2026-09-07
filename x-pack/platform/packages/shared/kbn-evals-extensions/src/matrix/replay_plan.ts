@@ -12,8 +12,17 @@ import type { EvaluationScoreDocument } from '@kbn/evals-common';
  *
  * A re-judge changes which model grades an already-recorded trajectory. It does
  * NOT need the agent, a Kibana, an Elasticsearch, or seeded data -- every input
- * the judges read (the user question, the agent's messages, the ground truth)
- * is already durable in the golden score documents.
+ * the judges read (the user question, the agent's messages, the tool calls it
+ * made, the ground truth) is already durable in the golden score documents.
+ *
+ * That durability is load-bearing and easy to lose: judges differ in WHICH
+ * parts of the trajectory they read. The correctness judges read the final
+ * message; the groundedness judge reads `task.output.steps` to check claims
+ * against retrieved evidence. A replay that forwards only the final message
+ * silently reduces the grounding judge to grading unsupported assertions, which
+ * looks like a model or judge regression but is a harness defect. When adding a
+ * judge here, forward the whole trajectory, not just the part today's judges
+ * happen to use.
  *
  * Re-running the full sweep to change a judge cost ~68min of wall clock and 25
  * VMs on 2026-09-06, of which ~83% was VM provisioning and stack boot. Replay
@@ -43,6 +52,20 @@ export interface ReplayCell {
   expected: string;
   /** The agent's final message, i.e. what gets graded. */
   agentResponse: string;
+  /**
+   * The agent's intermediate steps (tool calls and their results).
+   *
+   * The groundedness judge verifies each claim against the evidence the agent
+   * actually retrieved: it reads `output.steps` and passes it to the prompt as
+   * `tool_call_history`. Replaying with only the final message leaves that
+   * history empty, so every specific claim becomes unverifiable and the judge
+   * returns MAJOR_HALLUCINATIONS for answers it had graded as grounded moments
+   * earlier -- a property of the harness, not of the model or the judge.
+   *
+   * Steps are `_source`-only on the score documents (not indexed), so they can
+   * be read back but never filtered on.
+   */
+  steps: unknown[];
   /** Source document's timestamp, retained for provenance. */
   recordedAt: string;
 }
@@ -76,6 +99,12 @@ export function lastAgentMessage(output: unknown): string | undefined {
     }
   }
   return undefined;
+}
+
+/** Extract the agent's intermediate steps (tool calls + results) from a task output. */
+export function agentSteps(output: unknown): unknown[] {
+  const steps = (output as { steps?: unknown })?.steps;
+  return Array.isArray(steps) ? steps : [];
 }
 
 /**
@@ -136,6 +165,7 @@ export function planReplay(
       question: question as string,
       expected: expected as string,
       agentResponse: agentResponse as string,
+      steps: agentSteps(doc.task?.output),
       recordedAt: doc['@timestamp'],
     });
   }

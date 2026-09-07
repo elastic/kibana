@@ -15,6 +15,7 @@ const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
   question: 'q',
   expected: 'e',
   agentResponse: 'a',
+  steps: [],
   recordedAt: '2026-08-22T16:24:55.232Z',
   ...overrides,
 });
