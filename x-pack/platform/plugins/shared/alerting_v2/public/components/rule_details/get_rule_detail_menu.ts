@@ -113,9 +113,7 @@ export const getRuleDetailMenu = ({
         testId: 'ruleDetailsCloneButton',
         overflow: true,
       },
-      ...(viewChangeHistoryItem
-        ? [{ ...viewChangeHistoryItem, separator: 'above' as const }]
-        : []),
+      ...(viewChangeHistoryItem ? [{ ...viewChangeHistoryItem, separator: 'above' as const }] : []),
       {
         id: 'updateRuleApiKey',
         label: i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyButtonLabel', {
