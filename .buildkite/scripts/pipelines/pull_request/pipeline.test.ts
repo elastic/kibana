@@ -7,22 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { load as yamlLoad } from 'js-yaml';
+import { parse as yamlLoad } from 'yaml';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
 
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
+const mockDoAllChangesMatch = jest.fn();
 const mockGetAgentImageConfig = jest.fn();
+const mockFlushCancelOnGateFailureMetadata = jest.fn();
 const mockRunPreBuild = jest.fn();
 const mockGetEvalPipeline = jest.fn();
+const mockIsAutomatedVersionBumpPR = jest.fn();
+const mockGetPrChangesCached = jest.fn();
 
 jest.mock('#pipeline-utils', () => {
   const actual = jest.requireActual('#pipeline-utils');
   return {
     ...actual,
+    getKibanaDir: jest.fn().mockReturnValue('/kibana'),
     areChangesSkippable: mockAreChangesSkippable,
     doAnyChangesMatch: mockDoAnyChangesMatch,
+    doAllChangesMatch: mockDoAllChangesMatch,
     getAgentImageConfig: mockGetAgentImageConfig,
+    flushCancelOnGateFailureMetadata: mockFlushCancelOnGateFailureMetadata,
+    isAutomatedVersionBumpPR: mockIsAutomatedVersionBumpPR,
+    getPrChangesCached: mockGetPrChangesCached,
   };
 });
 
@@ -60,7 +70,7 @@ const waitForExit = () => {
 
 describe('pull_request pipeline generation', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     jest.resetModules();
     process.env = { ...ORIGINAL_ENV };
 
@@ -69,9 +79,12 @@ describe('pull_request pipeline generation', () => {
 
     mockAreChangesSkippable.mockResolvedValue(false);
     mockDoAnyChangesMatch.mockResolvedValue(false);
+    mockDoAllChangesMatch.mockResolvedValue(false);
     mockGetAgentImageConfig.mockReturnValue('agents:\n  provider: gcp\n');
     mockRunPreBuild.mockResolvedValue(undefined);
     mockGetEvalPipeline.mockReturnValue(null);
+    mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
+    mockGetPrChangesCached.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -95,7 +108,7 @@ describe('pull_request pipeline generation', () => {
   });
 
   it('emits valid renovate-only pipeline and skips pre-build', async () => {
-    mockAreChangesSkippable.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    mockDoAllChangesMatch.mockResolvedValueOnce(true);
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
     const emitted = waitForEmission();
 
@@ -163,5 +176,82 @@ describe('pull_request pipeline generation', () => {
       expect.stringContaining('Error while generating the pipeline steps:'),
       expect.any(Error)
     );
+  });
+
+  it('does not trigger Cypress suites for a Scout-tests-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_jsm.spec.ts',
+      },
+      {
+        filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/connector_tines.spec.ts',
+        previous_filename:
+          'x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/connectors/ui/tests/tines.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).not.toContain('security_serverless_explore.sh');
+    expect(output).not.toContain('security_solution_explore.sh');
+    expect(output).not.toContain('security_solution_investigations.sh');
+  });
+
+  it('triggers Cypress suites for product changes in the same plugin', async () => {
+    const changes = [
+      { filename: 'x-pack/platform/plugins/shared/triggers_actions_ui/public/application/app.tsx' },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('security_serverless_explore.sh');
+  });
+
+  it('still triggers Scout suites for a Scout-tests-only diff', async () => {
+    const changes = [
+      {
+        filename:
+          'x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/chat.spec.ts',
+      },
+    ];
+    mockGetPrChangesCached.mockResolvedValue(changes);
+    mockDoAnyChangesMatch.mockImplementation((paths, scopedChanges) =>
+      realDoAnyChangesMatch(paths, scopedChanges ?? changes)
+    );
+    jest.spyOn(console, 'warn').mockImplementation();
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    expect(output).toContain('scout-agent-builder-smoke-tests');
+  });
+
+  it('emits empty pipeline for automated version bump PRs from kibanamachine', async () => {
+    mockIsAutomatedVersionBumpPR.mockResolvedValueOnce(true);
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    const parsed = yamlLoad(output) as Record<string, unknown>;
+    expect(parsed).toEqual({ steps: [] });
+    expect(mockRunPreBuild).not.toHaveBeenCalled();
+    expect(mockAreChangesSkippable).not.toHaveBeenCalled();
   });
 });

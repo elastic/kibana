@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
@@ -52,6 +53,7 @@ import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { MonitorEnabled } from '../../management/monitor_list_table/monitor_enabled';
 import { ConfigKey, EncryptedSyntheticsMonitor, OverviewStatusMetaData } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
+import { getMonitorSpaceToAppend } from '../../../../hooks/use_edit_monitor_locator';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 
@@ -70,10 +72,32 @@ interface Props {
   previousDurationChartTo?: string;
 }
 
-const DEFAULT_DURATION_CHART_FROM = 'now-12h';
+const DURATION_CHART_LOOKBACK_HOURS = 12;
+const DEFAULT_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS}h`;
 const DEFAULT_CURRENT_DURATION_CHART_TO = 'now';
-const DEFAULT_PREVIOUS_DURATION_CHART_FROM = 'now-24h';
-const DEFAULT_PREVIOUS_DURATION_CHART_TO = 'now-12h';
+const DEFAULT_PREVIOUS_DURATION_CHART_FROM = `now-${DURATION_CHART_LOOKBACK_HOURS * 2}h`;
+const DEFAULT_PREVIOUS_DURATION_CHART_TO = DEFAULT_DURATION_CHART_FROM;
+
+/**
+ * For monitors younger than the 12h window, anchor the lower bound at creation
+ * time and drop the previous-period comparison — otherwise the mostly-empty
+ * window collapses each series to a single point and the chart looks empty (#221399).
+ */
+export const getDurationChartTimeRange = (
+  createdAt?: string,
+  now: moment.Moment = moment()
+): { from: string; showPreviousPeriod: boolean } => {
+  if (createdAt) {
+    const created = moment(createdAt);
+    if (
+      created.isValid() &&
+      created.isAfter(now.clone().subtract(DURATION_CHART_LOOKBACK_HOURS, 'hours'))
+    ) {
+      return { from: created.toISOString(), showPreviousPeriod: false };
+    }
+  }
+  return { from: DEFAULT_DURATION_CHART_FROM, showPreviousPeriod: true };
+};
 
 function DetailFlyoutDurationChart({
   id,
@@ -82,6 +106,7 @@ function DetailFlyoutDurationChart({
   currentDurationChartTo,
   previousDurationChartFrom,
   previousDurationChartTo,
+  createdAt,
 }: Pick<
   Props,
   | 'id'
@@ -90,12 +115,18 @@ function DetailFlyoutDurationChart({
   | 'currentDurationChartTo'
   | 'previousDurationChartFrom'
   | 'previousDurationChartTo'
->) {
+> & { createdAt?: string }) {
   const theme = useTheme();
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+
+  const { from: chartFrom, showPreviousPeriod } = useMemo(
+    () => getDurationChartTimeRange(createdAt),
+    [createdAt]
+  );
+
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -112,7 +143,7 @@ function DetailFlyoutDurationChart({
             seriesType: 'area',
             color: theme?.eui?.euiColorVis1,
             time: {
-              from: currentDurationChartFrom ?? DEFAULT_DURATION_CHART_FROM,
+              from: currentDurationChartFrom ?? chartFrom,
               to: currentDurationChartTo ?? DEFAULT_CURRENT_DURATION_CHART_TO,
             },
             reportDefinitions: {
@@ -130,28 +161,32 @@ function DetailFlyoutDurationChart({
             name: DURATION_SERIES_NAME,
             operationType: 'average',
           },
-          {
-            seriesType: 'line',
-            color: theme?.eui?.euiColorVis7,
-            time: {
-              from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
-              to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
-            },
-            reportDefinitions: {
-              'monitor.id': [id],
-              'observer.geo.name': [location],
-            },
-            filters: [
-              {
-                field: 'observer.geo.name',
-                values: [location],
-              },
-            ],
-            dataType: 'synthetics',
-            selectedMetricField: 'monitor.duration.us',
-            name: PREVIOUS_PERIOD_SERIES_NAME,
-            operationType: 'average',
-          },
+          ...(showPreviousPeriod
+            ? [
+                {
+                  seriesType: 'line' as const,
+                  color: theme?.eui?.euiColorVis7,
+                  time: {
+                    from: previousDurationChartFrom ?? DEFAULT_PREVIOUS_DURATION_CHART_FROM,
+                    to: previousDurationChartTo ?? DEFAULT_PREVIOUS_DURATION_CHART_TO,
+                  },
+                  reportDefinitions: {
+                    'monitor.id': [id],
+                    'observer.geo.name': [location],
+                  },
+                  filters: [
+                    {
+                      field: 'observer.geo.name',
+                      values: [location],
+                    },
+                  ],
+                  dataType: 'synthetics' as const,
+                  selectedMetricField: 'monitor.duration.us',
+                  name: PREVIOUS_PERIOD_SERIES_NAME,
+                  operationType: 'average' as const,
+                },
+              ]
+            : []),
         ]}
       />
     </EuiPageSection>
@@ -233,10 +268,20 @@ export function MonitorDetailFlyout(props: Props) {
     if (overviewItem) return overviewItem;
   }, [overviewStatus?.upConfigs, overviewStatus?.downConfigs, configId]);
 
+  // Ping-backed charts query `monitor.id`. For project monitors that is
+  // `custom_heartbeat_id` (`monitorQueryId`), not the saved-object UUID.
+  const monitorQueryId = monitor?.monitorQueryId ?? id;
+
   const setLocation = useCallback(
     (location: string, locationIdT: string) =>
-      onLocationChange({ id, configId, location, locationId: locationIdT, spaces }),
-    [onLocationChange, id, configId, spaces]
+      onLocationChange({
+        id: monitorQueryId,
+        configId,
+        location,
+        locationId: locationIdT,
+        spaces,
+      }),
+    [onLocationChange, monitorQueryId, configId, spaces]
   );
 
   const detailLink = useMonitorDetailLocator({
@@ -257,19 +302,37 @@ export function MonitorDetailFlyout(props: Props) {
   const monitorObject = useSelector(selectSyntheticsMonitor);
   const isLoading = useSelector(selectSyntheticsMonitorLoading);
   const error = useSelector(selectSyntheticsMonitorError);
+  const currentMonitorObject =
+    monitorObject?.[ConfigKey.CONFIG_ID] === configId ? monitorObject : null;
+  // Duration chart reads pings by monitor.id, not the saved object. Wait for
+  // the matching SO so we don't apply a stale `created_at`, but still render
+  // (default 12h window) when the SO 404s — e.g. cross-space monitors whose
+  // overview metadata is already on `monitor`.
+  const canRenderDurationChart =
+    Boolean(currentMonitorObject) || Boolean(monitor && error && !isLoading);
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
   const { space } = useKibanaSpace();
 
+  const { spaceId: crossSpaceId } = getMonitorSpaceToAppend(space, spaces);
+
   useEffect(() => {
+    // `useKibanaSpace` resolves asynchronously, so `space` is undefined on
+    // the first render. `getMonitorSpaceToAppend` short-circuits to `{}` in
+    // that case, which means an early dispatch would fetch the SO from the
+    // active space and 404 for cross-space monitors. The follow-up dispatch
+    // (after `space` resolves) is silently dropped by the `takeLeading`
+    // saga while the first request is still in flight, leaving the 404 in
+    // Redux state forever. Wait for the active space before dispatching.
+    if (!space) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
-        ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
+        ...(crossSpaceId ? { spaceId: crossSpaceId } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, crossSpaceId, dispatch, space, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
@@ -288,16 +351,24 @@ export function MonitorDetailFlyout(props: Props) {
       onClose={props.onClose}
       paddingSize="none"
     >
-      {error && !isLoading && <ErrorCallout {...error} />}
-      {isLoading && <LoadingState />}
-      {monitorObject && (
+      {/*
+        For cross-space monitors the saved-object fetch may legitimately 404
+        when the user can't read the SO from the active space, even though the
+        heartbeat-based `monitor` metadata renders the flyout fine. Don't
+        alarm the user with a "fetch failed" callout if we already have the
+        overview metadata to render — only surface real errors when there's
+        nothing else to show.
+      */}
+      {error && !isLoading && !monitor && <ErrorCallout {...error} />}
+      {isLoading && !monitor && !monitorObject && <LoadingState />}
+      {(monitorObject || monitor) && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorObject?.[ConfigKey.NAME]}</h2>
+                    <h2>{monitorObject?.[ConfigKey.NAME] ?? monitor?.name ?? configId}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -315,30 +386,45 @@ export function MonitorDetailFlyout(props: Props) {
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <DetailedFlyoutHeader
-                currentLocation={props.location}
-                locations={locations}
-                setCurrentLocation={setLocation}
-                configId={configId}
-                monitor={monitorObject}
-                onEnabledChange={props.onEnabledChange}
-              />
+              {monitorObject && (
+                <>
+                  <EuiSpacer size="m" />
+                  <DetailedFlyoutHeader
+                    currentLocation={props.location}
+                    locations={locations}
+                    setCurrentLocation={setLocation}
+                    configId={configId}
+                    monitor={monitorObject}
+                    onEnabledChange={props.onEnabledChange}
+                  />
+                </>
+              )}
             </EuiPanel>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <DetailFlyoutDurationChart {...props} location={props.location} />
-            <MonitorDetailsPanel
-              hasBorder={false}
-              hideEnabled
-              latestPing={monitorDetail.data}
-              configId={configId}
-              monitor={{
-                ...monitorObject,
-                id,
-              }}
-              loading={Boolean(isLoading)}
-            />
+            {canRenderDurationChart ? (
+              <DetailFlyoutDurationChart
+                {...props}
+                id={monitorQueryId}
+                location={props.location}
+                createdAt={currentMonitorObject?.created_at}
+              />
+            ) : (
+              <LoadingState />
+            )}
+            {currentMonitorObject && (
+              <MonitorDetailsPanel
+                hasBorder={false}
+                hideEnabled
+                latestPing={monitorDetail.data}
+                configId={configId}
+                monitor={{
+                  ...currentMonitorObject,
+                  id: monitorQueryId,
+                }}
+                loading={Boolean(isLoading)}
+              />
+            )}
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">

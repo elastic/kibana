@@ -71,7 +71,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .put({
       path: OUTPUT_API_ROUTES.UPDATE_PATTERN,
       fleetAuthz: (authz) => {
-        return authz.fleet.allSettings || authz.fleet.allAgentPolicies;
+        return authz.fleet.allSettings;
       },
       summary: 'Update output',
       description: 'Update output by ID.',

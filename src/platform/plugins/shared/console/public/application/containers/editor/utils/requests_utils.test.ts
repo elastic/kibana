@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { performance } from 'node:perf_hooks';
+
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import type { MetricsTracker } from '../../../../types';
 import {
@@ -17,6 +19,7 @@ import {
   trackSentRequests,
   getRequestFromEditor,
   containsComments,
+  removeCommentsFromData,
   collapseTripleQuoteStrings,
   expandTripleQuoteStrings,
   TRIPLE_QUOTE_STRINGS_MARKER,
@@ -459,6 +462,143 @@ describe('requests_utils', () => {
       });
       expect(result).toEqual(3);
     });
+
+    it('keeps request-like lines inside an unfinished triple-quoted value in the request', () => {
+      const content = ['POST _query', '{', '  "script": """', '  GET _all', '  {', '', '  }'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(7);
+
+      expect(
+        getRequestEndLineNumber({
+          parsedRequest,
+          model,
+          startLineNumber: 4,
+        })
+      ).toEqual(7);
+    });
+
+    it('still detects the next request after a completed triple-quoted value', () => {
+      const content = ['POST _query', '{', '  "script": """done"""', '}', 'GET _search'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(4);
+    });
+
+    it('skips request-like lines inside a closed multi-line triple-quoted value and stops at the next request', () => {
+      const content = [
+        'POST _query',
+        '{',
+        '  "script": """',
+        '  GET _all',
+        '  """',
+        '}',
+        'GET _search',
+      ];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(6);
+    });
+
+    it('detects the next request when empty lines precede a closed string value', () => {
+      // Pins the per-line offset accumulation: empty lines contribute only their newline,
+      // so a drifted offset for POST /b would fall back inside the closed "abc" string.
+      const content = ['GET /a', '{', '', '', '  "s": "abc"', 'POST /b'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(5);
+    });
+
+    it('ignores a stray quote on the request line when the request starts after a block comment', () => {
+      const content = ['/* c', ' */ GET x"', '{"a": ', 'GET y'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 2 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 2,
+      });
+
+      expect(result).toEqual(3);
+    });
+
+    it('does not treat a quote in the request line url as an unfinished string', () => {
+      const content = ['GET /a"b', 'POST /c'];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(1);
+    });
+
+    it('resolves a large unfinished triple-quoted body with many request-like lines quickly', () => {
+      const content = [
+        'POST _query',
+        '{',
+        '  "script": """',
+        ...Array.from({ length: 5000 }, () => 'GET _all?padding-to-make-the-line-longer'),
+      ];
+      const model = {
+        ...getMockModel(content),
+        getPositionAt: () => ({ lineNumber: 1 }),
+      } as unknown as monaco.editor.ITextModel;
+      const start = performance.now();
+
+      const result = getRequestEndLineNumber({
+        parsedRequest,
+        model,
+        startLineNumber: 1,
+      });
+
+      expect(result).toEqual(content.length);
+      expect(performance.now() - start).toBeLessThan(500);
+    });
   });
 
   describe('getRequestFromEditor', () => {
@@ -535,7 +675,7 @@ describe('requests_utils', () => {
   });
 
   describe('containsComments', () => {
-    it('should return false for JSON with // and /* inside strings', () => {
+    it('should return false for JSON with comment markers inside strings', () => {
       const requestData = `{
       "docs": [
         {
@@ -552,7 +692,7 @@ describe('requests_utils', () => {
           "_source": {
             "vulnerability": {
               "reference": [
-                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778"
+                "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-15778#details"
               ]
             }
           }
@@ -579,6 +719,14 @@ describe('requests_utils', () => {
       expect(containsComments(requestData)).toBe(true);
     });
 
+    it('should return true for text with actual hash comment', () => {
+      const requestData = `{
+      # This is a comment
+      "query": { "match_all": {} }
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+
     it('should return false for text without any comments', () => {
       const requestData = `{
       "field": "value"
@@ -588,6 +736,18 @@ describe('requests_utils', () => {
 
     it('should return false for empty string', () => {
       expect(containsComments('')).toBe(false);
+    });
+
+    it('should reset token scanning between calls', () => {
+      const requestDataWithComment = `{
+      // This is a comment
+      "query": { "match_all": {} }
+    }`;
+      const requestDataWithoutComment = '{ "query": { "match_all": {} } }';
+
+      expect(containsComments(requestDataWithComment)).toBe(true);
+      expect(containsComments(requestDataWithoutComment)).toBe(false);
+      expect(containsComments(requestDataWithComment)).toBe(true);
     });
 
     it('should correctly handle escaped quotes within strings', () => {
@@ -602,6 +762,109 @@ describe('requests_utils', () => {
       "field": "value" // comment here
     }`;
       expect(containsComments(requestData)).toBe(true);
+    });
+
+    it('should ignore comment-like sequences inside triple-quote strings', () => {
+      const requestData = `{
+      "script": """def quote = '"'; // painless comment # still script"""
+    }`;
+      expect(containsComments(requestData)).toBe(false);
+    });
+
+    it('should detect comments outside triple-quote strings', () => {
+      const requestData = `{
+      // request comment
+      "script": """def quote = '"'; // painless comment"""
+    }`;
+      expect(containsComments(requestData)).toBe(true);
+    });
+  });
+
+  describe('removeCommentsFromData', () => {
+    it('removes line and block comments from the request data', () => {
+      const requestData = `{
+  // line comment
+  "query": {
+    /* block comment */
+    "match_all": {}
+  } // trailing comment
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(containsComments(result)).toBe(false);
+      expect(JSON.parse(result)).toEqual({ query: { match_all: {} } });
+    });
+
+    it('removes comments when the data also contains multi-line triple-quote strings', () => {
+      // Regression test for https://github.com/elastic/kibana/issues/277160
+      const requestData = `{
+  // watch metadata
+  "script": {
+    "lang": "painless",
+    "source": """
+      def a = 1; // painless comment
+      return a;
+    """
+  } /* end of script */
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// watch metadata');
+      expect(result).not.toContain('/* end of script */');
+      // The triple-quote string is preserved, including the comments inside it
+      expect(result).toContain(`"source": """
+      def a = 1; // painless comment
+      return a;
+    """`);
+    });
+
+    it('preserves comment-like sequences inside strings', () => {
+      const requestData = `{
+  "url": "https://elastic.co", // comment
+  "pattern": "/*"
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(JSON.parse(result)).toEqual({ url: 'https://elastic.co', pattern: '/*' });
+    });
+
+    it('preserves a literal value matching the triple-quote placeholder', () => {
+      const requestData = `{
+  // comment
+  "literal": ${TRIPLE_QUOTE_STRINGS_MARKER},
+  "script": """return 1;"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(result).toMatch(/"literal"\s*:\s*"\{tripleQuoteString\}"/);
+      expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
+    });
+
+    it('preserves triple-quote values when object keys are reordered during parsing', () => {
+      const requestData = `{
+  // comment
+  "z": """first""",
+  "1": """second"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('// comment');
+      expect(result).toMatch(/"z"\s*:\s*"""first"""/);
+      expect(result).toMatch(/"1"\s*:\s*"""second"""/);
+    });
+
+    it('ignores triple-quote delimiters inside comments', () => {
+      const requestData = `{
+  // this comment mentions """
+  /* this block comment also mentions """ */
+  "script": """return 1;"""
+}`;
+      const result = removeCommentsFromData(requestData);
+      expect(result).not.toContain('this comment mentions');
+      expect(result).not.toContain('this block comment');
+      expect(result).toMatch(/"script"\s*:\s*"""return 1;"""/);
+    });
+
+    it('returns invalid data unchanged', () => {
+      const requestData = '{\n  "query": // comment\n    {';
+      expect(removeCommentsFromData(requestData)).toBe(requestData);
     });
   });
 

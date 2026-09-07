@@ -51,7 +51,6 @@ const externals = {
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
-  'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
@@ -111,6 +110,7 @@ const externals = {
   '@kbn/react-kibana-context-render': '__kbnSharedDeps__.KbnReactKibanaContextRender',
   '@kbn/react-kibana-context-theme': '__kbnSharedDeps__.KbnReactKibanaContextTheme',
   '@kbn/shared-ux-router': '__kbnSharedDeps__.KbnSharedUxRouter',
+  '@kbn/core-user-profile-browser-context': '__kbnSharedDeps__.KbnCoreUserProfileBrowserContext',
 };
 
 module.exports = { distDir, jsFilename, cssDistFilename, externals };

@@ -6,7 +6,6 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 
 import { getHistogramInterval } from '../common/get_histogram_interval';
 import {
@@ -18,6 +17,7 @@ import {
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGetUrlParams } from '../../../hooks';
 import { useSyntheticsRefreshContext } from '../../../contexts';
+import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 
 export const useMonitorHistogram = ({ items }: { items: OverviewStatusMetaData[] }) => {
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
@@ -33,7 +33,7 @@ export const useMonitorHistogram = ({ items }: { items: OverviewStatusMetaData[]
     SYNTHETICS_INDEX_PATTERN
   );
 
-  const { data, loading } = useEsSearch<Ping, typeof queryParams>(
+  const { data, loading } = useSyntheticsEsSearch<Ping, typeof queryParams>(
     queryParams,
     [JSON.stringify(monitorIds), lastRefresh],
     {

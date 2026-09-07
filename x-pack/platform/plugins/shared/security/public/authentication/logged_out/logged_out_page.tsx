@@ -8,7 +8,6 @@
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter, useSearchParams } from 'react-router-dom-v5-compat';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { AppMountParameters, CustomBrandingStart, IBasePath } from '@kbn/core/public';
@@ -26,7 +25,7 @@ interface Props {
 
 export function LoggedOutPage({ basePath, customBranding }: Props) {
   const customBrandingValue = useObservable(customBranding.customBranding$);
-  const [searchParams] = useSearchParams();
+  const searchParams = new URLSearchParams(window.location.search);
 
   const message =
     formMessages[searchParams.get(LOGOUT_REASON_QUERY_STRING_PARAMETER) as LogoutReason];
@@ -55,14 +54,7 @@ export function renderLoggedOutPage(
   { element }: Pick<AppMountParameters, 'element'>,
   props: Props
 ) {
-  ReactDOM.render(
-    services.rendering.addContext(
-      <BrowserRouter>
-        <LoggedOutPage {...props} />
-      </BrowserRouter>
-    ),
-    element
-  );
+  ReactDOM.render(services.rendering.addContext(<LoggedOutPage {...props} />), element);
 
   return () => ReactDOM.unmountComponentAtNode(element);
 }

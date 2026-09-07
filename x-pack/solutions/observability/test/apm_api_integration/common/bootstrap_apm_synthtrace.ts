@@ -10,27 +10,35 @@ import {
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 
-export async function getApmSynthtraceEsClient(
-  context: InheritedFtrProviderContext,
-  kibanaClient: ApmSynthtraceKibanaClient
-) {
+/**
+ * Creates the synthtrace ES client without talking to Fleet.
+ *
+ * FTR `providers.loadAll()` runs *before* `lifecycle.beforeTests`, and docker
+ * registry servers are only started in `beforeTests`. Hitting Fleet here while
+ * Kibana is pointed at the local registry (`xpack.fleet.registryUrl`) causes a
+ * consistent HTTP 502 (RegistryConnectionError). Package installation is done
+ * later from the suite root `before` hook instead.
+ */
+export function getApmSynthtraceEsClient(context: InheritedFtrProviderContext) {
   const es = context.getService('es');
 
-  const kibanaVersion = await kibanaClient.fetchLatestApmPackageVersion();
-  await kibanaClient.installApmPackage(kibanaVersion);
-
-  const esClient = new ApmSynthtraceEsClient({
+  return new ApmSynthtraceEsClient({
     client: es,
     logger: createLogger(LogLevel.info),
-    version: kibanaVersion,
+    version: kibanaPackageJson.version,
     refreshAfterIndex: true,
   });
+}
 
-  return esClient;
+export async function installApmPackage(kibanaClient: ApmSynthtraceKibanaClient) {
+  const packageVersion = await kibanaClient.fetchLatestApmPackageVersion();
+  await kibanaClient.installApmPackage(packageVersion);
+  return packageVersion;
 }
 
 export function getApmSynthtraceKibanaClient(kibanaServerUrl: string) {

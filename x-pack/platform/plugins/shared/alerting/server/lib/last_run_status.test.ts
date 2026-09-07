@@ -96,7 +96,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('warning');
     expect(result.lastRun.outcomeMsg).toEqual([
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed",
     ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');
 
@@ -158,7 +158,7 @@ describe('lastRunFromState', () => {
   it('overwrites rule execution warning if rule has reached alert limit; outcome messages are merged', () => {
     const ruleExecutionOutcomeMessage = 'Rule execution reported a warning';
     const frameworkOutcomeMessage =
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed';
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed";
     const result = lastRunFromState(
       {
         metrics: getMetrics({ hasReachedAlertLimit: true }),
@@ -258,7 +258,7 @@ describe('lastRunFromState', () => {
 
     expect(result.lastRun.outcome).toEqual('failed');
     expect(result.lastRun.outcomeMsg).toEqual([
-      'Rule reported more than the maximum number of alerts in a single run. Alerts may be missed and recovery notifications may be delayed',
+      "Rule reported more than the maximum number of alerts in a single run. This limit helps prevent actions being triggered excessively. Consider narrowing your rule's query results or adjusting the alert limit configuration. Alerts may be missed and recovery notifications may be delayed",
       'Rule execution reported an error',
     ]);
     expect(result.lastRun.warning).toEqual('maxAlerts');

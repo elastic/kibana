@@ -14,6 +14,10 @@ parameters, the function generally does the calculation index by index.
 Any function can be wrapped by another function as long as the return type
 of the inner function matches the acceptable parameter type of the outer function.
 
+NOTE: A TinyMath expression can contain up to 20 levels of parenthesis nesting and
+up to 1,000 characters. Expressions that exceed either limit are rejected before
+they're parsed. Typical expressions stay well within both limits.
+
 [float]
 === abs( a )
 

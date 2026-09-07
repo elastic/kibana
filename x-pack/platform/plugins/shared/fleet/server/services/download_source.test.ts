@@ -204,6 +204,18 @@ describe('Download Service', () => {
         { is_default: false }
       );
     });
+
+    it('should throw FleetError when given an invalid id', async () => {
+      const soClientMock = getMockedSoClient();
+
+      await expect(
+        downloadSourceService.create(
+          soClientMock,
+          { host: 'http://test.co', is_default: false, name: 'Test' },
+          { id: '../bad-id' }
+        )
+      ).rejects.toThrow('id is not valid');
+    });
   });
 
   describe('update', () => {

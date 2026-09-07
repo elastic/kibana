@@ -6,8 +6,16 @@
  */
 
 import { i18n as I18N } from '@kbn/i18n';
+import type { ReactNode } from 'react';
 
 declare global {
+  interface CanvasFunctionComponent<Props> {
+    (props: Props): ReactNode;
+    defaultProps?: Partial<Props>;
+    displayName?: string;
+    propTypes?: object;
+  }
+
   const canvas: {
     i18n: typeof I18N;
   };

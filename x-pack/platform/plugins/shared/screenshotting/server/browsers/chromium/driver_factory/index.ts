@@ -14,7 +14,7 @@ import del from 'del';
 import fs from 'fs';
 import { uniq } from 'lodash';
 import path from 'path';
-import puppeteer, { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
+import type { Browser, ConsoleMessage, Page, PageEvents, Viewport } from 'puppeteer';
 import { createInterface } from 'readline';
 import * as Rx from 'rxjs';
 import { catchError, concatMap, ignoreElements, map, mergeMap, reduce, takeUntil, tap } from 'rxjs';
@@ -146,6 +146,10 @@ export class HeadlessChromiumDriverFactory {
       (async () => {
         let browser: Browser | undefined;
         try {
+          // `puppeteer` is ESM-only (v25+), so it must be imported lazily. A static
+          // import compiles to a top-level `require` that forces Jest to parse the
+          // ESM package at module load, breaking any test that loads this plugin.
+          const puppeteer = await import('puppeteer');
           browser = await puppeteer.launch({
             pipe: !this.config.browser.chromium.inspect,
             userDataDir: this.userDataDir,

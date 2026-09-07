@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers';
 
@@ -70,10 +71,27 @@ export function _getSettingsValuesForAgentPolicy(
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
     if (val !== undefined && val !== '') {
-      settingsValues[setting.name] = val;
+      const convertedVal = convertValue(val, setting.type);
+      if (convertedVal !== undefined) {
+        settingsValues[setting.name] = convertedVal;
+      }
     }
   });
   return settingsValues;
+}
+
+function convertValue(val: any, type?: string) {
+  if (type === 'yaml') {
+    const valJs = parse(val);
+    if (valJs == null) {
+      return undefined;
+    }
+    if (valJs.agent?.internal) {
+      return valJs.agent.internal;
+    }
+    return valJs;
+  }
+  return val;
 }
 
 export function getSettings(settingSection: SettingsSection) {

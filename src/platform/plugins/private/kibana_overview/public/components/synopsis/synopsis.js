@@ -55,7 +55,7 @@ export function Synopsis({
 Synopsis.propTypes = {
   description: PropTypes.string.isRequired,
   iconUrl: PropTypes.string,
-  iconType: PropTypes.string,
+  iconType: PropTypes.oneOfType([PropTypes.string, PropTypes.elementType]),
   title: PropTypes.string.isRequired,
   url: PropTypes.string,
   onClick: PropTypes.func,

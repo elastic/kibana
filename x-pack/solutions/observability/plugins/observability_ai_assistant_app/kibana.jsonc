@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/observability-ai-assistant-app-plugin",
   "owner": [
-    "@elastic/obs-ai-assistant"
+    "@elastic/nightshift-context-and-research-team"
   ],
   "group": "observability",
   "visibility": "private",

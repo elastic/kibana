@@ -352,7 +352,7 @@ For example, if you have data like this available as Mustache variables:
   "context": {
     "title": "rule 'esq' matched query for group host-2",
     "conditions": "Number of matching documents for group \"host-2\" is less than 1000",
-    "link": "https://example.com/this-will-link-to-Discover",
+    "link": "https://<example-url>/this-will-link-to-Discover",
     "hits": [
       {
         "_source": {

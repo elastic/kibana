@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
@@ -30,7 +30,7 @@ describe('StepConfigurePackage', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
   const render = () => {
-    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
+    const validationResults = validatePackagePolicy(packagePolicy, packageInfo, parse);
 
     renderResult = testRenderer.render(
       <StepConfigurePackagePolicy
@@ -151,7 +151,7 @@ describe('StepConfigurePackage', () => {
       ).toBeInTheDocument();
     });
     act(() => {
-      fireEvent.click(renderResult.getByRole('switch'));
+      fireEvent.click(renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch'));
     });
     expect(mockUpdatePackagePolicy.mock.calls[0][0].inputs[0].enabled).toEqual(false);
   });

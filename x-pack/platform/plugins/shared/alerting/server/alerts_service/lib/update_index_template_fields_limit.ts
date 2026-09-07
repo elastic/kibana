@@ -5,7 +5,20 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesGetIndexTemplateIndexTemplateItem,
+  IndicesIndexTemplate,
+} from '@elastic/elasticsearch/lib/api/types';
+
+// On 8.x the ES client types don't yet declare the system-managed properties
+// that ES still returns in GET index template responses. We widen the type
+// locally so we can strip them before the PUT call.
+type IndexTemplateWithSystemFields = IndicesIndexTemplate & {
+  created_date?: string;
+  created_date_millis?: number;
+  modified_date?: string;
+  modified_date_millis?: number;
+};
 
 export const updateIndexTemplateFieldsLimit = ({
   esClient,
@@ -16,22 +29,29 @@ export const updateIndexTemplateFieldsLimit = ({
   template: IndicesGetIndexTemplateIndexTemplateItem;
   limit: number;
 }) => {
+  // Strip system-managed properties that ES returns in GET but rejects in PUT
+  const {
+    created_date: _createdDate,
+    created_date_millis: _createdDateMillis,
+    modified_date: _modifiedDate,
+    modified_date_millis: _modifiedDateMillis,
+    template: existingTemplate,
+    ignore_missing_component_templates: ignoreMissing,
+    ...rest
+  } = template.index_template as IndexTemplateWithSystemFields;
+
   return esClient.indices.putIndexTemplate({
     name: template.name,
-    body: {
-      ...template.index_template,
-      template: {
-        ...template.index_template.template,
-        settings: {
-          ...template.index_template.template?.settings,
-          'index.mapping.total_fields.limit': limit,
-          'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-        },
+    ...rest,
+    template: {
+      ...existingTemplate,
+      settings: {
+        ...existingTemplate?.settings,
+        'index.mapping.total_fields.limit': limit,
+        'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
-      // GET brings string | string[] | undefined but this PUT expects string[]
-      ignore_missing_component_templates: template.index_template.ignore_missing_component_templates
-        ? [template.index_template.ignore_missing_component_templates].flat()
-        : undefined,
     },
+    // GET brings string | string[] | undefined but this PUT expects string[]
+    ignore_missing_component_templates: ignoreMissing ? [ignoreMissing].flat() : undefined,
   });
 };

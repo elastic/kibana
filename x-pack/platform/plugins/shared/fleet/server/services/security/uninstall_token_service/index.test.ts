@@ -768,6 +768,19 @@ describe('UninstallTokenService', () => {
             },
           ]);
         });
+
+        it('excludes agentless policies when calling generateTokensForAllPolicies', async () => {
+          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
+
+          await uninstallTokenService.generateTokensForAllPolicies();
+
+          expect(agentPolicyService.fetchAllAgentPolicyIds).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              kuery: expect.stringContaining('NOT ingest-agent-policies.supports_agentless:true'),
+            })
+          );
+        });
       });
 
       describe('agentTamperProtectionEnabled false', () => {

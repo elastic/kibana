@@ -13,13 +13,14 @@ import type { FilesClient } from '../../../../common/files_client';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../../api_routes';
 import type { FileKind } from '../../../../common/types';
 import { CreateHandler, FileKindRouter } from '../types';
+import { fileId } from '../../common_schemas';
 import { FileShareNotFoundError } from '../../../file_share_service/errors';
 
 export const method = 'delete' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
   }),
 };
 

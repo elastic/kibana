@@ -25,8 +25,20 @@ export const createParser = () => {
     },
     text,
     errors,
-    addError = function (text) {
-      errors.push({ text: text, offset: at });
+    addError = function (text, offset = at, endOffset) {
+      const errorAnnotation = { text: text, offset: offset };
+      if (endOffset !== undefined) {
+        errorAnnotation.endOffset = endOffset;
+      }
+      errors.push(errorAnnotation);
+    },
+    hasErrorCoveringOffset = function (offset) {
+      return errors.some(
+        (errorAnnotation) =>
+          errorAnnotation.endOffset !== undefined &&
+          errorAnnotation.offset <= offset &&
+          offset <= errorAnnotation.endOffset
+      );
     },
     requests,
     requestStartOffset,
@@ -46,12 +58,14 @@ export const createParser = () => {
       lastRequest.endOffset = requestEndOffset;
       requests.push(lastRequest);
     },
-    error = function (m) {
+    error = function (m, errorAt = at, errorEndAt, unterminated = false) {
       throw {
         name: 'SyntaxError',
         message: m,
-        at: at,
+        at: errorAt,
+        endAt: errorEndAt,
         text: text,
+        unterminated: unterminated,
       };
     },
     reset = function (newAt) {
@@ -73,13 +87,31 @@ export const createParser = () => {
       let currentAt = at,
         i = text.indexOf(upTo, currentAt);
       if (i < 0) {
-        error(errorMessage || 'Expected \'' + upTo + '\'');
+        // Flag the error so `multi_request()` error recovery knows the delimiter never
+        // closes and the rest of the input is string content.
+        error(errorMessage || 'Expected \'' + upTo + '\'', currentAt, undefined, true);
       }
-      reset(i + upTo.length);
+      // Example: `"query": """...""",` can be followed by more fields in the same body.
+      // If the closing `"""` is stored as the request end, autocomplete below it shows request
+      // methods or no suggestions instead of body fields.
+      const afterClosingDelimiter = i + upTo.length;
+      ch = text.charAt(afterClosingDelimiter);
+      at = afterClosingDelimiter + 1;
+
       return text.substring(currentAt, i);
     },
     peek = function (offset) {
       return text.charAt(at + offset);
+    },
+    isRequestLineSeparator = function (character) {
+      return character === ' ' || character === '\t' || character === '\n' || character === '\r';
+    },
+    readCurrentLineTokenEndOffset = function (startOffset) {
+      let tokenEndOffset = startOffset;
+      while (tokenEndOffset < text.length && !isRequestLineSeparator(text[tokenEndOffset])) {
+        tokenEndOffset++;
+      }
+      return tokenEndOffset;
     },
     number = function () {
       let number,
@@ -195,6 +227,7 @@ export const createParser = () => {
       }
     },
     newLine = function () {
+      if (ch == '\r') next(); // handle CRLF: skip \r before \n
       if (ch == '\n') next();
     },
     word = function () {
@@ -221,6 +254,18 @@ export const createParser = () => {
       }
       error('Unexpected \'' + ch + '\'');
     },
+    // After consuming method letters, the next character must separate the
+    // method from the URL/body: horizontal whitespace, a line break, or
+    // end-of-input. Anything else is part of an invalid method token.
+    methodBoundary = function () {
+      if (ch && !isRequestLineSeparator(ch)) {
+        error(
+          'Expected one of GET/POST/PUT/DELETE/HEAD/PATCH',
+          requestStartOffset ?? at,
+          readCurrentLineTokenEndOffset(at)
+        );
+      }
+    },
     // parses and returns the method
     method = function () {
       switch (ch) {
@@ -228,23 +273,27 @@ export const createParser = () => {
           next('g');
           next('e');
           next('t');
+          methodBoundary();
           return 'get';
         case 'G':
           next('G');
           next('E');
           next('T');
+          methodBoundary();
           return 'GET';
         case 'h':
           next('h');
           next('e');
           next('a');
           next('d');
+          methodBoundary();
           return 'head';
         case 'H':
           next('H');
           next('E');
           next('A');
           next('D');
+          methodBoundary();
           return 'HEAD';
         case 'd':
           next('d');
@@ -253,6 +302,7 @@ export const createParser = () => {
           next('e');
           next('t');
           next('e');
+          methodBoundary();
           return 'delete';
         case 'D':
           next('D');
@@ -261,6 +311,7 @@ export const createParser = () => {
           next('E');
           next('T');
           next('E');
+          methodBoundary();
           return 'DELETE';
         case 'p':
           next('p');
@@ -270,15 +321,18 @@ export const createParser = () => {
               next('t');
               next('c');
               next('h');
+              methodBoundary();
               return 'patch';
             case 'u':
               next('u');
               next('t');
+              methodBoundary();
               return 'put';
             case 'o':
               next('o');
               next('s');
               next('t');
+              methodBoundary();
               return 'post';
             default:
               error('Unexpected \'' + ch + '\'');
@@ -292,15 +346,18 @@ export const createParser = () => {
               next('T');
               next('C');
               next('H');
+              methodBoundary();
               return 'PATCH';
             case 'U':
               next('U');
               next('T');
+              methodBoundary();
               return 'PUT';
             case 'O':
               next('O');
               next('S');
               next('T');
+              methodBoundary();
               return 'POST';
             default:
               error('Unexpected \'' + ch + '\'');
@@ -383,7 +440,7 @@ export const createParser = () => {
 
   let url = function () {
       let url = '';
-      while (ch && ch != '\n') {
+      while (ch && ch != '\n' && ch != '\r') {
         url += ch;
         next();
       }
@@ -444,10 +501,26 @@ export const createParser = () => {
           request();
           white();
         } catch (e) {
-          addError(e.message);
+          addError(e.message, e.at, e.endAt);
+          // An unterminated string swallows the rest of the input: request- and comment-looking
+          // lines below the error are string content, not recovery anchors (the search for the
+          // closing delimiter already scanned to the end of the input).
+          // https://github.com/elastic/kibana/issues/284396
+          if (e.unterminated) {
+            // Consume the swallowed content so the parser does not also flag it as a leftover
+            // 'Syntax error' on top of the unterminated-delimiter error.
+            at = text.length;
+            ch = '';
+            return;
+          }
           // snap
           const remainingText = text.substr(at);
-          const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)\b/mi);
+          // Match the verb without a trailing `\b` so that lines starting with
+          // a valid method prefix but continuing with identifier characters
+          // (`GETT`, `POSTS`, `PUThjjkjoj`) are picked up as recovery anchors;
+          // `method()` then re-throws at the boundary and an error annotation
+          // is recorded for each such line.
+          const nextMethodIndex = remainingText.search(/^\s*(POST|HEAD|GET|PUT|DELETE|PATCH)/mi);
           const nextCommentLine = remainingText.search(/^\s*(#|\/\*|\/\/).*$/m);
           if (nextMethodIndex === -1 && nextCommentLine === -1) {
             // If there are no comments or other requests after the error, there is no point in parsing more so we stop here
@@ -471,7 +544,9 @@ export const createParser = () => {
     multi_request();
     white();
     if (ch) {
-      addError('Syntax error');
+      if (!hasErrorCoveringOffset(at)) {
+        addError('Syntax error');
+      }
     }
 
     result = { errors, requests };

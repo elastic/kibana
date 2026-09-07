@@ -46,3 +46,5 @@ export { IndexPatternsService } from './services/index_patterns';
 export { RandomnessService } from './services/randomness';
 export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
 export { SecurityService } from './services/security';
+export { fetchSessionCookie } from './services/cookie_auth';
+export type { SessionCookie, FetchSessionCookieParams } from './services/cookie_auth';

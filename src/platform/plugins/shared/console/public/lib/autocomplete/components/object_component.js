@@ -9,6 +9,9 @@
 
 import _ from 'lodash';
 import { SharedComponent } from '.';
+
+const asArray = (val) => (Array.isArray(val) ? val : [val]);
+
 /**
  * @param constants list of components that represent constant keys
  * @param patternsAndWildCards list of components that represent patterns and should be matched only if
@@ -42,21 +45,30 @@ export class ObjectComponent extends SharedComponent {
       }
     });
 
-    // try to link to GLOBAL rules
-    const globalRules = context.globalComponentResolver(token, false);
-    if (globalRules) {
-      result.next.push.apply(result.next, globalRules);
+    // Constants preempt pattern rules, so patterns are only consulted when no
+    // constant child matched.
+    if (!result.next.length) {
+      _.each(this.patternsAndWildCards, function (component) {
+        const componentResult = component.match(token, context, editor);
+        if (componentResult && componentResult.next) {
+          result.next.push(...asArray(componentResult.next));
+        }
+      });
     }
 
-    if (result.next.length) {
-      return result;
-    }
-    _.each(this.patternsAndWildCards, function (component) {
-      const componentResult = component.match(token, context, editor);
-      if (componentResult && componentResult.next) {
-        result.next.push.apply(result.next, componentResult.next);
+    // Same-name GLOBAL rules are kept as a fallback branch: the engine drops
+    // their suggestions after the walk when the explicit branch above produced
+    // suggestions of its own (see populateContext in engine.ts).
+    const explicitMatches = result.next.slice();
+    const globalRules = context.globalComponentResolver
+      ? context.globalComponentResolver(token, false)
+      : null;
+    if (globalRules && globalRules.length) {
+      result.next.push(...globalRules);
+      if (explicitMatches.length) {
+        result.nextGroups = [{ next: explicitMatches }, { next: globalRules, fallback: true }];
       }
-    });
+    }
 
     return result;
   }

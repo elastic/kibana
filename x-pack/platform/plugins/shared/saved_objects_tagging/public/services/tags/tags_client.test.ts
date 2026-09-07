@@ -6,25 +6,29 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Tag } from '../../../common/types';
 import { createTag, createTagAttributes } from '../../../common/test_utils';
+import type { ITagsChangeListener } from './tags_cache';
 import { tagsCacheMock } from './tags_cache.mock';
 import { TagsClient, type FindTagsOptions } from './tags_client';
 import { coreMock } from '@kbn/core/public/mocks';
 
+type TagsClientCache = ITagsCache & ITagsChangeListener;
+
 describe('TagsClient', () => {
   let tagsClient: TagsClient;
-  let changeListener: ReturnType<typeof tagsCacheMock.create>;
+  let cache: ReturnType<typeof tagsCacheMock.create>;
   let http: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
     http = httpServiceMock.createSetupContract();
-    changeListener = tagsCacheMock.create();
+    cache = tagsCacheMock.create();
     const { analytics } = coreMock.createStart();
     tagsClient = new TagsClient({
       analytics,
       http,
-      changeListener,
+      cache: cache as unknown as TagsClientCache,
     });
   });
 
@@ -56,14 +60,14 @@ describe('TagsClient', () => {
 
       await expect(tagsClient.create(createTagAttributes())).rejects.toThrowError(error);
     });
-    it('notifies its changeListener if the http call succeed', async () => {
+    it('notifies its cache if the http call succeed', async () => {
       await tagsClient.create(createTagAttributes());
 
-      expect(changeListener.onCreate).toHaveBeenCalledTimes(1);
-      expect(changeListener.onCreate).toHaveBeenCalledWith(expectedTag);
+      expect(cache.onDidCreate).toHaveBeenCalledTimes(1);
+      expect(cache.onDidCreate).toHaveBeenCalledWith(expectedTag);
     });
-    it('ignores potential errors when calling `changeListener.onCreate`', async () => {
-      changeListener.onCreate.mockImplementation(() => {
+    it('ignores potential errors when calling `cache.onDidCreate`', async () => {
+      cache.onDidCreate.mockImplementation(() => {
         throw new Error('error in onCreate');
       });
 
@@ -100,15 +104,15 @@ describe('TagsClient', () => {
 
       await expect(tagsClient.update(tagId, createTagAttributes())).rejects.toThrowError(error);
     });
-    it('notifies its changeListener if the http call succeed', async () => {
+    it('notifies its cache if the http call succeed', async () => {
       await tagsClient.update(tagId, createTagAttributes());
 
       const { id, ...attributes } = expectedTag;
-      expect(changeListener.onUpdate).toHaveBeenCalledTimes(1);
-      expect(changeListener.onUpdate).toHaveBeenCalledWith(id, attributes);
+      expect(cache.onDidUpdate).toHaveBeenCalledTimes(1);
+      expect(cache.onDidUpdate).toHaveBeenCalledWith(id, attributes);
     });
-    it('ignores potential errors when calling `changeListener.onUpdate`', async () => {
-      changeListener.onUpdate.mockImplementation(() => {
+    it('ignores potential errors when calling `cache.onDidUpdate`', async () => {
+      cache.onDidUpdate.mockImplementation(() => {
         throw new Error('error in onUpdate');
       });
 
@@ -181,18 +185,128 @@ describe('TagsClient', () => {
 
       await expect(tagsClient.getAll()).rejects.toThrowError(error);
     });
-    it('notifies its changeListener if the http call succeed', async () => {
+    it('notifies its cache if the http call succeed', async () => {
       await tagsClient.getAll();
 
-      expect(changeListener.onGetAll).toHaveBeenCalledTimes(1);
-      expect(changeListener.onGetAll).toHaveBeenCalledWith(expectedTags);
+      expect(cache.onDidGetAll).toHaveBeenCalledTimes(1);
+      expect(cache.onDidGetAll).toHaveBeenCalledWith(expectedTags);
     });
-    it('ignores potential errors when calling `changeListener.onDelete`', async () => {
-      changeListener.onGetAll.mockImplementation(() => {
+    it('ignores potential errors when calling `cache.onDidGetAll`', async () => {
+      cache.onDidGetAll.mockImplementation(() => {
         throw new Error('error in onCreate');
       });
 
       await expect(tagsClient.getAll()).resolves.toBeDefined();
+    });
+  });
+
+  describe('#fetchAllFromNetwork', () => {
+    let expectedTags: Tag[];
+
+    beforeEach(() => {
+      expectedTags = [
+        createTag({ id: 'tag-1' }),
+        createTag({ id: 'tag-2' }),
+        createTag({ id: 'tag-3' }),
+      ];
+      http.get.mockResolvedValue({ tags: expectedTags });
+    });
+
+    it('calls the tags list API and notifies the cache', async () => {
+      const tags = await tagsClient.fetchAllFromNetwork({ asSystemRequest: true });
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+      expect(http.get).toHaveBeenCalledWith('/api/saved_objects_tagging/tags', {
+        asSystemRequest: true,
+      });
+      expect(cache.onDidGetAll).toHaveBeenCalledTimes(1);
+      expect(cache.onDidGetAll).toHaveBeenCalledWith(expectedTags);
+      expect(tags).toEqual(expectedTags);
+    });
+  });
+
+  describe('read-through cache', () => {
+    let cacheAndListener: ReturnType<typeof tagsCacheMock.create>;
+
+    beforeEach(() => {
+      cacheAndListener = tagsCacheMock.create();
+      const { analytics } = coreMock.createStart();
+      tagsClient = new TagsClient({
+        analytics,
+        http,
+        cache: cacheAndListener as unknown as TagsClientCache,
+      });
+    });
+
+    describe('#get', () => {
+      it('returns from cache without http when the tag id is present', async () => {
+        const tag = createTag({ id: 'cached-id' });
+        cacheAndListener.getState.mockReturnValue([tag]);
+        const result = await tagsClient.get('cached-id');
+        expect(result).toBe(tag);
+        expect(http.get).not.toHaveBeenCalled();
+      });
+
+      it('fetches via http and notifies onDidCreate when id is not in cache', async () => {
+        cacheAndListener.getState.mockReturnValue([]);
+        const expectedTag = createTag({ id: 'remote-id' });
+        http.get.mockResolvedValue({ tag: expectedTag });
+        const result = await tagsClient.get('remote-id');
+        expect(http.get).toHaveBeenCalledWith('/api/saved_objects_tagging/tags/remote-id');
+        expect(cacheAndListener.onDidCreate).toHaveBeenCalledWith(expectedTag);
+        expect(result).toEqual(expectedTag);
+      });
+    });
+
+    describe('#getAll', () => {
+      it('returns a shallow copy of cache state without http when initialized', async () => {
+        const tags = [createTag({ id: 'a' })];
+        cacheAndListener.isInitialized.mockReturnValue(true);
+        cacheAndListener.getState.mockReturnValue(tags);
+        const result = await tagsClient.getAll();
+        expect(result).toEqual(tags);
+        expect(result).not.toBe(tags);
+        expect(http.get).not.toHaveBeenCalled();
+      });
+
+      it('fetches from network when cache is not initialized', async () => {
+        cacheAndListener.isInitialized.mockReturnValue(false);
+        const expectedFromNetwork = [createTag({ id: 'n1' })];
+        http.get.mockResolvedValue({ tags: expectedFromNetwork });
+        const result = await tagsClient.getAll();
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(cacheAndListener.onDidGetAll).toHaveBeenCalledWith(expectedFromNetwork);
+        expect(result).toEqual(expectedFromNetwork);
+      });
+    });
+
+    describe('#findByName', () => {
+      it('returns from cache for exact match when initialized', async () => {
+        const tag = createTag({ id: 'i1', name: 'Security Solution' });
+        cacheAndListener.isInitialized.mockReturnValue(true);
+        cacheAndListener.getState.mockReturnValue([tag]);
+        const result = await tagsClient.findByName('security solution', { exact: true });
+        expect(result).toBe(tag);
+        expect(http.get).not.toHaveBeenCalled();
+      });
+
+      it('calls find and merges results on exact miss when initialized', async () => {
+        cacheAndListener.isInitialized.mockReturnValue(true);
+        cacheAndListener.getState.mockReturnValue([]);
+        const fromNetwork = {
+          ...createTag({ id: 'n1', name: 'Foo' }),
+          relationCount: 2,
+        };
+        http.get.mockResolvedValue({ tags: [fromNetwork], total: 1 });
+        const result = await tagsClient.findByName('Foo', { exact: true });
+        expect(http.get).toHaveBeenCalledWith('/internal/saved_objects_tagging/tags/_find', {
+          query: { page: 1, perPage: 10000, search: 'Foo' },
+        });
+        expect(cacheAndListener.onDidCreate).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'n1', name: 'Foo' })
+        );
+        expect(result).toMatchObject({ id: 'n1', name: 'Foo' });
+      });
     });
   });
 
@@ -215,14 +329,14 @@ describe('TagsClient', () => {
 
       await expect(tagsClient.delete(tagId)).rejects.toThrowError(error);
     });
-    it('notifies its changeListener if the http call succeed', async () => {
+    it('notifies its cache if the http call succeed', async () => {
       await tagsClient.delete(tagId);
 
-      expect(changeListener.onDelete).toHaveBeenCalledTimes(1);
-      expect(changeListener.onDelete).toHaveBeenCalledWith(tagId);
+      expect(cache.onDidDelete).toHaveBeenCalledTimes(1);
+      expect(cache.onDidDelete).toHaveBeenCalledWith(tagId);
     });
-    it('ignores potential errors when calling `changeListener.onDelete`', async () => {
-      changeListener.onDelete.mockImplementation(() => {
+    it('ignores potential errors when calling `cache.onDidDelete`', async () => {
+      cache.onDidDelete.mockImplementation(() => {
         throw new Error('error in onCreate');
       });
 
@@ -293,15 +407,15 @@ describe('TagsClient', () => {
 
         await expect(tagsClient.bulkDelete(tagIds)).rejects.toThrowError(error);
       });
-      it('notifies its changeListener if the http call succeed', async () => {
+      it('notifies its cache if the http call succeed', async () => {
         await tagsClient.bulkDelete(tagIds);
 
-        expect(changeListener.onDelete).toHaveBeenCalledTimes(2);
-        expect(changeListener.onDelete).toHaveBeenCalledWith(tagIds[0]);
-        expect(changeListener.onDelete).toHaveBeenCalledWith(tagIds[1]);
+        expect(cache.onDidDelete).toHaveBeenCalledTimes(2);
+        expect(cache.onDidDelete).toHaveBeenCalledWith(tagIds[0]);
+        expect(cache.onDidDelete).toHaveBeenCalledWith(tagIds[1]);
       });
-      it('ignores potential errors when calling `changeListener.onDelete`', async () => {
-        changeListener.onDelete.mockImplementation(() => {
+      it('ignores potential errors when calling `cache.onDidDelete`', async () => {
+        cache.onDidDelete.mockImplementation(() => {
           throw new Error('error in onCreate');
         });
 

@@ -34,10 +34,10 @@ export const ErrorsTabContent = ({
         <EuiFlexItem grow={1}>
           <PanelWithTitle title={OVERVIEW_LABEL} titleLeftAlign css={{ minWidth: 260 }}>
             <EuiFlexGroup wrap={true} responsive={false}>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
                 <MonitorErrorsCount from={time.from} to={time.to} id="monitorsErrorsCountErrors" />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem grow={false} css={{ minWidth: 120 }}>
                 <FailedTestsCount from={time.from} to={time.to} id="failedTestsCountErrors" />
               </EuiFlexItem>
             </EuiFlexGroup>

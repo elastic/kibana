@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { appContextService } from '../app_context';
@@ -14,11 +15,10 @@ import { setupFleet } from '../setup';
 import {
   LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from '../../constants';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../agent_policy';
-import { packagePolicyService } from '../package_policy';
+import { packagePolicyService, getPackagePolicySavedObjectType } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
@@ -72,6 +72,7 @@ async function _deleteGhostPackagePolicies(
     return acc;
   }, new Map<string, boolean>());
 
+  const packagePolicySavedObjectType = await getPackagePolicySavedObjectType();
   await pMap(
     packagePolicies,
     (packagePolicy) => {
@@ -79,7 +80,12 @@ async function _deleteGhostPackagePolicies(
         packagePolicy.policy_ids.every((policyId) => agentPolicyExistsMap.get(policyId) === false)
       ) {
         logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
-        return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
+        return soClient.delete(packagePolicySavedObjectType, packagePolicy.id).catch((err) => {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return undefined;
+          }
+          throw err;
+        });
       }
     },
     {
@@ -160,7 +166,7 @@ async function _deleteExistingData(
   const { agents } = await getAgentsByKuery(esClient, soClient, {
     showInactive: true,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   // Delete
@@ -174,7 +180,7 @@ async function _deleteExistingData(
   const { items: enrollmentApiKeys } = await listEnrollmentApiKeys(esClient, {
     perPage: SO_SEARCH_LIMIT,
     showInactive: true,
-    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${escapeQuotes(policy.id)}"`).join(' or '),
   });
 
   if (enrollmentApiKeys.length > 0) {

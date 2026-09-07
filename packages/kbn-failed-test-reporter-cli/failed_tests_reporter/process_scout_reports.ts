@@ -116,7 +116,9 @@ export async function processScoutReports(
         existingIssue.github.body = newBody;
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
-        log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+        if (updateGithub) {
+          log.info(`Updated existing Scout issue: ${url} (fail count: ${newCount})`);
+        }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }

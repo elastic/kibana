@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SavedObjectsClient, ElasticsearchClient } from '@kbn/core/server';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
 
@@ -38,7 +39,7 @@ export interface FleetServerUsage {
 }
 
 export const getFleetServerUsage = async (
-  soClient?: SavedObjectsClient,
+  soClient?: SavedObjectsClientContract,
   esClient?: ElasticsearchClient
 ): Promise<any> => {
   if (!soClient || !esClient) {
@@ -78,7 +79,7 @@ export const getFleetServerUsage = async (
       soClient,
       undefined,
       Array.from(policyIds)
-        .map((policyId) => `(policy_id:"${policyId}")`)
+        .map((policyId) => `(policy_id:"${escapeQuotes(policyId)}")`)
         .join(' or ')
     );
 
@@ -95,7 +96,7 @@ export const getFleetServerUsage = async (
   };
 };
 
-export const getFleetServerConfig = async (soClient: SavedObjectsClient): Promise<any> => {
+export const getFleetServerConfig = async (soClient: SavedObjectsClientContract): Promise<any> => {
   const res = await packagePolicyService.list(soClient, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,

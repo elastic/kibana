@@ -78,15 +78,21 @@ describe('validate params', () => {
   test('should validate and throw error when params are invalid', () => {
     expect(() => {
       validateParams(connectorType, {}, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subAction]: expected value to equal [postMessage]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
 
     expect(() => {
       validateParams(connectorType, { message: 1 }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action params: Cannot destructure property 'Symbol(Symbol.iterator)' of 'undefined' as it is undefined."`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action params: types that failed validation:
+      - [0.subAction]: expected value to equal [validChannelId]
+      - [1.subAction]: expected value to equal [postMessage]
+      - [2.subAction]: expected value to equal [postBlockkit]"
+    `);
   });
 
   test('should validate and pass when channels is used as a valid params for post message', () => {

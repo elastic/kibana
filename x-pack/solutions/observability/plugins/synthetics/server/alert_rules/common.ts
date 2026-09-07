@@ -43,7 +43,10 @@ import {
   SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
+import {
+  getSyntheticsErrorRouteFromMonitorId,
+  getSyntheticsCertificatesRoute,
+} from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
@@ -137,6 +140,20 @@ export const getRelativeViewInAppUrl = ({
   });
 };
 
+export const getRelativeCertificatesViewInAppUrl = () => getSyntheticsCertificatesRoute();
+/**
+ * For ungrouped alerts, the alert ID is just the configId (no location suffix),
+ * but config maps are keyed by `${configId}-${locationId}`. This helper tries
+ * an exact match first, then falls back to a prefix match.
+ */
+function findConfigKeyByAlertId<T>(
+  configs: Record<string, T>,
+  alertId: string
+): string | undefined {
+  if (configs[alertId]) return alertId;
+  return Object.keys(configs).find((key) => key.startsWith(`${alertId}-`));
+}
+
 export const setRecoveredAlertsContext = ({
   alertsClient,
   basePath,
@@ -214,14 +231,14 @@ export const setRecoveredAlertsContext = ({
       monitorSummary.locationId = formattedLocationIds;
     }
 
-    if (
-      recoveredAlertId &&
-      locationIds &&
-      (staleDownConfigs[recoveredAlertId] || stalePendingConfigs[recoveredAlertId])
-    ) {
+    const staleDownKey = findConfigKeyByAlertId(staleDownConfigs, recoveredAlertId);
+    const stalePendingKey = findConfigKeyByAlertId(stalePendingConfigs, recoveredAlertId);
+
+    if (recoveredAlertId && locationIds && (staleDownKey || stalePendingKey)) {
+      const effectiveKey = (staleDownKey || stalePendingKey)!;
       const summary = getDeletedMonitorOrLocationSummary({
-        staleConfigs: staleDownConfigs[recoveredAlertId] ? staleDownConfigs : stalePendingConfigs,
-        recoveredAlertId,
+        staleConfigs: staleDownKey ? staleDownConfigs : stalePendingConfigs,
+        recoveredAlertId: effectiveKey,
         locationIds,
         dateFormat,
         tz,
@@ -241,10 +258,12 @@ export const setRecoveredAlertsContext = ({
       linkMessage = '';
     }
 
-    if (configId && recoveredAlertId && locationIds && upConfigs[recoveredAlertId]) {
+    const upConfigKey = findConfigKeyByAlertId(upConfigs, recoveredAlertId);
+
+    if (configId && recoveredAlertId && locationIds && upConfigKey) {
       const summary = getUpMonitorRecoverySummary({
         upConfigs,
-        recoveredAlertId,
+        recoveredAlertId: upConfigKey,
         alertHit,
         locationIds,
         configId,
@@ -255,10 +274,12 @@ export const setRecoveredAlertsContext = ({
         params,
       });
       if (summary) {
-        monitorSummary = {
-          ...monitorSummary,
-          ...summary.monitorSummary,
-        };
+        if (groupByLocation) {
+          monitorSummary = {
+            ...monitorSummary,
+            ...summary.monitorSummary,
+          };
+        }
         recoveryStatus = summary.recoveryStatus;
         recoveryReason = summary.recoveryReason;
         isUp = summary.isUp;

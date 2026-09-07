@@ -759,20 +759,38 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
                 // for certain objects in the test setup.
                 const importAmbiguousConflictError = (errors as SavedObjectsImportFailure[])?.[0]
                   .error as SavedObjectsImportAmbiguousConflictError;
-                // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space
+                // It doesn't matter if overwrite is enabled or not, the object will not be copied because there are two matches in the destination space.
+                // The `updatedAt` values cannot be known upfront (test setup updates the
+                // spaces list for some objects), so look each one up by id from the response
+                // rather than by position.
+                const actualDestinations = importAmbiguousConflictError?.destinations ?? [];
+                const updatedAtById = (destinationId: string) =>
+                  actualDestinations.find((destination) => destination.id === destinationId)
+                    ?.updatedAt;
+                // The server sorts ambiguous-conflict destinations by `updatedAt` descending,
+                // then by `id` ascending as a tiebreak (see check_origin_conflicts.ts). Mirror
+                // that exact order here so the assertion stays deterministic even when the two
+                // objects end up with different `updatedAt` values during setup (sorting only
+                // by id was flaky: it held only while both shared an identical `updatedAt`).
                 const destinations = [
-                  // response destinations should be sorted by ID in ascending order
                   {
                     id: 'conflict_2_all',
                     title: 'A shared saved-object in all spaces',
-                    updatedAt: importAmbiguousConflictError?.destinations[0].updatedAt,
+                    updatedAt: updatedAtById('conflict_2_all'),
                   },
                   {
                     id: 'conflict_2_space_2',
                     title: 'A shared saved-object in one space',
-                    updatedAt: importAmbiguousConflictError?.destinations[1].updatedAt,
+                    updatedAt: updatedAtById('conflict_2_space_2'),
                   },
-                ];
+                ].sort((a, b) => {
+                  const aUpdatedAt = a.updatedAt ?? '';
+                  const bUpdatedAt = b.updatedAt ?? '';
+                  if (aUpdatedAt !== bUpdatedAt) {
+                    return aUpdatedAt < bUpdatedAt ? 1 : -1; // descending
+                  }
+                  return a.id < b.id ? -1 : 1; // ascending
+                });
                 expect(success).to.eql(false);
                 expect(successCount).to.eql(0);
                 expect(successResults).to.be(undefined);

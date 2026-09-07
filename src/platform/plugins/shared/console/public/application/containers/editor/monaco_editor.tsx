@@ -11,12 +11,8 @@ import React, { CSSProperties, useCallback, useMemo, useRef, useState, useEffect
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CodeEditor } from '@kbn/code-editor';
-import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, ESQLCallbacks, monaco } from '@kbn/monaco';
+import { CONSOLE_LANG_ID, CONSOLE_THEME_ID, ConsoleLang, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { getESQLSources } from '@kbn/esql-editor/src/helpers';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
-import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { EditorRequest } from './types';
 import {
@@ -25,6 +21,7 @@ import {
   useSetupAutosave,
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
+  useConsoleEsqlCallbacks,
 } from './hooks';
 import {
   useServicesContext,
@@ -138,38 +135,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
     unregisterKeyboardCommands();
   }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
-    const callbacks: ESQLCallbacks = {
-      getSources: async () => {
-        const getLicense = licensing?.getLicense;
-        return await getESQLSources(dataViews, { application, http }, getLicense);
-      },
-      getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
-        if (queryToExecute) {
-          try {
-            const columns = await getESQLQueryColumns({
-              esqlQuery: queryToExecute,
-              search: data.search.search,
-            });
-            return (
-              columns?.map((c) => {
-                return {
-                  name: c.name,
-                  type: c.meta.esType as FieldType,
-                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
-                };
-              }) || []
-            );
-          } catch (error) {
-            // Handle error
-            return [];
-          }
-        }
-        return [];
-      },
-    };
-    return callbacks;
-  }, [licensing, dataViews, application, http, data.search.search]);
+  const esqlCallbacks = useConsoleEsqlCallbacks({ application, http, licensing, data, dataViews });
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -262,6 +228,12 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_THEME_ID,
+          // Only let Enter accept an auto-triggered suggestion when accepting it would actually
+          // change the text. Without this, a fully typed term (e.g. `?pretty`) keeps the widget
+          // open and Enter gets consumed by a no-op acceptance instead of inserting a new line.
+          // Snippets (e.g. conditional templates) always count as a text edit, so they are
+          // still accepted with Enter.
+          acceptSuggestionOnEnter: 'smart',
           // Force the hover views to always render below the cursor to avoid clipping
           // when the cursor is near the top of the editor.
           hover: {

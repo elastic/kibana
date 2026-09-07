@@ -7,7 +7,6 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
-import { maintenanceWindowsReducer, MaintenanceWindowsState } from './maintenance_windows';
 import { certsListReducer, CertsListState } from './certs';
 import { certificatesReducer, CertificatesState } from './certificates/certificates';
 import { globalParamsReducer, GlobalParamsState } from './global_params';
@@ -49,7 +48,6 @@ export interface SyntheticsAppState {
   serviceLocations: ServiceLocationsState;
   syntheticsEnablement: SyntheticsEnablementState;
   ui: UiState;
-  maintenanceWindows: MaintenanceWindowsState;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -72,5 +70,4 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   serviceLocations: serviceLocationsReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
   ui: uiReducer,
-  maintenanceWindows: maintenanceWindowsReducer,
 });
