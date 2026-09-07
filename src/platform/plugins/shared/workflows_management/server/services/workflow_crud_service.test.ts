@@ -1929,7 +1929,7 @@ describe('WorkflowCrudService', () => {
       expect(taskScheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
     });
 
-    it('warns when an enabled scheduled workflow needs scheduler sync but the scheduler is unavailable', async () => {
+    it('warns with the persisted space when scheduler sync is unavailable', async () => {
       const { deps, client } = makeDeps();
       const scheduledDefinition = {
         name: 'Test Workflow',
@@ -1938,6 +1938,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       } as any;
       const existingSource = makeSource({
+        spaceId: '*',
         enabled: true,
         valid: true,
         triggerTypes: ['scheduled'],
@@ -1961,7 +1962,7 @@ describe('WorkflowCrudService', () => {
       await service.updateWorkflow('wf-1', { tags: ['new'] } as any, 'default', request);
 
       expect(deps.logger.warn).toHaveBeenCalledWith(
-        'Skipping scheduler sync for workflow wf-1 in space default: task scheduler is unavailable'
+        'Skipping scheduler sync for workflow wf-1 in space *: task scheduler is unavailable'
       );
     });
 
@@ -2637,7 +2638,7 @@ describe('WorkflowCrudService', () => {
       );
     });
 
-    it('keeps the disabled document when unscheduling fails', async () => {
+    it('records the disabled document change before unscheduling fails', async () => {
       const taskScheduler = makeTaskScheduler();
       taskScheduler.unscheduleWorkflowTasks.mockRejectedValue(new Error('tm down'));
       const { deps, client } = makeDeps();
@@ -2665,7 +2666,20 @@ describe('WorkflowCrudService', () => {
           document: expect.objectContaining({ enabled: false }),
         })
       );
-      expect(mockedLogWorkflowChanges).not.toHaveBeenCalled();
+      expect(mockedLogWorkflowChanges).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: WorkflowChangeHistoryAction.workflowUpdate,
+          workflows: [
+            expect.objectContaining({
+              id: 'wf-1',
+              document: expect.objectContaining({ enabled: false }),
+            }),
+          ],
+        })
+      );
+      expect(mockedLogWorkflowChanges.mock.invocationCallOrder[0]).toBeLessThan(
+        taskScheduler.unscheduleWorkflowTasks.mock.invocationCallOrder[0]
+      );
     });
 
     it('does not unschedule when the workflow is not visible in the requested space', async () => {
