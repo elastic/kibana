@@ -36,7 +36,7 @@ export const RuntimeFieldMapping = lazySchema(() =>
   z.object({
     type: RuntimeFieldType,
     /**
-     * Painless script that Elasticsearch evaluates for each candidate document. Only inline scripts (`source`) are accepted — stored scripts are not supported for security reasons.
+     * Painless script that Elasticsearch evaluates for each candidate document. Only inline scripts (`source`) are accepted — stored scripts, parameterised scripts (`params`), and non-default `lang` values are not supported. The server rejects any extra properties with a 400 to avoid silently changing runtime field semantics.
      */
     script: z
       .object({
@@ -45,6 +45,7 @@ export const RuntimeFieldMapping = lazySchema(() =>
          */
         source: z.string().max(10000),
       })
+      .strict()
       .optional(),
     /**
      * Optional format string for date runtime fields (e.g. `strict_date_optional_time`).

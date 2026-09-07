@@ -114,6 +114,13 @@ export const buildRuntimeMappingsFromFieldTypes = (
  * the whole `_update_by_query`. The value is never read from the request
  * body.
  *
+ * `script.params` and `lang` are intentionally not forwarded — the
+ * `RuntimeFieldMapping` schema accepts only `{ source }` on the script
+ * object and rejects any extra properties with a Zod 400 before this
+ * function is called. Callers (e.g. `toBulkCloseRuntimeMappings` on the
+ * client) should drop entries whose script contains unsupported properties
+ * rather than relying on server-side rejection.
+ *
  * Returns `undefined` when both inputs are empty/missing so callers can
  * pass the result straight to ES without an empty `runtime_mappings: {}`.
  */

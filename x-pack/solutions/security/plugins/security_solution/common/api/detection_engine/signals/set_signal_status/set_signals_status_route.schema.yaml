@@ -168,10 +168,13 @@ components:
           $ref: '#/components/schemas/RuntimeFieldType'
         script:
           type: object
+          additionalProperties: false
           description: >-
             Painless script that Elasticsearch evaluates for each candidate
             document. Only inline scripts (`source`) are accepted — stored
-            scripts are not supported for security reasons.
+            scripts, parameterised scripts (`params`), and non-default `lang`
+            values are not supported. The server rejects any extra properties
+            with a 400 to avoid silently changing runtime field semantics.
           required: [source]
           properties:
             source:
