@@ -31,18 +31,18 @@ const getGreeting = (): string => {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return i18n.translate('xpack.observability.nightshift.hero.morningGreetingDescription', {
+    return i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
       defaultMessage: 'Good morning!',
     });
   }
 
   if (hour < 18) {
-    return i18n.translate('xpack.observability.nightshift.hero.afternoonGreetingDescription', {
+    return i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
       defaultMessage: 'Good afternoon!',
     });
   }
 
-  return i18n.translate('xpack.observability.nightshift.hero.eveningGreetingDescription', {
+  return i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
     defaultMessage: 'Good evening!',
   });
 };
@@ -57,24 +57,24 @@ const getHeroTitle = ({
   hasNeedsAction: boolean;
 }): string => {
   if (isLoading) {
-    return i18n.translate('xpack.observability.nightshift.hero.checkingTitle', {
+    return i18n.translate('xpack.nightshift.hero.checkingTitle', {
       defaultMessage: 'Looking into your data...',
     });
   }
 
   if (isEmptyState) {
-    return i18n.translate('xpack.observability.nightshift.hero.noEventsTitle', {
+    return i18n.translate('xpack.nightshift.hero.noEventsTitle', {
       defaultMessage: 'No significant events found',
     });
   }
 
   if (hasNeedsAction) {
-    return i18n.translate('xpack.observability.nightshift.hero.needsActionTitle', {
+    return i18n.translate('xpack.nightshift.hero.needsActionTitle', {
       defaultMessage: 'Some significant events need action',
     });
   }
 
-  return i18n.translate('xpack.observability.nightshift.hero.allClearTitle', {
+  return i18n.translate('xpack.nightshift.hero.allClearTitle', {
     defaultMessage: "You're all caught up",
   });
 };
@@ -112,12 +112,9 @@ export function NightshiftHeader({
           >
             <EuiFlexItem grow={false}>
               <div
-                aria-label={i18n.translate(
-                  'xpack.observability.nightshift.hero.nightshiftIconAriaLabel',
-                  {
-                    defaultMessage: 'Nightshift',
-                  }
-                )}
+                aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
+                  defaultMessage: 'Nightshift',
+                })}
                 role="img"
                 css={css`
                   align-items: center;
@@ -171,7 +168,7 @@ export function NightshiftHeader({
                 color: ${euiTheme.colors.textSubdued};
               `}
             >
-              {i18n.translate('xpack.observability.nightshift.summary.showAllEventsLinkText', {
+              {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
                 defaultMessage: 'Show all events',
               })}
             </EuiButtonEmpty>

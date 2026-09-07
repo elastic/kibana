@@ -49,4 +49,21 @@ describe('Date Format: Server side edition', () => {
     expect(date.convertToText(null)).toBe(NULL_LABEL);
     expect(date.convertToText(undefined)).toBe(NULL_LABEL);
   });
+
+  test('should not serve stale values for the same input after the timezone changes', () => {
+    mockConfig['dateFormat:tz'] = 'America/Phoenix';
+    const date = new DateFormat({}, getConfig);
+    expect(date.convertToText(dateTime)).toBe('May 5th 2019, 07:04:56.201');
+
+    mockConfig['dateFormat:tz'] = 'UTC';
+    expect(date.convertToText(dateTime)).toBe('May 5th 2019, 14:04:56.201');
+  });
+
+  test('should not serve stale values for the same input after the pattern changes', () => {
+    const date = new DateFormat({ timezone: 'UTC' }, getConfig);
+    expect(date.convertToText(dateTime)).toBe('May 5th 2019, 14:04:56.201');
+
+    mockConfig.dateFormat = 'YYYY-MM-DD';
+    expect(date.convertToText(dateTime)).toBe('2019-05-05');
+  });
 });

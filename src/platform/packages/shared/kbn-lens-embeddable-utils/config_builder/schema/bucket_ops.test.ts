@@ -284,7 +284,7 @@ describe('Bucket Operation Schemas', () => {
       });
     });
 
-    it('enforces granularity limits', () => {
+    it('enforces the minimum granularity but leaves the ceiling to the runtime', () => {
       const result1 = bucketHistogramOperationSchema.safeParse({
         operation: 'histogram',
         field: 'price',
@@ -295,15 +295,15 @@ describe('Bucket Operation Schemas', () => {
           → at granularity"
       `);
 
-      const result2 = bucketHistogramOperationSchema.safeParse({
+      // No upper bound is enforced: the real ceiling is the deployment-configurable
+      // `histogram:maxBars` advanced setting, so large values are accepted here and
+      // clamped at render time rather than rejected during validation.
+      const aboveDefaultCeiling = bucketHistogramOperationSchema.safeParse({
         operation: 'histogram',
         field: 'price',
-        granularity: 8,
+        granularity: 5000,
       });
-      expectPrettyError(result2).toMatchInlineSnapshot(`
-        "✖ Too big: expected number to be <=7
-          → at granularity"
-      `);
+      expect(aboveDefaultCeiling.success).toBe(true);
     });
   });
 

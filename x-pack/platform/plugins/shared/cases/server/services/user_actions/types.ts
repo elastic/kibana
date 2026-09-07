@@ -367,6 +367,12 @@ export interface GetUserActionItemByDifference extends CommonUserActionArgs {
   newValue: unknown;
   /** Resolved name of a newly-applied template, recorded on the template user-action payload. */
   templateName?: string;
+  /**
+   * customFields keys whose edit is already recorded by the canonical
+   * `extended_fields` user action of the same update — their duplicate legacy
+   * `customFields` user actions are suppressed (#282474).
+   */
+  suppressedCustomFieldKeys?: Set<string>;
 }
 
 export interface TypedUserActionDiffedItems<T> extends GetUserActionItemByDifference {

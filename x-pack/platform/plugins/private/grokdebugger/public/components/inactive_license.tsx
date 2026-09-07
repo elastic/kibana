@@ -6,15 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiCallOut,
-  EuiText,
-  EuiLink,
-  EuiCode,
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
-} from '@elastic/eui';
+import { EuiLink, EuiCode, EuiPage, EuiPageBody, EuiPageSection } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -43,45 +36,44 @@ export const InactiveLicenseSlate = () => {
     <EuiPage>
       <EuiPageBody component="div">
         <EuiPageSection alignment="center" grow={true} color="plain">
-          <EuiCallOut
+          <KbnDangerCallout
             title={i18n.translate('xpack.grokDebugger.licenseErrorMessageTitle', {
               defaultMessage: 'License error',
             })}
-            color="danger"
-            iconType="warning"
             style={{ padding: '16px' }}
-          >
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.grokDebugger.licenseErrorMessageDescription"
-                  defaultMessage="The Grok Debugger requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
-                  values={{
-                    licenseTypeList: (
-                      <>
-                        <EuiCode>{trialLicense}</EuiCode>, <EuiCode>{basicLicense}</EuiCode>,{' '}
-                        <EuiCode>{goldLicense}</EuiCode>
-                      </>
-                    ),
-                    platinumLicenseType: <EuiCode>{platinumLicense}</EuiCode>,
-                  }}
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.grokDebugger.registerLicenseDescription"
-                  defaultMessage="Please {registerLicenseLink} to continue using the Grok Debugger"
-                  values={{
-                    registerLicenseLink: (
-                      <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
-                        {registerLicenseLinkLabel}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiText>
-          </EuiCallOut>
+            text={
+              <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.grokDebugger.licenseErrorMessageDescription"
+                    defaultMessage="The Grok Debugger requires an active license ({licenseTypeList} or {platinumLicenseType}), but none were found in your cluster."
+                    values={{
+                      licenseTypeList: (
+                        <>
+                          <EuiCode>{trialLicense}</EuiCode>, <EuiCode>{basicLicense}</EuiCode>,{' '}
+                          <EuiCode>{goldLicense}</EuiCode>
+                        </>
+                      ),
+                      platinumLicenseType: <EuiCode>{platinumLicense}</EuiCode>,
+                    }}
+                  />
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.grokDebugger.registerLicenseDescription"
+                    defaultMessage="Please {registerLicenseLink} to continue using the Grok Debugger"
+                    values={{
+                      registerLicenseLink: (
+                        <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
+                          {registerLicenseLinkLabel}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </>
+            }
+          />
         </EuiPageSection>
       </EuiPageBody>
     </EuiPage>

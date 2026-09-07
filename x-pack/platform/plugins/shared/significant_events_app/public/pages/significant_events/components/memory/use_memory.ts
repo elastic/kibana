@@ -44,7 +44,7 @@ export const useMemoryTree = () => {
 export const useMemoryEntry = (entryId?: string) => {
   const { core } = useKibana();
   return useQuery({
-    queryKey: memoryKeys.byId(entryId!),
+    queryKey: memoryKeys.byId(entryId ?? ''),
     queryFn: () => core.http.get<MemoryEntry>(`${MEMORY_BASE}/entries/${entryId}`),
     enabled: !!entryId,
   });
@@ -65,7 +65,7 @@ export const useMemorySearch = (query: string) => {
 export const useMemoryHistory = (entryId?: string) => {
   const { core } = useKibana();
   return useQuery({
-    queryKey: memoryKeys.history(entryId!),
+    queryKey: memoryKeys.history(entryId ?? ''),
     queryFn: () =>
       core.http.get<{ history: MemoryVersionRecord[] }>(
         `${MEMORY_BASE}/entries/${entryId}/history`
@@ -77,7 +77,7 @@ export const useMemoryHistory = (entryId?: string) => {
 export const useMemoryVersion = (entryId?: string, version?: number) => {
   const { core } = useKibana();
   return useQuery({
-    queryKey: memoryKeys.version(entryId!, version!),
+    queryKey: memoryKeys.version(entryId ?? '', version ?? -1),
     queryFn: () =>
       core.http.get<MemoryVersionRecord>(`${MEMORY_BASE}/entries/${entryId}/history/${version}`),
     enabled: !!entryId && version !== undefined,

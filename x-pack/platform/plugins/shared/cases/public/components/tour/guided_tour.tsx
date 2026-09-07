@@ -92,7 +92,10 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
     const anchorEl = document.querySelector(currentStepConfig.anchor);
     // jsdom does not implement scrollIntoView; guard so tours used in unit tests do not crash.
     if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
-      anchorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Instant, not smooth. EuiTourStep measures the anchor and positions the popover as soon as it
+      // mounts; a smooth scroll is still animating at that point, so the popover was placed against
+      // the anchor's pre-scroll coordinates and opened off-screen.
+      anchorEl.scrollIntoView({ behavior: 'auto', block: 'center' });
     }
   }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
 
@@ -115,6 +118,9 @@ const GuidedTourComponent: React.FC<GuidedTourProps> = ({
       step={currentStep}
       stepsTotal={stepsTotal}
       isStepOpen
+      // Keeps the popover with its anchor if anything scrolls after it opens — a sticky panel
+      // settling, or the reader scrolling mid-step.
+      repositionOnScroll
       minWidth={popoverWidth}
       maxWidth={popoverWidth}
       onFinish={onFinish}

@@ -8,33 +8,19 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
 
-interface CloseSignificantEventResponse {
-  event_uuid: string;
-  updated: number;
-  ignored: number;
-  status: SignificantEventStatus;
-}
+const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.successToastTitle', {
+  defaultMessage: 'Significant event closed',
+});
 
-const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.observability.nightshift.closeEvent.successToastTitle',
-  {
-    defaultMessage: 'Significant event closed',
-  }
-);
-
-const CLOSE_ERROR_TOAST_TITLE = i18n.translate(
-  'xpack.observability.nightshift.closeEvent.errorToastTitle',
-  {
-    defaultMessage: 'Failed to close significant event',
-  }
-);
+const CLOSE_ERROR_TOAST_TITLE = i18n.translate('xpack.nightshift.closeEvent.errorToastTitle', {
+  defaultMessage: 'Failed to close significant event',
+});
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
@@ -45,16 +31,24 @@ interface UseCloseSignificantEventResult {
 }
 
 export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
-  const { http, notifications } = useKibana().services;
+  const {
+    notifications,
+    significantEvents: { significantEventsRepositoryClient },
+  } = useKibana().services;
   const queryClient = useQueryClient();
   const [closingEventUuid, setClosingEventUuid] = useState<string>();
 
   const mutation = useMutation({
     mutationFn: (eventUuid: string) =>
-      http.post<CloseSignificantEventResponse>(
-        `/internal/significant_events/events/${encodeURIComponent(eventUuid)}/update`,
+      significantEventsRepositoryClient.fetch(
+        'POST /internal/significant_events/events/{id}/update',
         {
-          body: JSON.stringify({ status: 'closed' }),
+          params: {
+            path: { id: eventUuid },
+            body: { status: 'closed' },
+          },
+          // Unmounting the list must not abort a close that is already in flight.
+          signal: null,
         }
       ),
     onMutate: (eventUuid) => {

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 
 export const getFlyoutShareUrlAriaLabel = (): string =>
-  i18n.translate('xpack.observability.nightshift.flyout.shareUrlAriaLabel', {
+  i18n.translate('xpack.nightshift.flyout.shareUrlAriaLabel', {
     defaultMessage: 'Copy link to this flyout',
   });
 
@@ -25,7 +25,7 @@ export const useFlyoutShareUrlCustomAction = (
     const copied = copyToClipboard(getShareUrl());
     if (copied) {
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.observability.nightshift.flyout.shareUrlSuccess', {
+        title: i18n.translate('xpack.nightshift.flyout.shareUrlSuccess', {
           defaultMessage: 'Copied link to clipboard',
         }),
       });

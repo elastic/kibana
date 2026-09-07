@@ -17,12 +17,20 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/core/packages/di/server
 dependsOn:
+  - '@kbn/core-capabilities-common'
   - '@kbn/core-capabilities-server'
+  - '@kbn/core-di'
+  - '@kbn/core-elasticsearch-server'
   - '@kbn/core-http-server'
   - '@kbn/core-lifecycle-server'
   - '@kbn/core-plugins-server'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-security-common'
+  - '@kbn/core-security-server'
+  - '@kbn/core-ui-settings-server'
+  - '@kbn/core-user-profile-common'
+  - '@kbn/core-user-profile-server'
   - '@kbn/core-di-internal'
 tags:
   - shared-server

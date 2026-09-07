@@ -35,7 +35,7 @@ export function EntityChip({
       type="button"
       data-test-subj={testSubj}
       {...(ebt ? getEbtProps(ebt) : {})}
-      aria-label={i18n.translate('xpack.observability.nightshift.entityChip.viewDetailsLabel', {
+      aria-label={i18n.translate('xpack.nightshift.entityChip.viewDetailsLabel', {
         defaultMessage: 'View entity details for {label}',
         values: { label },
       })}
@@ -67,7 +67,7 @@ export function EntityChip({
       `}
     >
       <EuiText size="xs">{label}</EuiText>
-      <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden={true} />
+      <EuiIcon type="chevronSingleRight" size="s" color="subdued" aria-hidden={true} />
     </button>
   );
 }

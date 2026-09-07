@@ -56,11 +56,18 @@ export const esqlToObjects = <T extends Record<string, unknown>>(
       }, {}) as T
   );
 
-const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
+const parseSourceResponse = <T>(
+  response: ESQLSearchResponse,
+  fields: readonly string[] = []
+): T[] => {
   const sourceIdx = getSourceColumnIndex(response);
   if (sourceIdx === -1) {
     return [];
   }
+
+  const fieldIndexes = fields.map(
+    (field) => [field, response.columns.findIndex((column) => column.name === field)] as const
+  );
 
   return response.values.map((row) => {
     const rawSource = row[sourceIdx];
@@ -70,19 +77,24 @@ const parseSourceResponse = <T>(response: ESQLSearchResponse): T[] => {
     // `kibana.space_ids` is added by IDataStreamClient on write; strip the
     // whole `kibana` object so consumers only see the typed payload.
     const { kibana: _kibana, ...rest } = rawSource;
-    return rest as T;
+    return fieldIndexes.reduce<Record<string, unknown>>(
+      (result, [field, index]) => (index === -1 ? result : { ...result, [field]: row[index] }),
+      rest
+    ) as T;
   });
 };
 
 export const executeEsqlQuery = async <T>({
   esClient,
   query,
+  fields,
 }: {
   esClient: ElasticsearchClient;
   query: ComposerQuery;
+  fields?: readonly string[];
 }): Promise<T[]> => {
   try {
-    return parseSourceResponse<T>(await queryEsql({ esClient, query }));
+    return parseSourceResponse<T>(await queryEsql({ esClient, query }), fields);
   } catch (error) {
     if (isIndexNotFoundError(error)) {
       return [];

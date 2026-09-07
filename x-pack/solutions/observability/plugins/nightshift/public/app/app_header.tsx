@@ -12,11 +12,11 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
-const nightshiftPageTitle = i18n.translate('xpack.observability.nightshift.pageTitle', {
+const nightshiftPageTitle = i18n.translate('xpack.nightshift.pageTitle', {
   defaultMessage: 'Nightshift',
 });
 
-const settingsLabel = i18n.translate('xpack.observability.nightshift.settingsLinkLabel', {
+const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
 

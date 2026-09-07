@@ -27,7 +27,7 @@ describe('DeleteSLOInstances', () => {
             { sloId: 'second', instanceId: '*' },
           ],
         })
-      ).rejects.toThrowError("Cannot delete an SLO instance '*'");
+      ).rejects.toThrow("Cannot delete an SLO instance '*'");
     });
   });
 

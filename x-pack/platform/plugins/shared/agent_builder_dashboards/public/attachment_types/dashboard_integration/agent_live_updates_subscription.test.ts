@@ -22,14 +22,14 @@ const buildAttachment = (data: Record<string, unknown>) => ({
   versions: [{ version: 1, data }],
 });
 
-const buildRoundCompleteEvent = () => ({
+const buildRoundCompleteEvent = (actor: 'system' | 'user') => ({
   type: ChatEventType.roundComplete,
   data: {
     attachments: [buildAttachment({ panels: [] })],
     round: {
       input: {
         attachment_refs: [
-          { attachment_id: 'attachment-1', version: 1, operation: 'updated', actor: 'user' },
+          { attachment_id: 'attachment-1', version: 1, operation: 'updated', actor },
         ],
       },
     },
@@ -68,9 +68,18 @@ describe('createAgentLiveUpdatesSubscription', () => {
   it('applies the dashboard state when an attachment is updated', () => {
     const { chatEvents$, setState, subscription } = createHarness();
 
-    chatEvents$.next(buildRoundCompleteEvent());
+    chatEvents$.next(buildRoundCompleteEvent('system'));
 
     expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('does not apply the dashboard state for the ambient self-sync (user-actor) ref', () => {
+    const { chatEvents$, setState, subscription } = createHarness();
+
+    chatEvents$.next(buildRoundCompleteEvent('user'));
+
+    expect(setState).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
 });

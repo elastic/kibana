@@ -15,6 +15,7 @@ import {
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { addProvider } from '../../../../timelines/store/actions';
+import { selectIsSuperTimeline } from '../../../../timelines/store/selectors';
 import { TimelineId } from '../../../../../common/types';
 import type { SecurityAppStore } from '../../../../common/store';
 import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
@@ -54,6 +55,7 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
         const field = data[0]?.field;
 
         return (
+          !selectIsSuperTimeline(store.getState(), TimelineId.active) &&
           timelineCapabilities.read &&
           data.length === 1 && // TODO Add support for multiple values
           fieldHasCellActions(field.name) &&

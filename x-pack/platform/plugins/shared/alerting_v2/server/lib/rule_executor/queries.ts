@@ -10,6 +10,7 @@ import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 
 interface GetActiveAlertGroupHashesQueryParams {
   ruleId: string;
+  limit: number;
 }
 
 export interface ActiveAlertGroupHash {
@@ -22,6 +23,7 @@ export interface ActiveAlertGroupHash {
  */
 export const getActiveAlertGroupHashesQuery = ({
   ruleId,
+  limit,
 }: GetActiveAlertGroupHashesQueryParams): ComposerQuery => {
   let query = esql.from(ALERT_EVENTS_DATA_STREAM);
 
@@ -34,6 +36,8 @@ export const getActiveAlertGroupHashesQuery = ({
   query = query.where`last_episode_status IN ("pending", "active", "recovering")`;
 
   query = query.keep('group_hash');
+
+  query = query.limit(limit);
 
   return query;
 };

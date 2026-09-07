@@ -56,6 +56,11 @@ export const backToCases = () => {
 export const filterStatusOpen = () => {
   cy.get(ALL_CASES_STATUS_FILTER).click();
   cy.get(ALL_CASES_OPEN_FILTER).click();
+  // The status filter is a multi-select popover that stays open after picking an option and can
+  // cover the case rows below, blocking later clicks (e.g. on the case title link). Toggle it
+  // closed and wait for the option list to unmount before moving on.
+  cy.get(ALL_CASES_STATUS_FILTER).click();
+  cy.get(ALL_CASES_OPEN_FILTER).should('not.exist');
 };
 
 export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {

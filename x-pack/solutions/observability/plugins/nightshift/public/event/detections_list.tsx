@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
@@ -21,17 +21,17 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
 import type {
-  Feature,
   LifecycleDetection,
   EventLifecycleResponse,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { useFetchStreamFeaturesByStream } from '../hooks/use_fetch_stream_features';
+import { getImpactedServices } from '../common/impacted_services';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import {
   filterOccurrencesForDetection,
@@ -39,7 +39,7 @@ import {
   type OccurrencePoint,
 } from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
-import { getDetectionEntities } from './get_detection_entities';
+
 import { nightshiftBackgroundTransition } from '../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
@@ -48,6 +48,8 @@ const SPARKLINE_SKELETON_HEIGHT = 32;
 /** Placeholder rows on first load before any lifecycle data exists. */
 const INITIAL_DETECTION_SKELETON_COUNT = 2;
 const MAX_VISIBLE_ENTITY_PILLS = 2;
+/** Detection cards shown before the list collapses behind a `+{n} more` toggle. */
+export const MAX_VISIBLE_DETECTIONS = 3;
 
 export interface DetectionsListProps {
   event: SignificantEvent;
@@ -73,17 +75,16 @@ const parseTimestamp = (timestamp: string): number => {
 
 function DetectionCard({
   detection,
-  event,
   occurrences,
-  streamFeatures,
+  impactedServiceLabels,
   isLoadingOccurrences,
   isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
-  event: SignificantEvent;
   occurrences: OccurrencePoint[];
-  streamFeatures: Feature[];
+  /** Event-level: every card of the same event shows this identical list. */
+  impactedServiceLabels: string[];
   isLoadingOccurrences: boolean;
   isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
@@ -91,15 +92,8 @@ function DetectionCard({
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
-  const entityLabels = useMemo(() => {
-    const entities = getDetectionEntities(event, detection, streamFeatures);
-    if (entities.length > 0) {
-      return entities.map((entity) => entity.label);
-    }
-    return detection.stream_name ? [detection.stream_name] : [];
-  }, [detection, event, streamFeatures]);
-  const visibleEntityLabels = entityLabels.slice(0, MAX_VISIBLE_ENTITY_PILLS);
-  const hiddenEntityCount = Math.max(entityLabels.length - visibleEntityLabels.length, 0);
+  const visibleEntityLabels = impactedServiceLabels.slice(0, MAX_VISIBLE_ENTITY_PILLS);
+  const hiddenEntityCount = Math.max(impactedServiceLabels.length - visibleEntityLabels.length, 0);
 
   const handleClick = () => {
     onClick?.(detection);
@@ -223,13 +217,10 @@ function DetectionCard({
                 {hiddenEntityCount > 0 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="hollow">
-                      {i18n.translate(
-                        'xpack.observability.nightshift.flyout.detectionEntityOverflow',
-                        {
-                          defaultMessage: '+{count}',
-                          values: { count: hiddenEntityCount },
-                        }
-                      )}
+                      {i18n.translate('xpack.nightshift.flyout.detectionEntityOverflow', {
+                        defaultMessage: '+{count}',
+                        values: { count: hiddenEntityCount },
+                      })}
                     </EuiBadge>
                   </EuiFlexItem>
                 )}
@@ -321,7 +312,56 @@ function DetectionCardSkeleton(): React.ReactElement {
   );
 }
 
-function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.ReactElement {
+const getDetectionListFooterStyles = (euiTheme: EuiThemeComputed) => css`
+  border-top: ${euiTheme.border.thin};
+  padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+`;
+
+interface DetectionListPanelProps {
+  items: React.ReactElement[];
+  footer?: React.ReactNode;
+}
+
+interface DetectionsOverflowToggleProps {
+  hiddenCount: number;
+  isExpanded: boolean;
+  onToggle: () => void;
+}
+
+function DetectionsOverflowToggle({
+  hiddenCount,
+  isExpanded,
+  onToggle,
+}: DetectionsOverflowToggleProps): React.ReactElement {
+  return (
+    <EuiButtonEmpty
+      aria-expanded={isExpanded}
+      data-test-subj={isExpanded ? 'nightshiftDetectionsShowLess' : 'nightshiftDetectionsShowMore'}
+      flush="left"
+      iconSide="right"
+      iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+      onClick={onToggle}
+      size="xs"
+      {...getEbtProps({
+        action: isExpanded
+          ? NIGHTSHIFT_EBT_ACTIONS.COLLAPSE_DETECTIONS
+          : NIGHTSHIFT_EBT_ACTIONS.EXPAND_DETECTIONS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_DETECTIONS,
+      })}
+    >
+      {isExpanded
+        ? i18n.translate('xpack.nightshift.flyout.detectionsShowLess', {
+            defaultMessage: 'Show less',
+          })
+        : i18n.translate('xpack.nightshift.flyout.detectionsShowMore', {
+            defaultMessage: '+{count} more',
+            values: { count: hiddenCount },
+          })}
+    </EuiButtonEmpty>
+  );
+}
+
+function DetectionListPanel({ items, footer }: DetectionListPanelProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -348,6 +388,7 @@ function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.R
           </li>
         ))}
       </ol>
+      {footer && <div css={getDetectionListFooterStyles(euiTheme)}>{footer}</div>}
     </EuiPanel>
   );
 }
@@ -366,6 +407,7 @@ export function DetectionsList({
   });
   const lifecycleQuery = lifecycleQueryFromParent ?? internalLifecycleQuery;
   const { data, isLoading, isError, refetch } = lifecycleQuery;
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(
@@ -377,17 +419,30 @@ export function DetectionsList({
     [data]
   );
 
-  const streamNames = useMemo(
-    () => [
-      ...new Set(
-        detections
-          .map((detection) => detection.stream_name)
-          .filter((streamName): streamName is string => Boolean(streamName))
-      ),
-    ],
-    [detections]
+  const hasOverflow = detections.length > MAX_VISIBLE_DETECTIONS;
+  const visibleDetections = useMemo(() => {
+    if (!hasOverflow || isExpanded) {
+      return detections;
+    }
+
+    const collapsed = detections.slice(0, MAX_VISIBLE_DETECTIONS);
+    const selectedInOverflow = detections
+      .slice(MAX_VISIBLE_DETECTIONS)
+      .find(({ detection_id: detectionId }) => detectionId === selectedDetectionId);
+
+    // Keep the open detection's card visible, otherwise collapsing leaves its child
+    // flyout up with nothing on screen pointing at it. It takes the last visible slot so
+    // the collapsed list stays exactly MAX_VISIBLE_DETECTIONS long.
+    return selectedInOverflow
+      ? [...collapsed.slice(0, MAX_VISIBLE_DETECTIONS - 1), selectedInOverflow]
+      : collapsed;
+  }, [detections, hasOverflow, isExpanded, selectedDetectionId]);
+  const hiddenCount = detections.length - visibleDetections.length;
+
+  const impactedServiceLabels = useMemo(
+    () => getImpactedServices(event).map(({ name }) => name),
+    [event]
   );
-  const streamFeaturesByStream = useFetchStreamFeaturesByStream(streamNames);
 
   // Only skeleton on first load — keep cached cards visible during background refetch.
   const isInitialLoading = isLoading && (data?.detections?.length ?? 0) === 0;
@@ -397,7 +452,7 @@ export function DetectionsList({
     <>
       <EuiTitle size="xs">
         <h3>
-          {i18n.translate('xpack.observability.nightshift.flyout.detectionsTitle', {
+          {i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
             defaultMessage: 'Detections',
           })}
         </h3>
@@ -410,7 +465,7 @@ export function DetectionsList({
           color="danger"
           iconType="warning"
           size="s"
-          title={i18n.translate('xpack.observability.nightshift.flyout.detectionsErrorTitle', {
+          title={i18n.translate('xpack.nightshift.flyout.detectionsErrorTitle', {
             defaultMessage: 'Unable to load detections',
           })}
         >
@@ -422,7 +477,7 @@ export function DetectionsList({
             onClick={() => refetch()}
             size="s"
           >
-            {i18n.translate('xpack.observability.nightshift.flyout.detectionsRetryButtonText', {
+            {i18n.translate('xpack.nightshift.flyout.detectionsRetryButtonText', {
               defaultMessage: 'Retry',
             })}
           </EuiButtonEmpty>
@@ -439,7 +494,7 @@ export function DetectionsList({
 
       {!showDetectionSkeletons && !isError && detections.length === 0 && (
         <EuiText size="s" color="subdued">
-          {i18n.translate('xpack.observability.nightshift.flyout.detectionsEmptyDescription', {
+          {i18n.translate('xpack.nightshift.flyout.detectionsEmptyDescription', {
             defaultMessage: 'No detections found for this event.',
           })}
         </EuiText>
@@ -447,21 +502,29 @@ export function DetectionsList({
 
       {!showDetectionSkeletons && !isError && detections.length > 0 && (
         <DetectionListPanel
-          items={detections.map((detection) => (
+          items={visibleDetections.map((detection) => (
             <DetectionCard
               key={detection.detection_id}
               detection={detection}
-              event={event}
               occurrences={filterOccurrencesForDetection(
                 detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
                 detection['@timestamp']
               )}
-              streamFeatures={streamFeaturesByStream.get(detection.stream_name ?? '') ?? []}
+              impactedServiceLabels={impactedServiceLabels}
               isLoadingOccurrences={isLoadingOccurrences && Boolean(detection.rule_uuid)}
               isSelected={detection.detection_id === selectedDetectionId}
               onClick={onDetectionClick}
             />
           ))}
+          footer={
+            hasOverflow ? (
+              <DetectionsOverflowToggle
+                hiddenCount={hiddenCount}
+                isExpanded={isExpanded}
+                onToggle={() => setIsExpanded((expanded) => !expanded)}
+              />
+            ) : undefined
+          }
         />
       )}
     </>

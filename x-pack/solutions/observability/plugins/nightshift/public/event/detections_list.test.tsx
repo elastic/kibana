@@ -9,19 +9,14 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { LifecycleDetection, SignificantEvent } from '@kbn/significant-events-schema';
-import { DetectionsList } from './detections_list';
+import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import {
-  useFetchStreamFeatures,
-  useFetchStreamFeaturesByStream,
-} from '../hooks/use_fetch_stream_features';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
 jest.mock('../hooks/use_fetch_event_lifecycle');
-jest.mock('../hooks/use_fetch_stream_features');
 jest.mock('../detection/change_point_visualization', () => ({
   ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
     <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
@@ -43,8 +38,6 @@ jest.mock('../hooks/use_kibana', () => ({
 }));
 
 const mockUseFetchEventLifecycle = useFetchEventLifecycle as jest.Mock;
-const mockUseFetchStreamFeatures = useFetchStreamFeatures as jest.Mock;
-const mockUseFetchStreamFeaturesByStream = useFetchStreamFeaturesByStream as jest.Mock;
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -56,8 +49,10 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   summary: 'Summary',
   severity: '60-high',
   confidence: 0.9,
-  causal_features: [
+  blast_radius: [
     {
+      type: 'entity',
+      subtype: 'service',
       feature_id: 'web-frontend',
       name: 'web-frontend',
       stream_name: 'logs.web-frontend',
@@ -76,6 +71,18 @@ const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDe
   ...overrides,
 });
 
+const NEWEST_DETECTION_TIME_MS = Date.UTC(2026, 6, 10, 12);
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
+const buildDetectionsNewestFirst = (count: number): LifecycleDetection[] =>
+  Array.from({ length: count }, (_, index) =>
+    mockDetection({
+      detection_id: `det-${index}`,
+      rule_name: `detection-${index}`,
+      '@timestamp': new Date(NEWEST_DETECTION_TIME_MS - index * ONE_HOUR_MS).toISOString(),
+    })
+  );
+
 function setLifecycle({
   detections = [] as LifecycleDetection[],
   isLoading = false,
@@ -90,42 +97,6 @@ function setLifecycle({
     isError,
     refetch,
   });
-  mockUseFetchStreamFeatures.mockReturnValue({
-    data: [
-      {
-        uuid: 'feat-web-frontend',
-        id: 'web-frontend',
-        stream_name: 'logs.web-frontend',
-        type: 'entity',
-        title: 'web-frontend',
-        description: '',
-        properties: { name: 'web-frontend' },
-        confidence: 90,
-      },
-    ],
-    isLoading: false,
-    isError: false,
-    refetch: jest.fn(),
-  });
-  mockUseFetchStreamFeaturesByStream.mockReturnValue(
-    new Map([
-      [
-        'logs.web-frontend',
-        [
-          {
-            uuid: 'feat-web-frontend',
-            id: 'web-frontend',
-            stream_name: 'logs.web-frontend',
-            type: 'entity',
-            title: 'web-frontend',
-            description: '',
-            properties: { name: 'web-frontend' },
-            confidence: 90,
-          },
-        ],
-      ],
-    ])
-  );
   return { refetch };
 }
 
@@ -230,60 +201,29 @@ describe('DetectionsList', () => {
 
   it('shows at most two entity pills plus an overflow pill', () => {
     setLifecycle({ detections: [mockDetection()] });
-    mockUseFetchStreamFeaturesByStream.mockReturnValue(
-      new Map([
-        [
-          'logs.web-frontend',
-          [
-            {
-              uuid: 'feat-entity-one',
-              id: 'entity-one',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-one',
-              description: '',
-              properties: { name: 'entity-one' },
-              confidence: 90,
-            },
-            {
-              uuid: 'feat-entity-two',
-              id: 'entity-two',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-two',
-              description: '',
-              properties: { name: 'entity-two' },
-              confidence: 90,
-            },
-            {
-              uuid: 'feat-entity-three',
-              id: 'entity-three',
-              stream_name: 'logs.web-frontend',
-              type: 'entity',
-              title: 'entity-three',
-              description: '',
-              properties: { name: 'entity-three' },
-              confidence: 90,
-            },
-          ],
-        ],
-      ])
-    );
 
     renderList({
       event: mockEvent({
-        causal_features: [
+        blast_radius: [
           {
+            type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-one',
             name: 'entity-one',
             stream_name: 'logs.web-frontend',
           },
           {
+            type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-two',
             name: 'entity-two',
             stream_name: 'logs.web-frontend',
           },
+        ],
+        causal_features: [
           {
+            type: 'entity',
+            subtype: 'service',
             feature_id: 'entity-three',
             name: 'entity-three',
             stream_name: 'logs.web-frontend',
@@ -399,5 +339,91 @@ describe('DetectionsList', () => {
     fireEvent.click(cards[1]);
     expect(cards[0]).toHaveAttribute('aria-pressed', 'false');
     expect(cards[1]).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  describe('detection overflow', () => {
+    it('renders every detection without a toggle at the cap', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS) });
+      renderList();
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.queryByTestId('nightshiftDetectionsShowMore')).not.toBeInTheDocument();
+    });
+
+    it('caps the list and counts what it hides', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList();
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+      expect(screen.queryByText('detection-3')).not.toBeInTheDocument();
+      expect(screen.queryByText('detection-4')).not.toBeInTheDocument();
+    });
+
+    it('expands to the full list and collapses back', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList();
+
+      fireEvent.click(screen.getByTestId('nightshiftDetectionsShowMore'));
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(
+        MAX_VISIBLE_DETECTIONS + 2
+      );
+      expect(screen.getByText('detection-4')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('nightshiftDetectionsShowLess'));
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+    });
+
+    it('reports expansion state through the toggle attributes', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList();
+
+      const showMore = screen.getByTestId('nightshiftDetectionsShowMore');
+      expect(showMore).toHaveAttribute('aria-expanded', 'false');
+      expect(showMore).toHaveAttribute('data-ebt-action', 'expandDetections');
+      expect(showMore).toHaveAttribute('data-ebt-element', 'nightshiftEventFlyoutDetections');
+      expect(showMore.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+
+      fireEvent.click(showMore);
+
+      const showLess = screen.getByTestId('nightshiftDetectionsShowLess');
+      expect(showLess).toHaveAttribute('aria-expanded', 'true');
+      expect(showLess).toHaveAttribute('data-ebt-action', 'collapseDetections');
+      expect(showLess).toHaveAttribute('data-ebt-element', 'nightshiftEventFlyoutDetections');
+      expect(showLess.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
+    });
+
+    it('takes the last visible slot for a selected detection past the cap', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList({ selectedDetectionId: 'det-4', onDetectionClick: jest.fn() });
+
+      const cards = screen.getAllByTestId('nightshiftDetectionCard');
+      expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-4');
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.queryByText('detection-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+    });
+
+    it('never offers a +0 more toggle when a single overflow detection is selected', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 1) });
+      renderList({ selectedDetectionId: 'det-3', onDetectionClick: jest.fn() });
+
+      const cards = screen.getAllByTestId('nightshiftDetectionCard');
+      expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-3');
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+1 more');
+    });
+
+    it('ignores a selected detection that is no longer in the list', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
+      renderList({ selectedDetectionId: 'det-already-gone', onDetectionClick: jest.fn() });
+
+      expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+    });
   });
 });

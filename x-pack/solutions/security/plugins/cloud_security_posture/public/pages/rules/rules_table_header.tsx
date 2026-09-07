@@ -18,6 +18,7 @@ import {
   EuiPopoverTitle,
   EuiFilterGroup,
   EuiFilterButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
@@ -234,6 +235,7 @@ const CurrentPageOfTotal = ({
   setSelectedRules,
 }: RuleTableCount) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
   };
@@ -353,13 +355,14 @@ const CurrentPageOfTotal = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPopover
+            aria-labelledby={popoverTitleId}
             button={popoverButton}
             isOpen={isPopoverOpen}
             closePopover={() => setIsPopoverOpen(false)}
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >
-            <EuiPopoverTitle css={{ minWidth: 240 }}>
+            <EuiPopoverTitle id={popoverTitleId} css={{ minWidth: 240 }}>
               <EuiText size="s" textAlign="left" color="subdued" css={{ marginLeft: '8px' }}>
                 <b>
                   <FormattedMessage

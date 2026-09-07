@@ -5,438 +5,174 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
+import React, { useMemo } from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
   EuiLoadingSpinner,
-  EuiPanel,
-  EuiRange,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
-  EuiTextArea,
-  EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useHistory, useParams } from 'react-router-dom';
 import { isHttpFetchError } from '@kbn/core-http-browser';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AUTONOMY_LABELS,
-  coverageFromSchedule,
-  type AutonomyLevel,
-  type Watch,
-  type WatchCallableRef,
-  type WatchSchedule,
-} from '@kbn/pnd-common';
-import { PndPageSection } from '../../components/layout/pnd_page_section';
-import { PndPageHeader } from '../../components/pnd_page_header';
+import type { Worker } from '@kbn/pnd-common';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useWatch } from '../../hooks/use_watches_api';
-import { AgentCapabilitiesList } from './components/agent_capabilities_list';
-import { AutonomyMeter } from './components/autonomy_meter';
-import { RecentRunsTable } from './components/recent_runs_table';
-import { RunSparkline } from './components/run_sparkline';
-import { SchedulePanel } from './components/schedule_panel';
-import {
-  WatchesSectionLayout,
-  WatchesSubnavExpandControl,
-} from './components/watches_section_layout';
+import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
+import { AutonomySlider } from './components/autonomy_slider';
+import { SettingsSection } from './components/settings_section';
+import { WorkerSkillsTable } from './components/worker_skills_table';
+import { WatchesSectionLayout } from './components/watches_section_layout';
 import * as i18n from './translations';
+import * as settingsI18n from './settings_translations';
+import { workerName } from './workers/translations';
 
-const SCOPE_COLOR: Record<string, string> = {
-  full: '#16b3a6',
-  masked: '#f59e0b',
-  denied: '#ef4444',
+const WorkerSettingsCard: React.FC<{ worker: Worker }> = ({ worker }) => {
+  const { mutate: updateWorker } = useUpdateWorker();
+  const settingsLocked = worker.state === 'unavailable';
+
+  return (
+    <SettingsSection
+      title={workerName(worker.id, worker.name)}
+      subtitle={
+        settingsLocked
+          ? settingsI18n.WORKER_SETTINGS_UNAVAILABLE
+          : settingsI18n.WORKER_SECTION_SUBTITLE
+      }
+      data-test-subj={`pndWatchWorkerSection-${worker.id}`}
+    >
+      <EuiSwitch
+        label={settingsI18n.ENABLED_SWITCH_LABEL}
+        checked={worker.enabled}
+        disabled={settingsLocked}
+        onChange={(event) =>
+          updateWorker({ workerId: worker.id, patch: { enabled: event.target.checked } })
+        }
+        data-test-subj={`pndWorkerEnabledSwitch-${worker.id}`}
+      />
+      <EuiSpacer size="m" />
+      <AutonomySlider
+        current={worker.settings.autonomy}
+        isDisabled={settingsLocked}
+        onChange={(autonomyLevel) =>
+          updateWorker({ workerId: worker.id, patch: { autonomyLevel } })
+        }
+      />
+      <EuiSpacer size="m" />
+      <WorkerSkillsTable skills={worker.skills} />
+    </SettingsSection>
+  );
 };
 
 export const WatchDetailPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const { watchId } = useParams<{ watchId: string }>();
-  const { services } = useKibana();
   const { data, isLoading, error, refetch } = useWatch(watchId);
+  const {
+    data: workersData,
+    isLoading: workersLoading,
+    error: workersError,
+    refetch: refetchWorkers,
+  } = useWorkers();
 
-  const [localWatch, setLocalWatch] = useState<Watch | null>(null);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  usePndDocTitle(localWatch?.name ?? i18n.PAGE_TITLE);
+  const watch = data?.watch;
+  usePndDocTitle(watch?.name ?? i18n.PAGE_TITLE);
 
-  useEffect(() => {
-    setLocalWatch(null);
-    setIsDeleteConfirmOpen(false);
-  }, [watchId]);
-
-  useEffect(() => {
-    if (!data?.watch || data.watch.id !== watchId) {
-      return;
-    }
-    setLocalWatch((prev) => {
-      if (prev == null || prev.id !== data.watch.id) {
-        return data.watch;
-      }
-      return prev;
-    });
-  }, [data, watchId]);
-
-  const stubToast = useCallback(() => {
-    services.notifications?.toasts.addInfo(i18n.POC_STUB_TOAST);
-  }, [services.notifications]);
-
-  const onConfirmDelete = useCallback(() => {
-    setIsDeleteConfirmOpen(false);
-    stubToast();
-  }, [stubToast]);
-
-  const onScheduleChange = useCallback((schedule: WatchSchedule) => {
-    setLocalWatch((prev) =>
-      prev
-        ? {
-            ...prev,
-            schedule,
-            coverage: coverageFromSchedule(schedule),
-          }
-        : prev
-    );
-  }, []);
-
-  const onAutonomyChange = useCallback((level: AutonomyLevel) => {
-    setLocalWatch((prev) => (prev ? { ...prev, autonomyLevel: level } : prev));
-  }, []);
-
-  const onToggleCallable = useCallback(
-    (callableId: string) => {
-      setLocalWatch((prev) => {
-        if (!prev) return prev;
-        const callables: WatchCallableRef[] = prev.callables.map((c) =>
-          c.id === callableId ? { ...c, enabled: !c.enabled } : c
-        );
-        return { ...prev, callables };
-      });
-      stubToast();
-    },
-    [stubToast]
+  const members = useMemo(
+    () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
+    [workersData?.workers, watchId]
   );
 
-  const callablesOn = useMemo(
-    () => localWatch?.callables.filter((c) => c.enabled).length ?? 0,
-    [localWatch]
-  );
-
-  const hasCurrentWatch = localWatch?.id === watchId;
+  const hasCurrentWatch = watch?.id === watchId;
   const isNotFound =
     (isHttpFetchError(error) && error.response?.status === 404) ||
     (!isLoading && !error && !hasCurrentWatch);
 
   if (!hasCurrentWatch && isLoading) {
     return (
-      <PndPageSection>
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 240 }}>
+      <WatchesSectionLayout active={watchId} title={i18n.PAGE_TITLE}>
+        <EuiFlexGroup justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" aria-label={i18n.LOADING_WATCH} />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </PndPageSection>
-    );
-  }
-
-  if (!hasCurrentWatch) {
-    const title = isNotFound ? i18n.WATCH_NOT_FOUND_TITLE : i18n.WATCH_LOAD_ERROR_TITLE;
-    const body = isNotFound ? i18n.WATCH_NOT_FOUND_BODY : i18n.WATCH_LOAD_ERROR_BODY;
-    return (
-      <WatchesSectionLayout active="watches">
-        <PndPageSection>
-          <EuiEmptyPrompt
-            iconType={isNotFound ? 'search' : 'error'}
-            title={<h2>{title}</h2>}
-            body={<p>{body}</p>}
-            actions={
-              <EuiFlexGroup gutterSize="s" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButton onClick={() => history.push('/watches')}>
-                    {i18n.BACK_TO_WATCHES}
-                  </EuiButton>
-                </EuiFlexItem>
-                {error && !isNotFound ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty onClick={() => refetch()}>{i18n.RETRY}</EuiButtonEmpty>
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            }
-          />
-        </PndPageSection>
       </WatchesSectionLayout>
     );
   }
 
-  const watch = localWatch;
-
-  return (
-    <WatchesSectionLayout active="watches">
-      <PndPageSection
-        contentProps={{
-          css: {
-            ['--wt' as string]: watch.color,
-          },
-        }}
-      >
-        <PndPageHeader
-          title={
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>{watch.name}</EuiFlexItem>
+  if (!watch || !hasCurrentWatch) {
+    return (
+      <WatchesSectionLayout active={watchId} title={i18n.PAGE_TITLE}>
+        <EuiEmptyPrompt
+          iconType={isNotFound ? 'search' : 'error'}
+          title={<h2>{isNotFound ? i18n.WATCH_NOT_FOUND_TITLE : i18n.WATCH_LOAD_ERROR_TITLE}</h2>}
+          body={<p>{isNotFound ? i18n.WATCH_NOT_FOUND_BODY : i18n.WATCH_LOAD_ERROR_BODY}</p>}
+          actions={
+            <EuiFlexGroup gutterSize="s" justifyContent="center">
               <EuiFlexItem grow={false}>
-                {watch.draft ? (
-                  <EuiBadge color="warning">{i18n.DRAFT_BADGE}</EuiBadge>
-                ) : watch.enabled ? (
-                  <EuiBadge color="success">{i18n.ACTIVE_BADGE}</EuiBadge>
-                ) : (
-                  <EuiBadge color="default">{i18n.PAUSED_BADGE}</EuiBadge>
-                )}
+                <EuiButton onClick={() => history.push('/watches')}>
+                  {i18n.BACK_TO_WATCHES}
+                </EuiButton>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          subtitle={watch.mandate}
-          leftSideItems={[<WatchesSubnavExpandControl key="subnav-expand" />]}
-          backTo={{ path: '/watches', label: i18n.BACK_TO_WATCHES }}
-          rightSideItems={[
-            <EuiButton key="save" fill onClick={stubToast}>
-              {i18n.SAVE}
-            </EuiButton>,
-            <EuiButtonEmpty key="discard" onClick={() => history.push('/watches')}>
-              {i18n.DISCARD}
-            </EuiButtonEmpty>,
-            ...(!watch.managed
-              ? [
-                  <EuiButtonEmpty
-                    key="delete"
-                    color="danger"
-                    onClick={() => setIsDeleteConfirmOpen(true)}
-                  >
-                    {i18n.DELETE}
-                  </EuiButtonEmpty>,
-                ]
-              : []),
-          ]}
-        />
-
-        <EuiText size="s">
-          <p>{watch.description}</p>
-        </EuiText>
-        <EuiSpacer size="m" />
-
-        {isDeleteConfirmOpen ? (
-          <EuiConfirmModal
-            title={i18n.DELETE_CONFIRM_TITLE}
-            onCancel={() => setIsDeleteConfirmOpen(false)}
-            onConfirm={onConfirmDelete}
-            cancelButtonText={i18n.DELETE_CANCEL}
-            confirmButtonText={i18n.DELETE_CONFIRM_BUTTON}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          >
-            <p>{i18n.deleteConfirmBody(watch.name)}</p>
-          </EuiConfirmModal>
-        ) : null}
-
-        <div
-          css={css`
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: ${euiTheme.size.m};
-            max-width: 480px;
-            opacity: ${watch.metrics.runs7d == null ? 0.4 : 1};
-          `}
-        >
-          <div>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="m">
-                  <strong>{watch.metrics.runs7d ?? '—'}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              {watch.metrics.runs7d != null ? (
+              {error && !isNotFound ? (
                 <EuiFlexItem grow={false}>
-                  <RunSparkline seed={watch.id} color={watch.color} />
+                  <EuiButtonEmpty onClick={() => refetch()}>{i18n.RETRY}</EuiButtonEmpty>
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
-            <EuiText size="xs" color="subdued">
-              {i18n.RUNS_7D}
-            </EuiText>
-          </div>
-          <div>
-            <EuiText size="m">
-              <strong>
-                {watch.metrics.acceptedPct != null ? `${watch.metrics.acceptedPct}%` : '—'}
-              </strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              {i18n.ACCEPTED}
-            </EuiText>
-          </div>
-          <div>
-            <EuiText size="m">
-              <strong>{watch.metrics.timeSaved ?? '—'}</strong>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              {i18n.TIME_SAVED}
-            </EuiText>
-          </div>
-        </div>
+          }
+        />
+      </WatchesSectionLayout>
+    );
+  }
 
-        <EuiSpacer size="xl" />
+  const intro = settingsI18n.watchIntro(watch.id);
 
-        {/* Identity */}
-        <SectionHeading title={i18n.IDENTITY_TITLE} subtitle={i18n.IDENTITY_SUBTITLE} />
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.DESCRIPTION_LABEL} fullWidth>
-            <EuiTextArea
-              value={watch.description}
-              onChange={(e) =>
-                setLocalWatch((prev) => (prev ? { ...prev, description: e.target.value } : prev))
-              }
-              rows={2}
-              fullWidth
-              compressed
-            />
-          </EuiFormRow>
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        {/* Autonomy */}
-        <SectionHeading title={i18n.AUTONOMY_TITLE} subtitle={i18n.AUTONOMY_SUBTITLE} />
-        <EuiPanel hasBorder paddingSize="m">
-          <EuiFormRow label={i18n.AUTONOMY_LEVEL} fullWidth>
-            <div>
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <AutonomyMeter level={watch.autonomyLevel} color={watch.color} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {watch.autonomyLevel} / 5
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="s" />
-              <EuiRange
-                min={1}
-                max={5}
-                step={1}
-                value={watch.autonomyLevel}
-                onChange={(e) =>
-                  onAutonomyChange(Number((e.target as HTMLInputElement).value) as AutonomyLevel)
-                }
-                showTicks
-                ticks={AUTONOMY_LABELS.map((label, i) => ({
-                  value: i + 1,
-                  label: i === 0 || i === 4 ? label : '',
-                }))}
-                fullWidth
-                compressed
-              />
-              <EuiSpacer size="s" />
-              <EuiText size="xs" color="subdued">
-                {i18n.AUTONOMY_GUARDRAILS_NOTE}
-              </EuiText>
-            </div>
-          </EuiFormRow>
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        {/* Schedule */}
-        <SectionHeading title={i18n.SCHEDULE_TITLE} subtitle={i18n.SCHEDULE_SUBTITLE} />
-        <SchedulePanel watch={watch} onScheduleChange={onScheduleChange} />
-
-        <EuiSpacer size="l" />
-
-        {/* Agent capabilities */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem>
-            <SectionHeading
-              title={i18n.AGENT_CAPABILITIES_TITLE}
-              subtitle={i18n.agentCapabilitiesSubtitle(callablesOn, watch.callables.length)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="plusInCircle" onClick={stubToast}>
-              {i18n.ADD_CAPABILITY}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <AgentCapabilitiesList callables={watch.callables} onToggle={onToggleCallable} />
-
-        <EuiSpacer size="l" />
-
-        {/* Data boundaries */}
-        <SectionHeading title={i18n.DATA_BOUNDARIES_TITLE} />
-        <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-          {watch.scopes.map((scope) => (
-            <EuiFlexItem grow={false} key={scope.name}>
-              <EuiBadge
-                color="hollow"
-                css={css`
-                  border-left: 3px solid ${SCOPE_COLOR[scope.access] ?? euiTheme.colors.lightShade};
-                `}
-              >
-                {scope.name} — {scope.label}
-              </EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        {/* Recent runs */}
-        <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <SectionHeading title={i18n.RECENT_RUNS_TITLE} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={stubToast}>
-              {i18n.VIEW_ALL_RUNS}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiPanel hasBorder paddingSize="m">
-          <RecentRunsTable runs={watch.recentRuns} />
-        </EuiPanel>
-      </PndPageSection>
-    </WatchesSectionLayout>
-  );
-};
-
-const SectionHeading: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => {
-  const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup
-      alignItems="baseline"
-      gutterSize="s"
-      css={css`
-        margin-bottom: ${euiTheme.size.s};
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-      </EuiFlexItem>
-      {subtitle ? (
+    <WatchesSectionLayout active={watchId} title={watch.name}>
+      <EuiFlexGroup direction="column" gutterSize="xl" responsive={false}>
+        {intro ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued" data-test-subj="pndWatchIntro">
+              <p>{intro}</p>
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {subtitle}
-          </EuiText>
+          <SettingsSection
+            title={settingsI18n.WORKERS_SECTION_TITLE}
+            subtitle={settingsI18n.WORKERS_SECTION_SUBTITLE}
+            data-test-subj="pndWatchWorkersSection"
+          >
+            {workersError ? (
+              <EuiEmptyPrompt
+                iconType="error"
+                title={<h2>{i18n.WORKERS_LOAD_ERROR_TITLE}</h2>}
+                body={<p>{i18n.WORKERS_LOAD_ERROR_BODY}</p>}
+                actions={
+                  <EuiButtonEmpty onClick={() => refetchWorkers()}>{i18n.RETRY}</EuiButtonEmpty>
+                }
+                data-test-subj="pndWatchWorkersLoadError"
+              />
+            ) : workersLoading && members.length === 0 ? (
+              <EuiLoadingSpinner size="m" aria-label={i18n.LOADING_WATCH} />
+            ) : (
+              <EuiFlexGroup direction="column" gutterSize="l" responsive={false}>
+                {members.map((worker) => (
+                  <EuiFlexItem key={worker.id} grow={false}>
+                    <WorkerSettingsCard worker={worker} />
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            )}
+          </SettingsSection>
         </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+      </EuiFlexGroup>
+    </WatchesSectionLayout>
   );
 };

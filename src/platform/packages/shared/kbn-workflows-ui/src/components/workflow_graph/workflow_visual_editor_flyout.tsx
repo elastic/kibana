@@ -264,7 +264,7 @@ export function WorkflowVisualEditorFlyout({
                 button={
                   <EuiToolTip content={moreActionsLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      iconType="boxesHorizontal"
+                      iconType="boxesVertical"
                       color="text"
                       size="s"
                       aria-label={moreActionsLabel}
@@ -357,7 +357,7 @@ export function WorkflowVisualEditorFlyout({
         >
           <EuiButtonEmpty
             size="m"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onOpenInYaml}
             data-test-subj="workflowVisualEditorFlyoutOpenInYaml"
           >

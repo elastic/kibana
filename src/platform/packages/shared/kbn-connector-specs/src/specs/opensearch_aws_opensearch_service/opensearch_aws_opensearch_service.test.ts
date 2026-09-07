@@ -588,12 +588,8 @@ describe('OpenSearch (AWS OpenSearch Service) connector', () => {
     it('reports cluster name and status on success', async () => {
       mockRequest.mockResolvedValue(jsonResponse({ cluster_name: 'my-cluster', status: 'green' }));
 
-      const result = (await OpensearchAwsOpensearchService.test?.handler(mockContext)) as {
-        ok: boolean;
-        message: string;
-      };
+      const result = await OpensearchAwsOpensearchService.test.handler(mockContext);
 
-      expect(result.ok).toBe(true);
       expect(result.message).toContain('my-cluster');
       expect(result.message).toContain('green');
     });

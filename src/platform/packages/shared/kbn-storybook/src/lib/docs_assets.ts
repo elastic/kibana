@@ -263,6 +263,24 @@ export const createInlineRegistryWebpackConfig = ({
       module: {
         rules: [
           {
+            // `@storybook/react`'s barrel has a bare import of its `entry-preview-docs` chunk
+            // (docgen argTypes, source snippets, `jsdoc-type-pratt-parser`) to support
+            // `__definePreview`, which the embed runtime never uses. The package declares no
+            // `sideEffects`, so webpack cannot drop that ~360KB on its own. These chunks only
+            // declare bindings, making unused ones safe to elide. The name carries a build hash,
+            // so `docs_assets.test.ts` asserts the pattern still matches what is installed.
+            test: /[\\/]node_modules[\\/]@storybook[\\/]react[\\/]dist[\\/]chunk-[A-Za-z0-9]+\.mjs$/,
+            sideEffects: false,
+            resolve: {
+              // Those same chunks lazily import `@storybook/test` (~635KB) from `beforeAll`, only
+              // to install testing-library `act()` wrappers. The embed runtime never invokes
+              // `beforeAll`, and Storybook wraps the import in a bare `try`/`catch`, so stubbing it
+              // is inert. Scoped to this rule so a story's own `@storybook/test` import still
+              // resolves to the real package.
+              alias: { '@storybook/test': false },
+            },
+          },
+          {
             test: /\.(js|jsx|ts|tsx|mjs)$/,
             exclude: /node_modules/,
             use: {

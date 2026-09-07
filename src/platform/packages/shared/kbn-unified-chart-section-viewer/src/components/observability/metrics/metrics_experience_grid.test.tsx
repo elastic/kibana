@@ -25,7 +25,6 @@ import type {
 import { getFetchParamsMock, getFetch$Mock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EsqlResponseError } from '../../../common/errors/esql_response_error';
-import { DEFAULT_METRICS_SORT } from '../../../common/constants';
 import {
   ExternalServicesProvider,
   type ExternalServices,
@@ -34,9 +33,14 @@ import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../../../types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
-import { METRICS_GRID_SETTINGS_DEFAULTS } from '@kbn/discover-utils';
-import { FEATURE_FLAGS } from '../../../common/constants';
+import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
+import {
+  FEATURE_FLAGS,
+  METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ,
+  METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ,
+} from '../../../common/constants';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
 jest.mock('@kbn/ebt-tools', () => ({
@@ -202,9 +206,11 @@ const TestWrapper = ({
 }) => (
   <EuiProvider highContrastMode={false}>
     <IntlProvider locale="en">
-      <ExternalServicesProvider externalServices={externalServices}>
-        {children}
-      </ExternalServicesProvider>
+      <EventBasedTelemetryProvider>
+        <ExternalServicesProvider externalServices={externalServices}>
+          {children}
+        </ExternalServicesProvider>
+      </EventBasedTelemetryProvider>
     </IntlProvider>
   </EuiProvider>
 );
@@ -290,7 +296,7 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
@@ -325,12 +331,12 @@ describe('MetricsExperienceGrid', () => {
 
   it('renders the toolbar', () => {
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(getByTestId('toggleActions')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-    expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+    expect(getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
@@ -428,7 +434,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
@@ -446,7 +452,7 @@ describe('MetricsExperienceGrid', () => {
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: [] });
 
     const { queryByTestId, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(queryByTestId('discoverErrorCalloutTitle')).not.toBeInTheDocument();
@@ -470,7 +476,7 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
@@ -479,16 +485,16 @@ describe('MetricsExperienceGrid', () => {
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
-    const inputButton = getByTestId('metricsExperienceToolbarSearch');
+    const inputButton = getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ);
 
     act(() => {
       inputButton.click();
     });
 
-    const input = getByTestId('metricsExperienceGridToolbarSearch');
+    const input = getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ);
     expect(input).toBeInTheDocument();
 
     act(() => {
@@ -521,7 +527,7 @@ describe('MetricsExperienceGrid', () => {
       flyoutState: undefined,
       onFlyoutStateChange: jest.fn(),
       onFlyoutSelectedTabChange: jest.fn(),
-      metricsSort: DEFAULT_METRICS_SORT,
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
       gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
@@ -530,7 +536,7 @@ describe('MetricsExperienceGrid', () => {
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
+      wrapper: TestWrapper,
     });
 
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
@@ -544,16 +550,55 @@ describe('MetricsExperienceGrid', () => {
     expect(onToggleFullscreen).toHaveBeenCalled();
   });
 
+  it('exits fullscreen exactly once on Escape even when the search input has focus', () => {
+    const onToggleFullscreen = jest.fn();
+
+    useMetricsExperienceStateMock.mockReturnValue({
+      currentPage: 0,
+      selectedDimensions: [],
+      onDimensionsChange: jest.fn(),
+      onPageChange: jest.fn(),
+      isFullscreen: true,
+      searchTerm: '',
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen,
+      flyoutState: undefined,
+      onFlyoutStateChange: jest.fn(),
+      onFlyoutSelectedTabChange: jest.fn(),
+      metricsSort: METRICS_GRID_SORT_DEFAULTS,
+      onMetricsSortChange: jest.fn(),
+      profileId: 'test-profile-id',
+      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      recentlyExploredMetrics: [],
+      onGridSettingsChange: jest.fn(),
+    });
+
+    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+      wrapper: TestWrapper,
+    });
+
+    act(() => {
+      getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ).click();
+    });
+
+    act(() => {
+      fireEvent.keyDown(getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ), {
+        key: 'Escape',
+      });
+    });
+
+    expect(onToggleFullscreen).toHaveBeenCalledTimes(1);
+  });
+
   describe('wipe orphan dimensions on stream switch (#264957)', () => {
-    // Smoke tests only: these assert the grid wires `useDimensionsWipe`
-    // correctly (selection + breakdown callbacks reach Discover). The full
-    // matrix of wipe scenarios lives in `use_dimensions_wipe.test.ts`.
+    // Smoke test only: this asserts the grid wires `useDimensionsWipe`
+    // correctly. The full matrix of wipe scenarios lives in
+    // `use_dimensions_wipe.test.ts`.
     const hostName: Dimension = { name: 'host.name' };
     const environment: Dimension = { name: 'environment' };
 
-    it('prunes selectedDimensions and proposes a default breakdown via onBreakdownFieldChange', () => {
+    it('prunes selectedDimensions when the active stream no longer emits one', () => {
       const onDimensionsChange = jest.fn();
-      const onBreakdownFieldChange = jest.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
@@ -567,7 +612,7 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
@@ -585,70 +630,16 @@ describe('MetricsExperienceGrid', () => {
         error: null,
       });
 
-      render(
-        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
-        { wrapper: IntlProvider }
-      );
+      render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
 
       expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
-      // Discover had no breakdown yet, so the wipe proposes the first
-      // surviving dimension.
-      expect(onBreakdownFieldChange).toHaveBeenCalledWith('host.name');
-    });
-
-    it('does not touch the breakdown when the current breakdownField survives the prune', () => {
-      const onDimensionsChange = jest.fn();
-      const onBreakdownFieldChange = jest.fn();
-
-      useMetricsExperienceStateMock.mockReturnValue({
-        currentPage: 0,
-        selectedDimensions: [hostName, environment],
-        onDimensionsChange,
-        onPageChange: jest.fn(),
-        isFullscreen: false,
-        searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
-        onMetricsSortChange: jest.fn(),
-        profileId: 'test-profile-id',
-        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
-        recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
-      });
-
-      useFetchMetricsDataMock.mockReturnValue({
-        metricItems,
-        allDimensions: [hostName],
-        activeDimensions: [hostName],
-        loading: false,
-        error: null,
-      });
-
-      // Discover already breaks down by `host.name`, which survives the
-      // prune; the wipe must leave it untouched.
-      render(
-        <MetricsExperienceGrid
-          {...defaultProps}
-          breakdownField="host.name"
-          onBreakdownFieldChange={onBreakdownFieldChange}
-        />,
-        { wrapper: IntlProvider }
-      );
-
-      expect(onDimensionsChange).toHaveBeenCalledWith([hostName]);
-      expect(onBreakdownFieldChange).not.toHaveBeenCalled();
     });
   });
 
-  describe('onToolbarDimensionsChange', () => {
-    it('calls onDimensionsChange and onBreakdownFieldChange when user picks a dimension via the toolbar', () => {
+  describe('toolbar dimension selection', () => {
+    it('calls onDimensionsChange when user picks a dimension via the toolbar', () => {
       const onPageChange = jest.fn();
       const onDimensionsChange = jest.fn();
-      const onBreakdownFieldChange = jest.fn();
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 2,
@@ -662,7 +653,7 @@ describe('MetricsExperienceGrid', () => {
         flyoutState: undefined,
         onFlyoutStateChange: jest.fn(),
         onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
         profileId: 'test-profile-id',
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
@@ -670,27 +661,25 @@ describe('MetricsExperienceGrid', () => {
         onGridSettingsChange: jest.fn(),
       });
 
-      const { getByTestId } = render(
-        <MetricsExperienceGrid {...defaultProps} onBreakdownFieldChange={onBreakdownFieldChange} />,
-        { wrapper: IntlProvider }
-      );
+      const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
+        wrapper: TestWrapper,
+      });
 
       act(() => {
         getByTestId('metricsExperienceBreakdownSelectorOption-foo').click();
       });
 
       expect(onDimensionsChange).toHaveBeenCalledWith([dimensions[0]]);
-      // Page reset is now owned exclusively by useDiscoverFieldForBreakdown reacting
-      // to the breakdownField prop change — not by the toolbar handler directly.
+      // Page reset is owned exclusively by useResetPageOnDimensionsChange reacting
+      // to the selectedDimensions change -- not by the toolbar handler directly.
       expect(onPageChange).not.toHaveBeenCalled();
-      expect(onBreakdownFieldChange).toHaveBeenCalledWith(dimensions[0].name);
     });
   });
 
   describe('grid settings flyout', () => {
     it('hides the edit button when the host does not provide featureFlags (safe default)', () => {
       const { queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-        wrapper: IntlProvider,
+        wrapper: TestWrapper,
       });
 
       expect(queryByTestId('metricsExperienceEditGridButton')).not.toBeInTheDocument();
@@ -715,7 +704,7 @@ describe('MetricsExperienceGrid', () => {
         gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
         recentlyExploredMetrics: [],
         onGridSettingsChange,
-        metricsSort: DEFAULT_METRICS_SORT,
+        metricsSort: METRICS_GRID_SORT_DEFAULTS,
         onMetricsSortChange: jest.fn(),
       });
 

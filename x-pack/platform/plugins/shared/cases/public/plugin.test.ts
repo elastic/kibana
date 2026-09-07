@@ -25,6 +25,9 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
+  CASES_TEMPLATE_APPLIED_EVENT_TYPE,
+  CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE,
+  CASES_TEMPLATE_CLEARED_EVENT_TYPE,
   CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
@@ -39,6 +42,8 @@ function getConfig(overrides = {}) {
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
     incrementalId: { enabled: true },
+    templates: { enabled: true },
+    runWorkflows: { enabled: true },
     ...overrides,
   };
 }
@@ -119,9 +124,7 @@ describe('Cases Ui Plugin', () => {
       expect(setup).toMatchInlineSnapshot(`
         Object {
           "attachmentFramework": Object {
-            "registerExternalReference": [Function],
-            "registerPersistableState": [Function],
-            "registerUnified": [Function],
+            "registerAttachment": [Function],
           },
         }
       `);
@@ -217,6 +220,39 @@ describe('Cases Ui Plugin', () => {
       );
     });
 
+    it('registers the template apply event types', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_APPLIED_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
+            apply_mode: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_CLEARED_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+    });
+
     it('should register kibana feature when stack is enabled', async () => {
       plugin.setup(coreSetup, pluginsSetup);
 
@@ -255,9 +291,10 @@ describe('Cases Ui Plugin', () => {
           getRelatedCases: expect.any(Function),
         },
         config: {
-          templatesEnabled: false,
+          templatesEnabled: true,
           attachmentsEnabled: false,
           chatEnabled: false,
+          runWorkflowsEnabled: true,
           casesRedesign: { list: false, details: false, settings: false },
         },
         helpers: {

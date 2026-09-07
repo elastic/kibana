@@ -13,16 +13,64 @@ Use `platform.core.list_indices` to discover which ones exist.
 
 ### Field reference
 
-| Field | ES|QL type | Purpose |
+| Field | ES\|QL type | Purpose |
 |---|---|---|
 | `type` | keyword | Categorization — e.g. `"index_metadata"`, `"document"`, `"entity_profile"` |
 | `title` | text | Short name of the KI or its backing entity; semantic via `title.semantic` |
 | `content` | text | Full text: purpose, questions answered, access patterns; semantic via `content.semantic` |
 | `description` | text | Short description of this KI; semantic via `description.semantic` |
 | `tags` | keyword | Filter facets |
-| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.) |
+| `attributes` | flattened | Structured keyword-queryable metadata (status, themes, entity names, etc.). `attributes.esql` is the canonical location for a KI's runnable ES\|QL — see below. |
+| `spaces` | keyword | Optional — Kibana spaces a KI belongs to; absent means visible from every space. Filter via the `filter` parameter of `execute_esql`, never `WHERE` (see Space scoping) |
 
 Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, `description.semantic`.
+
+### `attributes.esql` — a KI's runnable ES|QL
+
+When a KI carries runnable ES|QL (e.g. a `detection` KI's materialized query, or an
+`index_metadata` KI's runnable example queries), those queries live in `attributes.esql`, as a
+string or an array of strings. This is the canonical location — do not hunt for runnable
+queries elsewhere in `attributes`. The prose access-pattern presentation (templates, params,
+returns) also appears inside `content`.
+
+The field is **optional**: only KI kinds that carry ES|QL set it, so queries must tolerate its
+absence rather than assume every KI has it. `attributes` is `flattened`, so extract the value
+with `FIELD_EXTRACT` before filtering or keeping it:
+
+```esql
+FROM ai-index-*
+| WHERE type == "detection"
+| EVAL esql = FIELD_EXTRACT(attributes, "esql")
+| WHERE esql IS NOT NULL
+| KEEP title, description, esql
+| LIMIT <n>
+```
+
+When the KI stores an array of queries, the extracted value is multivalued: `IS NOT NULL`
+still filters correctly, but scalar comparisons like `==` skip multivalued rows. Add
+`| MV_EXPAND esql` after the `WHERE esql IS NOT NULL` to get one row per query when you
+need per-query filtering.
+
+### Space scoping
+
+Some AI indices also carry a `spaces` keyword field naming the Kibana spaces a KI belongs to.
+Others omit the field entirely, and their KIs are visible from every space.
+
+Because of that split, the space condition belongs in the `filter` parameter of `execute_esql`,
+never in a `WHERE` clause: a `WHERE` on `spaces` would discard every KI from the indices that do
+not define the field. When your instructions include an AI INDICES section, pass its exact `filter`
+verbatim as an `execute_esql` argument on every AI-index query below. It is already resolved to the
+current space.
+
+The filter is a tool argument, not part of the ES|QL text, so the query templates below cannot
+show it. Every call pairs the two like this:
+
+```json
+{
+  "query": "FROM ai-index-* METADATA _id, _index, _score | <your pipeline> | LIMIT <n>",
+  "filter": <the exact filter object from the AI INDICES section>
+}
+```
 
 ---
 
@@ -36,12 +84,14 @@ either one:
 FROM ai-index-*
 | STATS ki_count = COUNT(*) BY type
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 ```esql
 FROM ai-index-*
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 `tags` is usually higher cardinality than `type`, and a single KI can carry several, so tags
@@ -55,6 +105,7 @@ FROM ai-index-*
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
+| LIMIT 10
 ```
 
 Then re-run the retrieval query with the most relevant tag added as a filter.
@@ -144,7 +195,7 @@ Replace `type == "index_metadata"` with any combination of `type` or `tags` filt
    of KIs are available. You may want to sample a few KIs — potentially per type if type names
    are ambiguous (`WHERE type == "..." | LIMIT 2`) — before running your full query. Remember
    that this doesn't come for free, so only proceed with this if needed.
-3. **Query** — use FORK+FUSE hybrid search.
+3. **Query** — use FORK+FUSE hybrid search, passing the space `filter` described above.
 4. **Return** — the `KEEP` clause already limits results to `title`, `description`, `content`,
    `type` and `tags`. Seeing `tags` on the results is often enough to narrow a follow-up query
    without a separate aggregation.

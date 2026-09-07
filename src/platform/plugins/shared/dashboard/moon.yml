@@ -108,6 +108,7 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/core-http-server'
   - '@kbn/core-chrome-layout-utils'
+  - '@kbn/core-chrome-layout-constants'
   - '@kbn/cps'
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
@@ -132,6 +133,7 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/ui-callout'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
@@ -148,6 +150,7 @@ fileGroups:
     - test/scout_oas_schema/**/*
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -71,6 +71,7 @@ const create = () => {
     minimumScheduleIntervalInMs: 0,
     featureFlags: coreFeatureFlagsMock.createStart(),
     isServerless: false,
+    analytics: { reportEvent: jest.fn() },
   };
 
   return rulesClientParams;
