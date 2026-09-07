@@ -69,13 +69,20 @@ interface EnrolledAgents {
  * `rebalanceByCost` needs a location's complete monitor list to compute a
  * correct plan, but nothing requires *applying* every move it produces in one
  * pass: the plan is idempotent and re-derived from a fresh read every cycle
- * (~1m), so writes beyond this cap are simply left for the next tick. This
- * keeps one cycle's write phase — the part whose cost scales with monitors
- * actually moving — bounded well inside the task's `10m` timeout even when a
- * location's first rebalance (or a mass agent failover) needs to move far
- * more monitors than fit in one run.
+ * (~1m), so writes beyond this cap are simply left for the next tick.
+ *
+ * Each cycle's moves go through Fleet's `bulkUpdatePartial`, which sends the
+ * whole batch as a single saved-objects `bulkUpdate` — one Elasticsearch
+ * `_bulk` call, not one round trip per monitor. The real constraint that cap
+ * protects against is therefore Kibana's ES client `requestTimeout` (30s
+ * default): a single bulk request large enough to run past that fails
+ * outright (non-fatal here — it's retried whole next cycle, per the idempotent
+ * design — but wasteful if it recurs every cycle for a persistently huge
+ * location). Sized to match {@link PackagePolicyService.listByAgentPolicy}'s
+ * own `perPage: 1000` for the same document shape, rather than an unrelated
+ * guess.
  */
-export const MAX_MOVES_PER_REBALANCE_CYCLE = 500;
+export const MAX_MOVES_PER_REBALANCE_CYCLE = 1000;
 
 export interface FailedPolicyUpdate {
   packagePolicy: NewPackagePolicyWithId;
