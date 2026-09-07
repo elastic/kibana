@@ -30,6 +30,7 @@ export {
   esArchiverFixture,
   networkFixture,
   createPlaywrightConfig,
+  defineConfig,
   createLazyPageObject,
   extendPlaywrightPage,
 } from './src/playwright';
