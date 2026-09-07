@@ -177,14 +177,18 @@ export const setSignalsStatusRoute = (
             // and runtime_mappings, but the generated Zod schema doesn't carry
             // that constraint — enforce the combined count here so one request
             // can't schedule unbounded runtime-script work on the
-            // `_update_by_query`.
-            const runtimeFieldCount =
-              (runtimeFields ? Object.keys(runtimeFields).length : 0) +
-              (passthroughRuntimeMappings ? Object.keys(passthroughRuntimeMappings).length : 0);
-            if (runtimeFieldCount > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+            // `_update_by_query`. Use the union of keys (a Set) rather than
+            // summing the two counts so a key present in both params is counted
+            // once — the merge step lets passthrough win on collision, so the
+            // effective number of runtime mappings sent to ES is the union size.
+            const runtimeFieldUnion = new Set([
+              ...Object.keys(runtimeFields ?? {}),
+              ...Object.keys(passthroughRuntimeMappings ?? {}),
+            ]);
+            if (runtimeFieldUnion.size > MAX_RUNTIME_FIELDS_PER_REQUEST) {
               return siemResponse.error({
                 statusCode: 400,
-                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldCount}`,
+                body: `runtime_fields and runtime_mappings combined are limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldUnion.size} unique field names`,
               });
             }
 
