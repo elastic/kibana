@@ -10,7 +10,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
-import { SlackAppService } from './service';
+import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
 import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
@@ -52,11 +52,40 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
 
   const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
 
+  // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
+  // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
+  // id already present, while unregistration only removes connectors this app registered.
+  const inMemoryConnectors: Array<{
+    id: string;
+    secrets?: Record<string, string>;
+    isDynamic?: boolean;
+  }> = [];
+  const registerDynamicConnector = jest.fn(
+    (connector: { id: string; secrets?: Record<string, string> }) => {
+      if (inMemoryConnectors.some(({ id }) => id === connector.id)) {
+        return false;
+      }
+      inMemoryConnectors.push({ ...connector, isDynamic: true });
+      return true;
+    }
+  );
+  const unregisterDynamicConnector = jest.fn((connectorId: string) => {
+    const index = inMemoryConnectors.findIndex(
+      ({ id, isDynamic }) => id === connectorId && isDynamic === true
+    );
+    if (index === -1) {
+      return false;
+    }
+    inMemoryConnectors.splice(index, 1);
+    return true;
+  });
+
   const server = {
     logger,
     config: {},
     agentBuilder: {},
     kibanaVersion: '9.2.0',
+    actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
     relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
@@ -72,7 +101,17 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     },
   } as unknown as StreamsServer;
 
-  return { server, soClient, grantAsInternalUser, invalidateAsInternalUser, getBooleanValue };
+  return {
+    server,
+    soClient,
+    logger,
+    grantAsInternalUser,
+    invalidateAsInternalUser,
+    getBooleanValue,
+    inMemoryConnectors,
+    registerDynamicConnector,
+    unregisterDynamicConnector,
+  };
 }
 
 describe('SlackAppService', () => {
@@ -749,6 +788,303 @@ describe('SlackAppService', () => {
       await new SlackAppService(server).unbindChannel(request, 'C123');
 
       expect(unbindChannel).toHaveBeenCalledWith('tenant-A', 'C123');
+    });
+  });
+
+  describe('elastic slack connector registration', () => {
+    const connectorFor = (tenantKey: string) =>
+      expect.objectContaining({
+        id: 'elastic-apps-slack',
+        actionTypeId: '.slack2',
+        config: { authType: 'relay' },
+        secrets: { authType: 'relay', tenantKey },
+      });
+
+    it('registers the connector when the Relay claim completes', async () => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-A' });
+
+      await new SlackAppService(server).getStatus(request);
+
+      expect(registerDynamicConnector).toHaveBeenCalledWith(connectorFor('tenant-A'));
+    });
+
+    it('does not register while the claim is still pending', async () => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'pending' });
+
+      await new SlackAppService(server).getStatus(request);
+
+      expect(registerDynamicConnector).not.toHaveBeenCalled();
+    });
+
+    it('unregisters when an in-progress install fails terminally', async () => {
+      const { server, soClient, unregisterDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.oauthInProgress, apiKeyId: 'key-1' },
+      });
+
+      await new SlackAppService(server).getStatus(request);
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+    });
+
+    it('withdraws the stale connector when a reconnect starts', async () => {
+      const { server, grantAsInternalUser, unregisterDynamicConnector } = createHarness();
+      grantAsInternalUser.mockResolvedValue({ id: 'key-2', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({
+        authorize_url: 'https://slack/oauth',
+        claim_id: 'claim-2',
+      });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+    });
+
+    it('replaces the connector on reconnect so a new tenant key takes effect', async () => {
+      const { server, soClient, inMemoryConnectors, registerDynamicConnector } = createHarness();
+      inMemoryConnectors.push({
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: 'key-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockResolvedValue({ status: 'complete', tenant_key: 'tenant-B' });
+
+      await new SlackAppService(server).getStatus(request);
+
+      expect(registerDynamicConnector).toHaveBeenCalledWith(connectorFor('tenant-B'));
+      expect(inMemoryConnectors).toEqual([connectorFor('tenant-B')]);
+    });
+
+    it('unregisters on disconnect', async () => {
+      const { server, soClient, unregisterDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-1',
+          tenantKey: 'tenant-A',
+        },
+      });
+      unbind.mockResolvedValue(undefined);
+
+      await new SlackAppService(server).disconnect(request);
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+    });
+
+    it('still unregisters when the Relay unbind fails and the connection is left in error', async () => {
+      const { server, soClient, unregisterDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'key-1',
+          tenantKey: 'tenant-A',
+        },
+      });
+      unbind.mockRejectedValue(new RelayRequestError('/v1/slack/uninstall', 502));
+
+      await expect(new SlackAppService(server).disconnect(request)).rejects.toThrow();
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+    });
+  });
+
+  describe('reconcileConnector', () => {
+    it('restores the connector for a deployment that is already connected', async () => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(registerDynamicConnector).toHaveBeenCalledWith(
+        expect.objectContaining({ secrets: { authType: 'relay', tenantKey: 'tenant-A' } })
+      );
+    });
+
+    it('registers nothing when there is no connection document', async () => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(registerDynamicConnector).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [RELAY_APP_CONNECTION_STATUS.oauthInProgress, null],
+      [RELAY_APP_CONNECTION_STATUS.error, null],
+      [RELAY_APP_CONNECTION_STATUS.connected, null],
+    ])('registers nothing for a %s connection without a tenant key', async (status, tenantKey) => {
+      const { server, soClient, registerDynamicConnector } = createHarness();
+      soClient.get.mockResolvedValue({ attributes: { status, tenantKey } });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(registerDynamicConnector).not.toHaveBeenCalled();
+    });
+
+    it('leaves an already correct registration untouched', async () => {
+      const {
+        server,
+        soClient,
+        inMemoryConnectors,
+        registerDynamicConnector,
+        unregisterDynamicConnector,
+      } = createHarness();
+      inMemoryConnectors.push({
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(registerDynamicConnector).not.toHaveBeenCalled();
+      expect(unregisterDynamicConnector).not.toHaveBeenCalled();
+    });
+
+    it('replaces a registration made for another workspace', async () => {
+      const { server, soClient, inMemoryConnectors } = createHarness();
+      inMemoryConnectors.push({
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-B' },
+      });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(inMemoryConnectors).toEqual([
+        expect.objectContaining({ secrets: { authType: 'relay', tenantKey: 'tenant-B' } }),
+      ]);
+    });
+
+    it('withdraws a connector left behind by a disconnect on another node', async () => {
+      const { server, soClient, inMemoryConnectors, unregisterDynamicConnector } = createHarness();
+      inMemoryConnectors.push({
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
+      });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+      expect(inMemoryConnectors).toEqual([]);
+    });
+
+    it('withdraws the connector when the app is no longer available', async () => {
+      const { server, soClient, inMemoryConnectors, unregisterDynamicConnector } = createHarness({
+        featureFlagEnabled: false,
+      });
+      inMemoryConnectors.push({
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+        isDynamic: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+      });
+
+      await new SlackAppService(server).reconcileConnector(soClient as never);
+
+      expect(unregisterDynamicConnector).toHaveBeenCalledWith(ELASTIC_APPS_SLACK_CONNECTOR_ID);
+      expect(soClient.get).not.toHaveBeenCalled();
+    });
+
+    describe('when the connector id is taken by a connector this app does not own', () => {
+      // A preconfigured `elastic-apps-slack` in kibana.yml. It carries the tenant key the reconcile
+      // wants, so matching on the id alone would read as "already correct" even though this app can
+      // neither vouch for its auth nor unregister it.
+      const foreignConnector = {
+        id: ELASTIC_APPS_SLACK_CONNECTOR_ID,
+        secrets: { tenantKey: 'tenant-A' },
+      };
+
+      const createCollidingHarness = () => {
+        const harness = createHarness();
+        harness.inMemoryConnectors.push({ ...foreignConnector });
+        harness.soClient.get.mockResolvedValue({
+          attributes: { status: RELAY_APP_CONNECTION_STATUS.connected, tenantKey: 'tenant-A' },
+        });
+        return harness;
+      };
+
+      it('does not read a matching tenant key as an already correct registration', async () => {
+        const { server, soClient, registerDynamicConnector } = createCollidingHarness();
+
+        await new SlackAppService(server).reconcileConnector(soClient as never);
+
+        expect(registerDynamicConnector).toHaveBeenCalled();
+      });
+
+      it('leaves the foreign connector in place', async () => {
+        const { server, soClient, inMemoryConnectors } = createCollidingHarness();
+
+        await new SlackAppService(server).reconcileConnector(soClient as never);
+
+        expect(inMemoryConnectors).toEqual([foreignConnector]);
+      });
+
+      it('warns once instead of on every reconcile pass', async () => {
+        const { server, soClient, logger } = createCollidingHarness();
+        const service = new SlackAppService(server);
+
+        await service.reconcileConnector(soClient as never);
+        await service.reconcileConnector(soClient as never);
+        await service.reconcileConnector(soClient as never);
+
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Could not register the "${ELASTIC_APPS_SLACK_CONNECTOR_ID}"`)
+        );
+      });
+
+      it('warns again when the id is taken a second time', async () => {
+        const { server, soClient, inMemoryConnectors, logger } = createCollidingHarness();
+        const service = new SlackAppService(server);
+
+        await service.reconcileConnector(soClient as never);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+
+        // The operator drops it from kibana.yml and restarts, so the app takes over the id.
+        inMemoryConnectors.length = 0;
+        await service.reconcileConnector(soClient as never);
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+
+        inMemoryConnectors.splice(0, inMemoryConnectors.length, { ...foreignConnector });
+        await service.reconcileConnector(soClient as never);
+
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+      });
     });
   });
 });
