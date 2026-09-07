@@ -12,15 +12,13 @@
  * tool calling, workflows, sub-agents) before being added here.
  * Once listed, the RecommendedEndpointsPoller will automatically promote it
  * when EIS marks it as the newest capable/balanced model for its family.
- *
- * Key: inference_id Value: ISO date when AB validation was confirmed
  */
-export const AB_VALIDATED_MODELS: ReadonlyMap<string, string> = new Map([
-  ['.anthropic-claude-4.6-sonnet-chat_completion', '2025-01-01'],
-  ['.anthropic-claude-4.6-opus-chat_completion', '2025-01-01'],
-  ['.openai-gpt-5.2-chat_completion', '2025-01-01'],
-  ['.anthropic-claude-4.5-haiku-chat_completion', '2025-01-01'],
-  ['.google-gemini-3.0-flash-chat_completion', '2025-01-01'],
+export const AB_VALIDATED_MODELS: ReadonlySet<string> = new Set([
+  '.anthropic-claude-4.6-sonnet-chat_completion',
+  '.anthropic-claude-4.6-opus-chat_completion',
+  '.openai-gpt-5.2-chat_completion',
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  '.google-gemini-3.0-flash-chat_completion',
 ]);
 
 export const isAbValidated = (inferenceId: string): boolean => AB_VALIDATED_MODELS.has(inferenceId);
