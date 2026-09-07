@@ -1728,6 +1728,7 @@ steps:
         })
       ).rejects.toThrow(/already responded to or no longer waiting for input/);
 
+      expect(mockWorkflowsService.getWaitingStepExecutionId).not.toHaveBeenCalled();
       expect(mockWorkflowsExecutionEngine.resumeWorkflowExecution).not.toHaveBeenCalled();
     });
 

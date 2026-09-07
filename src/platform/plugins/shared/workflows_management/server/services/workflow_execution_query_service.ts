@@ -824,6 +824,9 @@ export class WorkflowExecutionQueryService {
       if (isIndexNotFoundError(error)) {
         return null;
       }
+      this.deps.logger.warn(
+        `Failed to resolve the waiting step execution for ${executionId} in space ${spaceId}: ${error}`
+      );
       throw error;
     }
   }

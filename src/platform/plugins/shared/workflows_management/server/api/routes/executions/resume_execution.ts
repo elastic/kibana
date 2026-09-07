@@ -45,6 +45,7 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
               }),
               stepExecutionId: schema.maybe(
                 schema.string({
+                  minLength: 1,
                   maxLength: 1024,
                   meta: {
                     description:

@@ -88,7 +88,8 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       });
       const askStep = findAskStep(paused.stepExecutions);
       expect(askStep?.status).toBe(ExecutionStatus.WAITING_FOR_INPUT);
-      expect(askStep?.id).toBeDefined();
+      const askStepId = askStep?.id ?? '';
+      expectNonEmptyString(askStepId);
 
       const resumeResponse = await workflowsApi.rawResume(
         workflowExecutionId,
@@ -96,7 +97,7 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
           approved: true,
           source: 'happy-path',
         },
-        { stepExecutionId: askStep?.id }
+        { stepExecutionId: askStepId }
       );
       expect(resumeResponse.status).toBe(200);
       expect(resumeResponse.data).toMatchObject({
@@ -118,7 +119,7 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
       const lateResume = await workflowsApi.rawResume(
         workflowExecutionId,
         { approved: false, source: 'too-late' },
-        { ignoreErrors: [409], stepExecutionId: askStep?.id }
+        { ignoreErrors: [409], stepExecutionId: askStepId }
       );
       expect(lateResume.status).toBe(409);
     }
@@ -136,8 +137,8 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
         status: ExecutionStatus.WAITING_FOR_INPUT,
         timeout: WAITING_TIMEOUT,
       });
-      const askStepId = findAskStep(paused.stepExecutions)?.id;
-      expect(askStepId).toBeDefined();
+      const askStepId = findAskStep(paused.stepExecutions)?.id ?? '';
+      expectNonEmptyString(askStepId);
 
       const firstInput = { approved: true, source: 'consumer-a' };
       const secondInput = { approved: false, source: 'consumer-b' };
