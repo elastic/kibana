@@ -61,6 +61,26 @@ describe('pickLatestExperimentPerModel', () => {
     expect(kept.get('google-gemini-3.1-pro')?.experiment_id).toBe('newer-self-judged');
   });
 
+  it('ignores experiments newer than asOf for every model alike', () => {
+    const experiments = [
+      experiment({ experiment_id: 'clean', modelId: 'm1', timestamp: '2026-08-22T00:00:00.000Z' }),
+      experiment({ experiment_id: 'bad', modelId: 'm1', timestamp: '2026-09-05T00:00:00.000Z' }),
+      experiment({ experiment_id: 'clean2', modelId: 'm2', timestamp: '2026-08-22T00:00:00.000Z' }),
+      experiment({ experiment_id: 'bad2', modelId: 'm2', timestamp: '2026-09-05T00:00:00.000Z' }),
+    ];
+
+    // Without a cutoff the newest run wins, even when its instrumentation was
+    // broken -- that is the whole reason the cutoff exists.
+    expect(pickLatestExperimentPerModel(experiments).get('m1')?.experiment_id).toBe('bad');
+
+    const asOf = Date.parse('2026-09-01T00:00:00.000Z');
+    const selected = pickLatestExperimentPerModel(experiments, { now: asOf });
+    // The cutoff must move BOTH models back, never one: a matrix that mixes a
+    // pre-cutoff row with a post-cutoff row is not comparable across rows.
+    expect(selected.get('m1')?.experiment_id).toBe('clean');
+    expect(selected.get('m2')?.experiment_id).toBe('clean2');
+  });
+
   it('keeps the most recent experiment per model', () => {
     const result = pickLatestExperimentPerModel([
       experiment({ experiment_id: 'old', modelId: 'm1', timestamp: '2026-06-01T00:00:00.000Z' }),
@@ -912,6 +932,26 @@ describe('scoresByPrefixToDatasets errored-out tracking', () => {
     );
     // Saturated survivors still score — the guard flags the broken ones.
     expect(datasets[0].evaluators).toHaveLength(2);
+  });
+
+  it('flags a trace evaluator that reported unavailable for every example', () => {
+    // The Claude Sonnet 4.5 shape: SkillInvoked found no tool spans and wrote
+    // label=unavailable with a null score for all 19 examples. That is not
+    // "error", so the cell used to publish an overall built only on the
+    // evaluators that survived -- ranked against peers graded on the full set.
+    const datasets = scoresByPrefixToDatasets(
+      [
+        doc('alert-analysis-a', 'MinExpectedSteps', 1),
+        doc('alert-analysis-a', 'FinalAnswerPresent', 1),
+        doc('alert-analysis-a', 'SkillInvoked', undefined, 'unavailable'),
+        doc('alert-analysis-b', 'SkillInvoked', undefined, 'unavailable'),
+      ],
+      ['alert-analysis']
+    );
+
+    expect(datasets[0].erroredOutEvaluators).toEqual(
+      expect.arrayContaining(['SkillInvoked'])
+    );
   });
 
   it('does not flag an evaluator that errored once but recovered', () => {

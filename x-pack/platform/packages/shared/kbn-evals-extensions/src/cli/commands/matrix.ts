@@ -53,16 +53,26 @@ export const matrixScoreQuery = (
     modelIds,
     branch,
     lookbackDays,
+    asOf,
   }: Omit<
     QueryMatrixScoresOptions,
-    'prefixesBySuite' | 'scoring' | 'branchBySuite' | 'scoringBySuite'
-  >
+    'prefixesBySuite' | 'scoring' | 'branchBySuite' | 'scoringBySuite' | 'asOf'
+  > & {
+    /**
+     * Required (though nullable) so a caller that forgets it fails to compile.
+     * An optional `asOf` was silently dropped at the command call site once
+     * already: the flag parsed, selection ignored it, and the matrix published
+     * exactly the runs the cutoff existed to exclude.
+     */
+    asOf: number | undefined;
+  }
 ): QueryMatrixScoresOptions => ({
   suiteIds,
   modelIds,
   branch,
   branchBySuite: branchBySuiteFromColumns(config),
   lookbackDays,
+  asOf,
   prefixesBySuite: prefixesBySuiteFromColumns(config),
   scoring: config.scoring,
   scoringBySuite: scoringBySuiteFromColumns(config),
@@ -178,6 +188,7 @@ export const matrixCmd: Command<void> = {
       'out',
       'branch',
       'lookback-days',
+      'as-of',
       'profile',
       'kbn-url',
       'kbn-api-key',
@@ -191,6 +202,9 @@ export const matrixCmd: Command<void> = {
     --out              Output directory for artifacts (default: ${DEFAULT_OUT_DIR}).
     --branch           Git branch filter override (default: config.branch).
     --lookback-days    Only consider experiments newer than now-<n>d (default: config.lookbackDays).
+    --as-of            Render the matrix as of an ISO date/instant, ignoring runs
+                       after it for every model alike (e.g. 2026-09-01). Use to
+                       reproduce an earlier matrix or exclude a known-bad window.
     --model            Replace the config's model set for an on-demand run.
                        Format: id[:label][:open-source]. Repeatable.
                        e.g. --model gpt-5-preview:GPT-5 --model qwen3:Qwen3:open-source
@@ -247,6 +261,12 @@ export const matrixCmd: Command<void> = {
       throw createFlagError('--lookback-days must be a positive number.');
     }
 
+    const asOfFlag = flagsReader.string('as-of');
+    const asOf = asOfFlag === undefined ? undefined : Date.parse(asOfFlag);
+    if (asOf !== undefined && !Number.isFinite(asOf)) {
+      throw createFlagError('--as-of must be an ISO date or instant, e.g. 2026-09-01.');
+    }
+
     const outDir = Path.resolve(repoRoot, flagsReader.string('out') ?? DEFAULT_OUT_DIR);
     const suiteIds = [...new Set(config.columns.flatMap((column) => column.suites))];
     // Query per (suite, model) pair: the experiments route answers from a
@@ -286,7 +306,7 @@ export const matrixCmd: Command<void> = {
     const aggregated = await queryMatrixScores(
       evalsClient,
       log,
-      matrixScoreQuery(config, { suiteIds, modelIds, branch, lookbackDays })
+      matrixScoreQuery(config, { suiteIds, modelIds, branch, lookbackDays, asOf })
     );
 
     if (aggregated.length === 0) {

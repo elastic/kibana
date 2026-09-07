@@ -176,6 +176,13 @@ export interface QueryMatrixScoresOptions {
   branchBySuite?: Record<string, string | string[]>;
   lookbackDays?: number;
   /**
+   * Render the matrix as of this epoch-ms instant: experiments newer than it
+   * are ignored for every model alike. Reproduces an earlier matrix, or
+   * excludes a window of runs known to be instrumented wrong -- never a
+   * per-model choice of which run to score.
+   */
+  asOf?: number;
+  /**
    * When any config column sets `examplePrefixes`, per-example score documents
    * are fetched (stripped experiment-scores route — unbounded fields excluded)
    * and bucketed into synthetic per-prefix datasets alongside the dataset-level
@@ -272,7 +279,11 @@ export const scoresByPrefixToDatasets = (
       erroredByPrefix.set(prefix, errTrack);
     }
     const tally = errTrack.get(evaluatorName) ?? { errored: 0, scored: 0 };
-    if (doc.evaluator?.label === 'error') {
+    // 'unavailable' counts too: a trace evaluator that found no spans reports a
+    // null score without ever calling itself an error, so gating on 'error'
+    // alone let a model publish an overall built on the evaluators that did
+    // survive -- ranked against peers who were graded on the full set.
+    if (doc.evaluator?.label === 'error' || doc.evaluator?.label === 'unavailable') {
       tally.errored += 1;
       errTrack.set(evaluatorName, tally);
     }
@@ -359,6 +370,14 @@ export const pickLatestExperimentPerModel = (
     // An unparseable timestamp must not be treated as epoch 0, or stale
     // experiments would silently survive the lookback cutoff.
     if (!Number.isFinite(at) || (cutoff !== undefined && at < cutoff)) {
+      continue;
+    }
+
+    // `now` doubles as the upper bound so a matrix can be rendered as of a
+    // point in time. Applied to every model identically -- it reproduces an
+    // older matrix, it does not let one model be scored on a different run
+    // than its neighbours.
+    if (at > now) {
       continue;
     }
 
@@ -449,6 +468,7 @@ export const queryMatrixScores = async (
     branch,
     branchBySuite,
     lookbackDays,
+    asOf,
     prefixesBySuite = {},
     scoring,
     scoringBySuite,
@@ -495,6 +515,7 @@ export const queryMatrixScores = async (
       const [latest] = [
         ...pickLatestExperimentPerModel(experiments, {
           lookbackDays,
+          ...(asOf !== undefined ? { now: asOf } : {}),
           // A suite that opted out of the exclusion must also keep its
           // self-judged runs through selection, or the cell stays blank no
           // matter what the scoring policy allows.
@@ -561,8 +582,20 @@ export const queryMatrixScores = async (
       // A sharded sweep splits one model's examples across VMs, each with its
       // own execution_id. Selecting a single experiment would render one shard
       // and blank every example the others covered, so gather the whole sweep.
+      // Shard gathering re-scans the raw listing, so the cutoff has to be
+      // reapplied here. Without it selection honours `asOf` but the shard
+      // union pulls the excluded runs straight back in.
       const shardMembers = pickShardExperiments(
-        experiments.filter((candidate) => candidate.task_model?.id === modelId)
+        experiments.filter((candidate) => {
+          if (candidate.task_model?.id !== modelId) {
+            return false;
+          }
+          if (asOf === undefined) {
+            return true;
+          }
+          const at = Date.parse(candidate.timestamp);
+          return Number.isFinite(at) && at <= asOf;
+        })
       );
       const shards = shardMembers.some(
         (member) => member.execution_id === (latest.execution_id ?? latest.experiment_id)

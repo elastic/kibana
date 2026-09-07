@@ -25,6 +25,22 @@ describe('matrixScoreQuery', () => {
       { suiteIds: ['suite-a'], modelIds: ['model-a'] }
     );
 
+  it('forwards asOf to the score query', () => {
+    // The CLI parses --as-of, but selection happens in queryMatrixScores. If
+    // this object drops the value the flag is accepted and silently ignored,
+    // and the matrix publishes the runs it was told to exclude.
+    const asOf = Date.parse('2026-09-01T00:00:00.000Z');
+    const q = matrixScoreQuery(
+      parseMatrixConfig({
+        columns: [{ id: 'triage', label: 'Triage', suites: ['suite-a'] }],
+        models: [{ id: 'model-a', label: 'Model A' }],
+      }),
+      { suiteIds: ['suite-a'], modelIds: ['model-a'], asOf }
+    );
+
+    expect(q.asOf).toBe(asOf);
+  });
+
   it('lets a column opt out of the global self-judge exclusion', () => {
     // gemini-3.1-pro judges the attack-discovery suite and is also ranked in
     // it. The global policy blanks its cell; measured self-preference on that
