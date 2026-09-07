@@ -6,12 +6,9 @@
  */
 
 import { services as apiServices } from '../../reporting_api_integration/services';
-import type { FtrProviderContext } from '../ftr_provider_context';
-import { createScenarios } from './scenarios';
+import { ReportingFunctionalProvider } from './reporting_functional_provider';
 
-export function ReportingFunctionalProvider(context: FtrProviderContext) {
-  return createScenarios(context);
-}
+export { ReportingFunctionalProvider } from './reporting_functional_provider';
 
 export const services = {
   ...apiServices,

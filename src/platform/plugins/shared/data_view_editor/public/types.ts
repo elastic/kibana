@@ -25,6 +25,7 @@ import type {
   INDEX_PATTERN_TYPE,
   MatchedItem,
 } from '@kbn/data-views-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewEditorService } from './data_view_editor_service';
 import type { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
@@ -37,6 +38,7 @@ export interface DataViewEditorContext {
   overlays: OverlayStart;
   dataViews: DataViewsServicePublic;
   searchClient: DataPublicPluginStart['search']['search'];
+  cps?: CPSPluginStart;
 }
 
 /** @public */
@@ -72,6 +74,14 @@ export interface DataViewEditorProps {
    */
   showManagementLink?: boolean;
   /**
+   * If editing a data view and onDuplicate is defined, a duplicate button is shown
+   */
+  onDuplicate?: () => void;
+  /**
+   * Optional boolean to indicate if the data view is being duplicated
+   */
+  isDuplicating?: boolean;
+  /**
    * Optional callback to get help text based on the active data view
    */
   getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
@@ -102,6 +112,7 @@ export interface SetupPlugins {}
 export interface StartPlugins {
   data: DataPublicPluginStart;
   dataViews: DataViewsServicePublic;
+  cps?: CPSPluginStart;
 }
 
 export type CloseEditor = () => void;
@@ -140,6 +151,7 @@ export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'>
 export interface TimestampOption {
   display: string;
   fieldName?: string;
+  isDisabled?: boolean;
 }
 
 export interface MatchedIndicesSet {

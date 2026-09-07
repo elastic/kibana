@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
@@ -20,11 +20,9 @@ import { SuperDatePicker } from '../../../../common/components/super_date_picker
 import type { KueryFilterQuery } from '../../../../../common/types/timeline';
 import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
-import { Sourcerer } from '../../../../sourcerer/components';
 import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -87,7 +85,6 @@ export const SearchOrFilter = React.memo<Props>(
     toggleDataProviderVisibility,
     timelineType,
   }) => {
-    const { newDataViewPickerEnabled } = useEnableExperimental();
     const isDataProviderEmpty = useMemo(() => dataProviders?.length === 0, [dataProviders]);
 
     const dataProviderIconTooltipContent = useMemo(() => {
@@ -115,11 +112,7 @@ export const SearchOrFilter = React.memo<Props>(
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              {newDataViewPickerEnabled ? (
-                <DataViewPicker scope={SourcererScopeName.timeline} />
-              ) : (
-                <Sourcerer scope={SourcererScopeName.timeline} />
-              )}
+              <DataViewPicker scope={PageScope.timeline} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
               <QueryBarTimeline
@@ -149,14 +142,14 @@ export const SearchOrFilter = React.memo<Props>(
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={dataProviderIconTooltipContent} disableScreenReaderOutput>
                     <EuiButtonIcon
-                      color={buttonColor}
-                      isSelected={isDataProviderVisible}
-                      iconType="timeline"
-                      data-test-subj="toggle-data-provider"
-                      size="m"
-                      display="base"
                       aria-label={dataProviderIconTooltipContent}
+                      color={buttonColor}
+                      data-test-subj="toggle-data-provider"
+                      display="base"
+                      iconType="timeline"
+                      isSelected={isDataProviderVisible}
                       onClick={toggleDataProviderVisibility}
+                      size="s"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
@@ -168,10 +161,11 @@ export const SearchOrFilter = React.memo<Props>(
 
             <EuiFlexItem grow={false} data-test-subj="timeline-date-picker-container">
               <SuperDatePicker
-                width="auto"
+                compressed={true}
+                disabled={false}
                 id={InputsModelId.timeline}
                 timelineId={timelineId}
-                disabled={false}
+                width="auto"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

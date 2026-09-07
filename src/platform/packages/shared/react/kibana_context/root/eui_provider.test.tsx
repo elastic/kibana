@@ -17,7 +17,6 @@ import { useEuiTheme, EuiProvider } from '@elastic/eui';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { KibanaTheme } from '@kbn/react-kibana-context-common';
-import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
 
 import { KibanaEuiProvider } from './eui_provider';
 
@@ -51,7 +50,7 @@ describe('KibanaEuiProvider', () => {
   };
 
   it('exposes the EUI theme provider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
 
     render(
       <KibanaEuiProvider
@@ -70,11 +69,11 @@ describe('KibanaEuiProvider', () => {
 
     expect(euiTheme!.colorMode).toEqual('DARK');
     expect(euiTheme!.euiTheme.breakpoint.xxl).toEqual(1600);
-    expect(consoleWarnMock).not.toBeCalled();
+    expect(consoleWarnMock).not.toHaveBeenCalled();
   });
 
   it('propagates changes of the coreTheme observable', async () => {
-    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'amsterdam' });
+    const coreTheme$ = new BehaviorSubject<KibanaTheme>({ darkMode: true, name: 'borealis' });
 
     render(
       <KibanaEuiProvider theme={{ theme$: coreTheme$ }} userProfile={userProfile}>
@@ -91,7 +90,7 @@ describe('KibanaEuiProvider', () => {
 
     // Update the theme
     act(() => {
-      coreTheme$.next({ darkMode: false, name: 'amsterdam' });
+      coreTheme$.next({ darkMode: false, name: 'borealis' });
     });
 
     // Wait for the component to update with new theme
@@ -99,11 +98,11 @@ describe('KibanaEuiProvider', () => {
       expect(euiTheme!.colorMode).toEqual('LIGHT');
     });
 
-    expect(consoleWarnMock).not.toBeCalled();
+    expect(consoleWarnMock).not.toHaveBeenCalled();
   });
 
   it('passes component defaults to EuiProvider', async () => {
-    const coreTheme: KibanaTheme = { darkMode: true, name: 'amsterdam' };
+    const coreTheme: KibanaTheme = { darkMode: true, name: 'borealis' };
 
     render(
       <KibanaEuiProvider theme={{ theme$: of(coreTheme) }} userProfile={userProfile}>
@@ -115,7 +114,19 @@ describe('KibanaEuiProvider', () => {
       expect.objectContaining({
         componentDefaults: {
           EuiFlyout: {
-            includeSelectorInFocusTrap: euiIncludeSelectorInFocusTrap.selector,
+            includeSelectorInFocusTrap: '[data-eui-includes-in-flyout-focus-trap="true"]',
+            container: '#app-main-scroll',
+          },
+          EuiPopover: {
+            repositionOnScroll: true,
+          },
+          EuiToolTip: {
+            repositionOnScroll: true,
+          },
+          EuiTable: {
+            scrollableInline: true,
+            tableLayout: 'auto',
+            responsiveBreakpoint: false,
           },
         },
       }),

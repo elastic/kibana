@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -72,7 +73,7 @@ import {
   updateCustomIntegrationHandler,
 } from './handlers';
 
-import { installPackageKibanaAssetsHandler } from './kibana_assets_handler';
+import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
@@ -96,7 +97,7 @@ jest.mock('./handlers', () => ({
   getInputsHandler: jest.fn(),
 }));
 
-jest.mock('./kibana_assets_handler', () => ({
+jest.mock('./install_assets_handler', () => ({
   installPackageKibanaAssetsHandler: jest.fn(),
 }));
 
@@ -143,7 +144,7 @@ describe('schema validation', () => {
           },
         ],
       },
-      installed_kibana_space_id: 'space',
+      installed_kibana_space_id: asSpaceId('space'),
       install_format_schema_version: '1.0.0',
       verification_key_id: null,
       experimental_data_stream_features: [
@@ -191,6 +192,7 @@ describe('schema validation', () => {
     const assets: AssetsGroupedByServiceByType = {
       kibana: {
         alerting_rule_template: [],
+        slo_template: [],
         dashboard: [],
         visualization: [],
         search: [],
@@ -214,6 +216,7 @@ describe('schema validation', () => {
         data_stream_ilm_policy: [],
         ml_model: [],
         knowledge_base: [],
+        esql_view: [],
       },
     };
     packageInfo = {
@@ -508,6 +511,59 @@ describe('schema validation', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: expectedResponse,
     });
+    const validationResp = GetInputsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('get inputs template with OTelCollectorConfig fields should return valid response', () => {
+    const expectedResponse = {
+      inputs: [
+        {
+          id: 'log-input-1',
+          type: 'logfile',
+          streams: [
+            {
+              id: 'stream-1',
+              data_stream: { dataset: 'mypackage.logs', type: 'logs' },
+            },
+          ],
+        },
+      ],
+      extensions: {
+        health_check: {},
+      },
+      receivers: {
+        otlp: {
+          protocols: { grpc: {}, http: {} },
+        },
+      },
+      processors: {
+        batch: {},
+      },
+      connectors: {
+        some_connector: { config: {} },
+      },
+      exporters: {
+        elasticsearch: {
+          hosts: ['https://localhost:9200'],
+        },
+      },
+      service: {
+        extensions: ['health_check'],
+        pipelines: {
+          logs: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+          metrics: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+        },
+      },
+    };
     const validationResp = GetInputsResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });

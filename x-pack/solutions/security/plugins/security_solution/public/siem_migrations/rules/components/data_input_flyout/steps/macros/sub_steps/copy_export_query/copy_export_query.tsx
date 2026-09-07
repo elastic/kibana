@@ -28,7 +28,7 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="migrationCopyExportQueryDescription">
           <FormattedMessage
             id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.macros.copyExportQuery.description"
             defaultMessage="From you admin Splunk account, go to the {section} app and run the above query. Export your results as {format}."
@@ -40,12 +40,19 @@ export const CopyExportQuery = React.memo<CopyExportQueryProps>(({ onCopied }) =
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
-        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button. 
+        {/* The click event is also dispatched when using the keyboard actions (space or enter) for "copy" button.
         No need to use keyboard specific events, disabling the a11y lint rule:*/}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
         <div onClick={onClick}>
           {/* onCopy react event is dispatched when the user copies text manually */}
-          <EuiCodeBlock language="text" fontSize="m" paddingSize="m" isCopyable onCopy={onCopied}>
+          <EuiCodeBlock
+            language="text"
+            fontSize="m"
+            paddingSize="m"
+            isCopyable
+            onCopy={onCopied}
+            data-test-subj="migrationCopyExportQuery"
+          >
             {MACROS_SPLUNK_QUERY}
           </EuiCodeBlock>
         </div>

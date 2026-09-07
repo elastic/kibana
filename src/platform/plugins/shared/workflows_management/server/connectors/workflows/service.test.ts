@@ -10,7 +10,13 @@
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createExternalService, type WorkflowsServiceFunction } from './service';
+import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { WorkflowDisabledError, WorkflowNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  createExternalService,
+  type ScheduleWorkflowServiceFunction,
+  type WorkflowsServiceFunction,
+} from './service';
 
 describe('Workflows Service', () => {
   let mockLogger: jest.Mocked<Logger>;
@@ -30,6 +36,7 @@ describe('Workflows Service', () => {
 
     it('should create external service with all dependencies', () => {
       const mockWorkflowService: WorkflowsServiceFunction = jest.fn();
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest.fn();
 
       const service = createExternalService(
         actionId,
@@ -37,11 +44,13 @@ describe('Workflows Service', () => {
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
         mockRequest,
-        mockWorkflowService
+        mockWorkflowService,
+        mockScheduleWorkflowService
       );
 
       expect(service).toBeDefined();
       expect(service.runWorkflow).toBeInstanceOf(Function);
+      expect(service.scheduleWorkflow).toBeInstanceOf(Function);
     });
 
     it('should create external service without workflow service', () => {
@@ -55,6 +64,7 @@ describe('Workflows Service', () => {
 
       expect(service).toBeDefined();
       expect(service.runWorkflow).toBeInstanceOf(Function);
+      expect(service.scheduleWorkflow).toBeInstanceOf(Function);
     });
   });
 
@@ -80,7 +90,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -93,14 +116,27 @@ describe('Workflows Service', () => {
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
         'default',
-        { test: 'data' },
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
       );
 
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Successfully started workflow test-workflow-id, run ID: workflow-run-123'
       );
     });
@@ -117,14 +153,26 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
         'Workflows service not available. This connector requires workflows management plugin to be enabled.'
       );
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
+      expect(mockLogger.debug).toHaveBeenCalledWith(
         'Attempting to run workflow test-workflow-id via internal service'
       );
     });
@@ -146,7 +194,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -156,6 +217,84 @@ describe('Workflows Service', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         'Error running workflow test-workflow-id: Workflow execution failed'
       );
+    });
+
+    it('runWorkflow classifies disabled workflow error as user error', async () => {
+      const mockWorkflowService: WorkflowsServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowDisabledError('test-workflow-id'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        mockWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.runWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to run workflow');
+    });
+
+    it('runWorkflow classifies missing workflow error as user error', async () => {
+      const mockWorkflowService: WorkflowsServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        mockWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.runWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to run workflow');
     });
 
     it('should handle empty workflow run response', async () => {
@@ -173,7 +312,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
-        inputs: { test: 'data' },
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       await expect(service.runWorkflow(params)).rejects.toThrow(
@@ -198,6 +350,20 @@ describe('Workflows Service', () => {
       const params = {
         workflowId: 'test-workflow-id',
         spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
       };
 
       const result = await service.runWorkflow(params);
@@ -210,8 +376,282 @@ describe('Workflows Service', () => {
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
         'default',
-        {},
+        {
+          event: {
+            alerts: [],
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
         mockRequest
+      );
+    });
+  });
+
+  describe('scheduleWorkflow', () => {
+    const actionId = 'test-action-id';
+    const mockConfigurationUtilities = actionsConfigMock.create();
+    const mockConnectorUsageCollector = {} as any;
+
+    it('should successfully schedule workflow', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockResolvedValue('workflow-run-123');
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const result = await service.scheduleWorkflow(params);
+
+      expect(result).toBe('workflow-run-123');
+
+      expect(mockScheduleWorkflowService).toHaveBeenCalledWith(
+        'test-workflow-id',
+        'default',
+        {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+        'alert',
+        mockRequest
+      );
+    });
+
+    it('should handle missing schedule workflow service', async () => {
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      await expect(service.scheduleWorkflow(params)).rejects.toThrow(
+        'Workflows scheduling service not available. This connector requires workflows management plugin to be enabled.'
+      );
+    });
+
+    it('should handle schedule workflow service errors', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new Error('Scheduling failed'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      await expect(service.scheduleWorkflow(params)).rejects.toThrow(
+        'Unable to schedule workflow test-workflow-id. Error: Scheduling failed'
+      );
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error scheduling workflow test-workflow-id: Scheduling failed'
+      );
+    });
+
+    it('scheduleWorkflow classifies disabled workflow error as user error', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowDisabledError('new-workflow'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.scheduleWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to schedule workflow');
+    });
+
+    it('scheduleWorkflow classifies missing workflow error as user error', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockRejectedValue(new WorkflowNotFoundError('test-workflow-id'));
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const error = await service.scheduleWorkflow(params).catch((err) => err);
+
+      expect(getErrorSource(error)).toBe(TaskErrorSource.USER);
+      expect(error.message).toContain('Unable to schedule workflow');
+    });
+
+    it('should handle empty workflow run response', async () => {
+      const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
+        .fn()
+        .mockResolvedValue('');
+
+      const service = createExternalService(
+        actionId,
+        mockLogger,
+        mockConfigurationUtilities,
+        mockConnectorUsageCollector,
+        mockRequest,
+        undefined,
+        mockScheduleWorkflowService
+      );
+
+      const params = {
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        inputs: {
+          event: {
+            alerts: [{ _id: 'alert-1', _index: 'test-index' }] as any,
+            rule: {
+              id: 'rule-1',
+              name: 'Test Rule',
+              tags: [],
+              consumer: 'test',
+              producer: 'test',
+              ruleTypeId: 'test',
+            },
+            spaceId: 'default',
+          },
+        },
+      };
+
+      await expect(service.scheduleWorkflow(params)).rejects.toThrow(
+        'Invalid response: missing workflowRunId'
       );
     });
   });

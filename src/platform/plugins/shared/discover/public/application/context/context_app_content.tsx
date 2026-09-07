@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useMemo } from 'react';
 import { EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -29,27 +29,30 @@ import {
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { DataLoadingState, getDataGridDensity, getRowHeight } from '@kbn/unified-data-table';
+import {
+  DataLoadingState,
+  getDataGridDensity,
+  getRenderCustomToolbarWithElements,
+  getRowHeight,
+} from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
+import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
+import { ActionBarWarning } from './components/action_bar/action_bar_warning';
 import type { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
-import {
-  DISCOVER_CELL_ACTIONS_TRIGGER,
-  useAdditionalCellActions,
-  useProfileAccessor,
-} from '../../context_awareness';
+import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
 
 export interface ContextAppContentProps {
@@ -68,8 +71,14 @@ export interface ContextAppContentProps {
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
   interceptedWarnings: SearchResponseWarning[];
+  isWarningCalloutDismissed: boolean;
+  onDismissWarningCallout: () => void;
   setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
+  expandedDoc: DataTableRecord | undefined;
+  initialDocViewerTabId: string | undefined;
+  docViewerRef: React.RefObject<DocViewerApi>;
+  setExpandedDoc: (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => void;
 }
 
 const controlColumnIds = ['openDetails'];
@@ -78,7 +87,6 @@ export function clamp(value: number) {
   return Math.max(Math.min(MAX_CONTEXT_SIZE, value), MIN_CONTEXT_SIZE);
 }
 
-const DiscoverGridMemoized = React.memo(DiscoverGrid);
 const ActionBarMemoized = React.memo(ActionBar);
 
 export function ContextAppContent({
@@ -97,26 +105,17 @@ export function ContextAppContent({
   predecessorsStatus,
   successorsStatus,
   interceptedWarnings,
+  isWarningCalloutDismissed,
+  onDismissWarningCallout,
   setAppState,
   addFilter,
+  expandedDoc,
+  initialDocViewerTabId,
+  docViewerRef,
+  setExpandedDoc,
 }: ContextAppContentProps) {
-  const { uiSettings: config, uiActions } = useDiscoverServices();
   const services = useDiscoverServices();
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
-  const [initialTabId, setInitialTabId] = useState<string | undefined>(undefined);
-  const docViewerRef = useRef<DocViewerApi>(null);
-
-  const setExpandedDocWithInitialTab = useCallback(
-    (doc: DataTableRecord | undefined, options?: { initialTabId?: string }) => {
-      setExpandedDoc(doc);
-      setInitialTabId(options?.initialTabId);
-      if (options?.initialTabId) {
-        docViewerRef.current?.setSelectedTabId(options.initialTabId);
-      }
-    },
-    []
-  );
+  const { uiSettings: config, uiActions } = services;
 
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
@@ -125,6 +124,12 @@ export function ContextAppContent({
     predecessorsStatus === LoadingStatus.UNINITIALIZED;
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
+
+  const showInterceptedWarning = Boolean(interceptedWarnings.length) && !isWarningCalloutDismissed;
+  const showPredecessorsWarning =
+    !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
+  const showSuccessorsWarning =
+    !isAnchorLoading && !areSuccessorsLoading && successors.length < successorCount;
 
   const showTimeCol = useMemo(
     () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
@@ -156,12 +161,20 @@ export function ContextAppContent({
         onRemoveColumn={onRemoveColumn}
         onAddColumn={onAddColumn}
         onClose={() => setExpandedDoc(undefined)}
-        initialTabId={initialTabId}
-        setExpandedDoc={setExpandedDocWithInitialTab}
+        initialTabId={initialDocViewerTabId}
+        setExpandedDoc={setExpandedDoc}
         docViewerRef={docViewerRef}
       />
     ),
-    [addFilter, dataView, onAddColumn, onRemoveColumn, setExpandedDocWithInitialTab, initialTabId]
+    [
+      addFilter,
+      dataView,
+      docViewerRef,
+      initialDocViewerTabId,
+      onAddColumn,
+      onRemoveColumn,
+      setExpandedDoc,
+    ]
   );
 
   const onResize = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(
@@ -176,7 +189,6 @@ export function ContextAppContent({
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
-      actions: { addFilter },
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
       rowHeight: getRowHeight({
@@ -185,7 +197,7 @@ export function ContextAppContent({
         configRowHeight,
       }),
     });
-  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+  }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
@@ -202,30 +214,54 @@ export function ContextAppContent({
     timeRange,
   });
 
+  const predecessorsActionBar = useMemo(
+    () => (
+      <ActionBarMemoized
+        key="predecessorsActionBar"
+        type={SurrDocType.PREDECESSORS}
+        defaultStepSize={defaultStepSize}
+        docCount={predecessorCount}
+        onChangeCount={onChangeCount}
+        isLoading={arePredecessorsLoading}
+        isDisabled={isAnchorLoading}
+      />
+    ),
+    [defaultStepSize, predecessorCount, onChangeCount, arePredecessorsLoading, isAnchorLoading]
+  );
+
+  const renderCustomToolbar = useMemo(
+    () =>
+      getRenderCustomToolbarWithElements({
+        leftSide: predecessorsActionBar,
+      }),
+    [predecessorsActionBar]
+  );
+
   return (
     <Fragment>
-      <WrapperWithPadding>
-        {Boolean(interceptedWarnings.length) && (
-          <>
-            <SearchResponseWarningsCallout warnings={interceptedWarnings} />
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <ActionBarMemoized
-          type={SurrDocType.PREDECESSORS}
-          defaultStepSize={defaultStepSize}
-          docCount={predecessorCount}
-          docCountAvailable={predecessors.length}
-          onChangeCount={onChangeCount}
-          isLoading={arePredecessorsLoading}
-          isDisabled={isAnchorLoading}
-        />
-      </WrapperWithPadding>
+      {(showInterceptedWarning || showPredecessorsWarning) && (
+        <WrapperWithPadding direction="horizontal">
+          {showInterceptedWarning && (
+            <>
+              <SearchResponseWarningsCallout
+                warnings={interceptedWarnings}
+                isDismissed={isWarningCalloutDismissed}
+                onDismiss={onDismissWarningCallout}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {showPredecessorsWarning && (
+            <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
+          )}
+        </WrapperWithPadding>
+      )}
       <div css={dscDocsGridCss}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
-          <DiscoverGridMemoized
+          <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
-            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER.id}
+            renderCustomToolbar={renderCustomToolbar}
+            cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
             columns={columns}
@@ -240,7 +276,7 @@ export function ContextAppContent({
             isPaginationEnabled={false}
             rowsPerPageState={getDefaultRowsPerPage(services.uiSettings)}
             controlColumnIds={controlColumnIds}
-            setExpandedDoc={setExpandedDocWithInitialTab}
+            setExpandedDoc={setExpandedDoc}
             onFilter={addFilter}
             onSetColumns={onSetColumns}
             configRowHeight={configRowHeight}
@@ -255,12 +291,17 @@ export function ContextAppContent({
           />
         </CellActionsProvider>
       </div>
-      <WrapperWithPadding>
+      <WrapperWithPadding direction="all">
+        {showSuccessorsWarning && (
+          <>
+            <ActionBarWarning docCount={successors.length} type={SurrDocType.SUCCESSORS} />
+            <EuiSpacer size="s" />
+          </>
+        )}
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}
           defaultStepSize={defaultStepSize}
           docCount={successorCount}
-          docCountAvailable={successors.length}
           onChangeCount={onChangeCount}
           isLoading={areSuccessorsLoading}
           isDisabled={isAnchorLoading}
@@ -270,13 +311,16 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<React.PropsWithChildren<{}>> = ({ children }) => {
+const WrapperWithPadding: FC<React.PropsWithChildren<{ direction: 'horizontal' | 'all' }>> = ({
+  children,
+  direction,
+}) => {
   const padding = useEuiPaddingSize('s');
 
   return (
     <div
       css={css`
-        padding: 0 ${padding};
+        padding: ${direction === 'horizontal' ? `0 ${padding}` : padding};
       `}
     >
       {children}

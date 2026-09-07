@@ -10,11 +10,12 @@ import { extname } from 'path';
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ImportExceptionListRequestQuery,
   ImportExceptionListResponse,
 } from '@kbn/securitysolution-exceptions-common/api';
+import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
 
 import type { ListsPluginRouter } from '../types';
 import type { ConfigType } from '../config';
@@ -39,7 +40,7 @@ export const importExceptionsRoute = (router: ListsPluginRouter, config: ConfigT
       path: `${EXCEPTION_LIST_URL}/_import`,
       security: {
         authz: {
-          requiredPrivileges: ['lists-all'],
+          requiredPrivileges: [EXCEPTIONS_API_ALL],
         },
       },
     })

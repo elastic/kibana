@@ -13,7 +13,7 @@ import { range } from 'lodash';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
+import { getKibanaMigratorTestKit, startElasticsearch } from '@kbn/migrator-test-kit';
 import {
   getBaseMigratorParams,
   getDeletedType,

@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import { getSegments, isRootStreamDefinition, Streams } from '@kbn/streams-schema';
+import {
+  getAncestors,
+  getSegments,
+  isDescendantOf,
+  isIlmLifecycle,
+  LOGS_ECS_STREAM_NAME,
+  LOGS_OTEL_STREAM_NAME,
+  Streams,
+} from '@kbn/streams-schema';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
+import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import type { Direction } from '@elastic/eui';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
+import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
+import { lifecycleToRetentionMs } from '../../util/lifecycle_to_retention_ms';
 
-const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
+const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs', 'ingestionRate', 'storageBytes'] as const;
 
 export type SortableField = (typeof SORTABLE_FIELDS)[number];
 
@@ -19,7 +28,9 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  ingestionRate: number;
+  storageBytes: number;
+  type: 'wired' | 'classic' | 'query';
   children?: EnrichedStream[];
 }
 
@@ -28,23 +39,73 @@ export type TableRow = EnrichedStream & {
   rootNameSortKey: string;
   rootDocumentsCount: number;
   rootRetentionMs: number;
+  dataQuality: QualityIndicators;
 };
 export interface StreamTree extends ListStreamDetail {
   children: StreamTree[];
 }
 
-export function isParentName(parent: string, descendant: string) {
-  return parent !== descendant && descendant.startsWith(parent + '.');
+export function shouldComposeTree(sortField: SortableField) {
+  // Always allow tree mode for nameSortKey
+  return !sortField || sortField === 'nameSortKey';
 }
 
-export function shouldComposeTree(sortField: SortableField, query: string) {
-  return (!sortField || sortField === 'nameSortKey') && !query;
+// Returns all streams that match the query or are ancestors of a match
+export function filterStreamsByQuery(
+  streams: ListStreamDetail[],
+  query: string
+): ListStreamDetail[] {
+  if (!query) return streams;
+  const lowerQuery = query.toLowerCase();
+  const nameToStream = new Map<string, ListStreamDetail>();
+  streams.forEach((s) => nameToStream.set(s.stream.name, s));
+
+  // Find all streams that match the query
+  const matching = streams.filter((s) => s.stream.name.toLowerCase().includes(lowerQuery));
+  const resultSet = new Map<string, ListStreamDetail>();
+  for (const stream of matching) {
+    // Add the match
+    resultSet.set(stream.stream.name, stream);
+    // Add all ancestors
+    const ancestors = getAncestors(stream.stream.name);
+    for (let i = 0; i < ancestors.length; ++i) {
+      const ancestor = nameToStream.get(ancestors[i]);
+      if (ancestor) {
+        resultSet.set(ancestors[i], ancestor);
+      }
+    }
+  }
+  return Array.from(resultSet.values());
+}
+
+// Filters out rows that are children of collapsed streams
+export function filterCollapsedStreamRows(
+  rows: TableRow[],
+  collapsedStreams: Set<string>,
+  sortField: SortableField
+) {
+  if (!shouldComposeTree(sortField)) return rows;
+  const result: TableRow[] = [];
+  for (const row of rows) {
+    // If any ancestor is collapsed, skip this row
+    const ancestors = getAncestors(row.stream.name);
+    let skip = false;
+    for (let i = 0; i < ancestors.length; ++i) {
+      if (collapsedStreams.has(ancestors[i])) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) result.push(row);
+  }
+  return result;
 }
 
 export function buildStreamRows(
   enrichedStreams: EnrichedStream[],
   sortField: SortableField,
-  sortDirection: Direction
+  sortDirection: Direction,
+  qualityByStream: Record<string, QualityIndicators>
 ): TableRow[] {
   const isAscending = sortDirection === 'asc';
   const compare = (a: EnrichedStream, b: EnrichedStream): number => {
@@ -65,7 +126,12 @@ export function buildStreamRows(
     level: number,
     rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
   ) => {
-    result.push({ ...node, level, ...rootMeta });
+    result.push({
+      ...node,
+      level,
+      ...rootMeta,
+      dataQuality: qualityByStream[node.stream.name] ?? 'good',
+    });
     if (node.children) {
       node.children.sort(compare).forEach((child) => pushNode(child, level + 1, rootMeta));
     }
@@ -94,7 +160,7 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
     let existingNode: StreamTree | undefined;
     while (
       (existingNode = currentTree.find((node) =>
-        isParentName(node.stream.name, streamDetail.stream.name)
+        isDescendantOf(node.stream.name, streamDetail.stream.name)
       ))
     ) {
       currentTree = existingNode.children;
@@ -108,16 +174,22 @@ export function asTrees(streams: ListStreamDetail[]): StreamTree[] {
   return trees;
 }
 
-export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
-  let retentionMs = 0;
-  const lc = node.effective_lifecycle!;
-  if (isDslLifecycle(lc)) {
-    retentionMs = lc.dsl.data_retention
-      ? parseDurationInSeconds(lc.dsl.data_retention) * 1000
-      : Number.POSITIVE_INFINITY;
-  } else if (isIlmLifecycle(lc)) {
-    retentionMs = Number.POSITIVE_INFINITY;
+const getStreamType = (stream: Streams.all.Definition): EnrichedStream['type'] => {
+  if (Streams.ClassicStream.Definition.is(stream)) {
+    return 'classic';
   }
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return 'query';
+  }
+  return 'wired';
+};
+
+export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStream => {
+  const lifecycle = node.effective_lifecycle;
+  const retentionMs =
+    lifecycle && isIlmLifecycle(lifecycle)
+      ? Number.POSITIVE_INFINITY
+      : lifecycleToRetentionMs(lifecycle) ?? 0;
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`
@@ -128,14 +200,27 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
+    privileges: node.privileges,
     nameSortKey,
     documentsCount: 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
-      ? 'classic'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+    ingestionRate: 0,
+    storageBytes: 0,
+    type: getStreamType(node.stream),
     ...(children && { children }),
   };
+};
+
+export const getLegacyLogsStatus = (
+  streamsStatus: WiredStreamsStatus | undefined
+): { hasLegacyLogs: boolean; hasNewStreams: boolean } => {
+  if (!streamsStatus) {
+    return { hasLegacyLogs: false, hasNewStreams: false };
+  }
+
+  const hasLegacyLogs = streamsStatus.logs === true;
+  const hasNewStreams =
+    streamsStatus[LOGS_OTEL_STREAM_NAME] === true && streamsStatus[LOGS_ECS_STREAM_NAME] === true;
+
+  return { hasLegacyLogs, hasNewStreams };
 };

@@ -6,7 +6,7 @@
  */
 
 import React, { type FC, type PropsWithChildren } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { render, screen, waitFor, renderHook } from '@testing-library/react';
 
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -14,6 +14,8 @@ import type { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType, INDEX_STATUS } from '@kbn/ml-data-grid';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SimpleQuery } from '@kbn/ml-query-utils';
+
+import { useAppDependencies } from '../app_dependencies';
 
 import type { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';
@@ -38,7 +40,17 @@ const runtimeMappings: RuntimeMappings = {
 
 const queryClient = new QueryClient();
 
+class DataViewFields extends Array<{ name: string }> {
+  getByName(id: string) {
+    return this.find((d) => d.name === id);
+  }
+}
+
 describe('Transform: useIndexData()', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('empty populatedFields does not trigger loading', async () => {
     const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
       <QueryClientProvider client={queryClient}>
@@ -85,11 +97,7 @@ describe('Transform: useIndexData()', () => {
             getIndexPattern: () => 'the-index-pattern',
             metaFields: [],
             // minimal mock of DataView fields (array with getByName method)
-            fields: new (class DataViewFields extends Array<{ name: string }> {
-              getByName(id: string) {
-                return this.find((d) => d.name === id);
-              }
-            })(
+            fields: new DataViewFields(
               {
                 name: 'the-populated-field',
               },
@@ -111,6 +119,45 @@ describe('Transform: useIndexData()', () => {
       expect(IndexObj.errorMessage).toBe('');
       expect(IndexObj.status).toBe(INDEX_STATUS.LOADING);
       expect(IndexObj.tableItems).toEqual([]);
+    });
+  });
+
+  test('passes project routing to the source document search', async () => {
+    const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">{children}</IntlProvider>
+      </QueryClientProvider>
+    );
+
+    renderHook(
+      () =>
+        useIndexData({
+          dataView: {
+            id: 'the-id',
+            getIndexPattern: () => 'the-index-pattern',
+            metaFields: [],
+            fields: new DataViewFields({
+              name: 'the-populated-field',
+            }),
+          } as unknown as SearchItems['dataView'],
+          query,
+          combinedRuntimeMappings: runtimeMappings,
+          populatedFields: ['the-populated-field'],
+          projectRouting: '_id:linked-id',
+        }),
+      { wrapper }
+    );
+
+    const { data } = useAppDependencies();
+    await waitFor(() => {
+      expect(data.search.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            project_routing: '_id:linked-id',
+          }),
+        }),
+        expect.any(Object)
+      );
     });
   });
 });

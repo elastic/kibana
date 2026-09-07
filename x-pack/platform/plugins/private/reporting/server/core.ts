@@ -12,7 +12,6 @@ import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,
-  IBasePath,
   IClusterClient,
   KibanaRequest,
   Logger,
@@ -38,7 +37,7 @@ import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ExportType } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -48,8 +47,9 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 
 import { checkLicense } from '@kbn/reporting-server/check_license';
-import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ReportingSetup } from '.';
 import { createConfig } from './config';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
@@ -60,14 +60,15 @@ import type { ReportingPluginRouter } from './types';
 import { EventTracker } from './usage';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from './saved_objects';
 import { EmailNotificationService } from './services/notifications/email_notification_service';
+import { handleGenerateSystemReportRequest } from './routes/common/request_handler/generate_system_report_request_handler';
 import { API_PRIVILEGES } from './features';
 
 export interface ReportingInternalSetup {
   actions: ActionsPluginSetupContract;
-  basePath: Pick<IBasePath, 'set'>;
   docLinks: DocLinksServiceSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
   logger: Logger;
   router: ReportingPluginRouter;
   security?: SecurityPluginSetup;
@@ -108,7 +109,6 @@ export class ReportingCore {
   private runScheduledReportTask: RunScheduledReportTask;
   private config: ReportingConfigType;
   private executing: Set<string>;
-  private exportTypesRegistry = new ExportTypesRegistry();
 
   public getContract: () => ReportingSetup;
 
@@ -117,6 +117,7 @@ export class ReportingCore {
   constructor(
     private core: CoreSetup,
     private logger: Logger,
+    private exportTypesRegistry: ExportTypesRegistry,
     private context: PluginInitializerContext<ReportingConfigType>
   ) {
     this.packageInfo = context.env.packageInfo;
@@ -140,6 +141,14 @@ export class ReportingCore {
     this.getContract = () => ({
       registerExportTypes: (id) => id,
       getSpaceId: this.getSpaceId.bind(this),
+      handleGenerateSystemReportRequest: (path, requestParams, handleResponseFunc) =>
+        handleGenerateSystemReportRequest(
+          this,
+          this.logger,
+          path,
+          requestParams,
+          handleResponseFunc
+        ),
     });
 
     this.executing = new Set();
@@ -361,6 +370,10 @@ export class ReportingCore {
 
   public async scheduleTask(request: KibanaRequest, report: ReportTaskParams) {
     return await this.runSingleReportTask.scheduleTask(request, report);
+  }
+
+  public async scheduleTaskWithInternalES(request: KibanaRequest, report: ReportTaskParams) {
+    return await this.runSingleReportTask.scheduleTask(request, report, { useInternalUser: true });
   }
 
   public async scheduleRecurringTask(

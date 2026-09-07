@@ -13,8 +13,14 @@ import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
-import { SuperuserAtSpace1, systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
+import { AlertUtils, getAlwaysFiringInternalRule } from '../../../../common/lib/alert_utils';
+import {
+  DefaultSpace,
+  Superuser,
+  SuperuserAtSpace1,
+  systemActionScenario,
+  UserAtSpaceScenarios,
+} from '../../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
@@ -83,7 +89,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -177,7 +183,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -244,15 +250,19 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -311,7 +321,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -376,15 +386,19 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all at space2':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
               break;
             case 'space_1_all at space1':
             case 'space_1_all_alerts_none_actions at space1':
-              expect(response.body).to.eql({ errors: [], rules: [], skipped: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
               break;
             case 'global_read at space1':
               expect(response.body).to.eql({
@@ -553,7 +567,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.body).to.eql({
                 error: 'Bad Request',
                 message:
-                  "Failed to find rule types by query: Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments",
+                  "Both 'filter' and 'ids' are supplied. Define either 'ids' or 'filter' properties in method arguments",
                 statusCode: 400,
               });
               expect(response.statusCode).to.eql(400);
@@ -590,8 +604,13 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'superuser at space1':
             case 'global_read at space1':
             case 'system_actions at space1':
-              expect(response.body).to.eql({ rules: [], skipped: [], errors: [], total: 0 });
-              expect(response.statusCode).to.eql(200);
+              expect(response.body).to.eql({
+                statusCode: 400,
+                error: 'Bad Request',
+                message: 'No rules found for bulk edit',
+              });
+              expect(response.statusCode).to.eql(400);
+
               break;
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
@@ -600,7 +619,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
               expect(response.statusCode).to.eql(403);
@@ -648,7 +667,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Unauthorized to find rules for any rule types',
+                message: 'Unauthorized to find rules for any rule types.',
                 statusCode: 403,
               });
 
@@ -1042,12 +1061,20 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.errors.length).to.eql(1);
 
-        expect(response.body.errors[0].message).to.eql('Cannot use the same system action twice');
+        expect(response.body.errors[0].message).to.eql(
+          'Cannot use action system-connector-test.system-action more than once for this rule'
+        );
       });
     });
 
     describe('internally managed rule types', () => {
       const rulePayload = getAlwaysFiringInternalRule();
+
+      const alertUtils = new AlertUtils({
+        user: Superuser,
+        space: DefaultSpace,
+        supertestWithoutAuth: supertest,
+      });
 
       const payloadWithFilter = {
         filter: `alert.attributes.tags: "internally-managed"`,
@@ -1071,117 +1098,63 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         ],
       });
 
-      const getAPIKeyPayloadWithIds = (ids: string[]) => ({
-        ids,
-        operations: [
-          {
-            operation: 'set',
-            field: 'apiKey',
-          },
-        ],
-      });
-
-      const getMultiplePayloadsWithIds = (ids: string[]) => ({
-        ids,
-        operations: [
-          {
-            operation: 'add',
-            field: 'tags',
-            value: ['tag-A'],
-          },
-          {
-            operation: 'set',
-            field: 'apiKey',
-          },
-        ],
-      });
-
       it('should throw 400 error when trying to bulk update an internally managed rule type using the ids param', async () => {
-        const { body: createdRule1 } = await supertest
+        const { body: createdRule } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
-
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
 
         const response = await supertest
           .post('/internal/alerting/rules/_bulk_edit')
           .set('kbn-xsrf', 'foo')
-          .send(getPayloadWithIds([createdRule1.id]));
+          .send(getPayloadWithIds([createdRule.id]));
 
         expect(response.status).to.eql(400);
+
+        const res = await alertUtils.deleteInternallyManagedRule(createdRule.id);
+
+        expect(res.statusCode).to.eql(200);
       });
 
-      it('should throw 400 error when trying to bulk update an internally managed rule type using the filter param', async () => {
-        const { body: createdRule1 } = await supertest
+      it('should ignore internal rule types when trying to bulk update using the filter param', async () => {
+        const { body: internalRuleType } = await supertest
           .post('/api/alerts_fixture/rule/internally_managed')
           .set('kbn-xsrf', 'foo')
           .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+        const { body: nonInternalRuleType } = await supertest
+          .post('/api/alerting/rule')
+          .set('kbn-xsrf', 'foo')
+          .send(getTestRuleData({ tags: ['internally-managed'] }))
+          .expect(200);
 
-        const response = await supertest
+        objectRemover.add('default', nonInternalRuleType.id, 'rule', 'alerting');
+
+        const bulkEditResponse = await supertest
           .post('/internal/alerting/rules/_bulk_edit')
           .set('kbn-xsrf', 'foo')
           .send(payloadWithFilter);
 
-        expect(response.status).to.eql(400);
-      });
+        expect(bulkEditResponse.status).to.eql(200);
 
-      it('should throw 400 error when supplying both ids and filter', async () => {
-        const { body: createdRule1 } = await supertest
-          .post('/api/alerts_fixture/rule/internally_managed')
+        const { body: updatedInternalRuleType } = await supertest
+          .get(`/api/alerting/rule/${internalRuleType.id}`)
           .set('kbn-xsrf', 'foo')
-          .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
-
-        const response = await supertest
-          .post('/internal/alerting/rules/_bulk_edit')
+        const { body: updatedNonInternalRuleType } = await supertest
+          .get(`/api/alerting/rule/${nonInternalRuleType.id}`)
           .set('kbn-xsrf', 'foo')
-          .send({
-            ids: [createdRule1.id],
-            ...payloadWithFilter,
-          });
-
-        expect(response.status).to.eql(400);
-      });
-
-      it('should update the api key', async () => {
-        const { body: createdRule1 } = await supertest
-          .post('/api/alerts_fixture/rule/internally_managed')
-          .set('kbn-xsrf', 'foo')
-          .send({ ...rulePayload, tags: ['internally-managed'] })
           .expect(200);
 
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
+        expect(updatedInternalRuleType.tags).to.eql(['internally-managed']);
+        expect(updatedNonInternalRuleType.tags).to.eql(['internally-managed', 'tag-A']);
 
-        const response = await supertest
-          .post('/internal/alerting/rules/_bulk_edit')
-          .set('kbn-xsrf', 'foo')
-          .send(getAPIKeyPayloadWithIds([createdRule1.id]));
+        const res = await alertUtils.deleteInternallyManagedRule(internalRuleType.id);
 
-        expect(response.status).to.eql(200);
-      });
-
-      it('should throw 400 error when multiple supported and non supported operations', async () => {
-        const { body: createdRule1 } = await supertest
-          .post('/api/alerts_fixture/rule/internally_managed')
-          .set('kbn-xsrf', 'foo')
-          .send({ ...rulePayload, tags: ['internally-managed'] })
-          .expect(200);
-
-        objectRemover.add('default', createdRule1.id, 'rule', 'alerting');
-
-        const response = await supertest
-          .post('/internal/alerting/rules/_bulk_edit')
-          .set('kbn-xsrf', 'foo')
-          .send(getMultiplePayloadsWithIds([createdRule1.id]));
-
-        expect(response.status).to.eql(400);
+        expect(res.statusCode).to.eql(200);
       });
     });
   });

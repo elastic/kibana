@@ -7,7 +7,6 @@
 
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -17,12 +16,13 @@ import {
   EuiCode,
   EuiSpacer,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { getPlatform } from '@kbn/shared-ux-utility';
 import { keymap } from '../../lib/keymap';
 import type { ShortcutMap, ShortcutNameSpace } from '../../../types/shortcuts';
-import { getClientPlatform } from '../../lib/get_client_platform';
 import { getId } from '../../lib/get_id';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';
 
@@ -55,11 +55,11 @@ interface Props {
   onClose: () => void;
 }
 
-const os = getClientPlatform();
+const platform = getPlatform();
 
 const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[] =>
   shortcuts.map((shortcutKeyMap: ShortcutMap): DescriptionListItem => {
-    const osShortcuts = shortcutKeyMap[os];
+    const osShortcuts = shortcutKeyMap[platform];
     return {
       title: shortcutKeyMap.help,
       description: osShortcuts.reduce((acc: JSX.Element[], shortcut, i): JSX.Element[] => {
@@ -80,40 +80,40 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
     };
   });
 
-export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
-  <EuiFlyout
-    closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
-    size="s"
-    onClose={onClose}
-  >
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="s">
-        <h2>{strings.getTitle()}</h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-    <EuiFlyoutBody>
-      {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
-        const { displayName, ...shortcuts } = namespace;
-        return (
-          <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
-            <EuiTitle size="xs">
-              <h4>{displayName}</h4>
-            </EuiTitle>
-            <EuiHorizontalRule margin="s" />
-            <EuiDescriptionList
-              textStyle="reverse"
-              type="column"
-              listItems={getDescriptionListItems(Object.values(shortcuts) as ShortcutMap[])}
-              compressed
-            />
-            <EuiSpacer />
-          </div>
-        );
-      })}
-    </EuiFlyoutBody>
-  </EuiFlyout>
-);
-
-KeyboardShortcutsDoc.propTypes = {
-  onClose: PropTypes.func.isRequired,
+export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
+  return (
+    <EuiFlyout
+      closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
+      size="s"
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{strings.getTitle()}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {Object.values(keymap).map((namespace: ShortcutNameSpace) => {
+          const { displayName, ...shortcuts } = namespace;
+          return (
+            <div key={getId('shortcuts')} className="canvasKeyboardShortcut">
+              <EuiTitle size="xs">
+                <h4>{displayName}</h4>
+              </EuiTitle>
+              <EuiHorizontalRule margin="s" />
+              <EuiDescriptionList
+                textStyle="reverse"
+                type="column"
+                listItems={getDescriptionListItems(Object.values(shortcuts) as ShortcutMap[])}
+                compressed
+              />
+              <EuiSpacer />
+            </div>
+          );
+        })}
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
 };

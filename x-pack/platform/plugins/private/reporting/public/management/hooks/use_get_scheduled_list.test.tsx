@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import { getScheduledReportsList } from '../apis/get_scheduled_reports_list';
 import { useGetScheduledList } from './use_get_scheduled_list';
@@ -49,7 +49,7 @@ describe('useGetScheduledList', () => {
       expect(result.current.data).toEqual({ data: [] });
     });
 
-    expect(getScheduledReportsList).toBeCalledWith({
+    expect(getScheduledReportsList).toHaveBeenCalledWith({
       http,
       page: 1,
       perPage: 50,

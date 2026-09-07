@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { fieldList } from '@kbn/data-views-plugin/common';
+import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 
-const fields = [
+const fields: FieldSpec[] = [
   {
     count: 0,
     name: '_id',
@@ -411,18 +412,18 @@ const fields = [
     aggregatable: true,
     readFromDocValues: false,
   },
-] as DataView['fields'];
+];
 
 export const dataViewComplexMock = buildDataViewMock({
   name: 'data-view-with-various-field-types',
-  fields,
+  fields: fieldList(fields),
   timeFieldName: 'data',
 });
 
 export const dataViewAdHoc = {
   ...buildDataViewMock({
     name: 'data-view-ad-hoc',
-    fields,
+    fields: fieldList(fields),
     timeFieldName: 'time',
   }),
   isPersisted: () => false,
@@ -430,7 +431,7 @@ export const dataViewAdHoc = {
 
 export const dataViewWithDefaultColumnMock = buildDataViewMock({
   name: 'data-view-with-user-default-column',
-  fields: [
+  fields: fieldList([
     ...fields,
     {
       name: 'default_column',
@@ -439,6 +440,6 @@ export const dataViewWithDefaultColumnMock = buildDataViewMock({
       searchable: true,
       aggregatable: true,
     },
-  ] as DataView['fields'],
+  ]),
   timeFieldName: '@timestamp',
 });

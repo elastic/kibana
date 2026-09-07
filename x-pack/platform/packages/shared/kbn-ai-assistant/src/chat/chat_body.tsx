@@ -8,7 +8,6 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   euiCanAnimate,
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,6 +17,7 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -34,13 +34,13 @@ import {
   type ChatActionClickPayload,
   type Feedback,
   aiAssistantSimulatedFunctionCalling,
-  getElasticManagedLlmConnector,
   InferenceModelState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { findLastIndex } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public/analytics/schemas/chat_feedback';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../i18n';
 import { useAIAssistantChatService } from '../hooks/use_ai_assistant_chat_service';
@@ -126,6 +126,7 @@ export function ChatBody({
   initialTitle,
   knowledgeBase,
   showLinkToConversationsApp,
+  eisCalloutZIndex,
   onConversationUpdate,
   onToggleFlyoutPositionMode,
   navigateToConversation,
@@ -133,6 +134,7 @@ export function ChatBody({
   refreshConversations,
   updateDisplayedConversation,
   onConversationDuplicate,
+  navigateToModelManagementApp,
 }: {
   connectors: ReturnType<typeof useGenAIConnectors>;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
@@ -142,6 +144,7 @@ export function ChatBody({
   initialConversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   showLinkToConversationsApp: boolean;
+  eisCalloutZIndex?: number;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
   onConversationDuplicate: (conversation: Conversation) => void;
   onToggleFlyoutPositionMode?: (flyoutPositionMode: FlyoutPositionMode) => void;
@@ -149,6 +152,7 @@ export function ChatBody({
   setIsUpdatingConversationList: (isUpdating: boolean) => void;
   refreshConversations: () => void;
   updateDisplayedConversation: (id?: string) => void;
+  navigateToModelManagementApp: (application: ApplicationStart) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -408,14 +412,12 @@ export function ChatBody({
     conversation.refresh();
   };
 
-  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
-  const { conversationCalloutDismissed, tourCalloutDismissed } = useElasticLlmCalloutsStatus(false);
+  const { conversationCalloutDismissed } = useElasticLlmCalloutsStatus(false);
 
   const showElasticLlmCalloutInChat =
-    !!elasticManagedLlm &&
-    connectors.selectedConnector === elasticManagedLlm.id &&
-    !conversationCalloutDismissed &&
-    tourCalloutDismissed;
+    (connectors.connectors || []).some(
+      (connector) => connector.connectorId === connectors.selectedConnector && connector.isEis
+    ) && !conversationCalloutDismissed;
 
   const showKnowledgeBaseReIndexingCallout =
     knowledgeBase.status.value?.enabled === true &&
@@ -564,6 +566,7 @@ export function ChatBody({
                   }
                   showElasticLlmCalloutInChat={showElasticLlmCalloutInChat}
                   showKnowledgeBaseReIndexingCallout={showKnowledgeBaseReIndexingCallout}
+                  eisCalloutZIndex={eisCalloutZIndex}
                 />
               ) : (
                 <ChatTimeline
@@ -652,19 +655,17 @@ export function ChatBody({
         responsive={false}
       >
         <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
-          <EuiCallOut
-            color="danger"
+          <KbnDangerCallout
+            announceOnMount
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
             })}
-            iconType="warning"
-          >
-            {i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
+            text={i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
               defaultMessage:
                 'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
               values: { conversationId: initialConversationId },
             })}
-          </EuiCallOut>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -682,19 +683,17 @@ export function ChatBody({
         className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
       >
         {conversation.error ? (
-          <EuiCallOut
-            color="danger"
+          <KbnDangerCallout
+            announceOnMount
             title={i18n.translate('xpack.aiAssistant.couldNotFindConversationTitle', {
               defaultMessage: 'Conversation not found',
             })}
-            iconType="warning"
-          >
-            {i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
+            text={i18n.translate('xpack.aiAssistant.couldNotFindConversationContent', {
               defaultMessage:
                 'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
               values: { conversationId: initialConversationId },
             })}
-          </EuiCallOut>
+          />
         ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={false} className={headerContainerClassName}>
@@ -721,7 +720,7 @@ export function ChatBody({
           copyUrl={copyUrl}
           deleteConversation={deleteConversation}
           handleArchiveConversation={handleArchiveConversation}
-          isConversationApp={!showLinkToConversationsApp}
+          navigateToModelManagementApp={navigateToModelManagementApp}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

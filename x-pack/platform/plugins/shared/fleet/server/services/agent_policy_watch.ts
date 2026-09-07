@@ -6,7 +6,8 @@
  */
 
 import type { Subscription } from 'rxjs';
-import type { Logger, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type { Logger, SavedObjectErrorResult, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-types';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import pRetry from 'p-retry';
@@ -18,8 +19,10 @@ import {
   isAgentPolicyValidForLicense,
   unsetAgentPolicyAccordingToLicenseLevel,
 } from '../../common/services/agent_policy_config';
+
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { appContextService } from './app_context';
+import { getSpaceForAgentPolicy } from './spaces/helpers';
 
 export class PolicyWatcher {
   private subscription: Subscription | undefined;
@@ -62,40 +65,49 @@ export class PolicyWatcher {
 
     log.info('Checking agent policies for compliance with the current license.');
 
-    const updatedAgentPolicies: Array<SavedObjectsUpdateResponse<AgentPolicySOAttributes>> = [];
+    const updatedAgentPolicies: Array<
+      SavedObjectsUpdateResponse<AgentPolicySOAttributes> | SavedObjectErrorResult
+    > = [];
 
-    for await (const agentPolicyPageResults of agentPolicyFetcher) {
-      const policiesToUpdate = agentPolicyPageResults.reduce((acc: AgentPolicy[], policy) => {
-        if (!isAgentPolicyValidForLicense(policy, license)) {
-          acc.push(unsetAgentPolicyAccordingToLicenseLevel(policy, license) as AgentPolicy);
+    try {
+      for await (const agentPolicyPageResults of agentPolicyFetcher) {
+        const policiesToUpdate = agentPolicyPageResults.reduce((acc: AgentPolicy[], policy) => {
+          if (!isAgentPolicyValidForLicense(policy, license)) {
+            acc.push(unsetAgentPolicyAccordingToLicenseLevel(policy, license) as AgentPolicy);
+          }
+          return acc;
+        }, []);
+
+        if (policiesToUpdate.length === 0) {
+          break;
         }
-        return acc;
-      }, []);
+        const savedObjectType = await getAgentPolicySavedObjectType();
 
-      if (policiesToUpdate.length === 0) {
-        break;
+        const { saved_objects: bulkUpdateSavedObjects } =
+          await soClient.bulkUpdate<AgentPolicySOAttributes>(
+            policiesToUpdate.map((policy) => {
+              const { id, revision, ...policyContent } = policy;
+              const updatedPolicy = {
+                type: savedObjectType,
+                id,
+                attributes: {
+                  ...policyContent,
+                  revision: revision + 1,
+                  updated_at: new Date().toISOString(),
+                  updated_by: 'system',
+                },
+                ...(policyContent.space_ids?.length
+                  ? { namespace: getSpaceForAgentPolicy(policyContent) }
+                  : {}),
+              };
+              return updatedPolicy;
+            })
+          );
+        updatedAgentPolicies.push(...bulkUpdateSavedObjects);
       }
-      const savedObjectType = await getAgentPolicySavedObjectType();
-
-      const { saved_objects: bulkUpdateSavedObjects } =
-        await soClient.bulkUpdate<AgentPolicySOAttributes>(
-          policiesToUpdate.map((policy) => {
-            const { id, revision, ...policyContent } = policy;
-            const updatedPolicy = {
-              type: savedObjectType,
-              id,
-              attributes: {
-                ...policyContent,
-                revision: revision + 1,
-                updated_at: new Date().toISOString(),
-                updated_by: 'system',
-              },
-              ...(policyContent.space_ids?.length ? { namespace: policyContent.space_ids[0] } : {}),
-            };
-            return updatedPolicy;
-          })
-        );
-      updatedAgentPolicies.push(...bulkUpdateSavedObjects);
+    } catch (error) {
+      log.error(`Unable to process agent policy license compliance: ${error.message}`);
+      return;
     }
 
     const failedPolicies: Array<{
@@ -104,7 +116,7 @@ export class PolicyWatcher {
     }> = [];
 
     updatedAgentPolicies.forEach((policy) => {
-      if (policy.error) {
+      if (isSavedObjectErrorResult(policy)) {
         failedPolicies.push({
           id: policy.id,
           error: policy.error,
@@ -112,7 +124,9 @@ export class PolicyWatcher {
       }
     });
 
-    const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
+    const updatedPoliciesSuccess = updatedAgentPolicies.filter(
+      (policy) => !isSavedObjectErrorResult(policy)
+    );
 
     if (!updatedPoliciesSuccess.length && !failedPolicies.length) {
       log.info(`All agent policies are compliant, nothing to do!`);

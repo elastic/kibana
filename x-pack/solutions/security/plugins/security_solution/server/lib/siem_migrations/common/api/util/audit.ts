@@ -21,6 +21,7 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_STARTED = 'siem_migration_started',
   SIEM_MIGRATION_STOPPED = 'siem_migration_stopped',
   SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
+  SIEM_MIGRATION_ENHANCED_RULES = 'siem_migration_enhanced_rules',
   SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
   SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
   // Dashboards
@@ -61,6 +62,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_STARTED]: AUDIT_TYPE.START,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_STOPPED]: AUDIT_TYPE.END,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE]: AUDIT_TYPE.CHANGE,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_ENHANCED_RULES]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_INSTALLED_RULES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_RULES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_ITEMS]: AUDIT_TYPE.ACCESS,
@@ -300,6 +302,21 @@ export class SiemMigrationAuditLogger {
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS,
       error,
       message,
+    });
+  }
+
+  public async logEnhanceRules(params: {
+    migrationId: string;
+    vendor: string;
+    enhancementType: string;
+    error?: Error;
+  }): Promise<void> {
+    const { migrationId, vendor, enhancementType, error } = params;
+    const message = `User enhanced rules with vendor=${vendor} type=${enhancementType} for SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_ENHANCED_RULES,
+      message,
+      error,
     });
   }
 }

@@ -9,7 +9,7 @@ import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import type { FindGapsParams, FindGapsSearchAfterParams } from './types';
+import type { FindGapsParams, FindGapsSearchAfterParams } from '../../application/gaps/types';
 import type { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 import { buildGapsFilter } from './build_gaps_filter';
@@ -27,10 +27,11 @@ export const findGaps = async ({
   page: number;
   perPage: number;
 }> => {
-  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder } = params;
+  const { ruleId, start, end, page, perPage, statuses, sortField, sortOrder, excludedReasons } =
+    params;
 
   try {
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({ start, end, statuses, excludedReasons });
 
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
@@ -80,14 +81,38 @@ export const findGapsSearchAfter = async ({
   searchAfter?: SortResults[];
   pitId?: string;
 }> => {
-  const { ruleIds, start, end, perPage, statuses, sortField, sortOrder } = params;
+  const {
+    ruleIds,
+    start,
+    end,
+    perPage,
+    statuses,
+    sortField,
+    sortOrder,
+    hasUnfilledIntervals,
+    hasInProgressIntervals,
+    hasFilledIntervals,
+    updatedBefore,
+    failedAutoFillAttemptsLessThan,
+    excludedReasons,
+  } = params;
 
   if (ruleIds.length > FIND_GAPS_SEARCH_AFTER_MAX_RULES) {
     throw new Error(`ruleIds max size must be ${FIND_GAPS_SEARCH_AFTER_MAX_RULES}`);
   }
 
   try {
-    const filter = buildGapsFilter({ start, end, statuses });
+    const filter = buildGapsFilter({
+      start,
+      end,
+      statuses,
+      hasUnfilledIntervals,
+      hasInProgressIntervals,
+      hasFilledIntervals,
+      failedAutoFillAttemptsLessThan,
+      updatedBefore,
+      excludedReasons,
+    });
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIdsSearchAfter(
       RULE_SAVED_OBJECT_TYPE,
       ruleIds,

@@ -12,6 +12,6 @@ export const DEFAULT_BAR_TARGET = 75;
 export const INDEX_DATA_VISUALIZER_NAME = i18n.translate(
   'xpack.dataVisualizer.chrome.help.appName',
   {
-    defaultMessage: 'Data Visualizer',
+    defaultMessage: 'Data visualizer',
   }
 );

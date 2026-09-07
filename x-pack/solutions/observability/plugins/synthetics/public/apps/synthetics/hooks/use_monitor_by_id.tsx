@@ -6,7 +6,7 @@
  */
 
 import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { getMonitorAction, selectSyntheticsMonitor } from '../state';
 
 export const useMonitorById = (configId: string | undefined) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
@@ -35,7 +35,7 @@ export const usePutRuleset = (
   return useMutation(
     async ({ rulesetId, forceWrite, rules }: MutationArgs) => {
       return await http.put<QueryRulesQueryRuleset>(
-        `/internal/search_query_rules/ruleset/${rulesetId}`,
+        `/internal/search_query_rules/ruleset/${encodeURIComponent(rulesetId)}`,
         {
           query: { forceWrite },
           ...(rules ? { body: JSON.stringify({ rules }) } : {}),

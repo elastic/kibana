@@ -10,17 +10,31 @@ import { i18n } from '@kbn/i18n';
 import { EuiTitle, EuiButton, EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { AssetImage } from '../asset_image';
 import { useKibana } from '../../hooks/use_kibana';
+import { useOnboardingLink } from '../../hooks/use_onboarding_link';
 
-export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }) => {
-  const { docLinks } = useKibana().core;
+export const StreamsListEmptyPrompt = () => {
+  const {
+    core: { docLinks },
+  } = useKibana();
   const streamsDocsLink = docLinks.links.observability.logsStreams;
+
+  const onboardingLink = useOnboardingLink();
 
   return (
     <EuiEmptyPrompt
       css={{
-        maxInlineSize: '760px !important',
+        maxInlineSize: '960px !important',
+        '.euiEmptyPrompt__content': {
+          flexBasis: '35%',
+        },
+        '.euiEmptyPrompt__icon': {
+          maxInlineSize: 'unset !important',
+        },
+        '.euiEmptyPrompt__icon .euiImageWrapper': {
+          maxInlineSize: 'unset !important',
+        },
       }}
-      icon={<AssetImage type="addStreams" />}
+      icon={<AssetImage type="addStreams" size="fullWidth" />}
       title={
         <h2>
           {i18n.translate('xpack.streams.emptyState.title', {
@@ -34,18 +48,16 @@ export const StreamsListEmptyPrompt = ({ onAddData }: { onAddData?: () => void }
         <p>
           {i18n.translate('xpack.streams.emptyState.body', {
             defaultMessage:
-              'Easily turn your data into clear, structured flows with simple tools for routing, field extraction, and retention. Just stream it into Elastic to get started and your new streams will appear here.',
+              "Streams provides a centralized UI that streamlines common tasks like rerouting data, extracting fields, or setting data retention, so you don't need to navigate to multiple applications or manually configure underlying Elasticsearch components.",
           })}
         </p>
       }
       actions={
-        onAddData ? (
-          <EuiButton color="primary" fill onClick={onAddData}>
-            {i18n.translate('xpack.streams.emptyState.addDataButton', {
-              defaultMessage: 'Add data',
-            })}
-          </EuiButton>
-        ) : undefined
+        <EuiButton color="primary" fill href={onboardingLink}>
+          {i18n.translate('xpack.streams.emptyState.addDataButton', {
+            defaultMessage: 'Add data',
+          })}
+        </EuiButton>
       }
       footer={
         <>

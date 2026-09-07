@@ -84,7 +84,7 @@ paths:
                   id: '60b13926-289b-41b1-a537-197ef1fa5059'
                   anomaly_threshold: 50
                   machine_learning_job_id:
-                    - 'auth_high_count_logon_events'
+                    - 'auth_high_count_logon_events_ea'
       responses:
         200:
           description: Indicates a successful call.

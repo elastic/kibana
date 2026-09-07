@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,7 +9,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/task-manager-plugin",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
+    "@kbn/telemetry-plugin"
   ],
   "exclude": [
     "target/**/*"

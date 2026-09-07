@@ -15,6 +15,7 @@ import type {
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { ConfigType } from '../../../config';
 import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constants';
+import type { Owner } from '../../../../common/constants/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
 
@@ -50,27 +51,27 @@ export function registerCAISynchronizationTask({
   });
 }
 
-/**
- * @param {destIndex} string Should be a key of SYNCHRONIZATION_QUERIES_DICTIONARY
- */
+export function getSynchronizationTaskId(spaceId: string, owner: Owner): string {
+  return `cai_cases_analytics_sync_${spaceId}_${owner}`;
+}
+
 export async function scheduleCAISynchronizationTask({
-  taskId,
-  sourceIndex,
-  destIndex,
   taskManager,
   logger,
+  spaceId,
+  owner,
 }: {
-  taskId: string;
-  sourceIndex: string;
-  destIndex: string;
   taskManager: TaskManagerStartContract;
   logger: Logger;
+  spaceId: string;
+  owner: Owner;
 }) {
+  const taskId = getSynchronizationTaskId(spaceId, owner);
   try {
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ANALYTICS_SYNCHRONIZATION_TASK_TYPE,
-      params: { sourceIndex, destIndex },
+      params: { owner, spaceId },
       schedule: SCHEDULE, // every 5 minutes
       state: {},
     });

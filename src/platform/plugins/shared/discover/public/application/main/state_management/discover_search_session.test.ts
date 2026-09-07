@@ -26,18 +26,22 @@ describe('DiscoverSearchSessionManager', () => {
       const nextId = 'id';
       session.start.mockImplementationOnce(() => nextId);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
-      expect(session.start).toBeCalled();
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(false);
+      expect(session.start).toHaveBeenCalled();
     });
 
     test('restores a session using query param from the URL', () => {
       const nextId = 'id_from_url';
       history.push(`/?searchSessionId=${nextId}`);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
-      expect(session.restore).toBeCalled();
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(true);
+      expect(session.restore).toHaveBeenCalled();
     });
 
     test('removes query param from the URL when navigating away from a restored session', () => {
@@ -49,9 +53,11 @@ describe('DiscoverSearchSessionManager', () => {
       session.isCurrentSession.mockImplementationOnce(() => true);
       session.isRestore.mockImplementationOnce(() => true);
 
-      const id = searchSessionManager.getNextSearchSessionId();
-      expect(id).toEqual(nextId);
-      expect(session.start).toBeCalled();
+      const { searchSessionId, isSearchSessionRestored } =
+        searchSessionManager.getNextSearchSessionId();
+      expect(searchSessionId).toEqual(nextId);
+      expect(isSearchSessionRestored).toBe(false);
+      expect(session.start).toHaveBeenCalled();
       expect(history.location.search).toMatchInlineSnapshot(`""`);
     });
   });
@@ -60,7 +66,7 @@ describe('DiscoverSearchSessionManager', () => {
     test('notifies about searchSessionId changes in the URL', () => {
       const emits: Array<string | null> = [];
 
-      const sub = searchSessionManager.newSearchSessionIdFromURL$.subscribe((newId) => {
+      const sub = searchSessionManager.getNewSearchSessionIdFromURL$().subscribe((newId) => {
         emits.push(newId);
       });
 

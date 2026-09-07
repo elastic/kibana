@@ -39,7 +39,7 @@ const getMockUseExceptionsListCard = () => ({
   menuActionItems: [
     {
       key: 'Export',
-      icon: 'exportAction',
+      icon: 'upload',
       label: 'Export',
       onClick: jest.fn(),
     },

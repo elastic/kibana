@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -18,7 +18,7 @@ import {
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
-import type { ExecutorType, ActionType } from '../types';
+import type { ActionType } from '../types';
 import type { ILicenseState } from '../lib';
 import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
@@ -48,9 +48,12 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
-
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
+import { getConnectorType } from '../fixtures';
+import { createMockInMemoryConnector } from '../application/connector/mocks';
+import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
+import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -90,19 +93,19 @@ const getEventLogClient = jest.fn();
 const preSaveHook = jest.fn();
 const postSaveHook = jest.fn();
 const postDeleteHook = jest.fn();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
 let actionTypeRegistry: ActionTypeRegistry;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
-
+let authTypeRegistry: AuthTypeRegistry;
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
 
-const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-action-type') => {
+const actionTypeIdFromSavedObjectMock = (actionTypeId = 'my-connector-type') => {
   return {
     attributes: {
       actionTypeId,
@@ -133,9 +136,11 @@ beforeEach(() => {
     inMemoryConnectors: [],
   };
   actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+  authTypeRegistry = authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
   actionsClient = new ActionsClient({
     logger,
     actionTypeRegistry,
+    authTypeRegistry,
     unsecuredSavedObjectsClient,
     scopedClusterClient,
     kibanaIndices,
@@ -148,6 +153,9 @@ beforeEach(() => {
     usageCounter: mockUsageCounter,
     connectorTokenClient,
     getEventLogClient,
+    encryptedSavedObjectsClient,
+    isESOCanEncrypt,
+    getAxiosInstanceWithAuth,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -164,30 +172,19 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       await actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -195,7 +192,7 @@ describe('create()', () => {
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'create',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       });
     });
 
@@ -205,44 +202,35 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: 'my-action-type',
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(getConnectorType());
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to create a "my-action-type" action`)
+        new Error(`Unauthorized to create a "my-connector-type" action`)
       );
 
       await expect(
         actionsClient.create({
           action: {
             name: 'my name',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             config: {},
             secrets: {},
           },
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to create a "my-action-type" action]`);
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to create a "my-connector-type" action]`
+      );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         operation: 'create',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       });
     });
   });
@@ -254,24 +242,17 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: savedObjectCreateResult.attributes.actionTypeId,
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: savedObjectCreateResult.attributes.actionTypeId,
+        })
+      );
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       await actionsClient.create({
@@ -298,24 +279,17 @@ describe('create()', () => {
         type: 'action',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
         references: [],
       };
-      actionTypeRegistry.register({
-        id: savedObjectCreateResult.attributes.actionTypeId,
-        name: 'My action type',
-        minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['alerting'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: savedObjectCreateResult.attributes.actionTypeId,
+        })
+      );
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
       authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
@@ -356,42 +330,31 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      preSaveHook,
-      postSaveHook,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        preSaveHook,
+        postSaveHook,
+      })
+    );
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
     const result = await actionsClient.create({
       action: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         config: {},
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       name: 'my name',
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       config: {},
     });
@@ -400,7 +363,7 @@ describe('create()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -416,58 +379,53 @@ describe('create()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        config: {
-          schema: schema.object({
-            param1: schema.string(),
-          }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          config: {
+            schema: z.object({
+              param1: z.string(),
+            }),
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
     const connectorValidator = () => {
       return '[param1] is required';
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({ param1: schema.string() }) },
-        params: { schema: schema.object({}) },
-        connector: connectorValidator,
-      },
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({ param1: z.string() }) },
+          params: { schema: z.object({}) },
+          connector: connectorValidator,
+        },
+      })
+    );
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: { param1: '1' },
         },
@@ -493,26 +451,23 @@ describe('create()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: {
+            schema: z.object({ a: z.boolean(), b: z.boolean(), c: z.boolean() }),
+          },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
         },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {
           a: true,
@@ -526,7 +481,7 @@ describe('create()', () => {
     const result = await actionsClient.create({
       action: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         config: {
           a: true,
           b: true,
@@ -535,13 +490,10 @@ describe('create()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
       name: 'my name',
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       config: {
         a: true,
@@ -554,7 +506,7 @@ describe('create()', () => {
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {
             "a": true,
             "b": true,
@@ -589,6 +541,19 @@ describe('create()', () => {
       microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
       microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
       microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+      auth: {
+        oauth_authorization_code: {
+          rate_limits: {
+            authorize: { lookbackWindow: '1h', limit: 100 },
+            callback: { lookbackWindow: '1h', limit: 100 },
+          },
+        },
+      },
+      inboundEvents: {
+        enabled: false,
+        maxBodyBytes: new ByteSizeValue(1024 * 1024),
+        maxEmitted: 25,
+      },
     });
 
     const localActionTypeRegistryParams = {
@@ -612,6 +577,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -622,6 +588,9 @@ describe('create()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const savedObjectCreateResult = {
@@ -629,37 +598,26 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
 
     await expect(
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"action type \\"my-action-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
+      `"action type \\"my-connector-type\\" is not enabled in the Kibana config xpack.actions.enabledActionTypes"`
     );
   });
 
@@ -669,24 +627,13 @@ describe('create()', () => {
       type: 'type',
       attributes: {
         name: 'my name',
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         config: {},
       },
       references: [],
     };
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
@@ -695,7 +642,7 @@ describe('create()', () => {
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -705,42 +652,32 @@ describe('create()', () => {
 
   test('throws error when predefined id match a pre-configure action id', async () => {
     const preDefinedId = 'mySuperRadTestPreconfiguredId';
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
 
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: preDefinedId,
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
-
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
       actionExecutor,
       bulkExecutionEnqueuer,
       request,
@@ -753,7 +690,7 @@ describe('create()', () => {
       actionsClient.create({
         action: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           config: {},
           secrets: {},
         },
@@ -767,19 +704,14 @@ describe('create()', () => {
   });
 
   it('throws when creating a system connector', async () => {
-    actionTypeRegistry.register({
-      id: '.cases',
-      name: 'Cases',
-      minimumLicenseRequired: 'platinum',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      isSystemActionType: true,
-      executor,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: '.cases',
+        name: 'Cases',
+        minimumLicenseRequired: 'platinum',
+        isSystemActionType: true,
+      })
+    );
 
     await expect(
       actionsClient.create({
@@ -799,6 +731,7 @@ describe('create()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -807,19 +740,18 @@ describe('create()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           actionTypeId: '.cases',
-          config: {},
           id: 'system-connector-.cases',
           name: 'System action: .cases',
-          secrets: {},
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -843,7 +775,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -859,6 +791,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -867,23 +800,24 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await actionsClient.get({ id: 'testPreconfigured' });
@@ -895,6 +829,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -903,19 +838,18 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             actionTypeId: '.cases',
-            config: {},
             id: 'system-connector-.cases',
             name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await expect(actionsClient.get({ id: 'system-connector-.cases' })).rejects.toThrow();
@@ -929,7 +863,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -937,11 +871,11 @@ describe('get()', () => {
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "my-action-type" action`)
+        new Error(`Unauthorized to get a "my-connector-type" action`)
       );
 
       await expect(actionsClient.get({ id: '1' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "my-action-type" action]`
+        `[Error: Unauthorized to get a "my-connector-type" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
@@ -951,6 +885,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -959,31 +894,32 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
-        new Error(`Unauthorized to get a "my-action-type" action`)
+        new Error(`Unauthorized to get a "my-connector-type" action`)
       );
 
       await expect(actionsClient.get({ id: 'testPreconfigured' })).rejects.toMatchInlineSnapshot(
-        `[Error: Unauthorized to get a "my-action-type" action]`
+        `[Error: Unauthorized to get a "my-connector-type" action]`
       );
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
@@ -993,6 +929,7 @@ describe('get()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1001,19 +938,18 @@ describe('get()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             actionTypeId: '.cases',
-            config: {},
             id: 'system-connector-.cases',
             name: 'System action: .cases',
-            secrets: {},
-            isPreconfigured: false,
-            isDeprecated: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       authorization.ensureAuthorized.mockRejectedValue(
@@ -1037,7 +973,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -1063,7 +999,7 @@ describe('get()', () => {
         type: 'type',
         attributes: {
           name: 'my name',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           isMissingSecrets: false,
           config: {},
         },
@@ -1091,15 +1027,19 @@ describe('get()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'type',
-      attributes: {},
+      attributes: {
+        name: 'Test Connector',
+        actionTypeId: '.test-connector-type',
+        isMissingSecrets: false,
+      },
       references: [],
     });
     const result = await actionsClient.get({ id: '1' });
-    expect(result).toEqual({
+
+    expect(result).toContainConnector({
       id: '1',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
+      isMissingSecrets: false,
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.get.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1114,6 +1054,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1122,33 +1063,34 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'testPreconfigured',
       actionTypeId: '.slack',
       isPreconfigured: true,
-      isDeprecated: false,
-      isSystemAction: false,
       name: 'test',
+      config: undefined, // in memory connectors do not return unless exposeConfig is true
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
   });
@@ -1157,6 +1099,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1165,20 +1108,18 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -1190,6 +1131,7 @@ describe('get()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1198,31 +1140,28 @@ describe('get()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(
       await actionsClient.get({ id: 'system-connector-.cases', throwIfSystemAction: false })
-    ).toEqual({
+    ).toContainConnector({
       actionTypeId: '.cases',
       id: 'system-connector-.cases',
-      isDeprecated: false,
-      isPreconfigured: false,
       isSystemAction: true,
       name: 'System action: .cases',
+      authMode: 'shared',
     });
   });
 });
@@ -1260,6 +1199,7 @@ describe('getBulk()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -1268,21 +1208,21 @@ describe('getBulk()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
       return actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
     }
@@ -1397,6 +1337,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1405,46 +1346,43 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
+          secrets: {
+            test: 'test1',
+          },
           isDeprecated: false,
           isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
 
-    expect(result).toEqual([
+    expect(result).toContainConnectors([
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
-        secrets: {},
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         name: 'test',
-        config: { foo: 'bar' },
+        authMode: 'shared',
       },
       {
         id: '1',
@@ -1452,9 +1390,7 @@ describe('getBulk()', () => {
         name: 'test',
         config: { foo: 'bar' },
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
-        isDeprecated: false,
+        authMode: 'shared',
       },
     ]);
   });
@@ -1491,6 +1427,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1499,32 +1436,27 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -1564,6 +1496,7 @@ describe('getBulk()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1572,32 +1505,28 @@ describe('getBulk()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+          isMissingSecrets: false,
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(
@@ -1605,37 +1534,28 @@ describe('getBulk()', () => {
         ids: ['1', 'testPreconfigured', 'system-connector-.cases'],
         throwIfSystemAction: false,
       })
-    ).toEqual([
+    ).toContainConnectors([
       {
         actionTypeId: '.slack',
-        config: { foo: 'bar' },
         id: 'testPreconfigured',
-        isDeprecated: false,
         isPreconfigured: true,
-        isSystemAction: false,
         name: 'test',
-        secrets: {},
+        authMode: 'shared',
       },
       {
         actionTypeId: '.cases',
-        config: {},
         id: 'system-connector-.cases',
-        isDeprecated: false,
-        isMissingSecrets: false,
-        isPreconfigured: false,
         isSystemAction: true,
         name: 'System action: .cases',
-        secrets: {},
+        authMode: 'shared',
       },
       {
         actionTypeId: 'test',
         config: { foo: 'bar' },
         id: '1',
-        isDeprecated: false,
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
         name: 'test',
+        authMode: 'shared',
       },
     ]);
   });
@@ -1648,6 +1568,7 @@ describe('getOAuthAccessToken()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -1656,21 +1577,21 @@ describe('getOAuthAccessToken()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -1859,6 +1780,7 @@ describe('getOAuthAccessToken()', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'abc',
         },
@@ -1944,19 +1866,12 @@ describe('getOAuthAccessToken()', () => {
 
 describe('delete()', () => {
   beforeEach(() => {
-    actionTypeRegistry.register({
-      id: 'my-action-delete',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      postDeleteHook: async (options) => postDeleteHook(options),
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        id: 'my-action-delete',
+        postDeleteHook: async (options: unknown) => postDeleteHook(options),
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
@@ -1993,12 +1908,121 @@ describe('delete()', () => {
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
     });
 
+    test('revokes tokens before deleting the saved object', async () => {
+      const callOrder: string[] = [];
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await actionsClient.delete({ id: '1' });
+
+      expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'per-user',
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.get.mockReset();
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-action-delete',
+            isMissingSecrets: false,
+            config: {},
+            secrets: {},
+            authMode: 'shared',
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.delete({ id: '1' });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: '1',
+          authMode: 'shared',
+        });
+      });
+    });
+
     test(`failing to delete tokens logs error instead of throw`, async () => {
       connectorTokenClient.deleteConnectorTokens.mockRejectedValueOnce(new Error('Fail'));
       await expect(actionsClient.delete({ id: '1' })).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to delete auth tokens for connector "1" after delete: Fail`
+        `Failed to delete auth tokens for connector "1": Fail`
       );
+    });
+
+    test('evicts clients before deleting connector tokens', async () => {
+      const callOrder: string[] = [];
+      const evictClientPool = jest.fn().mockImplementation(async () => {
+        callOrder.push('evictClientPoolStarted');
+        await Promise.resolve();
+        callOrder.push('evictClientPoolFinished');
+      });
+      connectorTokenClient.deleteConnectorTokens.mockImplementationOnce(async () => {
+        callOrder.push('deleteConnectorTokens');
+      });
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        auditLogger,
+        usageCounter: mockUsageCounter,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        evictClientPool,
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(evictClientPool).toHaveBeenCalledWith('1');
+      expect(callOrder).toEqual([
+        'evictClientPoolStarted',
+        'evictClientPoolFinished',
+        'deleteConnectorTokens',
+      ]);
     });
   });
 
@@ -2060,27 +2084,29 @@ describe('delete()', () => {
   });
 
   it('throws when trying to delete a preconfigured connector', async () => {
+    unsecuredSavedObjectsClient.get.mockReset();
+    unsecuredSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
+
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2088,6 +2114,9 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2097,25 +2126,35 @@ describe('delete()', () => {
     );
   });
 
-  it('throws when trying to delete a system connector', async () => {
+  it('allows delete when both preconfigured and saved object exist (deletes saved object only)', async () => {
+    const savedObject = {
+      id: 'shared-id',
+      type: 'action',
+      attributes: {
+        actionTypeId: 'my-connector-type',
+        config: {},
+      },
+      references: [],
+    };
+    unsecuredSavedObjectsClient.get
+      .mockResolvedValueOnce(savedObject)
+      .mockResolvedValueOnce(savedObject);
+    unsecuredSavedObjectsClient.delete.mockResolvedValueOnce({});
+
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
-          id: 'system-connector-.cases',
-          actionTypeId: '.cases',
-          name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: true,
-        },
+        createMockInMemoryConnector({
+          id: 'shared-id',
+          actionTypeId: 'my-connector-type',
+          isPreconfigured: true,
+          name: 'Preconfigured',
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2123,6 +2162,41 @@ describe('delete()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    await actionsClient.delete({ id: 'shared-id' });
+
+    expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('action', 'shared-id');
+  });
+
+  it('throws when trying to delete a system connector', async () => {
+    actionsClient = new ActionsClient({
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'system-connector-.cases',
+          actionTypeId: '.cases',
+          name: 'System action: .cases',
+          isSystemAction: true,
+        }),
+      ],
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      connectorTokenClient: connectorTokenClientMock.create(),
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2168,23 +2242,12 @@ describe('delete()', () => {
 
 describe('update()', () => {
   function updateOperation(): ReturnType<ActionsClient['update']> {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
       },
       references: [],
@@ -2193,7 +2256,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2232,6 +2295,86 @@ describe('update()', () => {
     test(`deletes any existing authorization tokens`, async () => {
       await updateOperation();
       expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledTimes(1);
+    });
+
+    describe('when connector has authMode per-user', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'per-user',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode per-user to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'per-user',
+          skipRevocation: true,
+        });
+      });
+    });
+
+    describe('when connector has authMode shared', () => {
+      beforeEach(() => {
+        actionTypeRegistry.register(getConnectorType());
+        unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+          id: '1',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            authMode: 'shared',
+          },
+          references: [],
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'my-action',
+          type: 'action',
+          attributes: {
+            actionTypeId: 'my-connector-type',
+            isMissingSecrets: false,
+            name: 'my name',
+            config: {},
+            secrets: {},
+          },
+          references: [],
+        });
+      });
+
+      test(`passes authMode shared to deleteConnectorTokens`, async () => {
+        await actionsClient.update({
+          id: 'my-action',
+          action: { name: 'my name', config: {}, secrets: {} },
+        });
+        expect(connectorTokenClient.deleteConnectorTokens).toHaveBeenCalledWith({
+          connectorId: 'my-action',
+          authMode: 'shared',
+          skipRevocation: true,
+        });
+      });
     });
 
     test(`failing to delete tokens logs error instead of throw`, async () => {
@@ -2277,25 +2420,17 @@ describe('update()', () => {
   });
 
   test('updates an action with all given properties', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-      preSaveHook,
-      postSaveHook,
-    });
+    actionTypeRegistry.register(
+      getConnectorType({
+        preSaveHook,
+        postSaveHook,
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
       },
       references: [],
@@ -2304,7 +2439,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2320,22 +2455,20 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: false,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -2361,23 +2494,12 @@ describe('update()', () => {
   });
 
   test('updates an action with isMissingSecrets "true" (set true as the import result), to isMissingSecrets', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
       },
       references: [],
@@ -2386,7 +2508,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
         name: 'my name',
         config: {},
@@ -2402,22 +2524,20 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: true,
       name: 'my name',
       config: {},
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {},
           "isMissingSecrets": false,
           "name": "my name",
@@ -2433,27 +2553,24 @@ describe('update()', () => {
   });
 
   test('validates config', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        config: {
-          schema: schema.object({
-            param1: schema.string(),
-          }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          config: {
+            schema: z.object({
+              param1: z.string(),
+            }),
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2466,32 +2583,30 @@ describe('update()', () => {
           secrets: {},
         },
       })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [param1]: expected value of type [string] but got [undefined]"`
-    );
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "error validating connector type config: ✖ Invalid input: expected string, received undefined
+        → at param1"
+    `);
   });
 
   test('validates connector: config and secrets', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-        connector: () => {
-          return '[param1] is required';
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: { schema: z.object({}) },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
+          connector: () => {
+            return '[param1] is required';
+          },
         },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2510,25 +2625,22 @@ describe('update()', () => {
   });
 
   test('encrypts action type options unless specified not to', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: {
-          schema: schema.object({ a: schema.boolean(), b: schema.boolean(), c: schema.boolean() }),
+    actionTypeRegistry.register(
+      getConnectorType({
+        validate: {
+          config: {
+            schema: z.object({ a: z.boolean(), b: z.boolean(), c: z.boolean() }),
+          },
+          secrets: { schema: z.object({}) },
+          params: { schema: z.object({}) },
         },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+      })
+    );
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2536,7 +2648,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: true,
         name: 'my name',
         config: {
@@ -2560,12 +2672,9 @@ describe('update()', () => {
         secrets: {},
       },
     });
-    expect(result).toEqual({
+    expect(result).toContainConnector({
       id: 'my-action',
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: false,
-      actionTypeId: 'my-action-type',
+      actionTypeId: 'my-connector-type',
       isMissingSecrets: true,
       name: 'my name',
       config: {
@@ -2573,13 +2682,14 @@ describe('update()', () => {
         b: true,
         c: true,
       },
+      authMode: 'shared',
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(1);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         "action",
         Object {
-          "actionTypeId": "my-action-type",
+          "actionTypeId": "my-connector-type",
           "config": Object {
             "a": true,
             "b": true,
@@ -2599,18 +2709,7 @@ describe('update()', () => {
   });
 
   test('throws an error when ensureActionTypeEnabled throws', async () => {
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      validate: {
-        config: { schema: schema.object({}) },
-        secrets: { schema: schema.object({}) },
-        params: { schema: schema.object({}) },
-      },
-      executor,
-    });
+    actionTypeRegistry.register(getConnectorType());
     mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
       throw new Error('Fail');
     });
@@ -2618,7 +2717,7 @@ describe('update()', () => {
       id: '1',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       references: [],
     });
@@ -2626,7 +2725,7 @@ describe('update()', () => {
       id: 'my-action',
       type: 'action',
       attributes: {
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         isMissingSecrets: false,
         name: 'my name',
         config: {},
@@ -2650,24 +2749,23 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2675,6 +2773,9 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2695,21 +2796,17 @@ describe('update()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       actionExecutor,
       bulkExecutionEnqueuer,
@@ -2717,6 +2814,9 @@ describe('update()', () => {
       authorization: authorization as unknown as ActionsAuthorization,
       connectorTokenClient: connectorTokenClientMock.create(),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     await expect(
@@ -2735,6 +2835,10 @@ describe('update()', () => {
 });
 
 describe('execute()', () => {
+  beforeEach(() => {
+    actionTypeRegistry.register(getConnectorType());
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to excecute actions', async () => {
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
@@ -2746,7 +2850,7 @@ describe('execute()', () => {
         source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2770,7 +2874,7 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2779,20 +2883,16 @@ describe('execute()', () => {
     test('ensures that system actions privileges are being authorized correctly', async () => {
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2804,22 +2904,21 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: () => ['test/create'],
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -2838,23 +2937,22 @@ describe('execute()', () => {
     test('does not authorize kibana privileges for non system actions', async () => {
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2866,22 +2964,21 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges: () => ['test/create'],
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges: () => ['test/create'],
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -2891,7 +2988,7 @@ describe('execute()', () => {
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2902,20 +2999,16 @@ describe('execute()', () => {
 
       actionsClient = new ActionsClient({
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -2927,22 +3020,21 @@ describe('execute()', () => {
         usageCounter: mockUsageCounter,
         connectorTokenClient,
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
-      actionTypeRegistry.register({
-        id: '.cases',
-        name: 'Cases',
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['alerting'],
-        getKibanaPrivileges,
-        validate: {
-          config: { schema: schema.object({}) },
-          secrets: { schema: schema.object({}) },
-          params: { schema: schema.object({}) },
-        },
-        isSystemActionType: true,
-        executor,
-      });
+      actionTypeRegistry.register(
+        getConnectorType({
+          id: '.cases',
+          name: 'Cases',
+          minimumLicenseRequired: 'platinum',
+          supportedFeatureIds: ['alerting'],
+          getKibanaPrivileges,
+          isSystemActionType: true,
+        })
+      );
 
       unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
 
@@ -2965,6 +3057,7 @@ describe('execute()', () => {
     const actionId = uuidv4();
     const actionExecutionId = uuidv4();
     actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId });
+    unsecuredSavedObjectsClient.get.mockResolvedValue(actionTypeIdFromSavedObjectMock());
     await expect(
       actionsClient.execute({
         actionId,
@@ -2981,6 +3074,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      connectorTokenClient,
       actionExecutionId,
       source: asHttpRequestExecutionSource(request),
     });
@@ -3008,6 +3102,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      connectorTokenClient,
       relatedSavedObjects: [
         {
           id: 'some-id',
@@ -3043,6 +3138,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
+      connectorTokenClient,
       source: asHttpRequestExecutionSource(request),
       relatedSavedObjects: [
         {
@@ -3054,6 +3150,57 @@ describe('execute()', () => {
       ],
       actionExecutionId,
     });
+  });
+
+  test('preconfigured connector takes precedence over saved object connector with same ID', async () => {
+    const duplicateConnectorId = 'duplicate-connector-id';
+
+    actionsClient = new ActionsClient({
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: duplicateConnectorId,
+          actionTypeId: 'my-connector-type',
+          name: 'Preconfigured Connector',
+          isPreconfigured: true,
+          config: { url: 'https://preconfigured.example.com' },
+        }),
+      ],
+      logger,
+      actionTypeRegistry,
+      authTypeRegistry,
+      unsecuredSavedObjectsClient,
+      scopedClusterClient,
+      kibanaIndices,
+      actionExecutor,
+      bulkExecutionEnqueuer,
+      request,
+      authorization: authorization as unknown as ActionsAuthorization,
+      auditLogger,
+      usageCounter: mockUsageCounter,
+      connectorTokenClient,
+      getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
+    });
+
+    actionExecutor.execute.mockResolvedValue({ status: 'ok', actionId: duplicateConnectorId });
+
+    await actionsClient.execute({
+      actionId: duplicateConnectorId,
+      params: { message: 'test' },
+      source: asHttpRequestExecutionSource(request),
+    });
+
+    // Verify that savedObjectsClient.get was NOT called because preconfigured connector takes precedence
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+
+    // Verify the actionExecutor was called with the correct connector ID
+    expect(actionExecutor.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actionId: duplicateConnectorId,
+      })
+    );
   });
 });
 
@@ -3068,7 +3215,7 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
         },
         {
           id: uuidv4(),
@@ -3077,11 +3224,11 @@ describe('bulkEnqueueExecution()', () => {
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
         operation: 'execute',
       });
     });
@@ -3100,7 +3247,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
           },
           {
             id: uuidv4(),
@@ -3109,7 +3256,7 @@ describe('bulkEnqueueExecution()', () => {
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
-            actionTypeId: 'my-action-type',
+            actionTypeId: 'my-connector-type',
           },
         ])
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
@@ -3129,7 +3276,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
       {
         id: uuidv4(),
@@ -3138,7 +3285,7 @@ describe('bulkEnqueueExecution()', () => {
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
-        actionTypeId: 'my-action-type',
+        actionTypeId: 'my-connector-type',
       },
     ];
     await expect(actionsClient.bulkEnqueueExecution(opts)).resolves.toMatchInlineSnapshot(
@@ -3150,18 +3297,13 @@ describe('bulkEnqueueExecution()', () => {
 });
 
 describe('isActionTypeEnabled()', () => {
-  const fooActionType: ActionType = {
+  const fooActionType: ActionType = getConnectorType({
     id: 'foo',
     name: 'Foo',
     minimumLicenseRequired: 'gold',
     supportedFeatureIds: ['alerting'],
-    validate: {
-      config: { schema: schema.object({}) },
-      secrets: { schema: schema.object({}) },
-      params: { schema: schema.object({}) },
-    },
-    executor: jest.fn(),
-  };
+  });
+
   beforeEach(() => {
     actionTypeRegistry.register(fooActionType);
   });
@@ -3188,6 +3330,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3196,38 +3339,35 @@ describe('isPreconfigured()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isPreconfigured('testPreconfigured')).toEqual(true);
@@ -3237,6 +3377,7 @@ describe('isPreconfigured()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3245,38 +3386,35 @@ describe('isPreconfigured()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isPreconfigured(uuidv4())).toEqual(false);
@@ -3288,6 +3426,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3296,38 +3435,35 @@ describe('isSystemAction()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isSystemAction('system-connector-.cases')).toEqual(true);
@@ -3337,6 +3473,7 @@ describe('isSystemAction()', () => {
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -3345,38 +3482,35 @@ describe('isSystemAction()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
-          actionTypeId: 'my-action-type',
+          actionTypeId: 'my-connector-type',
           secrets: {
             test: 'test1',
           },
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
-        {
+        }),
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       connectorTokenClient: new ConnectorTokenClient({
         unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
         encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
         logger,
+        configurationUtilities: actionsConfigMock.create(),
       }),
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
 
     expect(actionsClient.isSystemAction(uuidv4())).toEqual(false);

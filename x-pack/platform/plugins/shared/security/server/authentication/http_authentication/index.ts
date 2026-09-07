@@ -6,4 +6,3 @@
  */
 
 export { BasicHTTPAuthorizationHeaderCredentials } from './basic_http_authorization_header_credentials';
-export { HTTPAuthorizationHeader } from './http_authorization_header';

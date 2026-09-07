@@ -7,10 +7,12 @@
 
 import type { ExclusiveUnion, WithEuiThemeProps } from '@elastic/eui';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
+  EuiSpacer,
   EuiText,
   withEuiTheme,
 } from '@elastic/eui';
@@ -19,16 +21,18 @@ import type {
   EuiSelectableOnChangeEvent,
   EuiSelectableSearchableSearchProps,
 } from '@elastic/eui/src/components/selectable/selectable';
+import { css } from '@emotion/react';
 import React, { Component, Fragment, lazy, Suspense } from 'react';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { i18n } from '@kbn/i18n';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';
-import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
+import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import type { EventTracker } from '../../analytics';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -50,34 +54,11 @@ interface Props {
   readonly activeSpace: Space | null;
   allowSolutionVisibility: boolean;
   eventTracker: EventTracker;
+  isLoading: boolean;
 }
 class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
-  private calculateOptimalWidth = (): number => {
-    const minWidth = 300;
-    const maxWidth = 400;
-
-    const { euiTheme } = this.props.theme;
-    const avatarWidth = parseInt(euiTheme.size.l, 10); // EUI theme size.l = 24px, matches avatar 's' size
-    const solutionBadgeWidth = this.props.allowSolutionVisibility ? 110 : 0; // 110px for badges like "Elasticsearch" or "Observability"
-    const paddingAndMargins = 48; // Rough estimate for internal padding and gaps between elements
-
-    // Find the longest space name
-    const longestSpaceName = this.props.spaces.reduce((longest, space) => {
-      return space.name.length > longest.length ? space.name : longest;
-    }, '');
-
-    // Rough estimation: 8px per character
-    const estimatedTextWidth = longestSpaceName.length * 8;
-    const totalEstimatedWidth =
-      estimatedTextWidth + avatarWidth + solutionBadgeWidth + paddingAndMargins;
-
-    // Clamp between min and max
-    return Math.min(Math.max(minWidth, totalEstimatedWidth), maxWidth);
-  };
-
   public render() {
     const spaceOptions: EuiSelectableOption[] = this.getSpaceOptions();
-    const calculatedWidth = this.calculateOptimalWidth();
 
     const noSpacesMessage = (
       <EuiText color="subdued" className="eui-textCenter">
@@ -106,6 +87,7 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
               compressed: true,
               isClearable: true,
               id: 'headerSpacesMenuListSearch',
+              'data-test-subj': 'spacesMenuSearchInput',
             },
           }
         : {
@@ -126,27 +108,48 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}
-          style={{ minWidth: calculatedWidth, maxWidth: calculatedWidth }}
+          css={css`
+            width: 400px;
+          `}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,
             showIcons: true,
             onFocusBadge: false,
+            paddingSize: 's',
           }}
+          isLoading={this.props.isLoading}
+          loadingMessage={i18n.translate('xpack.spaces.navControl.loadingMessage', {
+            defaultMessage: 'Loading...',
+          })}
         >
           {(list, search) => (
             <Fragment>
               <EuiPopoverTitle paddingSize="s">
-                {search ||
-                  i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
-                    defaultMessage: 'Spaces',
-                  })}
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      padding-left: ${this.props.theme.euiTheme.size.s};
+                    `}
+                  >
+                    {i18n.translate('xpack.spaces.navControl.spacesMenu.selectSpacesTitle', {
+                      defaultMessage: 'Spaces',
+                    })}
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>{this.renderManageButton()}</EuiFlexItem>
+                </EuiFlexGroup>
+                {search && (
+                  <>
+                    <EuiSpacer size="s" />
+                    {search}
+                  </>
+                )}
               </EuiPopoverTitle>
               {list}
             </Fragment>
           )}
         </EuiSelectable>
-        <EuiPopoverFooter paddingSize="s">{this.renderManageButton()}</EuiPopoverFooter>
       </Fragment>
     );
   }
@@ -239,7 +242,6 @@ class SpacesMenuUI extends Component<Props & WithEuiThemeProps> {
     return (
       <ManageSpacesButton
         key="manageSpacesButton"
-        size="s"
         onClick={this.props.onClickManageSpaceBtn}
         capabilities={this.props.capabilities}
         navigateToApp={this.props.navigateToApp}

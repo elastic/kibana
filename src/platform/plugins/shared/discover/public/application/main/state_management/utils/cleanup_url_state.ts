@@ -9,10 +9,28 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DiscoverAppState, AppStateUrl } from '../discover_app_state_container';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverServices } from '../../../../build_services';
+import type { DiscoverAppState } from '../redux';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
+import { APP_STATE_URL_KEY } from '../../../../../common';
+
+export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
+  /**
+   * Necessary to take care of legacy links [fieldName,direction]
+   */
+  sort?: string[][] | [string, string];
+  /**
+   * Legacy data view ID prop
+   */
+  index?: string;
+  /**
+   * Legacy ESQL approximate
+   */
+  isApproximate?: boolean;
+}
 
 /**
  * Takes care of the given url state, migrates legacy props and cleans up empty props
@@ -88,5 +106,21 @@ export function cleanupUrlState(
     }
   }
 
+  // Migrate legacy isApproximate
+  if (
+    typeof appStateFromUrl.esqlApproximation !== 'boolean' &&
+    typeof appStateFromUrl.isApproximate === 'boolean'
+  ) {
+    appStateFromUrl.esqlApproximation = appStateFromUrl.isApproximate;
+  }
+  delete appStateFromUrl.isApproximate;
+
   return appStateFromUrl as DiscoverAppState;
+}
+
+export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: DiscoverServices) {
+  return (
+    cleanupUrlState(stateStorage.get<AppStateUrl>(APP_STATE_URL_KEY) ?? {}, services.uiSettings) ??
+    {}
+  );
 }

@@ -15,8 +15,10 @@
       "kibanaReact",
       "triggersActionsUi",
       "encryptedSavedObjects",
+      "licensing",
       "spaces"
     ],
+    "optionalPlugins": ["usageCollection", "cloud"],
     "extraPublicDirs": ["public/common"]
   }
 }

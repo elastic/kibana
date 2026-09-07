@@ -16,6 +16,8 @@ import {
   InstallTranslatedButton,
   ReprocessFailedItemsButton,
 } from '../../../../common/components/bulk_actions';
+import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import type { BulkActionsItem } from '../../../../common/components/bulk_actions/types';
 
 const ReprocessFailedDashboardsButton = WithMissingPrivilegesTooltip(
   ReprocessFailedItemsButton,
@@ -39,15 +41,15 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
   ({
     isTableLoading,
     translationStats,
-    selectedDashboards: selectedRules,
+    selectedDashboards,
     installTranslatedDashboards,
     installSelectedDashboards,
     reprocessFailedDashboards,
   }) => {
-    const numberOfFailedRules = translationStats.dashboards.failed;
-    const numberOfTranslatedRules = translationStats.dashboards.success.installable;
-    const showInstallSelectedRulesButton = numberOfTranslatedRules > 0;
-    const showRetryFailedRulesButton = numberOfFailedRules > 0;
+    const numberOfFailedDashboards = translationStats.dashboards.failed;
+    const numberOfTranslatedDashboards = translationStats.dashboards.success.installable;
+    const showInstallSelectedDashboardsButton = numberOfTranslatedDashboards > 0;
+    const showRetryFailedDashboardsButton = numberOfFailedDashboards > 0;
     const reprocessFailedDashboardsCallback = useCallback(() => {
       reprocessFailedDashboards?.();
     }, [reprocessFailedDashboards]);
@@ -57,28 +59,41 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedDashboardsCallback = useCallback(() => {
       installSelectedDashboards?.();
     }, [installSelectedDashboards]);
+    const isDashboardInstallable = useCallback(
+      (item: BulkActionsItem) =>
+        item.translation_result === MigrationTranslationResult.FULL ||
+        item.translation_result === MigrationTranslationResult.PARTIAL,
+      []
+    );
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-        {showRetryFailedRulesButton && (
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        responsive={false}
+        wrap={true}
+        data-test-subj="migrationsBulkActions"
+      >
+        {showRetryFailedDashboardsButton && (
           <EuiFlexItem grow={false}>
             <ReprocessFailedDashboardsButton
               isDisabled={isTableLoading}
               isLoading={isTableLoading}
-              numberOfFailedItems={numberOfFailedRules}
+              numberOfFailedItems={numberOfFailedDashboards}
               onClick={reprocessFailedDashboardsCallback}
-              selectedItems={selectedRules}
+              selectedItems={selectedDashboards}
             />
           </EuiFlexItem>
         )}
-        {showInstallSelectedRulesButton && (
+        {showInstallSelectedDashboardsButton && (
           <EuiFlexItem grow={false}>
             <InstallTranslatedButton
               disableInstallTranslatedItemsButton={isTableLoading}
               installSelectedItem={installSelectedDashboardsCallback}
               installTranslatedItems={installTranslatedDashboardsCallback}
               isLoading={isTableLoading}
-              numberOfTranslatedItems={numberOfTranslatedRules}
-              selectedItems={selectedRules}
+              numberOfTranslatedItems={numberOfTranslatedDashboards}
+              selectedItems={selectedDashboards}
+              isInstallable={isDashboardInstallable}
             />
           </EuiFlexItem>
         )}

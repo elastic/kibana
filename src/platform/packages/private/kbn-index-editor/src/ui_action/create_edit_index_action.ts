@@ -9,12 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { FileUploadManager } from '@kbn/file-upload';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { createFlyout } from '../components/create_flyout';
-import { IndexUpdateService } from '../index_update_service';
+import { IndexUpdateService } from '../services/index_update_service';
 import type { EditLookupIndexContentContext, EditLookupIndexFlyoutDeps } from '../types';
-import { EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID } from './constants';
+import { IndexEditorTelemetryService } from '../telemetry/telemetry_service';
 
 export function createEditLookupIndexContentAction(
   dependencies: EditLookupIndexFlyoutDeps
@@ -30,12 +30,20 @@ export function createEditLookupIndexContentAction(
         defaultMessage: 'Open lookup index editor UI',
       }),
     async execute(context: EditLookupIndexContentContext) {
-      const { coreStart, data, fileUpload } = dependencies;
+      const { coreStart, data } = dependencies;
+
+      const indexEditorTelemetryService = new IndexEditorTelemetryService(
+        coreStart.analytics,
+        context.canEditIndex,
+        context.doesIndexExist,
+        context.triggerSource
+      );
 
       const indexUpdateService = new IndexUpdateService(
         coreStart.http,
         data,
         coreStart.notifications,
+        indexEditorTelemetryService,
         context.canEditIndex
       );
 
@@ -57,28 +65,19 @@ export function createEditLookupIndexContentAction(
 
       const existingIndexName = doesIndexExist ? indexName : null;
 
-      const fileManager = new FileUploadManager(
-        fileUpload,
-        coreStart.http,
-        data,
-        coreStart.notifications,
-        null,
-        false,
-        true,
-        existingIndexName,
-        { index: { mode: 'lookup' } },
-        // On index searchable
-        undefined,
-        // On all docs searchable
-        (index) => {
-          indexUpdateService.onFileUploadFinished(index);
-        }
-      );
-
       const storage = new Storage(localStorage);
 
       try {
-        createFlyout({ ...dependencies, indexUpdateService, fileManager, storage }, context);
+        createFlyout(
+          {
+            ...dependencies,
+            indexUpdateService,
+            indexEditorTelemetryService,
+            storage,
+            existingIndexName,
+          },
+          context
+        );
       } catch (e) {
         return Promise.reject(e);
       }

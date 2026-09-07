@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { Writable } from '@kbn/utility-types';
+import type { z } from '@kbn/zod';
 import type {
   timeRangeSchema,
   absoluteTimeRangeSchema,
   relativeTimeRangeSchema,
 } from './time_range';
+import type { aggregateQuerySchema, querySchema } from './query';
 
-export type TimeRange = Writable<TypeOf<typeof timeRangeSchema>>;
-export type AbsoluteTimeRange = TypeOf<typeof absoluteTimeRangeSchema>;
-export type RelativeTimeRange = TypeOf<typeof relativeTimeRangeSchema>;
+export type TimeRange = z.output<typeof timeRangeSchema>;
+export type AbsoluteTimeRange = z.output<typeof absoluteTimeRangeSchema>;
+export type RelativeTimeRange = z.output<typeof relativeTimeRangeSchema>;
+
+export type Query = z.output<typeof querySchema>;
+export type AggregateQuery = z.output<typeof aggregateQuerySchema>;

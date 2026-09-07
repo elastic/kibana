@@ -8,12 +8,8 @@ import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { FindSLOGroupsResponse } from '@kbn/slo-schema';
-import type {
-  QueryObserverResult,
-  RefetchOptions,
-  RefetchQueryFilters,
-} from '@tanstack/react-query';
-import { useQuery } from '@tanstack/react-query';
+import type { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
@@ -80,7 +76,7 @@ export function useFetchSloGroups({
           ],
           dataView,
           {
-            ignoreFilterIfFieldNotInIndex: true,
+            ignoreFilterIfFieldNotInIndex: false,
           }
         )
       );

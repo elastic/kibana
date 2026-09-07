@@ -8,7 +8,7 @@
 import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
-const ALL_VALUE = '*';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX, SLO_STATUS } from '../constants';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
@@ -37,10 +37,10 @@ const errorBudgetSchema = t.type({
 });
 
 const statusSchema = t.union([
-  t.literal('NO_DATA'),
-  t.literal('HEALTHY'),
-  t.literal('DEGRADING'),
-  t.literal('VIOLATED'),
+  t.literal(SLO_STATUS.NO_DATA),
+  t.literal(SLO_STATUS.HEALTHY),
+  t.literal(SLO_STATUS.DEGRADING),
+  t.literal(SLO_STATUS.VIOLATED),
 ]);
 
 const summarySchema = t.intersection([
@@ -99,8 +99,12 @@ const dateRangeSchema = t.type({
   to: dateType,
 });
 
+export type SLOStatus = t.TypeOf<typeof statusSchema>;
+
 export {
   ALL_VALUE,
+  SLO_GROUPINGS_PREFIX,
+  SLO_STATUS,
   allOrAnyString,
   allOrAnyStringOrArray,
   dateRangeSchema,

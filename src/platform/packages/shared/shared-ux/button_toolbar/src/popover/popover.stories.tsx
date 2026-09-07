@@ -49,7 +49,7 @@ export const Popover = {
       <Component
         type={buttonType}
         label="Add element"
-        iconType={showIcon ? 'plusInCircle' : undefined}
+        iconType={showIcon ? 'plusCircle' : undefined}
         panelPaddingSize="none"
       >
         {() => (

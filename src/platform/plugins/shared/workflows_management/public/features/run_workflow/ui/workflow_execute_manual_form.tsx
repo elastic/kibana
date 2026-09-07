@@ -7,140 +7,205 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto, WorkflowInputSchema, WorkflowListItemDto } from '@kbn/workflows';
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { z } from '@kbn/zod';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { JSONSchema7 } from 'json-schema';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { CodeEditor, monaco } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
+import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '@kbn/workflows';
+import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/lib/field_conversion';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
+import { InputValidationCallout } from './input_validation_callout';
 
-const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
-  return z.object(
-    inputs.reduce((acc, input) => {
-      switch (input.type) {
-        case 'string':
-          acc[input.name] = input.required ? z.string() : z.string().optional();
-          break;
-        case 'number':
-          acc[input.name] = input.required ? z.number() : z.number().optional();
-          break;
-        case 'boolean':
-          acc[input.name] = input.required ? z.boolean() : z.boolean().optional();
-          break;
-        case 'choice':
-          acc[input.name] = input.required
-            ? z.enum(input.options as [string, ...string[]])
-            : z.enum(input.options as [string, ...string[]]).optional();
-          break;
+const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
+
+const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, unknown> => {
+  if (!inputs?.properties) {
+    return {};
+  }
+
+  // Resolve defaults (with $ref and nested object support) so we can reuse the
+  // same values applyInputDefaults would produce at execution time.
+  const resolvedDefaults = applyInputDefaults(undefined, inputs) ?? {};
+
+  // Only include a property when the user should see/edit it: required fields, fields with
+  // defaults in the subtree (hasDefaultsRecursive), or $ref inputs (optional: partial defaults
+  // from applyInputDefaults; required: full generated sample via resolveRef).
+  // Optional properties without defaults stay omitted so runtime can treat them as unset.
+  // See issue elastic/security-team#16857.
+  const requiredProps = new Set(inputs.required ?? []);
+  const result: Record<string, unknown> = {};
+
+  for (const [propertyName, propertySchema] of Object.entries(inputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+    const isRequired = requiredProps.has(propertyName);
+    const hasDefaults = hasDefaultsRecursive(jsonSchema, inputs);
+    const resolvedValue = resolvedDefaults[propertyName];
+    const isRefProp = Boolean(jsonSchema.$ref);
+
+    // Required $ref: prefer a full generated sample (resolveRef + placeholders) so the run
+    // modal matches what authors need to edit; fall back to applyInputDefaults if sampling fails.
+    if (isRequired && isRefProp) {
+      const sample = generateSampleFromJsonSchema(jsonSchema, inputs);
+      if (sample !== undefined) {
+        result[propertyName] = sample;
+      } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
+        result[propertyName] = resolvedValue;
+      } else {
+        // Unknown/invalid $ref: keep the key editable so the run modal is not missing a required field.
+        result[propertyName] = {};
       }
-      return acc;
-    }, {} as Record<string, z.ZodType>)
-  );
+    } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
+      // Optional $ref (or defaults in subtree): partial structs from applyInputDefaults without
+      // hasDefaultsRecursive on the $ref wrapper alone.
+      result[propertyName] = resolvedValue;
+    } else if (isRequired) {
+      const sample = generateSampleFromJsonSchema(jsonSchema, inputs);
+      if (sample !== undefined) {
+        result[propertyName] = sample;
+      }
+    }
+  }
+
+  return result;
 };
 
 interface WorkflowExecuteManualFormProps {
-  workflow: WorkflowDetailDto | WorkflowListItemDto;
   value: string;
+  inputs?: JsonModelSchemaType; // normalized inputs
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
-
-const defaultWorkflowInputsMappings: Record<string, any> = {
-  string: 'Enter a string',
-  number: 0,
-  boolean: false,
-  choice: (input: any) => `Select an option: ${input.options.join(', ')}`,
-};
-
-const getDefaultWorkflowInput = (workflow: WorkflowDetailDto | WorkflowListItemDto): string => {
-  const inputPlaceholder: Record<string, any> = {};
-
-  if (workflow?.definition!.inputs) {
-    workflow.definition!.inputs.forEach((input: any) => {
-      let placeholder: string | number | boolean | ((input: any) => string) =
-        defaultWorkflowInputsMappings[input.type];
-      if (typeof placeholder === 'function') {
-        placeholder = placeholder(input);
-      }
-      inputPlaceholder[input.name] = input.default || placeholder;
-    });
-  }
-
-  return JSON.stringify(inputPlaceholder, null, 2);
-};
-
 export const WorkflowExecuteManualForm = ({
-  workflow,
   value,
+  inputs,
   setValue,
   errors,
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
-  const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(workflow?.definition!.inputs || []),
-    [workflow?.definition]
-  );
+  const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
 
-  const handleChange = useCallback(
-    (data: string) => {
-      setValue(data);
-      if (workflow?.definition!.inputs) {
-        try {
-          const res = inputsValidator.safeParse(JSON.parse(data));
-          if (!res.success) {
-            setErrors(
-              res.error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ')
-            );
-          } else {
-            setErrors(null);
-          }
-        } catch (e: Error | any) {
-          setErrors(`Invalid JSON: ${e.message || e.toString()}`);
-        }
-      }
-    },
-    [setValue, workflow?.definition, inputsValidator, setErrors]
-  );
+  /** Same root merge as workflow YAML Monaco schema so `#/kibana/definitions/*` $ref resolves. */
+  const monacoInputsJsonSchema = useMemo(() => {
+    if (!inputs) {
+      return undefined;
+    }
+    return (mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(inputs as object) ??
+      inputs) as JsonModelSchemaType;
+  }, [inputs]);
 
   useEffect(() => {
-    if (!value && workflow) {
-      handleChange(getDefaultWorkflowInput(workflow));
+    setValue(JSON.stringify(getDefaultWorkflowInput(inputs), null, 2));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Validate inputs on initial load and when definition changes
+  useEffect(() => {
+    if (value) {
+      try {
+        const res = inputsValidator.safeParse(JSON.parse(value));
+        if (!res.success) {
+          setErrors(
+            res.error.issues
+              .map((e) => (e.path.length > 0 ? `${e.path.join('.')}: ${e.message}` : e.message))
+              .join(', ')
+          );
+        } else {
+          setErrors(null);
+        }
+      } catch (e: Error | unknown) {
+        setErrors(
+          i18n.translate('workflows.workflowExecuteManualForm.invalidJson', {
+            defaultMessage: 'Invalid JSON: {message}',
+            values: { message: e instanceof Error ? e.message : String(e) },
+          })
+        );
+      }
     }
-  }, [workflow, value, handleChange]);
+  }, [inputsValidator, value, setErrors]);
+
+  const mountedOnce = useRef(false);
+  const handleMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      if (!monacoInputsJsonSchema || mountedOnce.current) return;
+      mountedOnce.current = true;
+
+      try {
+        const currentModel = editor.getModel();
+        monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+          validate: true,
+          allowComments: false,
+          enableSchemaRequest: false,
+          schemas: [
+            {
+              uri: SCHEMA_URI,
+              fileMatch: [currentModel?.uri.toString() ?? ''],
+              schema: monacoInputsJsonSchema,
+            },
+          ],
+        });
+      } catch {
+        // Monaco setup failed — fall back to basic JSON editing
+      }
+    },
+    [monacoInputsJsonSchema]
+  );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
-      <EuiSpacer size="s" />
-      {/* Error Display */}
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={css`
+        flex: 1;
+        min-height: 0;
+        align-self: stretch;
+      `}
+    >
       {errors && (
-        <>
-          <EuiFlexItem>
-            <EuiCallOut title="Input data is not valid" color="danger" iconType="help" size="s">
-              <p>{errors}</p>
-            </EuiCallOut>
-          </EuiFlexItem>
-        </>
+        <EuiFlexItem grow={false}>
+          <InputValidationCallout errors={errors} />
+        </EuiFlexItem>
       )}
 
-      {/* Input Data Editor */}
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow
+        css={css`
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        `}
+      >
         <EuiFormRow
-          label="Input Data"
-          helpText="JSON payload that will be passed to the workflow"
+          label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
+            defaultMessage: 'Input Data',
+          })}
           fullWidth
+          css={css`
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            .euiFormRow__fieldWrapper {
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+            }
+          `}
         >
           <CodeEditor
             languageId="json"
             value={value}
-            fitToContent={{
-              minLines: 5,
-              maxLines: 10,
-            }}
             width="100%"
-            editorDidMount={() => {}}
-            onChange={handleChange}
-            suggestionProvider={undefined}
+            height="100%"
+            onChange={setValue}
+            editorDidMount={handleMount}
             dataTestSubj={'workflow-manual-json-editor'}
+            overflowWidgetsContainerZIndexOverride={6001}
             options={{
               language: 'json',
               minimap: { enabled: false },
@@ -156,13 +221,14 @@ export const WorkflowExecuteManualForm = ({
               renderWhitespace: 'all',
               wordWrapColumn: 80,
               wrappingIndent: 'indent',
-              theme: 'vs-light',
-              quickSuggestions: {
-                other: true,
-                comments: false,
-                strings: true,
-              },
+              theme: WORKFLOWS_MONACO_EDITOR_THEME,
               formatOnType: true,
+              quickSuggestions: false,
+              suggestOnTriggerCharacters: false,
+              wordBasedSuggestions: false,
+              parameterHints: {
+                enabled: false,
+              },
             }}
           />
         </EuiFormRow>

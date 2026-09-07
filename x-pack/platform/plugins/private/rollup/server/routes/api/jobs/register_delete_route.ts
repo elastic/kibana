@@ -25,7 +25,7 @@ export const registerDeleteRoute = ({
       },
       validate: {
         body: schema.object({
-          jobIds: schema.arrayOf(schema.string()),
+          jobIds: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
         }),
       },
     },

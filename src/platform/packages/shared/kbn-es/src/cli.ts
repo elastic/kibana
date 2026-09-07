@@ -34,7 +34,7 @@ function help() {
     '--projectType' flag or use the '--serverless=<ProjectType>'
     shortcut, for example:
 
-      es --serverless=es
+      es --serverless=elasticsearch_general_purpose
 
     Global options:
 

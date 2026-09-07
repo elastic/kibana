@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { v4 as uuidv4 } from 'uuid';
-import {
-  type CoreSetup,
-  type ElasticsearchClient,
-  type Logger,
-  SavedObjectsClient,
-} from '@kbn/core/server';
+import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -18,27 +13,47 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory, SavedObjectsClientContract } from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
+import { errors, type estypes } from '@elastic/elasticsearch';
 
+import {
+  AGENT_STATUS_CHANGE_DATA_STREAM,
+  AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
+} from '../../common/constants/agent';
 import { agentPolicyService, appContextService } from '../services';
 import { bulkUpdateAgents, fetchAllAgentsByKuery } from '../services/agents';
 import type { Agent } from '../types';
-import { SO_SEARCH_LIMIT } from '../constants';
-import { getAgentPolicySavedObjectType } from '../services/agent_policy';
+
+import { throwIfAborted } from './utils';
 
 export const TYPE = 'fleet:agent-status-change-task';
-export const VERSION = '1.0.1';
+export const VERSION = '1.0.2';
 const TITLE = 'Fleet Agent Status Change Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '1m';
 const TIMEOUT = '1m';
 const AGENTS_BATCHSIZE = 10000;
-const AGENT_STATUS_CHANGE_DATA_STREAM = {
-  type: 'logs',
-  dataset: 'elastic_agent.status_change',
-  namespace: 'default',
+
+// Graceful stop so a mass status-change event doesn't run past the 1m task timeout.
+// Remaining agents still match `hasChanged:true` and are picked up on the next run.
+// Enforced after each page is fully processed, so up to AGENTS_BATCHSIZE agents over the cap.
+const MAX_AGENTS_PER_RUN = 50000;
+
+export const HAS_CHANGED_RUNTIME_FIELD: estypes.SearchRequest['runtime_mappings'] = {
+  hasChanged: {
+    type: 'boolean',
+    script: {
+      lang: 'painless',
+      source:
+        "emit(doc['last_known_status'].size() == 0 || doc['status'].size() == 0 || doc['last_known_status'].value != doc['status'].value );",
+    },
+  },
 };
-const AGENT_STATUS_CHANGE_DATA_STREAM_NAME = `${AGENT_STATUS_CHANGE_DATA_STREAM.type}-${AGENT_STATUS_CHANGE_DATA_STREAM.dataset}-${AGENT_STATUS_CHANGE_DATA_STREAM.namespace}`;
+
+export const AGENT_STATUS_CHANGE_SOURCE_FIELDS = [
+  'policy_id',
+  'namespaces',
+  'local_metadata.host.hostname',
+];
 
 interface AgentStatusChangeTaskConfig {
   taskInterval?: string;
@@ -71,14 +86,14 @@ export class AgentStatusChangeTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
             cancel: async () => {},
           };
@@ -117,13 +132,13 @@ export class AgentStatusChangeTask {
   }
 
   private endRun(msg: string = '') {
-    this.logger.info(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
+    this.logger.debug(`[AgentStatusChangeTask] runTask ended${msg ? ': ' + msg : ''}`);
   }
 
   public runTask = async (
     taskInstance: ConcreteTaskInstance,
     core: CoreSetup,
-    abortController: AbortController
+    signal: AbortSignal
   ) => {
     if (!appContextService.getExperimentalFeatures().enableAgentStatusAlerting) {
       this.logger.debug(
@@ -143,19 +158,19 @@ export class AgentStatusChangeTask {
       return getDeleteTaskRunResult();
     }
 
-    this.logger.info(`[runTask()] started`);
+    this.logger.debug(`[runTask()] started`);
 
     const [coreStart, _startDeps] = (await core.getStartServices()) as any;
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-
+    const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
     try {
-      await this.persistAgentStatusChanges(esClient, soClient, abortController);
+      const processed = await this.persistAgentStatusChanges(esClient, soClient, signal);
 
+      this.logger.debug(`[AgentStatusChangeTask] processed ${processed} agents`);
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`[AgentStatusChangeTask] request aborted due to timeout: ${err}`);
+        this.logger.warn(`[AgentStatusChangeTask] request aborted: ${err}`);
         this.endRun();
         return;
       }
@@ -167,46 +182,60 @@ export class AgentStatusChangeTask {
   private persistAgentStatusChanges = async (
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
-    abortController: AbortController
-  ) => {
-    let agentlessPolicies: string[] | undefined;
+    signal: AbortSignal
+  ): Promise<number> => {
+    let policiesInfo:
+      | { agentlessPolicies: string[]; policyNamespaceMap: Map<string, string> }
+      | undefined;
+    let processedCount = 0;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
       perPage: AGENTS_BATCHSIZE,
+      kuery: 'hasChanged:true',
+      runtimeFields: HAS_CHANGED_RUNTIME_FIELD,
+      // `id` comes from `hit._id` and `status` from `hit.fields.status`; these are the only
+      // `_source` fields read by `bulkCreateAgentStatusChangeDocs` and `bulkUpdateAgents`.
+      _source: AGENT_STATUS_CHANGE_SOURCE_FIELDS,
+      fetchFields: ['status'],
     });
     for await (const agentPageResults of agentsFetcher) {
       if (!agentPageResults.length) {
         this.endRun('Found no agents to process');
-        return;
+        return processedCount;
       }
 
-      const updateErrors = {};
-      const agentsToUpdate = [];
+      throwIfAborted(signal);
 
-      for (const agent of agentPageResults) {
-        this.throwIfAborted(abortController);
-
-        if (agent.status !== agent.last_known_status) {
-          agentsToUpdate.push(agent);
-        }
-      }
-
-      if (agentsToUpdate.length === 0) {
-        continue;
-      } else {
-        this.logger.debug(
-          `[AgentStatusChangeTask] Recording ${agentsToUpdate.length} status changes`
+      const agentsWithStatus = agentPageResults.filter((agent) => !!agent.status);
+      const skippedCount = agentPageResults.length - agentsWithStatus.length;
+      if (skippedCount > 0) {
+        this.logger.warn(
+          `[AgentStatusChangeTask] Skipped ${skippedCount} agent(s) with no status on this page`
         );
       }
 
-      if (!agentlessPolicies) {
-        agentlessPolicies = await this.findAgentlessPolicies();
+      if (agentsWithStatus.length === 0) {
+        continue;
       }
 
-      await this.bulkCreateAgentStatusChangeDocs(esClient, agentsToUpdate, agentlessPolicies);
+      this.logger.debug(
+        `[AgentStatusChangeTask] Recording ${agentsWithStatus.length} status changes`
+      );
 
+      if (!policiesInfo) {
+        policiesInfo = await this.findAgentPoliciesInfo();
+      }
+
+      await this.bulkCreateAgentStatusChangeDocs(
+        esClient,
+        agentsWithStatus,
+        policiesInfo.agentlessPolicies,
+        policiesInfo.policyNamespaceMap
+      );
+
+      const updateErrors: Record<string, Error> = {};
       await bulkUpdateAgents(
         esClient,
-        agentsToUpdate.map((agent: Agent) => ({
+        agentsWithStatus.map((agent: Agent) => ({
           agentId: agent.id,
           data: {
             last_known_status: agent.status,
@@ -214,31 +243,71 @@ export class AgentStatusChangeTask {
         })),
         updateErrors
       );
-      if (Object.keys(updateErrors).length > 0) {
-        this.logger.info(`Errors while bulk updating agents: ${JSON.stringify(updateErrors)}`);
+      const errorKeys = Object.keys(updateErrors);
+      if (errorKeys.length > 0) {
+        const sample = errorKeys.slice(0, 5).map((k) => ({ [k]: updateErrors[k] }));
+        this.logger.warn(
+          `[AgentStatusChangeTask] ${errorKeys.length} bulk update error(s): ${JSON.stringify(
+            sample
+          )}`
+        );
+      }
+
+      processedCount += agentsWithStatus.length;
+      if (processedCount >= MAX_AGENTS_PER_RUN) {
+        this.logger.info(
+          `[AgentStatusChangeTask] Reached per-run cap of ${MAX_AGENTS_PER_RUN} agents (processed ${processedCount}); remaining agents will be processed on the next run`
+        );
+        break;
       }
     }
+    return processedCount;
   };
 
-  private findAgentlessPolicies = async () => {
+  private findAgentPoliciesInfo = async () => {
     const internalSoClientWithoutSpaceExtension =
       appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
-    const agentlessPolicies = await agentPolicyService.list(internalSoClientWithoutSpaceExtension, {
-      spaceId: '*',
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${await getAgentPolicySavedObjectType()}.supports_agentless:true`,
-      fields: ['id'],
-    });
-    return agentlessPolicies.items.map((policy) => policy.id);
+    const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(
+      internalSoClientWithoutSpaceExtension,
+      {
+        spaceId: '*',
+        fields: ['id', 'namespace', 'supports_agentless'],
+      }
+    );
+
+    const agentlessPolicies: string[] = [];
+    const policyNamespaceMap = new Map<string, string>();
+
+    for await (const batch of agentPolicyFetcher) {
+      for (const policy of batch) {
+        if (policy.supports_agentless) {
+          agentlessPolicies.push(policy.id);
+        }
+        if (policy.id && policy.namespace) {
+          if (!policyNamespaceMap.has(policy.id)) {
+            policyNamespaceMap.set(policy.id, policy.namespace);
+          }
+        }
+      }
+    }
+
+    return { agentlessPolicies, policyNamespaceMap };
   };
 
   private bulkCreateAgentStatusChangeDocs = async (
     esClient: ElasticsearchClient,
     agentsToUpdate: Agent[],
-    agentlessPolicies: string[] | undefined
+    agentlessPolicies: string[] | undefined,
+    policyNamespaceMap: Map<string, string> | undefined
   ) => {
     const bulkBody = agentsToUpdate.flatMap((agent) => {
+      // Use policy_base_id (always the plain UUID) for map lookups so that agents whose
+      // policy_id carries a version suffix (e.g. "<uuid>#9.6") are still matched against
+      // the maps that are keyed by base id. Falls back to policy_id for agents enrolled by
+      // an older fleet-server that did not yet write policy_base_id.
+      const basePolicyId = agent.policy_base_id ?? agent.policy_id;
+      const policyNamespace = (basePolicyId && policyNamespaceMap?.get(basePolicyId)) || 'default';
       const body = {
         '@timestamp': new Date().toISOString(),
         data_stream: AGENT_STATUS_CHANGE_DATA_STREAM,
@@ -247,9 +316,10 @@ export class AgentStatusChangeTask {
         },
         status: agent.status,
         policy_id: agent.policy_id,
+        policy_namespace: policyNamespace,
         space_id: agent.namespaces,
-        hostname: agent.local_metadata.host.hostname,
-        agentless: (agent.policy_id && agentlessPolicies?.includes(agent.policy_id)) ?? false,
+        hostname: agent.local_metadata?.host?.hostname,
+        agentless: (basePolicyId && agentlessPolicies?.includes(basePolicyId)) ?? false,
       };
 
       return [
@@ -265,13 +335,6 @@ export class AgentStatusChangeTask {
     await esClient.bulk({
       index: AGENT_STATUS_CHANGE_DATA_STREAM_NAME,
       operations: bulkBody,
-      refresh: 'wait_for',
     });
   };
-
-  private throwIfAborted(abortController: AbortController) {
-    if (abortController.signal.aborted) {
-      throw new Error('Task was aborted');
-    }
-  }
 }

@@ -267,7 +267,13 @@ export const useBreadcrumbs = ({ history }: { history: History }) => {
         }
         delete breadcrumb.ignoreGlobalState;
       });
-      chrome.setBreadcrumbs(bcrumbs.slice(0));
+      bcrumbs = bcrumbs.slice(0);
+      // set the breadcrumbs for both classic and project navigation
+      chrome.setBreadcrumbs(bcrumbs, {
+        project: {
+          value: bcrumbs,
+        },
+      });
     },
     [chrome]
   );

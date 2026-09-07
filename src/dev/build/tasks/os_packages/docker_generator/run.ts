@@ -15,7 +15,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import { write, copyAll, mkdirp, exec } from '../../../lib';
-import type { Config, Build, Solution } from '../../../lib';
+import type { Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
@@ -39,7 +39,6 @@ export async function runDockerGenerator(
     serverless?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
-    solution?: Solution;
   }
 ) {
   let baseImageName = '';
@@ -52,18 +51,17 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:65778cbc3e4b5e8a70ef4a804a3fd7b969f54d4e6bbfcc328f159db620320bd7';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:3adfd929c8cb58d048512a27cde6feb44952caacbcded868628fa550d6141222';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
-  if (flags.solution) imageFlavor += `-${flags.solution}`;
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:6e230f32427971773d6ad5fe9a5a022892d20267f0bfc051223e852b053584c9';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:f62bf7f9fcf3cafb050c91e1a5f75ae19a92834e8880ea2240edd1282f27b27b';
   }
 
   // General docker var config
@@ -78,11 +76,10 @@ export async function runDockerGenerator(
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
   let artifactVariant = '';
-  let artifactSolution = '';
   if (flags.serverless) artifactVariant = '-serverless';
-  if (flags.solution) artifactSolution = `-${flags.solution}`;
-  const artifactPrefix = `kibana${artifactVariant}${artifactSolution}-${version}-linux`;
-  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
+  const tarExt = config.getTarZstd() ? 'tar.zst' : 'tar.gz';
+  const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.${tarExt}`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat${
     flags.fips ? '-fips' : ''
@@ -138,6 +135,8 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
     fips: flags.fips,
+    tarZstd: config.getTarZstd(),
+    tarExt,
   };
 
   type HostArchitectureToDocker = Record<string, string>;

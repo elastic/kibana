@@ -21,6 +21,7 @@ export {
   migrateSavedObjectIndices,
   cleanSavedObjectIndices,
   createDefaultSpace,
+  isSavedObjectIndex,
 } from './indices';
 
 export { createFilterRecordsStream } from './records';

@@ -43,10 +43,11 @@ const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
       {...args}
       items={managedItems}
       selectedItemId={managedSelectedItemId}
-      recentlyClosedItems={[]}
+      recentlyClosedItems={args.recentlyClosedItems ?? []}
       createItem={getNewTabDefaultProps}
       getPreviewData={getPreviewDataMock}
       services={servicesMock}
+      onEBTEvent={action('onEBTEvent')}
       onChanged={(updatedState) => {
         action('onChanged')(updatedState);
         setState({
@@ -54,6 +55,7 @@ const TabbedContentTemplate: StoryFn<TabbedContentProps> = (args) => {
           managedSelectedItemId: updatedState.selectedItem?.id,
         });
       }}
+      onClearRecentlyClosed={action('onClearRecentlyClosed')}
       renderContent={(item) => (
         <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
       )}
@@ -93,5 +95,12 @@ export const WithMultipleTabs: StoryObj<TabbedContentProps> = {
       },
     ],
     selectedItemId: '3',
+    recentlyClosedItems: [
+      {
+        id: '4',
+        label: 'Closed Tab',
+        closedAt: 123456789,
+      },
+    ],
   },
 };

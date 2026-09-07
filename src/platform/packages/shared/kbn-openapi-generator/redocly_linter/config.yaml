@@ -4,7 +4,6 @@ plugins:
   - extra_linter_rules_plugin.js
 
 rules:
-  spec: error
   spec-strict-refs: error
   no-path-trailing-slash: error
   no-identical-paths: error
@@ -20,6 +19,11 @@ rules:
   operation-operationId-url-safe: error
   operation-parameters-unique: error
   extra-linter-rules-plugin/valid-x-modify: error
+  no-duplicated-tag-names: error
+  no-example-value-and-externalValue: error
+  no-undefined-server-variable: error
+  nullable-type-sibling: error
+  spec-components-invalid-map-name: error
   # Disable rules generating the majority of warnings.
   # They will be handled separately.
   # operation-description: warn

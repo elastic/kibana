@@ -22,30 +22,17 @@ const sections = {
       items: [
         {
           label: 'Section two item 1',
-          description: (
-            <span>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-              incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-              exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure
-              dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-              mollit anim id est laborum.
-            </span>
-          ),
+          description: {
+            markdownContent:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+          },
         },
         {
           label: 'Section two item 2',
-          description: (
-            <span>
-              Was certainty remaining engrossed applauded sir how discovery. Settled opinion how
-              enjoyed greater joy adapted too shy. Now properly surprise expenses interest nor
-              replying she she. Bore tall nay many many time yet less. Doubtful for answered one fat
-              indulged margaret sir shutters together. Ladies so in wholly around whence in at.
-              Warmth he up giving oppose if. Impossible is dissimilar entreaties oh on terminated.
-              Earnest studied article country ten respect showing had. But required offering him
-              elegance son improved informed.
-            </span>
-          ),
+          description: {
+            markdownContent:
+              'Was certainty remaining engrossed applauded sir how discovery. Settled opinion how enjoyed greater joy adapted too shy. Now properly surprise expenses interest nor replying she she. Bore tall nay many many time yet less. Doubtful for answered one fat indulged margaret sir shutters together. Ladies so in wholly around whence in at. Warmth he up giving oppose if. Impossible is dissimilar entreaties oh on terminated. Earnest studied article country ten respect showing had. But required offering him elegance son improved informed.',
+          },
         },
       ],
     },

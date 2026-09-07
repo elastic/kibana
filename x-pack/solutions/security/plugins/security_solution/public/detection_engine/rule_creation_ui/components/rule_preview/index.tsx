@@ -33,6 +33,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
+import { AddRulePreviewAttachmentToChatButton } from './add_rule_preview_attachment_to_chat_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type {
   AboutStepRule,
   DefineStepRule,
@@ -96,6 +98,9 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
 }) => {
   const { indexPattern, ruleType } = defineRuleData;
   const { spaces } = useKibana().services;
+  const isRulePreviewAttachmentEnabled = useIsExperimentalFeatureEnabled(
+    'rulePreviewAttachmentEnabled'
+  );
 
   const [spaceId, setSpaceId] = useState('');
   useEffect(() => {
@@ -270,6 +275,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showInvocationCountWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             title={i18n.QUERY_PREVIEW_INVOCATION_COUNT_WARNING_TITLE}
             data-test-subj="previewInvocationCountWarning"
@@ -282,6 +288,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       {showRuleDefitnionInvalidWarning && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             color="warning"
             title={i18n.QUERY_PREVIEW_RULE_DEFINITION_INVALID_WARNING_TITLE}
             data-test-subj="previewRuleDefinitionInvalidWarning"
@@ -338,6 +345,16 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
       ) : null}
       <EuiSpacer size="l" />
       {isPreviewRequestInProgress && <LoadingHistogram />}
+      {!isPreviewRequestInProgress && previewId && isRulePreviewAttachmentEnabled && (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <AddRulePreviewAttachmentToChatButton previewId={previewId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
       {!isPreviewRequestInProgress && previewId && spaceId && (
         <PreviewHistogram
           ruleType={ruleType}

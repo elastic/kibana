@@ -9,6 +9,9 @@
 
 import { lexerRules as painlessLexerRules } from '../../painless/lexer_rules';
 
+import { languageTolerantRules } from './constants';
+import type { monaco } from '../../../monaco_imports';
+
 /*
  * This rule is used inside json root to start a painless highlighting sequence
  */
@@ -33,9 +36,11 @@ export const buildPainlessStartRule = (painlessRoot: string = 'painless_root') =
  * It reuses the lexer rules from the "painless" language, but since not all rules are referenced in the root
  * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
  */
-export const buildPainlessRules = (painlessRoot: string = 'painless_root') => {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+export const buildPainlessRules = (
+  painlessRoot: string = 'painless_root'
+): Record<string, monaco.languages.IMonarchLanguageRule[]> => {
   const { root, comment, string_dq, string_sq } = painlessLexerRules.tokenizer;
+
   return {
     [painlessRoot]: [
       // the rule to end painless highlighting and get back to the previous tokenizer state
@@ -46,6 +51,7 @@ export const buildPainlessRules = (painlessRoot: string = 'painless_root') => {
           next: '@pop',
         },
       ],
+      ...languageTolerantRules,
       ...root,
     ],
     comment,

@@ -19,8 +19,8 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiLink,
-  EuiCallOut,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { CodeEditor } from '@kbn/code-editor';
 import type { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
@@ -72,7 +72,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   );
 
   return (
-    <div className="snapshotRestore__restoreForm__stepSettings">
+    <div>
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -104,18 +104,19 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
       {dataStreams?.length ? (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
-            iconType="question"
+          <KbnInfoCallout
+            announceOnMount
             title={i18n.translate(
               'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',
               { defaultMessage: 'Backing indices' }
             )}
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.description"
-              defaultMessage="These settings also apply to the backing indices of data streams."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.description"
+                defaultMessage="These settings also apply to the backing indices of data streams."
+              />
+            }
+          />
         </>
       ) : undefined}
       <EuiSpacer size="l" />

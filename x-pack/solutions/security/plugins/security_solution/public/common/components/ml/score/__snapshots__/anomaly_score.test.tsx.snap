@@ -80,7 +80,8 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     grow={false}
   >
     <EuiPopover
-      anchorPosition="downCenter"
+      anchorPosition="downLeft"
+      aria-label="Anomaly score details"
       button={
         <Icon
           type="info"
@@ -89,7 +90,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       closePopover={[Function]}
       data-test-subj="anomaly-score-popover"
       display="inline-block"
-      hasArrow={true}
+      hasArrow={false}
       id="anomaly-score-popover"
       isOpen={false}
       onClick={[Function]}

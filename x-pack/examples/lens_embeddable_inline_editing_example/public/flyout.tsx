@@ -8,6 +8,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiPanel } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
 
 interface MainContent {
   content: JSX.Element;
@@ -40,6 +41,9 @@ export function MultiPaneFlyout({
 
   return (
     <EuiFlyout
+      aria-label={i18n.translate('lensEmbeddableInlineEditingExample.flyout.ariaLabel', {
+        defaultMessage: 'Lens inline editing',
+      })}
       onClose={onClose}
       size={inlineEditingContent && inlineEditingContent?.visible ? 'l' : 'm'}
       ownFocus={false}

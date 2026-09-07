@@ -13,13 +13,15 @@ import { replaceParamsQuery } from '../../common/utils/replace_params_query';
 import { AlertAttachmentContext } from '../common/contexts';
 import { LiveQueryForm } from './form';
 import type { AgentSelection } from '../agents/types';
+import type { AddToTimelineHandler } from '../types';
 
 interface LiveQueryProps {
   agentId?: string;
   agentIds?: string[];
   alertIds?: string[];
   agentPolicyIds?: string[];
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
+  redirectsOnSuccess?: boolean;
   query?: string;
   timeout?: number;
   savedQueryId?: string;
@@ -32,6 +34,7 @@ interface LiveQueryProps {
   hideAgentsField?: boolean;
   packId?: string;
   agentSelection?: AgentSelection;
+  addToTimeline?: AddToTimelineHandler;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -40,9 +43,9 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   alertIds,
   agentPolicyIds,
   onSuccess,
+  redirectsOnSuccess,
   query,
   savedQueryId,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
   queryField,
   ecsMappingField,
@@ -52,6 +55,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   packId,
   agentSelection,
   timeout,
+  addToTimeline,
 }) => {
   const initialAgentSelection = useMemo(() => {
     if (agentSelection) {
@@ -101,9 +105,11 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
       onSuccess={onSuccess}
+      redirectsOnSuccess={redirectsOnSuccess}
       formType={formType}
       enabled={enabled}
       hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };

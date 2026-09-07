@@ -16,7 +16,7 @@ import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
-
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfV1ExportType } from '.';
 import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
@@ -38,7 +38,6 @@ const fakeRawRequest: FakeRawRequest = {
   headers: {
     authorization: `ApiKey skdjtq4u543yt3rhewrh`,
   },
-  path: '/',
 };
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -57,14 +56,13 @@ beforeEach(async () => {
 
   mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
-  mockPdfExportType.setup({
-    basePath: { set: jest.fn() },
-  });
+  mockPdfExportType.setup({});
   mockPdfExportType.start({
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: mockCoreStart.savedObjects,
     uiSettings: mockCoreStart.uiSettings,
     screenshotting: screenshottingMock,
+    licensing: licensingMock.createStart(),
   });
   getScreenshotsSpy.mockImplementation((opts) => {
     const { logger } = opts;

@@ -112,6 +112,7 @@ test('correctly fills in default `loggers` config.', () => {
     appenders: ['default'],
     name: 'root',
     level: 'info',
+    filters: [],
   });
 });
 
@@ -149,21 +150,25 @@ test('correctly fills in custom `loggers` config.', () => {
     appenders: ['default'],
     name: 'root',
     level: 'info',
+    filters: [],
   });
   expect(configValue.loggers.get('plugins')).toEqual({
     appenders: ['file'],
     name: 'plugins',
     level: 'warn',
+    filters: [],
   });
   expect(configValue.loggers.get('plugins.pid')).toEqual({
     appenders: ['file'],
     name: 'plugins.pid',
     level: 'trace',
+    filters: [],
   });
   expect(configValue.loggers.get('http')).toEqual({
     appenders: ['default'],
     name: 'http',
     level: 'error',
+    filters: [],
   });
 });
 
@@ -332,6 +337,256 @@ describe('extend', () => {
       appenders: ['console'],
       name: 'plugins',
       level: 'trace',
+      filters: [],
     });
+  });
+});
+
+describe('meta filters', () => {
+  it('accepts a valid meta filter in logger config', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins.alerting',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }],
+          },
+        ],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins.alerting')).toEqual({
+      appenders: ['default'],
+      name: 'plugins.alerting',
+      level: 'warn',
+      filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }],
+    });
+  });
+
+  it('accepts filters with numeric and boolean match values', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { retryCount: 3, enabled: true }, level: 'trace' }],
+          },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('defaults to an empty filters array when none are specified', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [{ name: 'plugins', level: 'warn' }],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins')?.filters).toEqual([]);
+  });
+
+  it('rejects a filter with an invalid level', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'verbose' }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a filter with a missing level', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' } }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a filter with an empty match object', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: {}, level: 'debug' }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects more than 10 filters per logger', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: Array.from({ length: 11 }, (_, i) => ({
+              type: 'meta' as const,
+              match: { key: `val${i}` },
+              level: 'debug' as const,
+            })),
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('inherits filters from the parent logger when the child entry omits them', () => {
+    const parentFilter = {
+      type: 'meta' as const,
+      match: { 'labels.ruleType': 'esql' },
+      level: 'debug' as const,
+    };
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins.alerting',
+            level: 'warn',
+            filters: [parentFilter],
+          },
+          {
+            name: 'plugins.alerting.rules',
+            level: 'info',
+          },
+        ],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins.alerting.rules')?.filters).toEqual([parentFilter]);
+  });
+
+  it('accepts filters: null to opt out of inherited filters', () => {
+    const parentFilter = {
+      type: 'meta' as const,
+      match: { 'labels.ruleType': 'esql' },
+      level: 'debug' as const,
+    };
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins.alerting',
+            level: 'warn',
+            filters: [parentFilter],
+          },
+          {
+            name: 'plugins.alerting.rules',
+            level: 'info',
+            filters: null,
+          },
+        ],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins.alerting.rules')?.filters).toEqual([]);
+  });
+
+  it('skips a parent with filters: null when inheriting from a higher ancestor', () => {
+    const grandparentFilter = {
+      type: 'meta' as const,
+      match: { 'labels.ruleType': 'esql' },
+      level: 'debug' as const,
+    };
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [grandparentFilter],
+          },
+          {
+            name: 'plugins.alerting',
+            level: 'info',
+            filters: null,
+          },
+          {
+            name: 'plugins.alerting.rules',
+            level: 'info',
+          },
+        ],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins.alerting')?.filters).toEqual([]);
+    expect(configValue.loggers.get('plugins.alerting.rules')?.filters).toEqual([grandparentFilter]);
+  });
+
+  it('rejects more than 10 keys in a filter match object', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [
+              {
+                type: 'meta',
+                match: Object.fromEntries(
+                  Array.from({ length: 11 }, (_, i) => [`key${i}`, `value${i}`])
+                ),
+                level: 'debug',
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects match keys and string values that exceed max length', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [
+              {
+                type: 'meta',
+                match: { [`${'a'.repeat(257)}`]: 'value' },
+                level: 'debug',
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow();
+
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [
+              {
+                type: 'meta',
+                match: { key: 'a'.repeat(1025) },
+                level: 'debug',
+              },
+            ],
+          },
+        ],
+      })
+    ).toThrow();
   });
 });

@@ -19,14 +19,12 @@ describe('detectAndPreProcessPastedCommand()', () => {
           allowMultiples: false,
           about: 'Script name',
           SelectorComponent: () => null,
-          selectorShowTextValue: true,
         },
         CloudFile: {
           required: false,
           allowMultiples: false,
           about: 'Cloud file',
           SelectorComponent: () => null,
-          selectorShowTextValue: true,
         },
         NormalArg: {
           required: false,

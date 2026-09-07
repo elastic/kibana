@@ -8,7 +8,7 @@
 import {
   rowToDocument,
   toEsqlQueryHits,
-  transformDatatableToEsqlTable,
+  transformToEsqlTable,
   toGroupedEsqlQueryHits,
   getAlertIdFields,
 } from './esql_query_utils';
@@ -25,6 +25,10 @@ describe('ESQL query utils', () => {
   const value3 = ['2025-07-12T13:32:04.174Z', '1.2.0', '200'];
   const value4 = ['2025-07-12T13:32:04.174Z', '1.2.0', null];
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('rowToDocument', () => {
     it('correctly converts ESQL row to document', () => {
       expect(rowToDocument(columns, value1)).toEqual({
@@ -36,11 +40,15 @@ describe('ESQL query utils', () => {
   });
 
   describe('toEsqlQueryHits', () => {
-    it('correctly converts ESQL table to ES query hits', () => {
-      const { results, rows, cols } = toEsqlQueryHits({
-        columns,
-        values: [value1, value2],
-      });
+    it('correctly converts ESQL table to ES query hits', async () => {
+      const { results, rows, cols } = await toEsqlQueryHits(
+        {
+          columns,
+          values: [value1, value2],
+        },
+        true, // isPreview
+        1 // chunkSize
+      );
       expect(results).toEqual({
         esResult: {
           _shards: {
@@ -97,16 +105,32 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'error.code' },
       ]);
     });
+
+    it('correctly calls setImmediate', async () => {
+      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const values = [];
+      for (let i = 0; i < 1000; i++) {
+        values.push(value1);
+      }
+      await toEsqlQueryHits({
+        columns,
+        values,
+      });
+
+      expect(setImmediateSpy).toHaveBeenCalledTimes(9);
+    });
   });
 
   describe('toGroupedEsqlQueryHits', () => {
-    it('correctly converts ESQL table to grouped ES query hits', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2],
         },
-        ['ecs.version']
+        ['ecs.version'],
+        true, // isPreview
+        1 // chunkSize
       );
       expect(results).toEqual({
         esResult: {
@@ -117,6 +141,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -136,6 +161,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -185,8 +211,8 @@ describe('ESQL query utils', () => {
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
     });
-    it('correctly converts ESQL table to grouped ES query hits with duplicates', () => {
-      const { results, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits with duplicates', async () => {
+      const { results, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value3],
@@ -202,6 +228,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -221,6 +248,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 2,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -259,7 +287,7 @@ describe('ESQL query utils', () => {
       });
       expect(duplicateAlertIds?.size).toBe(1);
     });
-    it('correctly converts ESQL table to grouped ES query hits with long alertIds', () => {
+    it('correctly converts ESQL table to grouped ES query hits with long alertIds', async () => {
       const value5 = [
         '2023-07-12T13:32:04.174Z',
         '1.8.0',
@@ -284,7 +312,7 @@ describe('ESQL query utils', () => {
         'test message',
         '/app-search',
       ];
-      const { results, longAlertIds } = toGroupedEsqlQueryHits(
+      const { results, longAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns: [
             { name: '@timestamp', type: 'date' },
@@ -311,7 +339,8 @@ describe('ESQL query utils', () => {
           'tags',
           'message',
           'request',
-        ]
+        ],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -335,6 +364,17 @@ describe('ESQL query utils', () => {
                     'info',
                     'test message',
                     '/app-search',
+                  ],
+                  keyFields: [
+                    '@timestamp',
+                    'ecs.version',
+                    'host',
+                    'name',
+                    'geo.dest',
+                    'agent',
+                    'tags',
+                    'message',
+                    'request',
                   ],
                   topHitsAgg: {
                     hits: {
@@ -373,6 +413,18 @@ describe('ESQL query utils', () => {
                     'info',
                     'test message',
                     '/app-search',
+                  ],
+                  keyFields: [
+                    '@timestamp',
+                    'ecs.version',
+                    'error.code',
+                    'host',
+                    'name',
+                    'geo.dest',
+                    'agent',
+                    'tags',
+                    'message',
+                    'request',
                   ],
                   topHitsAgg: {
                     hits: {
@@ -425,13 +477,14 @@ describe('ESQL query utils', () => {
       });
       expect(longAlertIds?.size).toBe(1);
     });
-    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value4],
         },
-        ['error.code']
+        ['error.code'],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -442,6 +495,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['400'],
+                  keyFields: ['error.code'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -485,14 +539,14 @@ describe('ESQL query utils', () => {
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
     });
-
-    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', () => {
-      const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
+    it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', async () => {
+      const { results, rows, cols, duplicateAlertIds } = await toGroupedEsqlQueryHits(
         {
           columns,
           values: [value1, value2, value4],
         },
-        ['error.code', 'ecs.version']
+        ['error.code', 'ecs.version'],
+        true // isPreview
       );
       expect(results).toEqual({
         esResult: {
@@ -503,6 +557,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.8.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -522,6 +577,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['400', '1.2.0'],
+                  keyFields: ['error.code', 'ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -541,6 +597,7 @@ describe('ESQL query utils', () => {
                 {
                   doc_count: 1,
                   key: ['1.2.0'],
+                  keyFields: ['ecs.version'],
                   topHitsAgg: {
                     hits: {
                       hits: [
@@ -596,25 +653,34 @@ describe('ESQL query utils', () => {
       ]);
       expect(duplicateAlertIds?.size).toBe(0);
     });
+    it('correctly calls setImmediate', async () => {
+      const setImmediateSpy = jest.spyOn(global, 'setImmediate');
+      const values = [];
+      for (let i = 0; i < 1000; i++) {
+        values.push(value1);
+      }
+      await toGroupedEsqlQueryHits(
+        {
+          columns,
+          values,
+        },
+        ['error.code', 'ecs.version']
+      );
+
+      expect(setImmediateSpy).toHaveBeenCalledTimes(9);
+    });
   });
 
-  describe('transformDatatableToEsqlTable', () => {
+  describe('transformToEsqlTable', () => {
     it('correctly converts data table to ESQL table', () => {
       expect(
-        transformDatatableToEsqlTable({
-          type: 'datatable',
+        transformToEsqlTable({
           columns: [
-            { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
-            { id: 'ecs.version', name: 'ecs.version', meta: { type: 'string' } },
-            { id: 'error.code', name: 'error.code', meta: { type: 'string' } },
+            { name: '@timestamp', type: 'date' },
+            { name: 'ecs.version', type: 'string' },
+            { name: 'error.code', type: 'string' },
           ],
-          rows: [
-            {
-              '@timestamp': '2023-07-12T13:32:04.174Z',
-              'ecs.version': '1.8.0',
-              'error.code': null,
-            },
-          ],
+          values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
         })
       ).toEqual({
         columns: [
@@ -655,6 +721,111 @@ describe('ESQL query utils', () => {
           { name: 'count', type: 'number' },
         ])
       ).toEqual(['error.code', 'host']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that renames a column inline in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, host = source.host | KEEP error.code, host, count',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'host']);
+
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY code = error.code, host = source.host | KEEP code, host, count',
+          [
+            { name: 'code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['code', 'host']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that groups by an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour)', [
+          { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['BUCKET(@timestamp, 1 hour)']);
+
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY a + b', [
+          { name: 'a + b', type: 'number' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['a + b']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that mixes a column and an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'BUCKET(@timestamp, 1 hour)']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that aliases an expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'hour', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['hour']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that renames an unnamed expression after the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour) | RENAME `BUCKET(@timestamp, 1 hour)` AS bucket',
+          [
+            { name: 'bucket', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['bucket']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that uses INLINE STATS...BY', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | INLINE STATS host.uptime = SUM(event.duration) BY event.provider, event.action',
+          [
+            { name: '@timestamp', type: 'date' },
+            { name: 'event.provider', type: 'keyword' },
+            { name: 'event.action', type: 'keyword' },
+            { name: 'event.duration', type: 'number' },
+            { name: 'host.uptime', type: 'number' },
+          ]
+        )
+      ).toEqual(['event.provider', 'event.action']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that uses INLINE STATS...BY and RENAME', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | INLINE STATS count = COUNT(*) BY error.code, host | RENAME error.code AS code, host AS h',
+          [
+            { name: 'h', type: 'keyword' },
+            { name: 'code', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['code', 'h']);
     });
 
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and RENAME', () => {

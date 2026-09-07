@@ -43,7 +43,7 @@ import { getIndexPatterns } from '../common/get_index_patterns';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
-  cloud?: { isCloudEnabled: boolean };
+  cloud?: { isCloudEnabled: boolean; baseUrl?: string };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -98,6 +98,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
+
         const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
@@ -105,6 +106,10 @@ export class MonitoringPlugin
           data: pluginsStart.data,
           share: pluginsStart.share,
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          cloudBaseUrl: plugins.cloud?.baseUrl,
+          isAirGapped:
+            Boolean(pluginsStart.fleet?.config?.isAirGapped) &&
+            !Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig,
           triggersActionsUi: pluginsStart.triggersActionsUi,
@@ -112,6 +117,7 @@ export class MonitoringPlugin
           appMountParameters: params,
           dataViews: pluginsStart.dataViews,
           fieldsMetadata: pluginsStart.fieldsMetadata,
+          cloudConnect: pluginsStart.cloudConnect,
         };
 
         Legacy.init({
@@ -120,6 +126,8 @@ export class MonitoringPlugin
           data: deps.data,
           navigation: deps.navigation,
           isCloud: deps.isCloud,
+          cloudBaseUrl: deps.cloudBaseUrl,
+          isAirGapped: deps.isAirGapped,
           pluginInitializerContext: deps.pluginInitializerContext,
           externalConfig: deps.externalConfig,
           triggersActionsUi: deps.triggersActionsUi,
@@ -128,6 +136,7 @@ export class MonitoringPlugin
           dataViews: deps.dataViews,
           share: deps.share,
           fieldsMetadata: deps.fieldsMetadata,
+          cloudConnect: deps.cloudConnect,
         });
 
         const config = Object.fromEntries(externalConfig);

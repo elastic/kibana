@@ -9,23 +9,25 @@
   "plugin": {
     "id": "observabilityShared",
     "browser": true,
-    "server": true,
+    "server": false,
     "configPath": [
       "xpack",
-      "observabilityShared"
+      "observability_shared"
     ],
     "requiredPlugins": [
       "uiActions",
       "embeddable",
       "share"
     ],
+    "optionalPlugins": [
+      "agentBuilder"
+    ],
     "requiredBundles": [
       "cases",
       "data",
       "inspector",
       "kibanaReact",
-      "kibanaUtils",
-      "observabilityAIAssistant"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"

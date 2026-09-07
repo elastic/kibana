@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { RULES_API_READ } from '@kbn/security-solution-features/constants';
 import {
   GET_PREBUILT_RULES_BASE_VERSION_URL,
   GetPrebuiltRuleBaseVersionRequest,
@@ -20,7 +21,7 @@ export const getPrebuiltRuleBaseVersion = (router: SecuritySolutionPluginRouter)
       path: GET_PREBUILT_RULES_BASE_VERSION_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: [RULES_API_READ],
         },
       },
     })

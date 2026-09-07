@@ -254,6 +254,34 @@ describe('Event filter flyout', () => {
       expect(renderResult.getByText('Cancel')).not.toBeNull();
     });
 
+    it('should show OS selector and trigger enrichment when rendering with event data', async () => {
+      const searchMock = (useKibana as jest.Mock)().services.data.search.search;
+      const eventData = ecsEventMock();
+
+      act(() => {
+        render({ data: eventData });
+      });
+
+      // Verify enrichment was triggered with correct parameters
+      await waitFor(() => {
+        expect(searchMock).toHaveBeenCalledWith({
+          params: {
+            index: eventData._index,
+            body: {
+              query: {
+                match: {
+                  _id: eventData._id,
+                },
+              },
+            },
+          },
+        });
+      });
+
+      const osSelect = renderResult.getByTestId('eventFilters-form-os-select');
+      expect(osSelect).toBeVisible();
+    });
+
     it('should start with "add event filter" button disabled', () => {
       render();
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
@@ -324,8 +352,7 @@ describe('Event filter flyout', () => {
       expect(onCancelMock).toHaveBeenCalledTimes(0);
     });
 
-    // TODO: Find out why this test passes when run via `it.only()` but fails when run with all tests.
-    it.skip('should close when exception has been submitted successfully and close flyout', async () => {
+    it('should close when exception has been submitted successfully and close flyout', async () => {
       // mock submit query
       (useCreateArtifact as jest.Mock).mockImplementation(() => {
         return {
@@ -344,6 +371,8 @@ describe('Event filter flyout', () => {
       });
 
       render();
+
+      await user.type(renderResult.getByTestId('eventFilters-form-name-input'), 'a');
 
       const confirmButton = renderResult.getByTestId('add-exception-confirm-button');
       expect(confirmButton.hasAttribute('disabled')).toBeFalsy();

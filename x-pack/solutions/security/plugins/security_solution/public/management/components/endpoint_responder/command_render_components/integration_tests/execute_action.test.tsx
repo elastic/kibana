@@ -184,6 +184,16 @@ describe('When using execute action from response actions console', () => {
 
           completedAt: new Date().toISOString(),
           command: 'execute',
+          agents: ['a.b.c'],
+          agentState: {
+            'a.b.c': {
+              isCompleted: true,
+              wasSuccessful: true,
+              wasCanceled: false,
+              completedAt: '2025',
+              errors: undefined,
+            },
+          },
         },
       };
     apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);

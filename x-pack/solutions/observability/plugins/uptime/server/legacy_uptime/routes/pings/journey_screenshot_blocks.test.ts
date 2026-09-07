@@ -14,6 +14,11 @@ describe('journey screenshot blocks route', () => {
   let libs: UMServerLibs;
   const data: any = [];
   beforeEach(() => {
+    libs = {
+      requests: {
+        getJourneyScreenshotBlocks: jest.fn().mockReturnValue([]),
+      },
+    } as unknown as UMServerLibs;
     handlerContext = {
       uptimeEsClient: {
         search: jest.fn().mockResolvedValue({

@@ -8,26 +8,33 @@
  */
 
 import type { ExitRetryNode } from '@kbn/workflows/graph';
-import type { NodeImplementation } from '../../node_implementation';
+import type { RetryStepState } from './types';
+import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
-import type { IWorkflowEventLogger } from '../../../workflow_event_logger/workflow_event_logger';
+import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import type { NodeImplementation } from '../../node_implementation';
 
 export class ExitRetryNodeImpl implements NodeImplementation {
   constructor(
     private node: ExitRetryNode,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    // Exit whole retry step scope
-    this.workflowRuntime.exitScope();
-    await this.workflowRuntime.finishStep();
-    const retryState = this.workflowRuntime.getCurrentStepState()!;
-    this.workflowLogger.logDebug(
-      `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
-    );
-    await this.workflowRuntime.setCurrentStepState(undefined);
+    this.stepExecutionRuntime.finishStep();
+    const retryState = this.stepExecutionRuntime.getCurrentStepState() as
+      | RetryStepState
+      | undefined;
+
+    if (retryState) {
+      this.workflowLogger.logDebug(
+        `Exiting retry step ${this.node.stepId} after ${retryState.attempt} attempts.`
+      );
+    }
+
+    this.stepExecutionRuntime.setCurrentStepState(undefined);
     this.workflowRuntime.navigateToNextNode();
   }
 }

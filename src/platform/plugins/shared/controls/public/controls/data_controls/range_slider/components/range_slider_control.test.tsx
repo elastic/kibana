@@ -13,7 +13,7 @@ import { fireEvent, render } from '@testing-library/react';
 
 import type { Props as RangeSliderControlProps } from './range_slider_control';
 import { RangeSliderControl } from './range_slider_control';
-import type { RangeValue } from '../types';
+import type { RangeSliderValue } from '@kbn/controls-schemas';
 
 describe('RangeSliderControl', () => {
   const defaultProps: RangeSliderControlProps = {
@@ -28,6 +28,9 @@ describe('RangeSliderControl', () => {
     value: undefined,
     fieldFormatter: undefined,
     onChange: jest.fn(),
+    isEdit: false,
+    isPinned: true,
+    label: 'Test',
   };
 
   it('renders range slider without selection', () => {
@@ -53,7 +56,7 @@ describe('RangeSliderControl', () => {
   it('renders range slider with only lower bound selection', () => {
     const props = {
       ...defaultProps,
-      value: ['10', ''] as RangeValue,
+      value: ['10', ''] as RangeSliderValue,
     };
 
     const rangeSliderControl = render(<RangeSliderControl {...props} />);
@@ -66,7 +69,7 @@ describe('RangeSliderControl', () => {
   it('renders range slider with only upper bound selection', () => {
     const props = {
       ...defaultProps,
-      value: ['', '80'] as RangeValue,
+      value: ['', '80'] as RangeSliderValue,
     };
     const rangeSliderControl = render(<RangeSliderControl {...props} />);
 
@@ -78,7 +81,7 @@ describe('RangeSliderControl', () => {
   it('renders range slider with both bounds selected', () => {
     const props = {
       ...defaultProps,
-      value: ['30', '70'] as RangeValue,
+      value: ['30', '70'] as RangeSliderValue,
     };
     const rangeSliderControl = render(<RangeSliderControl {...props} />);
 
@@ -90,7 +93,7 @@ describe('RangeSliderControl', () => {
     const props = {
       ...defaultProps,
       isInvalid: true,
-      value: ['110', ''] as RangeValue,
+      value: ['110', ''] as RangeSliderValue,
     };
     const rangeSliderControl = render(<RangeSliderControl {...props} />);
 
@@ -103,7 +106,7 @@ describe('RangeSliderControl', () => {
     const props = {
       ...defaultProps,
       isLoading: true,
-      value: ['50', '60'] as RangeValue,
+      value: ['50', '60'] as RangeSliderValue,
     };
     const rangeSliderControl = render(<RangeSliderControl {...props} />);
 

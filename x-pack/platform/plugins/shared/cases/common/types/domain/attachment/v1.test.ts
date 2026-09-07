@@ -24,6 +24,17 @@ import {
   PersistableStateAttachmentRt,
   AttachmentPatchAttributesRt,
 } from './v1';
+import {
+  SingleFileAttachmentMetadataSchema,
+  FileAttachmentMetadataSchema,
+  AttachmentAttributesBasicSchema,
+  UserCommentAttachmentPayloadSchema,
+  AlertAttachmentPayloadSchema,
+  ActionsAttachmentPayloadSchema,
+  ExternalReferenceAttachmentPayloadSchema,
+  PersistableStateAttachmentPayloadSchema,
+  AttachmentSchema,
+} from '../../domain_zod/attachment/v1';
 
 describe('Attachments', () => {
   describe('Files', () => {
@@ -51,6 +62,21 @@ describe('Attachments', () => {
           _tag: 'Right',
           right: defaultRequest,
         });
+      });
+
+      it('zod: has expected attributes in request', () => {
+        const result = SingleFileAttachmentMetadataSchema.safeParse(defaultRequest);
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
+      });
+
+      it('zod: strips unknown fields', () => {
+        const result = SingleFileAttachmentMetadataSchema.safeParse({
+          ...defaultRequest,
+          foo: 'bar',
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual(defaultRequest);
       });
     });
 
@@ -93,6 +119,20 @@ describe('Attachments', () => {
           },
         });
       });
+
+      it('zod: has expected attributes in request', () => {
+        const result = FileAttachmentMetadataSchema.safeParse({ files: [defaultRequest] });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ files: [defaultRequest] });
+      });
+
+      it('zod: strips unknown fields from files', () => {
+        const result = FileAttachmentMetadataSchema.safeParse({
+          files: [{ ...defaultRequest, foo: 'bar' }],
+        });
+        expect(result.success).toBe(true);
+        expect(result.data).toStrictEqual({ files: [defaultRequest] });
+      });
     });
   });
 
@@ -128,6 +168,18 @@ describe('Attachments', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AttachmentAttributesBasicSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AttachmentAttributesBasicSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('UserCommentAttachmentPayloadRt', () => {
@@ -153,6 +205,21 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = UserCommentAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = UserCommentAttachmentPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -196,6 +263,27 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AlertAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AlertAttachmentPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields from rule', () => {
+      const result = AlertAttachmentPayloadSchema.safeParse({
+        ...defaultRequest,
+        rule: { id: 'rule-id-1', name: 'Awesome rule', foo: 'bar' },
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 
@@ -274,6 +362,18 @@ describe('Attachments', () => {
         right: defaultRequest,
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ActionsAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ActionsAttachmentPayloadSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('ExternalReferenceAttachmentPayloadRt', () => {
@@ -339,6 +439,21 @@ describe('Attachments', () => {
         },
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = ExternalReferenceAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = ExternalReferenceAttachmentPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('PersistableStateAttachmentPayloadRt', () => {
@@ -380,6 +495,21 @@ describe('Attachments', () => {
         },
       });
     });
+
+    it('zod: has expected attributes in request', () => {
+      const result = PersistableStateAttachmentPayloadSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = PersistableStateAttachmentPayloadSchema.safeParse({
+        ...defaultRequest,
+        foo: 'bar',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
   });
 
   describe('AttachmentRt', () => {
@@ -416,6 +546,18 @@ describe('Attachments', () => {
         _tag: 'Right',
         right: defaultRequest,
       });
+    });
+
+    it('zod: has expected attributes in request', () => {
+      const result = AttachmentSchema.safeParse(defaultRequest);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
+    });
+
+    it('zod: strips unknown fields', () => {
+      const result = AttachmentSchema.safeParse({ ...defaultRequest, foo: 'bar' });
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(defaultRequest);
     });
   });
 

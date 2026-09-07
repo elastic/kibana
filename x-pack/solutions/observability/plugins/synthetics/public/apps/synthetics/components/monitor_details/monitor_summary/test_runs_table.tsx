@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { type MouseEvent, useMemo, useState } from 'react';
-import dedent from 'dedent';
+import type { MouseEvent } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -51,7 +51,8 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 import { useMonitorPings } from '../hooks/use_monitor_pings';
 import { JourneyLastScreenshot } from '../../common/screenshot/journey_last_screenshot';
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
-import { useScreenContext } from '../../../hooks/use_screen_context';
+import { useGetUrlParams } from '../../../hooks';
+import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 
 type SortableField = 'timestamp' | 'monitor.status' | 'monitor.duration.us';
 
@@ -91,32 +92,11 @@ export const TestRunsTable = ({
     return sortPings(pings, sortField, sortDirection);
   }, [pings, sortField, sortDirection]);
 
-  const isLast10 = paginable === false && page.size === 10;
-  const timeRangeContext = `between ${from} and ${to} UTC`;
-
-  const screenContext = dedent`
-    This table shows ${isLast10 ? 'the last ' : ''}${page.size} test runs for the monitor${
-    isLast10 ? '' : ` ${timeRangeContext}`
-  }.
-
-    ${pings
-      .map((ping, i) => {
-        return `${i + 1}. Executed at ${ping['@timestamp']} from ${
-          ping.observer.geo.name
-        } with status ${ping.monitor.status} and duration ${formatTestDuration(
-          ping.monitor.duration?.us
-        )}.\n ${ping.error?.message ? `Error: ${ping.error.message}` : ''}\n`;
-      })
-      .join('\n')}
-  `;
-
-  useScreenContext({
-    screenDescription: screenContext,
-  });
-
   const pingsError = useSelector(selectPingsError);
   const { monitor } = useSelectedMonitor();
   const selectedLocation = useSelectedLocation();
+  const spaceId = useUrlSpaceId();
+  const { remoteName } = useGetUrlParams();
   const isTabletOrGreater = useIsWithinMinBreakpoint('s');
 
   const isBrowserMonitor = monitor?.[ConfigKey.MONITOR_TYPE] === MonitorTypeEnum.BROWSER;
@@ -186,6 +166,8 @@ export const TestRunsTable = ({
             isBrowserMonitor={isBrowserMonitor}
             basePath={basePath}
             locationId={selectedLocation?.id}
+            spaceId={spaceId}
+            remoteName={remoteName}
           />
         ),
       },
@@ -303,6 +285,8 @@ export const TestRunsTable = ({
               monitorId,
               checkGroup: item.monitor.check_group,
               locationId: selectedLocation?.id,
+              spaceId,
+              remoteName,
             })
           );
         }
@@ -340,6 +324,9 @@ export const TestRunsTable = ({
               }
             : undefined
         }
+        tableCaption={i18n.translate('xpack.synthetics.monitorDetails.summary.testRunsCaption', {
+          defaultMessage: 'Recent test runs',
+        })}
       />
     </EuiPanel>
   );
@@ -350,11 +337,15 @@ export const MobileRowDetails = ({
   isBrowserMonitor,
   basePath,
   locationId,
+  spaceId,
+  remoteName,
 }: {
   ping: Ping;
   isBrowserMonitor: boolean;
   basePath: string;
   locationId?: string;
+  spaceId?: string;
+  remoteName?: string;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
@@ -385,6 +376,8 @@ export const MobileRowDetails = ({
                 configId: ping.config_id,
                 locationId,
                 stateId: ping?.state?.id!,
+                spaceId,
+                remoteName,
               })}
             >
               {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {

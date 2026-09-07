@@ -203,6 +203,15 @@ Array [
   Object {
     "appLink": "",
     "attributes": Object {
+      "description": "Nginx availability SLO over the past 7 days",
+      "title": "SLO Template: Nginx Availability",
+    },
+    "id": "sample_slo_template",
+    "type": "slo_template",
+  },
+  Object {
+    "appLink": "",
+    "attributes": Object {
       "description": "",
       "title": "my tag",
     },

@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it.skip('create pivot transform configuration step JSON editor', async () => {
+        it('create pivot transform configuration step JSON editor', async () => {
           await transform.testExecution.logTestStep('displays the JSON pivot configuration');
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.enableAdvancedPivotEditor();
@@ -205,7 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('create latest transform configuration step source preview', async () => {
           await transform.navigation.navigateTo();
-          await transform.management.startTransformCreation();
+          await transform.management.startTransformCreation('latest');
           await transform.testExecution.logTestStep(
             'selects the source data and loads the Transform wizard page'
           );
@@ -225,8 +225,6 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertIndexPreviewLoaded();
           await transform.wizard.assertTransformPreviewEmpty();
 
-          await transform.testExecution.logTestStep('sets latest transform method');
-          await transform.wizard.selectTransformFunction('latest');
           await a11y.testAppSnapshot();
         });
 

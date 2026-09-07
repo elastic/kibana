@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup } from '@elastic/eui';
-import type { LegacyMetricState } from '../../../../common/types';
+import type { LegacyMetricState } from '@kbn/lens-common';
 
 export interface TitlePositionProps {
   state: LegacyMetricState;
@@ -23,21 +23,21 @@ const alignButtonIcons = [
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.left', {
       defaultMessage: 'Align left',
     }),
-    iconType: 'editorAlignLeft',
+    iconType: 'textAlignLeft',
   },
   {
     id: `center`,
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.center', {
       defaultMessage: 'Align center',
     }),
-    iconType: 'editorAlignCenter',
+    iconType: 'textAlignCenter',
   },
   {
     id: `right`,
     label: i18n.translate('xpack.lens.legacyMetric.alignLabel.right', {
       defaultMessage: 'Align right',
     }),
-    iconType: 'editorAlignRight',
+    iconType: 'textAlignRight',
   },
 ];
 

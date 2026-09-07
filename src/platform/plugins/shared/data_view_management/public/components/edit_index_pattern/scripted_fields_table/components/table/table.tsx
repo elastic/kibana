@@ -157,6 +157,10 @@ class TableClass extends PureComponent<
         pagination={pagination}
         sorting={sorting}
         onTableChange={onTableChange}
+        tableCaption={i18n.translate(
+          'indexPatternManagement.editIndexPattern.scripted.table.caption',
+          { defaultMessage: 'Scripted fields' }
+        )}
       />
     );
   }

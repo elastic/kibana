@@ -23,7 +23,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import * as labels from './translations';
 import { UptimeSettingsContext } from '../../../contexts';
 import { ShowLicenseInfo } from './license_info';
@@ -81,7 +81,12 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         </EuiText>
         <EuiSpacer />
         {!canCreateMLJob && (
-          <EuiCallOut title={labels.ADD_JOB_PERMISSIONS_NEEDED} color="primary" iconType="info">
+          <EuiCallOut
+            announceOnMount
+            title={labels.ADD_JOB_PERMISSIONS_NEEDED}
+            color="primary"
+            iconType="info"
+          >
             <p>
               <FormattedMessage
                 id="xpack.uptime.ml.enableAnomalyDetectionPanel.insufficient_permissions_add_job"

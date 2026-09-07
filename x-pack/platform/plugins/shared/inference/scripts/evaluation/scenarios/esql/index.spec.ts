@@ -641,6 +641,147 @@ const buildTestDefinitions = (): Section[] => {
             `,
           ],
         },
+        {
+          title: 'using SAMPLE',
+          question: `
+          The user is visualizing the "access_logs" index, representing access logs to some http server.
+
+          The relevant fields of this index are:
+          - @timestamp: the timestamp of the access
+          - status_code: the http status code
+          - response_time: the response time of the remote server
+          Note: there are other fields
+
+          Generate a query that randomly samples 10% of the access logs and returns the status_code and response_time.
+
+          You should use the SAMPLE command to answer this question.
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM access_logs
+          | SAMPLE 0.1
+          | KEEP status_code, response_time
+          """
+
+          In addition, the query **MUST**:
+          - use SAMPLE with a probability value (0.1 for 10%)
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using MATCH_PHRASE',
+          question: `
+          The user is visualizing the "books" index, representing books.
+
+          The relevant fields of this index are:
+          - title: text - the title of the book
+          - author: text - the author of the book
+          - description: text - the description of the book
+          Note: there are other fields
+
+          Generate a query that finds books where the description contains the exact phrase "rich and creamy",
+          and returns the title and author for the top 10 results.
+
+          You should use the MATCH_PHRASE function to answer this question.
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM books
+          | WHERE MATCH_PHRASE(description, "rich and creamy")
+          | KEEP title, author
+          | LIMIT 10
+          """
+
+          In addition, the query **MUST**:
+          - use MATCH_PHRASE in the WHERE clause
+          - use MATCH_PHRASE with the exact phrase "rich and creamy"
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using CHANGE_POINT',
+          question: `
+          The user is visualizing the "metrics" index, representing time series metrics.
+
+          The relevant fields of this index are:
+          - @timestamp: datetime - the timestamp of the metric
+          - metric_value: double - the value of the metric
+          Note: there are other fields
+
+          Generate a query that detects change points in the metric_value column, ordered by @timestamp,
+          and returns only the rows where a change point was detected, showing the timestamp, metric_value, change type, and p-value.
+
+          You should use the CHANGE_POINT command to answer this question.
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM metrics
+          | CHANGE_POINT metric_value ON @timestamp
+          | WHERE type IS NOT NULL
+          | KEEP @timestamp, metric_value, type, pvalue
+          """
+
+          In addition, the query **MUST**:
+          - use CHANGE_POINT command
+          - use CHANGE_POINT with ON clause to specify the key column (@timestamp)
+          - filter for rows where type IS NOT NULL to show only detected change points
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
+        {
+          title: 'using ROUND_TO',
+          question: `
+          The user is visualizing the "employees" index.
+
+          The relevant fields of this index are:
+          - emp_no: keyword - the employee number
+          - birth_date: datetime - the employee's birth date
+          Note: there are other fields
+
+          Generate a query that groups employees by birth date windows, rounding each birth date down to the nearest of these dates:
+          1900-01-01, 1950-01-01, 1955-01-01, 1960-01-01, 1965-01-01, 1970-01-01, 1975-01-01.
+          Return the count of employees in each birth window, sorted by birth window.
+
+          You should use the ROUND_TO function to answer this question.
+          `,
+          criteria: [
+            `
+          The answer provides a ES|QL query that is functionally equivalent to:
+
+          """esql
+          FROM employees
+          | STATS COUNT(*) BY birth_window=ROUND_TO(
+              birth_date,
+              "1900-01-01T00:00:00Z"::DATETIME,
+              "1950-01-01T00:00:00Z"::DATETIME,
+              "1955-01-01T00:00:00Z"::DATETIME,
+              "1960-01-01T00:00:00Z"::DATETIME,
+              "1965-01-01T00:00:00Z"::DATETIME,
+              "1970-01-01T00:00:00Z"::DATETIME,
+              "1975-01-01T00:00:00Z"::DATETIME
+          )
+          | SORT birth_window ASC
+          """
+
+          In addition, the query **MUST**:
+          - use ROUND_TO function in a STATS BY clause
+          - use ROUND_TO with multiple datetime constants as rounding points
+          **Not respecting any of those particular conditions should totally fail the criteria**
+            `,
+          ],
+        },
       ],
     },
     {

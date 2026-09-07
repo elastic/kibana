@@ -9,21 +9,22 @@ import type { ReactNode, FunctionComponent, ChangeEvent } from 'react';
 import sytled, { useTheme } from 'styled-components';
 
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiDragDropContext,
+  EuiDraggable,
+  EuiDroppable,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiFormRow,
-  EuiFieldText,
-  EuiDragDropContext,
-  EuiDroppable,
-  EuiDraggable,
-  EuiIcon,
-  EuiButtonIcon,
-  EuiSpacer,
-  EuiFormHelpText,
-  euiDragDropReorder,
   EuiFormErrorText,
+  EuiFormHelpText,
+  EuiFormRow,
+  EuiIcon,
+  EuiSpacer,
   EuiTextArea,
+  EuiToolTip,
+  euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -133,7 +134,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                   defaultMessage: 'Sort host handle',
                 })}
               >
-                <EuiIcon color="text" type="grab" />
+                <EuiIcon color="text" type="dragVertical" aria-hidden={true} />
               </DraggableDiv>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -161,15 +162,22 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
               {displayErrors(errors)}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="text"
-                onClick={onDeleteHandler}
-                iconType="cross"
-                disabled={disabled}
-                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
                   defaultMessage: 'Delete row',
                 })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  color="text"
+                  onClick={onDeleteHandler}
+                  iconType="cross"
+                  disabled={disabled}
+                  aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                    defaultMessage: 'Delete row',
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
@@ -228,15 +236,22 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
           </EuiFlexItem>
           {deletable && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="text"
-                onClick={onDeleteHandler}
-                iconType="cross"
-                disabled={disabled}
-                aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+              <EuiToolTip
+                content={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
                   defaultMessage: 'Delete row',
                 })}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  color="text"
+                  onClick={onDeleteHandler}
+                  iconType="cross"
+                  disabled={disabled}
+                  aria-label={i18n.translate('xpack.fleet.multiRowInput.deleteButton', {
+                    defaultMessage: 'Delete row',
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -379,7 +394,7 @@ export const MultiRowInput: FunctionComponent<MultiRowInputProps> = ({
           disabled={disabled}
           size="xs"
           flush="left"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={addRowHandler}
         >
           {isUrl ? (

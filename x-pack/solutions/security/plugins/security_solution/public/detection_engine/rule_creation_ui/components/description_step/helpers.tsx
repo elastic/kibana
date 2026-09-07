@@ -316,20 +316,22 @@ export const buildSeverityDescription = (severity: AboutStepSeverity): ListItems
                   <EuiToolTip
                     content={severityItem.field}
                     data-test-subj={`severityOverrideField${index}`}
+                    disableScreenReaderOutput
                   >
-                    <>{`${severityItem.field}:`}</>
+                    <span tabIndex={0}>{`${severityItem.field}:`}</span>
                   </EuiToolTip>
                 </OverrideColumn>
                 <OverrideValueColumn>
                   <EuiToolTip
                     content={severityItem.value}
                     data-test-subj={`severityOverrideValue${index}`}
+                    disableScreenReaderOutput
                   >
-                    {defaultToEmptyTag(severityItem.value)}
+                    <span tabIndex={0}>{defaultToEmptyTag(severityItem.value)}</span>
                   </EuiToolTip>
                 </OverrideValueColumn>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={'sortRight'} />
+                  <EuiIcon type="sortRight" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <SeverityBadge
@@ -361,12 +363,13 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                   <EuiToolTip
                     content={riskScoreItem.field}
                     data-test-subj={`riskScoreOverrideField${index}`}
+                    disableScreenReaderOutput
                   >
-                    <>{riskScoreItem.field}</>
+                    <span tabIndex={0}>{riskScoreItem.field}</span>
                   </EuiToolTip>
                 </OverrideColumn>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={'sortRight'} />
+                  <EuiIcon type={'sortRight'} aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem>{ALERT_RISK_SCORE}</EuiFlexItem>
               </EuiFlexGroup>

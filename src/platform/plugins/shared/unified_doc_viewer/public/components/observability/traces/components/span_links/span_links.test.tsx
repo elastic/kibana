@@ -10,25 +10,24 @@ import { type SpanLinks as SpanLinksType } from '@kbn/apm-types';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SpanLinks, getIncomingSpanLinksESQL, getOutgoingSpanLinksESQL } from '.';
-import { where } from '@kbn/esql-composer';
+import { esql } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import {
   OTEL_LINKS_SPAN_ID,
   OTEL_LINKS_TRACE_ID,
   SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_SPAN_ID,
 } from '@kbn/discover-utils';
-
 // Mock dependencies
-jest.mock('../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'apm-traces-*' } },
   }),
 }));
-jest.mock('../../hooks/use_get_generate_discover_link', () => ({
+jest.mock('../../../../../hooks/use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: () => ({
     generateDiscoverLink: jest.fn(() => 'http://discover/link'),
   }),
-  toESQLParamName: jest.requireActual('../../hooks/use_get_generate_discover_link').toESQLParamName,
 }));
 jest.mock('./get_columns', () => ({
   getColumns: jest.fn(() => [{ field: 'duration', name: 'Duration' }]),
@@ -36,8 +35,14 @@ jest.mock('./get_columns', () => ({
 jest.mock('./use_fetch_span_links', () => ({
   useFetchSpanLinks: jest.fn(),
 }));
-jest.mock('@kbn/esql-composer', () => ({
-  where: jest.fn(),
+
+jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
+  ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+    <div data-test-subj="ContentFrameworkSection" {...rest}>
+      <h2>{title}</h2>
+      {children}
+    </div>
+  ),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -76,8 +81,9 @@ describe('SpanLinks', () => {
       error: new Error('BOOM'),
       value: { incomingSpanLinks: [], outgoingSpanLinks: [] },
     });
-    const { getByText } = render(<SpanLinks {...defaultProps} />);
-    expect(getByText(/An error happened when trying to fetch data/i)).toBeInTheDocument();
+    const { getByTestId, getByText } = render(<SpanLinks {...defaultProps} />);
+    expect(getByTestId('unifiedDocViewerSpanLinksFetchErrorCallout')).toBeInTheDocument();
+    expect(getByText(/Couldn't load span links for this span/i)).toBeInTheDocument();
   });
 
   it('renders incoming links and table', () => {
@@ -171,60 +177,52 @@ describe('SpanLinks', () => {
   });
 });
 
+const renderClause = (condition: ESQLAstExpression | undefined): string | undefined => {
+  if (!condition) {
+    return undefined;
+  }
+  const query = esql.from('apm-traces-*');
+  query.where`${condition}`;
+  return query.print('pipe-multiline');
+};
+
 describe('getOutgoingSpanLinksESQL', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
-  it('calls where with correct query and params for multiple links', () => {
+  it('builds an IN query for multiple links', () => {
     const spanLinks = [
       { traceId: 'trace1', spanId: 'span1' },
       { traceId: 'trace2', spanId: 'span2' },
     ];
 
-    getOutgoingSpanLinksESQL(spanLinks);
-
-    expect(where).toHaveBeenCalledWith('trace.id IN (?,?) AND span.id IN (?,?)', [
-      'trace1',
-      'trace2',
-      'span1',
-      'span2',
-    ]);
+    expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("trace1", "trace2")) AND (span.id IN ("span1", "span2"))'
+    );
   });
 
-  it('calls where with correct query and params for a single link', () => {
+  it('builds an IN query for a single link', () => {
     const spanLinks = [{ traceId: 'traceX', spanId: 'spanX' }];
 
-    getOutgoingSpanLinksESQL(spanLinks);
-
-    expect(where).toHaveBeenCalledWith('trace.id IN (?) AND span.id IN (?)', ['traceX', 'spanX']);
+    expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("traceX")) AND (span.id IN ("spanX"))'
+    );
   });
 
-  it('calls where with empty arrays if no links are provided', () => {
-    getOutgoingSpanLinksESQL([]);
+  it('returns no clause when there are no links', () => {
+    expect(getOutgoingSpanLinksESQL([])).toBeUndefined();
+  });
 
-    expect(where).toHaveBeenCalledWith('trace.id IN () AND span.id IN ()', []);
+  it('preserves backslash-then-letter sequences inside IN lists', () => {
+    const spanLinks = [{ traceId: 'trace\\n1', spanId: 'span\\t1' }];
+
+    expect(renderClause(getOutgoingSpanLinksESQL(spanLinks))).toEqual(
+      'FROM apm-traces-*\n  | WHERE (trace.id IN ("trace\\\\n1")) AND (span.id IN ("span\\\\t1"))'
+    );
   });
 });
 
 describe('getIncomingSpanLinksESQL', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  afterAll(() => {
-    jest.clearAllMocks();
-  });
-
-  it('calls where with correct query', () => {
-    getIncomingSpanLinksESQL('trace1', 'span1');
-
-    expect(where).toHaveBeenCalledWith(
-      `QSTR("${OTEL_LINKS_TRACE_ID}:trace1 AND ${OTEL_LINKS_SPAN_ID}:span1") OR QSTR("${SPAN_LINKS_TRACE_ID}:trace1 AND ${SPAN_LINKS_SPAN_ID}:span1")`
+  it('builds a QSTR query', () => {
+    expect(renderClause(getIncomingSpanLinksESQL('trace1', 'span1'))).toEqual(
+      `FROM apm-traces-*\n  | WHERE QSTR("${OTEL_LINKS_TRACE_ID}:trace1 AND ${OTEL_LINKS_SPAN_ID}:span1") OR QSTR("${SPAN_LINKS_TRACE_ID}:trace1 AND ${SPAN_LINKS_SPAN_ID}:span1")`
     );
   });
 });

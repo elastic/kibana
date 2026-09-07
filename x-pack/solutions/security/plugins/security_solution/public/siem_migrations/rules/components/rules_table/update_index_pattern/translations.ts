@@ -35,27 +35,6 @@ export const INDEX_PATTERN_PLACEHOLDER_FORM_HELP_TEXT = i18n.translate(
   }
 );
 
-export const INDEX_PATTERN_PLACEHOLDER_FORM_INDEX_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.indexPatternPlaceholderForm.indexLabel',
-  {
-    defaultMessage: 'Index pattern',
-  }
-);
-
-export const UPDATE_INDEX_PATTERN_OVERWRITE_INDEX_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.updateIndexPatternForm.overwriteIndexLabel',
-  {
-    defaultMessage: 'Overwrite index pattern',
-  }
-);
-
-export const UPDATE_INDEX_PATTERN_OVERWRITE_DATA_VIEWS_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.table.updateIndexPatternForm.overwriteDataViewsLabel',
-  {
-    defaultMessage: 'Overwrite data views',
-  }
-);
-
 export const UPDATE_INDEX_PATTERN_REQUIRED_ERROR = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.updateIndexPatternForm.requiredError',
   {

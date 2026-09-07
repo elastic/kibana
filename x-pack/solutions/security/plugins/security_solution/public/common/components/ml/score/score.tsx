@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import {
-  SecurityCellActions,
-  CellActionsMode,
-  SecurityCellActionsTrigger,
-} from '../../cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../../cell_actions';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
 import { getScoreString } from './get_score_string';
@@ -31,7 +28,7 @@ export const ScoreComponent = ({
         value: score.entityValue,
         field: score.entityName,
       }}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
+      triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
       visibleCellActions={5}
     >
       <>

@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SimilarSpans, type SimilarSpansProps } from '.';
 
-jest.mock('../../../../content_framework/section', () => ({
+jest.mock('../../../../content_framework/lazy_content_framework_section', () => ({
   ContentFrameworkSection: ({ children, title, ...rest }: any) => (
     <div data-test-subj="ContentFrameworkSection" {...rest}>
       <h2>{title}</h2>
@@ -28,7 +28,7 @@ jest.mock('../../../../content_framework/chart', () => ({
   ),
 }));
 
-jest.mock('../../hooks/use_data_sources', () => ({
+jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
     indexes: { apm: { traces: 'test-index' } },
   }),

@@ -15,8 +15,12 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
   let resolve: ((value: IteratorResult<T>) => void) | null = null;
   let reject: ((reason?: any) => void) | null = null;
 
-  const queue: Array<IteratorResult<T>> = [];
+  // head-index queue: shift() re-indexes the whole array, so draining a
+  // large backlog through it is quadratic
+  let queue: Array<IteratorResult<T>> = [];
+  let head = 0;
   let done = false;
+  let error: any = null;
 
   const subscription = observable.subscribe({
     next(value) {
@@ -28,11 +32,15 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
       }
     },
     error(err) {
+      done = true;
+      error = err;
+      // Clear any queued values - we fail fast
+      queue = [];
+      head = 0;
       if (reject) {
         reject(err);
         reject = null;
-      } else {
-        queue.push(Promise.reject(err) as any); // Queue an error
+        resolve = null;
       }
     },
     complete() {
@@ -49,8 +57,23 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
       return this;
     },
     next() {
-      if (queue.length > 0) {
-        return Promise.resolve(queue.shift()!);
+      // Check for error first - fail fast
+      if (error !== null) {
+        return Promise.reject(error);
+      }
+
+      if (head < queue.length) {
+        const result = queue[head];
+        head++;
+        if (head === queue.length) {
+          queue = [];
+          head = 0;
+        } else if (head > 1024 && head * 2 >= queue.length) {
+          // amortized compaction so consumed entries don't accumulate
+          queue = queue.slice(head);
+          head = 0;
+        }
+        return Promise.resolve(result);
       }
 
       if (done) {
@@ -66,9 +89,9 @@ export function toAsyncIterator<T>(observable: Observable<T>): AsyncIterableIter
       subscription.unsubscribe();
       return Promise.resolve({ value: undefined, done: true });
     },
-    throw(error?: any) {
+    throw(err?: any) {
       subscription.unsubscribe();
-      return Promise.reject(error);
+      return Promise.reject(err);
     },
   };
 }

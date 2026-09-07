@@ -14,7 +14,7 @@ export const searchSessionsConfigSchema = schema.object({
   /**
    * Turns the feature on \ off (incl. removing indicator and management screens)
    */
-  enabled: schema.boolean({ defaultValue: false }),
+  enabled: schema.boolean({ defaultValue: true }),
 
   /**
    * notTouchedTimeout controls how long user can save a session after all searches completed.
@@ -55,7 +55,6 @@ export const searchConfigSchema = schema.object({
   asyncSearch: schema.object({
     /**
      *  Block and wait until the search is completed up to the timeout (see es async_search's `wait_for_completion_timeout`)
-     *  TODO: we should optimize this as 100ms is likely not optimal (https://github.com/elastic/kibana/issues/143277)
      */
     waitForCompletion: schema.duration({ defaultValue: '200ms' }),
     /**
@@ -71,9 +70,15 @@ export const searchConfigSchema = schema.object({
     batchedReduceSize: schema.number({ defaultValue: 64 }),
     /**
      * How long to wait before polling the async_search after the previous poll response.
-     * If not provided, then default dynamic interval with backoff is used.
+     * If not provided, defaults to zero.
      */
     pollInterval: schema.maybe(schema.number({ min: 200 })),
+    /**
+     * How long to wait for results before initiating a new poll request.
+     * Accepts duration format (e.g., "30s", "100ms"). If not provided,
+     * defaults to protocol-specific behavior (30s for HTTP/2 or HTTP/3).
+     */
+    pollLength: schema.maybe(schema.duration()),
   }),
   aggs: schema.object({
     shardDelay: schema.object({

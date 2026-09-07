@@ -20,7 +20,7 @@ import {
   type DataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepReadonly } from '@kbn/ml-common-types/common';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { DEFAULT_NUM_TOP_FEATURE_IMPORTANCE_VALUES } from '../../hooks/use_create_analytics_form';
 import type { State } from '../../hooks/use_create_analytics_form/state';
@@ -502,7 +502,7 @@ export const CloneActionName: FC<CloneActionNameProps> = ({ isDisabled }) => {
           defaultMessage: 'You do not have permission to clone analytics jobs.',
         })}
       >
-        <>{cloneActionNameText}</>
+        <span tabIndex={0}>{cloneActionNameText}</span>
       </EuiToolTip>
     );
   }

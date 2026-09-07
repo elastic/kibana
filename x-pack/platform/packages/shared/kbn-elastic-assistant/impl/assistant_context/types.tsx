@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ApiConfig, Message, Replacements, User } from '@kbn/elastic-assistant-common';
+import type {
+  ApiConfig,
+  InterruptResumeValue,
+  Message,
+  Replacements,
+  User,
+} from '@kbn/elastic-assistant-common';
 import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
@@ -76,6 +82,10 @@ export interface AssistantAvailability {
   hasUpdateAIAssistantAnonymization: boolean;
   // When true, user has `Edit` privilege for `Global Knowledge Base`
   hasManageGlobalKnowledgeBase: boolean;
+  // When true, user has privilege to access Agent Builder feature
+  hasAgentBuilderPrivilege?: boolean;
+  // When true, use has privilege to manage Agent Builder feature
+  hasAgentBuilderManagePrivilege?: boolean;
 }
 
 export type GetAssistantMessages = (commentArgs: {
@@ -90,3 +100,8 @@ export type GetAssistantMessages = (commentArgs: {
   systemPromptContent?: string;
   contentReferencesVisible: boolean;
 }) => EuiCommentProps[];
+
+export type ResumeGraphFunction = (
+  threadId: string,
+  resumeValue: InterruptResumeValue
+) => Promise<void>;

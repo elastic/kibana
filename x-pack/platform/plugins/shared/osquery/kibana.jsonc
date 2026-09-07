@@ -23,9 +23,13 @@
       "taskManager",
       "triggersActionsUi",
       "ruleRegistry",
-      "security"
+      "security",
+      "uiActions",
+      "unifiedDocViewer",
+      "unifiedSearch"
     ],
     "optionalPlugins": [
+      "cps",
       "fleet",
       "home",
       "lens",

@@ -17,6 +17,7 @@ import {
 
 import { firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { ThemeService } from './theme_service';
 
 declare global {
@@ -45,7 +46,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
-          name: 'amsterdam',
+          name: 'borealis',
           darkMode: false,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -59,13 +60,13 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: false,
-          name: 'amsterdam',
+          name: 'borealis',
         });
       });
 
       it('sets __kbnThemeTag__ to the correct value', async () => {
         themeService.setup({ injectedMetadata });
-        expect(window.__kbnThemeTag__).toEqual('v8light');
+        expect(window.__kbnThemeTag__).toEqual('borealislight');
       });
 
       it('calls createStyleSheet with the correct parameters', async () => {
@@ -80,6 +81,11 @@ describe('ThemeService', () => {
         expect(setDarkModeMock).toHaveBeenCalledWith(false);
       });
 
+      it('reflects the color mode on the root background', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(document.documentElement.style.backgroundColor).toEqual('rgb(246, 249, 252)'); // borealis light page background
+      });
+
       it('does not call onSystemThemeChange', async () => {
         themeService.setup({ injectedMetadata });
         expect(onSystemThemeChangeMock).not.toHaveBeenCalled();
@@ -90,7 +96,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
-          name: 'amsterdam',
+          name: 'borealis',
           darkMode: true,
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -104,13 +110,13 @@ describe('ThemeService', () => {
         const theme = await firstValueFrom(theme$);
         expect(theme).toEqual({
           darkMode: true,
-          name: 'amsterdam',
+          name: 'borealis',
         });
       });
 
       it('sets __kbnThemeTag__ to the correct value', async () => {
         themeService.setup({ injectedMetadata });
-        expect(window.__kbnThemeTag__).toEqual('v8dark');
+        expect(window.__kbnThemeTag__).toEqual('borealisdark');
       });
 
       it('calls createStyleSheet with the correct parameters', async () => {
@@ -125,6 +131,11 @@ describe('ThemeService', () => {
         expect(setDarkModeMock).toHaveBeenCalledWith(true);
       });
 
+      it('reflects the color mode on the root background', async () => {
+        themeService.setup({ injectedMetadata });
+        expect(document.documentElement.style.backgroundColor).toEqual('rgb(7, 16, 31)'); // borealis dark page background
+      });
+
       it('does not call onSystemThemeChange', async () => {
         themeService.setup({ injectedMetadata });
         expect(onSystemThemeChangeMock).not.toHaveBeenCalled();
@@ -135,7 +146,7 @@ describe('ThemeService', () => {
       beforeEach(() => {
         injectedMetadata.getTheme.mockReturnValue({
           version: 'v8',
-          name: 'amsterdam',
+          name: 'borealis',
           darkMode: 'system',
           stylesheetPaths: {
             dark: ['dark-1.css'],
@@ -155,10 +166,10 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
-            name: 'amsterdam',
+            name: 'borealis',
           });
 
-          expect(window.__kbnThemeTag__).toEqual('v8light');
+          expect(window.__kbnThemeTag__).toEqual('borealislight');
 
           expect(setDarkModeMock).toHaveBeenCalledTimes(1);
           expect(setDarkModeMock).toHaveBeenCalledWith(false);
@@ -183,10 +194,10 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: false,
-            name: 'amsterdam',
+            name: 'borealis',
           });
 
-          expect(window.__kbnThemeTag__).toEqual('v8light');
+          expect(window.__kbnThemeTag__).toEqual('borealislight');
 
           expect(setDarkModeMock).toHaveBeenCalledTimes(1);
           expect(setDarkModeMock).toHaveBeenCalledWith(false);
@@ -203,10 +214,10 @@ describe('ThemeService', () => {
 
           expect(theme).toEqual({
             darkMode: true,
-            name: 'amsterdam',
+            name: 'borealis',
           });
 
-          expect(window.__kbnThemeTag__).toEqual('v8dark');
+          expect(window.__kbnThemeTag__).toEqual('borealisdark');
 
           expect(setDarkModeMock).toHaveBeenCalledTimes(1);
           expect(setDarkModeMock).toHaveBeenCalledWith(true);
@@ -229,14 +240,14 @@ describe('ThemeService', () => {
           expect(await firstValueFrom(theme$)).toEqual({
             darkMode: false,
           });
-          expect(window.__kbnThemeTag__).toEqual('v8light');
+          expect(window.__kbnThemeTag__).toEqual('borealislight');
 
           handler!(true);
 
           expect(await firstValueFrom(theme$)).toEqual({
             darkMode: true,
           });
-          expect(window.__kbnThemeTag__).toEqual('v8dark');
+          expect(window.__kbnThemeTag__).toEqual('borealisdark');
         });
       });
     });
@@ -252,7 +263,7 @@ describe('ThemeService', () => {
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
       injectedMetadata.getTheme.mockReturnValue({
         version: 'v8',
-        name: 'amsterdam',
+        name: 'borealis',
         darkMode: true,
         stylesheetPaths: {
           dark: [],
@@ -264,8 +275,102 @@ describe('ThemeService', () => {
       const theme = await firstValueFrom(theme$);
       expect(theme).toEqual({
         darkMode: true,
-        name: 'amsterdam',
+        name: 'borealis',
       });
+    });
+  });
+
+  describe('#setDarkMode', () => {
+    beforeEach(() => {
+      // base theme is light; `dark-1.css` / `light-1.css` let us assert stylesheet swaps
+      injectedMetadata.getTheme.mockReturnValue({
+        version: 'v8',
+        name: 'borealis',
+        darkMode: false,
+        stylesheetPaths: {
+          dark: ['dark-1.css'],
+          default: ['light-1.css'],
+        },
+      });
+    });
+
+    it('applies the new theme when switching from light to dark', () => {
+      const { setDarkMode, getTheme } = themeService.setup({ injectedMetadata });
+
+      // ignore the side effects performed during setup itself
+      setDarkModeMock.mockClear();
+      createStyleSheetMock.mockClear();
+
+      setDarkMode(true);
+
+      expect(setDarkModeMock).toHaveBeenCalledTimes(1);
+      expect(setDarkModeMock).toHaveBeenCalledWith(true);
+
+      expect(createStyleSheetMock).toHaveBeenCalledTimes(1);
+      expect(createStyleSheetMock).toHaveBeenCalledWith({ href: 'dark-1.css' });
+
+      expect(window.__kbnThemeTag__).toEqual('borealisdark');
+      expect(getTheme()).toEqual({ darkMode: true, name: 'borealis' });
+      expect(document.documentElement.style.backgroundColor).toEqual('rgb(7, 16, 31)');
+    });
+
+    it('emits the updated theme on `theme$`', () => {
+      const { setDarkMode, theme$ } = themeService.setup({ injectedMetadata });
+
+      const emissions: CoreTheme[] = [];
+      const subscription = theme$.subscribe((theme) => emissions.push(theme));
+
+      setDarkMode(true);
+
+      expect(emissions).toEqual([
+        { darkMode: false, name: 'borealis' },
+        { darkMode: true, name: 'borealis' },
+      ]);
+
+      subscription.unsubscribe();
+    });
+
+    it('is a no-op when the requested mode matches the current one', () => {
+      const { setDarkMode, theme$ } = themeService.setup({ injectedMetadata });
+
+      setDarkModeMock.mockClear();
+      createStyleSheetMock.mockClear();
+
+      let emissionCount = 0;
+      const subscription = theme$.subscribe(() => emissionCount++);
+      // BehaviorSubject replays the current value on subscription
+      expect(emissionCount).toBe(1);
+
+      setDarkMode(false);
+
+      expect(setDarkModeMock).not.toHaveBeenCalled();
+      expect(createStyleSheetMock).not.toHaveBeenCalled();
+      expect(emissionCount).toBe(1);
+
+      subscription.unsubscribe();
+    });
+  });
+
+  describe('#stop', () => {
+    it('completes the `theme$` observable', () => {
+      injectedMetadata.getTheme.mockReturnValue({
+        version: 'v8',
+        name: 'borealis',
+        darkMode: false,
+        stylesheetPaths: {
+          dark: [],
+          default: [],
+        },
+      });
+
+      const { theme$ } = themeService.setup({ injectedMetadata });
+
+      let completed = false;
+      theme$.subscribe({ complete: () => (completed = true) });
+
+      themeService.stop();
+
+      expect(completed).toBe(true);
     });
   });
 });

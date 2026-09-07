@@ -8,15 +8,15 @@
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 
 import { ThemeProvider } from 'styled-components';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { euiDarkVars } from '@kbn/ui-theme';
-import { createStore as createReduxStore } from 'redux';
+import { createStore as createReduxStore } from 'redux-v4';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { mockGlobalState } from '../../mock/global_state';

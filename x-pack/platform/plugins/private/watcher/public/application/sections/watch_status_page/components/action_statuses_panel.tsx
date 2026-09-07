@@ -15,12 +15,12 @@ import {
   EuiTitle,
   EuiButtonEmpty,
   EuiToolTip,
-  EuiCallOut,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiIcon,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { PAGINATION } from '../../../../../common/constants';
 import { ackWatchAction } from '../../../lib/api';
@@ -87,11 +87,17 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate('xpack.watcher.sections.watchDetail.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -110,14 +116,20 @@ export const ActionStatusesPanel = () => {
             }
           )}
         >
-          <span>
+          <span tabIndex={0}>
             {i18n.translate(
               'xpack.watcher.sections.watchHistory.watchActionStatusTable.lastExecuted',
               {
                 defaultMessage: 'Last executed',
               }
             )}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -236,15 +248,19 @@ export const ActionStatusesPanel = () => {
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiCallOut
+            <KbnDangerCallout
+              announceOnMount
               title={i18n.translate('xpack.watcher.sections.watchDetail.actionErrorsCalloutTitle', {
                 defaultMessage: 'This action contains errors',
               })}
-              color="danger"
-              iconType="cross"
               data-test-subj="errorMessage"
+              text={
+                actionErrors[selectedErrorAction].length === 1
+                  ? actionErrors[selectedErrorAction][0].message
+                  : undefined
+              }
             >
-              {actionErrors[selectedErrorAction].length > 1 ? (
+              {actionErrors[selectedErrorAction].length > 1 && (
                 <ul>
                   {actionErrors[selectedErrorAction].map(
                     (actionError: ActionError, errorIndex: number) => (
@@ -252,10 +268,8 @@ export const ActionStatusesPanel = () => {
                     )
                   )}
                 </ul>
-              ) : (
-                <p>{actionErrors[selectedErrorAction][0].message}</p>
               )}
-            </EuiCallOut>
+            </KbnDangerCallout>
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
@@ -267,7 +281,13 @@ export const ActionStatusesPanel = () => {
         pagination={PAGINATION}
         sorting={true}
         data-test-subj="watchActionStatusTable"
-        message={
+        tableCaption={i18n.translate(
+          'xpack.watcher.sections.watchDetail.watchActionStatusesTable.caption',
+          {
+            defaultMessage: 'Action statuses',
+          }
+        )}
+        noItemsMessage={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
             defaultMessage="No actions to show"

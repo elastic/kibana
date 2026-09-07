@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useLocation } from 'react-router-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -78,8 +78,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         uptime: { enabled: false },
         observability: { enabled: false },
       },
-      managedOtlpServiceUrl: '',
     },
+    managedOtlpServiceUrl: '',
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
@@ -134,9 +134,9 @@ describe('RulesPage with all capabilities', () => {
 
     fireEvent.click(await wrapper.findByText('Rule type 1'));
     await waitFor(() => {
-      expect(mockApplication.navigateToUrl).toHaveBeenCalledWith(
-        '/app/observability/alerts/rules/create/1'
-      );
+      expect(mockApplication.navigateToApp).toHaveBeenCalledWith('rules', {
+        path: '/create/1',
+      });
     });
   });
 });

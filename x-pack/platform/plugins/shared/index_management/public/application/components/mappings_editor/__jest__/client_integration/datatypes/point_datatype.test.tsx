@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import React from 'react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import type { MappingsEditorTestBed } from '../helpers';
-import { componentHelpers } from '../helpers';
-
-const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
+import { WithAppDependencies } from '../helpers/setup_environment';
+import { MappingsEditor } from '../../../mappings_editor';
 
 // Parameters automatically added to the point datatype when saved (with the default values)
 export const defaultPointParameters = {
@@ -19,26 +19,10 @@ export const defaultPointParameters = {
   ignore_z_value: true,
 };
 
+const onChangeHandler = jest.fn();
 describe('Mappings editor: point datatype', () => {
-  /**
-   * Variable to store the mappings data forwarded to the consumer component
-   */
-  let data: any;
-  let onChangeHandler: jest.Mock = jest.fn();
-  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
-  let testBed: MappingsEditorTestBed;
-
-  beforeAll(() => {
-    jest.useFakeTimers({ legacyFakeTimers: true });
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
-    onChangeHandler = jest.fn();
-    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+    jest.clearAllMocks();
   });
 
   test('initial view and default parameters values', async () => {
@@ -50,24 +34,32 @@ describe('Mappings editor: point datatype', () => {
       },
     };
 
-    await act(async () => {
-      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-    });
-    testBed.component.update();
+    const Component = WithAppDependencies(MappingsEditor, {});
+    render(
+      <I18nProvider>
+        <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+      </I18nProvider>
+    );
 
-    const {
-      component,
-      actions: { startEditField, updateFieldName, updateFieldAndCloseFlyout },
-    } = testBed;
+    await screen.findByTestId('mappingsEditor');
 
     // Open the flyout to edit the field
-    await startEditField('myField');
+    const editButton = screen.getByTestId('editFieldButton');
+    fireEvent.click(editButton);
+
+    const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
 
     // Update the name of the field
-    await updateFieldName('updatedField');
+    const nameInput = within(flyout).getByTestId('nameParameterInput');
+    fireEvent.change(nameInput, { target: { value: 'updatedField' } });
 
     // Save the field and close the flyout
-    await updateFieldAndCloseFlyout();
+    const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+    fireEvent.click(updateButton);
+
+    await waitFor(() => {
+      expect(onChangeHandler).toHaveBeenCalled();
+    });
 
     // It should have the default parameters values added for fields which are not set
     const updatedMappings = {
@@ -78,8 +70,9 @@ describe('Mappings editor: point datatype', () => {
       },
     };
 
-    ({ data } = await getMappingsEditorData(component));
-    expect(data).toEqual(updatedMappings);
+    const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+    const actualMappings = callData.getData();
+    expect(actualMappings).toEqual(updatedMappings);
   });
 
   describe('meta parameter', () => {
@@ -91,78 +84,145 @@ describe('Mappings editor: point datatype', () => {
       },
     };
 
-    const updatedMappings = { ...defaultMappings };
-
     const metaParameter = {
       meta: {
         my_metadata: 'foobar',
       },
     };
 
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
-      });
-      testBed.component.update();
-    });
-
     test('valid meta object', async () => {
-      const {
-        component,
-        actions: {
-          startEditField,
-          updateFieldAndCloseFlyout,
-          showAdvancedSettings,
-          toggleFormRow,
-          updateJsonEditor,
-        },
-      } = testBed;
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
 
       // Open the flyout to edit the field
-      await startEditField('myField');
-      await showAdvancedSettings();
+      const editButton = screen.getByTestId('editFieldButton');
+      fireEvent.click(editButton);
 
-      // Enable the meta parameter and add value
-      toggleFormRow('metaParameter');
-      await act(async () => {
-        updateJsonEditor('metaParameterEditor', metaParameter.meta);
+      const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
+
+      // Show advanced settings
+      const advancedSettingsToggle = within(flyout).getByTestId('toggleAdvancedSetting');
+      fireEvent.click(advancedSettingsToggle);
+
+      await waitFor(() => {
+        const advancedSettings = within(flyout).getByTestId('advancedSettings');
+        expect(advancedSettings.style.display).not.toBe('none');
       });
-      component.update();
 
-      // Save the field and close the flyout
-      await updateFieldAndCloseFlyout();
+      // Enable the meta parameter toggle
+      const metaParameterSection = within(flyout).getByTestId('metaParameter');
+      const metaToggle = within(metaParameterSection).getByTestId('formRowToggle');
+      fireEvent.click(metaToggle);
+
+      await waitFor(() => {
+        expect(metaToggle.getAttribute('aria-checked')).toBe('true');
+      });
+
+      const metaEditor = await within(flyout).findByTestId('metaParameterEditor');
+      const metaValue = JSON.stringify(metaParameter.meta);
+
+      // Set the value property and data-currentvalue attribute
+      Object.defineProperty(metaEditor, 'value', {
+        writable: true,
+        value: metaValue,
+      });
+
+      metaEditor.setAttribute('data-currentvalue', metaValue);
+
+      // Trigger change event
+      fireEvent.change(metaEditor, { target: { value: metaValue } });
+
+      await waitFor(() => {
+        const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+        expect(updateButton).not.toBeDisabled();
+      });
+
+      // Click update button
+      const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+      fireEvent.click(updateButton);
+
+      await waitFor(() => {
+        expect(onChangeHandler).toHaveBeenCalled();
+      });
 
       // It should have the default parameters values added, plus metadata
-      updatedMappings.properties.myField = {
-        ...defaultPointParameters,
-        ...metaParameter,
+      const updatedMappings = {
+        properties: {
+          myField: {
+            ...defaultPointParameters,
+            ...metaParameter,
+          },
+        },
       };
 
-      ({ data } = await getMappingsEditorData(component));
-      expect(data).toEqual(updatedMappings);
+      const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+      const actualMappings = callData.getData();
+      expect(actualMappings).toEqual(updatedMappings);
     });
 
     test('strip empty string', async () => {
-      const {
-        component,
-        actions: { startEditField, updateFieldAndCloseFlyout, showAdvancedSettings, toggleFormRow },
-      } = testBed;
+      const Component = WithAppDependencies(MappingsEditor, {});
+      render(
+        <I18nProvider>
+          <Component value={defaultMappings} onChange={onChangeHandler} indexSettings={{}} />
+        </I18nProvider>
+      );
+
+      await screen.findByTestId('mappingsEditor');
 
       // Open the flyout to edit the field
-      await startEditField('myField');
-      await showAdvancedSettings();
+      const editButton = screen.getByTestId('editFieldButton');
+      fireEvent.click(editButton);
 
-      // Enable the meta parameter
-      toggleFormRow('metaParameter');
+      const flyout = await screen.findByTestId('mappingsEditorFieldEdit');
 
-      // Save the field and close the flyout without adding any values to meta parameter
-      await updateFieldAndCloseFlyout();
+      // Show advanced settings
+      const advancedSettingsToggle = within(flyout).getByTestId('toggleAdvancedSetting');
+      fireEvent.click(advancedSettingsToggle);
 
-      // It should have the default parameters values added
-      updatedMappings.properties.myField = defaultPointParameters;
+      await waitFor(() => {
+        const advancedSettings = within(flyout).getByTestId('advancedSettings');
+        expect(advancedSettings.style.display).not.toBe('none');
+      });
 
-      ({ data } = await getMappingsEditorData(component));
-      expect(data).toEqual(updatedMappings);
+      // Enable the meta parameter toggle
+      const metaParameterSection = within(flyout).getByTestId('metaParameter');
+      const metaToggle = within(metaParameterSection).getByTestId('formRowToggle');
+      fireEvent.click(metaToggle);
+
+      await waitFor(() => {
+        expect(metaToggle.getAttribute('aria-checked')).toBe('true');
+      });
+
+      // Don't set any value for meta parameter - just save
+
+      // Click update button
+      const updateButton = within(flyout).getByTestId('editFieldUpdateButton');
+      fireEvent.click(updateButton);
+
+      await waitFor(() => {
+        expect(onChangeHandler).toHaveBeenCalled();
+      });
+
+      // It should have only the type (meta parameter was enabled but empty, so it's stripped)
+      // When meta is enabled but not set, defaults are not applied
+      const updatedMappings = {
+        properties: {
+          myField: {
+            type: 'point',
+          },
+        },
+      };
+
+      const [callData] = onChangeHandler.mock.calls[onChangeHandler.mock.calls.length - 1];
+      const actualMappings = callData.getData();
+      expect(actualMappings).toEqual(updatedMappings);
     });
   });
 });

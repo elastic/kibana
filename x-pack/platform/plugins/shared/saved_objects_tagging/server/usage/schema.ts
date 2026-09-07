@@ -9,8 +9,8 @@ import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import type { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 const perTypeSchema: MakeSchemaFrom<ByTypeTaggingUsageData> = {
-  usedTags: { type: 'integer' },
-  taggedObjects: { type: 'integer' },
+  usedTags: { type: 'integer', _meta: { description: 'Count of tags used' } },
+  taggedObjects: { type: 'integer', _meta: { description: 'Count of Saved Objects tagged' } },
 };
 
 export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
@@ -27,5 +27,6 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
     'osquery-pack-asset': perTypeSchema,
     'osquery-saved-query': perTypeSchema,
     alerting_rule_template: perTypeSchema,
+    slo_template: perTypeSchema,
   },
 };

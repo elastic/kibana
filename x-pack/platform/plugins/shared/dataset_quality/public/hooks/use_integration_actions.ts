@@ -82,9 +82,9 @@ export const useIntegrationActions = () => {
     (dashboard: Dashboard) =>
       wrapLinkPropsForTelemetry(
         getRouterLinkProps({
-          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
+          href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id ?? '' }),
           onClick: () => {
-            return dashboardLocator?.navigate({ dashboardId: dashboard?.id } || '');
+            return dashboardLocator?.navigate({ dashboardId: dashboard?.id ?? '' });
           },
         }),
         navigationTargets.Dashboard,

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import {
-  EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
-  LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME,
-} from '@kbn/aiops-log-rate-analysis/constants';
+import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import {
-  type SerializedPanelState,
   apiHasExecutionContext,
   apiPublishesFilters,
   fetch$,
@@ -26,106 +22,81 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, merge, skip, skipWhile } from 'rxjs';
+import type { LogRateAnalysisEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/log_rate_analysis';
 import { getLogRateAnalysisEmbeddableWrapperComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysis_analysis_controls';
-import type { LogRateAnalysisEmbeddableApi, LogRateAnalysisEmbeddableState } from './types';
-import { getDataviewReferences } from '../get_dataview_references';
+import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
-
-const deserializeState = (
-  serializedState?: SerializedPanelState<LogRateAnalysisEmbeddableState>
-) => {
-  const state = serializedState?.rawState
-    ? cloneDeep(serializedState?.rawState)
-    : ({} as LogRateAnalysisEmbeddableState);
-  // inject the reference
-  const dataViewIdRef = serializedState?.references?.find(
-    (ref) => ref.name === LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME
-  );
-  // if the serializedState already contains a dataViewId, we don't want to overwrite it. (Unsaved state can cause this)
-  if (dataViewIdRef && state && !state.dataViewId) {
-    state.dataViewId = dataViewIdRef?.id;
-  }
-  return state;
-};
 
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<LogRateAnalysisEmbeddableState, LogRateAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    LogRateAnalysisEmbeddableState,
+    LogRateAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      const runtimeState = deserializeState(initialState);
-      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
-      const titleManager = initializeTitleManager(initialState.rawState);
+      canUseAiops(coreStart, true);
+      const runtimeState = initialState;
+      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
-      const {
-        logRateAnalysisControlsApi,
-        serializeLogRateAnalysisChartState,
-        logRateAnalysisControlsComparators,
-      } = initializeLogRateAnalysisControls(runtimeState);
+      const { logRateAnalysisControlsApi, serializeLogRateAnalysisChartState } =
+        initializeLogRateAnalysisControls(runtimeState);
 
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(
-          runtimeState.dataViewId ?? (await pluginStart.data.dataViews.getDefaultId())
-        ),
+        await pluginStart.data.dataViews.get(runtimeState.data_view_id),
       ]);
 
       const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        const dataViewId = logRateAnalysisControlsApi.dataViewId.getValue();
-        return {
-          rawState: {
-            ...titleManager.getLatestState(),
-            ...timeRangeManager.getLatestState(),
-            ...serializeLogRateAnalysisChartState(),
-          },
-          references: getDataviewReferences(dataViewId, LOG_RATE_ANALYSIS_DATA_VIEW_REF_NAME),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<LogRateAnalysisEmbeddableState>({
+      const stateApi = initializeStateApi<LogRateAnalysisEmbeddableState>({
         uuid,
         parentApi,
-        serializeState,
+        serializeState: () => ({
+          ...titleManager.getLatestState(),
+          ...timeRangeManager.getLatestState(),
+          ...serializeLogRateAnalysisChartState(),
+        }),
         anyStateChange$: merge(
           timeRangeManager.anyStateChange$,
           titleManager.anyStateChange$,
-          logRateAnalysisControlsApi.dataViewId
-        ).pipe(map(() => undefined)),
+          logRateAnalysisControlsApi.dataViewId.pipe(
+            skip(1),
+            map(() => undefined)
+          )
+        ),
         getComparators: () => ({
+          data_view_id: 'referenceEquality',
           ...timeRangeComparators,
           ...titleComparators,
-          ...logRateAnalysisControlsComparators,
-          windowParameters: 'skip',
         }),
-        onReset: (lastSaved) => {
-          const lastState = deserializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved?.rawState);
-          timeRangeManager.reinitializeState(lastSaved?.rawState);
-          logRateAnalysisControlsApi.updateUserInput(lastState);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          timeRangeManager.reinitializeState(nextState);
+          logRateAnalysisControlsApi.updateUserInput(nextState);
         },
       });
 
       const api = finalizeApi({
         ...timeRangeManager.api,
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         ...logRateAnalysisControlsApi,
         getTypeDisplayName: () =>
           i18n.translate('xpack.aiops.logRateAnalysis.typeDisplayName', {
@@ -165,7 +136,6 @@ export const getLogRateAnalysisEmbeddableFactory = (
         dataLoading$,
         blockingError$,
         dataViews$,
-        serializeState,
       });
 
       const LogRateAnalysisEmbeddableWrapper = getLogRateAnalysisEmbeddableWrapperComponent(

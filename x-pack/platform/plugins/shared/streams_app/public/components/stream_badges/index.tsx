@@ -5,23 +5,36 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import type { IndicesIndexMode } from '@elastic/elasticsearch/lib/api/types';
+import {
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButton,
+  EuiButtonIcon,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
 import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import {
-  isIlmLifecycle,
-  isErrorLifecycle,
-  isDslLifecycle,
   Streams,
-  getIndexPatternsForStream,
+  getDiscoverEsqlQuery,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import React from 'react';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
+
+import { truncateText } from '../../util/truncate_text';
+
+const INFINITY_SYMBOL = '∞';
 
 const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ children }) => (
   <EuiToolTip
@@ -30,7 +43,7 @@ const DataRetentionTooltip: React.FC<{ children: React.ReactElement }> = ({ chil
       defaultMessage: 'Data Retention',
     })}
     content={i18n.translate('xpack.streams.badges.lifecycle.description', {
-      defaultMessage: 'You can edit retention settings from the stream’s management view',
+      defaultMessage: 'The data retention period or policy for this stream.',
     })}
     anchorProps={{
       css: css`
@@ -51,7 +64,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          'Classic streams are based on existing data streams and may not support all Streams features like custom re-routing',
+          "Classic streams are based on existing data streams and don't support all Streams features like ingest-time partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -59,7 +72,13 @@ export function ClassicStreamBadge() {
         `,
       }}
     >
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge
+        color="hollow"
+        iconType="productStreamsClassic"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="classicStreamBadge"
+      >
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel', {
           defaultMessage: 'Classic',
         })}
@@ -68,7 +87,87 @@ export function ClassicStreamBadge() {
   );
 }
 
-export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
+export function WiredStreamBadge() {
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="productStreamsWired"
+      iconSide="left"
+      data-test-subj="wiredStreamBadge"
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
+        defaultMessage: 'Wired',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function DraftStreamBadge() {
+  return (
+    <EuiBadge iconType="dashedCircle" color="default" data-test-subj="draftStreamBadge">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+        defaultMessage: 'Draft',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function QueryStreamBadge() {
+  return (
+    <EuiBadge iconType="code" color="accent">
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.queryBadgeLabel', {
+        defaultMessage: 'Query',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function DeprecatedLogsBadge({
+  openFlyout,
+  hasNewStreams,
+}: {
+  openFlyout?: () => void;
+  hasNewStreams: boolean;
+}) {
+  const badge =
+    openFlyout && !hasNewStreams ? (
+      <EuiBadge
+        color="warning"
+        onClick={openFlyout}
+        onClickAriaLabel={i18n.translate('xpack.streams.badges.deprecatedLogs.ariaLabel', {
+          defaultMessage: 'The logs root stream is deprecated.',
+        })}
+      >
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    ) : (
+      <EuiBadge color="warning">
+        {i18n.translate('xpack.streams.badges.deprecatedLogs.label', {
+          defaultMessage: 'Deprecated',
+        })}
+      </EuiBadge>
+    );
+
+  return (
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.badges.deprecatedLogs.tooltip', {
+        defaultMessage: 'The logs root stream is deprecated.',
+      })}
+    >
+      {badge}
+    </EuiToolTip>
+  );
+}
+
+export function LifecycleBadge({
+  lifecycle,
+  dataTestSubj,
+}: {
+  lifecycle: IngestStreamEffectiveLifecycle;
+  dataTestSubj?: string;
+}) {
   const {
     dependencies: {
       start: { share },
@@ -78,28 +177,36 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
 
   let badge: React.ReactElement;
 
+  const indefiniteLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.dslIndefiniteBadgeLabel',
+    {
+      defaultMessage: 'Indefinite',
+    }
+  );
+
   if (isIlmLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" iconType="clock" iconSide="left" tabIndex={0}>
         <EuiLink
-          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
+          data-test-subj={dataTestSubj}
           color="text"
           target="_blank"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',
             policyName: lifecycle.ilm.policy,
           })}
+          title={lifecycle.ilm.policy}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
             defaultMessage: 'ILM Policy: {name}',
-            values: { name: lifecycle.ilm.policy },
+            values: { name: truncateText(lifecycle.ilm.policy, 25) },
           })}
         </EuiLink>
       </EuiBadge>
     );
   } else if (isErrorLifecycle(lifecycle)) {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
+      <EuiBadge color="hollow" tabIndex={0} data-test-subj={dataTestSubj}>
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
           values: { message: lifecycle.error.message },
@@ -107,20 +214,30 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
       </EuiBadge>
     );
   } else if (isDslLifecycle(lifecycle)) {
+    const hasRetention = Boolean(lifecycle.dsl.data_retention);
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
-          defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention || '∞' },
-        })}
+      <EuiBadge
+        color="hollow"
+        iconType="clock"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
+        aria-label={hasRetention ? undefined : indefiniteLabel}
+      >
+        {hasRetention ? lifecycle.dsl.data_retention : INFINITY_SYMBOL}
       </EuiBadge>
     );
   } else {
     badge = (
-      <EuiBadge color="hollow" tabIndex={0}>
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
-          defaultMessage: 'Retention: Disabled',
-        })}
+      <EuiBadge
+        color="hollow"
+        iconType="clock"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
+        aria-label={indefiniteLabel}
+      >
+        {INFINITY_SYMBOL}
       </EuiBadge>
     );
   }
@@ -128,23 +245,58 @@ export function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffective
   return <DataRetentionTooltip>{badge}</DataRetentionTooltip>;
 }
 
-export function DiscoverBadgeButton({
-  definition,
+interface DiscoverBadgeButtonBaseProps {
+  hasDataStream?: boolean;
+  spellOut?: boolean;
+}
+
+interface DiscoverBadgeButtonIngestProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.WiredStream.Definition | Streams.ClassicStream.Definition;
+  indexMode: IndicesIndexMode;
+}
+
+interface DiscoverBadgeButtonQueryProps extends DiscoverBadgeButtonBaseProps {
+  stream: Streams.QueryStream.Definition;
+  indexMode?: never;
+}
+
+export type DiscoverBadgeButtonProps =
+  | DiscoverBadgeButtonIngestProps
+  | DiscoverBadgeButtonQueryProps;
+
+/**
+ * Resolves the "Open in Discover" URL for a stream, or `undefined` when Discover is unavailable
+ * (no locator, no backing data stream, or no resolvable ES|QL query).
+ */
+export function useDiscoverStreamLink({
+  stream,
+  hasDataStream = false,
+  indexMode,
 }: {
-  definition: Streams.ingest.all.GetResponse;
-}) {
+  stream?:
+    | Streams.WiredStream.Definition
+    | Streams.ClassicStream.Definition
+    | Streams.QueryStream.Definition;
+  hasDataStream?: boolean;
+  indexMode?: IndicesIndexMode;
+}): string | undefined {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const dataStreamExists =
-    Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
-  const useUrl = share.url.locators.useUrl;
+  const { features } = useStreamsPrivileges();
+  const isIngestStream = stream ? !Streams.QueryStream.Definition.is(stream) : false;
+  const esqlQuery = stream
+    ? getDiscoverEsqlQuery({
+        definition: stream,
+        indexMode: isIngestStream ? indexMode : undefined,
+        includeMetadata: Streams.WiredStream.Definition.is(stream),
+        useViews: features.wiredStreamViews.enabled,
+      })
+    : undefined;
 
-  const discoverLink = useUrl<DiscoverAppLocatorParams>(
+  const discoverLink = share.url.locators.useUrl<DiscoverAppLocatorParams>(
     () => ({
       id: DISCOVER_APP_LOCATOR,
       params: {
@@ -154,20 +306,93 @@ export function DiscoverBadgeButton({
     [esqlQuery]
   );
 
-  if (!discoverLink || !dataStreamExists || !esqlQuery) {
+  if (!discoverLink || !hasDataStream || !esqlQuery) {
+    return undefined;
+  }
+
+  return discoverLink;
+}
+
+export function DiscoverBadgeButton({
+  stream,
+  hasDataStream = false,
+  spellOut = false,
+  indexMode,
+}: DiscoverBadgeButtonProps) {
+  const discoverLink = useDiscoverStreamLink({ stream, hasDataStream, indexMode });
+
+  if (!discoverLink) {
     return null;
   }
 
-  return (
-    <EuiButtonIcon
-      data-test-subj="streamsDetailOpenInDiscoverBadgeButton"
+  const ariaLabel = i18n.translate(
+    'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
+    { defaultMessage: 'Open in Discover' }
+  );
+
+  return spellOut ? (
+    <EuiButton
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
-      iconType="discoverApp"
-      size="xs"
-      aria-label={i18n.translate(
-        'xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel',
-        { defaultMessage: 'Open in Discover' }
-      )}
-    />
+      size="s"
+      aria-label={ariaLabel}
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.openInDiscoverBadgeLabel', {
+        defaultMessage: 'View in Discover',
+      })}
+    </EuiButton>
+  ) : (
+    <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
+        href={discoverLink}
+        iconType="discoverApp"
+        size="xs"
+        aria-label={ariaLabel}
+      />
+    </EuiToolTip>
   );
 }
+
+export function TimeSeriesBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      content={i18n.translate('xpack.streams.badges.timeSeries.description', {
+        defaultMessage:
+          'Time series streams are optimized for indexing metrics data and help you analyze a sequence of data points as a whole.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="chartLine"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="timeSeriesBadge"
+      >
+        {i18n.translate('xpack.streams.badges.timeSeries.label', {
+          defaultMessage: 'Time series',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
+export const TechnicalPreviewBadge = () => (
+  <EuiBetaBadge
+    tooltipContent={i18n.translate('xpack.streams.technicalPreviewTooltip', {
+      defaultMessage: 'This feature is in technical preview. We are working on it...',
+    })}
+    label={i18n.translate('xpack.streams.technicalPreviewLabel', {
+      defaultMessage: 'Technical preview',
+    })}
+    iconType="flask"
+    size="s"
+    css={{ display: 'block' }}
+  />
+);

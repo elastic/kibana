@@ -9,7 +9,7 @@ import { act, fireEvent } from '@testing-library/react';
 
 import React from 'react';
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { zodStringWithDurationValidation } from '../../../../../common/settings/agent_policy_settings';
 import type { SettingsConfig } from '../../../../../common/settings/types';
@@ -49,7 +49,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.limits.go_max_procs',
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',
@@ -78,7 +78,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'test',
         title: 'TEST',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'test',
@@ -111,7 +111,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'test',
         title: 'TEST',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'test',
@@ -153,7 +153,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.download.timeout',
         title: 'Agent binary download timeout',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_download_timeout',
@@ -180,7 +180,7 @@ describe('ConfiguredSettings', () => {
       {
         name: 'agent.logging.to_files',
         title: 'Agent logging to files',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_logging_to_files',
@@ -210,7 +210,7 @@ describe('ConfiguredSettings', () => {
         name: 'agent.limits.go_max_procs',
         hidden: true,
         title: 'GO_MAX_PROCS',
-        description: 'Description',
+        description: () => 'Description',
         learnMoreLink: '',
         api_field: {
           name: 'agent_limits_go_max_procs',
@@ -220,5 +220,45 @@ describe('ConfiguredSettings', () => {
     ]);
 
     expect(result.queryByText('GO_MAX_PROCS')).toBeNull();
+  });
+
+  it('should render learn more link with target="_blank"', () => {
+    const learnMoreUrl = 'https://www.elastic.co/guide/en/fleet';
+    const result = render([
+      {
+        name: 'agent.limits.go_max_procs',
+        title: 'GO_MAX_PROCS',
+        description: () => 'Description',
+        learnMoreLink: learnMoreUrl,
+        api_field: {
+          name: 'agent_limits_go_max_procs',
+        },
+        schema: z.number().int().min(0).default(0),
+      },
+    ]);
+
+    const learnMoreLink = result.getByText('Learn more.');
+    expect(learnMoreLink).not.toBeNull();
+    expect(learnMoreLink.closest('a')).toHaveAttribute('href', learnMoreUrl);
+    expect(learnMoreLink.closest('a')).toHaveAttribute('target', '_blank');
+  });
+
+  it('should render string field with yaml type', () => {
+    const result = render([
+      {
+        name: 'agent.internal',
+        title: 'Advanced Internal YAML Settings',
+        description: () => 'Description',
+        learnMoreLink: '',
+        api_field: {
+          name: 'agent_internal',
+        },
+        schema: z.string(),
+        type: 'yaml',
+      },
+    ]);
+
+    expect(result.getByText('Advanced Internal YAML Settings')).not.toBeNull();
+    expect(result.getByText('# Add YAML settings here')).not.toBeNull();
   });
 });

@@ -20,11 +20,12 @@ import {
   createTimelineWithTimelineId,
 } from '../../../__mocks__/request_responses';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 describe('clean draft timelines', () => {
   let server: ReturnType<typeof serverMock.create>;
   let securitySetup: SecurityPluginSetup;
-  let { context } = requestContextMock.createTools();
+  let context: SecuritySolutionRequestHandlerContextMock;
   let mockGetTimeline: jest.Mock;
   let mockGetDraftTimeline: jest.Mock;
   let mockPersistTimeline: jest.Mock;
@@ -73,6 +74,11 @@ describe('clean draft timelines', () => {
 
     const cleanDraftTimelinesRoute = jest.requireActual('.').cleanDraftTimelinesRoute;
     cleanDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   test('should create new draft if none is available', async () => {

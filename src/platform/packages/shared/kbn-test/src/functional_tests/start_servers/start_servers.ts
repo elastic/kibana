@@ -16,10 +16,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
-import { applyFipsOverrides } from '../lib/fips_overrides';
+import { runKibanaServer } from '@kbn/test-kibana-server';
+import { applyFipsOverrides, fipsIsEnabled } from '../lib/fips';
 import { Config, readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
-import { runKibanaServer } from '../lib/run_kibana_server';
 import type { StartServerOptions } from './flags';
 
 const FTR_SCRIPT_PATH = Path.resolve(REPO_ROOT, 'scripts/functional_test_runner');
@@ -30,20 +30,24 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
 
   await withProcRunner(log, async (procs) => {
     let config: Config;
-    if (process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() !== 'true') {
-      config = await readConfigFile(log, options.esVersion, options.config);
-    } else {
+    if (fipsIsEnabled()) {
       config = await readConfigFile(log, options.esVersion, options.config, {}, applyFipsOverrides);
+    } else {
+      config = await readConfigFile(log, options.esVersion, options.config);
     }
 
-    const shutdownEs = await runElasticsearch({
+    let shutdownEs: (() => Promise<void>) | undefined;
+
+    const esPromise = runElasticsearch({
       config,
       log,
       esFrom: options.esFrom,
       logsDir: options.logsDir,
+    }).then((shutdown) => {
+      shutdownEs = shutdown;
     });
 
-    await runKibanaServer({
+    const kibanaPromise = runKibanaServer({
       procs,
       config,
       installDir: options.installDir,
@@ -58,6 +62,17 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
               : '--server.versioned.versionResolution=oldest',
           ],
     });
+
+    try {
+      await Promise.all([esPromise, kibanaPromise]);
+    } catch (error) {
+      await esPromise.catch(() => {});
+
+      await shutdownEs?.().catch((shutdownError) => {
+        log.error(`failed to shut down Elasticsearch after startup failed: ${shutdownError}`);
+      });
+      throw error;
+    }
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
@@ -120,7 +135,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
     );
 
     await procs.waitForAllToStop();
-    await shutdownEs();
+    await shutdownEs?.();
   });
 }
 

@@ -12,8 +12,6 @@ import { useActions, useValues } from 'kea';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiButton,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +24,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import { KbnDangerCallout } from '@kbn/ui-callout';
+
 import { Status } from '../../../../../../common/types/api';
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
@@ -33,8 +33,8 @@ import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
+import { SearchIndexTabId } from '../constants';
 import { IndexNameLogic } from '../index_name_logic';
-import { SearchIndexTabId } from '../search_index';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
@@ -55,6 +55,7 @@ export const SearchIndexPipelines: React.FC = () => {
     isDeleteModalOpen,
     pipelineName,
     defaultPipelineValues,
+    showPipelineSettings,
   } = useValues(PipelinesLogic);
   const {
     closeAddMlInferencePipelineModal,
@@ -94,7 +95,7 @@ export const SearchIndexPipelines: React.FC = () => {
   }, [indexName, revertPipeline]);
 
   useEffect(() => {
-    if (index) {
+    if (index && !showPipelineSettings) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
         isConnectorIndex(index)
@@ -102,7 +103,7 @@ export const SearchIndexPipelines: React.FC = () => {
           : defaultPipelineValues
       );
     }
-  }, [index]);
+  }, [index, showPipelineSettings]);
 
   if (!index) {
     return <></>;
@@ -134,34 +135,33 @@ export const SearchIndexPipelines: React.FC = () => {
     <>
       {showMissingPipelineCallout && (
         <>
-          <EuiCallOut
-            color="danger"
-            iconType="error"
+          <KbnDangerCallout
+            announceOnMount
             title={i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.title',
               {
                 defaultMessage: 'Custom pipeline missing',
               }
             )}
-          >
-            <p>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.description',
-                {
-                  defaultMessage:
-                    'The custom pipeline for this index has been deleted. This may affect connector data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
-                }
-              )}
-            </p>
-            <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
-                {
-                  defaultMessage: 'Revert pipeline to default',
-                }
-              )}
-            </EuiButton>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.description',
+              {
+                defaultMessage:
+                  'The custom pipeline for this index has been deleted. This may affect connector data ingestion. Its configuration will need to be reverted to the default pipeline settings.',
+              }
+            )}
+            actionProps={{
+              primary: {
+                onClick: () => revertPipeline({ indexName }),
+                children: i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
+                  {
+                    defaultMessage: 'Revert pipeline to default',
+                  }
+                ),
+              },
+            }}
+          />
           <EuiSpacer />
         </>
       )}
@@ -278,7 +278,7 @@ export const SearchIndexPipelines: React.FC = () => {
                     }
                   )
             }
-            iconType="compute"
+            iconType="processor"
           >
             <MlInferencePipelineProcessorsCard />
           </DataPanel>

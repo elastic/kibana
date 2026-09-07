@@ -74,7 +74,7 @@ describe(
           rule_id: 'rule_testing',
           enabled: true,
         })
-      ).then((rule) => visitRuleDetailsPage(rule.body.id));
+      ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'alerts' }));
       waitForAlertsToPopulate();
     });
 

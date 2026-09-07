@@ -16,13 +16,14 @@ import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_know
 
 interface Props {
   display?: 'mini' | 'refresh';
+  fill?: boolean;
 }
 
 /**
  * Self-contained component that renders a button to set up the knowledge base.
  *
  */
-export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }: Props) => {
+export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display, fill }: Props) => {
   const {
     http,
     toasts,
@@ -50,19 +51,28 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
     : undefined;
 
   if (display === 'refresh') {
+    const setupKnowledgeBaseLabel = i18n.translate(
+      'xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton',
+      {
+        defaultMessage: 'Setup Knowledge Base',
+      }
+    );
     return (
-      <EuiButtonIcon
-        color="primary"
-        data-test-subj="setup-knowledge-base-button"
-        disabled={!kbStatus?.is_setup_available}
-        isLoading={isSetupInProgress}
-        iconType="refresh"
-        onClick={onInstallKnowledgeBase}
-        size="xs"
-        css={css`
-          margin-left: 8px;
-        `}
-      />
+      <EuiToolTip content={setupKnowledgeBaseLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          color="primary"
+          data-test-subj="setup-knowledge-base-button"
+          disabled={!kbStatus?.is_setup_available}
+          isLoading={isSetupInProgress}
+          iconType="refresh"
+          onClick={onInstallKnowledgeBase}
+          size="xs"
+          aria-label={setupKnowledgeBaseLabel}
+          css={css`
+            margin-left: 8px;
+          `}
+        />
+      </EuiToolTip>
     );
   }
 
@@ -74,7 +84,7 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
           data-test-subj="setup-knowledge-base-button"
           disabled={!kbStatus?.is_setup_available}
           isLoading={isSetupInProgress}
-          iconType="importAction"
+          iconType="download"
           onClick={onInstallKnowledgeBase}
           size={'xs'}
         >
@@ -86,10 +96,10 @@ export const SetupKnowledgeBaseButton: React.FC<Props> = React.memo(({ display }
         <EuiButton
           color="primary"
           data-test-subj="setup-knowledge-base-button"
-          fill
+          fill={fill ?? true}
           disabled={!kbStatus?.is_setup_available}
           isLoading={isSetupInProgress}
-          iconType="importAction"
+          iconType="download"
           onClick={onInstallKnowledgeBase}
         >
           {i18n.translate('xpack.elasticAssistant.knowledgeBase.installKnowledgeBaseButton', {

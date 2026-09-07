@@ -203,5 +203,35 @@ export const getCasesFeatureV3 = (
         },
       ],
     },
+    {
+      name: i18n.translate('xpack.observability.features.manageTemplatesSubFeatureName', {
+        defaultMessage: 'Manage templates',
+      }),
+      privilegeGroups: [
+        {
+          groupType: 'independent',
+          privileges: [
+            {
+              id: 'cases_manage_templates',
+              name: i18n.translate(
+                'xpack.observability.features.manageTemplatesSubFeatureDetails',
+                {
+                  defaultMessage: 'Manage case templates',
+                }
+              ),
+              includeIn: 'all',
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              cases: {
+                manageTemplates: [observabilityFeatureId],
+              },
+              ui: casesCapabilities.manageTemplates,
+            },
+          ],
+        },
+      ],
+    },
   ],
 });

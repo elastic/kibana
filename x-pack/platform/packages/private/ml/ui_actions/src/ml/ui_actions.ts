@@ -18,5 +18,16 @@ export interface CreateCategorizationADJobContext {
 
 export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION = 'createMLADCategorizationJobAction';
 
-export const CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER =
-  'CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER';
+/**
+ * Context for the update AD jobs project routing action; extend when a caller provides job selection.
+ */
+export interface UpdateADJobsProjectRoutingContext {
+  /**
+   * Invoked after the update project routing flyout is closed, when the trigger is executed with this in context.
+   */
+  onClose?: () => void;
+  initialJobIds?: string[];
+  allowScopeSelection?: boolean;
+}
+
+export const UPDATE_AD_JOBS_PROJECT_ROUTING_ACTION = 'updateADJobsProjectRoutingAction';

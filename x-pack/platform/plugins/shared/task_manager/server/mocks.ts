@@ -6,22 +6,25 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { lazyObject } from '@kbn/lazy-object';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, RunContext } from './task';
 import { TaskStatus } from './task';
 
 const createSetupMock = () => {
-  const mock: jest.Mocked<TaskManagerSetupContract> = {
+  const mock: jest.Mocked<TaskManagerSetupContract> = lazyObject({
     index: '.kibana_task_manager',
     addMiddleware: jest.fn(),
     registerTaskDefinitions: jest.fn(),
     registerCanEncryptedSavedObjects: jest.fn(),
-  };
+    registerTaskEventLogger: jest.fn(),
+  });
+
   return mock;
 };
 
 const createStartMock = () => {
-  const mock: jest.Mocked<TaskManagerStartContract> = {
+  const mock: jest.Mocked<TaskManagerStartContract> = lazyObject({
     fetch: jest.fn(),
     get: jest.fn(),
     bulkGet: jest.fn(),
@@ -39,7 +42,10 @@ const createStartMock = () => {
     getRegisteredTypes: jest.fn(),
     bulkUpdateState: jest.fn(),
     registerEncryptedSavedObjectsClient: jest.fn(),
-  };
+    registerApiKeyInvalidateFn: jest.fn(),
+    registerUiamApiKeyInvalidateFn: jest.fn(),
+  });
+
   return mock;
 };
 
@@ -64,8 +70,24 @@ const createTaskMock = (overrides: Partial<ConcreteTaskInstance> = {}): Concrete
   };
 };
 
+/**
+ * Builds a complete {@link RunContext} for use in tests.
+ *
+ * Centralising construction here means future additions or type changes to
+ * RunContext (e.g. narrowing `abortController` to `AbortSignal`) only require
+ * updating this one helper rather than every individual test file.
+ */
+const createRunContextMock = (overrides: Partial<RunContext> = {}): RunContext => ({
+  taskInstance: createTaskMock(),
+  signal: new AbortController().signal,
+  executionUuid: 'test-execution-uuid',
+  setCustomTaskRunEventFields: jest.fn(),
+  ...overrides,
+});
+
 export const taskManagerMock = {
   createSetup: createSetupMock,
   createStart: createStartMock,
   createTask: createTaskMock,
+  createRunContext: createRunContextMock,
 };

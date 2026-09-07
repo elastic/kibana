@@ -11,7 +11,11 @@ import type {
   GenericValidationResult,
   ActionTypeModel as ConnectorTypeModel,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  MAX_OTHER_FIELDS_LENGTH,
+} from '@kbn/connector-schemas/jira/constants';
 import type { JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import { validateJSON } from '../lib/validate_json';
 
@@ -19,19 +23,12 @@ export const JIRA_DESC = i18n.translate('xpack.stackConnectors.components.jira.s
   defaultMessage: 'Create an incident in Jira.',
 });
 
-export const JIRA_TITLE = i18n.translate(
-  'xpack.stackConnectors.components.jira.connectorTypeTitle',
-  {
-    defaultMessage: 'Jira',
-  }
-);
-
 export function getConnectorType(): ConnectorTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
-    id: '.jira',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: JIRA_DESC,
-    actionTypeTitle: JIRA_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     actionConnectorFields: lazy(() => import('./jira_connector_params')),
     validateParams: async (
       actionParams: JiraActionParams

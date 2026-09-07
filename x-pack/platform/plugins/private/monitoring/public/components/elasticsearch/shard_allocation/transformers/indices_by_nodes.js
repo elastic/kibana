@@ -42,12 +42,13 @@ export function indicesByNodes() {
 
       let nodeObj = find(obj[index].children, { id: node });
       if (!nodeObj) {
+        const nodeInfo = nodes[node] || {};
         nodeObj = {
           id: node,
           type: 'node',
-          name: nodes[node].name,
-          node_type: nodes[node].type,
-          ip_port: nodes[node].transport_address,
+          name: nodeInfo.name ?? node,
+          node_type: nodeInfo.type,
+          ip_port: nodeInfo.transport_address,
           children: [],
         };
         obj[index].children.push(nodeObj);

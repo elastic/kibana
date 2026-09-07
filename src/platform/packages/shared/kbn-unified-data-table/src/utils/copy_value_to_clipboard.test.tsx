@@ -13,11 +13,12 @@ import {
 } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import {
-  copyValueToClipboard,
+  CopyAsTextFormat,
   copyColumnNameToClipboard,
   copyColumnValuesToClipboard,
-  copyRowsAsTextToClipboard,
   copyRowsAsJsonToClipboard,
+  copyRowsAsTextToClipboard,
+  copyValueToClipboard,
 } from './copy_value_to_clipboard';
 import { convertValueToString } from './convert_value_to_string';
 import type { ValueToStringConverter } from '../types';
@@ -58,6 +59,8 @@ describe('copyValueToClipboard', () => {
     Object.defineProperty(navigator, 'clipboard', {
       value: originalClipboard,
     });
+    (servicesMock.toastNotifications.addInfo as jest.Mock).mockReset();
+    (servicesMock.toastNotifications.addWarning as jest.Mock).mockReset();
   });
 
   it('should copy a value to clipboard', () => {
@@ -181,50 +184,84 @@ describe('copyValueToClipboard', () => {
     });
   });
 
-  const textOutput = '"bool_enabled"\t"keyword_key"\nfalse\tabcd1';
+  const textOutputTabular = '"bool_enabled"\t"keyword_key"\nfalse\tabcd1';
+  const textOutputEscapedTabular = `"text_message"\n"Hi there! I am a sample string."\n"I'm multiline\n*&%$\\#|@"`;
+  const textOutputMarkdown = `| bool_enabled | keyword_key |
+| --- | --- |
+| false | abcd1 |`;
+  const textOutputEscapedMarkdown = `| text_message |
+| --- |
+| Hi there! I am a sample string. |
+| I'm multiline *&%$\\\\#\\|@ |`;
+  describe.each([
+    [CopyAsTextFormat.tabular, textOutputTabular, textOutputEscapedTabular],
+    [CopyAsTextFormat.markdown, textOutputMarkdown, textOutputEscapedMarkdown],
+  ])('copyRowsAsTextToClipboard format: %s', (format, textOutput, textOutputEscaped) => {
+    it('should copy rows to clipboard as text when Clipboard API is available', async () => {
+      execCommandMock.mockImplementationOnce(() => true);
 
-  it('should copy rows to clipboard as text when Clipboard API is available', async () => {
-    execCommandMock.mockImplementationOnce(() => true);
+      const result = await copyRowsAsTextToClipboard({
+        format,
+        toastNotifications: servicesMock.toastNotifications,
+        columns: ['bool_enabled', 'keyword_key'],
+        dataView: dataTableContextComplexMock.dataView,
+        selectedRowIndices: [0],
+        valueToStringConverter,
+      });
 
-    const result = await copyRowsAsTextToClipboard({
-      toastNotifications: servicesMock.toastNotifications,
-      columns: ['bool_enabled', 'keyword_key'],
-      dataView: dataTableContextComplexMock.dataView,
-      selectedRowIndices: [0],
-      valueToStringConverter,
+      expect(result).toBe(textOutput);
+      expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(textOutput);
+      expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
+        title: 'Copied to clipboard',
+      });
     });
 
-    expect(result).toBe(textOutput);
-    expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(textOutput);
-    expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied to clipboard',
+    it('should copy rows to clipboard as text when Clipboard API is not available', async () => {
+      Object.defineProperty(navigator, 'clipboard', { value: undefined });
+      execCommandMock.mockImplementationOnce(() => true);
+
+      const result = await copyRowsAsTextToClipboard({
+        format,
+        toastNotifications: servicesMock.toastNotifications,
+        columns: ['bool_enabled', 'keyword_key'],
+        dataView: dataTableContextComplexMock.dataView,
+        selectedRowIndices: [0],
+        valueToStringConverter,
+      });
+
+      expect(result).toBe(textOutput);
+      expect(execCommandMock).toHaveBeenCalledWith('copy');
+      expect(warn).not.toHaveBeenCalled();
+      expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
+        title: 'Copied to clipboard',
+      });
+    });
+
+    it('should copy escape values correctly', async () => {
+      execCommandMock.mockImplementationOnce(() => true);
+
+      const result = await copyRowsAsTextToClipboard({
+        format,
+        toastNotifications: servicesMock.toastNotifications,
+        columns: ['text_message'],
+        dataView: dataTableContextComplexMock.dataView,
+        selectedRowIndices: [0, 1],
+        valueToStringConverter,
+      });
+
+      expect(result).toBe(textOutputEscaped);
+      expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(textOutputEscaped);
+      expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
+        title: 'Copied to clipboard',
+      });
     });
   });
 
-  it('should copy rows to clipboard as text when Clipboard API is not available', async () => {
-    Object.defineProperty(navigator, 'clipboard', { value: undefined });
+  it('should copy rows to clipboard as text with a warning for tabular format', async () => {
     execCommandMock.mockImplementationOnce(() => true);
 
     const result = await copyRowsAsTextToClipboard({
-      toastNotifications: servicesMock.toastNotifications,
-      columns: ['bool_enabled', 'keyword_key'],
-      dataView: dataTableContextComplexMock.dataView,
-      selectedRowIndices: [0],
-      valueToStringConverter,
-    });
-
-    expect(result).toBe(textOutput);
-    expect(execCommandMock).toHaveBeenCalledWith('copy');
-    expect(warn).not.toHaveBeenCalled();
-    expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied to clipboard',
-    });
-  });
-
-  it('should copy rows to clipboard as text with a warning', async () => {
-    execCommandMock.mockImplementationOnce(() => true);
-
-    const result = await copyRowsAsTextToClipboard({
+      format: CopyAsTextFormat.tabular,
       toastNotifications: servicesMock.toastNotifications,
       columns: ['bool_enabled', 'scripted_string'],
       dataView: dataTableContextComplexMock.dataView,
@@ -232,11 +269,35 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    const output = '"bool_enabled"\t"scripted_string"\nfalse\t"hi there"\ntrue\t"\'=1+2"";=1+2"';
-    expect(result).toBe(output);
+    const textOutputWithFormulas =
+      '"bool_enabled"\t"scripted_string"\nfalse\t"hi there"\ntrue\t"\'=1+2"";=1+2"';
+    expect(result).toBe(textOutputWithFormulas);
     expect(servicesMock.toastNotifications.addWarning).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
       text: 'Values may contain formulas that are escaped.',
+    });
+  });
+
+  it('should copy rows to clipboard as text without a warning for markdown format', async () => {
+    execCommandMock.mockImplementationOnce(() => true);
+
+    const result = await copyRowsAsTextToClipboard({
+      format: CopyAsTextFormat.markdown,
+      toastNotifications: servicesMock.toastNotifications,
+      columns: ['bool_enabled', 'scripted_string'],
+      dataView: dataTableContextComplexMock.dataView,
+      selectedRowIndices: [0, 1],
+      valueToStringConverter,
+    });
+
+    const textOutputWithFormulas = `| bool_enabled | scripted_string |
+| --- | --- |
+| false | hi there |
+| true | =1+2";=1+2 |`;
+    expect(result).toBe(textOutputWithFormulas);
+    expect(servicesMock.toastNotifications.addWarning).not.toHaveBeenCalled();
+    expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
+      title: 'Copied to clipboard',
     });
   });
 

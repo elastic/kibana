@@ -24,21 +24,24 @@ export interface IImporter {
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
     pipeline: Array<IngestPipeline | undefined>,
-    existingIndex?: boolean
+    existingIndex?: boolean,
+    signal?: AbortSignal
   ): Promise<InitializeImportResponse>;
   initializeWithoutCreate(
     index: string,
     mappings: MappingTypeMapping,
-    pipelines: IngestPipeline[]
+    pipelines: IngestPipeline[],
+    signal?: AbortSignal
   ): void;
   import(
     index: string,
     ingestPipelineId: string | undefined,
-    setImportProgress: (progress: number) => void
+    setImportProgress: (progress: number) => void,
+    signal?: AbortSignal
   ): Promise<ImportResults>;
   initialized(): boolean;
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
   previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
-  deletePipelines(): Promise<IngestDeletePipelineResponse[]>;
+  deletePipelines(signal?: AbortSignal): Promise<IngestDeletePipelineResponse[]>;
 }

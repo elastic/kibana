@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { PLUGIN_ID, setFieldFormats, type ReportingConfigType } from '@kbn/reporting-server';
+import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import { ReportingCore } from '.';
 import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
@@ -51,7 +52,13 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup<ReportingStartDeps, unknown>, plugins: ReportingSetupDeps) {
     const { http, status } = core;
-    const reportingCore = new ReportingCore(core, this.logger, this.initContext);
+    const exportTypesRegistry = new ExportTypesRegistry(plugins.licensing);
+    const reportingCore = new ReportingCore(
+      core,
+      this.logger,
+      exportTypesRegistry,
+      this.initContext
+    );
     this.reportingCore = reportingCore;
 
     // prevent throwing errors in route handlers about async deps not being initialized
@@ -73,7 +80,6 @@ export class ReportingPlugin
     reportingCore.pluginSetup({
       logger: this.logger,
       status,
-      basePath: http.basePath,
       router: http.createRouter<ReportingRequestHandlerContext>(),
       usageCounter,
       docLinks: core.docLinks,

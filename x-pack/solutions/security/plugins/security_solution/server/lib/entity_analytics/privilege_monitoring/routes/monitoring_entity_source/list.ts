@@ -8,11 +8,10 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENTITY_LIST_SOURCES_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -20,11 +19,13 @@ import {
   ListEntitySourcesRequestQuery,
   type ListEntitySourcesResponse,
 } from '../../../../../../common/api/entity_analytics';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
 
 export const listMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .get({
@@ -44,29 +45,38 @@ export const listMonitoringEntitySourceRoute = (
             query: buildRouteValidationWithZod(ListEntitySourcesRequestQuery),
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
-      async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
-        const siemResponse = buildSiemResponse(response);
+      withMinimumLicense(
+        async (context, request, response): Promise<IKibanaResponse<ListEntitySourcesResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
+          try {
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
+            const body = await client.list(request.query);
 
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.list(request.query);
-
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error listing monitoring entity sources: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error listing monitoring entity sources: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

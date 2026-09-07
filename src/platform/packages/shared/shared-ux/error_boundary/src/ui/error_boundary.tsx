@@ -11,26 +11,15 @@ import { apm } from '@elastic/apm-rum';
 import React from 'react';
 
 import { getErrorBoundaryLabels } from '../../lib';
-import type { KibanaErrorBoundaryServices } from '../../types';
 import { useErrorBoundary } from '../services';
+import type { BaseErrorBoundaryState, BaseErrorBoundaryProps } from '../../types';
 import { FatalPrompt, RecoverablePrompt } from './message_components';
 
-interface ErrorBoundaryState {
-  error: null | Error;
-  errorInfo: null | Partial<React.ErrorInfo>;
-  componentName: null | string;
-  isFatal: null | boolean;
-}
-
-interface ServiceContext {
-  services: KibanaErrorBoundaryServices;
-}
-
 class ErrorBoundaryInternal extends React.Component<
-  React.PropsWithChildren<ServiceContext>,
-  ErrorBoundaryState
+  React.PropsWithChildren<BaseErrorBoundaryProps>,
+  BaseErrorBoundaryState
 > {
-  constructor(props: React.PropsWithChildren<ServiceContext>) {
+  constructor(props: React.PropsWithChildren<BaseErrorBoundaryProps>) {
     super(props);
     this.state = {
       error: null,
@@ -47,9 +36,13 @@ class ErrorBoundaryInternal extends React.Component<
     console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
     console.error(error); // eslint-disable-line no-console
 
-    const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
-    this.setState(() => {
-      return { error, errorInfo, componentName: name, isFatal };
+    const { isFatal, name } = this.props.services.errorService.enqueueError(error, errorInfo);
+
+    this.setState({
+      error,
+      errorInfo,
+      componentName: name,
+      isFatal,
     });
   }
 

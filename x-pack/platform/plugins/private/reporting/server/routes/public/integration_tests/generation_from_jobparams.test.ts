@@ -102,7 +102,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     eventTracker = new EventTracker(coreSetupMock.analytics, 'jobId', 'exportTypeId', 'appId');
     jest.spyOn(reportingCore, 'getEventTracker').mockReturnValue(eventTracker);
 
-    mockExportTypesRegistry = new ExportTypesRegistry();
+    mockExportTypesRegistry = new ExportTypesRegistry(licensingMock.createSetup());
     mockExportTypesRegistry.register(mockPdfExportType);
 
     store = await reportingCore.getStore();
@@ -181,7 +181,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({ jobParams: rison.encode({ browserTimezone: 'America/Amsterdam', title: `abc` }) })
       .expect(400)
       .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Invalid timezone \\"America/Amsterdam\\"."`)
+        expect(body.message).toEqual('invalid params: browserTimezone: Invalid timezone')
       );
   });
 
@@ -208,7 +208,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           objectType: 'canvas workpad',
         }),
       })
@@ -225,11 +225,11 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: false,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },
@@ -248,7 +248,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
       .send({
         jobParams: rison.encode({
           title: `abc`,
-          layout: { id: 'test' },
+          layout: { id: 'preserve_layout' },
           relativeUrls: ['test'],
           objectType: 'canvas workpad',
         }),
@@ -266,11 +266,11 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
               forceNow: expect.any(String),
               isDeprecated: true,
               layout: {
-                id: 'test',
+                id: 'preserve_layout',
               },
               objectType: 'canvas workpad',
               title: 'abc',
-              version: '7.14.0',
+              version: 'version',
             },
             status: 'pending',
           },
@@ -290,7 +290,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         })
@@ -313,7 +313,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
         .send({
           jobParams: rison.encode({
             title: `abc`,
-            layout: { id: 'test' },
+            layout: { id: 'preserve_layout' },
             objectType: 'canvas workpad',
           }),
         });

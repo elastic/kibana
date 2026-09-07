@@ -9,9 +9,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { LayoutDirection } from '@elastic/charts';
+import type { Dimension } from '@kbn/visualizations-common';
+import { validateAccessor, ChartLayoutDirection } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
 import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';
 import type { MetricVisExpressionFunctionDefinition } from '../types';
@@ -65,12 +65,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     secondaryLabel: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
-        defaultMessage: 'Optional text displayed next to the Secondary Metric.',
+        defaultMessage:
+          'Legacy custom label for the Secondary Metric, used as a runtime fallback until a future migration copies it onto the column',
       }),
+      required: false,
     },
     progressDirection: {
       types: ['string'],
-      options: [LayoutDirection.Vertical, LayoutDirection.Horizontal],
+      options: [ChartLayoutDirection.Vertical, ChartLayoutDirection.Horizontal],
       help: i18n.translate('expressionMetricVis.function.progressDirection.help', {
         defaultMessage:
           'The direction the progress bar should grow. Must be provided to render a progress bar.',
@@ -106,16 +108,16 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
         defaultMessage: 'The value font size.',
       }),
     },
+    density: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.density.help', {
+        defaultMessage: 'The metric density.',
+      }),
+    },
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
-      }),
-    },
-    titleWeight: {
-      types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.titleWeight.help', {
-        defaultMessage: 'The title weight.',
+        defaultMessage: 'The position of the Primary Metric (top, middle, or bottom).',
       }),
     },
     color: {
@@ -187,10 +189,19 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
-    secondaryLabelPosition: {
+    secondaryTrendTextPalette: {
       types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.secondaryLabelPosition.help', {
-        defaultMessage: 'Specifies the position of the Secondary Metric label',
+      help: i18n.translate('expressionMetricVis.function.secondaryTrend.textPalette.help', {
+        defaultMessage: 'Specifies the text palette used for the Secondary Metric trend',
+      }),
+      multi: true,
+      required: false,
+    },
+    secondaryNameVisibility: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
+        defaultMessage:
+          'Specifies whether the Secondary Metric name is hidden, or placed before or after the value',
       }),
       required: false,
     },
@@ -279,8 +290,8 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             secondaryAlign: args.secondaryAlign,
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
+            density: args.density,
             primaryPosition: args.primaryPosition,
-            titleWeight: args.titleWeight,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,
@@ -289,8 +300,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               visuals: args.secondaryTrendVisuals,
               baseline: args.secondaryTrendBaseline,
               palette: args.secondaryTrendPalette,
+              textPalette: args.secondaryTrendTextPalette,
             },
-            secondaryLabelPosition: args.secondaryLabelPosition,
+            secondaryNameVisibility: args.secondaryNameVisibility,
             applyColorTo: args.applyColorTo,
           },
           dimensions: {

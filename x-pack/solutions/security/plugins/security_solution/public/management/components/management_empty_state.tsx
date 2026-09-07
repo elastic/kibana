@@ -146,7 +146,7 @@ const PolicyEmptyState = React.memo<{
                   <EuiFlexItem grow={false}>
                     <EuiButton
                       fill
-                      iconType="plusInCircle"
+                      iconType="plusCircle"
                       onClick={onActionClick}
                       isDisabled={actionDisabled}
                       data-test-subj="onboardingStartButton"
@@ -167,7 +167,12 @@ const PolicyEmptyState = React.memo<{
           </EuiFlexItem>
 
           <EuiFlexItem grow={2}>
-            <EuiIcon type={onboardingLogo} size="original" css={MAX_SIZE_ONBOARDING_LOGO} />
+            <EuiIcon
+              type={onboardingLogo}
+              size="original"
+              css={MAX_SIZE_ONBOARDING_LOGO}
+              aria-hidden={true}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -203,6 +208,7 @@ const EndpointsEmptyState = React.memo<{
           <>
             <EuiSpacer size="xl" />
             <EuiCallOut
+              announceOnMount={false}
               color="primary"
               iconType="info"
               title={i18n.translate(
@@ -309,6 +315,7 @@ const EndpointsEmptyState = React.memo<{
                   if (!selectionOptions.length) {
                     return (
                       <EuiCallOut
+                        announceOnMount={false}
                         color="warning"
                         data-test-subj="noIntegrationsAddedToAgentPoliciesCallout"
                       >

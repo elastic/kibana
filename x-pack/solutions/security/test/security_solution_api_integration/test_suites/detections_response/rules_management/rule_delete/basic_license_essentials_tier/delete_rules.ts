@@ -7,6 +7,12 @@
 
 import expect from '@kbn/expect';
 
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
@@ -17,16 +23,10 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
-import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // delete the rule by its rule_id
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .deleteRule({ query: { rule_id: 'rule-1' } })
           .expect(200);
 
@@ -60,7 +60,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         // delete that rule by its auto-generated rule_id
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .deleteRule({ query: { rule_id: bodyWithCreatedRule.rule_id } })
           .expect(200);
 
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its auto-generated id
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .deleteRule({ query: { id: bodyWithCreatedRule.id } })
           .expect(200);
 
@@ -91,7 +91,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the id does not exist when trying to delete it', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .deleteRule({ query: { id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' } })
           .expect(404);
 
@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the rule_id does not exist when trying to delete it', async () => {
-        const { body } = await securitySolutionApi
+        const { body } = await detectionsApi
           .deleteRule({ query: { rule_id: 'fake_id' } })
           .expect(404);
 

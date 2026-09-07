@@ -8,7 +8,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -22,6 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout, KbnDangerCallout } from '@kbn/ui-callout';
 import { css } from '@emotion/react';
 
 import type { GeoipDatabase } from '../../../../common/types';
@@ -157,44 +157,42 @@ export const AddDatabaseModal = ({
           {databaseType === 'maxmind' && (
             <>
               <EuiSpacer />
-              <EuiCallOut
+              <KbnInfoCallout
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
                     defaultMessage="Add your MaxMind license token to the keystore"
                   />
                 }
-                iconType="info"
-              >
-                <p>
+                text={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
                     defaultMessage="The processor needs the license key to connect to the database."
                   />
-                </p>
-              </EuiCallOut>
+                }
+              />
               <EuiSpacer />
             </>
           )}
           {databaseType === 'ipinfo' && (
             <>
               <EuiSpacer />
-              <EuiCallOut
+              <KbnInfoCallout
+                announceOnMount
                 title={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutTitle"
                     defaultMessage="Add your IP Info license token to the keystore"
                   />
                 }
-                iconType="info"
-              >
-                <p>
+                text={
                   <FormattedMessage
                     id="xpack.ingestPipelines.manageProcessors.geoip.licenseCalloutText"
                     defaultMessage="The processor needs the license key to connect to the database."
                   />
-                </p>
-              </EuiCallOut>
+                }
+              />
               <EuiSpacer />
             </>
           )}
@@ -238,23 +236,21 @@ export const AddDatabaseModal = ({
         {nameExistsError && (
           <>
             <EuiSpacer />
-            <EuiCallOut
-              color="danger"
+            <KbnDangerCallout
+              announceOnMount
               title={
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorTitle"
                   defaultMessage="Database already exists"
                 />
               }
-              iconType="warning"
-            >
-              <p>
+              text={
                 <FormattedMessage
                   id="xpack.ingestPipelines.manageProcessors.geoip.nameExistsErrorText"
                   defaultMessage="A database needs to be added only once in order to be available."
                 />
-              </p>
-            </EuiCallOut>
+              }
+            />
           </>
         )}
       </EuiModalBody>

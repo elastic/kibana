@@ -7,17 +7,11 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import type { ConfigEntryView } from '../../types/types';
+import { FieldType, type Map } from '../../types/types';
 import { ConfigFieldTitularComponent } from './titular_component_registry';
 import { ConfigurationField } from './configuration_field';
 import * as LABELS from '../../translations';
@@ -30,7 +24,8 @@ interface ItemFormRowProps {
   isInternalProvider?: boolean;
   isEdit?: boolean;
   isLoading: boolean;
-  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  setConfigEntry: (key: string, value: string | number | boolean | null | Map) => void;
+  reenterSecretsOnEdit?: boolean;
 }
 
 export const ItemFormRow: React.FC<ItemFormRowProps> = ({
@@ -40,6 +35,7 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
   isInternalProvider,
   isEdit,
   isLoading,
+  reenterSecretsOnEdit,
   setConfigEntry,
 }) => {
   const { description, isValid, key, label, required, sensitive, validationErrors } = configEntry;
@@ -85,32 +81,46 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
     </EuiText>
   ) : undefined;
 
+  const wrapInFormRow = configEntry.type !== FieldType.MAP;
+
+  const configField = (
+    <ConfigurationField
+      configEntry={configEntry}
+      isLoading={isLoading}
+      setConfigValue={(value) => {
+        setConfigEntry(key, value);
+      }}
+      isEdit={isEdit}
+      isPreconfigured={isPreconfigured}
+    />
+  );
+
   return (
     <EuiFlexItem key={key}>
       <ConfigFieldTitularComponent configKey={key} />
-      <EuiFormRow
-        label={rowLabel}
-        fullWidth
-        helpText={helpText}
-        error={validationErrors}
-        isInvalid={!isValid}
-        labelAppend={optionalLabel}
-        data-test-subj={`configuration-formrow-${key}`}
-      >
-        <ConfigurationField
-          configEntry={configEntry}
-          isLoading={isLoading}
-          setConfigValue={(value) => {
-            setConfigEntry(key, value);
-          }}
-          isEdit={isEdit}
-          isPreconfigured={isPreconfigured}
-        />
-      </EuiFormRow>
-      {sensitive ? (
+      {wrapInFormRow ? (
+        <EuiFormRow
+          label={rowLabel}
+          fullWidth
+          helpText={helpText}
+          error={validationErrors}
+          isInvalid={!isValid}
+          labelAppend={optionalLabel}
+          data-test-subj={`configuration-formrow-${key}`}
+        >
+          {configField}
+        </EuiFormRow>
+      ) : (
+        configField
+      )}
+      {sensitive && reenterSecretsOnEdit ? (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
+          <KbnWarningCallout
+            announceOnMount={!isEdit}
+            size="s"
+            title={LABELS.RE_ENTER_SECRETS(label)}
+          />
         </>
       ) : null}
     </EuiFlexItem>

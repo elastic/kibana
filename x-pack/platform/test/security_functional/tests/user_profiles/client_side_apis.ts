@@ -50,7 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .post('/internal/security/user_profile/_data')
           .set('kbn-xsrf', 'xxx')
           .set('Cookie', cookie)
-          .send({ some: `data-${userPrefix}` })
+          .send({
+            avatar: { initials: `some-initials-${userPrefix}` },
+          })
           .expect(200);
 
         const { body: profile } = await supertestWithoutAuth
@@ -89,13 +91,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const currentUserProfileText = await testSubjects.getVisibleText(
           'testEndpointsUserProfilesAppCurrentUserProfile'
         );
-        expect(currentUserProfileText).to.equal(`${adminTestUser.username}:{}`);
+        expect(currentUserProfileText).to.equal(
+          `${adminTestUser.username}:{"userSettings":{"lastSelectedSpaceId":"default","rememberSelectedSpace":true}}`
+        );
 
         for (const userPrefix of ['one', 'two', 'three']) {
           const userProfileText = await testSubjects.getVisibleText(
             `testEndpointsUserProfilesAppUserProfile_user_${userPrefix}`
           );
-          expect(userProfileText).to.equal(`user_${userPrefix}:{"some":"data-${userPrefix}"}`);
+          expect(userProfileText).to.equal(
+            `user_${userPrefix}:{"avatar":{"color":null,"initials":"some-initials-${userPrefix}","imageUrl":null}}`
+          );
         }
       });
     });

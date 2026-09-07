@@ -44,6 +44,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  history: AppMountParameters['history'];
 }
 
 export interface HomePluginSetupDependencies {
@@ -92,6 +93,7 @@ export class HomePublicPlugin
           trackUiMetric,
           kibanaVersion: this.initializerContext.env.packageInfo.version,
           http: coreStart.http,
+          notifications: coreStart.notifications,
           toastNotifications: coreStart.notifications.toasts,
           banners: coreStart.overlays.banners,
           docLinks: coreStart.docLinks,
@@ -114,6 +116,7 @@ export class HomePublicPlugin
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
+          history: params.history,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

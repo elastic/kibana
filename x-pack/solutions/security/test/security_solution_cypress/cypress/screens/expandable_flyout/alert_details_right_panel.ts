@@ -79,8 +79,9 @@ export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE = getDataTestSu
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED = getDataTestSubjectSelector(
   'acknowledged-alert-status'
 );
-export const DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED =
-  getDataTestSubjectSelector('close-alert-status');
+export const DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED = getDataTestSubjectSelector(
+  'alert-close-context-menu-item'
+);
 export const DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION = getDataTestSubjectSelector(
   'add-endpoint-exception-menu-item'
 );

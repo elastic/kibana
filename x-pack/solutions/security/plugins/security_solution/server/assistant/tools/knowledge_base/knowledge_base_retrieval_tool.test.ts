@@ -14,7 +14,7 @@ import type {
 } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 
 describe('KnowledgeBaseRetievalTool', () => {
   const logger = loggerMock.create();

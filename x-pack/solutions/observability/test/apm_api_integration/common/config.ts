@@ -19,7 +19,7 @@ import supertest from 'supertest';
 import type { UrlObject } from 'url';
 import { format } from 'url';
 import { MachineLearningAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml/api';
-import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
 import type {
@@ -108,7 +108,15 @@ export function createTestConfig(
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+    // EPR_REQUIRE_PACKAGE_SIGNATURES=false: the `:lite` distribution ships some
+    // packages without `.sig` files, so opt out of upstream signature enforcement
+    // (added in elastic/package-registry#1646).
+    const dockerArgs: string[] = [
+      '-v',
+      `${packageRegistryConfig}:/package-registry/config.yml`,
+      '-e',
+      'EPR_REQUIRE_PACKAGE_SIGNATURES=false',
+    ];
 
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
@@ -120,7 +128,8 @@ export function createTestConfig(
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes,
+          preferCached: true,
         },
       }),
       testFiles: [require.resolve('../tests')],
@@ -216,6 +225,9 @@ export function createTestConfig(
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+          ...(dockerRegistryPort
+            ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
+            : []),
           ...(kibanaConfig
             ? Object.entries(kibanaConfig).map(([key, value]) =>
                 Array.isArray(value) ? `--${key}=${JSON.stringify(value)}` : `--${key}=${value}`

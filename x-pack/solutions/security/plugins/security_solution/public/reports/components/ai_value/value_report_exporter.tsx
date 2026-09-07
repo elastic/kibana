@@ -113,6 +113,7 @@ const ValueReportExporterComponent: React.FC<Props> = ({ children }) => {
       });
 
       const pdfBytes = await pdfDoc.save();
+      // @ts-expect-error upgrade typescript v5.9.3
       const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(pdfBlob);
 

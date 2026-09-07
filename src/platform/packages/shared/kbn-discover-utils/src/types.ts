@@ -8,6 +8,7 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
@@ -18,7 +19,7 @@ export type {
   RowControlRowProps,
 } from './components/custom_control_columns/types';
 export type * from './components/app_menu/types';
-export { AppMenuActionId, AppMenuActionType } from './components/app_menu/types';
+export { AppMenuActionId } from './components/app_menu/types';
 
 type DiscoverSearchHit = SearchHit<Record<string, unknown>>;
 
@@ -26,6 +27,11 @@ export interface EsHitRecord extends Omit<DiscoverSearchHit, '_index' | '_id' | 
   _index?: DiscoverSearchHit['_index'];
   _id?: DiscoverSearchHit['_id'];
   _source?: DiscoverSearchHit['_source'];
+  /**
+   * As oposed to DSL, ES|QL highlights are inlined in the hit value.
+   * This record holds which columns have highlights and what tag was used for it.
+   */
+  inline_highlights?: ESQLColumnsWithHighlights;
 }
 
 /**
@@ -61,24 +67,30 @@ export type DataTableColumnsMeta = Record<
   }
 >;
 
+import type { ReactNode } from 'react';
+
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
 export interface LogDocumentOverview
   extends LogResourceFields,
     LogStackTraceFields,
-    LogCloudFields {
+    LogCloudFields,
+    LogOtelStackTraceFields,
+    Partial<ApmErrorLogFields>,
+    Partial<OtelExceptionLogFields> {
   '@timestamp': string;
   'log.level'?: string;
   message?: string;
+  'body.text'?: string;
   'error.message'?: string;
   'event.original'?: string;
   'trace.id'?: string;
@@ -87,6 +99,21 @@ export interface LogDocumentOverview
   'log.file.path'?: string;
   'data_stream.namespace': string;
   'data_stream.dataset': string;
+  'exception.message'?: string;
+}
+
+export interface ApmErrorLogFields {
+  'processor.event': string;
+  'error.log.level'?: string;
+  'error.exception.type'?: string;
+  'error.exception.message'?: string;
+  'error.culprit'?: string;
+  'error.grouping_name'?: string;
+}
+
+export interface OtelExceptionLogFields {
+  event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
@@ -105,6 +132,12 @@ export interface LogStackTraceFields {
   'error.stack_trace'?: string;
   'error.exception.stacktrace'?: string;
   'error.log.stacktrace'?: string;
+}
+
+export interface LogOtelStackTraceFields {
+  'attributes.exception.stacktrace'?: string;
+  'attributes.exception.type'?: string;
+  'attributes.exception.message'?: string;
 }
 
 export interface LogCloudFields {
@@ -164,15 +197,4 @@ export interface SpanFields {
 export interface UserAgentFields {
   'user_agent.name': string;
   'user_agent.version': string;
-}
-
-export interface TraceDocumentOverview
-  extends TraceFields,
-    Partial<ServiceFields>,
-    Partial<SpanFields>,
-    Partial<UserAgentFields>,
-    Partial<TransactionFields> {
-  duration?: number;
-  kind?: string;
-  'resource.attributes.telemetry.sdk.language'?: string;
 }

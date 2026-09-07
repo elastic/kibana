@@ -224,6 +224,7 @@ export const getSharedListsTableColumns = () => [
         disableActions={false}
         text={references.length.toString()}
         dataTestSubj="addToSharedListsLinkedRulesMenuAction"
+        ariaLabel={i18n.LINKED_RULES_ARIA_LABEL}
       />
     ),
   },

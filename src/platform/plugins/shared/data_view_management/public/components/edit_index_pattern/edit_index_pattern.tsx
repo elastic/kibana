@@ -10,28 +10,20 @@
 import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter, useLocation } from 'react-router-dom';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiBadge,
-  EuiCallOut,
-  EuiCode,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiBadge, EuiCode, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuntimeField, DataView } from '@kbn/data-views-plugin/public';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { pickBy } from 'lodash';
 import type * as CSS from 'csstype';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 import type { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { dataViewsListTitle } from '../breadcrumbs';
 
 import { useStateSelector } from '../../management_app/state_utils';
 
@@ -58,7 +50,7 @@ const mappingConflictHeader = i18n.translate(
 const securityDataView = i18n.translate(
   'indexPatternManagement.editIndexPattern.badge.securityDataViewTitle',
   {
-    defaultMessage: 'Security Data View',
+    defaultMessage: 'Security Solution',
   }
 );
 
@@ -175,18 +167,19 @@ export const EditIndexPattern = withRouter(
     return (
       <div data-test-subj="editIndexPattern" role="region" aria-label={headingAriaLabel}>
         {dataView && (
-          <IndexHeader
-            indexPattern={dataView}
-            setDefault={() => dataViewMgmtService.setDefaultDataView()}
-            editIndexPatternClick={editPattern}
-            deleteIndexPatternClick={() => {
-              setFlyoutOpen(true);
-            }}
-            defaultIndex={defaultIndex}
-            canSave={userEditPermission}
-          >
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="l" />
+          <>
+            <IndexHeader
+              indexPattern={dataView}
+              setDefault={() => dataViewMgmtService.setDefaultDataView()}
+              editIndexPatternClick={editPattern}
+              deleteIndexPatternClick={dataView?.managed ? undefined : () => setFlyoutOpen(true)}
+              defaultIndex={defaultIndex}
+              canSave={userEditPermission}
+              back={{
+                href: history.createHref({ pathname: '/' }),
+                label: dataViewsListTitle,
+              }}
+            />
             <EuiFlexGroup wrap gutterSize="l" alignItems="center">
               {Boolean(indexPattern.title) && (
                 <EuiFlexItem grow={false}>
@@ -210,14 +203,14 @@ export const EditIndexPattern = withRouter(
               )}
               {indexPattern.id && indexPattern.id.indexOf(securitySolution) === 0 && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>{securityDataView}</EuiBadge>
+                  <EuiBadge color="accent">{securityDataView}</EuiBadge>
                 </EuiFlexItem>
               )}
               {tags.map((tag) => (
                 <EuiFlexItem grow={false} key={tag.key}>
                   {tag.key === 'default' ? (
                     <EuiBadge
-                      iconType="starFilled"
+                      iconType="starFill"
                       color="default"
                       data-test-subj={tag['data-test-subj']}
                     >
@@ -225,10 +218,14 @@ export const EditIndexPattern = withRouter(
                     </EuiBadge>
                   ) : tag.key === 'rollup' ? (
                     <RollupDeprecationTooltip>
-                      <EuiBadge color="warning">{tag.name}</EuiBadge>
+                      <EuiBadge color="warning" data-test-subj={tag['data-test-subj']}>
+                        {tag.name}
+                      </EuiBadge>
                     </RollupDeprecationTooltip>
                   ) : (
-                    <EuiBadge color="hollow">{tag.name}</EuiBadge>
+                    <EuiBadge color="hollow" data-test-subj={tag['data-test-subj']}>
+                      {tag.name}
+                    </EuiBadge>
                   )}
                 </EuiFlexItem>
               ))}
@@ -236,28 +233,27 @@ export const EditIndexPattern = withRouter(
             {fieldConflictCount > 0 && (
               <>
                 <EuiSpacer />
-                <EuiCallOut
+                <KbnWarningCallout
+                  announceOnMount={false}
                   title={mappingConflictHeader}
-                  color="warning"
-                  iconType="warning"
+                  text={mappingConflictLabel}
+                  actionProps={{
+                    primary: {
+                      children: i18n.translate(
+                        'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
+                        {
+                          defaultMessage: 'View conflicts',
+                        }
+                      ),
+                      href: conflictFieldsUrl,
+                      'data-test-subj': 'viewDataViewMappingConflictsButton',
+                    },
+                  }}
                   data-test-subj="dataViewMappingConflict"
-                >
-                  <p>{mappingConflictLabel}</p>
-                  <EuiLink
-                    data-test-subj="viewDataViewMappingConflictsButton"
-                    href={conflictFieldsUrl}
-                  >
-                    {i18n.translate(
-                      'indexPatternManagement.editIndexPattern.viewMappingConflictButton',
-                      {
-                        defaultMessage: 'View conflicts',
-                      }
-                    )}
-                  </EuiLink>
-                </EuiCallOut>
+                />
               </>
             )}
-          </IndexHeader>
+          </>
         )}
         <EuiSpacer size="xl" />
 

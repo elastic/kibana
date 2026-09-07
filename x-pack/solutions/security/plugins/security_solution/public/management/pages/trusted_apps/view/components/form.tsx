@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiTitle,
   EuiSpacer,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AllConditionEntryFields, EntryTypes } from '@kbn/securitysolution-utils';
@@ -30,6 +31,8 @@ import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
+  hasEntryEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   hasSimpleExecutableName,
@@ -39,13 +42,15 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
+import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import {
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useCanAssignArtifactPerPolicy, useGetUpdatedTags } from '../../../../hooks/artifacts';
 import { useSuggestions } from '../../../../hooks/use_suggestions';
@@ -78,8 +83,12 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
+  TRUSTED_APPS_PROCESS_DESCENDANTS,
+  TRUSTED_APPLICATIONS,
+  TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
 } from '../translations';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { OS_TITLES } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -91,14 +100,23 @@ import {
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
-import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ADVANCED_MODE_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  isAdvancedModeEnabled,
+  isProcessDescendantsEnabled,
+} from '../../../../../../common/endpoint/service/artifacts/utils';
+import {
+  ADVANCED_MODE_TAG,
+  PROCESS_DESCENDANT_EXTRA_ENTRY,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
+  TRUSTED_PROCESS_DESCENDANTS_TAG,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
-import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { ProcessDescendantsIconTip } from '../../../../components/process_descendant_icontip';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -116,7 +134,8 @@ interface ValidationResult {
   }>;
 
   /**  Additional Warning callout after submit */
-  extraWarning?: boolean;
+  showWildcardWithWrongOperatorCalloutAndConfirmModal?: boolean;
+  showUnnecessaryEscapingCalloutAndConfirmModal?: boolean;
 }
 
 const addResultToValidation = (
@@ -146,13 +165,12 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
-const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
+export const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
     result: {},
   };
-  let extraWarning: ValidationResult['extraWarning'];
 
   // Name field
   if (!values.name.trim()) {
@@ -169,8 +187,8 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
 
   if (
     isAdvancedModeEnabled(values) &&
-    (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-      (e) => e.value === '' || !e.value.length
+    (values.entries as ExceptionEntries).some(
+      (e) => e.type !== 'nested' && (e.value === '' || !e.value.length)
     )
   ) {
     isValid = false;
@@ -207,7 +225,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
         })
       ) {
         if (entry.field === ConditionEntryField.PATH) {
-          extraWarning = true;
+          validation.showWildcardWithWrongOperatorCalloutAndConfirmModal = true;
           addResultToValidation(
             validation,
             'entries',
@@ -222,6 +240,10 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
             INPUT_ERRORS.wildcardWithWrongField(index)
           );
         }
+      }
+
+      if (entry.field === ConditionEntryField.PATH && hasEntryEscaping(entry, [os])) {
+        validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
@@ -257,7 +279,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     });
   }
 
-  if (extraWarning) {
+  if (validation.showWildcardWithWrongOperatorCalloutAndConfirmModal) {
     addResultToValidation(
       validation,
       'entries',
@@ -268,7 +290,18 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
       </>,
       true
     );
-    validation.extraWarning = extraWarning;
+  }
+  if (validation.showUnnecessaryEscapingCalloutAndConfirmModal) {
+    addResultToValidation(
+      validation,
+      'entries',
+      'errors',
+      <>
+        <EuiSpacer size="s" />
+        <UnnecessaryEscapingCallout />
+      </>,
+      true
+    );
   }
   validation.isValid = isValid;
   return validation;
@@ -285,6 +318,9 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode, error: submitError }) => {
     const isTAAdvancedModeFeatureFlagEnabled =
       useIsExperimentalFeatureEnabled('trustedAppsAdvancedMode');
+    const isProcessDescendantsFeatureForTrustedAppsEnabled = useIsExperimentalFeatureEnabled(
+      'filterProcessDescendantsForTrustedAppsEnabled'
+    );
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -294,19 +330,27 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const [hasFormChanged, setHasFormChanged] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
-    const { getTagsUpdatedBy } = useGetUpdatedTags(item);
+    const { getTagsUpdatedBy, getMultipleTagsUpdatedBy } = useGetUpdatedTags(item);
     const [lastBasicFormConditions, setLastBasicFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(!isFormAdvancedMode ? item.entries : []);
     const [lastAdvancedFormConditions, setLastAdvancedFormConditions] = useState<
       ArtifactFormComponentProps['item']['entries']
     >(isFormAdvancedMode ? item.entries : []);
+    const isProcessDescendantsSelected = useMemo(
+      () => isProcessDescendantsEnabled(item, TRUSTED_PROCESS_DESCENDANTS_TAG),
+      [item]
+    );
+    const [wasProcessDescendantsSelected, setWasProcessDescendantsSelected] = useState(
+      isProcessDescendantsSelected
+    );
 
     // Combine related state into a single object to reduce re-renders
     const [conditionsState, setConditionsState] = useState({
       areValid: !!item.entries.length,
       hasDuplicateFields: false,
       hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard([item]),
+      hasUnnecessaryEscaping: hasEscaping([item], item.os_types),
       hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry([item]),
     });
 
@@ -314,7 +358,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
         const trustedAppsAPIClient = new TrustedAppsApiClient(http);
@@ -344,7 +391,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.basicMode', {
             defaultMessage: 'Basic',
           }),
-          iconType: selectedFormType === 'basicMode' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedFormType === 'basicMode' ? 'checkCircleFill' : 'empty',
           'data-test-subj': 'basicModeButton',
         },
         {
@@ -352,14 +399,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           label: i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.advancedMode', {
             defaultMessage: 'Advanced',
           }),
-          iconType: selectedFormType === 'advancedMode' ? 'checkInCircleFilled' : 'empty',
+          iconType: selectedFormType === 'advancedMode' ? 'checkCircleFill' : 'empty',
           'data-test-subj': 'advancedModeButton',
         },
       ],
       [selectedFormType]
     );
 
-    // Stabilized processChanged callback with minimal dependencies
     const processChanged = useCallback(
       (updatedFormValues?: ArtifactFormComponentProps['item']) => {
         const updatedItem = updatedFormValues
@@ -372,19 +418,44 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
+        const shouldShowWildcardConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasWildcardWithWrongOperator
+          : updatedValidationResult.showWildcardWithWrongOperatorCalloutAndConfirmModal;
+
+        const shouldShowUnnecessaryEscapingConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasUnnecessaryEscaping
+          : updatedValidationResult.showUnnecessaryEscapingCalloutAndConfirmModal;
+
         onChange({
           item: updatedItem,
-          isValid: updatedValidationResult.isValid && conditionsState.areValid,
-          confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
-            : undefined,
+          isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
+          confirmModalLabels:
+            shouldShowWildcardConfirmModal || shouldShowUnnecessaryEscapingConfirmModal
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'trusted application',
+                    }
+                  ),
+                  {
+                    hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal,
+                    hasUnnecessaryEscaping: shouldShowUnnecessaryEscapingConfirmModal,
+                  },
+                  links
+                )
+              : undefined,
         });
       },
-      [conditionsState.areValid, item, onChange]
+      [
+        conditionsState.areValid,
+        conditionsState.hasUnnecessaryEscaping,
+        conditionsState.hasWildcardWithWrongOperator,
+        hasFormChanged,
+        item,
+        links,
+        onChange,
+      ]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -432,24 +503,43 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         // save current form to relevant state before switching
         if (selectedId === 'advancedMode') {
           setLastBasicFormConditions(item.entries);
+          // set is process descendants state true if wasSelected before
         } else {
           setLastAdvancedFormConditions(item.entries);
+          setWasProcessDescendantsSelected(isProcessDescendantsSelected);
         }
 
         const nextItem: ArtifactFormComponentProps['item'] = {
           ...item,
           entries:
             selectedId === 'advancedMode' ? lastAdvancedFormConditions : lastBasicFormConditions,
-          tags: getTagsUpdatedBy(
-            'advancedMode',
-            selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : []
-          ),
+          tags: getMultipleTagsUpdatedBy([
+            {
+              tagType: 'advancedMode',
+              newTags: selectedId === 'advancedMode' ? [ADVANCED_MODE_TAG] : [],
+            },
+            {
+              tagType: 'trustedProcessDescendants',
+              newTags:
+                selectedId === 'advancedMode' && wasProcessDescendantsSelected
+                  ? [TRUSTED_PROCESS_DESCENDANTS_TAG]
+                  : [],
+            },
+          ]),
         };
 
         processChanged(nextItem);
         setHasFormChanged(true);
       },
-      [lastAdvancedFormConditions, lastBasicFormConditions, getTagsUpdatedBy, item, processChanged]
+      [
+        lastAdvancedFormConditions,
+        lastBasicFormConditions,
+        getMultipleTagsUpdatedBy,
+        isProcessDescendantsSelected,
+        item,
+        processChanged,
+        wasProcessDescendantsSelected,
+      ]
     );
 
     const handleOnOsChange = useCallback(
@@ -502,6 +592,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }
 
         processChanged(nextItem);
+        setConditionsState((prev) => ({
+          ...prev,
+          hasUnnecessaryEscaping: hasEscaping([nextItem], nextItem.os_types),
+        }));
         setHasFormChanged(true);
       },
       [item, processChanged]
@@ -590,62 +684,67 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleOnBuilderChange = useCallback(
       (arg: OnChangeProps) => {
         // Early return for unnecessary calls to prevent infinite loops
-        if (!arg.exceptionItems?.[0] && !hasFormChanged) {
-          return;
-        }
+        const isCalledWithoutChanges =
+          (!hasFormChanged && arg.exceptionItems[0] === undefined) ||
+          isEqual(arg.exceptionItems[0]?.entries, item?.entries);
 
-        const currentItem = item;
-        const newEntries = arg.exceptionItems[0]?.entries;
+        if (isCalledWithoutChanges) {
+          const addedFields = arg.exceptionItems[0]?.entries.map((e) => e.field) || [''];
 
-        // More robust change detection
-        const hasActualChanges =
-          newEntries && (!currentItem.entries || !isEqual(newEntries, currentItem.entries));
-
-        if (!hasActualChanges && hasFormChanged) {
-          // Only handle duplicate field detection for unchanged forms
-          if (newEntries) {
-            const addedFields = newEntries.map((e) => e.field) || [''];
-            setConditionsState((prev) => ({
-              ...prev,
-              hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
-            }));
-            return;
+          if (isProcessDescendantsSelected) {
+            addedFields.push(PROCESS_DESCENDANT_EXTRA_ENTRY.field);
           }
+
+          setConditionsState((prev) => ({
+            ...prev,
+            hasDuplicateFields: computeHasDuplicateFields(getAddedFieldsCounts(addedFields)),
+          }));
+          return;
+        } else {
+          setConditionsState((prev) => ({
+            ...prev,
+            hasDuplicateFields: false,
+          }));
         }
 
-        // Batch all condition state updates
+        // handle wildcard with wrong operator and partial code signature warnings
         setConditionsState((prev) => ({
           ...prev,
-          hasDuplicateFields: false,
           hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
+          hasUnnecessaryEscaping: hasEscaping(arg.exceptionItems, item.os_types),
           hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
-          areValid:
-            arg.exceptionItems[0] !== undefined
-              ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
-              : false,
         }));
 
         const updatedItem: ArtifactFormComponentProps['item'] =
           arg.exceptionItems[0] !== undefined
             ? ({
                 ...arg.exceptionItems[0],
-                name: currentItem?.name ?? '',
-                description: currentItem?.description ?? '',
-                comments: currentItem?.comments ?? [],
-                os_types: currentItem?.os_types ?? [OperatingSystem.WINDOWS],
-                tags: currentItem?.tags ?? [],
-                meta: currentItem.meta,
+                name: item?.name ?? '',
+                description: item?.description ?? '',
+                comments: item?.comments ?? [],
+                os_types: item?.os_types ?? [OperatingSystem.WINDOWS],
+                tags: item?.tags ?? [],
+                meta: item.meta,
               } as ArtifactFormComponentProps['item'])
             : {
-                ...currentItem,
+                ...item,
                 entries: [{ field: '', operator: 'included', type: 'match', value: '' }],
               };
+        const hasValidConditions =
+          arg.exceptionItems[0] !== undefined
+            ? !(arg.errorExists && !arg.exceptionItems[0]?.entries?.length)
+            : false;
+
+        setConditionsState((prev) => ({
+          ...prev,
+          areValid: hasValidConditions,
+        }));
         processChanged(updatedItem);
         if (!hasFormChanged) {
           setHasFormChanged(true);
         }
       },
-      [hasFormChanged, processChanged, item]
+      [item, hasFormChanged, isProcessDescendantsSelected, processChanged]
     );
 
     // Stabilized memoization with minimal dependencies
@@ -673,6 +772,77 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }),
       [autocompleteSuggestions, getTestId, http, indexPatterns, trustedApp, handleOnBuilderChange]
     );
+
+    const handleFilterTypeOnChange = useCallback(
+      (id: string) => {
+        const newTagsForDescendants = id === 'descendants' ? [TRUSTED_PROCESS_DESCENDANTS_TAG] : [];
+        const tags = getTagsUpdatedBy('trustedProcessDescendants', newTagsForDescendants);
+        processChanged({ ...item, tags });
+        if (!hasFormChanged) setHasFormChanged(true);
+      },
+      [getTagsUpdatedBy, hasFormChanged, processChanged, item]
+    );
+
+    const filterTypeOptions = useMemo(
+      () => [
+        {
+          id: 'trustedApps',
+          label: <EuiText size="s">{TRUSTED_APPLICATIONS}</EuiText>,
+          iconType: isProcessDescendantsSelected ? 'empty' : 'checkCircleFill',
+          'data-test-subj': 'trustedApps-filterEventsButton',
+        },
+        {
+          id: 'descendants',
+          label: (
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiText size="s">{TRUSTED_APPS_PROCESS_DESCENDANTS}</EuiText>
+              <ProcessDescendantsIconTip
+                tooltipText={TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS.tooltipText}
+                versionInfo={TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS.versionInfo}
+                data-test-subj="trustedAppsProcessDescendantsTooltip"
+              />
+            </EuiFlexGroup>
+          ),
+          iconType: isProcessDescendantsSelected ? 'checkCircleFill' : 'empty',
+          'data-test-subj': 'trustedApps-filterProcessDescendantsButton',
+        },
+      ],
+      [isProcessDescendantsSelected]
+    );
+
+    const filterTypeSubsection = useMemo(() => {
+      if (!isProcessDescendantsFeatureForTrustedAppsEnabled) return null;
+      return (
+        <>
+          <EuiButtonGroup
+            legend="Events or Process descendants selector"
+            color="primary"
+            onChange={handleFilterTypeOnChange}
+            options={filterTypeOptions}
+            idSelected={isProcessDescendantsSelected ? 'descendants' : 'trustedApps'}
+            data-test-subj="trustedApps-processDescendantsSelector"
+          />
+          <EuiSpacer size="m" />
+          {isProcessDescendantsSelected && (
+            <>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.securitySolution.trustedApps.filterProcessDescendants.additionalConditionDescription"
+                  defaultMessage="Additional condition added:"
+                />
+              </EuiText>
+              <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        </>
+      );
+    }, [
+      isProcessDescendantsFeatureForTrustedAppsEnabled,
+      handleFilterTypeOnChange,
+      filterTypeOptions,
+      isProcessDescendantsSelected,
+    ]);
 
     useEffect(() => {
       processChanged();
@@ -774,7 +944,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFilled" size="s" color="warning" />
+                <EuiIcon type="warningFill" size="s" color="warning" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
@@ -813,6 +983,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           />
         </EuiFormRow>
 
+        <EuiSpacer size="m" />
+        {isTAAdvancedModeFeatureFlagEnabled &&
+          isFormAdvancedMode &&
+          isProcessDescendantsFeatureForTrustedAppsEnabled &&
+          filterTypeSubsection}
+
         <EuiFormRow
           fullWidth
           data-test-subj={getTestId('conditionsRow')}
@@ -823,19 +999,43 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode ? (
             <>
               {exceptionBuilderComponentMemo}
-              {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-              {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {conditionsState.hasWildcardWithWrongOperator && (
+                  <WildCardWithWrongOperatorCallout />
+                )}
+                {conditionsState.hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+                {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+              </EuiFlexGroup>
+
+              {conditionsState.hasDuplicateFields && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiText
+                    color="subdued"
+                    size="xs"
+                    data-test-subj="duplicate-fields-warning-message"
+                  >
+                    <FormattedMessage
+                      id="xpack.securitySolution.eventFilters.warningMessage.duplicateFields"
+                      defaultMessage="Using multiples of the same field values can degrade Endpoint performance and/or create ineffective rules"
+                    />
+                  </EuiText>
+                </>
+              )}
             </>
           ) : (
-            <LogicalConditionBuilder
-              entries={trustedApp.entries as NewTrustedApp['entries']}
-              os={selectedOs}
-              onAndClicked={handleAndClick}
-              onEntryRemove={handleEntryRemove}
-              onEntryChange={handleEntryChange}
-              onVisited={handleConditionBuilderOnVisited}
-              data-test-subj={getTestId('conditionsBuilder')}
-            />
+            <>
+              <LogicalConditionBuilder
+                entries={trustedApp.entries as NewTrustedApp['entries']}
+                os={selectedOs}
+                onAndClicked={handleAndClick}
+                onEntryRemove={handleEntryRemove}
+                onEntryChange={handleEntryChange}
+                onVisited={handleConditionBuilderOnVisited}
+                data-test-subj={getTestId('conditionsBuilder')}
+              />
+            </>
           )}
         </EuiFormRow>
         {showAssignmentSection ? (

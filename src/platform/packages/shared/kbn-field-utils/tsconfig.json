@@ -1,11 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
   "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
   "kbn_references": [
     "@kbn/i18n",
+    "@kbn/i18n-react",
     "@kbn/data-views-plugin",
     "@kbn/react-field",
     "@kbn/field-types",
@@ -13,6 +14,7 @@
     "@kbn/data-view-utils",
     "@kbn/fields-metadata-plugin",
     "@kbn/shared-ux-markdown",
+    "@kbn/core",
   ],
   "exclude": ["target/**/*"]
 }

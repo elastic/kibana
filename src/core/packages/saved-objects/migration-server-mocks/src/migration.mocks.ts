@@ -11,15 +11,16 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectsMigrationLogger,
 } from '@kbn/core-saved-objects-server';
+import { lazyObject } from '@kbn/lazy-object';
 
 export const createSavedObjectsMigrationLoggerMock =
   (): jest.Mocked<SavedObjectsMigrationLogger> => {
-    const mock = {
+    const mock = lazyObject({
       debug: jest.fn(),
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
-    };
+    });
 
     return mock;
   };
@@ -33,12 +34,12 @@ const createContextMock = ({
   convertToMultiNamespaceTypeVersion?: string;
   isSingleNamespaceType?: boolean;
 } = {}): jest.Mocked<SavedObjectMigrationContext> => {
-  const mock = {
+  const mock = lazyObject({
     log: createSavedObjectsMigrationLoggerMock(),
     migrationVersion,
     convertToMultiNamespaceTypeVersion,
     isSingleNamespaceType,
-  };
+  });
   return mock;
 };
 

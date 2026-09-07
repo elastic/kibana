@@ -30,13 +30,13 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
+  const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
-    ruleMigrationsRetriever,
     telemetryClient,
+    ruleMigrationsRetriever,
   });
   const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
 
@@ -72,7 +72,14 @@ export function getTranslateRuleGraph({
 }
 
 const translatableRouter = (state: TranslateRuleState) => {
-  if (!state.inline_query) {
+  if (state.original_rule.vendor === 'splunk' && !state.inline_query) {
+    return 'translationResult';
+  }
+  if (
+    (state.original_rule.vendor === 'qradar' ||
+      state.original_rule.vendor === 'microsoft-sentinel') &&
+    !state.nl_query
+  ) {
     return 'translationResult';
   }
   return 'retrieveIntegrations';
@@ -82,6 +89,13 @@ const validationRouter = (state: TranslateRuleState) => {
   if (state.validation_errors.retries_left > 0 && !isEmpty(state.validation_errors?.esql_errors)) {
     return 'fixQueryErrors';
   }
+  if (
+    state.original_rule.vendor === 'qradar' ||
+    state.original_rule.vendor === 'microsoft-sentinel'
+  ) {
+    return 'translationResult';
+  }
+
   if (!state.includes_ecs_mapping) {
     return 'ecsMapping';
   }

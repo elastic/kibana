@@ -91,7 +91,14 @@ export const ClusterOverview: React.FC<{}> = () => {
   }, [clusters, generateBreadcrumbs]);
 
   return (
-    <PageTemplate title={title} pageTitle={pageTitle} tabs={tabs} getPageData={getPageData}>
+    <PageTemplate
+      title={title}
+      pageTitle={pageTitle}
+      tabs={tabs}
+      getPageData={getPageData}
+      showAutoOpsPromotion={true}
+      showAutoOpsEnabledBanner={true}
+    >
       <SetupModeRenderer
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>

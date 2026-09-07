@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
       const body = {
         stream: {
-          name: 'logs.nginx',
+          name: 'logs.otel.nginx',
         },
         where: {
           field: 'resource.attributes.host.name',
@@ -41,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         status: 'enabled' as RoutingStatus,
       };
       // We use a forked stream as processing changes cannot be made to the root stream
-      await forkStream(apiClient, 'logs', body);
+      await forkStream(apiClient, 'logs.otel', body);
     });
 
     after(async () => {
@@ -52,6 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const body: Streams.WiredStream.UpsertRequest = {
         ...emptyAssets,
         stream: {
+          type: 'wired',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -85,10 +86,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             },
+            failure_store: { inherit: {} },
           },
         },
       };
-      const response = await putStream(apiClient, 'logs.nginx', body);
+      const response = await putStream(apiClient, 'logs.otel.nginx', body);
       expect(response).to.have.property('acknowledged', true);
     });
 
@@ -98,10 +100,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         message: '2023-01-01T00:00:10.000Z error test',
         ['host.name']: 'routeme',
       };
-      const response = await indexDocument(esClient, 'logs', doc);
+      const response = await indexDocument(esClient, 'logs.otel', doc);
       expect(response.result).to.eql('created');
 
-      const result = await fetchDocument(esClient, 'logs.nginx', response._id);
+      const result = await fetchDocument(esClient, 'logs.otel.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:10.000Z',
         body: {
@@ -117,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message2: 'test',
         },
         severity_text: 'error',
-        stream: { name: 'logs.nginx' },
+        stream: { name: 'logs.otel.nginx' },
       });
     });
 
@@ -127,10 +129,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         message: '2023-01-01T00:00:10.000Z info mylogger this is the message',
         ['host.name']: 'routeme',
       };
-      const response = await indexDocument(esClient, 'logs', doc);
+      const response = await indexDocument(esClient, 'logs.otel', doc);
       expect(response.result).to.eql('created');
 
-      const result = await fetchDocument(esClient, 'logs.nginx', response._id);
+      const result = await fetchDocument(esClient, 'logs.otel.nginx', response._id);
       expect(result._source).to.eql({
         '@timestamp': '2024-01-01T00:00:11.000Z',
         body: {
@@ -148,13 +150,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message3: 'this is the message',
         },
         severity_text: 'info',
-        stream: { name: 'logs.nginx' },
+        stream: { name: 'logs.otel.nginx' },
       });
     });
 
     it('Doc is searchable', async () => {
       const response = await esClient.search({
-        index: 'logs.nginx',
+        index: 'logs.otel.nginx',
         query: {
           match: {
             'attributes.message2': 'mylogger',
@@ -166,7 +168,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('Non-indexed field is not searchable', async () => {
       const response = await esClient.search({
-        index: 'logs.nginx',
+        index: 'logs.otel.nginx',
         query: {
           match: {
             'attributes.log.logger': 'mylogger',

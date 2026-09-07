@@ -7,25 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import type { SerializedStyles } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { waitFor } from '@testing-library/dom';
-import { act } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLEditor } from './esql_editor';
+import { VALIDATION_DEBOUNCE_MS } from './hooks/use_query_validation';
 import type { ESQLEditorProps } from './types';
 
 const mockValidate = jest.fn().mockResolvedValue({ errors: [], warnings: [] });
-jest.mock('@kbn/monaco', () => ({
-  ...jest.requireActual('@kbn/monaco'),
+
+jest.mock('@kbn/code-editor', () => ({
+  ...jest.requireActual('@kbn/code-editor'),
   ESQLLang: {
-    ...jest.requireActual('@kbn/monaco').ESQLLang,
+    ...jest.requireActual('@kbn/code-editor').ESQLLang,
     getEsqlLanguage: jest.fn(() => ({
       id: 'esql',
       name: 'ESQL',
@@ -37,7 +41,20 @@ jest.mock('@kbn/monaco', () => ({
   },
 }));
 
-jest.mock('./custom_commands', () => {
+jest.mock('monaco-promql', () => ({
+  promLanguageDefinition: {
+    id: 'promql',
+    extensions: ['.promql'],
+    aliases: [],
+    mimetypes: [],
+    loader: jest.fn().mockResolvedValue({
+      language: { tokenizer: { root: [] } },
+      languageConfiguration: {},
+    }),
+  },
+}));
+
+jest.mock('./lookup_join', () => {
   return {
     useCanCreateLookupIndex: jest.fn().mockReturnValue(jest.fn().mockReturnValue(true)),
     useLookupIndexCommand: jest.fn().mockReturnValue({
@@ -47,6 +64,8 @@ jest.mock('./custom_commands', () => {
   };
 });
 
+window.performance.mark = jest.fn();
+
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
   const uiSettings = {
@@ -55,6 +74,20 @@ describe('ESQLEditor', () => {
 
   const corePluginMock = coreMock.createStart();
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject('oblt'));
+
+  corePluginMock.http.get = jest.fn().mockImplementation((url: string) => {
+    if (url.includes('/internal/esql/autocomplete/sources/')) {
+      return Promise.resolve([
+        { name: 'test_index', hidden: false, type: 'index' },
+        { name: 'logs', hidden: false, type: 'index' },
+      ]);
+    }
+    return Promise.resolve([]);
+  });
+
+  const kqlMock = kqlPluginMock.createStartContract();
+  (kqlMock.autocomplete.hasQuerySuggestions as jest.Mock).mockReturnValue(true);
+
   const services = {
     uiSettings,
     settings: {
@@ -62,6 +95,7 @@ describe('ESQLEditor', () => {
     },
     core: corePluginMock,
     data: dataPluginMock.createStartContract(),
+    kql: kqlMock,
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {
@@ -80,12 +114,15 @@ describe('ESQLEditor', () => {
       onTextLangQuerySubmit: jest.fn(),
     };
     mockValidate.mockResolvedValue({ errors: [], warnings: [] });
+
     jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
       (contextId, options) =>
         ({
           webkitBackingStorePixelRatio: 1,
         } as unknown as RenderingContext)
     );
+
+    localStorage.clear();
   });
 
   afterAll(() => {
@@ -97,48 +134,14 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor')).toBeInTheDocument();
   });
 
-  it('should  render the date info with no @timestamp found', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
-  });
-
-  it('should  render the feedback link', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-feedback-link')).toBeInTheDocument();
-  });
-
-  it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
+  it('should not render the query history icon when hideQueryHistory is true', async () => {
     const newProps = {
       ...props,
-      hideTimeFilterInfo: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).not.toBeInTheDocument();
-  });
-
-  it('should render the date info with @timestamp found if detectedTimestamp is given', async () => {
-    const newProps = {
-      ...props,
-      detectedTimestamp: '@timestamp',
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp found');
-  });
-
-  it('should  render the limit information', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-limit-info')).toHaveTextContent('LIMIT 1000 rows');
-  });
-
-  it('should not render the query history action if hideQueryHistory is set to true', async () => {
-    const newProps = {
-      ...props,
+      editorIsInline: true,
       hideQueryHistory: true,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(
-      queryByTestId('ESQLEditor-toggle-query-history-button-container')
-    ).not.toBeInTheDocument();
+    expect(queryByTestId('ESQLEditor-toggle-query-history-icon')).not.toBeInTheDocument();
   });
 
   it('should render the correct buttons for the expanded code editor mode', async () => {
@@ -155,12 +158,6 @@ describe('ESQLEditor', () => {
   it('should render the footer for the expanded code editor mode', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
     expect(queryByTestId('ESQLEditor-footer')).toBeInTheDocument();
-    expect(queryByTestId('ESQLEditor-footer-lines')).toHaveTextContent('1 line');
-  });
-
-  it('should render the run query text', async () => {
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(queryByTestId('ESQLEditor-run-query')).toBeInTheDocument();
   });
 
   it('should render the doc icon if the displayDocumentationAsFlyout is true', async () => {
@@ -173,33 +170,15 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-documentation')).toBeInTheDocument();
   });
 
-  it('should not render the run query text if the hideRunQueryText prop is set to true', async () => {
-    const newProps = {
-      ...props,
-      hideRunQueryText: true,
-    };
-    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
-  });
-
   it('should render correctly if editorIsInline prop is set to true', async () => {
-    const onTextLangQuerySubmit = jest.fn();
     const newProps = {
       ...props,
-      hideRunQueryText: true,
       editorIsInline: true,
-      onTextLangQuerySubmit,
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
-    expect(queryByTestId('ESQLEditor-run-query')).not.toBeInTheDocument();
 
     const runQueryButton = queryByTestId('ESQLEditor-run-query-button');
     expect(runQueryButton).toBeInTheDocument(); // Assert it exists
-
-    if (runQueryButton) {
-      await userEvent.click(runQueryButton);
-      expect(onTextLangQuerySubmit).toHaveBeenCalledTimes(1);
-    }
   });
 
   it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {
@@ -210,6 +189,20 @@ describe('ESQLEditor', () => {
     };
     const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
+  });
+
+  it('should render the visor by default', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
+  });
+
+  it('should hide the visor by default if the hideQuickSearch prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      hideQuickSearch: true,
+    };
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
   });
 
   describe('data errors switch', () => {
@@ -274,6 +267,155 @@ describe('ESQLEditor', () => {
         queryByTestId('ESQLEditor-footerPopoverButton-error')?.click();
       });
       expect(queryByTestId('ESQLEditor-footerPopover-dataErrorsSwitch')).not.toBeInTheDocument();
+    });
+  });
+
+  it('displays server errors when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs | COMPLETION "prompt" WITH { "inference_id": "bad" }';
+    const serverErrorMessage = 'Unknown inference_id [bad]';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query failed: parent passes server errors and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          errors: [new Error(serverErrorMessage)],
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 error')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 error'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverErrorMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('displays server warnings when query is submitted from editors parent', async () => {
+    jest.useFakeTimers();
+
+    const executedQuery = 'FROM logs';
+    const serverWarningMessage = 'No limit defined, adding default limit of [1000].';
+
+    const { rerender } = renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        isLoading: false,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ESQLEditor')).toBeInTheDocument();
+    });
+
+    // Simulate query bar Search: parent sets loading true.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: true,
+        })
+      );
+    });
+
+    // Query succeeded with warning: parent passes server warning and clears loading.
+    await act(async () => {
+      rerender(
+        renderESQLEditorComponent({
+          ...props,
+          query: { esql: executedQuery },
+          isLoading: false,
+          warning: serverWarningMessage,
+        })
+      );
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(VALIDATION_DEBOUNCE_MS);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      await userEvent
+        .setup({ advanceTimers: jest.advanceTimersByTime })
+        .click(screen.getByText('1 warning'));
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(serverWarningMessage)).toBeInTheDocument();
+    });
+
+    jest.useRealTimers();
+  });
+
+  it('should render warning if the warning and mergeExternalMessages props are set', async () => {
+    const user = userEvent.setup();
+
+    mockValidate.mockResolvedValue({
+      errors: [],
+      warnings: [],
+    });
+
+    renderWithI18n(
+      renderESQLEditorComponent({
+        ...props,
+        warning: 'Client warning example',
+        mergeExternalMessages: true,
+      })
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('1 warning')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText('1 warning'));
+
+    await waitFor(() => {
+      expect(screen.getByText('Client warning example')).toBeInTheDocument();
     });
   });
 });

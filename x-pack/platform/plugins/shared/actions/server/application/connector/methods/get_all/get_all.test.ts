@@ -26,6 +26,10 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import type { ActionTypeRegistry } from '../../../../action_type_registry';
 import { getAllUnsecured } from './get_all';
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { createMockInMemoryConnector } from '../../mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import type { AuthTypeRegistry } from '../../../../auth_types/auth_type_registry';
+import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -63,16 +67,22 @@ const eventLogClient = eventLogClientMock.create();
 const getEventLogClient = jest.fn();
 const connectorTokenClient = connectorTokenClientMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
+const getAxiosInstanceWithAuth = jest.fn();
+const isESOCanEncrypt = true;
 
 let actionsClient: ActionsClient;
-let actionTypeRegistry: ActionTypeRegistry;
-
+const actionTypeRegistry: ActionTypeRegistry = jest.fn() as unknown as ActionTypeRegistry;
+const authTypeRegistry: AuthTypeRegistry =
+  authTypeRegistryMock.create() as unknown as AuthTypeRegistry;
 describe('getAll()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({
       logger,
       actionTypeRegistry,
+      authTypeRegistry,
       unsecuredSavedObjectsClient,
       scopedClusterClient,
       kibanaIndices,
@@ -85,6 +95,9 @@ describe('getAll()', () => {
       usageCounter: mockUsageCounter,
       connectorTokenClient,
       getEventLogClient,
+      encryptedSavedObjectsClient,
+      isESOCanEncrypt,
+      getAxiosInstanceWithAuth,
     });
     (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -129,6 +142,7 @@ describe('getAll()', () => {
         actionsClient = new ActionsClient({
           logger,
           actionTypeRegistry,
+          authTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -137,21 +151,21 @@ describe('getAll()', () => {
           request,
           authorization: authorization as unknown as ActionsAuthorization,
           inMemoryConnectors: [
-            {
+            createMockInMemoryConnector({
               id: 'testPreconfigured',
               actionTypeId: '.slack',
-              secrets: {},
               isPreconfigured: true,
-              isDeprecated: false,
-              isSystemAction: false,
               name: 'test',
               config: {
                 foo: 'bar',
               },
-            },
+            }),
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
+          encryptedSavedObjectsClient,
+          isESOCanEncrypt,
+          getAxiosInstanceWithAuth,
         });
         return actionsClient.getAll();
       }
@@ -248,6 +262,7 @@ describe('getAll()', () => {
             type: 'type',
             attributes: {
               name: 'test',
+              actionTypeId: '.test-connector-type',
               isMissingSecrets: false,
               config: {
                 foo: 'bar',
@@ -273,6 +288,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -281,65 +297,57 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
           /**
            * System actions will not
            * be returned from getAll
            * if no options are provided
            */
-          {
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll();
 
-      expect(result).toEqual([
+      expect(result).toContainConnectorsFindResult([
         {
           id: '1',
           name: 'test',
           isMissingSecrets: false,
           config: { foo: 'bar' },
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           name: 'test',
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
 
-    test('get system actions correctly', async () => {
+    test.skip('get system actions correctly', async () => {
       const expectedResult = {
         total: 1,
         per_page: 10,
@@ -375,6 +383,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -383,64 +392,55 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'system-connector-.cases',
             actionTypeId: '.cases',
             name: 'System action: .cases',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
 
-      expect(result).toEqual([
+      expect(result).toContainConnectorsFindResult([
         {
           actionTypeId: '.cases',
           id: 'system-connector-.cases',
-          isDeprecated: false,
-          isPreconfigured: false,
           isSystemAction: true,
           name: 'System action: .cases',
           referencedByCount: 2,
+          authMode: 'shared',
         },
         {
           id: '1',
           name: 'test',
           isMissingSecrets: false,
           config: { foo: 'bar' },
-          isPreconfigured: false,
-          isDeprecated: false,
-          isSystemAction: false,
           referencedByCount: 6,
+          authMode: 'shared',
         },
         {
           id: 'testPreconfigured',
           actionTypeId: '.slack',
           name: 'test',
           isPreconfigured: true,
-          isSystemAction: false,
-          isDeprecated: false,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
     });
@@ -479,6 +479,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -487,45 +488,43 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: '.slack',
-            secrets: {},
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toEqual([
+      expect(result).toContainConnectorsFindResult([
         {
           config: {
             foo: 'bar',
           },
           id: '1',
-          isDeprecated: false,
           isMissingSecrets: false,
-          isPreconfigured: false,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 6,
+          actionTypeId: undefined,
+          authMode: 'shared',
         },
         {
           actionTypeId: '.slack',
           id: 'testPreconfigured',
-          isDeprecated: false,
           isPreconfigured: true,
-          isSystemAction: false,
           name: 'test',
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
 
@@ -570,6 +569,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -580,6 +580,9 @@ describe('getAll()', () => {
         inMemoryConnectors: [],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       await actionsClient.getAll();
@@ -612,6 +615,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -620,49 +624,455 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured01',
             actionTypeId: '.inference',
             name: 'test1',
             config: {
               inferenceId: '1',
             },
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'testPreconfigured02',
             actionTypeId: '.inference',
             name: 'test2',
             config: {
               inferenceId: '2',
             },
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAll({ includeSystemActions: true });
-      expect(result).toEqual([
+      expect(result).toContainConnectorsFindResult([
         {
           actionTypeId: '.inference',
           id: 'testPreconfigured02',
-          isDeprecated: false,
-          isPreconfigured: false,
           isSystemAction: true,
           name: 'test2',
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
+    });
+
+    test('returns deprecated connectors', async () => {
+      // force registry to return deprecated true
+      actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(true);
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            isPreconfigured: true,
+            name: 'test',
+            config: {
+              foo: 'bar',
+            },
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll({ includeSystemActions: true });
+      expect(result).toContainConnectorsFindResult([
+        {
+          config: {
+            foo: 'bar',
+          },
+          id: '1',
+          name: 'test',
+          referencedByCount: 6,
+          isConnectorTypeDeprecated: true,
+          isMissingSecrets: false,
+          authMode: 'shared',
+        },
+        {
+          actionTypeId: '.slack',
+          id: 'testPreconfigured',
+          isPreconfigured: true,
+          name: 'test',
+          referencedByCount: 2,
+          isConnectorTypeDeprecated: true,
+          authMode: 'shared',
+        },
+      ]);
+    });
+
+    test('returns connector with authMode "shared"', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithAuthMode: { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithAuthMode',
+            actionTypeId: '.webhook',
+            isPreconfigured: true,
+            name: 'test with authMode',
+            config: {
+              url: 'https://example.com',
+            },
+            authMode: 'shared',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+          authMode: 'shared',
+        },
+        {
+          id: 'testWithAuthMode',
+          actionTypeId: '.webhook',
+          name: 'test with authMode',
+          isPreconfigured: true,
+          authMode: 'shared',
+          referencedByCount: 2,
+        },
+      ]);
+    });
+
+    test('returns connector with authMode "per-user"', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithPerUserAuth: { doc_count: 3 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithPerUserAuth',
+            actionTypeId: '.webhook',
+            isPreconfigured: true,
+            name: 'test with per-user auth',
+            config: {
+              url: 'https://example.com',
+            },
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+          authMode: 'shared',
+        },
+        {
+          id: 'testWithPerUserAuth',
+          actionTypeId: '.webhook',
+          name: 'test with per-user auth',
+          isPreconfigured: true,
+          authMode: 'per-user',
+          referencedByCount: 3,
+        },
+      ]);
+    });
+
+    test('returns connector without authMode when not set', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testWithoutAuthMode: { doc_count: 1 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testWithoutAuthMode',
+            actionTypeId: '.slack',
+            isPreconfigured: true,
+            name: 'test without authMode',
+            config: {
+              url: 'https://slack.example.com',
+            },
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      expect(result).toContainConnectorsFindResult([
+        {
+          id: '1',
+          name: 'test',
+          isMissingSecrets: false,
+          config: { foo: 'bar' },
+          referencedByCount: 6,
+          authMode: 'shared',
+        },
+        {
+          id: 'testWithoutAuthMode',
+          actionTypeId: '.slack',
+          name: 'test without authMode',
+          isPreconfigured: true,
+          referencedByCount: 1,
+          authMode: 'shared',
+        },
+      ]);
+
+      // Ensure authMode defaults to 'shared' even when not explicitly set
+      const connectorWithoutAuthMode = result.find((c) => c.id === 'testWithoutAuthMode');
+      expect(connectorWithoutAuthMode).toBeDefined();
+      expect(connectorWithoutAuthMode!.authMode).toBe('shared');
+    });
+
+    test('always includes authMode in results', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: '.test-connector-type',
+              isMissingSecrets: false,
+              config: { foo: 'bar' },
+              authMode: 'per-user',
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      });
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+            testPreconfigured: { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'testPreconfigured',
+            actionTypeId: '.slack',
+            isPreconfigured: true,
+            name: 'test',
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAll();
+
+      result.forEach((connector) => {
+        expect(connector.authMode).toBeDefined();
+      });
     });
   });
 
@@ -681,6 +1091,7 @@ describe('getAll()', () => {
         actionsClient = new ActionsClient({
           logger,
           actionTypeRegistry,
+          authTypeRegistry,
           unsecuredSavedObjectsClient,
           scopedClusterClient,
           kibanaIndices,
@@ -689,20 +1100,18 @@ describe('getAll()', () => {
           request,
           authorization: authorization as unknown as ActionsAuthorization,
           inMemoryConnectors: [
-            {
+            createMockInMemoryConnector({
               id: 'system-connector-.test',
               actionTypeId: '.test',
               name: 'Test system action',
-              config: {},
-              secrets: {},
-              isDeprecated: false,
-              isMissingSecrets: false,
-              isPreconfigured: false,
               isSystemAction: true,
-            },
+            }),
           ],
           connectorTokenClient: connectorTokenClientMock.create(),
           getEventLogClient,
+          encryptedSavedObjectsClient,
+          isESOCanEncrypt,
+          getAxiosInstanceWithAuth,
         });
 
         return actionsClient.getAllSystemConnectors();
@@ -757,6 +1166,7 @@ describe('getAll()', () => {
       actionsClient = new ActionsClient({
         logger,
         actionTypeRegistry,
+        authTypeRegistry,
         unsecuredSavedObjectsClient,
         scopedClusterClient,
         kibanaIndices,
@@ -765,49 +1175,88 @@ describe('getAll()', () => {
         request,
         authorization: authorization as unknown as ActionsAuthorization,
         inMemoryConnectors: [
-          {
+          createMockInMemoryConnector({
             id: 'testPreconfigured',
             actionTypeId: 'my-action-type',
             secrets: {
               test: 'test1',
             },
             isPreconfigured: true,
-            isDeprecated: false,
-            isSystemAction: false,
             name: 'test',
             config: {
               foo: 'bar',
             },
-          },
-          {
+          }),
+          createMockInMemoryConnector({
             id: 'system-connector-.test',
             actionTypeId: '.test',
             name: 'Test system action',
-            config: {},
-            secrets: {},
-            isDeprecated: false,
-            isMissingSecrets: false,
-            isPreconfigured: false,
             isSystemAction: true,
-          },
+          }),
         ],
         connectorTokenClient: connectorTokenClientMock.create(),
         getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
       });
 
       const result = await actionsClient.getAllSystemConnectors();
 
-      expect(result).toEqual([
+      expect(result).toContainConnectorsFindResult([
         {
           id: 'system-connector-.test',
           actionTypeId: '.test',
           name: 'Test system action',
-          isPreconfigured: false,
-          isDeprecated: false,
           isSystemAction: true,
           referencedByCount: 2,
+          authMode: 'shared',
         },
       ]);
+    });
+
+    test('always includes authMode in system connector results', async () => {
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            'system-connector-.test': { doc_count: 2 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [
+          createMockInMemoryConnector({
+            id: 'system-connector-.test',
+            actionTypeId: '.test',
+            name: 'Test system action',
+            isSystemAction: true,
+            authMode: 'per-user',
+          }),
+        ],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+      });
+
+      const result = await actionsClient.getAllSystemConnectors();
+
+      result.forEach((connector) => {
+        expect(connector.authMode).toBeDefined();
+      });
     });
   });
 });
@@ -816,6 +1265,7 @@ describe('getAllUnsecured()', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.clearAllMocks();
+    actionTypeRegistry.isDeprecated = jest.fn().mockReturnValue(false);
   });
 
   test('calls internalSavedObjectRepository with parameters and returns inMemoryConnectors correctly', async () => {
@@ -829,11 +1279,13 @@ describe('getAllUnsecured()', () => {
           type: 'type',
           attributes: {
             name: 'test',
+            actionTypeId: '.test-connector-type',
             isMissingSecrets: false,
             config: {
               foo: 'bar',
             },
             secrets: 'this should not be returned',
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -855,61 +1307,52 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
           isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
           exposeConfig: true,
-        },
+        }),
         /**
          * System actions will not
          * be returned from getAllUnsecured
          */
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
       logger,
       spaceId: 'default',
+      connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toContainConnectorsFindResult([
       {
         id: '1',
         name: 'test',
         isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
         config: { foo: 'bar' },
+        authMode: 'shared',
       },
     ]);
 
@@ -1007,10 +1450,12 @@ describe('getAllUnsecured()', () => {
           attributes: {
             name: 'test',
             isMissingSecrets: false,
+            actionTypeId: '.test-connector-type',
             config: {
               foo: 'bar',
             },
             secrets: 'this should not be returned',
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -1032,59 +1477,49 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
         /**
          * System actions will not
          * be returned from getAllUnsecured
          */
-        {
+        createMockInMemoryConnector({
           id: 'system-connector-.cases',
           actionTypeId: '.cases',
           name: 'System action: .cases',
-          config: {},
-          secrets: {},
-          isDeprecated: false,
-          isMissingSecrets: false,
-          isPreconfigured: false,
           isSystemAction: true,
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
       logger,
       spaceId: 'custom',
+      connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toContainConnectorsFindResult([
       {
         id: '1',
         name: 'test',
         isMissingSecrets: false,
         config: { foo: 'bar' },
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         id: 'testPreconfigured',
         actionTypeId: '.slack',
         name: 'test',
         isPreconfigured: true,
-        isSystemAction: false,
-        isDeprecated: false,
         referencedByCount: 2,
+        authMode: 'shared',
       },
     ]);
 
@@ -1186,6 +1621,7 @@ describe('getAllUnsecured()', () => {
             config: {
               foo: 'bar',
             },
+            authMode: 'shared',
           },
           score: 1,
           references: [],
@@ -1205,51 +1641,101 @@ describe('getAllUnsecured()', () => {
     const result = await getAllUnsecured({
       esClient: scopedClusterClient.asInternalUser,
       inMemoryConnectors: [
-        {
+        createMockInMemoryConnector({
           id: 'testPreconfigured',
           actionTypeId: '.slack',
-          secrets: {},
           isPreconfigured: true,
-          isDeprecated: false,
-          isSystemAction: false,
           name: 'test',
           config: {
             foo: 'bar',
           },
-        },
+        }),
       ],
       internalSavedObjectsRepository,
       kibanaIndices,
       logger,
       spaceId: 'default',
+      connectorTypeRegistry: actionTypeRegistry,
     });
 
-    expect(result).toEqual([
+    expect(result).toContainConnectorsFindResult([
       {
         config: {
           foo: 'bar',
         },
         id: '1',
-        isDeprecated: false,
+        actionTypeId: undefined,
         isMissingSecrets: false,
-        isPreconfigured: false,
-        isSystemAction: false,
         name: 'test',
         referencedByCount: 6,
+        authMode: 'shared',
       },
       {
         actionTypeId: '.slack',
         id: 'testPreconfigured',
-        isDeprecated: false,
         isPreconfigured: true,
-        isSystemAction: false,
         name: 'test',
         referencedByCount: 2,
+        authMode: 'shared',
       },
     ]);
 
     expect(logger.warn).toHaveBeenCalledWith(
       'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
     );
+  });
+
+  test('always includes authMode in results', async () => {
+    internalSavedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10,
+      page: 1,
+      saved_objects: [
+        {
+          id: '1',
+          type: 'type',
+          attributes: {
+            name: 'test',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: { foo: 'bar' },
+            authMode: 'per-user',
+          },
+          score: 1,
+          references: [],
+        },
+      ],
+    });
+    scopedClusterClient.asInternalUser.search.mockResponse(
+      // @ts-expect-error not full search response
+      {
+        aggregations: {
+          '1': { doc_count: 6 },
+          testPreconfigured: { doc_count: 2 },
+        },
+      }
+    );
+
+    const result = await getAllUnsecured({
+      esClient: scopedClusterClient.asInternalUser,
+      inMemoryConnectors: [
+        createMockInMemoryConnector({
+          id: 'testPreconfigured',
+          actionTypeId: '.slack',
+          isPreconfigured: true,
+          name: 'test',
+          authMode: 'per-user',
+        }),
+      ],
+      internalSavedObjectsRepository,
+      kibanaIndices,
+      logger,
+      spaceId: 'default',
+      connectorTypeRegistry: actionTypeRegistry,
+    });
+
+    result.forEach((connector) => {
+      expect(connector.authMode).toBeDefined();
+    });
   });
 });

@@ -9,7 +9,7 @@ import { CrowdstrikeConnector } from './crowdstrike';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { CROWDSTRIKE_CONNECTOR_ID } from '../../../public/common';
+import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { CrowdstrikeError } from './error';
 
@@ -283,7 +283,7 @@ describe('CrowdstrikeConnector', () => {
 
       await expect(() =>
         connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
-      ).rejects.toThrowError('something goes wrong');
+      ).rejects.toThrow('something goes wrong');
     });
 
     it('should handle authentication flow for API requests', async () => {

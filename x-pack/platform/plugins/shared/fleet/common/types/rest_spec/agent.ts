@@ -96,6 +96,7 @@ export interface PostBulkAgentUnenrollRequest {
     force?: boolean;
     revoke?: boolean;
     includeInactive?: boolean;
+    dryRun?: boolean;
   };
 }
 
@@ -103,7 +104,30 @@ export interface BulkAgentAction {
   actionId: string;
 }
 
-export type PostBulkAgentUnenrollResponse = BulkAgentAction;
+export interface BulkAgentActionDryRun {
+  count: number;
+}
+
+export type PostBulkAgentUnenrollResponse = BulkAgentAction | BulkAgentActionDryRun;
+
+export interface PostRemoveCollectorRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PostRemoveCollectorResponse {}
+
+export interface PostBulkRemoveCollectorsRequest {
+  body: {
+    agents: string[] | string;
+    includeInactive?: boolean;
+    dryRun?: boolean;
+  };
+}
+
+export type PostBulkRemoveCollectorsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostAgentUpgradeRequest {
   params: {
@@ -125,13 +149,35 @@ export interface PostBulkAgentUpgradeRequest {
     start_time?: string;
     force?: boolean;
     includeInactive?: boolean;
+    dryRun?: boolean;
   };
 }
 
-export type PostBulkAgentUpgradeResponse = BulkAgentAction;
+export type PostBulkAgentUpgradeResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
+
+export interface PostAgentRollbackRequest {
+  params: {
+    agentId: string;
+  };
+}
+
+export interface PostAgentRollbackResponse {
+  actionId: string;
+}
+
+export interface PostBulkAgentRollbackRequest {
+  body: {
+    agents: string[] | string;
+    batchSize?: number;
+    includeInactive?: boolean;
+    dryRun?: boolean;
+  };
+}
+
+export type PostBulkAgentRollbackResponse = { actionIds: string[] } | BulkAgentActionDryRun;
 
 export interface PostAgentReassignRequest {
   params: {
@@ -149,6 +195,7 @@ export interface PostBulkAgentReassignRequest {
     agents: string[] | string;
     batchSize?: number;
     includeInactive?: boolean;
+    dryRun?: boolean;
   };
 }
 
@@ -163,19 +210,20 @@ export interface PostRequestDiagnosticsRequest {
 }
 
 export type PostRequestDiagnosticsResponse = BulkAgentAction;
-export type PostBulkRequestDiagnosticsResponse = BulkAgentAction;
+export type PostBulkRequestDiagnosticsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface PostRequestBulkDiagnosticsRequest {
   body: {
     agents: string[] | string;
     batchSize?: number;
     additional_metrics: RequestDiagnosticsAdditionalMetrics[];
+    dryRun?: boolean;
   };
 }
 
-export type PostBulkAgentReassignResponse = BulkAgentAction;
+export type PostBulkAgentReassignResponse = BulkAgentAction | BulkAgentActionDryRun;
 
-export type PostBulkUpdateAgentTagsResponse = BulkAgentAction;
+export type PostBulkUpdateAgentTagsResponse = BulkAgentAction | BulkAgentActionDryRun;
 
 export interface DeleteAgentRequest {
   params: {
@@ -198,9 +246,9 @@ export interface MigrateSingleAgentRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
-      replace_token?: boolean;
+      replace_token?: string;
     };
   };
 }
@@ -223,14 +271,13 @@ export interface BulkMigrateAgentsRequest {
       proxy_disabled?: boolean;
       proxy_headers?: Record<string, string>;
       proxy_url?: string;
-      staging?: boolean;
+      staging?: string;
       tags?: string;
     };
+    dryRun?: boolean;
   };
 }
-export interface BulkMigrateAgentsResponse {
-  actionId: string;
-}
+export type BulkMigrateAgentsResponse = BulkAgentAction | BulkAgentActionDryRun;
 export interface UpdateAgentRequest {
   params: {
     agentId: string;
@@ -247,6 +294,7 @@ export interface PostBulkUpdateAgentTagsRequest {
     tagsToAdd?: string[];
     tagsToRemove?: string[];
     includeInactive?: boolean;
+    dryRun?: boolean;
   };
 }
 
@@ -299,6 +347,7 @@ export interface GetActionStatusRequest {
     page?: number;
     date?: string;
     latest?: number;
+    scheduledOnly?: boolean;
   };
 }
 export interface GetActionStatusResponse {
@@ -316,4 +365,47 @@ export interface PostRetrieveAgentsByActionsRequest {
 
 export interface PostRetrieveAgentsByActionsResponse {
   items: string[];
+}
+
+export interface ChangeAgentPrivilegeLevelRequest {
+  agentId: string;
+  body: {
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+  } | null;
+}
+
+export interface ChangeAgentPrivilegeLevelResponse {
+  actionId: string;
+}
+
+export interface AgentPrivilegeLevelChangeUserInfo {
+  username?: string;
+  groupname?: string;
+  password?: string;
+}
+
+export interface BulkChangeAgentPrivilegeLevelRequest {
+  body: {
+    agents: string[] | string;
+    user_info?: AgentPrivilegeLevelChangeUserInfo;
+    dryRun?: boolean;
+  };
+}
+
+export type BulkChangeAgentPrivilegeLevelResponse = BulkAgentAction | BulkAgentActionDryRun;
+
+export interface PostGenerateAgentsReportRequest {
+  body: {
+    agents: string[] | string;
+    fields: string[];
+    timezone?: string;
+    sort?: {
+      field?: string;
+      direction?: 'asc' | 'desc';
+    };
+  };
+}
+
+export interface PostGenerateAgentsReportResponse {
+  url: string;
 }

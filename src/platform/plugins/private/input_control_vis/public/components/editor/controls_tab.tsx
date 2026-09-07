@@ -51,7 +51,7 @@ class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
 
   getIndexPattern = async (indexPatternId: string): Promise<DataView> => {
     const [, startDeps] = await this.props.deps.core.getStartServices();
-    return await startDeps.data.indexPatterns.get(indexPatternId);
+    return await startDeps.data.dataViews.get(indexPatternId);
   };
 
   onChange = (value: ControlParams[]) => this.props.setValue('controls', value);
@@ -192,7 +192,7 @@ class ControlsTab extends PureComponent<ControlsTabProps, ControlsTabUiState> {
                 <EuiButton
                   fill
                   onClick={this.handleAddControl}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   data-test-subj="inputControlEditorAddBtn"
                   aria-label={i18n.translate(
                     'inputControl.editor.controlsTab.select.addControlAriaLabel',

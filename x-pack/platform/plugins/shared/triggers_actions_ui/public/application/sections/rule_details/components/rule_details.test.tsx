@@ -7,15 +7,14 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { mountWithIntl, shallowWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { act, render, screen, waitFor } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { RuleDetails } from './rule_details';
 import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
-import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
@@ -24,11 +23,46 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      cacheTime: 0,
+      staleTime: 0,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    },
+  },
+});
 
 jest.mock('../../../../common/lib/kibana');
 
+jest.requireMock('../../../../common/get_experimental_features');
+
 jest.mock('../../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
+
+jest.mock('../../../lib/rule_api/rule_summary', () => ({
+  loadRuleSummary: jest.fn().mockReturnValue({
+    alerts: {},
+  }),
+}));
+
+jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
+  loadExecutionLogAggregations: jest.fn().mockReturnValue([]),
+}));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn(),
+}));
+
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => ({
+  getRuleTypes: jest.fn().mockResolvedValue([]),
 }));
 
 jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => ({
@@ -39,9 +73,20 @@ jest.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => (
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),
+    replace: jest.fn(),
+    createHref: jest.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
+    listen: jest.fn(() => jest.fn()),
+    location: {
+      pathname: '/triggersActions/rules/',
+      search: '',
+      hash: '',
+      state: undefined,
+    },
   }),
   useLocation: () => ({
     pathname: '/triggersActions/rules/',
+    search: '',
+    hash: '',
   }),
 }));
 
@@ -53,6 +98,10 @@ jest.mock('../../../lib/rule_api/update_api_key', () => ({
   bulkUpdateAPIKey: jest.fn(),
 }));
 
+jest.mock('./rule_route', () => ({
+  RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
+}));
+
 const { bulkUpdateAPIKey } = jest.requireMock('../../../lib/rule_api/update_api_key');
 
 jest.mock('../../../lib/capabilities', () => ({
@@ -60,7 +109,9 @@ jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
   hasExecuteActionsCapability: jest.fn(() => true),
   hasManageApiKeysCapability: jest.fn(() => true),
+  hasShowActionsCapability: jest.fn(() => false),
 }));
+
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -94,6 +145,40 @@ const ruleType: RuleType = {
   enabledInLicense: true,
   category: 'my-category',
   isExportable: true,
+  isInternallyManaged: false,
+};
+
+/**
+ * Renders `RuleDetails` with the providers it needs in tests, including the chrome context that the
+ * inline `AppHeader` reads from (via `MockAppHeaderProvider`).
+ */
+const renderRuleDetails = (ui: React.ReactElement) =>
+  render(
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">
+        <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+      </IntlProvider>
+    </QueryClientProvider>
+  );
+
+/**
+ * Opens the app menu overflow ("More") popover and clicks the menu item with the given test subject.
+ * At the jsdom viewport width every app-menu item collapses into the overflow popover, so it must be
+ * opened before the item can be interacted with.
+ */
+const clickMenuItem = async (testSubj: string) => {
+  await openAppMenuOverflow();
+  await userEvent.click(await screen.findByTestId(testSubj));
+};
+
+/**
+ * Opens the app menu overflow ("More") popover and toggles the enabled/disabled switch. Enable/disable
+ * now lives in the actions area as a toggle (the header badge is a non-interactive status indicator).
+ * At the jsdom viewport width the switch collapses into the overflow popover, so it must be opened first.
+ */
+const toggleEnabledSwitch = async () => {
+  await openAppMenuOverflow();
+  await userEvent.click(await screen.findByTestId('ruleEnabledSwitch'));
 };
 
 describe('rule_details', () => {
@@ -105,130 +190,143 @@ describe('rule_details', () => {
     const renderComponent = ({ autoRecoverAlerts }: { autoRecoverAlerts?: boolean }) => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      return render(
-        <IntlProvider locale="en">
-          <RuleDetails
-            rule={rule}
-            ruleType={{ ...ruleType, autoRecoverAlerts }}
-            actionTypes={[]}
-            {...mockRuleApis}
-            requestRefresh={requestRefresh}
-          />
-        </IntlProvider>
+      return renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={{ ...ruleType, autoRecoverAlerts }}
+          actionTypes={[]}
+          {...mockRuleApis}
+          requestRefresh={requestRefresh}
+        />
       );
     };
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `true`', async () => {
       renderComponent({ autoRecoverAlerts: true });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
 
     it('shows untrack active alerts modal if `autoRecoverAlerts` is `undefined`', async () => {
       renderComponent({ autoRecoverAlerts: undefined });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
-      });
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
+      expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
-      await userEvent.click(await screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
 
     it('does not show untrack active alerts modal if `autoRecoverAlerts` is `false`', async () => {
       renderComponent({ autoRecoverAlerts: false });
 
-      await userEvent.click(await screen.getByTestId('ruleActionsButton'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(await screen.getByTestId('disableButton'));
+      await toggleEnabledSwitch();
 
-      await waitFor(async () => {
-        expect(await screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
-
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
   });
 
   describe('page', () => {
+    const renderPage = (rule: Rule, overrideRuleType: RuleType = ruleType) =>
+      renderRuleDetails(
+        <RuleDetails rule={rule} ruleType={overrideRuleType} actionTypes={[]} {...mockRuleApis} />
+      );
+
     it('renders the rule name as a title', () => {
       const rule = mockRule();
-      expect(
-        shallowWithIntl(
-          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find('EuiPageHeader')
-      ).toBeTruthy();
+      renderPage(rule);
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
-    it('renders the rule type badge', () => {
+    it('renders the rule execution status badge', () => {
+      const rule = mockRule({
+        executionStatus: {
+          status: 'active',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+      });
+      renderPage(rule);
+      expect(screen.getByText('Active')).toBeInTheDocument();
+    });
+
+    it('renders the enabled badge as a non-interactive status indicator with an enabled toggle', async () => {
+      const rule = mockRule({ enabled: true });
+      renderPage(rule);
+
+      // The badge only materializes the status and is not a dropdown anymore.
+      expect(screen.getByTestId('ruleEnabledBadge')).toHaveTextContent('Enabled');
+      await userEvent.click(screen.getByTestId('ruleEnabledBadge'));
+      expect(screen.queryByTestId('enableRuleBadgeItem')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('disableRuleBadgeItem')).not.toBeInTheDocument();
+
+      // Enable/disable is now a toggle in the actions area.
+      await openAppMenuOverflow();
+      const enabledSwitch = await screen.findByTestId('ruleEnabledSwitch');
+      expect(enabledSwitch).toBeChecked();
+    });
+
+    it('renders the disabled badge when the rule is disabled', () => {
+      const rule = mockRule({ enabled: false });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleEnabledBadge')).toHaveTextContent('Disabled');
+    });
+
+    it('renders the documentation link in the app menu', async () => {
       const rule = mockRule();
+      renderPage(rule);
+      await openAppMenuOverflow();
       expect(
-        shallowWithIntl(
-          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        ).find(<EuiBadge>{ruleType.name}</EuiBadge>)
-      ).toBeTruthy();
+        await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)
+      ).toBeInTheDocument();
     });
 
-    it('renders the API key owner badge when user can manage API keys', () => {
+    it('renders the API key owner metadata when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
-      const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
-      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe('elastic');
+      renderPage(rule);
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
-    it('renders the user-managed icon when apiKeyCreatedByUser is true', async () => {
+    it('renders the API key owner metadata when apiKeyCreatedByUser is true', async () => {
       const rule = mockRule({ apiKeyOwner: 'elastic', apiKeyCreatedByUser: true });
-      const wrapper = mountWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
-      expect(wrapper.find('[data-test-subj="apiKeyOwnerLabel"]').first().text()).toBe(
-        'elastic Info'
-      );
+      renderPage(rule);
+      expect(screen.getByTestId('apiKeyOwnerLabel')).toHaveTextContent('elastic');
     });
 
-    it(`doesn't render the API key owner badge when user can't manage API keys`, () => {
+    it(`doesn't render the API key owner metadata when user can't manage API keys`, () => {
       const { hasManageApiKeysCapability } = jest.requireMock('../../../lib/capabilities');
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
-      expect(
-        shallowWithIntl(
-          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        )
-          .find(<EuiBadge>{rule.apiKeyOwner}</EuiBadge>)
-          .exists()
-      ).toBeFalsy();
+      renderPage(rule);
+      expect(screen.queryByTestId('apiKeyOwnerLabel')).not.toBeInTheDocument();
     });
 
-    it('does not render actions button if the user has only read permissions', async () => {
+    it('does not render the actions menu if the user has only read permissions', async () => {
+      const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
+      hasAllPrivilege.mockReturnValue(false);
       const rule = mockRule();
       const mockedRuleType: RuleType = {
         id: '.noop',
@@ -240,18 +338,23 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         producer: ALERTING_FEATURE_ID,
         authorizedConsumers: {
-          ALERTING_FEATURE_ID: { read: true, all: false },
+          [ALERTING_FEATURE_ID]: { read: true, all: false },
         },
         enabledInLicense: true,
         category: 'my-category',
         isExportable: true,
+        isInternallyManaged: false,
       };
 
-      const wrapper = shallowWithIntl(
-        <RuleDetails rule={rule} ruleType={mockedRuleType} actionTypes={[]} {...mockRuleApis} />
-      );
+      renderPage(rule, mockedRuleType);
 
-      expect(wrapper.find('[data-test-subj="ruleActionsButton"]').exists()).toBeFalsy();
+      // The menu still exists (it hosts the Documentation link), but a read-only user gets no rule
+      // management actions and the enabled/disabled badge is not an interactive dropdown.
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('runRuleButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('deleteRuleButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      hasAllPrivilege.mockReturnValue(true);
     });
 
     it('renders the rule error banner with error message, when rule has a license error', () => {
@@ -266,60 +369,12 @@ describe('rule_details', () => {
           },
         },
       });
-      const wrapper = shallowWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
-      expect(wrapper.find('[data-test-subj="ruleErrorBanner"]').first().shallow())
-        .toMatchInlineSnapshot(`
-        <EuiPanel
-          borderRadius="none"
-          color="danger"
-          css="unknown styles"
-          data-test-subj="ruleErrorBanner"
-          grow={false}
-          paddingSize="s"
-          panelRef={null}
-        >
-          <p
-            className="euiCallOutHeader__title"
-          >
-            <EuiIcon
-              aria-hidden="true"
-              color="inherit"
-              css="unknown styles"
-              size="m"
-              type="error"
-            />
-            Cannot run rule
-          </p>
-          <EuiSpacer
-            size="s"
-          />
-          <EuiText
-            color="default"
-            size="xs"
-          >
-            <EuiText
-              size="xs"
-            >
-              test
-            </EuiText>
-            <EuiSpacer
-              size="s"
-            />
-            <EuiLink
-              color="primary"
-              href="/app/management/stack/license_management"
-              target="_blank"
-            >
-              <MemoizedFormattedMessage
-                defaultMessage="Manage license"
-                id="xpack.triggersActionsUI.sections.ruleDetails.manageLicensePlanBannerLinkTitle"
-              />
-            </EuiLink>
-          </EuiText>
-        </EuiPanel>
-      `);
+      renderPage(rule);
+      const ruleErrorBanner = screen.getByTestId('ruleErrorBanner');
+      expect(ruleErrorBanner).toBeInTheDocument();
+      expect(ruleErrorBanner).toHaveTextContent('Cannot run rule');
+      expect(ruleErrorBanner).toHaveTextContent('test');
+      expect(screen.getByRole('link', { name: /manage license/i })).toBeInTheDocument();
     });
 
     it('renders the rule warning banner with warning message, when rule status is a warning', () => {
@@ -334,12 +389,46 @@ describe('rule_details', () => {
           },
         },
       });
-      const wrapper = shallowWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-      );
-      expect(
-        wrapper.find('[data-test-subj="ruleWarningBanner"]').first().text()
-      ).toMatchInlineSnapshot(`"<EuiIcon /> Action limit exceeded warning message"`);
+      renderPage(rule);
+      const ruleWarningBanner = screen.getByTestId('ruleWarningBanner');
+      expect(ruleWarningBanner).toBeInTheDocument();
+      expect(ruleWarningBanner).toHaveTextContent('warning message');
+    });
+
+    it('renders a rule with one action', async () => {
+      const rule = mockRule({
+        actions: [
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.server-log',
+          },
+        ],
+      });
+      renderPage(rule);
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
+    });
+
+    it('renders a rule with multiple actions', async () => {
+      const rule = mockRule({
+        actions: [
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.server-log',
+          },
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.email',
+          },
+        ],
+      });
+      renderPage(rule);
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(rule.name);
     });
 
     it('displays a toast message when interval is less than configured minimum', async () => {
@@ -348,166 +437,80 @@ describe('rule_details', () => {
           interval: '1s',
         },
       });
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
-    });
-
-    describe('actions', () => {
-      it('renders an rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-          ],
-        });
-
-        const actionTypes: ActionType[] = [
-          {
-            id: '.server-log',
-            name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
-        ];
-
-        const wrapper = mountWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        );
-
-        expect(
-          wrapper.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
-        ).toBeTruthy();
-      });
-
-      it('renders a counter for multiple rule action', () => {
-        const rule = mockRule({
-          actions: [
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.server-log',
-            },
-            {
-              group: 'default',
-              id: uuidv4(),
-              params: {},
-              actionTypeId: '.email',
-            },
-          ],
-        });
-        const actionTypes: ActionType[] = [
-          {
-            id: '.server-log',
-            name: 'Server log',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
-          {
-            id: '.email',
-            name: 'Send email',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-            supportedFeatureIds: ['alerting'],
-            isSystemActionType: false,
-          },
-        ];
-
-        const details = mountWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        );
-
-        expect(
-          details.find('[data-test-subj="actionConnectorName-0-Server log"]').exists
-        ).toBeTruthy();
-        expect(
-          details.find('[data-test-subj="actionConnectorName-0-Send email"]').exists
-        ).toBeTruthy();
+      await waitFor(() => {
+        expect(useKibanaMock().services.notifications.toasts.addInfo).toHaveBeenCalled();
       });
     });
 
     describe('links', () => {
-      it('links to the app that created the rule', () => {
+      it('links to the Edit flyout', async () => {
         const rule = mockRule();
-        expect(
-          shallowWithIntl(
-            <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-          ).find('ViewInApp')
-        ).toBeTruthy();
+        renderRuleDetails(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        );
+
+        await openAppMenuOverflow();
+
+        await screen.findByTestId('openEditRuleFlyoutButton');
       });
 
-      it('links to the Edit flyout', () => {
+      it('renders view in Discover menu item when navigation is available', async () => {
+        const alertingMock = useKibanaMock().services.alerting;
+        (alertingMock!.getNavigation as jest.Mock).mockResolvedValueOnce('/app/discover#/alert');
+
         const rule = mockRule();
-        const pageHeaderProps = shallowWithIntl(
+        renderRuleDetails(
           <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
-        )
-          .find('EuiPageHeader')
-          .props() as EuiPageHeaderProps;
-        const rightSideItems = pageHeaderProps.rightSideItems;
-        expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-          <React.Fragment>
-            <EuiButtonEmpty
-              data-test-subj="openEditRuleFlyoutButton"
-              disabled={false}
-              iconType="pencil"
-              name="edit"
-              onClick={[Function]}
-            >
-              <Memo(MemoizedFormattedMessage)
-                defaultMessage="Edit"
-                id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-              />
-            </EuiButtonEmpty>
-          </React.Fragment>
-        `);
+        );
+
+        await openAppMenuOverflow();
+
+        expect(await screen.findByTestId('ruleDetails-viewInDiscover')).toBeInTheDocument();
+        expect(screen.getByText('View in Discover')).toBeInTheDocument();
+      });
+
+      it('renders view linked object menu item for supported rule types', async () => {
+        const mockLocator = {
+          getRedirectUrl: jest.fn().mockReturnValue('/app/slos/slo-id-1'),
+        };
+        useKibanaMock().services.share = {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue(mockLocator),
+            },
+          },
+        } as any;
+
+        const rule = mockRule({
+          ruleTypeId: 'slo.rules.burnRate',
+          params: { sloId: 'slo-id-1' },
+        });
+        renderRuleDetails(
+          <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+        );
+
+        await openAppMenuOverflow();
+
+        expect(await screen.findByTestId('ruleDetails-viewLinkedObject')).toBeInTheDocument();
+        expect(screen.getByText('View linked SLO')).toBeInTheDocument();
+
+        delete (useKibanaMock().services as any).share;
       });
     });
   });
 
   describe('edit button', () => {
     const actionTypes: ActionType[] = [
-      {
+      createMockConnectorType({
         id: '.server-log',
         name: 'Server log',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-        isSystemActionType: false,
-      },
+      }),
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
     const ruleTypeR: RuleTypeModel = {
@@ -524,7 +527,17 @@ describe('rule_details', () => {
     ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
-    it('should render an edit button when rule and actions are editable', () => {
+    const renderEditButton = (rule: Rule, actionTypesOverride: ActionType[] = actionTypes) =>
+      renderRuleDetails(
+        <RuleDetails
+          rule={rule}
+          ruleType={ruleType}
+          actionTypes={actionTypesOverride}
+          {...mockRuleApis}
+        />
+      );
+
+    it('should render an edit button when rule and actions are editable', async () => {
       const rule = mockRule({
         enabled: true,
         muteAll: false,
@@ -537,33 +550,15 @@ describe('rule_details', () => {
           },
         ],
       });
-      const pageHeaderProps = shallowWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
-      )
-        .find('EuiPageHeader')
-        .props() as EuiPageHeaderProps;
-      const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
-      `);
+      renderEditButton(rule);
+      await openAppMenuOverflow();
+
+      await screen.findByTestId('openEditRuleFlyoutButton');
     });
 
-    it('should not render an edit button when rule editable but actions arent', () => {
+    it('should not render an edit button when rule editable but actions arent', async () => {
       const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
-      hasExecuteActionsCapability.mockReturnValueOnce(false);
+      hasExecuteActionsCapability.mockReturnValue(false);
       const rule = mockRule({
         enabled: true,
         muteAll: false,
@@ -576,20 +571,10 @@ describe('rule_details', () => {
           },
         ],
       });
-      expect(
-        shallowWithIntl(
-          <RuleDetails
-            rule={rule}
-            ruleType={ruleType}
-            actionTypes={actionTypes}
-            {...mockRuleApis}
-          />
-        )
-          .find(EuiButtonEmpty)
-          .find('[name="edit"]')
-          .first()
-          .exists()
-      ).toBeFalsy();
+      renderEditButton(rule);
+      await openAppMenuOverflow();
+      expect(screen.queryByTestId('openEditRuleFlyoutButton')).not.toBeInTheDocument();
+      hasExecuteActionsCapability.mockReturnValue(true);
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
@@ -600,28 +585,10 @@ describe('rule_details', () => {
         muteAll: false,
         actions: [],
       });
-      const pageHeaderProps = shallowWithIntl(
-        <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
-      )
-        .find('EuiPageHeader')
-        .props() as EuiPageHeaderProps;
-      const rightSideItems = pageHeaderProps.rightSideItems;
-      expect(!!rightSideItems && rightSideItems[1]!).toMatchInlineSnapshot(`
-        <React.Fragment>
-          <EuiButtonEmpty
-            data-test-subj="openEditRuleFlyoutButton"
-            disabled={false}
-            iconType="pencil"
-            name="edit"
-            onClick={[Function]}
-          >
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Edit"
-              id="xpack.triggersActionsUI.sections.ruleDetails.editRuleButtonLabel"
-            />
-          </EuiButtonEmpty>
-        </React.Fragment>
-      `);
+      renderEditButton(rule);
+      await openAppMenuOverflow();
+
+      await screen.findByTestId('openEditRuleFlyoutButton');
     });
   });
 
@@ -636,6 +603,8 @@ describe('rule_details', () => {
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         isSystemActionType: false,
+        isDeprecated: false,
+        source: 'stack',
       },
     ];
     ruleTypeRegistry.has.mockReturnValue(true);
@@ -695,21 +664,15 @@ describe('rule_details', () => {
           },
         ],
       });
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-      const brokenConnectorIndicator = wrapper
-        .find('[data-test-subj="actionWithBrokenConnector"]')
-        .first();
-      const brokenConnectorWarningBanner = wrapper
-        .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
-        .first();
-      expect(brokenConnectorIndicator.exists()).toBeFalsy();
-      expect(brokenConnectorWarningBanner.exists()).toBeFalsy();
+      await waitFor(() =>
+        expect(screen.queryByTestId('actionWithBrokenConnector')).not.toBeInTheDocument()
+      );
+      expect(
+        screen.queryByTestId('actionWithBrokenConnectorWarningBanner')
+      ).not.toBeInTheDocument();
     });
 
     it('should render broken connector indicator and warning if any rule actions connector does not exist', async () => {
@@ -737,21 +700,11 @@ describe('rule_details', () => {
           },
         ],
       });
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-      const brokenConnectorWarningBanner = wrapper
-        .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
-        .first();
-      const brokenConnectorWarningBannerAction = wrapper
-        .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
-        .first();
-      expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
-      expect(brokenConnectorWarningBannerAction.exists()).toBeTruthy();
+      await screen.findByTestId('actionWithBrokenConnectorWarningBanner');
+      expect(screen.getByTestId('actionWithBrokenConnectorWarningBannerEdit')).toBeInTheDocument();
     });
 
     it('should render broken connector indicator and warning with no edit button if any rule actions connector does not exist and user has no edit access', async () => {
@@ -781,48 +734,13 @@ describe('rule_details', () => {
       });
       const { hasExecuteActionsCapability } = jest.requireMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />
       );
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-      const brokenConnectorWarningBanner = wrapper
-        .find('[data-test-subj="actionWithBrokenConnectorWarningBanner"]')
-        .first();
-      const brokenConnectorWarningBannerAction = wrapper
-        .find('[data-test-subj="actionWithBrokenConnectorWarningBannerEdit"]')
-        .first();
-      expect(brokenConnectorWarningBanner.exists()).toBeTruthy();
-      expect(brokenConnectorWarningBannerAction.exists()).toBeFalsy();
-    });
-  });
-
-  describe('refresh button', () => {
-    it('should call requestRefresh when clicked', async () => {
-      const rule = mockRule();
-      const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
-        <RuleDetails
-          rule={rule}
-          ruleType={ruleType}
-          actionTypes={[]}
-          {...mockRuleApis}
-          requestRefresh={requestRefresh}
-        />
-      );
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
-
-      const refreshButton = wrapper.find('[data-test-subj="refreshRulesButton"]').last();
-      expect(refreshButton.exists()).toBeTruthy();
-
-      refreshButton.simulate('click');
-      expect(requestRefresh).toHaveBeenCalledTimes(1);
+      await screen.findByTestId('actionWithBrokenConnectorWarningBanner');
+      expect(
+        screen.queryByTestId('actionWithBrokenConnectorWarningBannerEdit')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -830,7 +748,7 @@ describe('rule_details', () => {
     it('should call update api key when clicked', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails
           rule={rule}
           ruleType={ruleType}
@@ -840,27 +758,15 @@ describe('rule_details', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await clickMenuItem('updateAPIKeyButton');
+
+      await screen.findByTestId('updateApiKeyIdsConfirmation');
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
-      actionsButton.simulate('click');
-
-      const updateButton = wrapper.find('[data-test-subj="updateAPIKeyButton"]').last();
-      expect(updateButton.exists()).toBeTruthy();
-
-      updateButton.simulate('click');
-
-      const confirm = wrapper.find('[data-test-subj="updateApiKeyIdsConfirmation"]').first();
-      expect(confirm.exists()).toBeTruthy();
-
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
-      expect(confirmButton.exists()).toBeTruthy();
-
-      confirmButton.simulate('click');
-
-      expect(bulkUpdateAPIKey).toHaveBeenCalledTimes(1);
       expect(bulkUpdateAPIKey).toHaveBeenCalledWith(expect.objectContaining({ ids: [rule.id] }));
     });
   });
@@ -874,7 +780,7 @@ describe('rule_details', () => {
       });
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails
           rule={rule}
           ruleType={ruleType}
@@ -884,36 +790,24 @@ describe('rule_details', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await clickMenuItem('deleteRuleButton');
+
+      await screen.findByTestId('rulesDeleteConfirmation');
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
-      actionsButton.simulate('click');
-
-      const updateButton = wrapper.find('[data-test-subj="deleteRuleButton"]').last();
-      expect(updateButton.exists()).toBeTruthy();
-
-      updateButton.simulate('click');
-
-      const confirm = wrapper.find('[data-test-subj="rulesDeleteConfirmation"]').first();
-      expect(confirm.exists()).toBeTruthy();
-
-      const confirmButton = wrapper.find('[data-test-subj="confirmModalConfirmButton"]').last();
-      expect(confirmButton.exists()).toBeTruthy();
-
-      confirmButton.simulate('click');
-
-      expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkDeleteRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
   });
 
-  describe('enable/disable rule button', () => {
-    it('should disable the rule when clicked', async () => {
+  describe('enable/disable rule toggle', () => {
+    it('should disable the rule when toggled off', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails
           rule={rule}
           ruleType={ruleType}
@@ -923,34 +817,25 @@ describe('rule_details', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await toggleEnabledSwitch();
+
+      await screen.findByTestId('untrackAlertsModal');
+
+      await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
-      actionsButton.simulate('click');
-
-      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
-      expect(disableButton.exists()).toBeTruthy();
-
-      disableButton.simulate('click');
-
-      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
-      expect(modal.exists()).toBeTruthy();
-
-      modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
-
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
         ids: [rule.id],
         untrack: false,
       });
     });
 
-    it('should enable the rule when clicked', async () => {
+    it('should enable the rule when toggled on', async () => {
       const rule = { ...mockRule(), enabled: false };
       const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails
           rule={rule}
           ruleType={ruleType}
@@ -960,26 +845,18 @@ describe('rule_details', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await toggleEnabledSwitch();
+
+      await waitFor(() => {
+        expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
-      actionsButton.simulate('click');
-
-      const enableButton = wrapper.find('[data-test-subj="disableButton"]').last();
-      expect(enableButton.exists()).toBeTruthy();
-
-      enableButton.simulate('click');
-
-      expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkEnableRules).toHaveBeenCalledWith({ ids: [rule.id] });
     });
 
     it('should not show untrack alerts modal if rule type does not track alerts life cycle', async () => {
       const rule = mockRule();
       const requestRefresh = jest.fn();
-      const wrapper = mountWithIntl(
+      renderRuleDetails(
         <RuleDetails
           rule={rule}
           ruleType={{ ...ruleType, autoRecoverAlerts: false }}
@@ -989,22 +866,13 @@ describe('rule_details', () => {
         />
       );
 
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await toggleEnabledSwitch();
+
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+
+      await waitFor(() => {
+        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       });
-      const actionsButton = wrapper.find('[data-test-subj="ruleActionsButton"]').last();
-      actionsButton.simulate('click');
-
-      const disableButton = wrapper.find('[data-test-subj="disableButton"]').last();
-      expect(disableButton.exists()).toBeTruthy();
-
-      disableButton.simulate('click');
-
-      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
-      expect(modal.exists()).not.toBeTruthy();
-
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
         ids: [rule.id],
         untrack: false,

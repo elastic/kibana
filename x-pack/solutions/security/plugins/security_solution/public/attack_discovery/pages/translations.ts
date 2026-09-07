@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const CONNECTOR_ERROR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.errorConnector',
   {
-    defaultMessage: 'No connector selected, select a connector to use attack discovery',
+    defaultMessage: 'No model selected, select a model to use attack discovery',
   }
 );
 
-export const ERROR_CANCELING_ATTACK_DISCOVERIES = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.errorCancelingAttackDiscoveriesToastTitle',
+export const ALERTS_INDEX_PATTERN_ERROR = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.errorAlertsIndexPattern',
   {
-    defaultMessage: 'Error canceling attack discoveries',
+    defaultMessage: 'Alerts index pattern is required to generate attack discoveries',
   }
 );
 
@@ -35,9 +35,9 @@ export const SHOW_ANONYMIZED_LABEL = i18n.translate(
   }
 );
 
-export const SHOW_REAL_VALUES = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.showRealValuesLabel',
+export const ANONYMIZATION_ARIAL_LABEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.anonymizationArialLabel',
   {
-    defaultMessage: 'Show real values',
+    defaultMessage: 'Anonymization',
   }
 );

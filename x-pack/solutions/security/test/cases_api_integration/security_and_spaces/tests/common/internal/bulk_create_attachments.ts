@@ -11,7 +11,7 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
 import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
@@ -23,7 +23,7 @@ import {
   getPostCaseRequest,
   getFilesAttachmentReq,
   fileAttachmentMetadata,
-  postExternalReferenceSOReq,
+  postExternalReferenceESReq,
   fileMetadata,
   postCommentAlertMultipleIdsReq,
   postCommentActionsReq,
@@ -66,7 +66,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../common/utils/detections_response';
+} from '@kbn/detections-response-ftr-services';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateAttachmentsRequest
+    attachments: BulkCreateAttachmentsRequestV2
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 
@@ -207,7 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [postExternalReferenceSOReq],
+            params: [postExternalReferenceESReq],
           });
 
           await bulkCreateAttachments({
@@ -718,7 +718,10 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
+        // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
+        // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
+        // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
+        it.skip('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           await createComment({
@@ -753,7 +756,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
+        // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
+        it.skip('400s when attempting to bulk create >100 external reference attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           await createComment({
@@ -836,12 +840,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bulkCreateAlertsAndVerifyAlertStatus = async ({
           syncAlerts,
+          extractObservables,
           expectedAlertStatus,
           caseAuth,
           attachmentExpectedHttpCode,
           attachmentAuth,
         }: {
           syncAlerts: boolean;
+          extractObservables: boolean;
           expectedAlertStatus: string;
           caseAuth?: { user: User; space: string | null };
           attachmentExpectedHttpCode?: number;
@@ -851,7 +857,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts },
+              settings: { syncAlerts, extractObservables },
             },
             200,
             caseAuth
@@ -908,7 +914,7 @@ export default ({ getService }: FtrProviderContext): void => {
             [...Array(totalCases).keys()].map((index) =>
               createCase(supertest, {
                 ...postCaseReq,
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               })
             )
           );
@@ -936,6 +942,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should change the status of the alerts if sync alert is on', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'acknowledged',
           });
         });
@@ -943,6 +950,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert if sync alert is off', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: false,
+            extractObservables: false,
             expectedAlertStatus: 'open',
           });
         });
@@ -950,6 +958,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should change the status of the alert when the user has write access to the indices and only read access to the siem solution', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'acknowledged',
             caseAuth: {
               user: superUser,
@@ -962,6 +971,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert when the user does NOT have access to the alert', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'open',
             caseAuth: {
               user: superUser,
@@ -975,6 +985,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should NOT change the status of the alert when the user has read access to the kibana feature but no read access to the ES index', async () => {
           await bulkCreateAlertsAndVerifyAlertStatus({
             syncAlerts: true,
+            extractObservables: true,
             expectedAlertStatus: 'open',
             caseAuth: {
               user: superUser,
@@ -1015,7 +1026,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           await bulkCreateAttachmentsAndRefreshIndex({
@@ -1030,7 +1041,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -1052,7 +1063,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -1074,7 +1085,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             {
               ...postCaseReq,
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -1110,7 +1121,7 @@ export default ({ getService }: FtrProviderContext): void => {
               createCase(supertest, {
                 ...postCaseReq,
                 owner: 'observabilityFixture',
-                settings: { syncAlerts: false },
+                settings: { syncAlerts: false, extractObservables: false },
               })
             )
           );
@@ -1192,7 +1203,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           await bulkCreateAttachments({
@@ -1220,7 +1231,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               ...postCaseReq,
               owner: 'observabilityFixture',
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }
@@ -1252,7 +1263,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               ...postCaseReq,
               owner: 'observabilityFixture',
-              settings: { syncAlerts: false },
+              settings: { syncAlerts: false, extractObservables: false },
             },
             200,
             { user: superUser, space: 'space1' }

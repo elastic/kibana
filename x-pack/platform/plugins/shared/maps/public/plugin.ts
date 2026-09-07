@@ -24,14 +24,12 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -43,17 +41,9 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 
-import {
-  createRegionMapFn,
-  GEOHASH_GRID,
-  getGeoHashBucketAgg,
-  regionMapRenderer,
-  regionMapVisType,
-  createTileMapFn,
-  tileMapRenderer,
-  tileMapVisType,
-} from './legacy_visualizations';
+import type { KqlPluginStart } from '@kbn/kql/public';
 import { MapsAppLocatorDefinition } from './locators/map_locator/locator_definition';
 import { MapsAppTileMapLocatorDefinition } from './locators/tile_map_locator/locator_definition';
 import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator/locator_definition';
@@ -81,6 +71,8 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
 import { registerUiActions } from './trigger_actions/register_ui_actions';
+import { REGION_MAP_VIS_TYPE } from './legacy_visualizations/region_map/types';
+import { TILE_MAP_VIS_TYPE } from './legacy_visualizations/tile_map/types';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -100,10 +92,11 @@ export interface MapsPluginSetupDependencies {
 
 export interface MapsPluginStartDependencies {
   charts: ChartsPluginStart;
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  kql: KqlPluginStart;
   embeddable: EmbeddableStart;
-  embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   fieldFormats: FieldFormatsStart;
   fileUpload: FileUploadPluginStart;
   inspector: InspectorStartContract;
@@ -113,13 +106,13 @@ export interface MapsPluginStartDependencies {
   share: SharePluginStart;
   visualizations: VisualizationsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   contentManagement: ContentManagementPublicStart;
   screenshotMode?: ScreenshotModePluginSetup;
   usageCollection?: UsageCollectionSetup;
   serverless?: ServerlessPluginStart;
+  expressions: ReturnType<ExpressionsPublicPlugin['start']>;
 }
 
 /**
@@ -199,14 +192,14 @@ export class MapsPlugin
           core.getStartServices(),
           import('./render_app'),
         ]);
-        const [coreStart, { savedObjectsTagging, spaces }] = startServices;
+        const [coreStart, { spaces }] = startServices;
         const UsageTracker =
           plugins.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
         const activeSpace = await spaces?.getActiveSpace();
         if (activeSpace) {
           setSpaceId(activeSpace.id);
         }
-        return renderApp(params, { coreStart, AppUsageTracker: UsageTracker, savedObjectsTagging });
+        return renderApp(params, { coreStart, AppUsageTracker: UsageTracker });
       },
     });
 
@@ -223,13 +216,33 @@ export class MapsPlugin
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
-    plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
-    plugins.expressions.registerFunction(createRegionMapFn);
-    plugins.expressions.registerRenderer(regionMapRenderer);
-    plugins.visualizations.createBaseVisualization(regionMapVisType);
-    plugins.expressions.registerFunction(createTileMapFn);
-    plugins.expressions.registerRenderer(tileMapRenderer);
-    plugins.visualizations.createBaseVisualization(tileMapVisType);
+    plugins.visualizations.createBaseVisualizationAsync(REGION_MAP_VIS_TYPE, async () => {
+      const [[, startPlugins], { regionMapVisType, createRegionMapFn, regionMapRenderer }] =
+        await Promise.all([
+          core.getStartServices(),
+          import('./legacy_visualizations/async_module'),
+        ]);
+      if (!startPlugins.expressions.getFunction('regionmap')) {
+        plugins.expressions.registerFunction(createRegionMapFn);
+        plugins.expressions.registerRenderer(regionMapRenderer);
+      }
+      return regionMapVisType;
+    });
+    plugins.visualizations.createBaseVisualizationAsync(TILE_MAP_VIS_TYPE, async () => {
+      const [
+        [, startPlugins],
+        { tileMapVisType, createTileMapFn, tileMapRenderer, GEOHASH_GRID, getGeoHashBucketAgg },
+      ] = await Promise.all([
+        core.getStartServices(),
+        import('./legacy_visualizations/async_module'),
+      ]);
+      if (!startPlugins.expressions.getFunction('tilemap')) {
+        plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
+        plugins.expressions.registerFunction(createTileMapFn);
+        plugins.expressions.registerRenderer(tileMapRenderer);
+      }
+      return tileMapVisType;
+    });
 
     setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 

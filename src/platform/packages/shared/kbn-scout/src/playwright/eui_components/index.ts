@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiComboBoxWrapper } from './combo_box';
-import { EuiSelectableWrapper } from './selectable';
-import { EuiCheckBoxWrapper } from './check_box';
-import { EuiDataGridWrapper } from './data_grid';
-
-export { EuiComboBoxWrapper, EuiSelectableWrapper, EuiCheckBoxWrapper, EuiDataGridWrapper };
+// Component Objects from the published `@elastic/eui-test-helpers`, consumed
+// through the `page.components` factories. Re-exported here so `@kbn/scout` and
+// the solution Scout packages expose them under a single entry point.
+export {
+  EuiComboBoxObject,
+  EuiDataGridObject,
+  EuiGlobalToastListObject,
+  EuiSuperSelectObject,
+  EuiSelectableObject,
+  EuiBasicTableObject,
+  EuiDraggableObject,
+} from '@elastic/eui-test-helpers';

@@ -9,8 +9,16 @@ import { isEmpty, isEqual, omit } from 'lodash';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import {
+  ALERT_MUTED,
+  ALERT_INSTANCE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+} from '@kbn/rule-data-utils';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -42,6 +50,7 @@ import {
   getIndexTemplate,
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
+  getAlertSnoozeSnapshot,
   installWithTimeout,
   InstallShutdownError,
 } from './lib';
@@ -50,8 +59,30 @@ import { AlertsClient } from '../alerts_client';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
 import { setAlertsToUntracked } from './lib/set_alerts_to_untracked';
+import type { ClearAlertFlappingHistoryParams } from './lib/clear_alert_flapping_history';
+import { clearAlertFlappingHistory } from './lib/clear_alert_flapping_history';
+import type { IsExistingAlertParams } from './lib/is_existing_alert';
+import { isExistingAlert } from './lib/is_existing_alert';
+import type { GetAlertSnoozeSnapshotParams } from './lib/get_alert_snooze_snapshot';
 
-export const TOTAL_FIELDS_LIMIT = 2500;
+/**
+ * Default field limit for alerts-as-data (`.alerts-*`) indices, their index
+ * templates and component templates.
+ *
+ * Usage:
+ * - `AlertsService` uses it only as a fallback when `totalFieldsLimit` is not
+ *   provided (e.g. in tests). In production the value comes from
+ *   `xpack.alerting.alertsService.totalFieldsLimit` (see `config.ts`), so keep
+ *   that config default in sync with this constant.
+ * - Re-exported from `@kbn/alerting-plugin/server` and consumed directly by
+ *   `rule_registry` (`resource_installer.ts`) when installing its own
+ *   technical/component templates, and by the AAD integration tests.
+ *
+ * Note: other plugins (alerting_v2, security_solution siem_migrations /
+ * workflow_insights, elastic_assistant, ecs_data_quality_dashboard) define
+ * their own local field-limit constants and are NOT affected by this value.
+ */
+export const TOTAL_FIELDS_LIMIT = 2800;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
 export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
@@ -64,12 +95,21 @@ interface AlertsServiceParams {
   dataStreamAdapter: DataStreamAdapter;
   elasticsearchAndSOAvailability$: Observable<boolean>;
   isServerless: boolean;
+  /**
+   * Field limit applied to alerts-as-data indices/templates. Defaults to
+   * `TOTAL_FIELDS_LIMIT` when not provided (e.g. in tests). In production this
+   * is sourced from `xpack.alerting.alertsService.totalFieldsLimit`.
+   */
+  totalFieldsLimit?: number;
 }
 
 export interface CreateAlertsClientParams extends LegacyAlertsClientParams {
   namespace: string;
   rule: AlertRuleData;
 }
+
+export type MuteInstances = Array<{ ruleId: string; alertInstanceIds?: string[] }>;
+
 interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
@@ -121,6 +161,14 @@ interface IAlertsService {
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
 export type PublicFrameworkAlertsService = PublicAlertsService & {
   enabled: () => boolean;
+  /**
+   * Field limit applied to alerts-as-data (`.alerts-*`) resources, sourced from
+   * `xpack.alerting.alertsService.totalFieldsLimit`. Consumed by `rule_registry`
+   * so its technical/component templates and indices use the same configurable
+   * limit as the alerting framework. Optional so existing mocks remain valid;
+   * consumers fall back to `TOTAL_FIELDS_LIMIT` when it is not provided.
+   */
+  getTotalFieldsLimit?: () => number;
 };
 
 export class AlertsService implements IAlertsService {
@@ -131,12 +179,14 @@ export class AlertsService implements IAlertsService {
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
   private commonInitPromise: Promise<InitializationPromise>;
   private dataStreamAdapter: DataStreamAdapter;
+  private totalFieldsLimit: number;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
 
     this.isServerless = options.isServerless;
     this.dataStreamAdapter = options.dataStreamAdapter;
+    this.totalFieldsLimit = options.totalFieldsLimit ?? TOTAL_FIELDS_LIMIT;
 
     // Kick off initialization of common assets and save the promise
     this.commonInitPromise = this.initializeCommon(
@@ -343,7 +393,7 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
             esClient,
             template: getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -354,7 +404,7 @@ export class AlertsService implements IAlertsService {
               name: LEGACY_ALERT_CONTEXT,
               includeSettings: true,
             }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
         () =>
           createOrUpdateComponentTemplate({
@@ -365,7 +415,7 @@ export class AlertsService implements IAlertsService {
               name: ECS_CONTEXT,
               includeSettings: true,
             }),
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           }),
       ];
 
@@ -441,7 +491,7 @@ export class AlertsService implements IAlertsService {
             logger: this.options.logger,
             esClient,
             template: componentTemplate,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
           })
       );
       componentTemplateRefs.push(componentTemplate.name);
@@ -467,7 +517,7 @@ export class AlertsService implements IAlertsService {
             indexPatterns: indexTemplateAndPattern,
             kibanaVersion: this.options.kibanaVersion,
             namespace,
-            totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+            totalFieldsLimit: this.totalFieldsLimit,
             dataStreamAdapter: this.dataStreamAdapter,
           }),
         }),
@@ -475,7 +525,7 @@ export class AlertsService implements IAlertsService {
         await createConcreteWriteIndex({
           logger: this.options.logger,
           esClient,
-          totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+          totalFieldsLimit: this.totalFieldsLimit,
           indexPatterns: indexTemplateAndPattern,
           dataStreamAdapter: this.dataStreamAdapter,
         }),
@@ -499,6 +549,202 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...opts,
+    });
+  }
+
+  public async clearAlertFlappingHistory(opts: ClearAlertFlappingHistoryParams) {
+    return clearAlertFlappingHistory({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...opts,
+    });
+  }
+
+  public async isExistingAlert(params: IsExistingAlertParams): Promise<boolean> {
+    return isExistingAlert({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...params,
+    });
+  }
+
+  public async getAlertSnoozeSnapshot(
+    params: GetAlertSnoozeSnapshotParams
+  ): Promise<Record<string, unknown> | null> {
+    return getAlertSnoozeSnapshot({
+      logger: this.options.logger,
+      esClient: await this.options.elasticsearchClientPromise,
+      ...params,
+    });
+  }
+
+  private async _updateMuteState({
+    muted,
+    targets,
+    indices,
+    logger,
+  }: {
+    muted: boolean;
+    targets: MuteInstances;
+    indices: string[];
+    logger: Logger;
+  }) {
+    if (!indices || indices.length === 0) {
+      throw new Error(
+        `Unable to update mute state for rules (example: ${JSON.stringify(
+          targets[0]
+        )}) - no alert indices available`
+      );
+    }
+    if (targets.length === 0) {
+      return;
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const shouldClauses: QueryDslQueryContainer[] = targets.map((target) => {
+      const must: QueryDslQueryContainer[] = [{ term: { [ALERT_RULE_UUID]: target.ruleId } }];
+      if (target.alertInstanceIds) {
+        must.push({ terms: { [ALERT_INSTANCE_ID]: target.alertInstanceIds } });
+      }
+      return { bool: { must } };
+    });
+
+    const query: QueryDslQueryContainer = {
+      bool: {
+        must: [{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }],
+        should: shouldClauses,
+        minimum_should_match: 1,
+      },
+    };
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        wait_for_completion: false,
+        refresh: true,
+        ignore_unavailable: true,
+        query,
+        script: {
+          source: `ctx._source['${ALERT_MUTED}'] = params.muted;`,
+          lang: 'painless',
+          params: { muted },
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error updating muted field to ${muted} for ${
+          targets.length
+        } targets (example: ${JSON.stringify(targets[0])}) - ${error.message}`
+      );
+      throw error;
+    }
+  }
+
+  public async muteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAlertInstance({
+    ruleId,
+    alertInstanceId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    alertInstanceId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      targets: [{ ruleId, alertInstanceIds: [alertInstanceId] }],
+      indices,
+      logger,
+    });
+  }
+
+  public async muteAllAlerts({
+    ruleId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      targets: [{ ruleId }],
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAllAlerts({
+    ruleId,
+    indices,
+    logger,
+  }: {
+    ruleId: string;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      targets: [{ ruleId }],
+      indices,
+      logger,
+    });
+  }
+
+  public async muteAlertInstances({
+    targets,
+    indices,
+    logger,
+  }: {
+    targets: MuteInstances;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: true,
+      targets,
+      indices,
+      logger,
+    });
+  }
+
+  public async unmuteAlertInstances({
+    targets,
+    indices,
+    logger,
+  }: {
+    targets: MuteInstances;
+    indices: string[];
+    logger: Logger;
+  }) {
+    return this._updateMuteState({
+      muted: false,
+      targets,
+      indices,
+      logger,
     });
   }
 }

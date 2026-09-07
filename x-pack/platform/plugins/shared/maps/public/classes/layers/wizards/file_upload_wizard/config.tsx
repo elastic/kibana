@@ -30,7 +30,7 @@ export const uploadLayerWizardConfig: LayerWizard = {
     });
     return !hasImportPermission;
   },
-  icon: 'importAction',
+  icon: 'download',
   prerequisiteSteps: [
     {
       id: UPLOAD_STEPS.CONFIGURE_UPLOAD,

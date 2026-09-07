@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { SentinelOneGetRemoteScriptsResponse } from '@kbn/connector-schemas/sentinelone';
 
 /**
  * The `activity` document ingested from SentinelOne via the integration
@@ -51,6 +51,12 @@ export interface SentinelOneAgentEsDoc {
       agent: {
         id: string;
       };
+      uuid: string;
+      last_active_date: string;
+      network_status: string;
+      is_active: boolean;
+      is_pending_uninstall: boolean;
+      is_uninstalled: boolean;
     };
   };
 }

@@ -7,12 +7,12 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { AnyAction, Dispatch } from 'redux';
-import type { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction, Dispatch } from 'redux-v4';
+import type { ThunkDispatch } from 'redux-thunk-v2';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
 import type { KibanaExecutionContext } from '@kbn/core/public';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, ProjectRouting } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { Geometry, Position } from 'geojson';
 import { asyncForEach, asyncMap } from '@kbn/std';
@@ -32,12 +32,12 @@ import {
   getLayerList,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getProjectRouting,
   getLayerById,
   getEditState,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
-  CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   MAP_DESTROYED,
@@ -46,13 +46,13 @@ import {
   ROLLBACK_MAP_SETTINGS,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_EXECUTION_CONTEXT,
-  SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
   SET_MOUSE_COORDINATES,
   SET_OPEN_TOOLTIPS,
   SET_QUERY,
   TRACK_MAP_SETTINGS,
+  SET_PAUSE_SYNC_DATA,
   UPDATE_DRAW_STATE,
   UPDATE_MAP_SETTING,
   UPDATE_EDIT_STATE,
@@ -67,7 +67,6 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import type {
   CustomIcon,
   DrawState,
-  MapCenterAndZoom,
   MapExtent,
   MapSettings,
   Timeslice,
@@ -78,6 +77,26 @@ import { SET_DRAW_MODE, pushDeletedFeatureId, clearDeletedFeatureIds } from './u
 import { expandToTileBoundaries, getTilesForExtent } from '../classes/util/geo_tile_utils';
 import { getToasts } from '../kibana_services';
 import { getDeletedFeatureIds } from '../selectors/ui_selectors';
+
+export function setPauseSyncData(pauseSyncData: boolean) {
+  return (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: SET_PAUSE_SYNC_DATA,
+      pauseSyncData,
+    });
+
+    if (!pauseSyncData) {
+      if (getMapSettings(getState()).autoFitToDataBounds) {
+        dispatch(autoFitToBounds());
+      } else {
+        dispatch(syncDataForAllLayers(false));
+      }
+    }
+  };
+}
 
 export function setMapInitError(errorMessage: string) {
   return {
@@ -262,17 +281,6 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {
-  return {
-    type: SET_GOTO,
-    center: { lat, lon, zoom },
-  };
-}
-
-export function clearGoto() {
-  return { type: CLEAR_GOTO };
-}
-
 export function setQuery({
   query,
   timeFilters,
@@ -282,6 +290,7 @@ export function setQuery({
   searchSessionId,
   searchSessionMapBuffer,
   clearTimeslice,
+  projectRouting,
 }: {
   filters?: Filter[];
   query?: Query;
@@ -291,6 +300,7 @@ export function setQuery({
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
   clearTimeslice?: boolean;
+  projectRouting?: ProjectRouting;
 }) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -317,6 +327,7 @@ export function setQuery({
       filters: filters ? filters : getFilters(getState()),
       searchSessionId: searchSessionId ? searchSessionId : getSearchSessionId(getState()),
       searchSessionMapBuffer,
+      projectRouting: projectRouting ?? getProjectRouting(getState()),
     };
 
     const prevQueryContext = {
@@ -326,6 +337,7 @@ export function setQuery({
       filters: getFilters(getState()),
       searchSessionId: getSearchSessionId(getState()),
       searchSessionMapBuffer: getSearchSessionMapBuffer(getState()),
+      projectRouting: getProjectRouting(getState()),
     };
 
     if (!forceRefresh && _.isEqual(nextQueryContext, prevQueryContext)) {

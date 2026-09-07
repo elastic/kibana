@@ -19,16 +19,10 @@ import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 
-import type {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  WebhookConnectorType,
-  WebhookConnectorTypeExecutorOptions,
-} from './types';
+import type { WebhookConnectorType, WebhookConnectorTypeExecutorOptions } from './types';
 
 import { getConnectorType } from '.';
-import { AuthType, SSLCertType, WebhookMethods } from '../../../common/auth/constants';
-import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
+import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 jest.mock('axios', () => ({
   create: jest.fn(),
@@ -36,6 +30,12 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 import axios from 'axios';
+import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
+import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/webhook';
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = {
   interceptors: {
@@ -52,6 +52,7 @@ jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
     patch: jest.fn(),
   };
 });
+
 jest.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
@@ -100,7 +101,7 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 
@@ -174,12 +175,12 @@ describe('secrets validation', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
+      `"error validating connector type secrets: ✖ must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
     );
   });
 });
@@ -225,9 +226,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [method]: types that failed validation:
-      - [method.0]: expected value to equal [post]
-      - [method.1]: expected value to equal [put]"
+      "error validating connector type config: ✖ Invalid option: expected one of \\"post\\"|\\"put\\"|\\"patch\\"|\\"get\\"|\\"delete\\"
+        → at method"
     `);
   });
 
@@ -250,7 +250,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
+      `"error validating connector type config: error validation webhook action config: unable to parse url: TypeError: Invalid URL: example.com/do-something"`
     );
   });
 
@@ -279,9 +279,8 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [headers]: types that failed validation:
-      - [headers.0]: could not parse record value from json input
-      - [headers.1]: expected value to equal [null]"
+      "error validating connector type config: ✖ Invalid input: expected record, received string
+        → at headers"
     `);
   });
 
@@ -323,7 +322,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities: configUtils });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: target url is not present in allowedHosts"`
+      `"error validating connector type config: error validation webhook action config: target url is not present in allowedHosts"`
     );
   });
 
@@ -341,8 +340,26 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
+      `"error validating connector type config: error validation webhook action config: certType \\"ssl-pfx\\" is disabled"`
     );
+  });
+
+  describe('OAuth2 Password', () => {
+    test('throws because OAuth2 password grant is not supported for webhook', async () => {
+      const config = {
+        method: 'post',
+        url: 'https://test.com',
+        hasAuth: true,
+        authType: AuthType.OAuth2Password,
+        accessTokenUrl: 'http://fake.test',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: OAuth2 password grant authentication is not supported"`
+      );
+    });
   });
 
   describe('OAuth2 Client Credentials', () => {
@@ -358,8 +375,60 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
+        `"error validating connector type config: error validation webhook action config: missing Access Token URL (accessTokenUrl), Client ID (clientId) fields"`
       );
+    });
+
+    test('throws if OAuth2 accessTokenUrl is not added to allowedHosts', () => {
+      const disallowedTokenUrl = 'http://token.not.in.allowlist/oauth';
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (uri: string) => {
+          if (uri === disallowedTokenUrl) {
+            throw new Error(
+              `target url "${disallowedTokenUrl}" is not added to the Kibana config xpack.actions.allowedHosts`
+            );
+          }
+        },
+      };
+
+      const config = {
+        method: 'post',
+        url: 'https://webhook.example/webhook',
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: disallowedTokenUrl,
+        clientId: 'client-id',
+      };
+
+      expect(() => {
+        validateConfig(connectorType, config, { configurationUtilities: configUtils });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating connector type config: error validation webhook action config: target url \\"http://token.not.in.allowlist/oauth\\" is not added to the Kibana config xpack.actions.allowedHosts"`
+      );
+    });
+
+    test('calls ensureUriAllowed for main url and accessTokenUrl when OAuth2 config is valid', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: jest.fn(),
+      };
+      const mainUrl = 'https://webhook.example/webhook';
+      const tokenUrl = 'https://token.example/oauth';
+      const config = {
+        method: 'post',
+        url: mainUrl,
+        hasAuth: true,
+        authType: AuthType.OAuth2ClientCredentials,
+        accessTokenUrl: tokenUrl,
+        clientId: 'client-id',
+      };
+
+      validateConfig(connectorType, config, { configurationUtilities: configUtils });
+
+      expect(configUtils.ensureUriAllowed).toHaveBeenCalledTimes(2);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(1, mainUrl);
+      expect(configUtils.ensureUriAllowed).toHaveBeenNthCalledWith(2, tokenUrl);
     });
 
     test('throws when additionalFields is no valid JSON', async () => {
@@ -376,7 +445,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -394,7 +463,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -412,7 +481,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
 
@@ -430,7 +499,7 @@ describe('config validation', () => {
       expect(() => {
         validateConfig(connectorType, config, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"error validating action type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
+        `"error validating connector type config: error validation webhook action config: additionalFields must be a non-empty JSON object."`
       );
     });
   });
@@ -873,7 +942,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
     );
   });
@@ -1003,10 +1072,10 @@ describe('execute()', () => {
     expect(params.body).toBe(`{"x": "double-quote:\\"; line-break->\\n"}`);
   });
 
-  test('404 response returns user error', async () => {
+  test('body is undefined when executing GET operation', async () => {
     const config: ConnectorTypeConfigType = {
       url: 'https://abc.def/my-webhook',
-      method: WebhookMethods.POST,
+      method: WebhookMethods.GET,
       headers: {
         aheader: 'a value',
       },
@@ -1014,18 +1083,7 @@ describe('execute()', () => {
       hasAuth: true,
     };
 
-    requestMock.mockRejectedValueOnce({
-      tag: 'err',
-      response: {
-        status: 404,
-        statusText: 'Not Found',
-        data: {
-          message:
-            'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
-        },
-      },
-    });
-    const result = await connectorType.executor({
+    await connectorType.executor({
       actionId: 'some-id',
       services,
       config,
@@ -1044,10 +1102,188 @@ describe('execute()', () => {
       connectorUsageCollector,
     });
 
-    expect(result.errorSource).toBe('user');
-    expect(result.serviceMessage).toBe(
-      '[404] Not Found: The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.'
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.GET);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
+  test('body is undefined when executing DELETE operation', async () => {
+    const config: ConnectorTypeConfigType = {
+      url: 'https://abc.def/my-webhook',
+      method: WebhookMethods.DELETE,
+      headers: {
+        aheader: 'a value',
+      },
+      authType: AuthType.Basic,
+      hasAuth: true,
+    };
+
+    await connectorType.executor({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        user: 'abc',
+        password: '123',
+        key: null,
+        crt: null,
+        pfx: null,
+        clientSecret: null,
+        secretHeaders: null,
+      },
+      params: { body: 'some data' },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].method).toBe(WebhookMethods.DELETE);
+    expect(requestMock.mock.calls[0][0].data).toBeUndefined();
+  });
+
+  describe('error handling', () => {
+    test.each([400, 404, 405, 406, 410, 411, 414, 428, 431])(
+      'forwards user error source in result for %s error responses',
+      async (status) => {
+        const config: ConnectorTypeConfigType = {
+          url: 'https://abc.def/my-webhook',
+          method: WebhookMethods.POST,
+          headers: {
+            aheader: 'a value',
+          },
+          authType: AuthType.Basic,
+          hasAuth: true,
+        };
+
+        requestMock.mockRejectedValueOnce(
+          createTaskRunError(
+            {
+              tag: 'err',
+              isAxiosError: true,
+              response: {
+                status,
+                statusText: 'Not Found',
+                data: {
+                  message:
+                    'The requested webhook "b946082a-a623-4353-bd99-ed35e5fa4fce" is not registered.',
+                },
+              },
+            } as unknown as Error,
+            TaskErrorSource.USER
+          )
+        );
+        const result = await connectorType.executor({
+          actionId: 'some-id',
+          services,
+          config,
+          secrets: {
+            user: 'abc',
+            password: '123',
+            key: null,
+            crt: null,
+            pfx: null,
+            clientSecret: null,
+            secretHeaders: null,
+          },
+          params: { body: 'some data' },
+          configurationUtilities,
+          logger: mockedLogger,
+          connectorUsageCollector,
+        });
+
+        expect(result.errorSource).toBe('user');
+      }
     );
+
+    test('serializes a non-string response body message instead of logging [object Object]', async () => {
+      const config: ConnectorTypeConfigType = {
+        url: 'https://abc.def/my-webhook',
+        method: WebhookMethods.POST,
+        headers: {
+          aheader: 'a value',
+        },
+        authType: AuthType.Basic,
+        hasAuth: true,
+      };
+
+      requestMock.mockRejectedValueOnce(
+        createTaskRunError(
+          {
+            tag: 'err',
+            isAxiosError: true,
+            response: {
+              status: 404,
+              statusText: 'Not Found',
+              data: { message: { code: 'invalid', detail: 'bad request' } },
+            },
+          } as unknown as Error,
+          TaskErrorSource.USER
+        )
+      );
+
+      const result = await connectorType.executor({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: {
+          user: 'abc',
+          password: '123',
+          key: null,
+          crt: null,
+          pfx: null,
+          clientSecret: null,
+          secretHeaders: null,
+        },
+        params: { body: 'some data' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result.serviceMessage).toBe(
+        '[404] Not Found: {"code":"invalid","detail":"bad request"}'
+      );
+    });
+
+    it('should log an error if refreshing access token fails', async () => {
+      const errorMessage = 'Invalid client or Invalid client credentials';
+      (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
+        new Error(errorMessage)
+      );
+      createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
+
+      const execOptions: WebhookConnectorTypeExecutorOptions = {
+        actionId: 'test-id',
+        config: {
+          method: WebhookMethods.POST,
+          url: 'https://test.com',
+          hasAuth: true,
+          authType: AuthType.OAuth2ClientCredentials,
+          accessTokenUrl: 'https://token.url',
+          clientId: 'client',
+          headers: { 'X-Custom': 'value' },
+        },
+        params: { body: '{}' },
+        secrets: {
+          clientSecret: 'secret',
+          key: null,
+          user: null,
+          password: null,
+          crt: null,
+          pfx: null,
+          secretHeaders: null,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        services,
+        connectorUsageCollector,
+      };
+
+      await connectorType.executor(execOptions);
+
+      expect(mockedLogger.error.mock.calls[0][0]).toMatchInlineSnapshot(
+        `"ConnectorId \\"test-id\\": error \\"Unable to retrieve/refresh the access token: Invalid client or Invalid client credentials\\""`
+      );
+    });
   });
 
   describe('oauth2 client credentials', () => {
@@ -1165,46 +1401,5 @@ describe('execute()', () => {
       expect(headers.Authorization).toBe(accessToken);
       expect(headers['X-Custom']).toBe('value');
     });
-  });
-
-  it('should log an error if refreshing access token fails', async () => {
-    const errorMessage = 'Invalid client or Invalid client credentials';
-    (getOAuthClientCredentialsAccessToken as jest.Mock).mockRejectedValueOnce(
-      new Error(errorMessage)
-    );
-    createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
-
-    const execOptions: WebhookConnectorTypeExecutorOptions = {
-      actionId: 'test-id',
-      config: {
-        method: WebhookMethods.POST,
-        url: 'https://test.com',
-        hasAuth: true,
-        authType: AuthType.OAuth2ClientCredentials,
-        accessTokenUrl: 'https://token.url',
-        clientId: 'client',
-        headers: { 'X-Custom': 'value' },
-      },
-      params: { body: '{}' },
-      secrets: {
-        clientSecret: 'secret',
-        key: null,
-        user: null,
-        password: null,
-        crt: null,
-        pfx: null,
-        secretHeaders: null,
-      },
-      configurationUtilities,
-      logger: mockedLogger,
-      services,
-      connectorUsageCollector,
-    };
-
-    await connectorType.executor(execOptions);
-
-    expect(mockedLogger.error.mock.calls[0][0]).toMatchInlineSnapshot(
-      `"ConnectorId \\"test-id\\": error \\"Unable to retrieve/refresh the access token: Invalid client or Invalid client credentials\\""`
-    );
   });
 });

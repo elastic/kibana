@@ -1,8 +1,6 @@
 # MV_EXPAND
 
-The `MV_EXPAND` command expands multivalued columns into one row per value, duplicating other columns.
-
-> **Note:** This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+The MV_EXPAND command expands multivalued columns so that each value appears in its own row, duplicating the other columns for each expanded value.
 
 ## Syntax
 
@@ -14,29 +12,15 @@ The `MV_EXPAND` command expands multivalued columns into one row per value, dupl
 
 The multivalued column to expand.
 
-## Notes
-
-The output rows produced by `MV_EXPAND` can be in any order and may not respect preceding `SORT` commands. To ensure a specific ordering, place a `SORT` command after any `MV_EXPAND` commands.
-
-
 ## Examples
 
-```esql
-ROW a=[1,2,3], b="b", j=["a","b"]
-| MV_EXPAND a
-```
-Expand a multivalued column `a` into individual rows:
+Expands each value in the multivalued column `a` into its own row, while duplicating the values of columns `b` and `j` for each expanded value.
 
 ```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
-| MV_EXPAND j
 ```
-Expand two multivalued columns `a` and `j` into individual rows:
 
-```esql
-ROW a=[1,2,3,4,5], b="b"
-| MV_EXPAND a
-| WHERE a > 2
-```
-Expand a multivalued column and then filtering the results:
+## Limitations
+
+The output rows produced by MV_EXPAND can be in any order and may not respect preceding SORT commands. To guarantee a specific ordering, place a SORT after any MV_EXPAND commands.

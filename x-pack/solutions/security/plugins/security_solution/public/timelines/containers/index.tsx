@@ -7,10 +7,11 @@
 
 import deepEqual from 'fast-deep-equal';
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDispatch } from 'react-redux-v7';
 import { Subscription } from 'rxjs';
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -18,19 +19,19 @@ import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
 } from '@kbn/timelines-plugin/common/api/search_strategy';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
-import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
   PaginationInputPaginated,
-  TimelineEventsAllStrategyResponse,
   TimelineEdges,
+  TimelineEventsAllStrategyResponse,
   TimelineItem,
   TimelineRequestSortField,
 } from '../../../common/search_strategy';
@@ -46,9 +47,11 @@ import type {
 } from '../../../common/search_strategy/timeline/events/eql';
 import { useTrackHttpRequest } from '../../common/lib/apm/use_track_http_request';
 import { APP_UI_ID } from '../../../common/constants';
+import { DETECTIONS_TABLE_IDS } from '../../detections/constants';
 
 export interface TimelineArgs {
   events: TimelineItem[];
+  rawEvents: EsHitRecord[];
   id: string;
   inspect: InspectResponse;
 
@@ -66,6 +69,20 @@ export interface TimelineArgs {
   refetch: inputsModel.Refetch;
   totalCount: number;
   refreshedAt: number;
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+/**
+ * Subset of an Elasticsearch shard failure carried to the Correlation tab so
+ * the incomplete-results callout can surface index / shard / reason detail.
+ */
+export interface EqlShardFailure {
+  index?: string;
+  shard?: number;
+  node?: string;
+  reason?: estypes.ErrorCause;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -90,6 +107,41 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
   ? TimelineEqlResponse
   : TimelineEventsAllStrategyResponse;
 
+/**
+ * Raw response fields that signal incomplete results. EQL reports dropped shards in
+ * `shard_failures` and leaves `is_partial` false once the async search finishes, so
+ * `isPartial` alone misses timed-out or failed shards.
+ */
+interface PartialResultsRawResponse {
+  timed_out?: boolean;
+  _shards?: { failed?: number };
+  shard_failures?: EqlShardFailure[];
+}
+
+interface PartialResultsState {
+  isPartial: boolean;
+  shardFailures: EqlShardFailure[];
+  timedOut: boolean;
+}
+
+const getPartialResults = (
+  isPartial: boolean | undefined,
+  rawResponse: PartialResultsRawResponse | undefined
+): PartialResultsState => {
+  const shardFailures = Array.isArray(rawResponse?.shard_failures)
+    ? rawResponse.shard_failures
+    : [];
+  const timedOut = rawResponse?.timed_out === true;
+  const hasFailedShards =
+    typeof rawResponse?._shards?.failed === 'number' && rawResponse._shards.failed > 0;
+
+  return {
+    isPartial: isPartial === true || timedOut || shardFailures.length > 0 || hasFailedShards,
+    shardFailures,
+    timedOut,
+  };
+};
+
 export interface UseTimelineEventsProps {
   dataViewId: string | null;
   endDate?: string;
@@ -106,6 +158,7 @@ export interface UseTimelineEventsProps {
   startDate?: string;
   timerangeKind?: 'absolute' | 'relative';
   fetchNotes?: boolean;
+  dateRangeField?: string;
 }
 
 const getTimelineEvents = (timelineEdges: TimelineEdges[]): TimelineItem[] =>
@@ -159,6 +212,7 @@ export const useTimelineEventsHandler = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
@@ -176,7 +230,7 @@ export const useTimelineEventsHandler = ({
   const { startTracking } = useTrackHttpRequest();
 
   const clearSignalsState = useCallback(() => {
-    if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
+    if (id != null && DETECTIONS_TABLE_IDS.some((timelineId) => timelineId === id)) {
       dispatch(timelineActions.clearEventsLoading({ id }));
       dispatch(timelineActions.clearEventsDeleted({ id }));
     }
@@ -233,8 +287,12 @@ export const useTimelineEventsHandler = ({
         querySize: 0,
       },
       events: [],
+      rawEvents: [],
       loadNextBatch,
       refreshedAt: 0,
+      isPartial: false,
+      shardFailures: [],
+      timedOut: false,
     }),
     [id, loadNextBatch]
   );
@@ -275,14 +333,22 @@ export const useTimelineEventsHandler = ({
 
                 setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
+                  const rawHits = response.rawResponse?.hits;
+                  const rawEvents =
+                    rawHits && 'hits' in rawHits ? (rawHits.hits as EsHitRecord[]) : [];
+
                   const newTimelineResponse = {
                     ...prevResponse,
-                    /**/
                     events: getTimelineEvents(response.edges),
+                    rawEvents,
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
                     refreshedAt: Date.now(),
+                    ...getPartialResults(
+                      response.isPartial,
+                      response.rawResponse as PartialResultsRawResponse | undefined
+                    ),
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setPageName(pageName);
@@ -363,15 +429,15 @@ export const useTimelineEventsHandler = ({
      * Trigger search with a new request object to fetch the latest data.
      *
      */
-    const newTimelineRequest: typeof timelineRequest = {
+    const newTimelineRequest = {
       ...timelineRequest,
       factoryQueryType: TimelineEventsQueries.all,
-      language,
+      language: language as TimelineEventsAllOptionsInput['language'],
       sort,
       fieldRequested: timelineRequest?.fieldRequested ?? fields,
       fields: timelineRequest?.fieldRequested ?? fields,
       pagination: refetchPagination,
-    };
+    } as NonNullable<typeof timelineRequest>;
 
     setTimelineRequest(newTimelineRequest);
 
@@ -395,6 +461,7 @@ export const useTimelineEventsHandler = ({
           timerange: prevRequest?.timerange ?? {},
           runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
           ...deStructureEqlOptions(prevEqlRequest),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const timerange =
@@ -408,6 +475,7 @@ export const useTimelineEventsHandler = ({
           runtimeMappings: runtimeMappings ?? {},
           ...timerange,
           ...deStructureEqlOptions(eqlOptions),
+          ...(dateRangeField ? { dateRangeField } : {}),
         };
 
         const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
@@ -462,6 +530,7 @@ export const useTimelineEventsHandler = ({
           sort,
           ...timerange,
           ...(eqlOptions ? eqlOptions : {}),
+          ...(dateRangeField ? { dateRangeField } : {}),
         } as const;
 
         if (activeBatch !== newActiveBatch) {
@@ -490,6 +559,7 @@ export const useTimelineEventsHandler = ({
     sort,
     fields,
     runtimeMappings,
+    dateRangeField,
   ]);
 
   /*
@@ -543,6 +613,7 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
+  dateRangeField,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
   const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>(defaultEvents);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
@@ -560,6 +631,7 @@ export const useTimelineEvents = ({
     sort,
     skip,
     timerangeKind,
+    dateRangeField,
   });
 
   useEffect(() => {

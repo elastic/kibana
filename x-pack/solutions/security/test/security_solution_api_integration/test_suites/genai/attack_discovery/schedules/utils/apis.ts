@@ -6,33 +6,33 @@
  */
 
 import type SuperTest from 'supertest';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import type {
-  AttackDiscoveryScheduleCreateProps,
-  AttackDiscoveryScheduleUpdateProps,
+  AttackDiscoveryApiScheduleCreateProps,
+  AttackDiscoveryApiScheduleUpdateProps,
+  BulkActionAttackDiscoverySchedulesResponse,
   FindAttackDiscoverySchedulesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ATTACK_DISCOVERY_SCHEDULES,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE,
+  ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE,
   ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
   ATTACK_DISCOVERY_SCHEDULES_FIND,
 } from '@kbn/elastic-assistant-common';
 
+import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
 import type { User } from '../../../utils/auth/types';
-import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 const configureTest = (test: SuperTest.Test, user: User | undefined) => {
   const configuredTest = test
     .set('kbn-xsrf', 'true')
-    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
-    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1);
   if (user) {
     configuredTest.auth(user.username, user.password);
   }
@@ -57,7 +57,7 @@ export const getAttackDiscoverySchedulesApis = ({
       kibanaSpace = 'default',
       expectedHttpCode = 200,
     }: {
-      schedule: Partial<AttackDiscoveryScheduleCreateProps>;
+      schedule: Partial<AttackDiscoveryApiScheduleCreateProps>;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {
@@ -121,7 +121,7 @@ export const getAttackDiscoverySchedulesApis = ({
       expectedHttpCode = 200,
     }: {
       id: string;
-      schedule: Partial<AttackDiscoveryScheduleUpdateProps>;
+      schedule: Partial<AttackDiscoveryApiScheduleUpdateProps>;
       kibanaSpace?: string;
       expectedHttpCode?: number;
     }) => {
@@ -197,6 +197,63 @@ export const getAttackDiscoverySchedulesApis = ({
       );
       const configuredTest = configureTest(supertest.post(route), user);
       const response = await configuredTest.expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk enables Attack Discovery Schedules
+     */
+    bulkEnable: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_ENABLE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk disables Attack Discovery Schedules
+     */
+    bulkDisable: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_DISABLE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
+
+      return response.body;
+    },
+
+    /**
+     * Bulk deletes Attack Discovery Schedules
+     */
+    bulkDelete: async ({
+      ids,
+      kibanaSpace = 'default',
+      expectedHttpCode = 200,
+    }: {
+      ids: string[];
+      kibanaSpace?: string;
+      expectedHttpCode?: number;
+    }): Promise<BulkActionAttackDiscoverySchedulesResponse> => {
+      const route = routeWithNamespace(ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE, kibanaSpace);
+      const configuredTest = configureTest(supertest.post(route), user);
+      const response = await configuredTest.send({ ids }).expect(expectedHttpCode);
 
       return response.body;
     },

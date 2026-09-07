@@ -584,7 +584,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bulkGetAttachmentsResponse = await bulkGetAttachments({
           supertest,
-          attachmentIds: [caseWithAttachments.comments![0].id, caseWithAttachments.comments![1].id],
+          savedObjectIds: [
+            caseWithAttachments.comments![0].id,
+            caseWithAttachments.comments![1].id,
+          ],
           caseId: postedCase.id,
         });
 

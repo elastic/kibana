@@ -17,6 +17,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const securityService = getService('security');
   const testSubjects = getService('testSubjects');
 
+  /**
+   * Purpose: Verify created_by column added when created and not removed on edit
+   *
+   * Migration: Remove test, duplicated by dashboard API tests
+   */
   describe('created_by', function () {
     const DASHBOARD_NAME = 'veryuniquemydashboardname';
     const USERNAME_1 = 'global_dashboard_all_user_1';
@@ -122,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await testSubjects.existOrFail('tableHeaderCell_createdBy_1');
       await testSubjects.existOrFail(`userAvatarTip-${USERNAME_1}`);
-      await dashboard.gotoDashboardEditMode(DASHBOARD_NAME);
+      await dashboard.loadDashboardInEditMode(DASHBOARD_NAME);
       await dashboard.addVisualizations(['A Pie']);
       await dashboard.saveDashboard(DASHBOARD_NAME, {
         waitDialogIsClosed: false,

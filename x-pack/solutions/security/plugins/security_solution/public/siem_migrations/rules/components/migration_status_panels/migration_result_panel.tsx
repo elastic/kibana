@@ -8,18 +8,19 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
-  EuiBasicTable,
-  EuiHealth,
-  EuiText,
-  EuiAccordion,
-  EuiButtonIcon,
+  EuiPanel,
   EuiSpacer,
-  EuiBadge,
+  EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
   useEuiTheme,
 } from '@elastic/eui';
@@ -41,6 +42,7 @@ import * as i18n from './translations';
 import { RuleMigrationsUploadMissingPanel } from './upload_missing_panel';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
 import { MigrationPanelTitle } from '../../../common/components/migration_panels/migration_title';
+import { TotalExecutionTime } from '../../../common/components/total_execution_time';
 
 const headerStyle = css`
   &:hover {
@@ -95,6 +97,12 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
                         moment(migrationStats.last_updated_at).fromNow()
                       )}
                     </p>
+                    {migrationStats.last_execution?.total_execution_time_ms && (
+                      <TotalExecutionTime
+                        migrationType="rule"
+                        milliseconds={migrationStats.last_execution.total_execution_time_ms}
+                      />
+                    )}
                   </PanelText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -103,11 +111,18 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
               <EuiBadge css={completeBadgeStyles}>{i18n.RULE_MIGRATION_COMPLETE_BADGE}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
-                onClick={toggleCollapsed}
-                aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
-              />
+              <EuiToolTip
+                content={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isCollapsed ? 'chevronSingleDown' : 'chevronSingleUp'}
+                  onClick={toggleCollapsed}
+                  aria-label={
+                    isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE
+                  }
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -132,7 +147,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={AssistantIcon} size="m" />
+                    <EuiIcon type={AssistantIcon} size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <PanelText size="s" semiBold>
@@ -302,6 +317,7 @@ const TranslationResultsTable = React.memo<{
       data-test-subj="translatedResultsTable"
       items={items}
       columns={columns}
+      tableCaption={i18n.RULE_MIGRATION_SUMMARY_TITLE}
       compressed
     />
   );

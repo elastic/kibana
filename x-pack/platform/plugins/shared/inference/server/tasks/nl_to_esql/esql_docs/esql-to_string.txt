@@ -1,6 +1,6 @@
 # TO_STRING
 
-Converts an input value into a string.
+The TO_STRING function converts an input value into a string. It can be used on single-valued or multi-valued columns, as well as expressions.
 
 ## Syntax
 
@@ -8,21 +8,19 @@ Converts an input value into a string.
 
 ### Parameters
 
-#### `field`
+#### field
 
-The input value to be converted. This can be a single- or multi-valued column or an expression.
+The input value to convert to a string. This can be a single- or multi-valued column, or an expression.
 
 ## Examples
 
-Converting a single value to a string
-
+Converts the integer value in column `a` to a string and stores it in column `j`:
 ```esql
 ROW a=10
 | EVAL j = TO_STRING(a)
 ```
 
-Converting a multivalued field to a string
-
+Converts the array of integers in column `a` to a string and stores it in column `j`:
 ```esql
 ROW a=[10, 9, 8]
 | EVAL j = TO_STRING(a)

@@ -13,6 +13,7 @@ import type {
   PluginInitializerContext,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -24,9 +25,11 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { IPM_APP_ID, NEW_APP_PATH } from './constants';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -35,6 +38,7 @@ export interface IndexPatternManagementSetupDependencies {
 }
 
 export interface IndexPatternManagementStartDependencies {
+  cps?: CPSPluginStart;
   data: DataPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   dataViewEditor: DataViewEditorStart;
@@ -44,6 +48,7 @@ export interface IndexPatternManagementStartDependencies {
   spaces?: SpacesPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   uiSettings: IUiSettingsClient;
 }
 
@@ -56,8 +61,6 @@ export interface IndexPatternManagementStart {}
 const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsHeader', {
   defaultMessage: 'Data Views',
 });
-
-export const IPM_APP_ID = 'dataViews';
 
 export class IndexPatternManagementPlugin
   implements
@@ -80,11 +83,10 @@ export class IndexPatternManagementPlugin
       throw new Error('`kibana` management section not found.');
     }
 
-    const newAppPath = `management/kibana/${IPM_APP_ID}`;
     const legacyPatternsPath = 'management/kibana/index_patterns';
 
-    urlForwarding.forwardApp('management/kibana/index_pattern', newAppPath, (path) => '/create');
-    urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
+    urlForwarding.forwardApp('management/kibana/index_pattern', NEW_APP_PATH, (path) => '/create');
+    urlForwarding.forwardApp(legacyPatternsPath, NEW_APP_PATH, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
     });

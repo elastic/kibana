@@ -16,6 +16,7 @@ import {
   TelemetryTimelineFetcher,
   newTelemetryLogger,
   getPreviousDailyTaskTimestamp,
+  withErrorMessage,
 } from '../helpers';
 import { telemetryConfiguration } from '../configuration';
 
@@ -93,7 +94,7 @@ export function createTelemetryTimelineTaskConfig() {
 
         return counter;
       } catch (error) {
-        logger.error('could not complete task', { error });
+        logger.error('could not complete task', withErrorMessage(error));
         await taskMetricsService.end(trace, error);
         return 0;
       }

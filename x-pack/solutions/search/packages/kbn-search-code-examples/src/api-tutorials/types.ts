@@ -11,6 +11,8 @@ export interface ConsoleTutorial {
   esql: string;
   aggregations: string;
   semanticSearch: string;
+  timeSeriesDataStreams: string;
   hybridSearch: string;
-  vectorSearch: string;
+  vectorDatabase: string;
+  agentBuilder: string;
 }

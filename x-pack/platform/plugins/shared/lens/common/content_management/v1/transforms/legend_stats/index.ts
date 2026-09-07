@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { XYState } from '../../../../../public';
-import type { PieVisualizationState } from '../../../../types';
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import type { XYVisualizationState } from '../../../../../public';
 import type { LensAttributes } from '../../../../../server/content_management/v1/types';
 import {
   convertPartitionToLegendStats,
-  type DeprecatedLegendValuePieVisualizationState,
+  type DeprecatedLegendValueLensPartitionVisualizationState,
 } from './partition';
 import { convertXYToLegendStats, type DeprecatedLegendValueXYState } from './xy';
 
@@ -41,14 +41,14 @@ export function getUpdatedVisualizationState(
   state: LensAttributes['state'] & { visualization?: unknown }
 ): LensAttributes['state'] {
   if (visualizationType === 'lnsXY' && state?.visualization) {
-    const visState = state.visualization as XYState | DeprecatedLegendValueXYState;
+    const visState = state.visualization as XYVisualizationState | DeprecatedLegendValueXYState;
     return convertXYToLegendStats(visState);
   }
 
   if (visualizationType === 'lnsPie' && state?.visualization) {
     const visState = state.visualization as
-      | PieVisualizationState
-      | DeprecatedLegendValuePieVisualizationState;
+      | LensPartitionVisualizationState
+      | DeprecatedLegendValueLensPartitionVisualizationState;
     return convertPartitionToLegendStats(visState);
   }
 

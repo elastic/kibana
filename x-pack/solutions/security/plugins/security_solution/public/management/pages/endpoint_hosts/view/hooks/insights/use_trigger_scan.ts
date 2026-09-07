@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
-import type { DefendInsightsResponse, DefendInsightType } from '@kbn/elastic-assistant-common';
+import { useMutation } from '@kbn/react-query';
+import type { DefendInsightsResponse } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
+import type { WorkflowInsightType } from '../../../../../../../common/endpoint/types/workflow_insights';
 import { useKibana, useToasts } from '../../../../../../common/lib/kibana';
 import { WORKFLOW_INSIGHTS } from '../../translations';
 
@@ -16,7 +17,7 @@ interface UseTriggerScanPayload {
   endpointId: string;
   connectorId: string;
   actionTypeId: string;
-  insightTypes: DefendInsightType[];
+  insightTypes: WorkflowInsightType[];
 }
 
 interface UseTriggerScanConfig {

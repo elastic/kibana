@@ -12,10 +12,9 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { PrivMonUtils } from '../utils';
-import { enablePrivmonSetting, disablePrivmonSetting } from '../../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
-  const api = getService('securitySolutionApi');
+  const entityAnalyticsApi = getService('entityAnalyticsApi');
   const es = getService('es');
   const privMonUtils = PrivMonUtils(getService);
 
@@ -36,15 +35,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
   describe('@ess @serverless @skipInServerlessMKI Entity Monitoring Privileged Users APIs', () => {
-    const kibanaServer = getService('kibanaServer');
-
-    before(async () => {
-      await enablePrivmonSetting(kibanaServer);
-    });
-
     after(async () => {
-      await api.deleteMonitoringEngine({ query: { data: true } });
-      await disablePrivmonSetting(kibanaServer);
+      await entityAnalyticsApi.deleteMonitoringEngine({ query: { data: true } });
     });
 
     describe('Index Entity Source APIs', () => {
@@ -77,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should delete privileged users when the index pattern changes', async () => {
         await privMonUtils.initPrivMonEngine();
-        const createEntitySourceResponse = await api.createEntitySource({
+        const createEntitySourceResponse = await entityAnalyticsApi.createEntitySource({
           body: {
             type: 'index',
             name: 'User Monitored Indices',
@@ -91,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await privMonUtils.waitForSyncTaskRun();
 
-        await api.updateEntitySource({
+        await entityAnalyticsApi.updateEntitySource({
           body: {
             indexPattern: index2,
           },
@@ -100,13 +92,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         await privMonUtils.waitForSyncTaskRun();
 
-        const usersForIndex2 = (await api.listPrivMonUsers({ query: {} }))
+        const usersForIndex2 = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
           .body as ListPrivMonUsersResponse;
 
         privMonUtils.assertIsPrivileged(privMonUtils.findUser(usersForIndex2, user2.name), true);
         privMonUtils.assertIsPrivileged(privMonUtils.findUser(usersForIndex2, user1.name), false);
 
-        await api.updateEntitySource({
+        await entityAnalyticsApi.updateEntitySource({
           body: {
             indexPattern: `${index2},${index1}`,
           },
@@ -115,7 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await privMonUtils.waitForSyncTaskRun();
 
-        const usersForIndex1AndIndex2 = (await api.listPrivMonUsers({ query: {} }))
+        const usersForIndex1AndIndex2 = (await entityAnalyticsApi.listPrivMonUsers({ query: {} }))
           .body as ListPrivMonUsersResponse;
 
         privMonUtils.assertIsPrivileged(

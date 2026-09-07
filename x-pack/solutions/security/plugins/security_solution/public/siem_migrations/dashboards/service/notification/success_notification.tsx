@@ -5,44 +5,67 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { i18n } from '@kbn/i18n';
-import { NavigationProvider } from '@kbn/security-solution-navigation';
-import type { ToastInput } from '@kbn/core-notifications-browser';
+import {
+  SecurityPageName,
+  useNavigation,
+  NavigationProvider,
+} from '@kbn/security-solution-navigation';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DashboardMigrationTaskStats } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
-export const getSuccessToast = (
+export const raiseSuccessToast = (
   migrationStats: DashboardMigrationTaskStats,
   core: CoreStart
-): ToastInput => ({
-  color: 'success',
-  iconType: 'check',
-  toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
-  title: i18n.translate(
-    'xpack.securitySolution.siemMigrations.dashboardsService.polling.successTitle',
-    {
-      defaultMessage: 'Dashboards translation complete.',
-    }
-  ),
-  text: toMountPoint(
-    <NavigationProvider core={core}>
-      <SuccessToastContent migrationStats={migrationStats} />
-    </NavigationProvider>,
-    core
-  ),
-});
+): void => {
+  const toast = core.notifications.toasts.addSuccess({
+    color: 'success',
+    iconType: 'check',
+    toastLifeTimeMs: 1000 * 60 * 30, // 30 minutes
+    title: i18n.translate(
+      'xpack.securitySolution.siemMigrations.dashboardsService.polling.successTitle',
+      {
+        defaultMessage: 'Dashboards translation complete.',
+      }
+    ),
+    text: toMountPoint(
+      <NavigationProvider core={core}>
+        <SuccessToastContent
+          migrationStats={migrationStats}
+          dismissHandler={() => core.notifications.toasts.remove(toast)}
+        />
+      </NavigationProvider>,
+      core
+    ),
+  });
+};
 
-const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStats }> = ({
-  migrationStats,
-}) => {
-  const onClick: React.MouseEventHandler = (ev) => {
-    ev.preventDefault();
-    // TODO: need to add navigation once `Translated Dashboards` page complete
-  };
+const SuccessToastContent: React.FC<{
+  migrationStats: DashboardMigrationTaskStats;
+  dismissHandler: () => void;
+}> = ({ migrationStats, dismissHandler }) => {
+  const { navigateTo, getAppUrl } = useNavigation();
+
+  const navParams = useMemo(() => {
+    return { deepLinkId: SecurityPageName.siemMigrationsDashboards, path: migrationStats.id };
+  }, [migrationStats.id]);
+
+  const onClick: React.MouseEventHandler = useCallback(
+    (ev) => {
+      ev.preventDefault();
+      navigateTo({
+        deepLinkId: SecurityPageName.siemMigrationsDashboards,
+        path: migrationStats.id,
+      });
+      dismissHandler();
+    },
+    [navigateTo, migrationStats.id, dismissHandler]
+  );
+  const url = useMemo(() => getAppUrl(navParams), [getAppUrl, navParams]);
 
   return (
     <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="s">
@@ -54,7 +77,7 @@ const SuccessToastContent: React.FC<{ migrationStats: DashboardMigrationTaskStat
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton onClick={onClick} color="success">
+        <EuiButton onClick={onClick} href={url} color="success">
           {i18n.translate(
             'xpack.securitySolution.siemMigrations.dashboardsService.polling.successLinkText',
             { defaultMessage: 'Go to translated dashboards' }

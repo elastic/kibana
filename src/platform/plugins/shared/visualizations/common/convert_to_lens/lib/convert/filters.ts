@@ -27,7 +27,7 @@ export const convertToFiltersColumn = (
     isBucketed: true,
     isSplit,
     params: {
-      filters: aggParams.filters ?? [],
+      filters: aggParams.filters.map(({ label, input }) => ({ label: label ?? '', input })),
     },
     timeShift: aggParams.timeShift,
     meta: { aggId },

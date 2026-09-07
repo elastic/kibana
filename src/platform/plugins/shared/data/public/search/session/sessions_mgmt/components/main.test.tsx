@@ -7,31 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
-import { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
+import { getSearchSessionEBTManagerMock } from '../../mocks';
 
-const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boolean }) => {
+const setup = async () => {
   const mockCoreSetup = coreMock.createSetup();
   mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
     return key === 'dateFormat:tz' ? 'UTC' : null;
   });
 
-  const mockCoreStart = coreMock.createStart();
-  mockCoreStart.featureFlags.getBooleanValue.mockImplementation((flag) => {
-    if (flag === BACKGROUND_SEARCH_FEATURE_FLAG_KEY) return backgroundSearchEnabled;
-    return false;
-  });
+  const mockCoreStart = coreMock.createStart() as unknown as CoreStart;
 
   const mockShareStart = sharePluginMock.createStartContract();
   const mockSearchUsageCollector = createSearchUsageCollectorMock();
@@ -45,7 +43,13 @@ const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boo
     },
   } as any;
 
-  const sessionsClient = new SessionsClient({ http: mockCoreSetup.http });
+  const sessionsClient = new SessionsClient({
+    http: mockCoreSetup.http,
+  }) as jest.Mocked<SessionsClient>;
+  sessionsClient.find = jest.fn().mockResolvedValue({
+    saved_objects: [],
+    statuses: {},
+  });
 
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
@@ -53,28 +57,22 @@ const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boo
     featureFlags: mockCoreStart.featureFlags,
   });
 
-  const docLinks: DocLinksStart = {
-    ELASTIC_WEBSITE_URL: `boo/`,
-    DOC_LINK_VERSION: `#foo`,
-    links: {
-      search: { sessions: `mock-url` } as any,
-    } as any,
-  };
-
   await act(async () => {
     render(
       <LocaleWrapper>
-        <SearchSessionsMgmtMain
-          core={mockCoreStart}
-          api={api}
-          http={mockCoreSetup.http}
-          timezone="UTC"
-          documentation={new AsyncSearchIntroDocumentation(docLinks)}
-          config={mockConfig}
-          kibanaVersion={'8.0.0'}
-          searchUsageCollector={mockSearchUsageCollector}
-          share={mockShareStart}
-        />
+        <MockAppHeaderProvider>
+          <SearchSessionsMgmtMain
+            core={mockCoreStart}
+            api={api}
+            http={mockCoreSetup.http}
+            timezone="UTC"
+            config={mockConfig}
+            kibanaVersion={'8.0.0'}
+            searchUsageCollector={mockSearchUsageCollector}
+            share={mockShareStart}
+            searchSessionEBTManager={getSearchSessionEBTManagerMock()}
+          />
+        </MockAppHeaderProvider>
       </LocaleWrapper>
     );
   });
@@ -84,23 +82,21 @@ const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boo
     mockCoreStart,
     mockCoreSetup,
     mockSearchUsageCollector,
+    sessionsClient,
   };
 };
 
 describe('<SearchSessionsMgmtMain />', () => {
-  describe.each([
-    { backgroundSearchEnabled: false, expectedName: 'Search Sessions' },
-    { backgroundSearchEnabled: true, expectedName: 'Background Search' },
-  ])(
+  describe.each([{ expectedName: 'Background Search' }])(
     'when background search is $backgroundSearchEnabled',
-    ({ backgroundSearchEnabled, expectedName }) => {
+    ({ expectedName }) => {
       it('should render the page title', async () => {
-        await setup({ backgroundSearchEnabled });
-        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(expectedName);
+        await setup();
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(expectedName);
       });
 
       it('should render the table', async () => {
-        await setup({ backgroundSearchEnabled });
+        await setup();
 
         const table = screen.getByTestId('searchSessionsMgmtUiTable');
         expect(table).toBeVisible();
@@ -108,21 +104,40 @@ describe('<SearchSessionsMgmtMain />', () => {
     }
   );
 
+  it('renders Refresh as the AppHeader primary action', async () => {
+    await setup();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Manage your background searches.'
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('sessionManagementRefreshBtn')).toBeInTheDocument();
+    });
+
+    expect(screen.getAllByTestId('sessionManagementRefreshBtn')).toHaveLength(1);
+  });
+
+  it('refreshes sessions when the AppHeader primary action is clicked', async () => {
+    const user = userEvent.setup();
+    const { sessionsClient } = await setup();
+
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(screen.getByTestId('sessionManagementRefreshBtn')).toBeEnabled();
+    });
+
+    await user.click(screen.getByTestId('sessionManagementRefreshBtn'));
+
+    await waitFor(() => expect(sessionsClient.find).toHaveBeenCalledTimes(2));
+  });
+
   describe('when background search is true', () => {
     it('should NOT render the documentation link', async () => {
-      await setup({ backgroundSearchEnabled: true });
+      await setup();
 
       const docLink = screen.queryByText('Documentation');
       expect(docLink).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when background search is false', () => {
-    it('should render the documentation link', async () => {
-      await setup({ backgroundSearchEnabled: false });
-
-      const docLink = screen.getByText('Documentation');
-      expect(docLink).toBeInTheDocument();
     });
   });
 });

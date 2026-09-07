@@ -221,6 +221,7 @@ export interface CreateOrUpdateSpacesDataStreamParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  expandIndexPattern?: boolean;
 }
 
 export async function updateDataStreams({
@@ -229,6 +230,7 @@ export async function updateDataStreams({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  expandIndexPattern = false,
 }: CreateOrUpdateSpacesDataStreamParams): Promise<void> {
   logger.info(`Updating data streams - ${name}`);
 
@@ -251,7 +253,7 @@ export async function updateDataStreams({
       logger,
       esClient,
       totalFieldsLimit,
-      indexNames: dataStreams.map((dataStream) => dataStream.name),
+      indexNames: expandIndexPattern ? dataStreams.map((dataStream) => dataStream.name) : [name],
       writeIndexOnly,
     });
   }

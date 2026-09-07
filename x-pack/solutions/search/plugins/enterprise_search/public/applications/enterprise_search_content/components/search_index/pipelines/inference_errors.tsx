@@ -21,6 +21,11 @@ import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_
 
 import { InferenceErrorsLogic } from './inference_errors_logic';
 
+const inferenceErrorsTitle = i18n.translate(
+  'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
+  { defaultMessage: 'Inference errors' }
+);
+
 export const InferenceErrors: React.FC = () => {
   const { indexName, isLoading, inferenceErrors } = useValues(InferenceErrorsLogic);
   const { makeRequest } = useActions(FetchMlInferenceErrorsApiLogic);
@@ -60,23 +65,13 @@ export const InferenceErrors: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <DataPanel
-        hasBorder
-        iconType="documents"
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.tabs.pipelineInferenceLogs.title',
-              { defaultMessage: 'Inference errors' }
-            )}
-          </h3>
-        }
-      >
+      <DataPanel hasBorder iconType="documents" title={<h3>{inferenceErrorsTitle}</h3>}>
         {isLoading ? (
           <EuiLoadingSpinner />
         ) : (
           <EuiBasicTable
             tableLayout="auto"
+            tableCaption={inferenceErrorsTitle}
             columns={errorsColumns}
             items={inferenceErrors}
             rowHeader="message"

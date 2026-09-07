@@ -373,7 +373,11 @@ export class JobTable extends Component {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill {...getRouterLinkProps('/create')}>
+            <EuiButton
+              fill
+              data-test-subj="createRollupJobButton"
+              {...getRouterLinkProps('/create')}
+            >
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.createButtonLabel"
                 defaultMessage="Create rollup job"

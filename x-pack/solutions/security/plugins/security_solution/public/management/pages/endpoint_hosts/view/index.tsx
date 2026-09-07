@@ -27,12 +27,13 @@ import {
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { createStructuredSelector } from 'reselect';
-import { useDispatch } from 'react-redux';
+import { createStructuredSelector } from 'reselect-v4';
+import { useDispatch } from 'react-redux-v7';
 import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { isPolicyOutOfDate } from '../utils';
 import { useGetAgentStatus } from '../../../hooks/agents/use_get_agent_status';
 import { TransformFailedCallout } from './components/transform_failed_callout';
@@ -210,6 +211,7 @@ const getEndpointListColumns = ({
         return (
           <EuiToolTip content={POLICY_STATUS_TO_TEXT[status]} anchorClassName="eui-textTruncate">
             <EuiHealth
+              tabIndex={0}
               color={POLICY_STATUS_TO_HEALTH_COLOR[status]}
               className="eui-textTruncate eui-fullWidth"
               data-test-subj="rowPolicyStatus"
@@ -235,7 +237,7 @@ const getEndpointListColumns = ({
       render: (os: string) => {
         return (
           <EuiToolTip content={os} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-TextTruncate">{os}</p>
             </EuiText>
           </EuiToolTip>
@@ -252,7 +254,7 @@ const getEndpointListColumns = ({
       render: (ip: string[]) => {
         return (
           <EuiToolTip content={ip.toString().replace(',', ', ')} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-textTruncate">
                 {ip.toString().replace(',', ', ')}
               </p>
@@ -271,7 +273,7 @@ const getEndpointListColumns = ({
       render: (version: string) => {
         return (
           <EuiToolTip content={version} anchorClassName="eui-textTruncate">
-            <EuiText size="s" className="eui-textTruncate eui-fullWidth">
+            <EuiText tabIndex={0} size="s" className="eui-textTruncate eui-fullWidth">
               <p className="eui-displayInline eui-TextTruncate">{version}</p>
             </EuiText>
           </EuiToolTip>
@@ -420,10 +422,10 @@ export const EndpointList = () => {
   );
 
   const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
-    'fleet',
+    INTEGRATIONS_PLUGIN_ID,
     {
-      path: `/integrations/${
-        endpointPackageVersion ? `/endpoint-${endpointPackageVersion}` : ''
+      path: `/detail/${
+        endpointPackageVersion ? `endpoint-${endpointPackageVersion}` : 'endpoint'
       }/add-integration`,
       state: stateHandleCreatePolicyClick,
     }
@@ -447,10 +449,13 @@ export const EndpointList = () => {
   }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
+    if (autoRefreshInterval <= 0) {
+      return;
+    }
     dispatch({
       type: 'appRequestedEndpointList',
     });
-  }, [dispatch]);
+  }, [autoRefreshInterval, dispatch]);
 
   const onRefreshChange = useCallback<NonNullable<EuiSuperDatePickerProps['onRefreshChange']>>(
     (evt) => {
@@ -613,6 +618,12 @@ export const EndpointList = () => {
         return (
           <EuiBasicTable
             data-test-subj="endpointListTable"
+            tableCaption={i18n.translate(
+              'xpack.securitySolution.endpoint.list.endpointTableCaption',
+              {
+                defaultMessage: 'Endpoint',
+              }
+            )}
             items={mutableListData}
             columns={columns}
             pagination={paginationSetup}

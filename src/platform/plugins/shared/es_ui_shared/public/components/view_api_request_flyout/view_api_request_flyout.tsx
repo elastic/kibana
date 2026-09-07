@@ -98,7 +98,7 @@ export const ApiRequestFlyout: React.FunctionComponent<ViewApiRequestFlyoutProps
               <EuiButtonEmpty
                 size="xs"
                 flush="right"
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
                 data-test-subj="apiRequestFlyoutCopyClipboardButton"
               >

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/group5/_no_data.ts
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -23,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   describe('discover no data', function () {
-    this.tags(['skipSvlOblt']);
+    this.tags(['skipSvlOblt', 'skipSvlSec']);
 
     const kbnDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 

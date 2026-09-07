@@ -22,8 +22,30 @@ export const dsl = {
   isCustom(): QueryDslQueryContainer {
     return { bool: { must_not: dsl.isPrebuilt() } };
   },
+  matchElasticTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'elastic_rule.title': { query: title, operator: 'and' } } };
+  },
+  matchOriginalTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'original_rule.title': { query: title, operator: 'and' } } };
+  },
   matchTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_rule.title': title } };
+    return {
+      bool: {
+        should: [
+          // Match the translated title
+          dsl.matchElasticTitle(title),
+          // If translation failed, match the original title
+          { bool: { must: [genericDsl.isFailed(), dsl.matchOriginalTitle(title)] } },
+        ],
+      },
+    };
+  },
+  matchTitles(titles: string[]): QueryDslQueryContainer {
+    return {
+      terms: {
+        'original_rule.title.keyword': titles,
+      },
+    };
   },
   isInstallable(): QueryDslQueryContainer {
     return { bool: { must: [genericDsl.isFullyTranslated(), dsl.isNotInstalled()] } };

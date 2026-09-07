@@ -7,6 +7,9 @@
 
 export const SECURITY_UI_APP_ID = 'securitySolutionUI' as const;
 
+/** PND ships as its own app, so its deep links are namespaced separately from the Security UI. */
+export const PND_APP_ID = 'pnd' as const;
+
 export { SecurityPageName } from '@kbn/deeplinks-security';
 
 export enum LinkCategoryType {
@@ -30,4 +33,16 @@ export enum SecurityGroupName {
   entityAnalytics = 'securityGroup:entityAnalytics',
   machineLearning = 'securityGroup:machineLearning',
   launchpad = 'securityGroup:launchpad',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'securityGroup:alertDetections',
 }
+
+/** This Kibana Advanced Setting allows users to enable/disable Attack Discovery 2.0 Workflows per space */
+export const ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING =
+  'securitySolution:enableAttackDiscoveryWorkflows' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature */
+export const ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING =
+  'securitySolution:enableAlertsAndAttacksAlignment' as const;

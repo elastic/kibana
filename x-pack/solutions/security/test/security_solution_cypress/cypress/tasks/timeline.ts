@@ -14,92 +14,91 @@ import {
   EQL_QUERY_VALIDATION_LABEL,
   EQL_QUERY_VALIDATION_SPINNER,
 } from '../screens/create_new_rule';
+import {
+  CREATE_CASE_FLYOUT,
+  DESCRIPTION_INPUT as CASE_DESCRIPTION_INPUT,
+  SUBMIT_BTN as CREATE_CASE_SUBMIT_BTN,
+  TITLE_INPUT as CASE_TITLE_INPUT,
+  VIEW_CASE_TOASTER_LINK,
+} from '../screens/create_new_case';
 
 import {
+  ACTIVE_TIMELINE_BOTTOM_BAR,
   ADD_FILTER,
   ADD_NOTE_BUTTON,
   ATTACH_TIMELINE_TO_CASE_BUTTON,
   ATTACH_TIMELINE_TO_EXISTING_CASE_ICON,
   ATTACH_TIMELINE_TO_NEW_CASE_ICON,
+  BOTTOM_BAR_CREATE_NEW_TIMELINE,
+  BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
+  BOTTOM_BAR_TIMELINE_PLUS_ICON,
   CLOSE_TIMELINE_BTN,
   COMBO_BOX_INPUT,
   CREATE_NEW_TIMELINE,
+  ESQL_TAB,
   FIELD_BROWSER,
-  ID_HEADER_FIELD,
-  ID_TOGGLE_FIELD,
-  ID_HOVER_ACTION_OVERFLOW_BTN,
+  GET_TIMELINE_GRID_CELL,
+  HOVER_ACTIONS,
+  NEW_TIMELINE_ACTION,
   NOTES_TAB_BUTTON,
   NOTES_TEXT_AREA,
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
+  QUERY_EVENT_COUNT,
   RESET_FIELDS,
+  SAVE_DATA_PROVIDER_BTN,
   SAVE_FILTER_BTN,
+  SAVE_TIMELINE_ACTION,
+  SAVE_TIMELINE_ACTION_BTN,
   SEARCH_OR_FILTER_CONTAINER,
   SELECT_CASE,
   STAR_ICON,
-  TIMELINE_DESCRIPTION_INPUT,
-  TIMELINE_FIELDS_BUTTON,
-  TIMELINE_FILTER_FIELD,
-  TIMELINE_FILTER_OPERATOR,
-  TIMELINE_FILTER_VALUE,
-  TIMELINE_INSPECT_BUTTON,
-  TIMELINE_TITLE_INPUT,
-  TIMELINE_TITLE_BY_ID,
-  TIMESTAMP_TOGGLE_FIELD,
-  TOGGLE_TIMELINE_EXPAND_EVENT,
-  TIMELINE_SAVE_MODAL,
-  TIMELINE_SAVE_MODAL_SAVE_BUTTON,
-  TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
-  TIMELINE_PROGRESS_BAR,
-  QUERY_TAB_BUTTON,
   TIMELINE_ADD_FIELD_BUTTON,
+  TIMELINE_COLLAPSED_ITEMS_BTN,
+  TIMELINE_CORRELATION_INPUT,
+  TIMELINE_CORRELATION_TAB,
+  TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
+  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
   TIMELINE_DATA_PROVIDER_FIELD,
   TIMELINE_DATA_PROVIDER_OPERATOR,
   TIMELINE_DATA_PROVIDER_VALUE,
-  SAVE_DATA_PROVIDER_BTN,
-  TIMELINE_CORRELATION_INPUT,
-  TIMELINE_CORRELATION_TAB,
-  TIMELINE_CREATE_TIMELINE_FROM_TEMPLATE_BTN,
-  TIMELINE_CREATE_TEMPLATE_FROM_TIMELINE_BTN,
-  TIMELINE_COLLAPSED_ITEMS_BTN,
-  TIMELINE_TAB_CONTENT_EQL,
-  TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
-  ACTIVE_TIMELINE_BOTTOM_BAR,
-  GET_TIMELINE_GRID_CELL,
-  HOVER_ACTIONS,
-  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
-  TIMELINE_SHOWQUERYBARMENU_BUTTON,
-  TIMELINE_LUCENELANGUAGE_BUTTON,
-  TIMELINE_KQLLANGUAGE_BUTTON,
-  TIMELINE_QUERY,
-  ESQL_TAB,
-  NEW_TIMELINE_ACTION,
-  SAVE_TIMELINE_ACTION,
-  TOGGLE_DATA_PROVIDER_BTN,
-  SAVE_TIMELINE_ACTION_BTN,
-  TIMELINE_SEARCH_OR_FILTER,
-  TIMELINE_KQLMODE_FILTER,
-  TIMELINE_KQLMODE_SEARCH,
   TIMELINE_DATA_PROVIDERS_CONTAINER,
-  ROW_ADD_NOTES_BUTTON,
-  TIMELINE_PANEL,
-  BOTTOM_BAR_TIMELINE_PLUS_ICON,
-  BOTTOM_BAR_CREATE_NEW_TIMELINE,
-  BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
+  TIMELINE_DESCRIPTION_INPUT,
+  TIMELINE_DISCOVER_FIELDS_BUTTON,
+  TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER,
+  TIMELINE_FILTER_FIELD,
+  TIMELINE_FILTER_OPERATOR,
+  TIMELINE_FILTER_VALUE,
   TIMELINE_FLYOUT,
   TIMELINE_FULL_SCREEN_BUTTON,
-  QUERY_EVENT_COUNT,
-  TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER,
-  TIMELINE_DISCOVER_FIELDS_BUTTON,
+  TIMELINE_INSPECT_BUTTON,
+  TIMELINE_KQLLANGUAGE_BUTTON,
+  TIMELINE_KQLMODE_FILTER,
+  TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_LUCENELANGUAGE_BUTTON,
+  TIMELINE_PANEL,
+  TIMELINE_PROGRESS_BAR,
+  TIMELINE_QUERY,
+  TIMELINE_SAVE_MODAL,
+  TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
+  TIMELINE_SAVE_MODAL_SAVE_BUTTON,
+  TIMELINE_SEARCH_OR_FILTER,
+  TIMELINE_SHOWQUERYBARMENU_BUTTON,
+  TIMELINE_SWITCHQUERYLANGUAGE_BUTTON,
+  TIMELINE_TAB_CONTENT_EQL,
   TIMELINE_TITLE,
+  TIMELINE_TITLE_BY_ID,
+  TIMELINE_TITLE_INPUT,
+  TIMELINE_WRAPPER,
+  TOGGLE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
 
 import {
   DUPLICATE_TIMELINE,
   REFRESH_BUTTON,
   TIMELINE,
-  TIMELINES_TABLE,
   TIMELINES_TAB_TEMPLATE,
+  TIMELINES_TABLE,
 } from '../screens/timelines';
 import { waitForTabToBeLoaded } from './common';
 
@@ -112,10 +111,31 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 
 const hostExistsQuery = 'host.name: *';
 
+const typeAndVerifyValue = (
+  selector: string,
+  value: string,
+  options?: Partial<Cypress.TypeOptions>
+) => {
+  recurse(
+    () => {
+      cy.get(selector).focus();
+      cy.get(selector).clear();
+      cy.get(selector).type(value, options);
+      return cy.get(selector).invoke('val');
+    },
+    (nextValue) => `${nextValue ?? ''}` === value,
+    {
+      limit: 5,
+      delay: 100,
+    }
+  );
+};
+
 export const addNameToTimelineAndSave = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -124,23 +144,13 @@ export const addNameToTimelineAndSave = (name: string) => {
 export const addNameToTimelineAndSaveAsNew = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
   cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).click();
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
-};
-
-export const openSaveTimelineModal = () => {
-  recurse(
-    () => {
-      cy.get(SAVE_TIMELINE_ACTION);
-
-      return cy.get(TIMELINE_TITLE_INPUT);
-    },
-    (sub) => sub.is(':visible')
-  );
 };
 
 export const addNameAndDescriptionToTimeline = (
@@ -150,9 +160,10 @@ export const addNameAndDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(SAVE_TIMELINE_ACTION).click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, timeline.title);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
+  typeAndVerifyValue(TIMELINE_DESCRIPTION_INPUT, timeline.description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -183,11 +194,6 @@ export const goToCorrelationTab = () => {
   return cy.get(TIMELINE_CORRELATION_TAB);
 };
 
-export const goToQueryTab = () => {
-  cy.get(QUERY_TAB_BUTTON).click();
-  cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
-};
-
 export const addNotesToTimeline = (notes: string) => {
   goToNotesTab();
 
@@ -196,7 +202,7 @@ export const addNotesToTimeline = (notes: string) => {
     .invoke('text')
     .then(parseInt)
     .then((notesCount) => {
-      cy.get(NOTES_TEXT_AREA).type(notes, {
+      typeAndVerifyValue(NOTES_TEXT_AREA, notes, {
         parseSpecialCharSequences: false,
       });
 
@@ -205,15 +211,6 @@ export const addNotesToTimeline = (notes: string) => {
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
-};
-
-export const addNoteToFirstRowEvent = (notes: string) => {
-  cy.get(ROW_ADD_NOTES_BUTTON).first().click();
-  cy.get(NOTES_TEXT_AREA).type(notes, {
-    parseSpecialCharSequences: false,
-  });
-
-  cy.get(ADD_NOTE_BUTTON).click();
 };
 
 export const addEqlToTimeline = (eql: string) => {
@@ -300,37 +297,70 @@ export const attachTimelineToExistingCase = () => {
   cy.get(ATTACH_TIMELINE_TO_EXISTING_CASE_ICON).click();
 };
 
-const clickIdHoverActionOverflowButton = () => {
-  cy.get(ID_HOVER_ACTION_OVERFLOW_BTN).should('exist');
+/**
+ * Reads `xpack.cases.attachments.enabled` from the server-injected browser config so a spec
+ * can assert the actual runtime behavior: the legacy markdown link (flag off) or the
+ * `security.timeline` case attachment (flag on). Follows the real flag instead of pinning it
+ * per CI lane, so the spec passes whether or not the flag has been flipped.
+ */
+export const getCasesAttachmentsEnabled = (): Cypress.Chainable<boolean> =>
+  cy
+    .get('kbn-injected-metadata')
+    .invoke('attr', 'data')
+    .then((data) => {
+      const { uiPlugins = [] } = JSON.parse(data ?? '{}');
+      const casesPlugin = uiPlugins.find((plugin: { id: string }) => plugin.id === 'cases');
+      return Boolean(casesPlugin?.config?.attachments?.enabled);
+    });
 
-  cy.get(ID_HOVER_ACTION_OVERFLOW_BTN).click();
+/**
+ * Fills and submits the create-case flyout opened by the unified attachments flow.
+ */
+export const createCaseFromTimelineFlyout = () => {
+  cy.get(CREATE_CASE_FLYOUT).should('be.visible');
+  cy.get(CASE_TITLE_INPUT).type('Timeline case');
+  cy.get(CASE_DESCRIPTION_INPUT).type('Timeline case description');
+  cy.get(CREATE_CASE_SUBMIT_BTN).click();
 };
 
-export const clickIdToggleField = () => {
-  clickIdHoverActionOverflowButton();
-  cy.get(ID_HEADER_FIELD).should('not.exist');
+export const navigateToCaseFromSuccessToaster = () => {
+  cy.get(VIEW_CASE_TOASTER_LINK).click();
+};
 
-  cy.get(ID_TOGGLE_FIELD).click();
+/**
+ * Retry until the timeline overlay mask is hidden. When the overlay is still open,
+ * click the close button so concurrent React re-renders (e.g. from markAsFavorite's
+ * timelines refresh) can settle before the next attempt.
+ */
+export const ensureTimelineOverlayHidden = () => {
+  recurse(
+    () => {
+      return cy.get(TIMELINE_WRAPPER).then(($wrapper) => {
+        if (!$wrapper.hasClass('timeline-portal-overlay-mask--hidden')) {
+          cy.get(CLOSE_TIMELINE_BTN).should('be.visible').click();
+        }
+        return cy.get(TIMELINE_WRAPPER);
+      });
+    },
+    ($timelineWrapper) => $timelineWrapper.hasClass('timeline-portal-overlay-mask--hidden')
+  );
 };
 
 export const closeTimeline = () => {
-  cy.get(CLOSE_TIMELINE_BTN).click();
-  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
+  ensureTimelineOverlayHidden();
 };
 
 export const createNewTimeline = () => {
   openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE).click();
+  cy.get(CREATE_NEW_TIMELINE).filter(':visible').click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
-  recurse(
-    () => {
-      cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE);
-    },
-    (sub) => sub.is(':visible')
-  );
+  // NEW_TIMELINE_ACTION toggles the popover, so click it once and wait on the
+  // menu item instead of re-clicking in a retry loop, which would re-toggle the
+  // popover shut and detach CREATE_NEW_TIMELINE mid-click.
+  cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
+  cy.get(CREATE_NEW_TIMELINE).should('be.visible');
 };
 
 export const createTimelineFromBottomBar = () => {
@@ -358,16 +388,14 @@ export const createTimelineTemplateFromBottomBar = () => {
 };
 
 export const executeTimelineKQL = (query: string) => {
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).clear();
-  cy.get(`${SEARCH_OR_FILTER_CONTAINER} textarea`).type(`${query} {enter}`);
+  const selector = `${SEARCH_OR_FILTER_CONTAINER} textarea`;
+  typeAndVerifyValue(selector, query);
+  cy.get(selector).type(' {enter}');
 };
 
 export const executeTimelineSearch = (query: string) => {
-  cy.get(TIMELINE_QUERY).type(`${query} {enter}`);
-};
-
-export const expandFirstTimelineEventDetails = () => {
-  cy.get(TOGGLE_TIMELINE_EXPAND_EVENT).first().click();
+  typeAndVerifyValue(TIMELINE_QUERY, query);
+  cy.get(TIMELINE_QUERY).type(' {enter}');
 };
 
 /**
@@ -393,12 +421,10 @@ export const saveTimeline = () => {
 
 export const markAsFavorite = () => {
   cy.intercept('PATCH', 'api/timeline/_favorite').as('markedAsFavourite');
+  cy.intercept('GET', '/api/timelines*').as('timelinesRefreshed');
   cy.get(TIMELINE_PANEL).within(() => cy.get(STAR_ICON).click());
   cy.wait('@markedAsFavourite');
-};
-
-export const openTimelineFieldsBrowser = () => {
-  cy.get(TIMELINE_FIELDS_BUTTON).first().click();
+  cy.wait('@timelinesRefreshed');
 };
 
 export const openTimelineDiscoverAddField = () => {
@@ -452,20 +478,6 @@ export const pinFirstEvent = (): Cypress.Chainable<JQuery<HTMLElement>> => {
 export const populateTimeline = () => {
   executeTimelineKQL(hostExistsQuery);
   cy.get(QUERY_EVENT_COUNT).should('not.have.text', '0');
-};
-
-const clickTimestampHoverActionOverflowButton = () => {
-  cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).should('exist');
-
-  cy.get(TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN).click();
-};
-
-export const clickTimestampToggleField = () => {
-  clickTimestampHoverActionOverflowButton();
-
-  cy.get(TIMESTAMP_TOGGLE_FIELD).should('exist');
-
-  cy.get(TIMESTAMP_TOGGLE_FIELD).click();
 };
 
 export const removeColumn = (columnName: string) => {
@@ -568,9 +580,4 @@ export const toggleFullScreen = () => {
 export const enableAllRowRenderersWithSwitch = () => {
   cy.get(TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER).click();
   cy.get(TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER).should('have.attr', 'aria-checked', 'true');
-};
-
-export const disableAllRowRenderersWithSwitch = () => {
-  cy.get(TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER).click();
-  cy.get(TIMELINE_ENABLE_DISABLE_ALL_ROW_RENDERER).should('have.attr', 'aria-checked', 'false');
 };

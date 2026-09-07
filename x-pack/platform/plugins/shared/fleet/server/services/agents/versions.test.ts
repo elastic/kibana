@@ -10,18 +10,24 @@ import { readFile } from 'fs/promises';
 import fetch from 'node-fetch';
 import type { DeepPartial } from 'utility-types';
 
-import type { FleetConfigType } from '../../../public/plugin';
+import type { FleetConfigType } from '../../config';
 
-import { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
+import {
+  getAvailableVersions,
+  getLatestAgentAvailableDockerImageVersion,
+  getLatestAvailableAgentVersion,
+} from './versions';
 
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
 
+const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
+const mockLogger = loggerMock.create();
+
 jest.mock('../app_context', () => {
-  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
     appContextService: {
-      getLogger: () => loggerMock.create(),
+      getLogger: () => mockLogger,
       getKibanaVersion: () => mockKibanaVersion,
       getConfig: () => mockConfig,
     },
@@ -42,6 +48,7 @@ const emptyResponse = {
 beforeEach(() => {
   mockedReadFile.mockReset();
   mockedFetch.mockReset();
+  loggerMock.clear(mockLogger);
 });
 
 describe('getLatestAvailableAgentVersion', () => {
@@ -157,6 +164,44 @@ describe('getLatestAvailableAgentVersion', () => {
     const res = await getLatestAvailableAgentVersion({ ignoreCache: true });
 
     expect(res).toEqual('8.12.2+build20240501');
+  });
+});
+
+describe('getLatestAgentAvailableDockerImageVersion', () => {
+  it('should return latest available docker image version with + replaced by .', async () => {
+    mockKibanaVersion = '8.12.2';
+    mockedReadFile.mockResolvedValue(
+      `["8.13.0", "8.12.2+build20240501", "8.12.2+build20240501", "8.12.2",  "8.12.1", "8.12.0"]`
+    );
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.13.0',
+              version_number: '8.13.0',
+            },
+            {
+              title: 'Elastic Agent 8.12.2',
+              version_number: '8.12.2',
+            },
+            {
+              title: 'Elastic Agent 8.12.1',
+              version_number: '8.12.1',
+            },
+            {
+              title: 'Elastic Agent 8.12.0',
+              version_number: '8.12.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getLatestAgentAvailableDockerImageVersion({ ignoreCache: true });
+
+    expect(res).toEqual('8.12.2.build20240501');
   });
 });
 
@@ -387,7 +432,7 @@ describe('getAvailableVersions', () => {
 
     const res2 = await getAvailableVersions();
 
-    expect(mockedFetch).toBeCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(res2).not.toContain('300.0.0');
   });
 
@@ -424,7 +469,7 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
-    expect(mockedFetch).not.toBeCalled();
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 
   it('should filter out versions higher than kibana version but allow patch versions', async () => {
@@ -497,5 +542,63 @@ describe('getAvailableVersions', () => {
     // No API data should be included since air-gapped
     expect(res).toEqual(['8.10.2', '8.10.4', '8.10.1', '8.9.0', '7.17.0']);
     expect(mockedFetch).not.toHaveBeenCalled(); // Verify no API call was made
+  });
+
+  it('should fall back to disk versions and log a warning when the fetch times out (AbortError)', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 1000 };
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
+
+    const abortError = Object.assign(new Error('The operation was aborted'), {
+      name: 'AbortError',
+    });
+    mockedFetch.mockRejectedValue(abortError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Timed out fetching available agent versions')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('xpack.fleet.isAirGapped: true')
+    );
+  });
+
+  it('should fall back to disk versions and log a warning when the fetch times out (TimeoutError)', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 1000 };
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0"]`);
+
+    const timeoutError = Object.assign(new Error('The operation timed out'), {
+      name: 'TimeoutError',
+    });
+    mockedFetch.mockRejectedValue(timeoutError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Timed out fetching available agent versions')
+    );
+  });
+
+  it('should honour productVersionsApiTimeoutMs config when set', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockConfig = { productVersionsApiTimeoutMs: 5000 };
+    mockedReadFile.mockResolvedValue(`["8.1.0"]`);
+
+    const abortError = Object.assign(new Error('The operation was aborted'), {
+      name: 'AbortError',
+    });
+    mockedFetch.mockRejectedValue(abortError);
+
+    const res = await getAvailableVersions({ ignoreCache: true });
+
+    expect(res).toEqual(['300.0.0', '8.1.0']);
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('5000ms'));
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('xpack.fleet.productVersionsApiTimeoutMs')
+    );
   });
 });

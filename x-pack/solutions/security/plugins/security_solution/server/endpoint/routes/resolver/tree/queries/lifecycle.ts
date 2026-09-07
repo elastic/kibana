@@ -12,6 +12,7 @@ import type { NodeID } from '../utils';
 import { validIDs } from '../utils';
 import type { ResolverQueryParams } from './base';
 import { BaseResolverQuery } from './base';
+import { createEventKindFilter } from '../../utils/event_kind_filters';
 
 /**
  * Builds a query for retrieving descendants of a node.
@@ -72,9 +73,7 @@ export class LifecycleQuery extends BaseResolverQuery {
             {
               terms: { 'event.category': ['process'] },
             },
-            {
-              terms: { 'event.kind': ['event', 'alert'] },
-            },
+            createEventKindFilter(),
           ],
         },
       },
@@ -108,7 +107,9 @@ export class LifecycleQuery extends BaseResolverQuery {
      *
      * So the schema fields are flattened ('process.parent.entity_id')
      */
-    // @ts-expect-error @elastic/elasticsearch _source is optional
-    return body.hits.hits.map((hit) => hit.fields);
+    return body.hits.hits.map((hit) => ({
+      ...(hit.fields ?? {}),
+      ...(hit._index ? { _index: hit._index } : {}),
+    }));
   }
 }

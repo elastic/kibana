@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -16,7 +17,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { type IndiciesItem } from '../../../../server/routes/diagnostics/route';
+import { type IndiciesItem } from '@kbn/apm-types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useDiagnosticsContext } from './context/use_diagnostics';
 
@@ -83,7 +84,7 @@ export function DiagnosticsIndices() {
         return (
           <>
             {fieldMappings.isValid ? (
-              <EuiIcon type="check" />
+              <EuiIcon type="check" aria-hidden={true} />
             ) : (
               <EuiIconTip
                 content={`The field "service.name" should be mapped as keyword but is mapped as "${fieldMappings.invalidType}"`}
@@ -113,6 +114,9 @@ export function DiagnosticsIndices() {
         items={invalidIndices}
         rowHeader="index"
         columns={columns}
+        tableCaption={i18n.translate('xpack.apm.diagnostics.indicesTab.invalidIndicesCaption', {
+          defaultMessage: 'Indices with problems',
+        })}
       />
 
       <EuiSpacer />
@@ -125,6 +129,9 @@ export function DiagnosticsIndices() {
         items={validIndices}
         rowHeader="index"
         columns={columns}
+        tableCaption={i18n.translate('xpack.apm.diagnostics.indicesTab.validIndicesCaption', {
+          defaultMessage: 'Indices without problems',
+        })}
       />
     </>
   );

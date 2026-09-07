@@ -161,7 +161,7 @@ export function SelectServices({
               <EuiButton
                 data-test-subj="apmSelectServicesButton"
                 onClick={handleOnSubmit}
-                iconType={!kuery ? 'search' : 'refresh'}
+                iconType={!kuery ? 'magnify' : 'refresh'}
                 isDisabled={isServiceListPreviewLoading || !stagedKuery}
               >
                 {!kuery
@@ -198,6 +198,7 @@ export function SelectServices({
               {kueryValidationMessage?.length ? (
                 <CentralizedContainer>
                   <EuiCallOut
+                    announceOnMount
                     title={i18n.translate('xpack.apm.serviceGroups.searchResults.error', {
                       defaultMessage: 'Error retrieving search results',
                     })}

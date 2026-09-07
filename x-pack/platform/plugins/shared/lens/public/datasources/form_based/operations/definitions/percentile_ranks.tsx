@@ -13,28 +13,19 @@ import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_RANK_ID, PERCENTILE_RANK_NAME } from '@kbn/lens-formula-docs';
-import type { ValueFormatConfig } from '../../../../../common';
+import type { PercentileRanksIndexPatternColumn } from '@kbn/lens-common';
+import { adjustTimeScaleLabelSuffix, getSafeName } from '@kbn/lens-common';
 import type { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
-  getSafeName,
   isValidNumber,
   getFilter,
-  isColumnOfType,
+  hasOperationType,
+  getNumberParam,
 } from './helpers';
-import type { FieldBasedIndexPatternColumn } from './column_types';
-import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { FormRow } from './shared_components';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
-
-export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
-  operationType: typeof PERCENTILE_RANK_ID;
-  params: {
-    value: number;
-    format?: ValueFormatConfig;
-  };
-}
 
 function ofName(
   name: string,
@@ -118,12 +109,11 @@ export const percentileRanksOperation: OperationDefinition<
       column.reducedTimeRange
     ),
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
-    const existingPercentileRanksParam =
-      previousColumn &&
-      isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', previousColumn) &&
-      previousColumn.params.value;
+    const existingPercentileRanksParam = hasOperationType(previousColumn, 'percentile_rank')
+      ? getNumberParam(previousColumn, 'value')
+      : undefined;
     const newPercentileRanksParam =
-      columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
+      columnParams?.value ?? existingPercentileRanksParam ?? DEFAULT_PERCENTILE_RANKS_VALUE;
     return {
       label: ofName(
         getSafeName(field.name, indexPattern),

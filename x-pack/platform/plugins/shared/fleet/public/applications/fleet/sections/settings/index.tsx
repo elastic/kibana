@@ -25,6 +25,8 @@ import { Loading } from '../../components';
 import {
   SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../../../../common/constants';
 
 import { FleetServerFlyout } from '../../components';
@@ -54,8 +56,12 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const flyoutContext = useFlyoutContext();
 
   const { outputs, fleetServerHosts, downloadSources, proxies } = useSettingsAppData();
-  const outputItems = outputs.data?.items.filter((item) => !item.is_internal);
-  const fleetServerHostsItems = fleetServerHosts.data?.items.filter((item) => !item.is_internal);
+  const outputItems = outputs.data?.items.filter(
+    (item) => !item.is_internal || item.id === SERVERLESS_PRIVATE_OUTPUT_ID
+  );
+  const fleetServerHostsItems = fleetServerHosts.data?.items.filter(
+    (item) => !item.is_internal || item.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID
+  );
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
@@ -84,6 +90,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
   ]);
 
   const { cloud } = useStartServices();
+  const isServerlessEnabled = cloud?.isServerlessEnabled;
 
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
@@ -120,6 +127,13 @@ export const SettingsApp = withConfirmModalProvider(() => {
                   proxies={proxies.data?.items ?? []}
                   onClose={onCloseCallback}
                   fleetServerHost={fleetServerHost}
+                  defaultFleetServerHost={
+                    isServerlessEnabled
+                      ? fleetServerHosts.data?.items.find(
+                          (o) => o.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+                        )
+                      : undefined
+                  }
                 />
               </EuiPortal>
             );
@@ -127,7 +141,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
           <EuiPortal>
-            {cloud?.isServerlessEnabled ? (
+            {isServerlessEnabled ? (
               <FleetServerHostsFlyout
                 proxies={proxies.data?.items ?? []}
                 onClose={onCloseCallback}
@@ -145,7 +159,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
             <EditOutputFlyout
               proxies={proxies.data.items}
               onClose={onCloseCallback}
-              defaultOuput={outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)}
+              defaultOutput={
+                isServerlessEnabled
+                  ? outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)
+                  : undefined
+              }
             />
           </EuiPortal>
         </Route>
@@ -182,9 +200,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
                   proxies={proxies.data?.items ?? []}
                   onClose={onCloseCallback}
                   output={output}
-                  defaultOuput={outputs.data?.items.find(
-                    (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
-                  )}
+                  defaultOutput={
+                    isServerlessEnabled
+                      ? outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)
+                      : undefined
+                  }
                 />
               </EuiPortal>
             );

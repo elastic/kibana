@@ -91,7 +91,7 @@ export const MonitorBarSeries = ({ histogramSeries, minInterval }: MonitorBarSer
         />
       }
     >
-      <EuiText color="success">
+      <EuiText color="success" tabIndex={0}>
         {i18n.translate('xpack.synthetics.monitorBarSeries.TextLabel', { defaultMessage: '--' })}
       </EuiText>
     </EuiToolTip>

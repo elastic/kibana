@@ -12,42 +12,42 @@ import {
   TOASTER_CLOSE_ICON,
 } from '../screens/alerts_detection_rules';
 import {
-  EXCEPTIONS_TABLE,
-  EXCEPTIONS_TABLE_SEARCH,
-  EXCEPTIONS_TABLE_DELETE_BTN,
-  EXCEPTIONS_TABLE_SEARCH_CLEAR,
-  EXCEPTIONS_TABLE_MODAL,
-  EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
-  EXCEPTIONS_TABLE_EXPORT_MODAL_BTN,
-  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
-  EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN,
-  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
-  MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
-  CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT,
-  CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT,
   CREATE_SHARED_EXCEPTION_LIST_BTN,
-  EXCEPTIONS_LIST_MANAGEMENT_NAME,
-  EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN,
-  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT,
-  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT,
-  EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN,
-  EXCEPTIONS_LIST_DETAILS_HEADER,
-  EXCEPTIONS_TABLE_DUPLICATE_BTN,
-  EXCEPTIONS_TABLE_LIST_NAME,
-  INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
-  EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME,
-  exceptionsTableListManagementListContainerByListId,
-  EXCEPTIONS_TABLE_LINK_RULES_BTN,
-  RULE_ACTION_LINK_RULE_SWITCH,
-  LINKED_RULES_BADGE,
-  MANAGE_RULES_SAVE,
-  IMPORT_SHARED_EXCEPTION_LISTS_BTN,
-  IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
+  CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT,
+  CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT,
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU,
   EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM,
-  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
+  EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME,
+  EXCEPTIONS_LIST_DETAILS_HEADER,
+  EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN,
+  EXCEPTIONS_LIST_MANAGEMENT_NAME,
+  EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
+  EXCEPTIONS_TABLE,
+  EXCEPTIONS_TABLE_DELETE_BTN,
+  EXCEPTIONS_TABLE_DUPLICATE_BTN,
+  EXCEPTIONS_TABLE_EXPIRED_EXCEPTION_ITEMS_MODAL_CONFIRM_BTN,
+  EXCEPTIONS_TABLE_EXPORT_MODAL_BTN,
+  EXCEPTIONS_TABLE_LINK_RULES_BTN,
+  EXCEPTIONS_TABLE_LIST_NAME,
+  EXCEPTIONS_TABLE_MODAL,
+  EXCEPTIONS_TABLE_MODAL_CONFIRM_BTN,
+  EXCEPTIONS_TABLE_SEARCH,
+  EXCEPTIONS_TABLE_SEARCH_CLEAR,
+  exceptionsTableListManagementListContainerByListId,
+  IMPORT_SHARED_EXCEPTION_LISTS_BTN,
+  IMPORT_SHARED_EXCEPTION_LISTS_CONFIRM_BTN,
   IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX,
   IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_EXISTING_CHECKBOX,
+  INCLUDE_EXPIRED_EXCEPTION_ITEMS_SWITCH,
+  LINKED_RULES_BADGE,
+  MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION,
+  MANAGE_EXCEPTION_CREATE_BUTTON_MENU,
+  MANAGE_EXCEPTION_CREATE_LIST_BUTTON,
+  MANAGE_RULES_SAVE,
+  RULE_ACTION_LINK_RULE_SWITCH,
 } from '../screens/exceptions';
 import { closeErrorToast } from './alerts_detection_rules';
 import { assertExceptionItemsExists } from './exceptions';
@@ -56,11 +56,7 @@ export const clearSearchSelection = () => {
   cy.get(EXCEPTIONS_TABLE_SEARCH_CLEAR).first().click();
 };
 
-export const expandExceptionActions = () => {
-  cy.get(EXCEPTIONS_OVERFLOW_ACTIONS_BTN).first().click();
-};
-
-export const importExceptionLists = (listsFile: string) => {
+export const importExceptionLists = (listsFile: Cypress.FileReference) => {
   cy.get(IMPORT_SHARED_EXCEPTION_LISTS_BTN).click();
   cy.get(INPUT_FILE).should('exist');
   cy.get(INPUT_FILE).trigger('click');
@@ -150,7 +146,8 @@ export const createSharedExceptionList = (
   }
 
   if (submit) {
-    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click();
+    // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+    cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click({ force: true });
   }
 };
 
@@ -185,7 +182,8 @@ export const waitForExceptionListDetailToBeLoaded = () => {
 };
 
 export const findSharedExceptionListItemsByName = (listName: string, itemNames: string[]) => {
-  cy.contains(listName).click();
+  const escapedListName = listName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  cy.contains(new RegExp(`^${escapedListName}$`)).click();
   waitForExceptionListDetailToBeLoaded();
   assertExceptionItemsExists(EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME, itemNames);
 };
@@ -238,7 +236,8 @@ export const linkSharedListToRulesFromListDetails = (numberOfRules: number) => {
 };
 
 export const saveLinkedRules = () => {
-  cy.get(MANAGE_RULES_SAVE).first().click();
+  // { force: true }: Element can be covered by overlay (e.g. "See the..." link)
+  cy.get(MANAGE_RULES_SAVE).first().click({ force: true });
 };
 
 export const validateSharedListLinkedRules = (
@@ -292,10 +291,23 @@ export const validateImportExceptionListFailedBecauseExistingListFound = () => {
   cy.wait('@import').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
-    cy.get(TOASTER_BODY).should('contain', 'Found that list_id');
+    cy.get(TOASTER_BODY)
+      .invoke('text')
+      .should((bodyText) => {
+        expect(bodyText).to.match(
+          /(Found that list_id|list_id.*already exists|already exists.*list_id)/i
+        );
+      });
   });
 };
 
-export const validateImportExceptionListCreateNewOptionDisabled = () => {
-  cy.get(IMPORT_SHARED_EXCEPTION_LISTS_OVERWRITE_CREATE_NEW_CHECKBOX).should('be.disabled');
+export const validateImportExceptionListFailedOnArtifactTypePrecheck = () => {
+  cy.get(TOASTER).should('have.text', 'There was an error uploading the exception list.');
+  cy.get(TOASTER_BODY)
+    .invoke('text')
+    .should((bodyText) => {
+      expect(bodyText).to.match(
+        /You can only import shared exception lists here, but at least one of the imported files contains endpoint artifacts. Import endpoint artifacts from their dedicated pages instead./i
+      );
+    });
 };

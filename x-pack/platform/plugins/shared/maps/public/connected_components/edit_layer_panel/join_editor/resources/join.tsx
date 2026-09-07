@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
-import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextColor,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField, DataView, Query } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
+import { isNestedField } from '@kbn/data-views-plugin/common';
+import { getIndexPatternService } from '../../../../kibana_services';
+import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
+import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
+import type { JoinField } from '../join_editor';
+import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
+import {
+  isSpatialSourceComplete,
+  isTermSourceComplete,
+} from '../../../../classes/sources/join_sources';
 import { SpatialJoinExpression } from './spatial_join_expression';
 import { TermJoinExpression } from './term_join_expression';
 import { MetricsExpression } from './metrics_expression';
@@ -25,16 +40,6 @@ import type {
   JoinDescriptor,
   JoinSourceDescriptor,
 } from '../../../../../common/descriptor_types';
-
-import { getIndexPatternService } from '../../../../kibana_services';
-import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
-import { AGG_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
-import type { JoinField } from '../join_editor';
-import { isSpatialJoin } from '../../../../classes/joins/is_spatial_join';
-import {
-  isSpatialSourceComplete,
-  isTermSourceComplete,
-} from '../../../../classes/sources/join_sources';
 
 interface Props {
   join: Partial<JoinDescriptor>;
@@ -62,7 +67,8 @@ export class Join extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadRightFields(_.get(this.props.join, 'right.indexPatternId'));
+    const indexPatternId = this.props.join.right?.indexPatternId;
+    this._loadRightFields(typeof indexPatternId === 'string' ? indexPatternId : undefined);
   }
 
   componentWillUnmount() {
@@ -92,7 +98,7 @@ export class Join extends Component<Props, State> {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter((field) => !indexPatterns.isNestedField(field)),
+      rightFields: indexPattern.fields.filter((field) => !isNestedField(field)),
       indexPattern,
     });
   }
@@ -280,18 +286,22 @@ export class Join extends Component<Props, State> {
 
         {globalTimeCheckbox}
 
-        <EuiButtonIcon
-          className="mapJoinItem__delete"
-          iconType="trash"
-          color="danger"
-          aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
             defaultMessage: 'Delete join',
           })}
-          title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
-            defaultMessage: 'Delete join',
-          })}
-          onClick={onRemove}
-        />
+          anchorClassName="mapJoinItem__delete"
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join',
+            })}
+            onClick={onRemove}
+          />
+        </EuiToolTip>
       </div>
     );
   }

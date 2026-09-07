@@ -7,15 +7,26 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
-const FINDINGS_INDEX = 'logs-cloud_security_posture.findings-default';
-const FINDINGS_LATEST_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 export const VULNERABILITIES_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.vulnerabilities-default';
 export const CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest-default';
+
+// Maps a grouping option's visible label to the stable `data-test-subj` rendered
+// by kbn-grouping's group selector (`panel-none` / `panel-${key}`).
+const GROUP_SELECTOR_OPTION_TEST_SUBJECTS: Record<string, string> = {
+  None: 'panel-none',
+  'Resource ID': 'panel-resource.id',
+  'Rule name': 'panel-rule.name',
+  'Cloud account ID': 'panel-cloud.account.id',
+  'Kubernetes cluster ID': 'panel-orchestrator.cluster.id',
+  Namespace: 'panel-data_stream.namespace',
+  CVE: 'panel-vulnerability.id',
+};
 
 export function FindingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -55,14 +66,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   };
 
   const index = {
-    remove: () =>
-      Promise.all([deleteByQuery(FINDINGS_INDEX), deleteByQuery(FINDINGS_LATEST_INDEX)]),
+    remove: () => Promise.all([deleteByQuery(CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS)]),
     add: async (findingsMock: Array<Record<string, unknown>>) => {
       await es.bulk({
         refresh: true,
         operations: [
-          ...insertOperation(FINDINGS_INDEX, findingsMock),
-          ...insertOperation(FINDINGS_LATEST_INDEX, findingsMock),
+          ...insertOperation(CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS, findingsMock),
         ],
       });
     },
@@ -294,9 +303,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
     '3p-integrations-no-vulnerabilities-findings-prompt'
   );
-  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
-    '3p-integrations-no-misconfigurations-findings-prompt'
-  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -331,12 +337,16 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await testSubjects.find(testSubj);
     },
     async setValue(value: string) {
-      const contextMenu = await testSubjects.find('groupByContextMenu');
-      const menuItems = await contextMenu.findAllByCssSelector('button.euiContextMenuItem');
-      const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
-      const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
-      await menuItems[menuItemValueIndex].click();
-      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      const optionTestSubj = GROUP_SELECTOR_OPTION_TEST_SUBJECTS[value];
+      if (!optionTestSubj) {
+        throw new Error(`Unknown group selector option: "${value}"`);
+      }
+      await testSubjects.click(optionTestSubj);
+      await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      // 'None' renders a flat table, not accordion rows — skip the accordion wait.
+      if (value !== 'None') {
+        await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
+      }
     },
     async openDropDown() {
       const element = await this.getElement();
@@ -381,7 +391,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
     thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,

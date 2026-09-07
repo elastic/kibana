@@ -9,17 +9,18 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiTitle,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
-  EuiButton,
   EuiFormLabel,
   EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, CONNECTOR_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
@@ -76,16 +77,23 @@ export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => 
               justify-content: center;
             `}
           >
-            <EuiButtonIcon
-              data-test-subj="serverlessSearchEditNameButton"
-              isDisabled={isDisabled}
-              color="text"
-              iconType="pencil"
-              aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
                 defaultMessage: 'Edit connector name',
               })}
-              onClick={() => setIsEditing(true)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="serverlessSearchEditNameButton"
+                isDisabled={isDisabled}
+                color="text"
+                iconType="pencil"
+                aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
+                  defaultMessage: 'Edit connector name',
+                })}
+                onClick={() => setIsEditing(true)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </>
       ) : (

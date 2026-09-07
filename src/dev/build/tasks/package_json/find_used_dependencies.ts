@@ -8,7 +8,7 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { ImportResolver } from '@kbn/import-resolver';
 import { ImportLocator } from '@kbn/import-locator';
 import type { PluginPackage } from '@kbn/repo-packages';
@@ -53,6 +53,7 @@ export async function findUsedDependencies(
         ...(await globby(
           [
             // main code entries
+            'src/cli/*/dist.js',
             'src/cli*/dist.js',
             // core entry
             'src/core/server/index.js',

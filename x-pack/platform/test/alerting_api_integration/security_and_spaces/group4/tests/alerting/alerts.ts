@@ -81,7 +81,6 @@ export default function alertTests({ getService }: FtrProviderContext) {
           createdBy: user.fullName,
           updatedBy: user.fullName,
           actions: actions.map((action: any) => {
-            /* eslint-disable @typescript-eslint/naming-convention */
             const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,
@@ -176,7 +175,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source as object,
-                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+                ['alertInfo.createdAt', 'alertInfo.updatedAt', 'alertInfo.lastEnabledAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
@@ -300,7 +299,7 @@ instanceStateValue: true
               expect(alertSearchResult.body.hits.total.value).to.eql(1);
               const alertSearchResultWithoutDates = omit(
                 alertSearchResult.body.hits.hits[0]._source as object,
-                ['alertInfo.createdAt', 'alertInfo.updatedAt']
+                ['alertInfo.createdAt', 'alertInfo.updatedAt', 'alertInfo.lastEnabledAt']
               );
               expect(alertSearchResultWithoutDates).to.eql({
                 source: 'alert:test.always-firing',
@@ -412,7 +411,7 @@ instanceStateValue: true
           const alertSearchResultInfoWithoutDates = omit(
             // @ts-expect-error _source: unknown
             alertSearchResult.body.hits.hits[0]._source.alertInfo,
-            ['createdAt', 'updatedAt']
+            ['createdAt', 'updatedAt', 'lastEnabledAt']
           );
           expect(alertSearchResultInfoWithoutDates).to.eql({
             id: alertId,
@@ -430,7 +429,6 @@ instanceStateValue: true
             createdBy: user.fullName,
             updatedBy: Superuser.fullName,
             actions: response2.body.actions.map((action: any) => {
-              /* eslint-disable @typescript-eslint/naming-convention */
               const { connector_type_id, group, id, params, uuid } = action;
               return {
                 actionTypeId: connector_type_id,
@@ -1498,8 +1496,11 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            snoozed: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1543,8 +1544,11 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             severity_improving: false,
+                            snoozed: false,
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1604,8 +1608,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1628,6 +1634,7 @@ instanceStateValue: true
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '1' },
+                            snoozed: false,
                             start: expectExpect.any(String),
                             uuid: expectExpect.any(String),
                             status: 'active',
@@ -1649,8 +1656,10 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            maintenance_window_names: [],
                             pending_recovered_count: 0,
                             previous_action_group: 'default',
+                            muted: false,
                             rule: {
                               parameters: {
                                 index: 'kibana-alerting-test-data',
@@ -1673,6 +1682,7 @@ instanceStateValue: true
                             duration: { us: expectExpect.any(Number) },
                             time_range: { gte: expectExpect.any(String) },
                             instance: { id: '2' },
+                            snoozed: false,
                             start: expectExpect.any(String),
                             uuid: expectExpect.any(String),
                             status: 'active',
@@ -1758,8 +1768,11 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      snoozed: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',
@@ -1803,8 +1816,11 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      maintenance_window_names: [],
                       pending_recovered_count: 0,
                       severity_improving: false,
+                      snoozed: false,
+                      muted: false,
                       rule: {
                         parameters: {
                           index: 'kibana-alerting-test-data',

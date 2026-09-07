@@ -7,7 +7,7 @@
 
 import { PromptTemplate } from '@langchain/core/prompts';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import { loadEvaluator } from 'langchain/evaluation';
+import { loadEvaluator } from '@langchain/classic/evaluation';
 
 import { type GetCustomEvaluatorOptions, getCustomEvaluator } from '.';
 import { getDefaultPromptTemplate } from './get_default_prompt_template';
@@ -18,8 +18,8 @@ import { runWithReplacements } from '../../__mocks__/mock_runs';
 
 const mockLlm = jest.fn() as unknown as ActionsClientLlm;
 
-jest.mock('langchain/evaluation', () => ({
-  ...jest.requireActual('langchain/evaluation'),
+jest.mock('@langchain/classic/evaluation', () => ({
+  ...jest.requireActual('@langchain/classic/evaluation'),
   loadEvaluator: jest.fn().mockResolvedValue({
     evaluateStrings: jest.fn().mockResolvedValue({
       key: 'correctness',

@@ -18,6 +18,8 @@ import {
   useEuiTheme,
   EuiPanel,
   EuiToolTip,
+  EuiOutsideClickDetector,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +35,7 @@ export interface BaseToolbarProps {
   'data-test-subj': string;
   'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
+  buttonTooltipContent?: ReactElement | string;
   popoverContentBelowSearch?: ReactElement;
   popoverTitle?: string;
   options: SelectableEntry[];
@@ -40,6 +43,7 @@ export interface BaseToolbarProps {
   optionMatcher?: EuiSelectableProps['optionMatcher'];
   hasArrow?: boolean;
   disabled?: boolean;
+  fullWidth?: boolean;
 }
 
 export interface ToolbarSingleSelectorProps {
@@ -59,6 +63,7 @@ export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
+  buttonTooltipContent,
   popoverContentBelowSearch,
   popoverTitle,
   options,
@@ -68,10 +73,11 @@ export const ToolbarSelector = ({
   singleSelection,
   hasArrow = true,
   disabled = false,
+  fullWidth = false,
 }: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
 
   const [searchTerm, _setSearchTerm] = useState<string>(); // current value to show in the search input
   const [searchTermDebounced, _setSearchTermDebounced] = useState<string>(); // debounced value to filter options less often when typing
@@ -120,29 +126,31 @@ export const ToolbarSelector = ({
     }
   }, [isOpen, closePopover, setIsOpen]);
 
-  const disableLabelPopover = useCallback(() => setLabelPopoverDisabled(true), []);
-
-  const enableLabelPopover = useCallback(
-    () => setTimeout(() => setLabelPopoverDisabled(false)),
-    []
-  );
-
   const onSelectionChange = useCallback<
     NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
   >(
     (newOptions) => {
       if (singleSelection === false) {
-        onChange?.(newOptions.filter(({ checked }) => checked === 'on'));
+        // For multi-selection, we need to preserve previously selected options
+        const currentlyVisibleSelected = newOptions.filter(({ checked }) => checked === 'on');
+        const currentlyVisibleValues = new Set(newOptions.map((option) => option.value));
+
+        // Find previously selected options that are not currently visible (filtered out)
+        const previouslySelectedButHidden = options.filter(
+          (option) => option.checked === 'on' && !currentlyVisibleValues.has(option.value)
+        );
+
+        const allSelected = [...currentlyVisibleSelected, ...previouslySelectedButHidden];
+        onChange?.(allSelected);
       } else {
         const chosenOption = newOptions.find(({ checked }) => checked === 'on');
         onChange?.(
           chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
         );
         closePopover();
-        disableLabelPopover();
       }
     },
-    [closePopover, disableLabelPopover, onChange, singleSelection]
+    [closePopover, onChange, singleSelection, options]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
@@ -166,93 +174,112 @@ export const ToolbarSelector = ({
 
   const panelMinWidth = calculateWidthFromEntries(options, ['label']) + 2 * euiTheme.base; // plus extra width for the right Enter button
 
+  const handleOutsideClick = useCallback(() => {
+    if (!isOpen) return;
+    closePopover();
+  }, [closePopover, isOpen]);
+
   return (
-    <EuiPopover
-      id={dataTestSubj}
-      ownFocus
-      initialFocus={
-        searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
-      }
-      panelProps={{
-        css: searchable
-          ? css`
-              min-width: ${panelMinWidth}px;
-            `
-          : css`
-              width: ${panelMinWidth}px;
-            `,
-      }}
-      panelPaddingSize="none"
-      button={
-        <EuiToolTip
-          content={labelPopoverDisabled ? undefined : buttonLabel}
-          delay="long"
-          display="block"
-        >
-          <ToolbarButton
-            size="s"
-            data-test-subj={`${dataTestSubj}Button`}
-            data-selected-value={dataSelectedValue}
-            aria-label={popoverTitle}
-            label={buttonLabel}
-            onClick={togglePopover}
-            onBlur={enableLabelPopover}
-            hasArrow={hasArrow}
-            isDisabled={disabled}
-          />
-        </EuiToolTip>
-      }
-      isOpen={isOpen}
-      closePopover={closePopover}
-    >
-      {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
-      <EuiSelectable<SelectableEntry>
-        id={`${dataTestSubj}Selectable`}
-        singleSelection={singleSelection ?? true}
-        aria-label={popoverTitle}
-        data-test-subj={`${dataTestSubj}Selectable`}
-        isPreFiltered={searchable}
-        options={filteredOptions}
-        onChange={onSelectionChange}
-        listProps={{
-          truncationProps: { truncation: 'middle' },
-          isVirtualized: searchable,
+    <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
+      <EuiPopover
+        id={dataTestSubj}
+        ownFocus
+        aria-labelledby={popoverTitle ? popoverTitleId : undefined}
+        aria-label={
+          !popoverTitle
+            ? i18n.translate('sharedUXPackages.toolbarSelectorPopover.ariaLabel', {
+                defaultMessage: 'Selector options',
+              })
+            : undefined
+        }
+        anchorPosition="downLeft"
+        repositionToCrossAxis={false}
+        initialFocus={
+          searchable ? `#${dataTestSubj}SelectableInput` : `#${dataTestSubj}Selectable_listbox`
+        }
+        panelProps={{
+          css: searchable
+            ? css`
+                min-width: ${panelMinWidth}px;
+              `
+            : css`
+                width: ${panelMinWidth}px;
+              `,
         }}
-        {...(searchable
-          ? {
-              searchable,
-              searchProps,
-              noMatchesMessage: (
-                <p>
-                  <FormattedMessage
-                    id="sharedUXPackages.toolbarSelectorPopover.noResults"
-                    defaultMessage="No results found for {term}"
-                    values={{
-                      term: <strong>{searchTerm}</strong>,
-                    }}
-                  />
-                </p>
-              ),
-            }
-          : {})}
+        panelPaddingSize="none"
+        button={
+          <EuiToolTip content={buttonTooltipContent ?? popoverTitle} display="block">
+            <ToolbarButton
+              size="s"
+              data-test-subj={`${dataTestSubj}Button`}
+              data-selected-value={dataSelectedValue}
+              aria-label={popoverTitle}
+              label={buttonLabel}
+              onClick={togglePopover}
+              hasArrow={hasArrow}
+              fullWidth={fullWidth}
+              isDisabled={disabled}
+            />
+          </EuiToolTip>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
       >
-        {(list, search) => (
-          <>
-            {search && (
-              <EuiPanel
-                color="transparent"
-                paddingSize="s"
-                hasShadow={false}
-                css={{ paddingBottom: 0 }}
-              >
-                {search}
-                {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
-              </EuiPanel>
-            )}
-            {list}
-          </>
+        {popoverTitle && (
+          <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+            {popoverTitle}
+          </EuiPopoverTitle>
         )}
-      </EuiSelectable>
-    </EuiPopover>
+        <EuiSelectable<SelectableEntry>
+          id={`${dataTestSubj}Selectable`}
+          singleSelection={singleSelection ?? true}
+          aria-label={popoverTitle}
+          data-test-subj={`${dataTestSubj}Selectable`}
+          data-is-searching={searchTerm !== searchTermDebounced}
+          isPreFiltered={searchable}
+          options={filteredOptions}
+          onChange={onSelectionChange}
+          listProps={{
+            truncationProps: { truncation: 'middle' },
+            isVirtualized: searchable,
+            paddingSize: 's',
+          }}
+          {...(searchable
+            ? {
+                searchable,
+                searchProps,
+                noMatchesMessage: (
+                  <p>
+                    <FormattedMessage
+                      id="sharedUXPackages.toolbarSelectorPopover.noResults"
+                      defaultMessage="No results found for {term}"
+                      values={{
+                        term: <strong>{searchTerm}</strong>,
+                      }}
+                    />
+                  </p>
+                ),
+              }
+            : {})}
+        >
+          {(list, search) => (
+            <>
+              {search && (
+                <EuiPanel
+                  color="transparent"
+                  paddingSize="s"
+                  hasShadow={false}
+                  css={{ paddingBottom: 0 }}
+                >
+                  {search}
+                  {popoverContentBelowSearch && <>{popoverContentBelowSearch}</>}
+                </EuiPanel>
+              )}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+    </EuiOutsideClickDetector>
   );
 };

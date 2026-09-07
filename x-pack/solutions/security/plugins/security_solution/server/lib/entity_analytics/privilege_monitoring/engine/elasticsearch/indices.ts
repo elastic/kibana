@@ -15,7 +15,7 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
   const { deps, index } = dataClient;
   const internalUserClient = deps.clusterClient.asInternalUser;
 
-  const upsertIndex = async () => {
+  const _upsertIndex = async () => {
     dataClient.log('debug', `Creating or updating index: ${index}`);
     await createOrUpdateIndex({
       esClient: internalUserClient,
@@ -25,6 +25,7 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
         mappings: generateUserIndexMappings(),
         settings: {
           hidden: true,
+          auto_expand_replicas: '0-1',
           mode: 'lookup',
           default_pipeline: PRIVMON_EVENT_INGEST_PIPELINE_ID,
         },
@@ -52,7 +53,7 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
       });
   };
 
-  const createIngestPipelineIfDoesNotExist = async () => {
+  const _createIngestPipelineIfDoesNotExist = async () => {
     const pipelinesResponse = await internalUserClient.ingest.getPipeline(
       { id: PRIVMON_EVENT_INGEST_PIPELINE_ID },
       { ignore: [404] }
@@ -65,9 +66,15 @@ export const createPrivmonIndexService = (dataClient: PrivilegeMonitoringDataCli
     await internalUserClient.ingest.putPipeline(eventIngestPipeline);
   };
 
+  const initialisePrivmonIndex = async () => {
+    await _upsertIndex();
+    await _createIngestPipelineIfDoesNotExist();
+  };
+
   return {
-    upsertIndex,
+    _upsertIndex,
+    _createIngestPipelineIfDoesNotExist,
+    initialisePrivmonIndex,
     doesIndexExist,
-    createIngestPipelineIfDoesNotExist,
   };
 };

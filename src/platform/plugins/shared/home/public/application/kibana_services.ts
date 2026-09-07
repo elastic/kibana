@@ -12,11 +12,13 @@ import type {
   DocLinksStart,
   HttpStart,
   NotificationsSetup,
+  NotificationsStart,
   OverlayStart,
   IUiSettingsClient,
   ApplicationStart,
   ThemeServiceStart,
   I18nStart,
+  AppMountParameters,
 } from '@kbn/core/public';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -42,6 +44,7 @@ export interface HomeKibanaServices {
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;
+  notifications: NotificationsStart;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;
@@ -57,6 +60,7 @@ export interface HomeKibanaServices {
   overlays: OverlayStart;
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
+  history: AppMountParameters['history'];
 }
 
 let services: HomeKibanaServices | null = null;

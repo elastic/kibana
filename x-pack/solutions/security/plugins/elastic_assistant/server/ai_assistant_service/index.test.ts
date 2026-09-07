@@ -28,6 +28,8 @@ import { retryUntil } from './create_resource_installation_helper.test';
 import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { getDefaultAnonymizationFields } from '../../common/anonymization';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 jest.mock('../ai_assistant_data_clients/conversations', () => ({
   AIAssistantConversationsDataClient: jest.fn(),
@@ -110,6 +112,7 @@ describe('AI Assistant Service', () => {
   let pluginStop$: Subject<void>;
   let assistantServiceOpts: AIAssistantServiceOpts;
   let ml: MlPluginSetup;
+  let adhocAttackDiscoveryDataClient: jest.Mocked<IRuleDataClient>;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -128,6 +131,9 @@ describe('AI Assistant Service', () => {
     ml.trainedModelsProvider = jest.fn().mockImplementation(() => ({
       getELSER: jest.fn().mockImplementation(() => '.elser_model_2'),
     }));
+    adhocAttackDiscoveryDataClient = {
+      getWriter: jest.fn().mockResolvedValue({}),
+    } as unknown as jest.Mocked<IRuleDataClient>;
     assistantServiceOpts = {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
@@ -138,11 +144,17 @@ describe('AI Assistant Service', () => {
       taskManager: taskManagerMock.createSetup(),
       productDocManager: Promise.resolve({
         getStatus: jest.fn(),
+        getStatuses: jest.fn(),
         install: jest.fn(),
+        installSecurityLabs: jest.fn(),
         update: jest.fn(),
         updateAll: jest.fn(),
+        updateSecurityLabsAll: jest.fn().mockResolvedValue({ inferenceIds: [] }),
         uninstall: jest.fn(),
+        uninstallSecurityLabs: jest.fn(),
+        getSecurityLabsStatus: jest.fn(),
       }),
+      adhocAttackDiscoveryDataClient,
     };
   });
 
@@ -662,6 +674,83 @@ describe('AI Assistant Service', () => {
         `There was an error in the framework installing spaceId-level resources and creating concrete indices for spaceId \"test\" - Retry failed with errors: Failure during installation of create or update .kibana-elastic-ai-assistant-index-template-conversations index template. No mappings would be generated for .kibana-elastic-ai-assistant-index-template-conversations, possibly due to failed/misconfigured bootstrapping`
       );
     });
+    test('should eagerly create the ad-hoc Attack Discovery index for the default space', async () => {
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: DEFAULT_NAMESPACE_STRING,
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () =>
+          (await getSpaceResourcesInitialized(assistantService, DEFAULT_NAMESPACE_STRING)) === true
+      );
+
+      expect(adhocAttackDiscoveryDataClient.getWriter).toHaveBeenCalledWith({
+        namespace: DEFAULT_NAMESPACE_STRING,
+      });
+    });
+
+    test('should not eagerly create the ad-hoc Attack Discovery index for non-default spaces', async () => {
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: 'test-space',
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () => (await getSpaceResourcesInitialized(assistantService, 'test-space')) === true
+      );
+
+      expect(adhocAttackDiscoveryDataClient.getWriter).not.toHaveBeenCalled();
+    });
+
+    test('should swallow errors when eagerly creating the ad-hoc Attack Discovery index', async () => {
+      adhocAttackDiscoveryDataClient.getWriter.mockRejectedValue(
+        new Error('RuleDataWriteDisabledError')
+      );
+      assistantService = new AIAssistantService(assistantServiceOpts);
+
+      await retryUntil(
+        'AI Assistant service initialized',
+        async () => assistantService.isInitialized() === true
+      );
+
+      await assistantService.createAIAssistantConversationsDataClient({
+        logger,
+        spaceId: DEFAULT_NAMESPACE_STRING,
+        currentUser: mockUser1,
+        licensing,
+      });
+
+      await retryUntil(
+        'space resources initialized',
+        async () =>
+          (await getSpaceResourcesInitialized(assistantService, DEFAULT_NAMESPACE_STRING)) === true
+      );
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Unable to pre-create ad-hoc Attack Discovery index for space "${DEFAULT_NAMESPACE_STRING}": RuleDataWriteDisabledError`
+      );
+    });
   });
 
   describe('retries', () => {
@@ -810,6 +899,70 @@ describe('AI Assistant Service', () => {
       );
 
       expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(7);
+    });
+  });
+
+  describe('createDefaultAnonymizationFields', () => {
+    test('should create default anonymization fields', async () => {
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: { hits: [], total: { value: 0 } },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            { create: { _index: '.kibana-elastic-ai-assistant-anonymization-fields-test' } },
+          ]),
+        }),
+        expect.any(Object)
+      );
+    });
+
+    test('should not create default anonymization fields if they already exist', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [],
+          total: { value: defaultAnonymizationFields.length },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('default');
+
+      expect(clusterClient.bulk).not.toHaveBeenCalled();
+    });
+
+    test('should create one default anonymization field when the last default anonymization field does not exist in the index', async () => {
+      const defaultAnonymizationFields = getDefaultAnonymizationFields('default');
+      // Mock the search response to return the default anonymization fields except the last one
+      const storedFieldsLength = defaultAnonymizationFields.length - 1;
+      const defaultFieldsExpectLast = defaultAnonymizationFields.slice(0, -1);
+      const lastField = defaultAnonymizationFields[storedFieldsLength];
+      (clusterClient.search as unknown as jest.Mock).mockResolvedValue({
+        hits: {
+          hits: [...defaultFieldsExpectLast.map((field) => ({ _source: field }))],
+          total: { value: storedFieldsLength },
+        },
+      });
+
+      const assistantService = new AIAssistantService(assistantServiceOpts);
+      await assistantService.createDefaultAnonymizationFields('test');
+
+      // it should create the last default anonymization field
+      expect(clusterClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.arrayContaining([
+            expect.objectContaining({
+              field: lastField.field,
+            }),
+          ]),
+        }),
+        expect.any(Object)
+      );
     });
   });
 });

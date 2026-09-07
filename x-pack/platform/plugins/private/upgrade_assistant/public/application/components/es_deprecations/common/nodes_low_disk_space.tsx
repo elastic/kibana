@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
@@ -15,15 +16,12 @@ interface Props {
     nodeId: string;
     nodeName: string;
     available: string;
-    lowDiskWatermarkSetting: string;
   }>;
 }
 export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) => {
   return (
     <>
-      <EuiCallOut
-        color="warning"
-        iconType="warning"
+      <KbnWarningCallout
         data-test-subj="lowDiskSpaceCallout"
         title={
           <FormattedMessage
@@ -55,7 +53,7 @@ export const NodesLowSpaceCallOut: React.FunctionComponent<Props> = ({ nodes }) 
             ))}
           </ul>
         </>
-      </EuiCallOut>
+      </KbnWarningCallout>
       <EuiSpacer size="m" />
     </>
   );

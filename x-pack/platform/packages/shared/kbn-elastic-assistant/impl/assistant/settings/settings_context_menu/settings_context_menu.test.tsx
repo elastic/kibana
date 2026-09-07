@@ -17,6 +17,7 @@ import { AssistantSettingsContextMenu } from './settings_context_menu';
 import { AI_ASSISTANT_MENU } from './translations';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KNOWLEDGE_BASE_TAB } from '../const';
+
 const props = {};
 describe('AssistantSettingsContextMenu', () => {
   beforeEach(() => {

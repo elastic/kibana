@@ -10,6 +10,7 @@
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
 import { Env, type RawPackageInfo, type EnvOptions } from '@kbn/config';
+import { lazyObject } from '@kbn/lazy-object';
 
 type DeepPartial<T> = {
   [P in keyof T]?: P extends 'repoPackages'
@@ -20,7 +21,7 @@ type DeepPartial<T> = {
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {
-  return {
+  return lazyObject({
     configs: options.configs || [],
     cliArgs: {
       dev: true,
@@ -35,7 +36,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       ...(options.cliArgs || {}),
     },
     repoPackages: options.repoPackages ?? getPackages(REPO_ROOT),
-  };
+  });
 }
 
 export const createTestPackageInfo = ({ dist = true }: { dist?: boolean } = {}): RawPackageInfo => {

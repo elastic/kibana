@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import type { ComponentOpts } from './rule_enabled_switch';
 import { RuleEnabledSwitch } from './rule_enabled_switch';
 
@@ -39,6 +39,7 @@ describe('RuleEnabledSwitch', () => {
       ruleType: 'test_rule_type',
       createdAt: new Date('2020-08-20T19:23:38Z'),
       enabledInLicense: true,
+      isInternallyManaged: false,
       isEditable: false,
       notifyWhen: null,
       index: 0,
@@ -51,12 +52,12 @@ describe('RuleEnabledSwitch', () => {
   beforeEach(() => jest.resetAllMocks());
 
   test('renders switch control as disabled when rule is not editable', () => {
-    const wrapper = mountWithIntl(<RuleEnabledSwitch {...props} />);
-    expect(wrapper.find('[data-test-subj="enableSwitch"]').first().props().disabled).toBeTruthy();
+    render(<RuleEnabledSwitch {...props} />);
+    expect(screen.getByTestId('enableSwitch')).toBeDisabled();
   });
 
   test('renders switch control', () => {
-    const wrapper = mountWithIntl(
+    render(
       <RuleEnabledSwitch
         {...{
           ...props,
@@ -84,6 +85,7 @@ describe('RuleEnabledSwitch', () => {
             ruleType: 'test_rule_type',
             createdAt: new Date('2020-08-20T19:23:38Z'),
             enabledInLicense: true,
+            isInternallyManaged: false,
             isEditable: true,
             notifyWhen: null,
             index: 0,
@@ -93,6 +95,6 @@ describe('RuleEnabledSwitch', () => {
         }}
       />
     );
-    expect(wrapper.find('[data-test-subj="enableSwitch"]').first().props().checked).toBeFalsy();
+    expect(screen.getByTestId('enableSwitch')).not.toBeChecked();
   });
 });

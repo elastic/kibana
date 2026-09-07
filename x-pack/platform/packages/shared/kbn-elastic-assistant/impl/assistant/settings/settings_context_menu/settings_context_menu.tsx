@@ -121,7 +121,7 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
           aria-label={'alerts-to-analyze'}
           key={'alerts-to-analyze'}
           onClick={handleShowAlertsModal}
-          icon={'magnifyWithExclamation'}
+          icon={'magnifyExclamation'}
           data-test-subj={'alerts-to-analyze'}
         >
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -135,9 +135,9 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
       ],
       [
-        handleNavigateToAnonymization,
-        handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
+        handleNavigateToKnowledgeBase,
+        handleNavigateToAnonymization,
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
       ]
@@ -145,9 +145,10 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
 
     return (
       <>
-        <EuiToolTip content={i18n.AI_ASSISTANT_MENU}>
-          <EuiPopover
-            button={
+        <EuiPopover
+          aria-label={i18n.AI_ASSISTANT_MENU}
+          button={
+            <EuiToolTip content={i18n.AI_ASSISTANT_MENU} disableScreenReaderOutput>
               <EuiButtonIcon
                 aria-label={i18n.AI_ASSISTANT_MENU}
                 isDisabled={isDisabled}
@@ -155,20 +156,20 @@ export const AssistantSettingsContextMenu: React.FC<Params> = React.memo(
                 onClick={onButtonClick}
                 data-test-subj="chat-context-menu"
               />
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="leftUp"
-          >
-            <EuiContextMenuPanel
-              items={items}
-              css={css`
-                width: 280px;
-              `}
-            />
-          </EuiPopover>
-        </EuiToolTip>
+            </EuiToolTip>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftUp"
+        >
+          <EuiContextMenuPanel
+            items={items}
+            css={css`
+              width: 280px;
+            `}
+          />
+        </EuiPopover>
         {isAlertsSettingsModalVisible && <AlertsSettingsModal onClose={closeAlertSettingsModal} />}
         {isAnonymizationModalVisible && (
           <AnonymizationSettingsManagement modalMode onClose={closeAnonymizationModal} />

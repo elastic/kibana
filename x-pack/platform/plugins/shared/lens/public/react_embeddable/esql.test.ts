@@ -29,14 +29,17 @@ describe('ES|QL attributes creation', () => {
     return {
       ...makeEmbeddableServices(new BehaviorSubject<string>(''), undefined, {
         visOverrides: { id: 'lnsXY' },
-        dataOverrides: { id: 'form_based' },
+        dataOverrides: { id: 'formBased' },
       }),
       uiSettings: { ...getUiSettingsOverrides(), get: jest.fn().mockReturnValue(true) },
       ...servicesOverrides,
     };
   }
-  it('should not update the attributes if no index is available', async () => {
+  it('should not update the attributes if no index is available and no suggestions generated', async () => {
     jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce(null);
+    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
+    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValueOnce([]);
+    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([]);
 
     const attributes = await loadESQLAttributes(getServices());
     expect(attributes).toBeUndefined();
@@ -52,6 +55,38 @@ describe('ES|QL attributes creation', () => {
     expect(attributes).toBeUndefined();
   });
 
+  it('should fall back to ROW x=1 attributes when the main path times out', async () => {
+    jest.useFakeTimers();
+
+    // Main path hangs indefinitely
+    jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockReturnValue(new Promise(() => {}));
+
+    // Fallback path (ROW x=1) succeeds
+    jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValue(dataViewMock);
+    jest.spyOn(esqlUtils, 'getESQLQueryColumns').mockResolvedValue([]);
+    jest.spyOn(suggestionModule, 'suggestionsApi').mockReturnValue([
+      {
+        title: 'Fallback',
+        visualizationId: 'lnsXY',
+        datasourceId: 'formBased',
+        datasourceState: {},
+        visualizationState: {},
+        columns: 1,
+        score: 1,
+        previewIcon: 'icon',
+        changeType: 'initial',
+        keptLayerIds: [],
+      },
+    ]);
+
+    const attributesPromise = loadESQLAttributes(getServices());
+    jest.advanceTimersByTime(5001);
+    const attributes = await attributesPromise;
+
+    expect(attributes).not.toBeUndefined();
+    jest.useRealTimers();
+  });
+
   it('should update the attributes if there is a valid suggestion', async () => {
     jest.spyOn(esqlUtils, 'getIndexForESQLQuery').mockResolvedValueOnce('index');
     jest.spyOn(esqlUtils, 'getESQLAdHocDataview').mockResolvedValueOnce(dataViewMock);
@@ -60,7 +95,7 @@ describe('ES|QL attributes creation', () => {
       {
         title: 'MyTitle',
         visualizationId: 'lnsXY',
-        datasourceId: 'form_based',
+        datasourceId: 'formBased',
         datasourceState: {},
         visualizationState: {},
         columns: 1,

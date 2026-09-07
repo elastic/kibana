@@ -25,8 +25,8 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import styled, { css } from 'styled-components';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import styled from '@emotion/styled';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -54,9 +54,7 @@ const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
 ];
 
 const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+  font-weight: ${({ theme }) => theme.euiTheme.font.weight.semiBold};
 `;
 
 interface ExceptionsFlyoutConditionsComponentProps {
@@ -105,7 +103,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
   onSetErrorExists,
   getExtendedFields,
 }): JSX.Element => {
-  const { http, unifiedSearch } = useKibana().services;
+  const { http, kql } = useKibana().services;
   const isEndpointException = useMemo(
     (): boolean => exceptionListType === ExceptionListTypeEnum.ENDPOINT,
     [exceptionListType]
@@ -126,7 +124,9 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       return 'endpoint_list';
     }
 
-    const defaultValue = isEndpointException ? ENDPOINT_LIST_ID : undefined;
+    const defaultValue = isEndpointException
+      ? ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      : undefined;
 
     return isEdit ? exceptionListItems[0].list_id : defaultValue;
   }, [isEndpointException, isEdit, exceptionListItems]);
@@ -212,7 +212,11 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       </SectionHeader>
       {includesRuleWithEQLSequenceStatement && (
         <>
-          <EuiCallOut data-test-subj="eqlSequenceCallout" title={eqlCalloutWarning} />
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="eqlSequenceCallout"
+            title={eqlCalloutWarning}
+          />
           <EuiSpacer />
         </>
       )}
@@ -249,7 +253,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       {getExceptionBuilderComponentLazy({
         allowLargeValueLists,
         httpService: http,
-        autocompleteService: unifiedSearch.autocomplete,
+        autocompleteService: kql.autocomplete,
         exceptionListItems,
         listType: exceptionListType,
         osTypes,

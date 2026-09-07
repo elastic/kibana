@@ -12,6 +12,7 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { INTERNAL_EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
+import { APP_ID } from '@kbn/security-solution-features/constants';
 
 import { buildExceptionFilter } from '../../services/exception_lists/build_exception_filter';
 import type { ListsPluginRouter } from '../../types';
@@ -25,7 +26,18 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
       path: INTERNAL_EXCEPTION_FILTER,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          /*
+          This route is used in the UI when
+          closing alerts that match the exception
+          and when investigating in timeline. As such,
+          I believe we should update the authz string
+          to include some mix of timeline, alerts,
+          exceptions, and lists privileges once the
+          alerts feature is made available. Until then
+          We will keep this as-is.
+          */
+          // TODO: replace this when alerts feature lands
+          requiredPrivileges: [APP_ID],
         },
       },
     })
@@ -93,6 +105,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             startedAt: new Date(),
           });
 
+          // @ts-expect-error upgrade typescript v5.9.3
           return response.ok({ body: { filter } ?? {} });
         } catch (err) {
           const error = transformError(err);

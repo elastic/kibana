@@ -335,7 +335,7 @@ describe('AggConfig', () => {
     it('fails when the list is not defined', () => {
       expect(() => {
         AggConfig.nextId(undefined as unknown as IAggConfig[]);
-      }).toThrowError();
+      }).toThrow();
     });
   });
 
@@ -559,7 +559,7 @@ describe('AggConfig', () => {
             "id": "terms",
             "params": Object {
               "id": undefined,
-              "missingBucketLabel": "Missing",
+              "missingBucketLabel": undefined,
               "otherBucketLabel": "Other",
             },
           },
@@ -661,9 +661,6 @@ describe('AggConfig', () => {
                 "missingBucket": Array [
                   false,
                 ],
-                "missingBucketLabel": Array [
-                  "Missing",
-                ],
                 "order": Array [
                   "asc",
                 ],
@@ -732,9 +729,6 @@ describe('AggConfig', () => {
                   ],
                   "missingBucket": Array [
                     false,
-                  ],
-                  "missingBucketLabel": Array [
-                    "Missing",
                   ],
                   "order": Array [
                     "asc",

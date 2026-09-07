@@ -13,6 +13,11 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
+if ! command -v tar >/dev/null 2>&1; then
+  fail "tar is required to run this script"
+fi
+
+
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
@@ -71,7 +76,7 @@ for i in "$@"; do
     elastic_agent_version="${i#*=}"
     ;;
   --metrics-enabled=*)
-    val="${1#*=}"
+    val="${i#*=}"
     case "$val" in
       true) metrics_enabled=true ;;
       *) metrics_enabled=false ;;
@@ -291,7 +296,11 @@ install_integrations() {
 
     case "$item" in
     "system")
-      metadata="\t$(hostname | tr '[:upper:]' '[:lower:]')"
+      local host_name=$(hostname 2>/dev/null | tr '[:upper:]' '[:lower:]')
+      if [ -z "$host_name" ]; then
+        host_name="unknown-host"
+      fi
+      metadata="\t$host_name"
       ;;
     esac
 

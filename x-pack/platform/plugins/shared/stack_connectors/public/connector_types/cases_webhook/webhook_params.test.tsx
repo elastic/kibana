@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
 import WebhookParamsFields from './webhook_params';
 import type { CasesWebhookActionConnector } from './types';
 
@@ -35,7 +35,7 @@ const actionConnector = {
 
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const wrapper = mountWithIntl(
+    render(
       <WebhookParamsFields
         actionConnector={actionConnector}
         actionParams={actionParams}
@@ -51,23 +51,21 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="tagsComboBox"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="case-severity-selection"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="case-status-filter"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').first().prop('disabled')).toEqual(
-      false
-    );
+    expect(screen.getByTestId('titleInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsComboBox')).toBeInTheDocument();
+    const commentsTextArea = screen.getByTestId('commentsTextArea') as HTMLTextAreaElement;
+    expect(commentsTextArea).toBeInTheDocument();
+    expect(screen.getByTestId('case-severity-selection')).toBeInTheDocument();
+    expect(screen.getByTestId('case-status-filter')).toBeInTheDocument();
+    expect(commentsTextArea).not.toBeDisabled();
   });
+
   test('comments field is disabled when comment data is missing', () => {
     const actionConnectorNoComments = {
       config: {},
     } as unknown as CasesWebhookActionConnector;
-    const wrapper = mountWithIntl(
+    render(
       <WebhookParamsFields
         actionConnector={actionConnectorNoComments}
         actionParams={actionParams}
@@ -83,8 +81,6 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="commentsTextArea"]').first().prop('disabled')).toEqual(
-      true
-    );
+    expect(screen.getByTestId('commentsTextArea')).toBeDisabled();
   });
 });

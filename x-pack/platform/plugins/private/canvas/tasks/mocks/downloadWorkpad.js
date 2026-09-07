@@ -6,10 +6,3 @@
  */
 
 export const downloadWorkpad = async (workpadId) => console.log(`Download workpad ${workpadId}`);
-
-export const downloadRenderedWorkpad = async (renderedWorkpad) =>
-  console.log(`Download workpad ${renderedWorkpad.id}`);
-
-export const downloadRuntime = async (basePath) => console.log(`Download run time at ${basePath}`);
-
-export const downloadZippedRuntime = async (data) => console.log(`Downloading data ${data}`);

@@ -48,7 +48,9 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
+import { cspUiSettings } from './ui_settings';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
 import {
   deletePreviousTransformsVersions,
@@ -95,6 +97,7 @@ export class CspPlugin
   ): CspServerPluginSetup {
     core.savedObjects.registerType<CspBenchmarkRule>(cspBenchmarkRule);
     core.savedObjects.registerType<CspSettings>(cspSettings);
+    core.uiSettings.register(cspUiSettings);
 
     setupRoutes({
       core,
@@ -123,9 +126,20 @@ export class CspPlugin
           getRetryOptions(this.logger, 'getInstallation')
         );
 
-        // If package is installed we want to make sure all needed assets are installed
+        // If package is installed we want to make sure all needed assets are installed.
+        // initialize() is idempotent, so retrying on transient failures (e.g. ES not ready,
+        // transforms not yet available) is safe and prevents isPluginInitialized from
+        // staying false when CI infrastructure is slow to come up.
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
+          pRetry(() => this.initialize(core, plugins.taskManager, packageInfo.install_version), {
+            ...getRetryOptions(this.logger, 'initialize'),
+            // Use longer backoff than the default (1s) so transient ES/transform
+            // failures have time to resolve before the next attempt.
+            minTimeout: 5_000,
+            maxTimeout: 30_000,
+          }).catch((e) => {
+            this.logger.error('CSP plugin initialization failed after all retries', e);
+          });
         }
 
         plugins.fleet.registerExternalCallback(
@@ -239,8 +253,10 @@ export class CspPlugin
   ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
+
     await initializeCspIndices(
       esClient,
       this.config,
@@ -252,14 +268,26 @@ export class CspPlugin
       isIntegrationVersionIncludesTransformAsset,
       this.logger
     );
+
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
+
+    // Delete old and legacy CDR data views for all spaces
+    await deleteOldAndLegacyCdrDataViewsForAllSpaces(soClient, this.logger);
+
     this.#isInitialized = true;
   }
 
   // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
   // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
   initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isIndexExists = await esClient.indices.exists({
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+    if (isIndexExists) {
+      return;
+    }
+
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });
@@ -322,8 +350,9 @@ const getRetryOptions = (logger: Logger, operation: string): Options => {
   return {
     retries: 3,
     onFailedAttempt: (err: FailedAttemptError) => {
-      const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
-      logger.warn(message);
+      logger.warn(
+        `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`
+      );
     },
   };
 };

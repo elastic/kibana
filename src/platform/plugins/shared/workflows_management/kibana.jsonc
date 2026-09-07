@@ -16,12 +16,26 @@
       "taskManager",
       "actions",
       "workflowsExecutionEngine",
+      "workflowsExtensions",
       "features",
       "security",
       "triggersActionsUi",
       "spaces",
-      "embeddable"
+      "esUiShared",
+      "share",
+      "stackConnectors",
+      "data",
+      "dataViews",
+      "kql",
+      "fieldFormats",
+      "unifiedSearch",
+      "embeddable",
+      "controls",
+      "uiActions",
+      "licensing"
     ],
-    "optionalPlugins": ["alerting"]
+    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox"],
+    "runtimePluginDependencies": ["agentBuilder"],
+    "extraPublicDirs": ["common"]
   }
 }

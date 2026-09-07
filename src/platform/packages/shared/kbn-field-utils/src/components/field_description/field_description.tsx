@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import {
   EuiText,
@@ -16,6 +17,7 @@ import {
   EuiTextBlockTruncate,
   EuiSkeletonText,
   useEuiTheme,
+  EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
@@ -45,14 +47,30 @@ export interface FieldDescriptionContentProps {
 
 export interface FieldDescriptionProps extends FieldDescriptionContentProps {
   fieldsMetadataService?: FieldsMetadataPublicStart;
+  streamNames?: string[];
 }
 
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
   fieldsMetadataService,
+  streamNames,
   ...props
 }) => {
   if (fieldsMetadataService && !props.field.customDescription) {
-    return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
+    const fieldName = removeKeywordSuffix(props.field.name);
+    return (
+      <>
+        <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />
+        {streamNames?.length ? (
+          <StreamsFieldDescriptionFallback
+            fieldName={fieldName}
+            streamNames={streamNames}
+            fieldsMetadataService={fieldsMetadataService}
+            color={props.color}
+            truncate={props.truncate}
+          />
+        ) : null}
+      </>
+    );
   }
 
   return <FieldDescriptionContent {...props} />;
@@ -62,6 +80,7 @@ const EcsFieldDescriptionFallback: React.FC<
   FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
 > = ({ fieldsMetadataService, ...props }) => {
   const fieldName = removeKeywordSuffix(props.field.name);
+
   const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
     attributes: ['description', 'type'],
     fieldNames: [fieldName],
@@ -74,7 +93,7 @@ const EcsFieldDescriptionFallback: React.FC<
     <EuiSkeletonText isLoading={loading} size="s">
       <FieldDescriptionContent
         {...props}
-        ecsFieldDescription={
+        description={
           escFieldType && esFieldTypeToKibanaFieldType(escFieldType) === props.field.type
             ? escFieldDescription
             : undefined
@@ -84,15 +103,57 @@ const EcsFieldDescriptionFallback: React.FC<
   );
 };
 
+const StreamsFieldDescriptionFallback: React.FC<{
+  fieldName: string;
+  streamNames: string[];
+  fieldsMetadataService: FieldsMetadataPublicStart;
+  color?: 'subdued';
+  truncate?: boolean;
+}> = ({ fieldName, streamNames, fieldsMetadataService, color, truncate }) => {
+  const { streamFieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
+    attributes: ['description'],
+    fieldNames: [fieldName],
+    streamNames,
+    source: ['streams'],
+  });
+
+  return (
+    <EuiSkeletonText isLoading={loading} size="s">
+      {streamNames.map((streamName) => {
+        const description = streamFieldsMetadata?.[streamName]?.[fieldName]?.description;
+        if (!description) return null;
+        return (
+          <React.Fragment key={streamName}>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" className="eui-textBreakWord eui-textLeft">
+              <FormattedMessage
+                id="fieldUtils.fieldDescription.perStreamLabel"
+                defaultMessage="Per {streamName} stream:"
+                values={{ streamName: <strong>{streamName}</strong> }}
+              />
+            </EuiText>
+            <FieldDescriptionContent
+              field={{ name: fieldName, type: '' }}
+              description={description}
+              color={color}
+              truncate={truncate}
+            />
+          </React.Fragment>
+        );
+      })}
+    </EuiSkeletonText>
+  );
+};
+
 export const FieldDescriptionContent: React.FC<
-  FieldDescriptionContentProps & { ecsFieldDescription?: string }
-> = ({ field, color, truncate = true, ecsFieldDescription, Wrapper }) => {
+  FieldDescriptionContentProps & { description?: string }
+> = ({ field, color, truncate = true, description, Wrapper }) => {
   const [shouldTruncateByDefault, setShouldTruncateByDefault] = useLocalStorage<boolean>(
     SHOULD_TRUNCATE_FIELD_DESCRIPTION_LOCALSTORAGE_KEY,
     SHOULD_TRUNCATE_FIELD_DESCRIPTION_BY_DEFAULT
   );
   const { euiTheme } = useEuiTheme();
-  const customDescription = (field?.customDescription || ecsFieldDescription || '').trim();
+  const customDescription = (field?.customDescription || description || '').trim();
   const isTooLong = Boolean(truncate && customDescription.length > MAX_VISIBLE_LENGTH);
   const [isTruncated, setIsTruncated] = useState<boolean>(
     (shouldTruncateByDefault ?? SHOULD_TRUNCATE_FIELD_DESCRIPTION_BY_DEFAULT) && isTooLong
@@ -122,6 +183,7 @@ export const FieldDescriptionContent: React.FC<
             className="eui-textBreakWord eui-textLeft"
             onClick={() => truncateFieldDescription(false)}
             css={css`
+              display: block;
               padding: 0;
               margin: 0;
               color: ${color === 'subdued' ? euiTheme.colors.subduedText : euiTheme.colors.text};

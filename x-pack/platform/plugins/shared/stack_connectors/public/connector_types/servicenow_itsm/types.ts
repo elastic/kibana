@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ExecutorSubActionPushParamsITSM } from '../../../server/connector_types/lib/servicenow/types';
+import type { ExecutorSubActionPushParamsITSM } from '@kbn/connector-schemas/servicenow_itsm';
 
 export enum EventAction {
   TRIGGER = 'trigger',

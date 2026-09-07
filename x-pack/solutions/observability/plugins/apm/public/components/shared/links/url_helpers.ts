@@ -39,19 +39,38 @@ function getNextLocation(history: History, locationWithQuery: LocationWithQuery)
   };
 }
 
+export function isInactiveHistoryError(error: unknown): boolean {
+  return error instanceof Error && error.message.includes('fell out of navigation scope');
+}
+
 export function replace(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.replace(location);
+  try {
+    return history.replace(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return;
+    throw error;
+  }
 }
 
 export function push(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.push(location);
+  try {
+    return history.push(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return;
+    throw error;
+  }
 }
 
 export function createHref(history: History, locationWithQuery: LocationWithQuery) {
   const location = getNextLocation(history, locationWithQuery);
-  return history.createHref(location);
+  try {
+    return history.createHref(location);
+  } catch (error) {
+    if (isInactiveHistoryError(error)) return '';
+    throw error;
+  }
 }
 
 export interface APMQueryParams {
@@ -87,6 +106,14 @@ export interface APMQueryParams {
   agentName?: string;
   serviceVersion?: string;
   serviceGroup?: string;
+
+  // Logs tab state (for persisting saved search customizations)
+  logsColumns?: string;
+  logsSort?: string;
+  logsGrid?: string;
+  logsRowHeight?: number;
+  logsRowsPerPage?: number;
+  logsDensity?: string;
 }
 
 // forces every value of T[K] to be type: string

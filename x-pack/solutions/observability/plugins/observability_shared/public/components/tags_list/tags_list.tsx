@@ -7,7 +7,14 @@
 
 import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
 
@@ -19,7 +26,11 @@ export interface TagsListProps {
   ignoreEmpty?: boolean;
   disableExpand?: boolean;
   prependChildren?: React.ReactNode;
+  maxWidth?: number | string;
 }
+
+const MININUM_TAGS_TO_DISPLAY = 3;
+
 const getFilterLabel = (tag: string) => {
   return i18n.translate('xpack.observabilityShared.getFilterLabel.filter', {
     defaultMessage: 'Click to filter list with tag {tag}',
@@ -32,11 +43,12 @@ const getFilterLabel = (tag: string) => {
 const TagsList = ({
   ignoreEmpty,
   tags,
-  numberOfTagsToDisplay = 3,
+  numberOfTagsToDisplay = MININUM_TAGS_TO_DISPLAY,
   onClick,
   color = 'hollow',
   disableExpand = false,
   prependChildren,
+  maxWidth = 400,
 }: TagsListProps) => {
   const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
@@ -54,7 +66,16 @@ const TagsList = ({
   const tagsToDisplay = tags.slice(0, toDisplay);
 
   return (
-    <EuiFlexGroup wrap gutterSize="xs" css={{ maxWidth: 400 }} alignItems="center">
+    <EuiFlexGroup
+      wrap
+      gutterSize="xs"
+      responsive={false}
+      css={{
+        maxWidth,
+        ...(maxWidth === '100%' ? { width: '100%', minWidth: 0 } : {}),
+      }}
+      alignItems="center"
+    >
       {prependChildren}
       {tagsToDisplay.map((tag) => (
         // filtering only makes sense in monitor list, where we have summary
@@ -96,8 +117,8 @@ const TagsList = ({
               </>
             }
           >
-            <EuiBadge
-              color={color}
+            <EuiButtonEmpty
+              size="xs"
               onClick={() => {
                 if (disableExpand) {
                   return;
@@ -107,28 +128,35 @@ const TagsList = ({
               onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation(); // stops propagation of metric onElementClick
               }}
-              onClickAriaLabel={EXPAND_TAGS_LABEL}
+              aria-label={EXPAND_TAGS_LABEL}
+              data-test-subj="expand-tags"
             >
-              +{tags.length - toDisplay}
-            </EuiBadge>
+              {i18n.translate('xpack.observabilityShared.tagsList.showMore', {
+                defaultMessage: '+ {count} more',
+                values: { count: tags.length - toDisplay },
+              })}
+            </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
       )}
-      {toDisplay > 3 && (
-        <EuiFlexItem key={tags.length - 3} grow={false}>
+      {toDisplay > MININUM_TAGS_TO_DISPLAY && (
+        <EuiFlexItem key={tags.length - MININUM_TAGS_TO_DISPLAY} grow={false}>
           <EuiToolTip content={COLLAPSE_TAGS_LABEL} key={toDisplay}>
-            <EuiBadge
-              color={color}
+            <EuiButtonEmpty
+              size="xs"
               onClick={() => {
-                setToDisplay(3);
+                setToDisplay(MININUM_TAGS_TO_DISPLAY);
               }}
               onMouseDown={(e: MouseEvent<HTMLButtonElement>) => {
                 e.stopPropagation(); // stops propagation of metric onElementClick
               }}
-              onClickAriaLabel={COLLAPSE_TAGS_LABEL}
+              aria-label={COLLAPSE_TAGS_LABEL}
+              data-test-subj="collapse-tags"
             >
-              -{tags.length - 3}
-            </EuiBadge>
+              {i18n.translate('xpack.observabilityShared.tagsList.showLess', {
+                defaultMessage: 'Show less',
+              })}
+            </EuiButtonEmpty>
           </EuiToolTip>
         </EuiFlexItem>
       )}

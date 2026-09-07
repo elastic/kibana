@@ -31,7 +31,8 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../../common/constants/locator';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 
 const MAX_FORECASTS = 500;
@@ -251,7 +252,14 @@ export class ForecastsTable extends Component {
     }
 
     if (this.state.errorMessage !== undefined) {
-      return <EuiCallOut title={this.state.errorMessage} color="danger" iconType="cross" />;
+      return (
+        <EuiCallOut
+          announceOnMount
+          title={this.state.errorMessage}
+          color="danger"
+          iconType="cross"
+        />
+      );
     }
 
     const forecasts = this.state.forecasts;
@@ -259,6 +267,7 @@ export class ForecastsTable extends Component {
     if (forecasts.length === 0) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsTitle"
@@ -437,6 +446,9 @@ export class ForecastsTable extends Component {
           compressed={true}
           items={forecasts}
           columns={columns}
+          tableCaption={i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.tableCaption', {
+            defaultMessage: 'Forecasts run on this job',
+          })}
           pagination={{
             pageSizeOptions: [5, 10, 25],
           }}

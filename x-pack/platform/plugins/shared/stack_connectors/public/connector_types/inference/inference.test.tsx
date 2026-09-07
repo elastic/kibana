@@ -9,7 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/inference/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const ACTION_TYPE_ID = '.inference';
@@ -77,7 +77,7 @@ describe('OpenAI action params validation', () => {
         subAction,
         subActionParams,
       };
-      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
         errors: { body: [], input: [], subAction: [], inputType: [], query: [] },
       });
     }
@@ -89,7 +89,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: 'message {test}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['The request body is not in a valid JSON format.'],
         inputType: [],
@@ -105,7 +105,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],
@@ -122,7 +122,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],
@@ -139,7 +139,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: ['Input is required.', 'Input does not have a valid Array format.'],
@@ -156,7 +156,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],

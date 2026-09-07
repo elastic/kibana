@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { createTestConfig } from '@kbn/test-suites-xpack-platform/serverless/functional/config.base';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
 import { services } from '../services';
 import { pageObjects } from '../page_objects';
 
@@ -32,4 +32,5 @@ export default createTestConfig({
       '../test_suites/ftr/cloud_security_posture/csp_integrations_form.essentials.ts'
     ),
   ],
+  enableFleetDockerRegistry: false,
 });

@@ -21,18 +21,16 @@ export default function ({ getService }: FtrProviderContext) {
       adminSupertest = await utils.createSuperTest();
     });
 
-    describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
-      it('should not return feature disabled error, but a connector not found error', async () => {
-        const { body } = await adminSupertest
-          .post(ISOLATE_HOST_ROUTE_V2)
-          .set('kbn-xsrf', 'true')
-          .set('Elastic-Api-Version', '2023-10-31')
-          .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
-          .send({ endpoint_ids: ['test'], agent_type: 'sentinel_one' })
-          .expect(404);
+    it('should not return feature disabled error, but a connector not found error', async () => {
+      const { body } = await adminSupertest
+        .post(ISOLATE_HOST_ROUTE_V2)
+        .set('kbn-xsrf', 'true')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .on('error', createSupertestErrorLogger(log).ignoreCodes([404]))
+        .send({ endpoint_ids: ['test'], agent_type: 'sentinel_one' })
+        .expect(404);
 
-        expect(body.message).to.match(/No stack connector instance configured for/);
-      });
+      expect(body.message).to.match(/No stack connector instance configured for/);
     });
   });
 }

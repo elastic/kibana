@@ -22,6 +22,7 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiSpacer,
+  getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -65,6 +66,11 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
   existingCategories,
 }) => {
   const updateCustomIntegration = useUpdateCustomIntegration;
+
+  const isUploadedIntegration =
+    packageInfo != null &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.install_source === 'upload';
 
   // Get all the possible categories
   const { data: categoriesData } = useGetCategoriesQuery({
@@ -111,6 +117,11 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
       setReadmeLoading(false);
     });
   }, [packageInfo]);
+
+  // Get markdown plugins without tooltip support
+  const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
+    exclude: ['tooltip'], // Exclude tooltip plugin from the editor
+  });
 
   const saveIntegrationEdits = async (updatedReadMe: string | undefined) => {
     setSavingEdits(true);
@@ -181,10 +192,12 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             />
           }
           helpText={
-            <FormattedMessage
-              id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
-              defaultMessage="You can assign up to two categories to your integration."
-            />
+            !isUploadedIntegration && (
+              <FormattedMessage
+                id="xpack.fleet.epm.editIntegrationFlyout.categoriesHelpText"
+                defaultMessage="You can assign up to two categories to your integration."
+              />
+            )
           }
         >
           <EuiComboBox
@@ -196,7 +209,7 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             options={parentCategories?.map((category) => ({
               label: category.title,
               value: category.id,
-              disabled: selectedCategories.length >= 2,
+              disabled: !isUploadedIntegration && selectedCategories.length >= 2,
             }))}
             onChange={(selectedOptions) => {
               const selectedValues = selectedOptions as SelectOption[];
@@ -226,13 +239,24 @@ export const EditIntegrationFlyout: React.FunctionComponent<{
             onChange={setEditedContent}
             readOnly={false}
             height={600}
+            parsingPluginList={parsingPlugins}
+            processingPluginList={processingPlugins}
+            uiPlugins={uiPlugins}
           />
         )}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              aria-label={i18n.translate(
+                'xpack.fleet.editIntegrationFlyout.cancelButtonAriaLabel',
+                {
+                  defaultMessage: 'Cancel editing integration',
+                }
+              )}
+            >
               <FormattedMessage
                 id="xpack.fleet.editIntegrationFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

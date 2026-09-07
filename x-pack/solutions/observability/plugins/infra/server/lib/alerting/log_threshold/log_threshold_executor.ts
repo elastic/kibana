@@ -14,6 +14,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_GROUP,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import type { ElasticsearchClient, IBasePath } from '@kbn/core/server';
@@ -26,7 +27,7 @@ import type {
   RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { ObservabilityLogsAlert } from '@kbn/alerts-as-data-utils';
 import type {
   PublicAlertsClient,
@@ -41,7 +42,13 @@ import {
 } from '@kbn/alerting-rule-utils';
 import { unflattenObject } from '@kbn/object-utils';
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
-import { decodeOrThrow } from '@kbn/io-ts-utils';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import { isLeft } from 'fp-ts/Either';
+import {
+  formatLogThresholdSearchResponseError,
+  getSearchResponseErrorContext,
+  type LogThresholdSearchResponseErrorContext,
+} from './format_search_response_error';
 import { getChartGroupNames } from '../../../../common/utils/get_chart_group_names';
 import type {
   RuleParams,
@@ -144,74 +151,17 @@ export const createLogThresholdExecutor =
       throw new AlertsClientError();
     }
 
-    const alertReporter: LogThresholdAlertReporter = (
-      id,
-      reason,
-      value,
-      threshold,
-      actions,
-      rootLevelContext,
-      flattenGrouping
-    ) => {
-      const alertContext =
-        actions != null
-          ? actions.reduce((next, action) => Object.assign(next, action.context), {})
-          : {};
-
-      if (actions && actions.length > 0) {
-        actions.forEach((actionSet) => {
-          const { actionGroup, context: actionContext } = actionSet;
-          const alertInstanceId = (actionContext.group || id) as string;
-          const { uuid, start } = alertsClient.report({
-            id: alertInstanceId,
-            actionGroup,
-            state: {
-              alertState: AlertStates.ALERT,
-            },
-          });
-          const indexedStartedAt = start ?? startedAt.toISOString();
-          const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
-          const viewInAppUrl = addSpaceIdToPath(
-            basePath.publicBaseUrl,
-            spaceId,
-            relativeViewInAppUrl
-          );
-
-          const groups = getFormattedGroups(flattenGrouping);
-          const grouping = unflattenGrouping(flattenGrouping);
-
-          const context = {
-            ...actionContext,
-            timestamp: startedAt.toISOString(),
-            viewInAppUrl,
-            alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
-            grouping,
-          };
-
-          const payload = {
-            [ALERT_EVALUATION_THRESHOLD]: threshold,
-            [ALERT_EVALUATION_VALUE]: value,
-            [ALERT_REASON]: reason,
-            [ALERT_CONTEXT]: alertContext,
-            [ALERT_GROUP]: groups,
-            [ALERT_GROUPING]: grouping,
-            ...flattenAdditionalContext(rootLevelContext),
-            ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
-          };
-
-          alertsClient.setAlertData({
-            id: alertInstanceId,
-            payload,
-            context,
-          });
-        });
-      }
-    };
-
     const [, { logsShared, logsDataAccess }] = await libs.getStartServices();
 
     try {
-      const validatedParams = decodeOrThrow(ruleParamsRT)(params);
+      const decoded = ruleParamsRT.decode(params);
+
+      if (isLeft(decoded)) {
+        const errorMessages = formatErrors(decoded.left);
+        throw new Error(`Invalid rule parameters: ${errorMessages.join(', ')}`);
+      }
+
+      const validatedParams = decoded.right;
 
       const logSourcesService =
         logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
@@ -219,6 +169,71 @@ export const createLogThresholdExecutor =
       const { indices, timestampField, runtimeMappings } = await logsShared.logViews
         .getClient(savedObjectsClient, scopedClusterClient.asCurrentUser, logSourcesService)
         .getResolvedLogView(validatedParams.logView);
+
+      const alertReporter: LogThresholdAlertReporter = (
+        id,
+        reason,
+        value,
+        threshold,
+        actions,
+        rootLevelContext,
+        flattenGrouping
+      ) => {
+        const alertContext =
+          actions != null
+            ? actions.reduce((next, action) => Object.assign(next, action.context), {})
+            : {};
+
+        if (actions && actions.length > 0) {
+          actions.forEach((actionSet) => {
+            const { actionGroup, context: actionContext } = actionSet;
+            const alertInstanceId = (actionContext.group || id) as string;
+            const { uuid, start } = alertsClient.report({
+              id: alertInstanceId,
+              actionGroup,
+              state: {
+                alertState: AlertStates.ALERT,
+              },
+            });
+            const indexedStartedAt = start ?? startedAt.toISOString();
+            const relativeViewInAppUrl = getLogsAppAlertUrl(new Date(indexedStartedAt).getTime());
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              relativeViewInAppUrl
+            );
+
+            const groups = getFormattedGroups(flattenGrouping);
+            const grouping = unflattenGrouping(flattenGrouping);
+
+            const context = {
+              ...actionContext,
+              timestamp: startedAt.toISOString(),
+              viewInAppUrl,
+              alertDetailsUrl: getAlertDetailsUrl(libs.basePath, spaceId, uuid),
+              grouping,
+            };
+
+            const payload = {
+              [ALERT_EVALUATION_THRESHOLD]: threshold,
+              [ALERT_EVALUATION_VALUE]: value,
+              [ALERT_REASON]: reason,
+              [ALERT_CONTEXT]: alertContext,
+              [ALERT_GROUP]: groups,
+              [ALERT_GROUPING]: grouping,
+              [ALERT_INDEX_PATTERN]: indices,
+              ...flattenAdditionalContext(rootLevelContext),
+              ...getEcsGroupsFromFlattenGrouping(flattenGrouping),
+            };
+
+            alertsClient.setAlertData({
+              id: alertInstanceId,
+              payload,
+              context,
+            });
+          });
+        }
+      };
 
       if (!isRatioRuleParams(validatedParams)) {
         await executeAlert(
@@ -254,7 +269,7 @@ export const createLogThresholdExecutor =
         validatedParams,
       });
     } catch (e) {
-      throw new Error(e);
+      throw e instanceof Error ? e : new Error(String(e));
     }
 
     return { state: {} };
@@ -289,14 +304,17 @@ export async function executeAlert(
 
   if (hasGroupBy(ruleParams)) {
     processGroupByResults(
-      await getGroupedResults(query, esClient),
+      await getGroupedResults(query, esClient, {
+        indexPattern,
+        groupBy: ruleParams.groupBy,
+      }),
       ruleParams,
       alertReporter,
       alertsClient
     );
   } else {
     processUngroupedResults(
-      await getUngroupedResults(query, esClient),
+      await getUngroupedResults(query, esClient, { indexPattern }),
       ruleParams,
       alertReporter,
       alertsClient
@@ -350,9 +368,13 @@ export async function executeRatioAlert(
   }
 
   if (hasGroupBy(ruleParams)) {
+    const groupedErrorContext = {
+      indexPattern,
+      groupBy: ruleParams.groupBy,
+    };
     const [numeratorGroupedResults, denominatorGroupedResults] = await Promise.all([
-      getGroupedResults(numeratorQuery, esClient),
-      getGroupedResults(denominatorQuery, esClient),
+      getGroupedResults(numeratorQuery, esClient, groupedErrorContext),
+      getGroupedResults(denominatorQuery, esClient, groupedErrorContext),
     ]);
     processGroupByRatioResults(
       numeratorGroupedResults,
@@ -363,8 +385,8 @@ export async function executeRatioAlert(
     );
   } else {
     const [numeratorUngroupedResults, denominatorUngroupedResults] = await Promise.all([
-      getUngroupedResults(numeratorQuery, esClient),
-      getUngroupedResults(denominatorQuery, esClient),
+      getUngroupedResults(numeratorQuery, esClient, { indexPattern }),
+      getUngroupedResults(denominatorQuery, esClient, { indexPattern }),
     ]);
     processUngroupedRatioResults(
       numeratorUngroupedResults,
@@ -857,20 +879,57 @@ export const getUngroupedESQuery = (
   };
 };
 
-const getUngroupedResults = async (query: object, esClient: ElasticsearchClient) => {
-  return decodeOrThrow(UngroupedSearchQueryResponseRT)(await esClient.search(query));
+const getUngroupedResults = async (
+  query: object,
+  esClient: ElasticsearchClient,
+  errorContext: LogThresholdSearchResponseErrorContext = {}
+) => {
+  const searchResponse = await esClient.search(query);
+  const decoded = UngroupedSearchQueryResponseRT.decode(searchResponse);
+
+  if (isLeft(decoded)) {
+    throw new Error(
+      formatLogThresholdSearchResponseError({
+        searchResponse,
+        validationErrors: decoded.left,
+        responseType: 'ungrouped',
+        errorContext: getSearchResponseErrorContext(query, errorContext),
+      })
+    );
+  }
+
+  return decoded.right;
 };
 
-const getGroupedResults = async (query: object, esClient: ElasticsearchClient) => {
+const getGroupedResults = async (
+  query: object,
+  esClient: ElasticsearchClient,
+  errorContext: LogThresholdSearchResponseErrorContext = {}
+) => {
   let compositeGroupBuckets: GroupedSearchQueryResponse['aggregations']['groups']['buckets'] = [];
   let lastAfterKey: GroupedSearchQueryResponse['aggregations']['groups']['after_key'] | undefined;
+  const resolvedErrorContext = getSearchResponseErrorContext(query, errorContext);
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
     queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
-    const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
-      await esClient.search(queryWithAfterKey)
-    );
+
+    const searchResponse = await esClient.search(queryWithAfterKey);
+    const decoded = GroupedSearchQueryResponseRT.decode(searchResponse);
+
+    if (isLeft(decoded)) {
+      throw new Error(
+        formatLogThresholdSearchResponseError({
+          searchResponse,
+          validationErrors: decoded.left,
+          responseType: 'grouped',
+          errorContext: resolvedErrorContext,
+        })
+      );
+    }
+
+    const groupResponse = decoded.right;
+
     compositeGroupBuckets = [
       ...compositeGroupBuckets,
       ...groupResponse.aggregations.groups.buckets,

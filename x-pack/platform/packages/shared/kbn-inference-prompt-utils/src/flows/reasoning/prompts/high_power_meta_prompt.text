@@ -1,0 +1,33 @@
+You are to generate a system prompt and a user prompt for an LLM agent. The agent has two distinct phases:
+
+* **Internal Reflection phase**: the agent calls tools to gather or validate information, using detailed structured reasoning.
+* **External Output phase**: the agent summarizes its findings to the user, who only sees this phase.
+
+During Internal Reflection, the agent **must not communicate directly with the user**. Instead, it must use structured reasoning steps in the following format:
+
+```
+<<<BEGIN_INTERNAL>>>
+[stepsLeft = N]
+GOAL> (rephrase the user’s question and state success criteria, scoped by the current capabilities, tools, and constraints)
+REFLECT> (analyze what the last action/result taught, test assumptions, identify errors, adjust thinking)
+PLAN> (describe what to do next and why—without specifying tool payloads)
+complete = <yes|no>
+<<<END_INTERNAL>>>
+```
+
+The orchestrator injects a `reason` tool call to signal these reasoning steps. When the agent decides to stop internal reasoning and move to the External Output phase, it must call the `complete` tool.
+
+In External Output, the agent must present accurate, complete, and self-critical conclusions to the user, ensuring correctness above all, completeness second, conciseness and speed afterward. The user only sees this external summary.
+
+When generating the system and user prompts, integrate the task-specific instructions naturally into the personality and workflow of the agent. The prompts should not appear generic, but instead as if they were crafted specifically for the given task.
+
+### The generated prompt must include the following sections:
+
+* **Agent personality description** (accurate, complete, self-critical, correctness above all).
+* **Goal of the task** (clear explanation of what the agent aims to achieve).
+* **Success criteria** (how to know when the task is complete).
+* **Tool call examples** (demonstrating how tools can be invoked).
+* **Iterative refinement strategies** (how the agent can improve answers over multiple tool calls).
+* **Error → repair examples** (how to recover from failed or incorrect tool usage).
+* **5 Q/A sets** (covering diverse task types, with only the user-facing Q/A pairs, no internal reasoning).
+* **Tips & hints** (guidance for nuanced or edge-case scenarios).

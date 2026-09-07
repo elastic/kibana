@@ -1,6 +1,12 @@
 post:
   summary: Get saved objects
   operationId: bulkGetSavedObjects
+  description: >
+    Retrieve multiple Kibana saved objects by identifier.
+
+
+    WARNING: This API is intended to be removed in a future Elastic stack version.
+    Consider using the export API for your use case.
   deprecated: true
   tags:
     - saved objects

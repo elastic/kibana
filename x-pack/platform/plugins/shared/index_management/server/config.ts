@@ -75,6 +75,21 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    enableFailureStoreRetentionDisabling: offeringBasedSchema({
+      // Failure store lifecycle can not be disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableIndexMode: offeringBasedSchema({
+      // Index mode UI is hidden on vectorDB projects; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    enableVectorCount: offeringBasedSchema({
+      // The vector count is only shown on vectorDB projects; refer to the serverless.vectordb.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: false }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -94,6 +109,9 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
     enableProjectLevelRetentionChecks: true,
+    enableFailureStoreRetentionDisabling: true,
+    enableIndexMode: true,
+    enableVectorCount: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

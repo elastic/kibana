@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import {
+  DASHBOARD_KI_TYPE,
+  VISUALIZATION_KI_TYPE,
+} from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
@@ -228,6 +232,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
+
     {
       id: 'filesSharedImage',
       name: i18n.translate('xpack.features.filesSharedImagesFeatureName', {
@@ -449,7 +454,7 @@ const getBaseDiscoverFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -460,7 +465,7 @@ const getBaseDiscoverFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',
@@ -522,6 +527,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiAllPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: ['index-pattern', 'search', 'tag'],
@@ -544,6 +550,7 @@ const getBaseVisualizeFeature = ({
         app: ['visualize', 'lens', 'kibana'],
         api: apiReadPrivileges,
         catalogue: ['visualize'],
+        aiIndex: { read: [VISUALIZATION_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,
@@ -607,7 +614,7 @@ const getBaseDashboardFeature = ({
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
-  const savedObjectAllPrivileges = ['dashboard'];
+  const savedObjectAllPrivileges = ['dashboard', 'links', 'markdown'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
   const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectReadPrivileges = [
@@ -621,6 +628,7 @@ const getBaseDashboardFeature = ({
     'map',
     'dashboard',
     'tag',
+    'markdown',
   ];
 
   if (version === 'v1') {
@@ -646,6 +654,7 @@ const getBaseDashboardFeature = ({
       all: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: [
@@ -655,7 +664,6 @@ const getBaseDashboardFeature = ({
             'canvas-workpad',
             'event-annotation-group',
             'lens',
-            'links',
             'map',
             'tag',
           ],
@@ -678,6 +686,7 @@ const getBaseDashboardFeature = ({
       read: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,
@@ -731,7 +740,7 @@ const getBaseDashboardFeature = ({
       },
       {
         name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
-          defaultMessage: 'Store Search Sessions',
+          defaultMessage: 'Store Background search',
         }),
         privilegeGroups: [
           {
@@ -742,7 +751,7 @@ const getBaseDashboardFeature = ({
                 name: i18n.translate(
                   'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
                   {
-                    defaultMessage: 'Store Search Sessions',
+                    defaultMessage: 'Store Background search',
                   }
                 ),
                 includeIn: 'all',

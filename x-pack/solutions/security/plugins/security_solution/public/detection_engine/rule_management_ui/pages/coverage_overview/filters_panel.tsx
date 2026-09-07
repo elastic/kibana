@@ -11,10 +11,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSearchBar,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import React, { memo, useCallback } from 'react';
-import { css } from '@emotion/css';
 import { CoverageOverviewLegend } from './shared_components/dashboard_legend';
 import * as i18n from './translations';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
@@ -36,8 +35,8 @@ const CoverageOverviewFiltersPanelComponent = () => {
   const handleCollapseCellsFilterClick = () => setShowExpandedCells(false);
 
   const handleRuleSearchOnChange = useCallback(
-    ({ queryText }: { queryText: string }) => {
-      setRuleSearchFilter(queryText);
+    (queryText: string) => {
+      setRuleSearchFilter(queryText?.trim());
     },
     [setRuleSearchFilter]
   );
@@ -46,30 +45,30 @@ const CoverageOverviewFiltersPanelComponent = () => {
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup
-            css={css`
-              flex-grow: 0;
-            `}
-          >
-            <RuleActivityFilter
-              onChange={setRuleActivityFilter}
-              isLoading={isLoading}
-              selected={filter.activity ?? []}
-            />
-            <RuleSourceFilter
-              onChange={setRuleSourceFilter}
-              isLoading={isLoading}
-              selected={filter.source ?? []}
-            />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={0}>
+              <RuleActivityFilter
+                onChange={setRuleActivityFilter}
+                isLoading={isLoading}
+                selected={filter.activity ?? []}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={0}>
+              <RuleSourceFilter
+                onChange={setRuleSourceFilter}
+                isLoading={isLoading}
+                selected={filter.source ?? []}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem>
-              <EuiSearchBar
-                box={{
-                  placeholder: i18n.CoverageOverviewSearchBarPlaceholder,
-                  'data-test-subj': 'coverageOverviewFilterSearchBar',
-                }}
-                onChange={handleRuleSearchOnChange}
+              <EuiFieldSearch
+                fullWidth
+                incremental={false}
+                data-test-subj="coverageOverviewFilterSearchBar"
+                placeholder={i18n.CoverageOverviewSearchBarPlaceholder}
+                onSearch={handleRuleSearchOnChange}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

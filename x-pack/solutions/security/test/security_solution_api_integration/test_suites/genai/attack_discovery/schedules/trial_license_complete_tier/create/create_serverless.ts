@@ -43,10 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Happy path for predefined users', () => {
       const roles = [
-        'viewer',
         'editor',
-        ROLES.t1_analyst,
-        ROLES.t2_analyst,
         ROLES.t3_analyst,
         ROLES.rule_author,
         ROLES.soc_manager,
@@ -75,6 +72,31 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
+      // These roles have `securitySolutionAttackDiscovery: minimal_all`, which grants read-only
+      // Attack Discovery access without the schedule management privilege, so they cannot create
+      // schedules (mirroring their read-only Rule privileges).
+      const minimalAllRoles = ['viewer', ROLES.t1_analyst, ROLES.t2_analyst];
+
+      minimalAllRoles.forEach((role) => {
+        it(`should not be able to create a schedule with the "${role}" role`, async () => {
+          const testAgent = await utils.createSuperTest(role);
+
+          const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+
+          const result = await apis.create({
+            schedule: getSimpleAttackDiscoverySchedule(),
+            kibanaSpace: kibanaSpace1,
+            expectedHttpCode: 403,
+          });
+
+          expect(result).toEqual(
+            getMissingScheduleKibanaPrivilegesError({
+              routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES}`,
+            })
+          );
+        });
+      });
+
       it('should not be able to create a schedule without `assistant` kibana privileges', async () => {
         const superTest = await utils.createSuperTestWithCustomRole(noKibanaPrivileges);
 

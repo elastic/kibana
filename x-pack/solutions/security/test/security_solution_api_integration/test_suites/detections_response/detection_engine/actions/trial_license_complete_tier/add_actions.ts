@@ -10,14 +10,15 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCases } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
-import { waitForCases } from '../../../utils/cases';
 import {
   deleteAllRules,
   waitForRuleSuccess,
   deleteAllAlerts,
   getRuleForAlertTesting,
   createRule,
-} from '../../../../../config/services/detections_response';
+  createAlertsIndex,
+} from '@kbn/detections-response-ftr-services';
+import { waitForCases } from '../../../utils/cases';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createWebHookRuleAction,
@@ -48,19 +49,11 @@ export default ({ getService }: FtrProviderContext) => {
     describe('adding actions', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',
-          {
-            useCreate: true,
-            docsOnly: true,
-          }
-        );
+        await createAlertsIndex(supertest, log);
       });
       after(async () => {
         await esArchiver.unload(auditbeatPath);
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
-        );
+        await deleteAllAlerts(supertest, log, es);
       });
       beforeEach(async () => {
         await es.indices.delete({ index: 'logs-test', ignore_unavailable: true });

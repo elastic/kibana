@@ -10,18 +10,11 @@ exports[`PipelineEditor component includes required error message for falsy pipe
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Create Pipeline"
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={
       Array [
         "Pipeline ID is required",
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}
@@ -57,6 +50,7 @@ exports[`PipelineEditor component includes required error message for falsy pipe
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -141,6 +135,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -173,6 +168,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -273,17 +269,10 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Create Pipeline"
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={
       Array [
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}
@@ -319,6 +308,7 @@ exports[`PipelineEditor component invalidates form for invalid pipeline id input
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -403,6 +393,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -435,6 +426,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -535,17 +527,10 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Create Pipeline"
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={
       Array [
-        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, and numbers",
+        "Pipeline ID must begin with a letter or underscore and contain only letters, underscores, dashes, hyphens, and numbers",
       ]
     }
     isInvalid={true}
@@ -581,6 +566,7 @@ exports[`PipelineEditor component invalidates form for pipeline id with spaces 1
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -665,6 +651,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -697,6 +684,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -797,13 +785,6 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Clone Pipeline \\"pipelineToClone\\""
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={Array []}
     isInvalid={false}
@@ -820,6 +801,7 @@ exports[`PipelineEditor component matches snapshot for clone pipeline 1`] = `
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -904,6 +886,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -936,6 +919,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -1050,13 +1034,6 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Create Pipeline"
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={Array []}
     isInvalid={false}
@@ -1092,6 +1069,7 @@ exports[`PipelineEditor component matches snapshot for create pipeline 1`] = `
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -1176,6 +1154,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -1208,6 +1187,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={
@@ -1308,13 +1288,6 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
     }
   }
 >
-  <EuiPageHeader
-    bottomBorder={true}
-    pageTitle="Edit Pipeline \\"pipelineId\\""
-  />
-  <EuiSpacer
-    size="l"
-  />
   <EuiForm
     error={Array []}
     isInvalid={false}
@@ -1331,6 +1304,7 @@ exports[`PipelineEditor component matches snapshot for edit pipeline 1`] = `
       <EuiFieldText
         data-test-subj="inputDescription"
         fullWidth={true}
+        maxLength={1024}
         name="pipelineDescription"
         onChange={[Function]}
         value="pipeline description"
@@ -1415,6 +1389,7 @@ Default value: 50ms"
 Default value: memory"
       >
         <EuiSelect
+          aria-label="Queue type"
           data-test-subj="selectQueueType"
           onChange={[Function]}
           options={
@@ -1447,6 +1422,7 @@ Default value: 1024mb (1g)"
       </FlexItemSetting>
       <FlexItemSetting>
         <EuiSelect
+          aria-label="Queue max bytes units"
           data-test-subj="selectQueueMaxBytesUnits"
           onChange={[Function]}
           options={

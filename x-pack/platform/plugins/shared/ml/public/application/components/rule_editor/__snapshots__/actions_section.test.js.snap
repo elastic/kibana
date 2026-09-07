@@ -22,12 +22,17 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="empty"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="empty"
+              role="presentation"
+            />
+          </span>
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
             id="skip_result_cb"
@@ -47,6 +52,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -70,12 +76,17 @@ exports[`ActionsSection renders with no actions selected 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="empty"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="empty"
+              role="presentation"
+            />
+          </span>
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
             id="skip_model_update_cb"
@@ -95,6 +106,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -130,12 +142,17 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="check"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="check"
+              role="presentation"
+            />
+          </span>
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -156,6 +173,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -179,12 +197,17 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="check"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="check"
+              role="presentation"
+            />
+          </span>
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -205,6 +228,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -240,12 +264,17 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-selected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="check"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="check"
+              role="presentation"
+            />
+          </span>
           <input
             checked=""
             class="euiCheckbox__input emotion-euiCheckbox__input"
@@ -266,6 +295,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"
@@ -289,12 +319,17 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
         class="euiCheckbox emotion-euiCheckbox"
       >
         <div
-          class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+          class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="emotion-euiCheckbox__icon-check"
-            data-euiicon-type="empty"
-          />
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
+          >
+            <span
+              class="emotion-euiCheckbox__icon-check"
+              data-euiicon-type="empty"
+              role="presentation"
+            />
+          </span>
           <input
             class="euiCheckbox__input emotion-euiCheckbox__input"
             id="skip_model_update_cb"
@@ -314,6 +349,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+        id="generated-id-wrapper"
       >
         <span
           data-euiicon-type="question"

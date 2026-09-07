@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_DASHBOARD_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/dashboards/constants';
 import {
   StartDashboardsMigrationRequestBody,
@@ -15,7 +15,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
-import { authz } from '../../common/api/util/authz';
+import { authz } from './util/authz';
 import { getRetryFilter } from '../../common/api/util/retry';
 import { withLicense } from '../../common/api/util/with_license';
 import { createTracersCallbacks } from '../../common/api/util/tracing';
@@ -58,11 +58,9 @@ export const registerSiemDashboardMigrationsStartRoute = (
             try {
               const ctx = await context.resolve(['actions', 'securitySolution']);
 
-              // Check if the connector exists and user has permissions to read it
-              const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
-              if (!connector) {
-                return res.badRequest({ body: `Connector with id ${connectorId} not found` });
-              }
+              // Validates connector existence and user privileges via the inference plugin
+              const inferenceClient = ctx.securitySolution.getInferenceClient();
+              await inferenceClient.getConnectorById(connectorId);
 
               const dashboardMigrationsClient =
                 ctx.securitySolution.siemMigrations.getDashboardsClient();

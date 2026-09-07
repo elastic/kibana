@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import {
+  buildAlertingV1RuleTemplateEngineFilter,
   buildConsumersFilter,
   buildFilter,
   buildRuleTypeIdsFilter,
   combineFilterWithAuthorizationFilter,
   combineFilters,
 } from './filters';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 describe('filters', () => {
   describe('combineFilterWithAuthorizationFilter', () => {
@@ -159,16 +161,31 @@ describe('filters', () => {
 
   describe('buildFilter', () => {
     it('returns undefined if filters is undefined', () => {
-      expect(buildFilter({ filters: undefined, field: 'abc', operator: 'or' })).toBeUndefined();
+      expect(
+        buildFilter({
+          filters: undefined,
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toBeUndefined();
     });
 
     it('returns undefined if filters is is an empty array', () => {
-      expect(buildFilter({ filters: [], field: 'abc', operator: 'or' })).toBeUndefined();
+      expect(
+        buildFilter({ filters: [], field: 'abc', operator: 'or', type: RULE_SAVED_OBJECT_TYPE })
+      ).toBeUndefined();
     });
 
     it('returns a KueryNode using or operator', () => {
-      expect(buildFilter({ filters: ['value1'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: ['value1'],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -189,8 +206,14 @@ describe('filters', () => {
     });
 
     it("returns multiple nodes or'd together", () => {
-      expect(buildFilter({ filters: ['value1', 'value2'], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: ['value1', 'value2'],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -235,8 +258,14 @@ describe('filters', () => {
     it('does not escape special kql characters in the filter values', () => {
       const specialCharacters = 'awesome:()\\<>"*';
 
-      expect(buildFilter({ filters: [specialCharacters], field: 'abc', operator: 'or' }))
-        .toMatchInlineSnapshot(`
+      expect(
+        buildFilter({
+          filters: [specialCharacters],
+          field: 'abc',
+          operator: 'or',
+          type: RULE_SAVED_OBJECT_TYPE,
+        })
+      ).toMatchInlineSnapshot(`
         Object {
           "arguments": Array [
             Object {
@@ -405,6 +434,14 @@ describe('filters', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('buildAlertingV1RuleTemplateEngineFilter', () => {
+    it('matches engine v1 or missing engine', () => {
+      expect(toKqlExpression(buildAlertingV1RuleTemplateEngineFilter())).toBe(
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *)'
+      );
     });
   });
 

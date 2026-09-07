@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { MutableRefObject } from 'react';
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';
@@ -20,6 +21,7 @@ interface GetUpdatedColumnProps<Item extends ItemWithAnID> {
   canRemoveLastItem?: boolean;
   isLoading?: boolean;
   lastItemWarning?: string;
+  prevFocusRef?: MutableRefObject<HTMLElement | null>;
   uneditableItems?: Item[];
 }
 
@@ -31,6 +33,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
   canRemoveLastItem,
   isLoading = false,
   lastItemWarning,
+  prevFocusRef,
   uneditableItems,
 }: GetUpdatedColumnProps<Item>): Array<Column<Item>> => {
   return [
@@ -57,6 +60,7 @@ export const getUpdatedColumns = <Item extends ItemWithAnID>({
           isLoading={isLoading}
           canRemoveLastItem={canRemoveLastItem}
           lastItemWarning={lastItemWarning}
+          prevFocusRef={prevFocusRef}
           uneditableItems={uneditableItems}
           item={item}
         />

@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink } from '@elastic/eui';
-import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import type {
+  ArtifactListPageProps,
+  ArtifactListPageLabels,
+} from '../../../components/artifact_list_page';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { TrustedDevicesApiClient } from '../service/api_client';
 import { TrustedDevicesForm } from './components/form';
@@ -25,18 +28,48 @@ type TrustedDevicesListProps = Omit<
   'apiClient' | 'ArtifactFormComponent' | 'labels' | 'data-test-subj'
 >;
 
-const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
+const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageLabels = {
   pageTitle: i18n.translate('xpack.securitySolution.trustedDevices.list.pageTitle', {
     defaultMessage: 'Trusted devices',
   }),
   pageAboutInfo: i18n.translate('xpack.securitySolution.trustedDevices.list.pageAboutInfo', {
     defaultMessage:
-      'Add a trusted device to improve performance or alleviate compatibility issues with the Elastic Security app.',
+      'Allow a specific external device to connect to your endpoints, even when Device Control is enabled.',
   }),
   pageAddButtonTitle: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.pageAddButtonTitle',
     {
       defaultMessage: 'Add trusted device',
+    }
+  ),
+  pageImportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportButtonTitle',
+    {
+      defaultMessage: 'Import trusted devices',
+    }
+  ),
+  pageExportButtonTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportButtonTitle',
+    {
+      defaultMessage: 'Export trusted devices',
+    }
+  ),
+  pageExportSuccessToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportSuccessToastTitle',
+    {
+      defaultMessage: 'Trusted devices exported successfully',
+    }
+  ),
+  pageExportErrorToastTitle: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageExportErrorToastTitle',
+    {
+      defaultMessage: 'Trusted devices export failed',
+    }
+  ),
+  pageImportOnlyCurrentArtifactCanBeImportedError: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.pageImportOnlyCurrentArtifactCanBeImportedError',
+    {
+      defaultMessage: 'You can only import trusted devices here.',
     }
   ),
   getShowingCountLabel: (total) =>
@@ -116,13 +149,17 @@ const TRUSTED_DEVICES_PAGE_LABELS: ArtifactListPageProps['labels'] = {
   }),
   emptyStateInfo: i18n.translate('xpack.securitySolution.trustedDevices.list.emptyStateInfo', {
     defaultMessage:
-      'There are currently no trusted devices on your Endpoints. Add trusted devices to improve performance or alleviate compatibility issues with the Elastic Security app.',
+      'Add trusted devices to allow specific external devices to connect to your endpoints even when Device Control is enabled.',
   }),
   emptyStatePrimaryButtonLabel: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.emptyStatePrimaryButtonLabel',
     {
       defaultMessage: 'Add trusted device',
     }
+  ),
+  emptyStateImportButtonLabel: i18n.translate(
+    'xpack.securitySolution.trustedDevices.list.emptyStateImportButtonLabel',
+    { defaultMessage: 'Import trusted devices' }
   ),
   searchPlaceholderInfo: i18n.translate(
     'xpack.securitySolution.trustedDevices.list.searchPlaceholderInfo',

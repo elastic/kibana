@@ -45,7 +45,7 @@ export interface TestDependencies {
   toasts: NotificationsSetup['toasts'];
   ilmLocator: LocatorPublic<SerializableRecord>;
   uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
-  reportDiagnostic: typeof ReportDiagnostic;
+  reportDiagnostic: () => React.JSX.Element;
   data: DataPublicPluginStart;
   share: SharePluginStart;
 }
@@ -56,6 +56,7 @@ export const mockConfig: ClientConfigType = {
       duration: '10m',
       size: 500,
     },
+    maxRows: 10000,
   },
   poll: {
     jobsRefresh: {

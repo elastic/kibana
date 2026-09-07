@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
+import { escapeKuery } from '@kbn/es-query';
 
 import type { Agent } from '@kbn/fleet-plugin/common';
 import type { processAggregations } from '../../common/utils/aggregations';
@@ -34,21 +35,16 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
     groups: ReturnType<typeof processAggregations>;
     total: number;
   }>({
+    // osqueryPolicies kept in queryKey so the picker refetches if the set of osquery policies changes
     queryKey: ['agents', osqueryPolicies, searchValue, perPage, agentIds],
     queryFn: () => {
-      let kuery = '';
-
-      if (osqueryPolicies?.length) {
-        kuery = `(${osqueryPolicies.map((p) => `policy_id:${p}`).join(' or ')})`;
-
-        if (searchValue) {
-          kuery += ` and (local_metadata.host.hostname.keyword:*${searchValue}* or local_metadata.elastic.agent.id:*${searchValue}* or policy_id: *${searchValue}* or local_metadata.os.platform: *${searchValue}* or policy_name:${searchValue} )`;
-        } else {
-          kuery += ` and (status:online ${
-            agentIds?.length ? `or local_metadata.elastic.agent.id:(${agentIds.join(' or ')})` : ''
-          })`;
-        }
-      }
+      // Policy-id scoping is enforced server-side; sending the ids here overflowed the 16 KB
+      // request header at ~175 policies (#266739). Escaping is not cosmetic: an unescaped
+      // `)` + `or` can lift clauses out of the server's policy scope.
+      const escapedSearch = escapeKuery(searchValue);
+      const kuery = searchValue
+        ? `local_metadata.host.hostname.keyword:*${escapedSearch}* or local_metadata.elastic.agent.id:*${escapedSearch}* or policy_id: *${escapedSearch}* or local_metadata.os.platform: *${escapedSearch}* or policy_name:${escapedSearch}`
+        : '';
 
       return http.get(`/internal/osquery/fleet_wrapper/agents`, {
         version: API_VERSIONS.internal.v1,

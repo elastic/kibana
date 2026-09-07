@@ -27,12 +27,12 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import type { QueryBarMenuPanelsProps, AdditionalQueryBarMenuItems } from './query_bar_menu_panels';
 import { useQueryBarMenuPanels, QueryBarMenuPanel } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
 import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
-import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {
   getFilterSetButtonLabel: () =>
@@ -148,15 +148,16 @@ function QueryBarMenuComponent({
   };
 
   const button = (
-    <EuiToolTip delay="long" content={strings.getFilterSetButtonLabel()} disableScreenReaderOutput>
+    <EuiToolTip content={strings.getFilterSetButtonLabel()} disableScreenReaderOutput>
       <EuiButtonIcon
-        size="m"
+        {...buttonProps}
+        size="s"
         display="empty"
+        color="text"
         onClick={onButtonClick}
         isDisabled={isDisabled}
-        {...buttonProps}
         css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-        iconType="filter"
+        iconType="ellipsis"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
       />
@@ -265,6 +266,12 @@ function QueryBarMenuComponent({
       anchorPosition="downLeft"
       repositionOnScroll
       data-test-subj="queryBarMenuPopover"
+      aria-label={i18n.translate('unifiedSearch.queryBarMenu.popoverAriaLabel', {
+        defaultMessage: 'Query bar menu',
+      })}
+      focusTrapProps={
+        renderedComponent === 'addFilter' ? { clickOutsideDisables: false } : undefined
+      }
     >
       {renderComponent()}
     </EuiPopover>

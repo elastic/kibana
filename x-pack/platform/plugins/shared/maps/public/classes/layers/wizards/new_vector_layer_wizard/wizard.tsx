@@ -6,12 +6,12 @@
  */
 
 import React, { Component } from 'react';
-import { EuiPanel, EuiCallOut } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { createNewIndexAndPattern } from './create_new_index_pattern';
 import type { RenderWizardArguments } from '../layer_wizard_registry';
-import { GeoJsonVectorLayer } from '../../vector_layer';
-import { ESSearchSource } from '../../../sources/es_search_source';
+import { createDefaultLayerDescriptor } from '../../../sources/es_search_source/es_documents_layer_wizard';
 import { ADD_LAYER_STEP_ID } from '../../../../connected_components/add_layer_panel/view';
 import { getFileUpload, getIndexNameFormComponent } from '../../../../kibana_services';
 
@@ -122,14 +122,13 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
       return;
     }
     // Creates empty layer
-    const sourceDescriptor = ESSearchSource.createDescriptor({
-      indexPatternId,
-      geoField: 'coordinates',
-      filterByMapBounds: false,
-      applyGlobalQuery: false,
-    });
-    const layerDescriptor = GeoJsonVectorLayer.createDescriptor(
-      { sourceDescriptor },
+    const layerDescriptor = createDefaultLayerDescriptor(
+      {
+        indexPatternId,
+        geoField: 'coordinates',
+        filterByMapBounds: false,
+        applyGlobalQuery: false,
+      },
       this.props.mapColors
     );
     this.props.previewLayers([layerDescriptor]);
@@ -152,27 +151,23 @@ export class NewVectorLayerEditor extends Component<RenderWizardArguments, State
     if (this.state.createIndexError) {
       if (!this.state.userHasIndexWritePermissions) {
         return (
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount
             title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.indexPrivsErrorTitle', {
               defaultMessage: 'Missing index privileges',
             })}
-            color="danger"
-            iconType="warning"
-          >
-            <p>{this.state.createIndexError}</p>
-          </EuiCallOut>
+            text={this.state.createIndexError}
+          />
         );
       }
       return (
-        <EuiCallOut
+        <KbnDangerCallout
+          announceOnMount
           title={i18n.translate('xpack.maps.layers.newVectorLayerWizard.createIndexErrorTitle', {
             defaultMessage: 'Unable to create index',
           })}
-          color="danger"
-          iconType="warning"
-        >
-          <p>{this.state.createIndexError}</p>
-        </EuiCallOut>
+          text={this.state.createIndexError}
+        />
       );
     }
 

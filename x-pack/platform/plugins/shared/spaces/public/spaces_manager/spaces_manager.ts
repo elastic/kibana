@@ -15,8 +15,12 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import {
   API_VERSIONS,
+  type CompleteInitialSolutionSetupRequest,
+  type CompleteInitialSolutionSetupResponse,
   type GetAllSpacesOptions,
+  type GetInitialSolutionSetupResponse,
   type GetSpaceResult,
+  type InitialSolutionSetupView,
   type Space,
 } from '../../common';
 import type { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
@@ -211,5 +215,31 @@ export class SpacesManager {
 
   public getRolesForSpace(id: string): Promise<Role[]> {
     return this.http.get(`/internal/security/roles/${id}`);
+  }
+
+  public async getPersistedFeatureVisibility(
+    id: string
+  ): Promise<{ featureVisibility: { disabledFeatures: string[] } }> {
+    return this.http.get(
+      `/internal/spaces/space/${encodeURIComponent(id)}/persisted_feature_visibility`
+    );
+  }
+
+  public getInitialSolutionSetup(): Promise<GetInitialSolutionSetupResponse> {
+    return this.http.get<GetInitialSolutionSetupResponse>(
+      '/internal/spaces/_initial_solution_setup'
+    );
+  }
+
+  public completeInitialSolutionSetup(
+    solution: InitialSolutionSetupView
+  ): Promise<CompleteInitialSolutionSetupResponse> {
+    const body: CompleteInitialSolutionSetupRequest = { solution };
+    return this.http.post<CompleteInitialSolutionSetupResponse>(
+      '/internal/spaces/_complete_initial_solution_setup',
+      {
+        body: JSON.stringify(body),
+      }
+    );
   }
 }

@@ -15,6 +15,7 @@ export const GetTagsRequestSchema = {
   query: schema.object({
     kuery: schema.maybe(
       schema.string({
+        meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
           if (validationObj?.error) {
@@ -23,10 +24,13 @@ export const GetTagsRequestSchema = {
         },
       })
     ),
-    showInactive: schema.boolean({ defaultValue: false }),
+    showInactive: schema.boolean({
+      defaultValue: false,
+      meta: { description: 'When true, include tags from inactive agents' },
+    }),
   }),
 };
 
 export const GetTagsResponseSchema = schema.object({
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });

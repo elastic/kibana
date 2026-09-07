@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import user from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
@@ -55,12 +56,78 @@ describe('UserForm', () => {
     );
   };
 
-  it('prevents editing username when disabled', async () => {
-    // See https://github.com/elastic/kibana/issues/204268
+  it('renders an avatar when editing an existing user', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
 
-    renderUserForm({ disabled: true });
+  it('renders an avatar when creating a user', () => {
+    const { unmount } = renderUserForm({ isNewUser: true });
+    expect(screen.getByTestId('userFormAvatar')).toBeInTheDocument();
+    unmount();
+  });
+
+  it('gives the empty create-user avatar an accessible name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: true,
+      defaultValues: { ...userMock, username: '', full_name: '', email: '' },
+    });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'User avatar');
+    unmount();
+  });
+
+  it('uses email for the avatar when the user has no full name', () => {
+    const { unmount } = renderUserForm({
+      isNewUser: false,
+      defaultValues: { ...userMock, email: 'alice@example.com' },
+    });
+    const avatar = screen.getByTestId('userFormAvatar');
+    expect(avatar).toHaveTextContent('a');
+    expect(avatar).toHaveAttribute('aria-label', 'alice@example.com');
+    unmount();
+  });
+
+  it('keeps an accessible name when the avatar has a username', () => {
+    const { unmount } = renderUserForm({ isNewUser: false });
+    expect(screen.getByTestId('userFormAvatar')).toHaveAttribute('aria-label', 'jdoe');
+    unmount();
+  });
+
+  it('prevents editing username when disabled', async () => {
+    const { unmount } = renderUserForm({ disabled: true });
     const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');
-    fireEvent.change(usernameInput, { target: { value: 'foo' } });
+    await user.type(usernameInput, 'foo');
     expect(usernameInput.value).toBe('jdoe');
+    unmount();
+  });
+
+  it('does not render submit button if user is form is disabled', () => {
+    const { unmount } = renderUserForm({ disabled: true });
+    expect(() => {
+      screen.getByTestId('editUserFormSubmitButton');
+    }).toThrow();
+    unmount();
+  });
+
+  it('renders disabled submit button if no changes have been made', () => {
+    const { unmount } = renderUserForm();
+    const submitButton = screen.getByTestId('editUserFormSubmitButton');
+    expect(submitButton).toBeDisabled();
+    unmount();
+  });
+
+  it('enables the submit button if changes have been made', async () => {
+    const { unmount } = renderUserForm();
+    const submitButton = screen.getByTestId('editUserFormSubmitButton');
+    expect(submitButton).toBeDisabled();
+    const usernameInput = screen.getByTestId<HTMLInputElement>('userFormUserNameInput');
+
+    await user.type(usernameInput, 'foo');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('editUserFormSubmitButton')).toBeEnabled();
+    });
+    unmount();
   });
 });

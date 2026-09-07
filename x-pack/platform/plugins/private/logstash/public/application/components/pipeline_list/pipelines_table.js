@@ -88,7 +88,6 @@ function getColumns(openPipeline, clonePipeline) {
 
 function PipelinesTableUi({
   clonePipeline,
-  createPipeline,
   isReadOnly,
   isSelectable,
   message,
@@ -164,20 +163,6 @@ function PipelinesTableUi({
       },
     ],
     toolsLeft: deleteButton,
-    toolsRight: (
-      <EuiButton
-        isDisabled={isReadOnly}
-        key="btnAdd"
-        fill
-        onClick={createPipeline}
-        data-test-subj="btnAdd"
-      >
-        <FormattedMessage
-          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
-          defaultMessage="Create pipeline"
-        />
-      </EuiButton>
-    ),
   };
 
   const columns = getColumns(openPipeline, clonePipeline);
@@ -188,7 +173,7 @@ function PipelinesTableUi({
       data-test-subj="pipelineTable"
       itemId="id"
       items={pipelines}
-      message={message}
+      noItemsMessage={message}
       pagination={pagination}
       search={search}
       selection={selectionOptions}
@@ -196,6 +181,9 @@ function PipelinesTableUi({
       rowProps={{
         'data-test-subj': 'row',
       }}
+      tableCaption={i18n.translate('xpack.logstash.pipelinesTable.tableCaption', {
+        defaultMessage: 'Logstash pipelines',
+      })}
     />
   );
 }

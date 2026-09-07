@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core-data-streams-server",
+    "@kbn/es-mappings",
     "@kbn/core",
   ]
 }

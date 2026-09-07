@@ -14,7 +14,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 
 interface Props {
-  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  query: Partial<Pick<NonNullable<QueryDslQueryContainer>, 'bool' | 'ids'>>;
   size: number;
 }
 
@@ -32,7 +32,7 @@ const AlertsPreviewComponent: React.FC<Props> = ({ query, size }) => {
         id={`attack-discovery-alerts-preview-${uuid.v4()}`}
         showAlertStatusWithFlapping={false}
         query={query}
-        initialPageSize={size}
+        pageSize={size}
       />
     </div>
   );

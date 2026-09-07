@@ -89,3 +89,9 @@ export const getAlertingSectionBreadcrumb = (
       };
   }
 };
+
+export const getRulesBreadcrumbWithHref = () => ({
+  ...getAlertingSectionBreadcrumb('rules'),
+  // Management scopes breadcrumb hrefs to the mounted app.
+  href: routeToHome,
+});

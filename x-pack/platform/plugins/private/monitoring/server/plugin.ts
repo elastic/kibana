@@ -12,6 +12,7 @@ import type {
   CoreSetup,
   CoreStart,
   CustomHttpResponseOptions,
+  IClusterClient,
   ICustomClusterClient,
   KibanaRequest,
   KibanaResponseFactory,
@@ -76,7 +77,12 @@ export class MonitoringPlugin
   private readonly initializerContext: PluginInitializerContext;
   private readonly log: Logger;
   private readonly getLogger: (...scopes: string[]) => Logger;
-  private cluster = {} as ICustomClusterClient;
+  /**
+   * Internal elasticsearch client used for monitoring purposes.
+   * It can be Kibana's internal client (`core.elasticsearch.client`), or a custom client, depending on the configuration.
+   * @private
+   */
+  private cluster: IClusterClient | ICustomClusterClient = {} as IClusterClient;
   private licenseService = {} as MonitoringLicenseService;
   private monitoringCore = {} as MonitoringCore;
   private legacyShimDependencies = {} as LegacyShimDependencies;
@@ -134,20 +140,20 @@ export class MonitoringPlugin
     const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
 
     // Register collector objects for stats to show up in the APIs
-    if (plugins.usageCollection) {
-      coreSetup.savedObjects.registerType({
-        name: SAVED_OBJECT_TELEMETRY,
-        hidden: true,
-        namespaceType: 'agnostic',
-        mappings: {
-          properties: {
-            reportedClusterUuids: {
-              type: 'keyword',
-            },
+    coreSetup.savedObjects.registerType({
+      name: SAVED_OBJECT_TELEMETRY,
+      hidden: true,
+      namespaceType: 'agnostic',
+      mappings: {
+        properties: {
+          reportedClusterUuids: {
+            type: 'keyword',
           },
         },
-      });
+      },
+    });
 
+    if (plugins.usageCollection) {
       registerCollectors(plugins.usageCollection, config, () => this.cluster);
       registerMonitoringTelemetryCollection(
         plugins.usageCollection,
@@ -166,7 +172,7 @@ export class MonitoringPlugin
     };
   }
 
-  init(cluster: ICustomClusterClient, coreStart: CoreStart) {
+  init(cluster: IClusterClient, coreStart: CoreStart) {
     const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;
@@ -210,11 +216,7 @@ export class MonitoringPlugin
 
   start(coreStart: CoreStart, { licensing }: PluginsStart) {
     const config = this.config!;
-    this.cluster = instantiateClient(
-      config.ui.elasticsearch,
-      this.log,
-      coreStart.elasticsearch.createClient
-    );
+    this.cluster = instantiateClient(config.ui.elasticsearch, this.log, coreStart.elasticsearch);
 
     this.init(this.cluster, coreStart);
 
@@ -258,7 +260,7 @@ export class MonitoringPlugin
   }
 
   stop() {
-    if (this.cluster && this.cluster.close) {
+    if (this.cluster && 'close' in this.cluster) {
       this.cluster.close().catch(() => {});
     }
     if (this.licenseService && this.licenseService.stop) {
@@ -300,6 +302,9 @@ export class MonitoringPlugin
               alerting: {
                 rule: {
                   all: alertingFeatures,
+                  enable: alertingFeatures,
+                  manual_run: alertingFeatures,
+                  manage_rule_settings: alertingFeatures,
                 },
                 alert: {
                   all: alertingFeatures,
@@ -316,7 +321,7 @@ export class MonitoringPlugin
   getLegacyShim(
     config: MonitoringConfig,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
-    cluster: ICustomClusterClient,
+    cluster: IClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;

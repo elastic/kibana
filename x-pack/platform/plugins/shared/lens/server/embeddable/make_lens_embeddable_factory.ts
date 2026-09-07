@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
+
+import { inject, extract } from './references';
 import { DOC_TYPE } from '../../common/constants';
 import {
   commonEnhanceTableRowHeight,
@@ -49,7 +50,7 @@ import type {
   VisStatePre830,
   XYVisState850,
 } from '../migrations/types';
-import { extract, inject } from '../../common/embeddable_factory';
+import type { LensEmbeddableRegistryDefinition } from './types';
 
 export const makeLensEmbeddableFactory =
   (
@@ -57,8 +58,11 @@ export const makeLensEmbeddableFactory =
     getDataViewMigrations: () => MigrateFunctionsObject,
     customVisualizationMigrations: CustomVisualizationMigrations
   ) =>
-  (): EmbeddableRegistryDefinition => {
+  (): LensEmbeddableRegistryDefinition => {
     return {
+      // In 9.4, lens embeddable type changed from 'lens' to 'vis' as part of "as code" project.
+      // Migrations should be registered with legacy value, 'lens', because
+      // embeddable migrations are BWC that work on legacy embeddable state
       id: DOC_TYPE,
       migrations: () =>
         mergeMigrationFunctionMaps(

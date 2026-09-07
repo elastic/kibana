@@ -8,7 +8,7 @@
  */
 
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import type { Layer } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { NavigateToLensLayer as Layer } from '@kbn/lens-common';
 import {
   getIndexPatternIds,
   isAnnotationsLayer,

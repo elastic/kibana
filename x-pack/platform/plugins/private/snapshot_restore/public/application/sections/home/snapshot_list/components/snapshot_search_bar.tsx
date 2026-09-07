@@ -14,7 +14,8 @@ import type { SearchFilterConfig } from '@elastic/eui/src/components/search_bar/
 import type { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui/src/components/search_bar/search_bar';
 import type { Query } from '@elastic/eui';
-import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { SnapshotDeleteProvider } from '../../../../components';
 import type { SnapshotDetails } from '../../../../../../common/types';
 import type { SnapshotListParams } from '../../../../lib';
@@ -28,7 +29,7 @@ const onlyOneClauseMessage = i18n.translate(
     defaultMessage: 'You can only use one clause in the search bar',
   }
 );
-// for now limit the search bar to snapshot, repository and policyName queries
+// for now limit the search bar to snapshot, repository, policyName and state queries
 const searchSchema: SchemaType = {
   strict: true,
   fields: {
@@ -39,6 +40,9 @@ const searchSchema: SchemaType = {
       type: 'string',
     },
     policyName: {
+      type: 'string',
+    },
+    state: {
       type: 'string',
     },
   },
@@ -118,10 +122,51 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
         view: repository,
       })),
     },
+    {
+      type: 'field_value_selection' as const,
+      field: 'state',
+      name: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterLabel', {
+        defaultMessage: 'State',
+      }),
+      operator: 'exact',
+      multiSelect: false,
+      options: [
+        {
+          value: 'SUCCESS',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterSuccess', {
+            defaultMessage: 'Success',
+          }),
+        },
+        {
+          value: 'IN_PROGRESS',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterInProgress', {
+            defaultMessage: 'In Progress',
+          }),
+        },
+        {
+          value: 'FAILED',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterFailed', {
+            defaultMessage: 'Failed',
+          }),
+        },
+        {
+          value: 'PARTIAL',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterPartial', {
+            defaultMessage: 'Partial',
+          }),
+        },
+        {
+          value: 'INCOMPATIBLE',
+          view: i18n.translate('xpack.snapshotRestore.snapshotList.table.stateFilterIncompatible', {
+            defaultMessage: 'Incompatible',
+          }),
+        },
+      ],
+    },
   ];
 
   const reloadButton = (
-    <EuiButton color="success" iconType="refresh" onClick={reload} data-test-subj="reloadButton">
+    <EuiButton iconType="refresh" onClick={reload} data-test-subj="reloadButton">
       <FormattedMessage
         id="xpack.snapshotRestore.snapshotList.table.reloadSnapshotsButton"
         defaultMessage="Reload"
@@ -163,11 +208,10 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       <EuiSpacer />
       {error ? (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
+            announceOnMount={false}
             data-test-subj="snapshotListSearchError"
-            iconType="warning"
             role="alert"
-            color="danger"
             title={
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.searchBar.invalidSearchMessage"

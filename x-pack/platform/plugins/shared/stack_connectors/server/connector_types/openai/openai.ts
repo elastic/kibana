@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ServiceParams, SSLSettings } from '@kbn/actions-plugin/server';
+import type { SSLSettings } from '@kbn/actions-utils';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import OpenAI from 'openai';
@@ -22,34 +23,30 @@ import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
-import { removeEndpointFromUrl } from './lib/openai_utils';
 import {
+  DEFAULT_MODEL,
+  DEFAULT_TIMEOUT_MS,
+  OpenAiProviderType,
+  SUB_ACTION,
   RunActionParamsSchema,
   RunActionResponseSchema,
   DashboardActionParamsSchema,
   StreamActionParamsSchema,
   StreamingResponseSchema,
   InvokeAIActionParamsSchema,
-} from '../../../common/openai/schema';
+} from '@kbn/connector-schemas/openai';
 import type {
   Config,
   Secrets,
   RunActionParams,
   RunActionResponse,
   StreamActionParams,
-} from '../../../common/openai/types';
-import {
-  DEFAULT_OPENAI_MODEL,
-  DEFAULT_TIMEOUT_MS,
-  OpenAiProviderType,
-  SUB_ACTION,
-} from '../../../common/openai/constants';
-import type {
   DashboardActionParams,
   DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
-} from '../../../common/openai/types';
+} from '@kbn/connector-schemas/openai';
+import { removeEndpointFromUrl } from './lib/openai_utils';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   getAxiosOptions,
@@ -234,7 +231,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body The stringified request body to be sent in the POST request.
    */
   public async runApi(
-    { body, signal, timeout }: RunActionParams,
+    { body, signal, timeout, maxContentLength }: RunActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -260,6 +257,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           signal,
           // give up to 2 minutes for response
           timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
           ...axiosOptions,
           headers: {
             ...this.headers,
@@ -290,7 +288,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param stream flag indicating whether it is a streaming request or not
    */
   public async streamApi(
-    { body, stream, signal, timeout }: StreamActionParams,
+    { body, stream, signal, timeout, maxContentLength }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
     const parentSpan = trace.getActiveSpan();
@@ -314,6 +312,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
           responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
           data: executeBody,
           signal,
+          ...(maxContentLength !== undefined ? { maxContentLength } : {}),
           ...axiosOptions,
           headers: {
             ...this.headers,
@@ -325,6 +324,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         connectorUsageCollector
       );
 
+      // @ts-expect-error upgrade typescript v5.9.3
       return stream ? pipeStreamingResponse(response) : response.data;
     } catch (error) {
       // special error handling for PKI errors
@@ -417,13 +417,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
+      let model: string = DEFAULT_MODEL;
+      if (rest.model) {
+        model = rest.model;
+      } else if ('defaultModel' in this.config && this.config.defaultModel) {
+        model = this.config.defaultModel;
+      }
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
         stream: true,
         messages,
-        model:
-          rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+        model,
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);
@@ -459,9 +463,15 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     body: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
-    const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
+    const {
+      signal,
+      timeout,
+      maxContentLength,
+      telemetryMetadata: _telemetryMetadata,
+      ...rest
+    } = body;
     const res = await this.runApi(
-      { body: JSON.stringify(rest), signal, timeout },
+      { body: JSON.stringify(rest), signal, timeout, maxContentLength },
       connectorUsageCollector
     );
 

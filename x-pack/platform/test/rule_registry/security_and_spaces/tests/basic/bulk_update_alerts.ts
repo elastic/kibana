@@ -52,6 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const TEST_URL = '/internal/rac/alerts';
   const ALERTS_INDEX_URL = `${TEST_URL}/index`;
+  const DEFAULT = 'default';
   const SPACE1 = 'space1';
   const SPACE2 = 'space2';
   const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
@@ -66,10 +67,10 @@ export default ({ getService }: FtrProviderContext) => {
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'true')
         .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
+    const observabilityIndex = indexNames?.index_name?.find((indexName) =>
+      indexName.startsWith(APM_ALERT_INDEX)
     );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
+    expect(observabilityIndex).to.eql(`${APM_ALERT_INDEX}-${DEFAULT}`); // assert this here so we can use constants in the dynamically-defined test cases below
   };
 
   const getSecuritySolutionIndexName = async (user: User) => {
@@ -83,6 +84,25 @@ export default ({ getService }: FtrProviderContext) => {
       indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
     );
     expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
+  };
+
+  const resetChanges = async (
+    space: string,
+    username: string,
+    password: string,
+    alertId: string,
+    index: string
+  ) => {
+    await supertestWithoutAuth
+      .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
+      .auth(username, password)
+      .set('kbn-xsrf', 'true')
+      .send({
+        ids: [alertId],
+        status: 'open',
+        index,
+      })
+      .expect(200);
   };
 
   describe('Alert - Bulk Update - RBAC - spaces', () => {
@@ -102,7 +122,7 @@ export default ({ getService }: FtrProviderContext) => {
     function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
       authorizedUsers.forEach(({ username, password }) => {
         it(`${username} should bulk update alert with given id ${alertId} in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
+          const response = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
@@ -110,15 +130,16 @@ export default ({ getService }: FtrProviderContext) => {
               ids: [alertId],
               status: 'closed',
               index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          const items = updated.body.items;
+            })
+            .expect(200);
+          const items = response.body.items;
           // @ts-expect-error
           items.map((item) => expect(item.update.result).to.eql('updated'));
+          await resetChanges(space, username, password, alertId, index);
         });
 
         it(`${username} should bulk update alerts which match KQL query string in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
+          const response = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
@@ -126,13 +147,14 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'closed',
               query: `${ALERT_WORKFLOW_STATUS}: open`,
               index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          expect(updated.body.updated).to.greaterThan(0);
+            })
+            .expect(200);
+          expect(response.body.updated).to.greaterThan(0);
+          await resetChanges(space, username, password, alertId, index);
         });
 
         it(`${username} should bulk update alerts which match query in DSL in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
+          const response = await supertestWithoutAuth
             .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/bulk_update`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
@@ -140,9 +162,11 @@ export default ({ getService }: FtrProviderContext) => {
               status: 'closed',
               query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
               index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          expect(updated.body.updated).to.greaterThan(0);
+            })
+            .expect(200);
+
+          expect(response.body.updated).to.greaterThan(0);
+          await resetChanges(space, username, password, alertId, index);
         });
       });
 
@@ -165,16 +189,16 @@ export default ({ getService }: FtrProviderContext) => {
     // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
     // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
     describe('Security Solution', () => {
-      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [secOnly, obsSec];
-      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
-      const unauthorized = [
-        // these users are not authorized to update alerts for the Security Solution in any space
-        globalRead,
-        secOnlyRead,
-        obsSecRead,
+      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll, globalRead];
+      const authorizedOnlyInSpace1 = [secOnly, obsSec, secOnlyRead, obsSecRead];
+      const authorizedOnlyInSpace2 = [
+        secOnlySpace2,
+        obsSecAllSpace2,
         secOnlyReadSpace2,
         obsSecReadSpace2,
+      ];
+      const unauthorized = [
+        // these users are not authorized to update alerts for the Security Solution in any space
         obsOnly,
         obsOnlyRead,
         obsOnlySpace2,

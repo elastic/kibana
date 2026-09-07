@@ -7,14 +7,16 @@
 
 import { DEFAULT_MAP_STATE, map } from './map';
 import { SET_MAP_SETTINGS } from '../../actions/map_action_constants';
+import type { MapSettings } from '../../../server';
+import type { Writable } from '@kbn/utility-types';
 
 describe('SET_MAP_SETTINGS', () => {
   test('Should preserve previous settings when setting partial map settings', () => {
     const initialState = {
       ...DEFAULT_MAP_STATE,
     };
-    initialState.settings.autoFitToDataBounds = false;
-    initialState.settings.showTimesliderToggleButton = false;
+    (initialState.settings as Writable<MapSettings>).autoFitToDataBounds = false;
+    (initialState.settings as Writable<MapSettings>).showTimesliderToggleButton = false;
 
     const updatedState1 = map(initialState, {
       type: SET_MAP_SETTINGS,

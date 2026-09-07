@@ -9,12 +9,12 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getPreviewAlerts, previewRule, dataGeneratorFactory } from '../../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
   getRuleForAlertTesting,
-} from '../../../../../../config/services/detections_response';
+} from '@kbn/detections-response-ftr-services';
+import { getPreviewAlerts, previewRule, dataGeneratorFactory } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

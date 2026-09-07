@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Get Scheduled Action Results Schema
+  version: '2023-10-31'
+paths: {}
+components:
+  schemas:
+    ScheduledExecutionMetadata:
+      type: object
+      description: 'Execution metadata resolved from the pack saved object.'
+      properties:
+        scheduleId:
+          description: 'The schedule ID for the scheduled query.'
+          type: string
+        executionCount:
+          description: 'The execution count for this scheduled query run.'
+          type: integer
+        packId:
+          description: 'The ID of the pack containing the query.'
+          type: string
+        packName:
+          description: 'The name of the pack containing the query.'
+          type: string
+        queryName:
+          description: 'The name of the query within the pack.'
+          type: string
+        queryText:
+          description: 'The SQL query that was executed.'
+          type: string
+        timestamp:
+          description: 'The timestamp of the most recent response for this execution.'
+          type: string
+
+    ScheduledActionResultsAggregations:
+      type: object
+      properties:
+        totalRowCount:
+          description: 'The total number of result rows across all agents.'
+          type: integer
+        totalResponded:
+          description: 'The total number of agents that responded.'
+          type: integer
+        successful:
+          description: 'The number of agents that completed successfully.'
+          type: integer
+        failed:
+          description: 'The number of agents that returned errors.'
+          type: integer
+        pending:
+          description: 'The number of agents with pending responses.'
+          type: integer
+
+    GetScheduledActionResultsResponse:
+      type: object
+      properties:
+        metadata:
+          $ref: '#/components/schemas/ScheduledExecutionMetadata'
+        edges:
+          description: 'The paginated list of per-agent action results.'
+          type: array
+          items:
+            type: object
+        total:
+          description: 'The total number of action results.'
+          type: integer
+        currentPage:
+          description: 'The current page number (zero-based).'
+          type: integer
+        pageSize:
+          description: 'The number of results per page.'
+          type: integer
+        totalPages:
+          description: 'The total number of pages.'
+          type: integer
+        aggregations:
+          $ref: '#/components/schemas/ScheduledActionResultsAggregations'
+        inspect:
+          description: 'Debug/inspection data for the search query.'
+          type: object
+      example:
+        metadata:
+          scheduleId: 'pack_my_pack_uptime'
+          executionCount: 3
+          packId: '42ba9c50-0cc5-11ed-aa1d-2b27890bc90d'
+          packName: 'My Pack'
+          queryName: 'uptime'
+          queryText: 'select * from uptime;'
+          timestamp: '2024-07-26T09:00:00.000Z'
+        edges:
+          - _id: 'result-001'
+            fields:
+              agent_id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+              status: 'success'
+              rows_count: 5
+        total: 10
+        currentPage: 0
+        pageSize: 20
+        totalPages: 1
+        aggregations:
+          totalRowCount: 42
+          totalResponded: 10
+          successful: 9
+          failed: 1
+          pending: 0

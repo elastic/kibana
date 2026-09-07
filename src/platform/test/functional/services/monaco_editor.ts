@@ -35,7 +35,7 @@ export class MonacoEditorService extends FtrService {
         () =>
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
           window
-            .MonacoEnvironment!.monaco!.editor.getModels()
+            .MonacoEnvironment!.monaco.editor.getModels()
             .map((model: any) => model.getValue()) as string[]
       );
     });
@@ -54,10 +54,10 @@ export class MonacoEditorService extends FtrService {
       await this.browser.execute(
         (editorIndex, codeEditorValue) => {
           // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
-          const editor = window.MonacoEnvironment!.monaco!.editor;
+          const editor = window.MonacoEnvironment!.monaco.editor;
           const textModels = editor.getModels();
 
-          if (editorIndex) {
+          if (editorIndex !== undefined && textModels[editorIndex]) {
             textModels[editorIndex].setValue(codeEditorValue);
           } else {
             // when specific model instance is unknown, update all models returned
@@ -79,5 +79,31 @@ export class MonacoEditorService extends FtrService {
     return this.findService.allByCssSelector(
       `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`
     );
+  }
+
+  public getCodeEditorSuggestWidget() {
+    return this.findService.byCssSelector(
+      '[data-test-subj="kbnCodeEditorEditorOverflowWidgetsContainer"] .suggest-widget'
+    );
+  }
+
+  public async setScrollTop(scrollTop: number, nthIndex: number = 0) {
+    await this.browser.execute(
+      (editorIndex, scrollAmount) => {
+        const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
+        if (editors && editors[editorIndex]) {
+          editors[editorIndex].setScrollTop(scrollAmount);
+        }
+      },
+      nthIndex,
+      scrollTop
+    );
+  }
+
+  public async getScrollTop(nthIndex: number = 0): Promise<number> {
+    return await this.browser.execute((editorIndex) => {
+      const editors = window.MonacoEnvironment?.monaco?.editor?.getEditors();
+      return editors?.[editorIndex]?.getScrollTop() ?? 0;
+    }, nthIndex);
   }
 }

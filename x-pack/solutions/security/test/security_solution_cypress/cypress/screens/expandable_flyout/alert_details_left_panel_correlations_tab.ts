@@ -69,12 +69,3 @@ export const CORRELATIONS_CASES_SECTION_TITLE = getDataTestSubjectSelector(
 export const CORRELATIONS_CASES_SECTION_TABLE = getDataTestSubjectSelector(
   'securitySolutionFlyoutCorrelationsDetailsCasesSectionTable'
 );
-
-export const CORRELATIONS_SUPPRESSED_ALERTS_TITLE = getDataTestSubjectSelector(
-  'securitySolutionFlyoutCorrelationsDetailsSuppressedAlertsSectionTitleText'
-);
-
-export const CORRELATIONS_SUPPRESSED_ALERTS_INVESTIGATE_IN_TIMELINE_BUTTON =
-  getDataTestSubjectSelector(
-    'securitySolutionFlyoutCorrelationsDetailsSuppressedAlertsSectionInvestigateInTimeline'
-  );

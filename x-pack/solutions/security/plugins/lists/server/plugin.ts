@@ -57,7 +57,8 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
       this.createRouteHandlerContext()
     );
     const router = core.http.createRouter<ListsRequestHandlerContext>();
-    initRoutes(router, config);
+    const kibanaVersion = this.initializerContext.env.packageInfo.version;
+    initRoutes(router, config, kibanaVersion);
 
     return {
       getExceptionListClient: (

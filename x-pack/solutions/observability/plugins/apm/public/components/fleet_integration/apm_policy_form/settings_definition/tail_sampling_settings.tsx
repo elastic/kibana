@@ -10,8 +10,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 import type { PackagePolicyVars, SettingsRow } from '../typings';
-import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
-import { getStorageSizeRt } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
+import { getDurationSchema } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
+import { getStorageSizeSchema } from '../../../../../common/agent_configuration/runtime_types/storage_size_rt';
 
 export const TAIL_SAMPLING_ENABLED_KEY = 'tail_sampling_enabled';
 
@@ -51,7 +51,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
-          validation: getDurationRt({ min: '1s' }),
+          validation: getDurationSchema({ min: '1s' }),
         },
         {
           key: 'tail_sampling_policies',
@@ -117,7 +117,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
-          validation: getStorageSizeRt({ min: '0GB' }),
+          validation: getStorageSizeSchema({ min: '0GB' }),
         },
         {
           key: 'tail_sampling_ttl',
@@ -141,7 +141,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
-          validation: getDurationRt({ min: '1s' }),
+          validation: getDurationSchema({ min: '1s' }),
         },
         {
           key: 'tail_sampling_discard_on_write_failure',

@@ -65,6 +65,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_system_action: false,
         is_missing_secrets: false,
         name: 'an action created before test.not-enabled was disabled',
+        is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 
@@ -95,6 +97,8 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         is_missing_secrets: false,
         is_system_action: false,
         name: 'an action created before test.not-enabled was disabled',
+        is_connector_type_deprecated: false,
+        auth_mode: 'shared',
       });
     });
 

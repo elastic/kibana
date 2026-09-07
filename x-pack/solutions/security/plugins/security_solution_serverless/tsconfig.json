@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": ["target/**/*"],
@@ -38,15 +39,23 @@
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-logging-server-mocks",
-    "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/dev-utils",
-    "@kbn/inference-common",
-    "@kbn/ai-assistant-icon",
     "@kbn/core-application-browser",
+    "@kbn/deeplinks-management",
+    "@kbn/connector-schemas",
+    "@kbn/management-settings-ids",
+    "@kbn/alerting-v2-utils",
+    "@kbn/ai-assistant-common",
+    "@kbn/deeplinks-workflows",
+    "@kbn/workflows",
+    "@kbn/usage-api-plugin",
+    "@kbn/workflows-management-plugin",
+    "@kbn/navigation-plugin",
+    "@kbn/scout-security",
   ]
 }

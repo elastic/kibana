@@ -146,9 +146,6 @@ Object {
         },
       },
       "filters": Array [],
-      "query": Object {
-        "esql": "from logstash | stats avg(bytes) by extension.keyword",
-      },
       "visualization": Object {
         "gridConfig": Object {
           "isCellLabelVisible": false,
@@ -171,7 +168,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "requestData": Object {
@@ -295,9 +292,6 @@ Object {
         },
       },
       "filters": Array [],
-      "query": Object {
-        "esql": "from logstash | stats avg(bytes) by extension.keyword",
-      },
       "visualization": Object {
         "gridConfig": Object {
           "isCellLabelVisible": false,
@@ -320,7 +314,7 @@ Object {
       },
     },
     "title": "Heat map",
-    "version": 1,
+    "version": 2,
     "visualizationType": "lnsHeatmap",
   },
   "requestData": Object {

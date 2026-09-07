@@ -7,12 +7,13 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ApmMainTemplate } from '../templates/apm_main_template';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Breadcrumb } from '../../app/breadcrumb';
 import {
-  indexLifecyclePhaseRt,
+  indexLifecyclePhaseSchema,
   IndexLifecyclePhaseSelectOption,
 } from '../../../../common/storage_explorer_types';
 
@@ -30,10 +31,9 @@ export const storageExplorer = {
         href="/storage-explorer"
       >
         <ApmMainTemplate
-          environmentFilter={false}
-          pageHeader={{
-            alignItems: 'center',
-            pageTitle: i18n.translate('xpack.apm.views.storageExplorer.title', {
+          searchBar={<SearchBar />}
+          header={{
+            title: i18n.translate('xpack.apm.views.storageExplorer.title', {
               defaultMessage: 'Storage explorer',
             }),
           }}
@@ -42,8 +42,8 @@ export const storageExplorer = {
         </ApmMainTemplate>
       </Breadcrumb>
     ),
-    params: t.type({
-      query: indexLifecyclePhaseRt,
+    params: z.object({
+      query: indexLifecyclePhaseSchema,
     }),
     defaults: {
       query: {

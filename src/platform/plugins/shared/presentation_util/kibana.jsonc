@@ -10,10 +10,9 @@
   "plugin": {
     "id": "presentationUtil",
     "browser": true,
-    "server": true,
+    "server": false,
     "requiredPlugins": [
       "kibanaReact",
-      "contentManagement",
       "embeddable",
       "expressions",
       "dataViews",
@@ -21,9 +20,6 @@
     ],
     "requiredBundles": [
       "savedObjects"
-    ],
-    "extraPublicDirs": [
-      "common"
     ]
   }
 }

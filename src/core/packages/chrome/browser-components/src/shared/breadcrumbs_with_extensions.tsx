@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { PropsWithChildren } from 'react';
+import React, { Suspense } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import classnames from 'classnames';
+import { css } from '@emotion/react';
+import { useBreadcrumbsAppendExtensions } from './chrome_hooks';
+
+const styles = {
+  breadcrumbsWithExtensionContainer: css`
+    overflow: hidden; // enables text-ellipsis in the last breadcrumb
+    .euiHeaderBreadcrumbs,
+    .euiBreadcrumbs {
+      // stop breadcrumbs from growing.
+      // this makes the extension appear right next to the last breadcrumb
+      flex-grow: 0;
+      margin-right: 0;
+
+      overflow: hidden; // enables text-ellipsis in the last breadcrumb
+    }
+
+    .header__breadcrumbsAppendExtension--last {
+      flex-grow: 1;
+    }
+  `,
+};
+
+export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
+  const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
+
+  return breadcrumbsAppendExtensions.length === 0 ? (
+    <>{children}</>
+  ) : (
+    <EuiFlexGroup
+      responsive={false}
+      wrap={false}
+      alignItems={'center'}
+      gutterSize={'none'}
+      css={styles.breadcrumbsWithExtensionContainer}
+    >
+      {children}
+      {breadcrumbsAppendExtensions.map((breadcrumbsAppendExtension, index) => {
+        const isLast = breadcrumbsAppendExtensions.length - 1 === index;
+        return (
+          <div
+            key={index}
+            className={classnames({
+              'header__breadcrumbsAppendExtension--last': isLast,
+            })}
+          >
+            <Suspense fallback={null}>{breadcrumbsAppendExtension.content}</Suspense>
+          </div>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};

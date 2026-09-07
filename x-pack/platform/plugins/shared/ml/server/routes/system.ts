@@ -14,14 +14,15 @@ import { mlLog } from '../lib/log';
 import { capabilitiesProvider } from '../lib/capabilities';
 import { spacesUtilsProvider } from '../lib/spaces_utils';
 import type { RouteInitialization, SystemRouteDeps } from '../types';
-import { getLazyMlNodeCount, getMlNodeCount } from '../lib/node_utils';
+import { getMlNodeCount } from '../lib/node_utils';
+import { getMlInfo } from '../models/system/ml_info';
 
 /**
  * System routes
  */
 export function systemRoutes(
   { router, mlLicense, routeGuard }: RouteInitialization,
-  { getSpaces, cloud, resolveMlCapabilities, isServerless }: SystemRouteDeps
+  { getSpaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
   router.versioned
     .post({
@@ -179,36 +180,10 @@ export function systemRoutes(
         version: '1',
         validate: false,
       },
-      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client }) => {
+      routeGuard.basicLicenseAPIGuard(async ({ mlClient, response, client, serverless }) => {
         try {
-          const body = await mlClient.info();
-          const cloudId = cloud?.cloudId;
-          const isCloudTrial = cloud?.trialEndDate && Date.now() < cloud.trialEndDate.getTime();
-
-          let isMlAutoscalingEnabled = false;
-          try {
-            // kibana_system user does not have the manage_autoscaling cluster privilege.
-            // perform this check as a current user.
-            await client.asCurrentUser.autoscaling.getAutoscalingPolicy({ name: 'ml' });
-            isMlAutoscalingEnabled = true;
-          } catch (e) {
-            // If ml autoscaling policy doesn't exist or the user does not have privileges to fetch it,
-            // check the number of lazy ml nodes to determine if autoscaling is enabled.
-            const lazyMlNodeCount = await getLazyMlNodeCount(client);
-            isMlAutoscalingEnabled = lazyMlNodeCount > 0;
-          }
-
-          return response.ok({
-            body: {
-              ...body,
-              cloudId,
-              isCloudTrial,
-              cloudUrl: cloud.baseUrl,
-              isMlAutoscalingEnabled,
-              showNodeInfo: !isServerless,
-              showLicenseInfo: !isServerless,
-            },
-          });
+          const body = await getMlInfo({ mlClient, client, cloud, serverless });
+          return response.ok({ body });
         } catch (error) {
           return response.customError(wrapError(error));
         }
@@ -264,7 +239,11 @@ export function systemRoutes(
       {
         version: '1',
         validate: {
-          request: { body: schema.object({ indices: schema.arrayOf(schema.string()) }) },
+          request: {
+            body: schema.object({
+              indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 100 }),
+            }),
+          },
         },
       },
       routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {

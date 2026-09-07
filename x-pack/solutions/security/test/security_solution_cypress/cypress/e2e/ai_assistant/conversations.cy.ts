@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RULE_MANAGEMENT_CONTEXT_DESCRIPTION } from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertConnectorSelected,
@@ -19,7 +18,6 @@ import {
   openAssistant,
   selectConnector,
   selectConversation,
-  selectRule,
   submitMessage,
   typeAndSendMessage,
 } from '../../tasks/assistant';
@@ -33,10 +31,9 @@ import {
 import { expandFirstAlert } from '../../tasks/alerts';
 import { ALERTS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
-import { visitRulesManagementTable } from '../../tasks/rules_management';
 import { deleteAlertsAndRules, deleteConnectors } from '../../tasks/api_calls/common';
 import { createRule } from '../../tasks/api_calls/rules';
-import { getExistingRule, getNewRule } from '../../objects/rule';
+import { getNewRule } from '../../objects/rule';
 import { login } from '../../tasks/login';
 import {
   CONNECTOR_MISSING_CALLOUT,
@@ -44,6 +41,7 @@ import {
   USER_PROMPT,
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
+import { setPreferredChatExperienceToClassic } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const mockConvo1 = {
   id: 'spooky',
@@ -61,6 +59,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     deleteConversations();
     deleteAlertsAndRules();
     login(Cypress.env(IS_SERVERLESS) ? 'admin' : undefined);
+    setPreferredChatExperienceToClassic();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
@@ -80,25 +79,16 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
   });
   describe('When no conversations exist but connectors do exist, show empty convo', () => {
     beforeEach(() => {
+      cy.clearLocalStorage();
       createAzureConnector();
     });
     it('When invoked on AI Assistant click', () => {
       visitGetStartedPage();
       openAssistant();
       assertNewConversation(false, 'New chat');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should('not.have.text');
-    });
-    it('When invoked from rules page', () => {
-      createRule(getExistingRule({ rule_id: 'rule1', enabled: true })).then((createdRule) => {
-        visitRulesManagementTable();
-        cy.log('NEW RULE', createdRule);
-        selectRule(createdRule?.body?.id);
-        openAssistant('rule');
-        assertNewConversation(false, `Detection Rules - Rule 1`);
-        assertConnectorSelected(azureConnectorAPIPayload.name);
-        cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);
-      });
     });
     it('When invoked from alert details', () => {
       createRule(getNewRule());
@@ -107,14 +97,19 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       expandFirstAlert();
       openAssistant('alert');
       assertConversationTitleContains('New Rule Test');
+      selectConnector(azureConnectorAPIPayload.name);
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', 'Alert (from summary)');
     });
     it('Shows empty connector callout when a conversation that had a connector no longer does', () => {
+      cy.intercept('PUT', '**/api/security_ai_assistant/current_user/conversations/**').as(
+        'updateConversation'
+      );
       visitGetStartedPage();
       openAssistant();
       selectConversation(mockConvo1.title);
       selectConnector(azureConnectorAPIPayload.name);
+      cy.wait('@updateConversation');
       closeAssistant();
       deleteConnectors();
       openAssistant();

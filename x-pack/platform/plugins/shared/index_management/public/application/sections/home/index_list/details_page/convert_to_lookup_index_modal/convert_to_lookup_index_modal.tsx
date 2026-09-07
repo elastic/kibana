@@ -16,9 +16,11 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -31,10 +33,12 @@ import {
 
 import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-interface Props {
+export interface ConvertToLookupIndexModalProps {
   onCloseModal: () => void;
   onConvert: (lookupIndexName: string) => void;
   sourceIndexName: string;
+  isConverting?: boolean;
+  errorMessage?: string;
 }
 
 const convertToLookupIndexSchema: FormSchema = {
@@ -59,7 +63,13 @@ const convertToLookupIndexSchema: FormSchema = {
   },
 };
 
-export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndexName }: Props) => {
+export const ConvertToLookupIndexModal = ({
+  onCloseModal,
+  onConvert,
+  sourceIndexName,
+  isConverting = false,
+  errorMessage,
+}: ConvertToLookupIndexModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
   const onSubmitForm = async () => {
@@ -79,7 +89,7 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndex
   });
 
   const formHasErrors = form.getErrors().length > 0;
-  const disableSubmit = formHasErrors || form.isValid === false;
+  const disableSubmit = formHasErrors || form.isValid === false || isConverting;
 
   return (
     <EuiModal
@@ -97,16 +107,23 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndex
       </EuiModalHeader>
 
       <EuiModalBody>
+        <FormattedMessage
+          id="xpack.idxMgmt.convertToLookupIndexModal.modalBodyDescription"
+          defaultMessage="A new lookup index will be created, and the original index will still exist as before."
+        />
+        <EuiSpacer />
         <Form form={form} data-test-subj="convertToLookupIndexForm">
           <EuiFormRow
             label={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.sourceIndexLabel', {
               defaultMessage: 'Source index',
             })}
+            fullWidth
           >
             <EuiFieldText
               defaultValue={sourceIndexName}
               disabled
               data-test-subj="sourceIndexName"
+              fullWidth
             />
           </EuiFormRow>
 
@@ -118,13 +135,30 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndex
             })}
             euiFieldProps={{
               'data-test-subj': 'lookupIndexName',
+              disabled: isConverting,
             }}
           />
+          {errorMessage && (
+            <EuiFormRow fullWidth>
+              <KbnDangerCallout
+                announceOnMount
+                title={i18n.translate('xpack.idxMgmt.convertToLookupIndexModal.errorCalloutTitle', {
+                  defaultMessage: 'An error has occurred',
+                })}
+                data-test-subj="errorCallout"
+                text={errorMessage}
+              />
+            </EuiFormRow>
+          )}
         </Form>
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="cancelButton" onClick={() => onCloseModal()}>
+        <EuiButtonEmpty
+          data-test-subj="cancelButton"
+          onClick={() => onCloseModal()}
+          disabled={isConverting}
+        >
           <FormattedMessage
             id="xpack.idxMgmt.convertToLookupIndexModal.cancelButton"
             defaultMessage="Cancel"
@@ -134,15 +168,22 @@ export const ConvertToLookupIndexModal = ({ onCloseModal, onConvert, sourceIndex
         <EuiButton
           fill
           type="submit"
-          isLoading={false}
+          isLoading={isConverting}
           data-test-subj="convertButton"
           onClick={onSubmitForm}
           disabled={disableSubmit}
         >
-          <FormattedMessage
-            id="xpack.idxMgmt.convertToLookupIndexModal.convertButton"
-            defaultMessage="Convert"
-          />
+          {isConverting ? (
+            <FormattedMessage
+              id="xpack.idxMgmt.convertToLookupIndexModal.convertingButton"
+              defaultMessage="Converting..."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.idxMgmt.convertToLookupIndexModal.convertButton"
+              defaultMessage="Convert"
+            />
+          )}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>

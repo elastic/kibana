@@ -11,7 +11,6 @@ import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
@@ -27,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -56,11 +56,17 @@ const stateColumnHeader = (
       defaultMessage: 'Active, inactive, or error.',
     })}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.stateHeader', {
         defaultMessage: 'State',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -74,11 +80,17 @@ const conditionLastMetHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastFiredHeader', {
         defaultMessage: 'Condition last met',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -92,11 +104,17 @@ const lastCheckedHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.lastTriggeredHeader', {
         defaultMessage: 'Last checked',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -111,11 +129,17 @@ const commentHeader = (
       }
     )}
   >
-    <span>
+    <span tabIndex={0}>
       {i18n.translate('xpack.watcher.sections.watchList.watchTable.commentHeader', {
         defaultMessage: 'Comment',
       })}{' '}
-      <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+      <EuiIcon
+        size="s"
+        color="subdued"
+        type="question"
+        className="eui-alignTop"
+        aria-hidden={true}
+      />
     </span>
   </EuiToolTip>
 );
@@ -172,7 +196,7 @@ export const WatchListPage = () => {
         <EuiButton
           fill
           data-test-subj="createWatchButton"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           iconSide="right"
           onClick={() => setIsPopOverOpen(!isPopoverOpen)}
         >
@@ -186,6 +210,9 @@ export const WatchListPage = () => {
       closePopover={() => setIsPopOverOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downCenter"
+      aria-label={i18n.translate('xpack.watcher.sections.watchList.createWatchPopoverAriaLabel', {
+        defaultMessage: 'Create watch',
+      })}
     >
       <EuiContextMenuPanel
         items={[WATCH_TYPES.THRESHOLD, WATCH_TYPES.JSON].map((watchType: string) => {
@@ -390,7 +417,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Edit' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -416,7 +443,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Delete' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -495,6 +522,9 @@ export const WatchListPage = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
+          tableCaption={i18n.translate('xpack.watcher.sections.watchList.watchTable.caption', {
+            defaultMessage: 'List of watches and their status',
+          })}
           onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
             setPagination({ pageIndex: index, pageSize: size })
           }
@@ -517,10 +547,9 @@ export const WatchListPage = () => {
           childrenBetween={
             queryError && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
+                  announceOnMount
                   data-test-subj="watcherListSearchError"
-                  iconType="warning"
-                  color="danger"
                   title={
                     <FormattedMessage
                       id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
@@ -533,7 +562,7 @@ export const WatchListPage = () => {
               </>
             )
           }
-          message={
+          noItemsMessage={
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watchTable.noWatchesMessage"
               defaultMessage="No watches to show"

@@ -142,22 +142,173 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
+  it('should allow to specify iacProvisioner.api.url and tls with a single CA path', () => {
+    expect(() => {
+      config.schema.validate({
+        iacProvisioner: {
+          enabled: true,
+          api: {
+            url: 'https://iac-provisioner.api.url',
+            tls: {
+              certificate: 'config/certs/kibana.crt',
+              key: 'config/certs/kibana.key',
+              ca: 'config/certs/ca.crt',
+            },
+          },
+        },
+      });
+    }).not.toThrow();
+  });
+
+  it('should reject iacProvisioner.api.tls.ca as a list of CA paths', () => {
+    expect(() => {
+      config.schema.validate({
+        iacProvisioner: {
+          enabled: true,
+          api: {
+            url: 'https://iac-provisioner.api.url',
+            tls: {
+              certificate: 'config/certs/kibana.crt',
+              key: 'config/certs/kibana.key',
+              ca: ['config/certs/cluster-ca.crt', 'config/certs/mki-ca.crt'],
+            },
+          },
+        },
+      });
+    }).toThrow();
+  });
+
+  it('should allow to specify packageInstallation configuration', () => {
+    expect(() => {
+      config.schema.validate({
+        packageInstallation: {
+          maxConcurrentDatastreamOperations: 25,
+        },
+      });
+    }).not.toThrow();
+  });
+
+  it('should use 50 as default for maxConcurrentDatastreamOperations', () => {
+    const result = config.schema.validate({
+      packageInstallation: {},
+    });
+    expect(result.packageInstallation?.maxConcurrentDatastreamOperations).toBe(50);
+  });
+
+  it('should reject maxConcurrentDatastreamOperations below 1', () => {
+    expect(() => {
+      config.schema.validate({
+        packageInstallation: {
+          maxConcurrentDatastreamOperations: 0,
+        },
+      });
+    }).toThrow();
+  });
+
+  it('should reject maxConcurrentDatastreamOperations above 50', () => {
+    expect(() => {
+      config.schema.validate({
+        packageInstallation: {
+          maxConcurrentDatastreamOperations: 51,
+        },
+      });
+    }).toThrow();
+  });
+
+  it('should allow to specify fleetPolicyRevisionsCleanup configuration', () => {
+    expect(() => {
+      config.schema.validate({
+        fleetPolicyRevisionsCleanup: {
+          maxRevisions: 20,
+          interval: '2h',
+          maxPoliciesPerRun: 50,
+        },
+      });
+    }).not.toThrow();
+  });
+
   describe('deprecations', () => {
-    it('should add a depreciations when trying to enable a non existing experimental feature', () => {
+    it('should add two deprecations when trying to enable a non existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
         enableExperimental: ['notvalid'],
       });
 
       expect(res.messages).toMatchInlineSnapshot(`
         Array [
-          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.fleet.enableExperimental].",
+          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].",
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
         ]
       `);
     });
 
-    it('should not add a depreciations when enabling an existing experimental feature', () => {
+    it('should only add one deprecation when enabling an existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
         enableExperimental: ['useSpaceAwareness'],
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
+        ]
+      `);
+    });
+
+    it('should add a deprecation when trying to enable a non existing experimental feature with experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          notvalid: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[notvalid] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].",
+        ]
+      `);
+    });
+
+    it('should not add a deprecation when enabling an existing experimental feature with experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          useSpaceAwareness: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('should add a warning when the agentless policies UI is disabled while the agentless legacy API is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          enableAgentlessPoliciesUI: false,
+          disableAgentlessLegacyAPI: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "When [enableAgentlessPoliciesUI] is disabled and [disableAgentlessLegacyAPI] is enabled, the server rejects agentless policy operations from the Fleet UI.",
+        ]
+      `);
+    });
+
+    it('should not warn when only the agentless policies UI is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          enableAgentlessPoliciesUI: false,
+          // disableAgentlessLegacyAPI defaults on, so pin it off to isolate "only the UI disabled".
+          disableAgentlessLegacyAPI: false,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('should not warn when only the agentless legacy API is disabled', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          disableAgentlessLegacyAPI: true,
+        },
       });
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);

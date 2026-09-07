@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ALLOWED_KEY_REGEX, PROPERTY_PATH_REGEX } from './regex';
+import { ALLOWED_KEY_REGEX, PROPERTY_PATH_REGEX } from '@kbn/workflows-yaml';
 
 export function validateVariablePath(path: string) {
   return ALLOWED_KEY_REGEX.test(path);
@@ -19,6 +19,11 @@ export interface ParsedVariablePath {
   filters: string[];
 }
 
+// Receives a variable path e.g. 'items[0].name' or 'items[0].name | title' or 'items[0].name | title | uppercase'
+// Tries to parse the path into a property path and filters
+// Returns null if the path is invalid
+// Returns an object with the property path and filters if the path is valid
+// TODO: should be refactored to use liquidjs parser
 export function parseVariablePath(path: string): ParsedVariablePath | null {
   const errors: string[] = [];
   // Trim whitespace

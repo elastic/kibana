@@ -96,7 +96,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   },
   '7.14.0': (
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$7$14$0>
-  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$0$0> => {
     return {
       ...doc,
       attributes: {
@@ -107,7 +107,7 @@ export const searchSessionSavedObjectMigrations: SavedObjectMigrationMap = {
   },
   '8.0.0': (
     doc: SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$0$0>
-  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesLatest> => {
+  ): SavedObjectUnsanitizedDoc<SearchSessionSavedObjectAttributesPre$8$6$0> => {
     const {
       attributes: { urlGeneratorId, ...otherAttrs },
     } = doc;

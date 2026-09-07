@@ -9,7 +9,6 @@
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiBasicTable,
   EuiSpacer,
   EuiScreenReaderOnly,
@@ -18,13 +17,17 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiText,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { RemoveDataViewProps } from '../edit_index_pattern';
 import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
+import type { IndexPatternManagmentContext } from '../../types';
 
 const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {
   defaultMessage: 'all',
@@ -44,6 +47,13 @@ const spacesColumnName = i18n.translate('indexPatternManagement.dataViewTable.sp
 const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTitle', {
   defaultMessage: 'Data views selected for deletion',
 });
+
+const relationshipsTableCaption = i18n.translate(
+  'indexPatternManagement.dataViewTable.relationshipsTableCaption',
+  {
+    defaultMessage: 'Kibana objects using this data view',
+  }
+);
 
 export const spacesWarningText = i18n.translate(
   'indexPatternManagement.dataViewTable.deleteWarning',
@@ -76,9 +86,12 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   reviewedItems,
   setReviewedItems,
 }) => {
+  const { http } = useKibana<IndexPatternManagmentContext>().services;
+
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
   );
+  const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
   const toggleDetails = (id: string) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -94,7 +107,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
           }),
           render: (meta: SavedObjectRelation['meta']) => {
             return meta.inAppUrl ? (
-              <EuiLink target="_blank" href={meta.inAppUrl.path}>
+              <EuiLink target="_blank" href={http.basePath.prepend(meta.inAppUrl.path)}>
                 {meta.title}
               </EuiLink>
             ) : (
@@ -122,7 +135,11 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
               <EuiSpacer size="xs" />
             </>
           )}
-          <EuiBasicTable items={relationships[id]} columns={relationsColumns} />
+          <EuiBasicTable
+            tableCaption={relationshipsTableCaption}
+            items={relationships[id]}
+            columns={relationsColumns}
+          />
         </div>
       );
       itemIdToExpandedRowMapValues[id] = relationsTable;
@@ -175,15 +192,25 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                 onClick={() => toggleDetails(id)}
                 aria-label={itemIdToExpandedRowMapValues[id] ? 'Collapse' : 'Expand'}
                 color="danger"
+                size={isMobile ? 's' : 'm'}
               >
                 <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-                  <EuiText>
-                    {i18n.translate('indexPatternManagement.dataViewTable.review', {
-                      defaultMessage: 'Review',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiIcon type={itemIdToExpandedRowMapValues[id] ? 'arrowDown' : 'arrowRight'} />
+                  {!isMobile && (
+                    <>
+                      <EuiText>
+                        {i18n.translate('indexPatternManagement.dataViewTable.review', {
+                          defaultMessage: 'Review',
+                        })}
+                      </EuiText>
+                      <EuiSpacer size="xs" />
+                    </>
+                  )}
+                  <EuiIcon
+                    type={
+                      itemIdToExpandedRowMapValues[id] ? 'chevronSingleDown' : 'chevronSingleRight'
+                    }
+                    aria-hidden={true}
+                  />
                 </EuiFlexGroup>
               </EuiButtonEmpty>
             ) : (
@@ -209,10 +236,10 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     <div>
       {showRelationshipsCallout ? (
         <>
-          <EuiCallOut color="danger" iconType="warning" title={relationshipCalloutText} />
+          <KbnDangerCallout announceOnMount={false} title={relationshipCalloutText} />
         </>
       ) : (
-        <EuiCallOut color="warning" iconType="warning" title={spacesWarningText} />
+        <KbnWarningCallout announceOnMount={false} title={spacesWarningText} />
       )}
       <EuiSpacer size="m" />
       <div>

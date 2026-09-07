@@ -35,6 +35,8 @@ export type {
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   CreatedObject,
+  AccessControlImportTransforms,
+  AccessControlImportTransformsFactory,
 } from './src/import';
 export type {
   SavedObjectsTypeMappingDefinition,
@@ -67,13 +69,26 @@ export {
   ALL_SAVED_OBJECT_INDICES,
   SEARCH_SOLUTION_SAVED_OBJECT_INDEX,
 } from './src/saved_objects_index_pattern';
+export {
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_VERSION_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_AGGS_LENGTH,
+  MAX_SAVED_OBJECTS_PER_BULK_REQUEST,
+  MAX_SAVED_OBJECT_REFERENCES_PER_OBJECT,
+  MAX_SAVED_OBJECTS_PER_QUERY,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+} from './src/saved_objects_length_limits';
 export type {
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectTypeVersionGuesser,
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,
-  SavedObjectsRawDocSource,
   SavedObjectsRawDoc,
   SavedObjectSanitizedDoc,
   SavedObjectsRawDocParseOptions,
@@ -87,6 +102,8 @@ export type {
   EncryptedObjectDescriptor,
 } from './src/extensions/encryption';
 export type {
+  AuthorizeObject,
+  AuthorizationResult,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
@@ -112,6 +129,8 @@ export type {
   AuthorizeUpdateSpacesParams,
   AuthorizeFindParams,
   WithAuditName,
+  AuthorizeChangeAccessControlParams,
+  SetAccessControlToWriteParams,
 } from './src/extensions/security';
 export type { ISavedObjectsSpacesExtension } from './src/extensions/spaces';
 export type { SavedObjectsExtensions } from './src/extensions/extensions';
@@ -122,11 +141,13 @@ export {
 } from './src/extensions/extensions';
 export {
   SavedObjectsErrorHelpers,
+  errorContent,
   type DecoratedError,
   type BulkResolveError,
 } from './src/saved_objects_error_helpers';
 
 export type {
+  ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,
@@ -147,13 +168,20 @@ export type {
   SavedObjectModelVersionForwardCompatibilityFn,
   SavedObjectModelVersionForwardCompatibilityObjectSchema,
   SavedObjectModelVersionForwardCompatibilitySchema,
+  SavedObjectsFullModelVersion,
+  SavedObjectsFullModelVersionSchemaDefinitions,
 } from './src/model_version';
 
 // We re-export the SavedObject types here for convenience.
 export type {
   SavedObject,
+  SavedObjectAccessControl,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectReference,
+  SavedObjectsRawDocSource,
+  SavedObjectErrorResult,
+  SavedObjectBulkResult,
 } from '@kbn/core-saved-objects-api-server';
+export { isSavedObjectErrorResult } from '@kbn/core-saved-objects-api-server';

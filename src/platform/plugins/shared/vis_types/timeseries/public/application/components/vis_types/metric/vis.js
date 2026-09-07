@@ -12,7 +12,7 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { getMetricsField } from '../../lib/get_metrics_field';
 import { createTickFormatter } from '../../lib/tick_formatter';
-import { createFieldFormatter } from '../../lib/create_field_formatter';
+import { createReactFieldFormatter } from '../../lib/create_field_formatter';
 import { get, isUndefined, assign, includes, pick } from 'lodash';
 import { Metric } from '../../../visualizations/views/metric';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
@@ -51,11 +51,10 @@ function MetricVisualization(props) {
       if (seriesDef) {
         newProps.formatter =
           seriesDef.formatter === DATA_FORMATTERS.DEFAULT
-            ? createFieldFormatter(
+            ? createReactFieldFormatter(
                 getMetricsField(seriesDef.metrics),
                 fieldFormatMap,
-                'html',
-                colors.color
+                !!colors.color
               )
             : createTickFormatter(seriesDef.formatter, seriesDef.value_template, getConfig);
       }

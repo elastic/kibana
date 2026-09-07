@@ -23,11 +23,10 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import type { LayerAction, Visualization } from '@kbn/lens-common';
 import type { LayerType } from '../../../..';
-import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
 import { getRemoveLayerAction } from './remove_layer_action';
-import { getOpenLayerSettingsAction } from './open_layer_settings';
 
 export interface LayerActionsProps {
   layerIndex: number;
@@ -43,8 +42,6 @@ export const getSharedActions = ({
   activeVisualization,
   isOnlyLayer,
   isTextBasedLanguage,
-  hasLayerSettings,
-  openLayerSettings,
   onCloneLayer,
   onRemoveLayer,
   customRemoveModalText,
@@ -57,15 +54,9 @@ export const getSharedActions = ({
   activeVisualization: Visualization;
   layerType?: LayerType;
   isTextBasedLanguage?: boolean;
-  hasLayerSettings: boolean;
-  openLayerSettings: () => void;
   core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
-  getOpenLayerSettingsAction({
-    hasLayerSettings,
-    openLayerSettings,
-  }),
   getCloneLayerAction({
     execute: onCloneLayer,
     layerIndex,
@@ -114,19 +105,29 @@ const InContextMenuActions = (props: LayerActionsProps) => {
   return (
     <EuiOutsideClickDetector onOutsideClick={closePopover}>
       <EuiPopover
+        aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+          defaultMessage: `Layer actions`,
+        })}
         id={splitButtonPopoverId}
         button={
-          <EuiButtonIcon
-            display="empty"
-            color="text"
-            size="s"
-            iconType="boxesVertical"
-            aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
               defaultMessage: `Layer actions`,
             })}
-            onClick={onButtonClick}
-            data-test-subj={dataTestSubject}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              display="empty"
+              color="text"
+              size="xs"
+              iconType="boxesVertical"
+              aria-label={i18n.translate('xpack.lens.layer.actions.contextMenuAriaLabel', {
+                defaultMessage: `Layer actions`,
+              })}
+              onClick={onButtonClick}
+              data-test-subj={dataTestSubject}
+            />
+          </EuiToolTip>
         }
         ownFocus={true}
         isOpen={isPopoverOpen}
@@ -138,7 +139,6 @@ const InContextMenuActions = (props: LayerActionsProps) => {
         }}
       >
         <EuiContextMenuPanel
-          size="s"
           items={props.actions.map((i) => (
             <EuiContextMenuItem
               key={i.displayName}
@@ -210,7 +210,6 @@ export const LayerActions = (props: LayerActionsProps) => {
               color={outsideListAction.color ?? 'text'}
               data-test-subj={outsideListAction['data-test-subj']}
               aria-label={outsideListAction.displayName}
-              title={outsideListAction.displayName}
               disabled={outsideListAction.disabled}
               onClick={() => outsideListAction.execute?.(props.mountingPoint)}
             />

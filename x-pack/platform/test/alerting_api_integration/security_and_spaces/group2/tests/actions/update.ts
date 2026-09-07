@@ -90,9 +90,11 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
                 connector_type_id: 'test.index-record',
                 is_missing_secrets: false,
                 name: 'My Connector updated',
+                is_connector_type_deprecated: false,
                 config: {
                   unencrypted: `This value shouldn't get encrypted`,
                 },
+                auth_mode: 'shared',
               });
               // Ensure AAD isn't broken
               await checkAAD({
@@ -315,8 +317,7 @@ export default function updateConnectorTests({ getService }: FtrProviderContext)
               expect(response.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message:
-                  'error validating action type secrets: [encrypted]: expected value of type [string] but got [number]',
+                message: `error validating connector type secrets: ✖ Invalid input: expected string, received number\n  → at encrypted`,
               });
               break;
             default:

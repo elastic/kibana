@@ -31,7 +31,7 @@ import { requestDocumentationSchema } from './shared';
 import type { NlToEsqlTaskEvent } from '../types';
 import { generateEsqlPrompt } from './prompts';
 
-const MAX_CALLS = 5;
+const MAX_CALLS = 8;
 
 interface LlmEsqlTaskOptions {
   documentationRequest: { commands?: string[]; functions?: string[] };
@@ -85,6 +85,8 @@ export function generateEsqlTask({
     const requestedDocumentation = docBase.getDocumentation(keywords);
     const fakeRequestDocsToolCall = createFakeTooCall(commands, functions);
 
+    const availableTools = Object.keys(tools ?? {});
+
     const next$ = merge(
       of<
         OutputCompleteEvent<
@@ -110,6 +112,7 @@ export function generateEsqlTask({
         system: generateEsqlPrompt({
           esqlPrompts: docBase.getPrompts(),
           additionalSystemInstructions,
+          availableTools,
           hasTools: !functionLimitReached && Object.keys(tools ?? {}).length > 0,
         }),
         messages: [

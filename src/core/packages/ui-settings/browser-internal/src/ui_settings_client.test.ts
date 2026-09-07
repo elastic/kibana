@@ -159,7 +159,7 @@ describe('#set', () => {
 
   it('stores a value in a previously unknown client key', () => {
     const { client } = setup();
-    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrowError();
+    expect(() => client.set('unrecognizedProperty', 'somevalue')).not.toThrow();
     expect(client.get('unrecognizedProperty')).toBe('somevalue');
   });
 
@@ -240,8 +240,8 @@ describe('#isDefault', () => {
 
   it('returns false if name is not known', () => {
     const { client } = setup();
-    client.set('dateFormat', 'foo');
-    expect(client.isDefault('dateFormat')).toBe(false);
+    client.set('unknownSettingKey', 'foo');
+    expect(client.isDefault('unknownSettingKey')).toBe(false);
   });
 });
 

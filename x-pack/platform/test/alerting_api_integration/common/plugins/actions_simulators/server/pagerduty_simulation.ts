@@ -23,9 +23,11 @@ export function initPlugin(router: IRouter, path: string) {
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
-      },
-      options: {
-        authRequired: false,
+        authc: {
+          enabled: false,
+          reason:
+            'This route simulates an external service endpoint and does not require authentication.',
+        },
       },
       validate: {
         body: schema.object(

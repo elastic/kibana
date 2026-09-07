@@ -27,6 +27,7 @@ function transformRuleForExport(
       apiKey: null,
       apiKeyOwner: null,
       apiKeyCreatedByUser: null,
+      uiamApiKey: null,
       scheduledTaskId: null,
       executionStatus: getRuleExecutionStatusPendingAttributes(exportDate),
     },

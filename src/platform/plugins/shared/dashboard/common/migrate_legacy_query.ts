@@ -8,15 +8,21 @@
  */
 
 import { has } from 'lodash';
-import type { DashboardQuery } from '../server';
+import type { Query } from '@kbn/es-query';
 
-export function migrateLegacyQuery(
-  query: DashboardQuery | { [key: string]: any } | string
-): DashboardQuery {
+/**
+ * Migrates legacy query formats to the current stored {@link Query} format.
+ * Queries without a `language` property are assumed to be Lucene queries,
+ * since Lucene was the only option in earlier versions.
+ *
+ * @param query - The query to migrate, which can be a {@link Query}, a legacy object, or a string.
+ * @returns The migrated {@link Query}.
+ */
+export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
   if (!has(query, 'language')) {
     return { query, language: 'lucene' };
   }
 
-  return query as DashboardQuery;
+  return query as Query;
 }

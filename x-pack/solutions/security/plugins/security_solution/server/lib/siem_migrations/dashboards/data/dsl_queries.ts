@@ -9,8 +9,23 @@ import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types
 import { dsl as genericDsl } from '../../common/data/dsl_queries';
 
 export const dsl = {
+  matchElasticTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'elastic_dashboard.title': { query: title, operator: 'and' } } };
+  },
+  matchOriginalTitle(title: string): QueryDslQueryContainer {
+    return { match: { 'original_dashboard.title': { query: title, operator: 'and' } } };
+  },
   matchTitle(title: string): QueryDslQueryContainer {
-    return { match: { 'elastic_dashboard.title': title } };
+    return {
+      bool: {
+        should: [
+          // Match the translated title
+          dsl.matchElasticTitle(title),
+          // If translation failed, match the original title
+          { bool: { must: [genericDsl.isFailed(), dsl.matchOriginalTitle(title)] } },
+        ],
+      },
+    };
   },
 
   isInstalled(): QueryDslQueryContainer {

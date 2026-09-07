@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
 
 export const useGenerateRuleId = (rulesetId: string) => {
@@ -16,7 +16,7 @@ export const useGenerateRuleId = (rulesetId: string) => {
   return useMutation<string>({
     mutationFn: async () => {
       const response = await http.post<{ ruleId: string }>(
-        `/internal/search_query_rules/ruleset/${rulesetId}/generate_rule_id`
+        `/internal/search_query_rules/ruleset/${encodeURIComponent(rulesetId)}/generate_rule_id`
       );
       return response.ruleId;
     },

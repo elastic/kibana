@@ -14,6 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -57,6 +58,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   features: FeaturesPluginStart;
+  cps?: CPSPluginStart;
   dataViews?: DataViewsPublicPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;
@@ -144,7 +146,9 @@ export class SecurityPlugin
       securityApiClients: this.securityApiClients,
     });
 
-    core.security.registerSecurityDelegate(buildSecurityApi({ authc: this.authc }));
+    core.security.registerSecurityDelegate(
+      buildSecurityApi({ authc: this.authc, config: this.config })
+    );
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({ userProfile: this.securityApiClients.userProfiles })
     );
@@ -192,7 +196,7 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
-    const { application, http, notifications } = core;
+    const { application, http, notifications, overlays } = core;
     const { anonymousPaths } = http;
 
     const logoutUrl = getLogoutUrl(http);
@@ -200,7 +204,14 @@ export class SecurityPlugin
 
     const sessionExpired = new SessionExpired(application, logoutUrl, tenant);
     http.intercept(new UnauthorizedResponseHttpInterceptor(sessionExpired, anonymousPaths));
-    this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
+    this.sessionTimeout = new SessionTimeout(
+      core,
+      notifications,
+      overlays,
+      sessionExpired,
+      http,
+      tenant
+    );
 
     this.sessionTimeout.start();
     this.securityCheckupService.start(core);
@@ -242,6 +253,7 @@ export class SecurityPlugin
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
         userProfileLoaded$: this.securityApiClients.userProfiles.userProfileLoaded$,
         enabled$: this.securityApiClients.userProfiles.enabled$,
+        dataUpdates$: this.securityApiClients.userProfiles.dataUpdates$,
       },
     };
   }

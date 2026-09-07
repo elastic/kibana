@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
@@ -23,15 +23,12 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { HeaderPage } from '../../../common/components/header_page';
 import { inputsSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DashboardToolBar } from '../../components/dashboard_tool_bar';
-
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
 
@@ -53,7 +50,6 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView();
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -64,20 +60,17 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   const { detailName: savedObjectId } = useParams<{ detailName?: string }>();
   const [dashboardTitle, setDashboardTitle] = useState<string>();
 
-  const { dashboardContainer, handleDashboardLoaded } = useDashboardRenderer();
+  const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
+    useDashboardRenderer(savedObjectId);
   const onDashboardToolBarLoad = useCallback((mode: ViewMode) => {
     setViewMode(mode);
   }, []);
-  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView();
+  const { dataView } = useDataView();
 
   return (
     <>
       <FiltersGlobal>
-        <SiemSearchBar
-          id={InputsModelId.global}
-          sourcererDataView={newDataViewPickerEnabled ? experimentalDataView : oldSourcererDataView}
-        />
+        <SiemSearchBar dataView={dataView} id={InputsModelId.global} />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup
@@ -87,22 +80,23 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
           data-test-subj="dashboard-view-wrapper"
         >
           <EuiFlexItem grow={false}>
-            {dashboardContainer && (
-              <HeaderPage
-                border
-                title={
-                  <DashboardTitle
-                    dashboardContainer={dashboardContainer}
-                    onTitleLoaded={setDashboardTitle}
-                  />
-                }
-                subtitle={
-                  <DashboardToolBar
-                    dashboardContainer={dashboardContainer}
-                    onLoad={onDashboardToolBarLoad}
-                  />
-                }
-              />
+            {dashboardContainer && dashboardInternalApi && (
+              <>
+                <HeaderPage
+                  border
+                  title={
+                    <DashboardTitle
+                      dashboardContainer={dashboardContainer}
+                      onTitleLoaded={setDashboardTitle}
+                    />
+                  }
+                />
+                <DashboardToolBar
+                  dashboardContainer={dashboardContainer}
+                  dashboardInternalApi={dashboardInternalApi}
+                  onLoad={onDashboardToolBarLoad}
+                />
+              </>
             )}
           </EuiFlexItem>
           {!errorState && (

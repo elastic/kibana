@@ -8,7 +8,6 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { CasesContextFeatures } from '../../common/ui';
 import { useCasesFeatures } from './use_cases_features';
 import { TestProviders } from './mock/test_providers';
 import type { LicenseType } from '@kbn/licensing-types';
@@ -16,40 +15,91 @@ import { LICENSE_TYPE } from '@kbn/licensing-types';
 import { CaseMetricsFeature } from '../../common/types/api';
 
 describe('useCasesFeatures', () => {
-  // isAlertsEnabled, isSyncAlertsEnabled, alerts
-  const tests: Array<[boolean, boolean, CasesContextFeatures['alerts']]> = [
-    [true, true, { enabled: true, sync: true }],
-    [true, false, { enabled: true, sync: false }],
-    [false, false, { enabled: false, sync: true }],
-    [false, false, { enabled: false, sync: false }],
-    [false, false, { enabled: false }],
-    // the default for sync is true
-    [true, true, { enabled: true }],
-    // the default for enabled is true
-    [true, true, { sync: true }],
-    // the default for enabled is true
-    [true, false, { sync: false }],
-    // the default for enabled and sync is true
-    [true, true, {}],
-  ];
+  it('enables sync alerts, extract observables, and the observables table for the security owner', () => {
+    const { result } = renderHook(() => useCasesFeatures(), {
+      wrapper: TestProviders,
+    });
 
-  it.each(tests)(
-    'returns isAlertsEnabled=%s and isSyncAlertsEnabled=%s if feature.alerts=%s',
-    async (isAlertsEnabled, isSyncAlertsEnabled, alerts) => {
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        isSyncAlertsEnabled: true,
+        isObservablesFeatureEnabled: true,
+        isExtractObservablesEnabled: true,
+        hasCaseSettings: true,
+      })
+    );
+  });
+
+  it('disables sync/extract and the observables table for the observability owner', () => {
+    const { result } = renderHook(() => useCasesFeatures(), {
+      wrapper: ({ children }) => (
+        <TestProviders owner={['observability']}>{children}</TestProviders>
+      ),
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        isSyncAlertsEnabled: false,
+        isObservablesFeatureEnabled: false,
+        isExtractObservablesEnabled: false,
+        hasCaseSettings: false,
+      })
+    );
+  });
+
+  it('disables sync/extract but keeps the observables table for the stack owner', () => {
+    const { result } = renderHook(() => useCasesFeatures(), {
+      wrapper: ({ children }) => <TestProviders owner={['cases']}>{children}</TestProviders>,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        isSyncAlertsEnabled: false,
+        isObservablesFeatureEnabled: true,
+        isExtractObservablesEnabled: false,
+        hasCaseSettings: false,
+      })
+    );
+  });
+
+  it('looks up OWNER_INFO for an explicit caseOwner even when the host did not pin one', () => {
+    const { result } = renderHook(() => useCasesFeatures('securitySolution'), {
+      wrapper: ({ children }) => <TestProviders owner={[]}>{children}</TestProviders>,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        isSyncAlertsEnabled: true,
+        isExtractObservablesEnabled: true,
+        isObservablesFeatureEnabled: true,
+      })
+    );
+  });
+
+  it('falls back to the context owner when caseOwner is an empty string', () => {
+    const { result } = renderHook(() => useCasesFeatures(''), {
+      wrapper: TestProviders,
+    });
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        isSyncAlertsEnabled: true,
+        isExtractObservablesEnabled: true,
+      })
+    );
+  });
+
+  it.each([
+    [{ all: false }, false],
+    [{ all: true }, true],
+  ])(
+    'gates sync alerts on alerts.all (%j → isSyncAlertsEnabled=%s)',
+    (alerts, isSyncAlertsEnabled) => {
       const { result } = renderHook(() => useCasesFeatures(), {
         wrapper: ({ children }) => <TestProviders features={{ alerts }}>{children}</TestProviders>,
       });
 
-      expect(result.current).toEqual({
-        isAlertsEnabled,
-        isSyncAlertsEnabled,
-        metricsFeatures: [],
-        caseAssignmentAuthorized: false,
-        pushToServiceAuthorized: false,
-        observablesAuthorized: false,
-        isObservablesFeatureEnabled: true,
-        connectorsAuthorized: false,
-      });
+      expect(result.current.isSyncAlertsEnabled).toBe(isSyncAlertsEnabled);
     }
   );
 
@@ -62,15 +112,25 @@ describe('useCasesFeatures', () => {
       ),
     });
 
-    expect(result.current).toEqual({
-      isAlertsEnabled: true,
-      isSyncAlertsEnabled: true,
-      metricsFeatures: [CaseMetricsFeature.CONNECTORS],
-      caseAssignmentAuthorized: false,
-      pushToServiceAuthorized: false,
-      observablesAuthorized: false,
-      isObservablesFeatureEnabled: true,
-      connectorsAuthorized: false,
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        metricsFeatures: [CaseMetricsFeature.CONNECTORS],
+        hasCaseSettings: true,
+      })
+    );
+  });
+
+  describe('hasCaseSettings', () => {
+    it('is true when metrics are enabled even though sync and extract are off', () => {
+      const { result } = renderHook(() => useCasesFeatures(), {
+        wrapper: ({ children }) => (
+          <TestProviders owner={['cases']} features={{ metrics: [CaseMetricsFeature.CONNECTORS] }}>
+            {children}
+          </TestProviders>
+        ),
+      });
+
+      expect(result.current.hasCaseSettings).toBe(true);
     });
   });
 
@@ -110,7 +170,6 @@ describe('useCasesFeatures', () => {
 
       expect(result.current).toEqual(
         expect.objectContaining({
-          isAlertsEnabled: true,
           isSyncAlertsEnabled: true,
           metricsFeatures: [],
           caseAssignmentAuthorized: expectedResult,

@@ -34,7 +34,7 @@ export async function getAgentsPerOutput(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<AgentsPerOutputType[]> {
-  const { items: outputs } = await outputService.list(soClient);
+  const { items: outputs } = await outputService.list();
 
   const defaultOutputId = outputs.find((output) => output.is_default)?.id || '';
   const defaultMonitoringOutputId =
@@ -82,7 +82,7 @@ export async function getAgentsPerOutput(
     });
 
   outputs.forEach((output) => {
-    if (!outputTypeSupportPresets(output.type)) {
+    if (!outputTypeSupportPresets(output)) {
       return;
     }
     if (!outputTypes[output.type]) {

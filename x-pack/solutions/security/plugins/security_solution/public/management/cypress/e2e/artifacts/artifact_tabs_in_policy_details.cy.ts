@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getEndpointSecurityPolicyManager } from '../../../../../scripts/endpoint/common/roles_users';
-import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
+import { getEndpointSecurityPolicyManagerArtifactRole } from '../../../../../scripts/endpoint/common/roles_users';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { visitPolicyDetailsPage } from '../../screens/policy_details';
 import {
@@ -20,44 +19,23 @@ import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
-import { SECURITY_FEATURE_ID } from '../../../../../common/constants';
 
 const loginWithPrivilegeAll = () => {
   login(ROLE.endpoint_policy_manager);
 };
 
 const loginWithPrivilegeRead = (privilegePrefix: string) => {
-  const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
+  login.withCustomRole({
+    name: 'roleWithArtifactReadPrivilege',
+    ...getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, 'read'),
+  });
 };
 
 const loginWithPrivilegeNone = (privilegePrefix: string) => {
-  const roleWithoutArtifactPrivilege = getRoleWithoutArtifactPrivilege(privilegePrefix);
-  login.withCustomRole({ name: 'roleWithoutArtifactPrivilege', ...roleWithoutArtifactPrivilege });
-};
-
-const getRoleWithoutArtifactPrivilege = (privilegePrefix: string) => {
-  const endpointSecurityPolicyManagerRole = getEndpointSecurityPolicyManager();
-
-  return {
-    ...endpointSecurityPolicyManagerRole,
-    kibana: [
-      {
-        ...endpointSecurityPolicyManagerRole.kibana[0],
-        feature: {
-          ...endpointSecurityPolicyManagerRole.kibana[0].feature,
-          [SECURITY_FEATURE_ID]: endpointSecurityPolicyManagerRole.kibana[0].feature[
-            SECURITY_FEATURE_ID
-          ].filter((privilege) => privilege !== `${privilegePrefix}all`),
-        },
-      },
-    ],
-  };
-};
-
-const visitArtifactTab = (tabId: string) => {
-  visitPolicyDetailsPage();
-  clickArtifactTab(tabId);
+  login.withCustomRole({
+    name: 'roleWithoutArtifactPrivilege',
+    ...getEndpointSecurityPolicyManagerArtifactRole(privilegePrefix, 'none'),
+  });
 };
 
 const clickArtifactTab = (tabId: string) => {
@@ -66,13 +44,31 @@ const clickArtifactTab = (tabId: string) => {
 
 describe(
   'Artifact tabs in Policy Details page',
-  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
+  {
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'endpointExceptionsMovedUnderManagement',
+          ])}`,
+        ],
+      },
+    },
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+  },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+    let policyId: string;
+
+    const visitArtifactTab = (tabId: string) => {
+      visitPolicyDetailsPage(policyId);
+      clickArtifactTab(tabId);
+    };
 
     before(() => {
       indexEndpointHosts().then((indexEndpoints) => {
         endpointData = indexEndpoints;
+        policyId = indexEndpoints.data.integrationPolicies[0].id;
       });
     });
 
@@ -84,9 +80,7 @@ describe(
     });
 
     for (const testData of getArtifactsListTestsData()) {
-      // FLAKY: https://github.com/elastic/kibana/issues/183670
-      // FLAKY: https://github.com/elastic/kibana/issues/183671
-      describe.skip(`${testData.title} tab`, () => {
+      describe(`${testData.title} tab`, () => {
         beforeEach(() => {
           login();
           removeExceptionsList(testData.createRequestBody.list_id);
@@ -98,7 +92,7 @@ describe(
           { tags: ['@skipInServerless'] },
           () => {
             loginWithPrivilegeNone(testData.privilegePrefix);
-            visitPolicyDetailsPage();
+            visitPolicyDetailsPage(policyId);
 
             cy.get(`#${testData.tabId}`).should('not.exist');
           }
@@ -116,6 +110,7 @@ describe(
               cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
 
               cy.getByTestSubj('unexisting-manage-artifacts-button').should('not.exist');
+              cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('not.exist');
             }
           );
 
@@ -124,6 +119,7 @@ describe(
             visitArtifactTab(testData.tabId);
 
             cy.getByTestSubj('policy-artifacts-empty-unexisting').should('exist');
+            cy.getByTestSubj('unexisting-manage-artifacts-import-button').should('exist');
 
             cy.getByTestSubj('unexisting-manage-artifacts-button').should('exist').click();
 

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { UserProfileService } from '../../services';
+import type { CasesWorkflowRunService } from '../../workflows/execution/service';
 import { getConnectorsRoute } from './internal/get_connectors';
 import { getCaseUserActionStatsRoute } from './internal/get_case_user_actions_stats';
 import { bulkCreateAttachmentsRoute } from './internal/bulk_create_attachments';
@@ -25,11 +27,20 @@ import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { deleteObservableRoute } from './observables/delete_observable';
 import { findUserActionsRoute } from './internal/find_user_actions';
-import { getCaseSummaryRoute } from './cases_ai/get_case_summary';
-import { findCasesContainingAllAlertsRoute } from './internal/find_cases_containing_all_alerts';
+import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
+import { getTemplateRoutes } from './templates';
+import { getFieldDefinitionRoutes } from './field_definitions';
+import { createRunWorkflowRoute } from './internal/run_workflow';
 
-export const getInternalRoutes = (userProfileService: UserProfileService, config: ConfigType) =>
+export const getInternalRoutes = (
+  userProfileService: UserProfileService,
+  config: ConfigType,
+  workflowRun?: {
+    service: CasesWorkflowRunService;
+    getSpaceId: (request: KibanaRequest) => string;
+  }
+) =>
   [
     bulkCreateAttachmentsRoute,
     suggestUserProfilesRoute(userProfileService),
@@ -49,7 +60,8 @@ export const getInternalRoutes = (userProfileService: UserProfileService, config
     deleteObservableRoute,
     similarCaseRoute,
     findUserActionsRoute,
-    findCasesContainingAllAlertsRoute,
-  ].concat(
-    config.unsafe?.enableCaseSummary ? [getCaseSummaryRoute as CaseRoute] : []
-  ) as CaseRoute[];
+    findCasesContainingAllDocumentsRoute,
+    ...getTemplateRoutes(config),
+    ...getFieldDefinitionRoutes(config),
+    ...(workflowRun ? [createRunWorkflowRoute(workflowRun)] : []),
+  ] as CaseRoute[];

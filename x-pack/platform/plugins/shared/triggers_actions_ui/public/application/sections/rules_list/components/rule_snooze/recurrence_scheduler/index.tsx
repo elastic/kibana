@@ -32,7 +32,12 @@ import {
 } from './constants';
 import { CustomRecurrenceScheduler } from './custom_recurrence_scheduler';
 import type { CustomFrequencyState } from './helpers';
-import { generateNthByweekday, getWeekdayInfo, recurrenceSummary } from './helpers';
+import {
+  generateNthByweekday,
+  getWeekdayInfo,
+  isCustomRecurrenceFrequency,
+  recurrenceSummary,
+} from './helpers';
 import { i18nNthWeekday } from './translations';
 
 interface ComponentOpts {
@@ -90,8 +95,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
 
   useEffect(() => {
     if (initialState && !hasInitialized.current) {
-      const isCustomFrequency =
-        initialState.interval > 1 || (initialState.byweekday ?? []).length > 1;
+      const isCustomFrequency = isCustomRecurrenceFrequency(initialState);
       setFrequency(isCustomFrequency ? 'CUSTOM' : initialState.freq);
       if (isCustomFrequency) {
         setCustomFrequency(initialState as CustomFrequencyState);
@@ -118,6 +122,13 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
     const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate);
     return {
       repeatOptions: [
+        {
+          text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurHourly', {
+            defaultMessage: 'Hourly',
+          }),
+          value: RRuleFrequency.HOURLY,
+          disabled: disableDailyOption,
+        },
         {
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDaily', {
             defaultMessage: 'Daily',
@@ -153,6 +164,9 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
         },
       ],
       rrulePresets: {
+        [RRuleFrequency.HOURLY]: {
+          interval: 1,
+        },
         [RRuleFrequency.DAILY]: {
           interval: 1,
         },
@@ -220,6 +234,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
               setFrequency(e.target.value === 'CUSTOM' ? 'CUSTOM' : Number(e.target.value))
             }
             compressed
+            data-test-subj="recurrenceSchedulerRepeat"
           />
         </EuiFormRow>
         {frequency === 'CUSTOM' && (

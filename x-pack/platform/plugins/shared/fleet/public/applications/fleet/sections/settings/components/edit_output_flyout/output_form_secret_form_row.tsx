@@ -7,7 +7,6 @@
 
 import {
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -19,16 +18,25 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import {
+  SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+  DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
+} from '../../../../../../../common/constants';
+
+export type SecretType = 'output' | 'ssl' | 'download_source_auth';
 
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
   children: EuiFormRowProps['children'];
   useSecretsStorage: boolean;
   isConvertedToSecret?: boolean;
-  onToggleSecretStorage: (secretEnabled: boolean) => void;
+  onToggleSecretStorage?: (secretEnabled: boolean) => void;
   error?: string[];
   isInvalid?: boolean;
   title?: string;
@@ -37,6 +45,7 @@ export const SecretFormRow: React.FC<{
   cancelEdit?: () => void;
   label?: JSX.Element;
   disabled?: boolean;
+  secretType?: SecretType;
 }> = ({
   fullWidth,
   error,
@@ -51,7 +60,14 @@ export const SecretFormRow: React.FC<{
   isConvertedToSecret = false,
   label,
   disabled,
+  secretType = 'output',
 }) => {
+  const minVersion =
+    secretType === 'output'
+      ? OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+      : secretType === 'download_source_auth'
+      ? DOWNLOAD_SOURCE_AUTH_SECRETS_MINIMUM_FLEET_SERVER_VERSION
+      : SSL_SECRETS_MINIMUM_FLEET_SERVER_VERSION;
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
   const valueHiddenPanel = (
@@ -79,7 +95,12 @@ export const SecretFormRow: React.FC<{
           </EuiText>
           <EuiSpacer size="s" />
           <EuiButtonEmpty
-            onClick={() => setEditMode(true)}
+            onClick={() => {
+              setEditMode(true);
+              if (clear) {
+                clear();
+              }
+            }}
             color="primary"
             iconType="refresh"
             iconSide="left"
@@ -132,7 +153,7 @@ export const SecretFormRow: React.FC<{
 
   const secretLabel = (
     <>
-      <EuiIcon type="lock" data-test-subj="lockIcon" />
+      <EuiIcon type="lock" data-test-subj="lockIcon" aria-hidden={true} />
       &nbsp;
       {title}
       &nbsp;
@@ -150,23 +171,33 @@ export const SecretFormRow: React.FC<{
     if (disabled) return null;
     if (isConvertedToSecret)
       return (
-        <EuiCallOut size="s" color="warning">
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
-            defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above."
-          />
-        </EuiCallOut>
+        <KbnWarningCallout
+          announceOnMount
+          size="s"
+          title={i18n.translate(
+            'xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle',
+            { defaultMessage: 'Converting to secret storage' }
+          )}
+          text={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutBody"
+              defaultMessage="Saving this field stores it as a secret instead of plain text. Secret storage requires Fleet Server v{minVersion} or later."
+              values={{ minVersion }}
+            />
+          }
+        />
       );
 
     if (!initialValue)
       return (
         <FormattedMessage
           id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputCalloutTitle"
-          defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above."
+          defaultMessage="This field uses secret storage and requires Fleet Server v{minVersion} and above."
+          values={{ minVersion }}
         />
       );
     return undefined;
-  }, [disabled, initialValue, isConvertedToSecret]);
+  }, [disabled, initialValue, isConvertedToSecret, minVersion]);
 
   const plainTextHelp = disabled ? null : (
     <FormattedMessage
@@ -174,7 +205,7 @@ export const SecretFormRow: React.FC<{
       defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"
       values={{
         enableSecretLink: (
-          <EuiLink onClick={() => onToggleSecretStorage(true)} color="primary">
+          <EuiLink onClick={() => onToggleSecretStorage?.(true)} color="primary">
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink"
               defaultMessage="Click to use secret storage instead"

@@ -132,7 +132,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should work with valid values', async function () {
-      await supertest
+      const { body: packagePolicyCreateResponse } = await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
         .send({
@@ -149,11 +149,17 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      const { body } = await supertest
-        .get(`/internal/saved_objects_tagging/tags/_find?page=1&perPage=10000`)
+      const packagePolicyId = packagePolicyCreateResponse.item.id;
+      const { body: packagePolicyGetResponse } = await supertest
+        .get(`/api/fleet/package_policies/${packagePolicyId}`)
         .expect(200);
-      expect(body.tags.find((tag: any) => tag.name === 'Managed').relationCount).to.be(9);
-      expect(body.tags.find((tag: any) => tag.name === 'For File Tests').relationCount).to.be(9);
+      expect(packagePolicyGetResponse.item.name).to.eql('filetest-2');
+      expect(packagePolicyGetResponse.item.policy_id).to.eql(agentPolicyId);
+      expect(packagePolicyGetResponse.item.package).to.eql({
+        name: 'filetest',
+        title: 'For File Tests',
+        version: '0.1.0',
+      });
     });
 
     it('should work with multiple policy ids', async function () {
@@ -298,6 +304,59 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
+    });
+
+    it('should not allow an individual_policies package with enabled inputs from multiple policy templates', async function () {
+      await apiClient.installPackage({
+        pkgName: 'individual_policies_test',
+        pkgVersion: '0.1.0',
+      });
+
+      const { body } = await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'individual-policies-multi-test',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            { type: 'logfile', policy_template: 'template_a', enabled: true, streams: [] },
+            { type: 'httpjson', policy_template: 'template_b', enabled: true, streams: [] },
+          ],
+          package: {
+            name: 'individual_policies_test',
+            title: 'Individual Policies Test',
+            version: '0.1.0',
+          },
+        })
+        .expect(400);
+
+      expect(body.message).to.contain('cannot have enabled inputs from multiple policy templates');
+    });
+
+    it('should allow an individual_policies package when only one policy template has enabled inputs', async function () {
+      await supertest
+        .post('/api/fleet/package_policies')
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'individual-policies-single-test',
+          description: '',
+          namespace: 'default',
+          policy_id: agentPolicyId,
+          enabled: true,
+          inputs: [
+            { type: 'logfile', policy_template: 'template_a', enabled: true, streams: [] },
+            { type: 'httpjson', policy_template: 'template_b', enabled: false, streams: [] },
+          ],
+          package: {
+            name: 'individual_policies_test',
+            title: 'Individual Policies Test',
+            version: '0.1.0',
+          },
+        })
+        .expect(200);
     });
 
     it('should return a 409 if there is another package policy with the same name', async function () {

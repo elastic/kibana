@@ -114,7 +114,13 @@ export const SyncJobEventsPanel: React.FC<SyncJobsEventPanelProps> = ({
         defaultMessage: 'Events',
       })}
     >
-      <EuiBasicTable columns={columns} items={events} />
+      <EuiBasicTable
+        columns={columns}
+        items={events}
+        tableCaption={i18n.translate('searchConnectors.index.syncJobs.events.tableCaption', {
+          defaultMessage: 'Sync job events',
+        })}
+      />
     </FlyoutPanel>
   );
 };

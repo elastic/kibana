@@ -21,7 +21,7 @@ import { FormattedDate } from '@kbn/i18n-react';
 import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
 import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
@@ -68,6 +68,7 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
         margin-left: 4px;
         margin-right: 14px;
       `}
+      aria-hidden={true}
     />
   ) : userAvatar?.imageUrl != null ? (
     <EuiAvatar
@@ -82,7 +83,7 @@ const AuthorColumn = ({ entry }: { entry: KnowledgeBaseEntryResponse }) => {
   ) : (
     <EuiAvatar
       name={userName}
-      initials={userAvatar?.initials}
+      initials={userAvatar?.initials ?? undefined}
       size={'s'}
       color={userAvatar?.color ?? 'subdued'}
       css={css`
@@ -136,7 +137,7 @@ export const useKnowledgeBaseTable = () => {
   const getIconForEntry = (entry: KnowledgeBaseEntryResponse): string => {
     if (entry.type === DocumentEntryType.value) {
       if (entry.kbResource === 'user') {
-        return 'userAvatar';
+        return 'user';
       }
       if (['esql', 'security_labs'].includes(entry.kbResource)) {
         return 'logoElastic';
@@ -167,7 +168,9 @@ export const useKnowledgeBaseTable = () => {
       return [
         {
           name: '',
-          render: (entry: KnowledgeBaseEntryResponse) => <EuiIcon type={getIconForEntry(entry)} />,
+          render: (entry: KnowledgeBaseEntryResponse) => (
+            <EuiIcon type={getIconForEntry(entry)} aria-hidden={true} />
+          ),
           width: '24px',
         },
         {

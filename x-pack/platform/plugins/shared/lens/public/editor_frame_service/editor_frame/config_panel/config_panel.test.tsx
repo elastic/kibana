@@ -6,31 +6,27 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { screen, act, fireEvent } from '@testing-library/react';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 
-import type { MountStoreProps } from '../../../mocks';
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
   mockDatasourceMap,
   mockStoreDeps,
+  renderWithReduxStore,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Visualization } from '../../../types';
-import { LayerPanels } from './config_panel';
-import { LayerPanel } from './layer_panel';
+import type { Visualization, FramePublicAPI } from '@kbn/lens-common';
+import { ConfigPanel } from './config_panel';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { generateId } from '../../../id_generator';
-import { mountWithReduxStore } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { ReactWrapper } from 'enzyme';
 import { createIndexPatternServiceMock } from '../../../mocks/data_views_service_mock';
-import { AddLayerButton } from '../../../visualizations/xy/add_layer';
-import type { LayerType } from '@kbn/visualizations-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 
 jest.mock('../../../id_generator');
 
@@ -44,86 +40,86 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 
-const addNewLayer = (instance: ReactWrapper, type: LayerType = LayerTypes.REFERENCELINE) =>
-  act(() => {
-    instance.find(`button[data-test-subj="${type}"]`).first().simulate('click');
-  });
-
-const waitMs = (time: number) => new Promise((r) => setTimeout(r, time));
-
-let container: HTMLDivElement | undefined;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  container.id = 'lensContainer';
-  document.body.appendChild(container);
-});
-
-afterEach(() => {
-  if (container && container.parentNode) {
-    container.parentNode.removeChild(container);
-  }
-
-  container = undefined;
-});
-
 describe('ConfigPanel', () => {
-  const frame = createMockFramePublicAPI();
-
+  let frame: FramePublicAPI;
   let uiActions: UiActionsStart;
 
   beforeEach(() => {
+    jest.useFakeTimers();
+    frame = createMockFramePublicAPI();
     uiActions = uiActionsPluginMock.createStartContract();
   });
 
-  function prepareAndMountComponent(
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  function renderConfigPanel(
     props: ReturnType<typeof getDefaultProps>,
-    customStoreProps?: Partial<MountStoreProps>,
-    query?: Query | AggregateQuery
+    customStoreProps?: {
+      preloadedState?: Record<string, unknown>;
+      storeDeps?: ReturnType<typeof mockStoreDeps>;
+    },
+    query?: Query | AggregateQuery,
+    selectedLayerId: string | null = 'first'
   ) {
     (generateId as jest.Mock).mockReturnValue(`newId`);
-    return mountWithReduxStore(
-      <LayerPanels {...props} />,
+    const { visualizationMap, datasourceMap, ...rest } = props;
+    return renderWithReduxStore(
+      <EditorFrameServiceProvider visualizationMap={visualizationMap} datasourceMap={datasourceMap}>
+        <ConfigPanel {...rest} />
+      </EditorFrameServiceProvider>,
+      {},
       {
         preloadedState: {
           datasourceStates: {
-            testDatasource: {
+            [rest.activeDatasourceId]: {
               isLoading: false,
               state: 'state',
             },
           },
-          activeDatasourceId: 'testDatasource',
+          activeDatasourceId: rest.activeDatasourceId,
           query: query as Query,
+          visualization: {
+            activeId: 'testVis',
+            state: 'state',
+            selectedLayerId,
+          },
+          ...customStoreProps?.preloadedState,
         },
-        storeDeps: mockStoreDeps({
-          datasourceMap: props.datasourceMap,
-          visualizationMap: props.visualizationMap,
-        }),
-        ...customStoreProps,
-      },
-      {
-        attachTo: container,
+        storeDeps:
+          customStoreProps?.storeDeps ??
+          mockStoreDeps({
+            datasourceMap,
+            visualizationMap,
+          }),
       }
     );
   }
-  function getDefaultProps(
-    { datasourceMap = mockDatasourceMap(), visualizationMap = mockVisualizationMap() } = {
-      datasourceMap: mockDatasourceMap(),
-      visualizationMap: mockVisualizationMap(),
-    }
-  ) {
+
+  function getDefaultProps({
+    datasourceMap = mockDatasourceMap(),
+    visualizationMap = mockVisualizationMap(),
+    activeDatasourceId = 'formBased',
+  }: {
+    datasourceMap?: ReturnType<typeof mockDatasourceMap>;
+    visualizationMap?: ReturnType<typeof mockVisualizationMap>;
+    activeDatasourceId?: string;
+  } = {}) {
+    const activeDatasource = datasourceMap[activeDatasourceId as keyof typeof datasourceMap];
     frame.datasourceLayers = {
-      first: datasourceMap.testDatasource.publicAPIMock,
+      first: activeDatasource.publicAPIMock,
     };
     return {
       activeVisualizationId: 'testVis',
       visualizationMap,
-      activeDatasourceId: 'testDatasource',
+      activeDatasourceId,
       datasourceMap,
       activeVisualization: {
         ...visualizationMap.testVis,
         getLayerIds: () => Object.keys(frame.datasourceLayers),
-        getAddLayerButtonComponent: (props) => {
+        getAddLayerButtonComponent: (props: { addLayer: (type: string) => void }) => {
           return (
             <>
               <button
@@ -138,12 +134,6 @@ describe('ConfigPanel', () => {
           );
         },
       } as Visualization,
-      datasourceStates: {
-        testDatasource: {
-          isLoading: false,
-          state: 'state',
-        },
-      },
       indexPatternService: createIndexPatternServiceMock(),
       visualizationState: 'state',
       updateVisualization: jest.fn(),
@@ -161,145 +151,87 @@ describe('ConfigPanel', () => {
     };
   }
 
-  // in what case is this test needed?
-  it('should fail to render layerPanels if the public API is out of date', async () => {
+  it('should not render layer panel if the public API is out of date', () => {
     const props = getDefaultProps();
     props.framePublicAPI.datasourceLayers = {};
-    const { instance } = await prepareAndMountComponent(props);
-    expect(instance.find(LayerPanel).exists()).toBe(false);
+    renderConfigPanel(props, undefined, undefined, null);
+    expect(screen.queryByTestId('lns-layerPanel-0')).not.toBeInTheDocument();
   });
 
-  it('updates datasources and visualizations', async () => {
-    const props = getDefaultProps();
-    const { instance, lensStore } = await prepareAndMountComponent(props);
-    const { updateDatasource, updateAll } = instance.find(LayerPanel).props();
+  function mockDimensionEditorApply(
+    datasourceMap: ReturnType<typeof mockDatasourceMap>,
+    visualizationMap: ReturnType<typeof mockVisualizationMap>,
+    accessors: Array<{ columnId: string }>
+  ) {
+    visualizationMap.testVis.getConfiguration = jest.fn(() => ({
+      groups: [
+        {
+          groupId: 'a',
+          groupLabel: 'a',
+          layerId: 'first',
+          supportsMoreColumns: true,
+          accessors,
+          filterOperations: jest.fn(() => true),
+          dataTestSubj: 'mockVisA',
+        },
+      ],
+    }));
+    visualizationMap.testVis.setDimension = jest.fn().mockReturnValue('state');
+    datasourceMap.formBased.DimensionEditorComponent = jest
+      .fn()
+      .mockImplementation(({ setState }: { setState: (s: unknown) => void }) => (
+        <button data-test-subj="mockDimensionEditorApply" onClick={() => setState('updated')} />
+      ));
+  }
 
-    const newDatasourceState = 'updated';
-    updateDatasource('testDatasource', newDatasourceState);
-    await waitMs(0);
-    expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-    expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
-      'updated'
-    );
+  it('updates datasource state by exercising the existing-accessor callback chain', () => {
+    const datasourceMap = mockDatasourceMap();
+    const visualizationMap = mockVisualizationMap();
+    mockDimensionEditorApply(datasourceMap, visualizationMap, [{ columnId: 'col1' }]);
 
-    updateAll('testDatasource', newDatasourceState, props.visualizationState);
-    // wait for one tick so async updater has a chance to trigger
-    await waitMs(0);
-    expect(lensStore.dispatch).toHaveBeenCalledTimes(3);
-    expect((lensStore.dispatch as jest.Mock).mock.calls[0][0].payload.newDatasourceState).toEqual(
-      'updated'
+    const props = getDefaultProps({ datasourceMap, visualizationMap });
+    const { store } = renderConfigPanel(props);
+
+    fireEvent.click(screen.getByTestId('lnsLayerPanel-dimensionLink'));
+    fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
+  });
+
+  it('updates datasource and visualization by exercising the new-accessor callback chain', () => {
+    const datasourceMap = mockDatasourceMap();
+    const visualizationMap = mockVisualizationMap();
+    mockDimensionEditorApply(datasourceMap, visualizationMap, []);
+
+    const props = getDefaultProps({ datasourceMap, visualizationMap });
+    const { store } = renderConfigPanel(props);
+
+    fireEvent.click(screen.getByTestId('lns-empty-dimension'));
+    fireEvent.click(screen.getByTestId('mockDimensionEditorApply'));
+
+    act(() => {
+      jest.runAllTimers();
+    });
+
+    expect(store.getState().lens.datasourceStates.formBased.state).toEqual('updated');
+    expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith(
+      expect.objectContaining({
+        layerId: 'first',
+        groupId: 'a',
+        columnId: 'newId',
+      })
     );
   });
 
   describe('initial default value', () => {
-    function clickToAddDimension(instance: ReactWrapper) {
-      act(() => {
-        instance.find('[data-test-subj="lns-empty-dimension"]').last().simulate('click');
-      });
-      return waitMs(0);
-    }
-
-    it('should not add an initial dimension when not specified', async () => {
+    it('should add an initial dimension value when clicking on the empty dimension button', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: LayerTypes.DATA, label: 'Data Layer' },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-        },
-      ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
-
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
-    });
-
-    it('should not add an initial dimension when initialDimensions are not available for the given layer type', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const visualizationMap = mockVisualizationMap();
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        {
-          type: LayerTypes.DATA,
-          label: 'Data Layer',
-          initialDimensions: [
-            {
-              groupId: 'testGroup',
-              columnId: 'myColumn',
-              staticValue: 100,
-            },
-          ],
-        },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-        },
-      ]);
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-
-      addNewLayer(instance);
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
-    });
-
-    it('should use group initial dimension value when adding a new layer if available', async () => {
-      const datasourceMap = mockDatasourceMap();
-      const visualizationMap = mockVisualizationMap();
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        { type: LayerTypes.DATA, label: 'Data Layer' },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-          initialDimensions: [
-            {
-              groupId: 'testGroup',
-              columnId: 'myColumn',
-              staticValue: 100,
-            },
-          ],
-        },
-      ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
-
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-      addNewLayer(instance);
-
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
-        {},
-        'newId',
-        frame.dataViews.indexPatterns,
-        {
-          columnId: 'myColumn',
-          groupId: 'testGroup',
-          staticValue: 100,
-          visualizationGroups: [
-            expect.objectContaining({
-              accessors: [],
-              dataTestSubj: 'mockVisA',
-              groupId: 'a',
-              groupLabel: 'a',
-              layerId: 'layer1',
-              supportsMoreColumns: true,
-            }),
-          ],
-        }
-      );
-    });
-
-    it('should add an initial dimension value when clicking on the empty dimension button', async () => {
-      const datasourceMap = mockDatasourceMap();
-
-      const visualizationMap = mockVisualizationMap();
       visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
         {
           type: LayerTypes.DATA,
@@ -313,14 +245,14 @@ describe('ConfigPanel', () => {
           ],
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
+      datasourceMap.formBased.initializeDimension = jest.fn();
       const props = getDefaultProps({ visualizationMap, datasourceMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
+      const { store } = renderConfigPanel(props);
 
-      await clickToAddDimension(instance);
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
+      fireEvent.click(screen.getByTestId('lns-empty-dimension'));
+      expect(store.dispatch).toHaveBeenCalledTimes(1);
 
-      expect(datasourceMap.testDatasource.initializeDimension).toHaveBeenCalledWith(
+      expect(datasourceMap.formBased.initializeDimension).toHaveBeenCalledWith(
         'state',
         'first',
         frame.dataViews.indexPatterns,
@@ -328,6 +260,7 @@ describe('ConfigPanel', () => {
           groupId: 'a',
           columnId: 'newId',
           staticValue: 100,
+          activeVisualizationTypeId: 'testVis',
           visualizationGroups: [
             expect.objectContaining({
               accessors: [],
@@ -341,74 +274,10 @@ describe('ConfigPanel', () => {
         }
       );
     });
-
-    it('When visualization is `noDatasource` should not run datasource methods', async () => {
-      const datasourceMap = mockDatasourceMap();
-
-      const visualizationMap = mockVisualizationMap();
-      visualizationMap.testVis.setDimension = jest.fn();
-      visualizationMap.testVis.getSupportedLayers = jest.fn(() => [
-        {
-          type: LayerTypes.DATA,
-          label: 'Data Layer',
-          initialDimensions: [
-            {
-              groupId: 'testGroup',
-              columnId: 'myColumn',
-              staticValue: 100,
-            },
-          ],
-        },
-        {
-          type: LayerTypes.REFERENCELINE,
-          label: 'Reference layer',
-        },
-        {
-          type: LayerTypes.ANNOTATIONS,
-          label: 'Annotations Layer',
-          noDatasource: true,
-          initialDimensions: [
-            {
-              groupId: 'a',
-              columnId: 'newId',
-              staticValue: 100,
-            },
-          ],
-        },
-      ]);
-
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ visualizationMap, datasourceMap });
-      const { instance, lensStore } = await prepareAndMountComponent(props);
-
-      addNewLayer(instance, LayerTypes.ANNOTATIONS);
-
-      expect(lensStore.dispatch).toHaveBeenCalledTimes(1);
-
-      expect(visualizationMap.testVis.setDimension).toHaveBeenCalledWith({
-        columnId: 'newId',
-        frame: {
-          dataViews: expect.anything(),
-          activeData: undefined,
-          datasourceLayers: {
-            a: expect.anything(),
-          },
-          dateRange: expect.anything(),
-          absDateRange: expect.anything(),
-          filters: [],
-          now: expect.anything(),
-          query: undefined,
-        },
-        groupId: 'a',
-        layerId: 'newId',
-        prevState: undefined,
-      });
-      expect(datasourceMap.testDatasource.initializeDimension).not.toHaveBeenCalled();
-    });
   });
 
   describe('text based languages', () => {
-    it('should not allow to add a new layer', async () => {
+    it('should not allow to clone a layer', () => {
       const datasourceMap = mockDatasourceMap();
       const visualizationMap = mockVisualizationMap();
 
@@ -419,11 +288,19 @@ describe('ConfigPanel', () => {
           label: 'Reference layer',
         },
       ]);
-      datasourceMap.testDatasource.initializeDimension = jest.fn();
-      const props = getDefaultProps({ datasourceMap, visualizationMap });
+      datasourceMap.textBased.publicAPIMock.isTextBasedLanguage.mockReturnValue(true);
+      visualizationMap.testVis.cloneLayer = jest.fn();
 
-      const { instance } = await prepareAndMountComponent(props, {}, { esql: 'from "foo"' });
-      expect(instance.find(AddLayerButton).exists()).toBe(false);
+      const props = getDefaultProps({
+        datasourceMap,
+        visualizationMap,
+        activeDatasourceId: 'textBased',
+      });
+
+      renderConfigPanel(props, undefined, { esql: 'from "foo"' });
+      expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
+      // Regex matches "lnsLayerClone--{index}" (e.g. "lnsLayerClone--0")
+      expect(screen.queryByTestId(/^lnsLayerClone/)).not.toBeInTheDocument();
     });
   });
 });

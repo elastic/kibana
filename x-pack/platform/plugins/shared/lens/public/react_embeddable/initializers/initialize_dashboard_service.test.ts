@@ -6,12 +6,16 @@
  */
 
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '../types';
-import { getLensRuntimeStateMock, getLensInternalApiMock, makeEmbeddableServices } from '../mocks';
+import type { LensRuntimeState } from '@kbn/lens-common';
+import {
+  getLensRuntimeStateMock,
+  getLensInternalApiMock,
+  makeEmbeddableServices,
+  getTextBasedLensSerializedStateMock,
+} from '../mocks';
 import { initializeStateManagement } from './initialize_state_management';
 import { initializeDashboardServices } from './initialize_dashboard_services';
 import { faker } from '@faker-js/faker';
-import { createEmptyLensState } from '../helper';
 
 function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>) {
   const services = makeEmbeddableServices();
@@ -32,8 +36,8 @@ function setupDashboardServicesApi(runtimeOverrides?: Partial<LensRuntimeState>)
 }
 
 describe('Transformation API', () => {
-  it("should not save to library if there's already a saveObjectId", async () => {
-    const api = setupDashboardServicesApi({ savedObjectId: faker.string.uuid() });
+  it("should not save to library if there's already a ref_id", async () => {
+    const api = setupDashboardServicesApi({ ref_id: faker.string.uuid() });
     expect(await api.canLinkToLibrary()).toBe(false);
   });
 
@@ -44,11 +48,7 @@ describe('Transformation API', () => {
 
   it('should not save to library for ES|QL chart types', async () => {
     // setup a state with an ES|QL query
-    const api = setupDashboardServicesApi(
-      createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
-        esql: 'FROM index',
-      })
-    );
+    const api = setupDashboardServicesApi(getTextBasedLensSerializedStateMock());
     expect(await api.canLinkToLibrary()).toBe(false);
   });
 });

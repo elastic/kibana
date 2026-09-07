@@ -5,16 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
+import { z } from '@kbn/zod/v4';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { ReviewFieldsPrompt, assembleGrokProcessor } from '@kbn/grok-heuristics';
+import type { GrokProcessor } from '@kbn/streamlang';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
-import { Streams } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
-import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
+import {
+  callInferenceWithPrompt,
+  fetchFieldMetadata,
+  normalizeFieldName,
+} from './common_processing_helpers';
 
 export interface ProcessingGrokSuggestionsParams {
   path: {
@@ -22,37 +28,29 @@ export interface ProcessingGrokSuggestionsParams {
   };
   body: {
     connector_id: string;
+    field_name: string;
     sample_messages: string[];
-    review_fields: Record<
-      string,
-      {
-        grok_component: string;
-        example_values: string[];
-      }
-    >;
   };
 }
 
 export interface ProcessingGrokSuggestionsHandlerDeps {
   params: ProcessingGrokSuggestionsParams;
+  connectorId: string;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  patternExtractionService: IPatternExtractionService;
+  signal: AbortSignal;
+  logger: Logger;
 }
 
 export const processingGrokSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
+    field_name: z.string(),
     sample_messages: z.array(z.string()),
-    review_fields: z.record(
-      z.string(),
-      z.object({
-        grok_component: z.string(),
-        example_values: z.array(z.string()),
-      })
-    ),
   }),
 }) satisfies z.Schema<ProcessingGrokSuggestionsParams>;
 
@@ -62,55 +60,143 @@ type FieldReviewResults = ToolCallsOfToolOptions<
 
 export const handleProcessingGrokSuggestions = async ({
   params,
+  connectorId,
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
-}: ProcessingGrokSuggestionsHandlerDeps) => {
-  const stream = await streamsClient.getStream(params.path.name);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+  patternExtractionService,
+  signal,
+  logger,
+}: ProcessingGrokSuggestionsHandlerDeps): Promise<GrokProcessor | null> => {
+  const { name: streamName } = params.path;
 
-  const response = await inferenceClient.prompt({
-    connectorId: params.body.connector_id,
-    prompt: ReviewFieldsPrompt,
-    input: {
-      sample_messages: params.body.sample_messages,
-      review_fields: JSON.stringify(params.body.review_fields),
+  logger.debug(
+    `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`
+  );
+
+  const { patternGroups } = await patternExtractionService.extractGrokPatterns(
+    params.body.sample_messages
+  );
+
+  logger.debug(`Extraction complete (stream=${streamName} patternGroups=${patternGroups.length})`);
+
+  if (patternGroups.length === 0) {
+    logger.debug(`No pattern groups found, returning null (stream=${streamName})`);
+    return null;
+  }
+
+  for (const [i, group] of patternGroups.entries()) {
+    logger.debug(
+      `Pattern group ${i + 1}/${patternGroups.length}` +
+        ` (stream=${streamName} messages=${group.messages.length} nodes=${group.nodes.length})`
+    );
+  }
+
+  const result = await assembleGrokProcessor({
+    from: params.body.field_name,
+    patternGroups,
+    reviewFn: async (reviewFields, messages) => {
+      logger.debug(
+        `LLM review request (stream=${streamName} messages=${messages.length} fields=${
+          Object.keys(reviewFields).length
+        } components=${Object.values(reviewFields)
+          .map((f) => f.grok_component)
+          .join(',')})`
+      );
+      const reviewResult = await reviewGrokFields({
+        streamName,
+        connectorId,
+        fieldName: params.body.field_name,
+        sampleMessages: messages,
+        reviewFields,
+        inferenceClient,
+        streamsClient,
+        fieldsMetadataClient,
+        signal,
+      });
+      logger.debug(
+        `LLM review result (stream=${streamName} log_source=${reviewResult.log_source} fields=${
+          reviewResult.fields.length
+        } fieldNames=${reviewResult.fields.map((f) => f.name).join(',')})`
+      );
+      return reviewResult;
     },
   });
-  const reviewResult = response.toolCalls[0].function.arguments;
 
-  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
+  if (result) {
+    logger.debug(
+      `Assembled processor (stream=${streamName} patterns=${
+        result.patterns.length
+      } patternDefinitions=${Object.keys(result.pattern_definitions ?? {}).length})`
+    );
+  } else {
+    logger.debug(`Assembly returned null (stream=${streamName})`);
+  }
 
-  const fieldMetadata = await fieldsMetadataClient
-    .find({
-      fieldNames: reviewResult.fields.map((field) => field.ecs_field),
-    })
-    .then((fieldsDictionary) => fieldsDictionary.toPlain());
+  return result;
+};
+
+export async function reviewGrokFields({
+  streamName,
+  connectorId,
+  fieldName,
+  sampleMessages,
+  reviewFields,
+  inferenceClient,
+  streamsClient,
+  fieldsMetadataClient,
+  signal,
+}: {
+  streamName: string;
+  connectorId: string;
+  fieldName: string;
+  sampleMessages: string[];
+  reviewFields: Record<string, { grok_component: string; example_values: string[] }>;
+  inferenceClient: InferenceClient;
+  streamsClient: StreamsClient;
+  fieldsMetadataClient: IFieldsMetadataClient;
+  signal: AbortSignal;
+}) {
+  const stream = await streamsClient.getStream(streamName);
+  const useOtelFieldNames = isOtelStream(stream);
+
+  // Call LLM inference to review fields
+  const reviewResult = await callInferenceWithPrompt(
+    inferenceClient,
+    connectorId,
+    ReviewFieldsPrompt,
+    sampleMessages,
+    reviewFields,
+    signal
+  );
+
+  // Fetch field metadata for ECS/OTEL field name resolution
+  const fieldMetadata = await fetchFieldMetadata(
+    fieldsMetadataClient,
+    reviewResult.fields.map((field: { ecs_field: string }) => field.ecs_field)
+  );
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, !!useOtelFieldNames),
+    fields: mapFields(reviewResult.fields, fieldMetadata, useOtelFieldNames, fieldName),
   };
-};
+}
 
 export function mapFields(
   reviewResults: FieldReviewResults,
   fieldMetadata: Record<string, FieldMetadataPlain>,
-  useOtelFieldNames: boolean
+  useOtelFieldNames: boolean,
+  fieldName: string
 ) {
   return reviewResults.map((field) => {
-    // @timestamp is a special case that we want to map to custom.timestamp - if we let it overwrite @timestamp it will most likely
-    // fail because the format won't be right. I a follow-up we can extend the suggestion to also add a date format processor step
-    // to map it back correctly.
-    const name = field.ecs_field.startsWith('@timestamp')
-      ? field.ecs_field.replace('@timestamp', 'custom.timestamp')
-      : field.ecs_field;
+    // The LLM always uses "message" as the catch-all content field. Replace it with the actual
+    // target field name (e.g. "error.message" on ECS streams or "body.text" on OTel streams).
+    if (field.ecs_field === 'message') {
+      return { name: fieldName, columns: field.columns, grok_components: field.grok_components };
+    }
+    const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
     return {
-      // make sure otel field names are translated/prefixed correctly
-      name: useOtelFieldNames
-        ? fieldMetadata[name]?.otel_equivalent ?? prefixOTelField(name)
-        : name,
+      name,
       columns: field.columns,
       grok_components: field.grok_components,
     };

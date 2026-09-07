@@ -7,14 +7,16 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { ClientPluginsSetup, ClientPluginsStart } from '../../plugin';
-import { SYNTHETICS_MONITORS_EMBEDDABLE, SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from './constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../common/embeddables/monitors_overview/constants';
+import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../common/embeddables/stats_overview/constants';
 
 export const registerSyntheticsEmbeddables = (
   core: CoreSetup<ClientPluginsStart, unknown>,
   pluginsSetup: ClientPluginsSetup
 ) => {
-  pluginsSetup.embeddable.registerReactEmbeddableFactory(
+  pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     async () => {
       const { getStatsOverviewEmbeddableFactory } = await import(
@@ -23,8 +25,17 @@ export const registerSyntheticsEmbeddables = (
       return getStatsOverviewEmbeddableFactory(core.getStartServices);
     }
   );
+  pluginsSetup.embeddable.registerLegacyURLTransform(
+    SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    async (transformDrilldownsOut: DrilldownTransforms['transformOut']) => {
+      const { getTransformOut } = await import(
+        '../../../common/embeddables/stats_overview/get_transform_out'
+      );
+      return getTransformOut(transformDrilldownsOut);
+    }
+  );
 
-  pluginsSetup.embeddable.registerReactEmbeddableFactory(
+  pluginsSetup.embeddable.registerEmbeddablePublicDefinition(
     SYNTHETICS_MONITORS_EMBEDDABLE,
     async () => {
       const { getMonitorsEmbeddableFactory } = await import(
@@ -33,4 +44,10 @@ export const registerSyntheticsEmbeddables = (
       return getMonitorsEmbeddableFactory(core.getStartServices);
     }
   );
+  pluginsSetup.embeddable.registerLegacyURLTransform(SYNTHETICS_MONITORS_EMBEDDABLE, async () => {
+    const { getTransformOut } = await import(
+      '../../../common/embeddables/monitors_overview/get_transform_out'
+    );
+    return getTransformOut();
+  });
 };

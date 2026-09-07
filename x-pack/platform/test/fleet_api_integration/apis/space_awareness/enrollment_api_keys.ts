@@ -11,7 +11,7 @@ import { type EnrollmentAPIKey } from '@kbn/fleet-plugin/common/types';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices } from './helpers';
+import { cleanFleetIndices, createTestSpace } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -28,8 +28,10 @@ export default function (providerContext: FtrProviderContext) {
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
+    let allSpacePolicy1: CreateAgentPolicyResponse;
     let defaultSpaceEnrollmentKey1: EnrollmentAPIKey;
     let spaceTest1EnrollmentKey1: EnrollmentAPIKey;
+    let allSpaceEnrollmentKey1: EnrollmentAPIKey;
 
     before(async () => {
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
@@ -42,20 +44,32 @@ export default function (providerContext: FtrProviderContext) {
       // Create agent policies it should create a enrollment key for every keys
       await apiClient.postEnableSpaceAwareness();
 
-      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2] = await Promise.all([
-        apiClient.createAgentPolicy(),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-        apiClient.createAgentPolicy(TEST_SPACE_1),
-      ]);
+      const [_defaultSpacePolicy1, _spaceTest1Policy1, _spaceTest1Policy2, _allSpacePolicy1] =
+        await Promise.all([
+          apiClient.createAgentPolicy(),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(TEST_SPACE_1),
+          apiClient.createAgentPolicy(undefined, {
+            space_ids: ['*'],
+          }),
+        ]);
       defaultSpacePolicy1 = _defaultSpacePolicy1;
       spaceTest1Policy1 = _spaceTest1Policy1;
       spaceTest1Policy2 = _spaceTest1Policy2;
+      allSpacePolicy1 = _allSpacePolicy1;
 
       const space1ApiKeys = await apiClient.getEnrollmentApiKeys(TEST_SPACE_1);
       const defaultSpaceApiKeys = await apiClient.getEnrollmentApiKeys();
-      defaultSpaceEnrollmentKey1 = defaultSpaceApiKeys.items[0];
-      spaceTest1EnrollmentKey1 = space1ApiKeys.items[0];
-      await spaces.createTestSpace(TEST_SPACE_1);
+      defaultSpaceEnrollmentKey1 = defaultSpaceApiKeys.items.find(
+        (item) => item.policy_id === defaultSpacePolicy1.item.id
+      ) as EnrollmentAPIKey;
+      spaceTest1EnrollmentKey1 = space1ApiKeys.items.find(
+        (item) => item.policy_id === spaceTest1Policy1.item.id
+      ) as EnrollmentAPIKey;
+      allSpaceEnrollmentKey1 = space1ApiKeys.items.find(
+        (item) => item.policy_id === allSpacePolicy1.item.id
+      ) as EnrollmentAPIKey;
+      await createTestSpace(providerContext, TEST_SPACE_1);
     });
 
     after(async () => {
@@ -70,26 +84,34 @@ export default function (providerContext: FtrProviderContext) {
       describe('GET /enrollment_api_keys', () => {
         it('should return enrolmment keys in a specific space', async () => {
           const apiKeys = await apiClient.getEnrollmentApiKeys(TEST_SPACE_1);
-          expect(apiKeys.total).to.eql(2);
+          expect(apiKeys.total).to.eql(3);
           const policyIds = apiKeys.items?.map((item) => item.policy_id);
           expect(policyIds).to.contain(spaceTest1Policy1.item.id);
           expect(policyIds).to.contain(spaceTest1Policy2.item.id);
+          expect(policyIds).to.contain(allSpacePolicy1.item.id);
           expect(policyIds).not.to.contain(defaultSpacePolicy1.item.id);
         });
 
         it('should return enrolmment keys in default space', async () => {
           const apiKeys = await apiClient.getEnrollmentApiKeys();
-          expect(apiKeys.total).to.eql(1);
+          expect(apiKeys.total).to.eql(2);
           const policyIds = apiKeys.items?.map((item) => item.policy_id);
           expect(policyIds).not.to.contain(spaceTest1Policy1.item.id);
           expect(policyIds).not.contain(spaceTest1Policy2.item.id);
           expect(policyIds).to.contain(defaultSpacePolicy1.item.id);
+          expect(policyIds).to.contain(allSpacePolicy1.item.id);
         });
       });
 
       describe('GET /enrollment_api_keys/{id}', () => {
-        it('should allow to access a enrollment keu in a specific space', async () => {
+        it('should allow to access a enrollment key in a specific space', async () => {
           await apiClient.getEnrollmentApiKey(spaceTest1EnrollmentKey1.id, TEST_SPACE_1);
+        });
+        it('should allow to access an all space agent policy enrollment key in a specific space', async () => {
+          await apiClient.getEnrollmentApiKey(allSpaceEnrollmentKey1.id, TEST_SPACE_1);
+        });
+        it('should allow to access an all space agent policy enrollment key in the default space', async () => {
+          await apiClient.getEnrollmentApiKey(allSpaceEnrollmentKey1.id);
         });
         it('should not allow to get an enrolmment key from a different space from the default space', async () => {
           let err: Error | undefined;
@@ -123,6 +145,21 @@ export default function (providerContext: FtrProviderContext) {
           const res = await apiClient.postEnrollmentApiKeys({
             policy_id: defaultSpacePolicy1.item.id,
           });
+          expect(res.item).to.have.key('id');
+        });
+        it('should allow to create an enrollment api key for an all space policy in the default space', async () => {
+          const res = await apiClient.postEnrollmentApiKeys({
+            policy_id: allSpacePolicy1.item.id,
+          });
+          expect(res.item).to.have.key('id');
+        });
+        it('should allow to create an enrollment api key for an all space policy in the test space', async () => {
+          const res = await apiClient.postEnrollmentApiKeys(
+            {
+              policy_id: allSpacePolicy1.item.id,
+            },
+            TEST_SPACE_1
+          );
           expect(res.item).to.have.key('id');
         });
         it('should allow to create an enrollment api key for a policy in the same space', async () => {

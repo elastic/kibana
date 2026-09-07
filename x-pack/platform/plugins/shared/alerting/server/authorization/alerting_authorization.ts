@@ -27,6 +27,13 @@ export interface EnsureAuthorizedOpts {
   additionalPrivileges?: string[];
 }
 
+export interface BulkEnsureAuthorizedOpts {
+  ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
+  operation: ReadOperations | WriteOperations;
+  entity: AlertingAuthorizationEntity;
+  additionalPrivileges?: string[];
+}
+
 interface HasPrivileges {
   read: boolean;
   all: boolean;
@@ -66,6 +73,7 @@ interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
   ruleTypeIds?: string[];
   operations: Array<ReadOperations | WriteOperations>;
   authorizationEntity: AlertingAuthorizationEntity;
+  namespaces?: Array<string | undefined>;
 }
 
 interface GetAllAuthorizedRuleTypesFindOperationParams {
@@ -236,20 +244,56 @@ export class AlertingAuthorization {
     entity,
     additionalPrivileges = [],
   }: EnsureAuthorizedOpts) {
+    return this._ensureAuthorized({
+      ruleTypeIdConsumersPairs: [{ ruleTypeId, consumers: [consumer] }],
+      operation,
+      entity,
+      additionalPrivileges,
+    });
+  }
+
+  public async bulkEnsureAuthorized({
+    ruleTypeIdConsumersPairs,
+    operation,
+    entity,
+    additionalPrivileges = [],
+  }: BulkEnsureAuthorizedOpts) {
+    return this._ensureAuthorized({
+      ruleTypeIdConsumersPairs,
+      operation,
+      entity,
+      additionalPrivileges,
+    });
+  }
+
+  private async _ensureAuthorized({
+    ruleTypeIdConsumersPairs,
+    operation,
+    entity,
+    additionalPrivileges = [],
+  }: BulkEnsureAuthorizedOpts) {
     const { authorization } = this;
 
-    const isAvailableConsumer = this.allRegisteredConsumers.has(consumer);
+    const areAllConsumersAvailable = ruleTypeIdConsumersPairs.every(({ consumers }) =>
+      consumers.every((consumer) => this.allRegisteredConsumers.has(consumer))
+    );
+
     if (authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
-      const { hasAllRequested } = await checkPrivileges({
-        kibana: [
-          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation),
-          ...additionalPrivileges,
-        ],
+      const privileges = ruleTypeIdConsumersPairs.flatMap(({ ruleTypeId, consumers }) =>
+        consumers.map((consumer) =>
+          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)
+        )
+      );
+
+      const res = await checkPrivileges({
+        kibana: [...privileges, ...additionalPrivileges],
       });
 
-      if (!isAvailableConsumer) {
+      const { hasAllRequested } = res;
+
+      if (!areAllConsumersAvailable) {
         /**
          * Under most circumstances this would have been caught by `checkPrivileges` as
          * a user can't have Privileges to an unknown consumer, but super users
@@ -257,14 +301,14 @@ export class AlertingAuthorization {
          * as Privileged.
          * This check will ensure we don't accidentally let these through
          */
-        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
       }
 
       if (!hasAllRequested) {
-        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+        throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
       }
-    } else if (!isAvailableConsumer) {
-      throw Boom.forbidden(getUnauthorizedMessage(ruleTypeId, consumer, operation, entity));
+    } else if (!areAllConsumersAvailable) {
+      throw Boom.forbidden(getUnauthorizedMessage(ruleTypeIdConsumersPairs, operation, entity));
     }
   }
 
@@ -296,6 +340,103 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
+      const { namespaces } = params.filterOpts;
+      const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+        operations: [params.operation],
+        authorizationEntity: params.authorizationEntity,
+        namespaces,
+      });
+
+      if (!authorizedRuleTypes.size) {
+        const baseMessage = `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types.`;
+        const errorMessage =
+          (namespaces ?? []).length > 0
+            ? `${baseMessage} Validate that you have permissions to access spaces: ${(
+                namespaces ?? []
+              ).map((space) => (space === undefined ? 'default' : space))}`
+            : baseMessage;
+        throw Boom.forbidden(errorMessage);
+      }
+
+      return {
+        filter: asFiltersByRuleTypeAndConsumer(
+          authorizedRuleTypes,
+          params.filterOpts,
+          this.spaceId
+        ) as JsonObject,
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
+          if (!authorizedRuleTypes.has(ruleTypeId) || authType !== params.authorizationEntity) {
+            throw Boom.forbidden(
+              getUnauthorizedMessage(
+                [{ ruleTypeId, consumers: [consumer] }],
+                params.operation,
+                authType
+              )
+            );
+          }
+
+          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId)!;
+          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
+
+          if (!authorizedConsumers[consumer]) {
+            throw Boom.forbidden(
+              getUnauthorizedMessage(
+                [{ ruleTypeId, consumers: [consumer] }],
+                params.operation,
+                params.authorizationEntity
+              )
+            );
+          }
+        },
+      };
+    }
+
+    return {
+      filter: asFiltersBySpaceId(params.filterOpts, this.spaceId) as JsonObject,
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
+    };
+  }
+
+  /**
+   * Like `ensureAuthorized` but without a consumer. Checks authorization by ruleTypeId only,
+   * succeeding if the user is authorized under any registered consumer.
+   */
+  public async ensureAuthorizedByRuleType({
+    ruleTypeId,
+    operation,
+    entity,
+    consumerRequiredPrivilege,
+  }: {
+    ruleTypeId: string;
+    operation: ReadOperations | WriteOperations;
+    entity: AlertingAuthorizationEntity;
+    consumerRequiredPrivilege: keyof HasPrivileges;
+  }): Promise<void> {
+    if (!this.authorization || !this.shouldCheckAuthorization()) {
+      return;
+    }
+
+    const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
+      operations: [operation],
+      authorizationEntity: entity,
+    });
+
+    const authorizedConsumers = authorizedRuleTypes.get(ruleTypeId)?.authorizedConsumers ?? {};
+    const isAuthorized = Object.values(authorizedConsumers).some(
+      (consumer) => consumer[consumerRequiredPrivilege]
+    );
+
+    if (!isAuthorized) {
+      throw Boom.forbidden(`Unauthorized to ${operation} "${ruleTypeId}" ${entity}`);
+    }
+  }
+
+  /**
+   * Like `getAuthorizationFilter` but without consumers. Returns a filter scoped to authorized
+   * rule types and an `ensureRuleTypeIsAuthorized` callback for post-query validation.
+   */
+  public async getByRuleTypeAuthorizationFilter(params: GetAuthorizationFilterParams) {
+    if (this.authorization && this.shouldCheckAuthorization()) {
       const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
         operations: [params.operation],
         authorizationEntity: params.authorizationEntity,
@@ -313,24 +454,10 @@ export class AlertingAuthorization {
           params.filterOpts,
           this.spaceId
         ) as JsonObject,
-        ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {
+        ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {
           if (!authorizedRuleTypes.has(ruleTypeId) || authType !== params.authorizationEntity) {
             throw Boom.forbidden(
-              getUnauthorizedMessage(ruleTypeId, consumer, params.operation, authType)
-            );
-          }
-
-          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId)!;
-          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
-
-          if (!authorizedConsumers[consumer]) {
-            throw Boom.forbidden(
-              getUnauthorizedMessage(
-                ruleTypeId,
-                consumer,
-                params.operation,
-                params.authorizationEntity
-              )
+              getUnauthorizedMessage([{ ruleTypeId, consumers: [] }], params.operation, authType)
             );
           }
         },
@@ -339,7 +466,7 @@ export class AlertingAuthorization {
 
     return {
       filter: asFiltersBySpaceId(params.filterOpts, this.spaceId) as JsonObject,
-      ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, authType: string) => {},
+      ensureRuleTypeIsAuthorized: (ruleTypeId: string, authType: string) => {},
     };
   }
 
@@ -362,7 +489,7 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Map<string, { authorizedConsumers: AuthorizedConsumers }>;
   }> {
-    const { operations, authorizationEntity } = params;
+    const { operations, authorizationEntity, namespaces } = params;
     const ruleTypeIds = params.ruleTypeIds
       ? new Set(params.ruleTypeIds)
       : new Set(this.ruleTypeRegistry.getAllTypes());
@@ -374,10 +501,6 @@ export class AlertingAuthorization {
 
     if (this.authorization && this.shouldCheckAuthorization()) {
       const authorizedRuleTypes = new Map<string, { authorizedConsumers: AuthorizedConsumers }>();
-
-      const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
-        this.request
-      );
 
       for (const ruleTypeId of ruleTypeIds) {
         /**
@@ -410,31 +533,44 @@ export class AlertingAuthorization {
         }
       }
 
-      const { username, hasAllRequested, privileges } = await checkPrivileges({
+      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const spaces = (namespaces ? namespaces : [this.spaceId]).map((space) =>
+        space === undefined ? 'default' : space
+      );
+
+      const { username, hasAllRequested, privileges } = await checkPrivileges.atSpaces(spaces, {
         kibana: [...requiredPrivileges.keys()],
       });
 
+      const privilegeAuthResults = new Map<string, boolean[]>();
       for (const { authorized, privilege } of privileges.kibana) {
-        if (authorized && requiredPrivileges.has(privilege)) {
-          const { ruleTypeId, consumer, operation } = requiredPrivileges.get(privilege)!;
-
-          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId) ?? {
-            authorizedConsumers: {},
-          };
-
-          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
-          const mergedOperations = mergeHasPrivileges(
-            getPrivilegesFromOperation(operation),
-            authorizedConsumers[consumer]
-          );
-
-          authorizedRuleTypes.set(ruleTypeId, {
-            authorizedConsumers: {
-              ...authorizedConsumers,
-              [consumer]: mergedOperations,
-            },
-          });
+        if (requiredPrivileges.has(privilege)) {
+          const auths = privilegeAuthResults.get(privilege) ?? [];
+          auths.push(authorized);
+          privilegeAuthResults.set(privilege, auths);
         }
+      }
+
+      for (const [privilege, auths] of privilegeAuthResults) {
+        if (!auths.every(Boolean)) continue;
+
+        const { ruleTypeId, consumer, operation } = requiredPrivileges.get(privilege)!;
+        const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId) ?? {
+          authorizedConsumers: {},
+        };
+
+        const authorizedConsumers = authorizedRuleType.authorizedConsumers;
+        const mergedOperations = mergeHasPrivileges(
+          getPrivilegesFromOperation(operation),
+          authorizedConsumers[consumer]
+        );
+
+        authorizedRuleTypes.set(ruleTypeId, {
+          authorizedConsumers: {
+            ...authorizedConsumers,
+            [consumer]: mergedOperations,
+          },
+        });
       }
 
       return {
@@ -496,10 +632,15 @@ function getConsumersWithPrivileges(
 }
 
 function getUnauthorizedMessage(
-  ruleTypeId: string,
-  scope: string,
+  ruleTypeIdConsumersPairs: BulkEnsureAuthorizedOpts['ruleTypeIdConsumersPairs'],
   operation: string,
   entity: string
 ): string {
-  return `Unauthorized by "${scope}" to ${operation} "${ruleTypeId}" ${entity}`;
+  const allConsumers = ruleTypeIdConsumersPairs.flatMap(({ consumers }) => consumers);
+  const allRuleTypeIds = ruleTypeIdConsumersPairs.map(({ ruleTypeId }) => ruleTypeId);
+
+  const ruleTypeIdsMessage = allRuleTypeIds.length <= 0 ? 'any' : `${allRuleTypeIds.join(', ')}`;
+  const consumersMessage = allConsumers.length <= 0 ? 'any consumer' : `${allConsumers.join(', ')}`;
+
+  return `Unauthorized by "${consumersMessage}" to ${operation} "${ruleTypeIdsMessage}" ${entity}`;
 }

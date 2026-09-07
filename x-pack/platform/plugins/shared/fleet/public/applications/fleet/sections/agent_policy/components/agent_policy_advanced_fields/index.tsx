@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useMemo, Suspense, useCallback } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -24,6 +24,9 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiSwitch,
+  EuiButtonEmpty,
+  EuiConfirmModal,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -53,8 +56,10 @@ import { UninstallCommandFlyout } from '../../../../../../components';
 
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { useAgentPolicyFormContext } from '../agent_policy_form';
 import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
+
+import { AgentPolicyCustomFields } from '../../../../components/custom_fields';
+import { sendRotateUninstallToken } from '../../../../../../hooks/use_request/uninstall_tokens';
 
 import {
   useOutputOptions,
@@ -62,7 +67,6 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
-import { CustomFields } from './custom_fields';
 import { SpaceSelector } from './space_selector';
 import { AgentPolicyAdvancedMonitoringOptions } from './advanced_monitoring';
 
@@ -71,6 +75,7 @@ interface Props {
   allowedNamespacePrefixes?: string[];
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
+  setInvalidSpaceError?: (hasErrors: boolean) => void;
   disabled?: boolean;
 }
 
@@ -78,9 +83,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   agentPolicy,
   updateAgentPolicy,
   validation,
+  setInvalidSpaceError,
   disabled = false,
 }) => {
-  const { docLinks } = useStartServices();
+  const { docLinks, notifications } = useStartServices();
   const { spaceId, isSpaceAwarenessEnabled } = useFleetStatus();
 
   const { getAbsolutePath } = useLink();
@@ -122,7 +128,35 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const monitoringCheckboxIdSuffix = Date.now();
 
   const licenseService = useLicense();
+  const rotateConfirmModalTitleId = useGeneratedHtmlId();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+  const [isRotateConfirmOpen, setIsRotateConfirmOpen] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
+
+  const handleRotateToken = useCallback(async () => {
+    if (!agentPolicy.id) return;
+    setIsRotating(true);
+    try {
+      const { error } = await sendRotateUninstallToken(agentPolicy.id);
+      if (error) {
+        throw error;
+      }
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.agentPolicyForm.rotateTokenSuccessMessage', {
+          defaultMessage: 'Uninstall token rotated successfully.',
+        })
+      );
+    } catch (e) {
+      notifications.toasts.addError(e, {
+        title: i18n.translate('xpack.fleet.agentPolicyForm.rotateTokenErrorTitle', {
+          defaultMessage: 'Failed to rotate uninstall token',
+        }),
+      });
+    } finally {
+      setIsRotating(false);
+      setIsRotateConfirmOpen(false);
+    }
+  }, [agentPolicy.id, notifications.toasts]);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
   const isManagedPolicy = agentPolicy.is_managed === true;
   const isManagedOrAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
@@ -131,8 +165,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
     () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
-
-  const agentPolicyFormContext = useAgentPolicyFormContext();
 
   const AgentTamperProtectionSectionContent = useMemo(
     () => (
@@ -189,28 +221,88 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         {agentPolicy.id && (
           <>
             <EuiSpacer size="s" />
-            <MissingPrivilegesToolTip
-              missingPrivilege={
-                policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
-                  ? 'Agents All'
-                  : undefined
-              }
-              position="left"
-            >
-              <EuiLink
-                onClick={() => {
-                  setIsUninstallCommandFlyoutOpen(true);
-                }}
-                disabled={
-                  !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
-                }
-                data-test-subj="uninstallCommandLink"
+            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+              <EuiFlexItem grow={false}>
+                <MissingPrivilegesToolTip
+                  missingPrivilege={
+                    policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
+                      ? 'Agents All'
+                      : undefined
+                  }
+                  position="left"
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="commandLine"
+                    onClick={() => {
+                      setIsUninstallCommandFlyoutOpen(true);
+                    }}
+                    disabled={
+                      !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
+                    }
+                    data-test-subj="uninstallCommandLink"
+                  >
+                    {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                      defaultMessage: 'Get uninstall command',
+                    })}
+                  </EuiButtonEmpty>
+                </MissingPrivilegesToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <MissingPrivilegesToolTip
+                  missingPrivilege={
+                    policyHasElasticDefend && agentPolicy.is_protected && !authz.fleet.allAgents
+                      ? 'Agents All'
+                      : undefined
+                  }
+                  position="left"
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    color="danger"
+                    iconType="refresh"
+                    isLoading={isRotating}
+                    onClick={() => setIsRotateConfirmOpen(true)}
+                    disabled={
+                      !agentPolicy.is_protected || !policyHasElasticDefend || !authz.fleet.allAgents
+                    }
+                    data-test-subj="rotateUninstallTokenButton"
+                  >
+                    {i18n.translate('xpack.fleet.agentPolicyForm.rotateUninstallTokenButton', {
+                      defaultMessage: 'Rotate uninstall token',
+                    })}
+                  </EuiButtonEmpty>
+                </MissingPrivilegesToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {isRotateConfirmOpen && (
+              <EuiConfirmModal
+                title={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.title',
+                  { defaultMessage: 'Rotate uninstall token?' }
+                )}
+                titleProps={{ id: rotateConfirmModalTitleId }}
+                aria-labelledby={rotateConfirmModalTitleId}
+                onCancel={() => setIsRotateConfirmOpen(false)}
+                onConfirm={handleRotateToken}
+                cancelButtonText={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.cancelButton',
+                  { defaultMessage: 'Cancel' }
+                )}
+                confirmButtonText={i18n.translate(
+                  'xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.confirmButton',
+                  { defaultMessage: 'Rotate token' }
+                )}
+                buttonColor="danger"
+                isLoading={isRotating}
+                data-test-subj="rotateUninstallTokenConfirmModal"
               >
-                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-                  defaultMessage: 'Get uninstall command',
-                })}
-              </EuiLink>
-            </MissingPrivilegesToolTip>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.rotateUninstallTokenModal.body"
+                  defaultMessage="This will generate a new uninstall token and push an updated policy to all agents. The previous token will no longer be valid. To uninstall agents that are still using the old policy, you need to use the new uninstall command."
+                />
+              </EuiConfirmModal>
+            )}
           </>
         )}
       </EuiDescribedFormGroup>
@@ -222,6 +314,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
       updateAgentPolicy,
       disabled,
       authz.fleet.allAgents,
+      isRotateConfirmOpen,
+      isRotating,
+      handleRotateToken,
+      rotateConfirmModalTitleId,
     ]
   );
 
@@ -346,7 +442,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ? agentPolicy.space_ids.filter((id) => id !== UNKNOWN_SPACE)
                 : [spaceId || 'default']
             }
-            setInvalidSpaceError={agentPolicyFormContext?.setInvalidSpaceError}
+            setInvalidSpaceError={setInvalidSpaceError}
             onChange={(newValue) => {
               if (newValue.length === 0) {
                 return;
@@ -390,12 +486,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           error={validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(validation.namespace)}
           isDisabled={disabled}
+          aria-label="defaultNamespaceRow"
         >
           <EuiComboBox
+            data-test-subj="defaultNamespaceInput"
             fullWidth
             singleSelection
             noSuggestions
-            isDisabled={disabled}
+            isDisabled={disabled || agentPolicy.is_managed === true}
             selectedOptions={agentPolicy.namespace ? [{ label: agentPolicy.namespace }] : []}
             onCreateOption={(value: string) => {
               updateAgentPolicy({ namespace: value });
@@ -410,7 +508,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      <CustomFields
+      <AgentPolicyCustomFields
         updateAgentPolicy={updateAgentPolicy}
         agentPolicy={agentPolicy}
         isDisabled={disabled || agentPolicy.is_managed === true}
@@ -545,7 +643,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                     />
                   }
                 >
-                  <EuiBadge color="warning">
+                  <EuiBadge color="warning" tabIndex={0}>
                     <FormattedMessage
                       id="xpack.fleet.agentPolicyForm.inactivityTimeoutBadge"
                       defaultMessage="Warning"
@@ -614,6 +712,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isDisabled={disabled}
           isInvalid={Boolean(touchedFields.fleet_server_host_id && validation.fleet_server_host_id)}
+          aria-label="fleet server hosts options"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -655,6 +754,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent integrations"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -696,6 +796,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
           isDisabled={disabled}
+          aria-label="outputs options for agent monitoring"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}
@@ -738,6 +839,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
           isDisabled={disabled || isManagedOrAgentlessPolicy}
+          aria-label="download source options for agent binaries"
         >
           <EuiSuperSelect
             disabled={disabled || isManagedOrAgentlessPolicy}

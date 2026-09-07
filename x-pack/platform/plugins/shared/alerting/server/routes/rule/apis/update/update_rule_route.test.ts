@@ -130,7 +130,6 @@ describe('updateRuleRoute', () => {
         alerts_filter: {
           query: {
             kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
             filters: [],
           },
         },
@@ -218,7 +217,6 @@ describe('updateRuleRoute', () => {
             "throttle": "10m",
           },
           "id": "1",
-          "isFlappingEnabled": true,
         },
       ]
     `);
@@ -357,14 +355,9 @@ describe('updateRuleRoute', () => {
         ['ok']
       );
 
-      await handler(context, req, res);
-
-      expect(res.badRequest).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Cannot update rule of type "test.internal-rule-type" because it is internally managed.',
-        },
-      });
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { selectDynamicSettings } from '../state/selectors';
 import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
@@ -106,7 +106,7 @@ export const SettingsPage: React.FC = () => {
 
   const cannotEditNotice = canEdit ? null : (
     <>
-      <EuiCallOut title={Translations.settings.editNoticeTitle}>
+      <EuiCallOut announceOnMount title={Translations.settings.editNoticeTitle}>
         {Translations.settings.editNoticeText}
       </EuiCallOut>
       <EuiSpacer size="s" />

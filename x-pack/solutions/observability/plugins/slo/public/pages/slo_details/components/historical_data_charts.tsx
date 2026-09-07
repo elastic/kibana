@@ -16,17 +16,17 @@ import { SliChartPanel } from './sli_chart_panel';
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
-  hideMetadata?: boolean;
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
+  hideHeaderDurationLabel?: boolean;
 }
 
 export function HistoricalDataCharts({
   slo,
   range,
   isAutoRefreshing,
-  hideMetadata = false,
   onBrushed,
+  hideHeaderDurationLabel = false,
 }: Props) {
   const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
     sloList: [slo],
@@ -45,23 +45,28 @@ export function HistoricalDataCharts({
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
+  const timeRange = range
+    ? { from: range.from.toISOString(), to: range.to.toISOString() }
+    : undefined;
+
   return (
     <>
       <EuiFlexItem>
         <SliChartPanel
+          slo={slo}
           data={historicalSliData}
           isLoading={isLoading}
-          slo={slo}
-          hideMetadata={hideMetadata}
+          timeRange={timeRange}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>
       <EuiFlexItem>
         <ErrorBudgetChartPanel
-          data={errorBudgetBurnDownData}
-          isLoading={isLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
+          isLoading={isLoading}
+          data={errorBudgetBurnDownData}
+          hideHeaderDurationLabel={hideHeaderDurationLabel}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>

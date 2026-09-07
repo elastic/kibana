@@ -19,7 +19,7 @@ export const FLYOUT_ADD_TO_EXISTING_CASE_ITEM = getDataTestSubjectSelector(
 export const FLYOUT_ADD_TO_NEW_CASE_ITEM = getDataTestSubjectSelector(
   'tiIndicatorFlyoutAddToNewCaseContextMenu'
 );
-export const SELECT_EXISTING_CASE = `[class="eui-textTruncate"]`;
+export const SELECT_EXISTING_CASE = `.euiButton`;
 export const VIEW_CASE_TOASTER_LINK = getDataTestSubjectSelector('toaster-content-case-view-link');
 export const CASE_COMMENT_EXTERNAL_REFERENCE = getDataTestSubjectSelector(
   'comment-externalReference-indicator'

@@ -13,7 +13,6 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import {
   API_VERSIONS,
   APP_ID,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   MONITORING_ENTITY_SOURCE_URL,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
@@ -22,16 +21,18 @@ import {
   type UpdateEntitySourceResponse,
   UpdateEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics';
-import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createEngineStatusService } from '../../engine/status_service';
 import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
 import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
+import { withMinimumLicense } from '../../../utils/with_minimum_license';
+import { validateIndexPermissions } from '../../../watchlists/entity_sources/entity_source_api_key';
 
 export const updateMonitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  config: EntityAnalyticsRoutesDeps['config']
+  { experimentalFeatures }: EntityAnalyticsRoutesDeps['config'],
+  docLinks: EntityAnalyticsRoutesDeps['docLinks']
 ) => {
   router.versioned
     .put({
@@ -52,47 +53,72 @@ export const updateMonitoringEntitySourceRoute = (
             params: UpdateEntitySourceRequestParams,
           },
         },
+        ...(experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
-      async (context, request, response): Promise<IKibanaResponse<UpdateEntitySourceResponse>> => {
-        const siemResponse = buildSiemResponse(response);
-
-        try {
-          await assertAdvancedSettingsEnabled(
-            await context.core,
-            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
-          );
-          const secSol = await context.securitySolution;
-          const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.update({ ...request.body, id: request.params.id });
-
-          const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
-          const soClient = privMonDataClient.getScopedSoClient(request, {
-            includedHiddenTypes: [
-              PrivilegeMonitoringApiKeyType.name,
-              monitoringEntitySourceType.name,
-            ],
-          });
-
-          const statusService = createEngineStatusService(privMonDataClient, soClient);
-          const engineStatus = await statusService.get();
+      withMinimumLicense(
+        async (
+          context,
+          request,
+          response
+        ): Promise<IKibanaResponse<UpdateEntitySourceResponse>> => {
+          const siemResponse = buildSiemResponse(response);
 
           try {
-            if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
-              await statusService.scheduleNow();
-            }
-          } catch (e) {
-            logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
-          }
+            const secSol = await context.securitySolution;
+            const client = secSol.getMonitoringEntitySourceDataClient();
 
-          return response.ok({ body });
-        } catch (e) {
-          const error = transformError(e);
-          logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
-          return siemResponse.error({
-            statusCode: error.statusCode,
-            body: error.message,
-          });
-        }
-      }
+            const { elasticsearch } = await context.core;
+            const effectiveIndexPattern =
+              request.body.indexPattern ?? (await client.get(request.params.id))?.indexPattern;
+            if (effectiveIndexPattern) {
+              await validateIndexPermissions(
+                elasticsearch.client.asCurrentUser,
+                effectiveIndexPattern
+              );
+            }
+
+            const body = await client.update({ ...request.body, id: request.params.id });
+
+            const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+            const soClient = privMonDataClient.getScopedSoClient(request, {
+              includedHiddenTypes: [
+                PrivilegeMonitoringApiKeyType.name,
+                monitoringEntitySourceType.name,
+              ],
+            });
+
+            const statusService = createEngineStatusService(privMonDataClient, soClient);
+            const engineStatus = await statusService.get();
+
+            try {
+              if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+                await statusService.scheduleNow();
+              }
+            } catch (e) {
+              logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
+            }
+
+            return response.ok({ body });
+          } catch (e) {
+            const error = transformError(e);
+            logger.error(`Error creating monitoring entity source sync config: ${error.message}`);
+            return siemResponse.error({
+              statusCode: error.statusCode,
+              body: error.message,
+            });
+          }
+        },
+        'platinum'
+      )
     );
 };

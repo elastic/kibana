@@ -6,13 +6,15 @@
  */
 
 import {
-  EuiButtonEmpty,
+  EuiCard,
   useEuiTheme,
+  EuiIconTip,
+  EuiStat,
   EuiText,
   EuiSpacer,
+  EuiThemeProvider,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -25,6 +27,8 @@ export function Card({
   kpiValue,
   footer,
   onClick,
+  isLoading = false,
+  dataTestSubjTitle,
 }: {
   isDisabled?: boolean;
   isSelected?: boolean;
@@ -33,60 +37,92 @@ export function Card({
   kpiValue: string;
   footer: React.ReactNode;
   onClick?: () => void;
+  isLoading?: boolean;
+  dataTestSubjTitle?: string;
 }) {
   const { euiTheme } = useEuiTheme();
+  const isCardDisabled = Boolean(isDisabled) || Boolean(isSelected);
+  const isClickable = Boolean(onClick) && !isCardDisabled;
 
-  const style = css`
+  const cardStyle = css`
     height: 100%;
     min-width: 300px;
+    border-radius: ${euiTheme.border.radius.medium};
     border: ${isSelected
-      ? `${euiTheme.border.width.thick} solid ${euiTheme.colors.borderStrongPrimary}`
+      ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
       : 'none'};
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
+    cursor: ${isClickable ? 'pointer' : 'default'};
   `;
 
-  const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${title}`;
+  const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${dataTestSubjTitle || title}`;
+  const displayKpiValue = isLoading ? '--' : kpiValue;
 
   const content = (
     <>
-      <EuiText textAlign="left">
-        {titleTooltipContent ? (
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>{title}</EuiFlexItem>
-            <EuiFlexItem>
-              <EuiIconTip css={{ minWidth: '300px' }} content={titleTooltipContent} size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          title
-        )}
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
-        <h2>{kpiValue}</h2>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <EuiText textAlign="left">{footer}</EuiText>
+      <EuiStat
+        title={
+          <span data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
+            {displayKpiValue}
+          </span>
+        }
+        titleColor={isSelected ? 'primary' : 'default'}
+        titleSize="m"
+        descriptionElement="div"
+        css={css`
+          color: ${isSelected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        `}
+        description={
+          <>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-weight: ${euiTheme.font.weight.semiBold};
+                  `}
+                >
+                  {title}
+                </EuiText>
+              </EuiFlexItem>
+              {titleTooltipContent && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    content={
+                      <EuiThemeProvider colorMode="dark">{titleTooltipContent}</EuiThemeProvider>
+                    }
+                    size="m"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+          </>
+        }
+        textAlign="left"
+      >
+        <EuiSpacer size="xs" />
+
+        {footer}
+      </EuiStat>
     </>
   );
 
-  return onClick ? (
-    <EuiButtonEmpty
-      isDisabled={isDisabled}
-      onClick={onClick}
-      css={style}
-      contentProps={{
-        css: css`
-          justify-content: flex-start;
-        `,
-      }}
+  return (
+    <EuiCard
+      display="plain"
+      hasBorder={false}
+      paddingSize="m"
+      isDisabled={onClick ? isCardDisabled : undefined}
+      onClick={isClickable ? onClick : undefined}
+      css={cardStyle}
+      aria-pressed={isSelected}
+      title={content}
+      titleElement="span"
+      textAlign="left"
+      aria-label={title}
       data-test-subj={dataTestSubject}
-    >
-      {content}
-    </EuiButtonEmpty>
-  ) : (
-    <div css={style} data-test-subj={dataTestSubject}>
-      {content}
-    </div>
+    />
   );
 }

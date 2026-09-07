@@ -71,6 +71,7 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
+      preferCached: Joi.boolean().optional(),
       waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
       waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
@@ -121,6 +122,22 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+
+        // Deadline for a single HTTP request made through the FTR supertest wrappers. Without
+        // one, a request that stalls (rather than being refused) hangs until the enclosing
+        // mocha timeout fires, at which point the FTR aborts the whole config -- so a single
+        // stalled request is reported as every remaining test in the suite failing.
+        //
+        // 0 disables it, which is the default: how long a single legitimate request takes
+        // varies enormously between suites (some deliberately budget minutes for ML jobs or
+        // agent inference), so a global ceiling would be guesswork. Opt in per FTR config:
+        //
+        //   timeouts: { request: 30_000 },
+        //
+        // and keep the value comfortably below that config's mocha timeouts so a stall
+        // surfaces as a request error rather than a suite-wide abort.
+        request: Joi.number().default(0),
+
         kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
@@ -150,6 +167,16 @@ export const schema = Joi.object()
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
+        // Timeout for hooks (before/beforeEach/after/afterEach + FTR lifecycle triggers)
+        // Overridable per-config or inside a hook body via this.timeout().
+        hookTimeout: Joi.number().default(INSPECTING ? 360000 * 100 : 120_000),
+        // Abort the whole config run on the first Mocha timeout (test or hook) instead of
+        // running remaining tests and waiting out the full teardown cascade.
+        abortOnTimeout: Joi.boolean().default(true),
+        // Bound on final cleanup (service/lifecycle teardown) once aborting, so a hung
+        // handler (e.g. a WebDriver call against a dead browser/session) can't stall
+        // reclaiming the CI agent.
+        abortCleanupTimeout: Joi.number().default(20_000),
         ui: Joi.string().default('bdd'),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()
@@ -229,6 +256,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 
@@ -236,6 +264,7 @@ export const schema = Joi.object()
       .keys({
         host: Joi.string().ip(),
         resources: Joi.array().items(Joi.string()).default([]),
+        uiam: Joi.boolean().default(false),
       })
       .default(),
 
@@ -307,6 +336,7 @@ export const schema = Joi.object()
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
+        globalDefaults: Joi.object().unknown(true),
       })
       .default(),
 
@@ -351,9 +381,18 @@ export const schema = Joi.object()
           })
           .default(['superuser']),
         disableTestUser: Joi.boolean(),
+        cookieLogin: Joi.boolean().default(true),
       })
       .default(),
 
     dockerServers: Joi.object().pattern(Joi.string(), dockerServerSchema()).default(),
+
+    // refresh_interval to be used on existing system indices (eg .kibana*), existing common indices (eg logs*)
+    // and all templates created during tests.
+    // defaults to 50ms if not overriden, otherwise accepts a duration (eg '50ms', '1s') or false to opt out the optimization.
+    indexRefreshInterval: Joi.alternatives()
+      .optional()
+      .try(Joi.string(), Joi.boolean().valid(false))
+      .default('50ms'),
   })
   .default();

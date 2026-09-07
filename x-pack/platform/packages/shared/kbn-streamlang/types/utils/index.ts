@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ZodObject, ZodRawShape } from '@kbn/zod';
+export * from './dissect_patterns';
+export * from './grok_patterns';
+export * from './grok_to_regex';
+export * from './painless_field_access';
+export * from './painless_encoding';
+
+import type { z, ZodObject } from '@kbn/zod/v4';
 
 // Utility type to rename multiple fields in a type
 export type RenameFields<
@@ -20,23 +26,27 @@ export type RenameFieldsAndRemoveAction<
   Renames extends { [K in keyof Renames]: K extends keyof T ? string : never }
 > = Omit<RenameFields<T, Renames>, 'action'>;
 
+/** Zod object shape: record of string keys to Zod types */
+type ZodObjectShape = Record<string, z.ZodType>;
+
 /**
  * Zod helper to rename multiple fields in a Zod object schema.
  */
-export function zodRenameFields<T extends ZodObject<any>, Renames extends Record<string, string>>(
-  schema: T,
-  renames: Renames
-): ZodObject<any> {
+export function zodRenameFields<
+  T extends ZodObject<ZodObjectShape>,
+  Renames extends Record<string, string>
+>(schema: T, renames: Renames): ZodObject<ZodObjectShape> {
   // Remove old fields
   const newSchema = schema.omit(
     Object.keys(renames).reduce((acc, key) => ({ ...acc, [key]: true }), {} as Record<string, true>)
   );
   // Add new fields with the same type as the old ones
-  const extensions: ZodRawShape = {};
+  const extensions: Record<string, z.ZodType> = {};
+  const shape = schema.shape as ZodObjectShape;
   for (const oldKey in renames) {
     if (Object.prototype.hasOwnProperty.call(renames, oldKey)) {
       const newKey = renames[oldKey];
-      extensions[newKey] = (schema.shape as any)[oldKey];
+      extensions[newKey] = shape[oldKey];
     }
   }
   return newSchema.extend(extensions);
@@ -46,8 +56,8 @@ export function zodRenameFields<T extends ZodObject<any>, Renames extends Record
  * Zod helper to rename fields and remove the 'action' property.
  */
 export function zodRenameFieldsAndRemoveAction<
-  T extends ZodObject<any>,
+  T extends ZodObject<ZodObjectShape>,
   Renames extends Record<string, string>
->(schema: T, renames: Renames): ZodObject<any> {
+>(schema: T, renames: Renames): ZodObject<ZodObjectShape> {
   return zodRenameFields(schema, renames).omit({ action: true });
 }

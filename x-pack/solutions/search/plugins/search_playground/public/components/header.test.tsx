@@ -10,14 +10,24 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
 import { Header } from './header';
 import { PlaygroundFormFields, PlaygroundPageMode, PlaygroundViewMode } from '../types';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiForm } from '@elastic/eui';
+import { EuiForm, EuiThemeProvider } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 
 jest.mock('../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({}),
+}));
+
+jest.mock('../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: {
+      history: { push: jest.fn() },
+      uiActions: null,
+    },
+  }),
 }));
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
@@ -50,15 +60,19 @@ const MockPlaygroundForm = ({
   children: React.ReactElement;
   handleSubmit: React.FormEventHandler;
 }) => (
-  <MockFormProvider>
-    <EuiForm
-      onSubmit={handleSubmit}
-      data-test-subj="chatPage"
-      css={{ display: 'flex', flexGrow: 1 }}
-    >
-      {children}
-    </EuiForm>
-  </MockFormProvider>
+  <MockChromeContextProvider>
+    <EuiThemeProvider>
+      <MockFormProvider>
+        <EuiForm
+          onSubmit={handleSubmit}
+          data-test-subj="chatPage"
+          css={{ display: 'flex', flexGrow: 1 }}
+        >
+          {children}
+        </EuiForm>
+      </MockFormProvider>
+    </EuiThemeProvider>
+  </MockChromeContextProvider>
 );
 
 describe('Header', () => {
@@ -70,7 +84,6 @@ describe('Header', () => {
             pageMode={PlaygroundPageMode.chat}
             viewMode={PlaygroundViewMode.preview}
             onModeChange={() => {}}
-            onSelectPageModeChange={() => {}}
           />
         </MockPlaygroundForm>
       </IntlProvider>
@@ -88,7 +101,6 @@ describe('Header', () => {
             pageMode={PlaygroundPageMode.search}
             viewMode={PlaygroundViewMode.preview}
             onModeChange={() => {}}
-            onSelectPageModeChange={() => {}}
           />
         </MockPlaygroundForm>
       </IntlProvider>

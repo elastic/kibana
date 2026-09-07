@@ -12,19 +12,21 @@ import type {
   UserSettingsService,
   InternalUserSettingsServiceSetup,
 } from '@kbn/core-user-settings-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createSetupContractMock = (): jest.Mocked<InternalUserSettingsServiceSetup> => {
   return {
     getUserSettingDarkMode: jest.fn(),
+    getUserSettingLocale: jest.fn(),
+    getUserSettingRememberSelectedSpace: jest.fn(),
   };
 };
 
 const createMock = (): jest.Mocked<PublicMethodsOf<UserSettingsService>> => {
-  const mock = {
-    setup: jest.fn(),
+  const mock = lazyObject({
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
     start: jest.fn(),
-  };
-  mock.setup.mockReturnValue(createSetupContractMock());
+  });
   return mock;
 };
 

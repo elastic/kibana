@@ -202,7 +202,11 @@ export class AlertUtils {
 
   public getMuteInstanceRequest(alertId: string, instanceId: string) {
     const request = this.supertestWithoutAuth
-      .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/alert/${instanceId}/_mute`)
+      .post(
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerting/rule/${alertId}/alert/${instanceId}/_mute?validate_alerts_existence=false`
+      )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
@@ -214,6 +218,37 @@ export class AlertUtils {
     const request = this.supertestWithoutAuth
       .post(
         `${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/alert/${instanceId}/_unmute`
+      )
+      .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getSnoozeInstanceRequest(
+    alertId: string,
+    instanceId: string,
+    body: { expires_at?: string; conditions?: unknown[]; condition_operator?: string }
+  ) {
+    const request = this.supertestWithoutAuth
+      .post(
+        `${getUrlPrefix(
+          this.space.id
+        )}/api/alerting/rule/${alertId}/alert/${instanceId}/_snooze?validate_alerts_existence=false`
+      )
+      .set('kbn-xsrf', 'foo')
+      .send(body);
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getUnsnoozeInstanceRequest(alertId: string, instanceId: string) {
+    const request = this.supertestWithoutAuth
+      .post(
+        `${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/alert/${instanceId}/_unsnooze`
       )
       .set('kbn-xsrf', 'foo');
     if (this.user) {
@@ -527,13 +562,16 @@ export class AlertUtils {
     return response;
   }
 
-  public async runSoon(ruleId: string) {
+  public async runSoon(ruleId: string, options?: { force?: boolean }) {
     let request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
       .set('kbn-xsrf', 'foo');
 
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
+    }
+    if (options?.force) {
+      request = request.query({ force: true });
     }
     return await request.send();
   }
@@ -579,6 +617,36 @@ export class AlertUtils {
     if (response.statusCode === 200 && objectRemover) {
       objectRemover.add(this.space.id, response.body.id, 'rule', 'alerting');
     }
+
+    return response;
+  }
+
+  public async deleteInternallyManagedRule(ruleId: string) {
+    let request = this.supertestWithoutAuth
+      .delete(`${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/internally_managed/${ruleId}`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send();
+
+    return response;
+  }
+
+  public async deleteAllInternallyManagedRules() {
+    let request = this.supertestWithoutAuth
+      .delete(`${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/internally_managed`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+
+    if (this.user) {
+      request = request.auth(this.user.username, this.user.password);
+    }
+
+    const response = await request.send();
 
     return response;
   }

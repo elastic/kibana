@@ -16,28 +16,32 @@ import type {
   TestResult,
 } from '@playwright/test/reporter';
 
-import path from 'node:path';
-import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
-import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  type CodeOwnersEntry,
   getCodeOwnersEntries,
   getOwningTeamsForPath,
+  type CodeOwnersEntry,
 } from '@kbn/code-owners';
+import { ToolingLog } from '@kbn/tooling-log';
+import path from 'node:path';
+import {
+  BROWSER_CONSOLE_ERRORS_ATTACHMENT,
+  SCOUT_REPORT_OUTPUT_ROOT,
+  ScoutTestTarget,
+} from '@kbn/scout-info';
+import {
+  excapeHtmlCharacters,
+  generateTestRunId,
+  getKibanaModuleData,
+  getRunCommand,
+  getTestTargetFromProcessArguments,
+  parseStdout,
+  stripFilePath,
+} from '../../../helpers';
 import type { TestFailure } from '../../report';
 import { ScoutFailureReport } from '../../report';
 import type { ScoutPlaywrightReporterOptions } from '../scout_playwright_reporter';
-import {
-  getRunTarget,
-  getPluginManifestData,
-  parseStdout,
-  generateTestRunId,
-  getTestIDForTitle,
-  stripRunCommand,
-  stripFilePath,
-  excapeHtmlCharacters,
-} from '../../../helpers';
+import { getTestIdentity } from '../test_identity';
+import { ScoutFailureTracker } from './failure_tracking';
 
 /**
  * Scout Failed Test reporter
@@ -47,11 +51,14 @@ export class ScoutFailedTestReporter implements Reporter {
   private readonly runId: string;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
   private readonly report: ScoutFailureReport;
-  private target: string;
-  private plugin: TestFailure['plugin'];
-  private command: string;
+  private readonly command: string;
+  private readonly testTarget: string;
+  private failureTracker?: ScoutFailureTracker;
+  private kibanaModule: TestFailure['kibanaModule'];
+  /** Root suite captured in `onBegin`; walked in `onEnd` to identify tests that ended up flaky. */
+  private suite?: Suite;
 
-  constructor(private reporterOptions: ScoutPlaywrightReporterOptions = {}) {
+  constructor(private readonly reporterOptions: ScoutPlaywrightReporterOptions = {}) {
     this.log = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
@@ -59,14 +66,23 @@ export class ScoutFailedTestReporter implements Reporter {
 
     this.report = new ScoutFailureReport(this.log);
     this.codeOwnersEntries = getCodeOwnersEntries();
-
     this.runId = this.reporterOptions.runId || generateTestRunId();
-    this.target = 'undefined'; // when '--grep' is not provided in the command line
-    this.command = stripRunCommand(process.argv);
+    this.command = getRunCommand();
+    this.testTarget =
+      (ScoutTestTarget.tryFromEnv() || getTestTargetFromProcessArguments())?.tag || 'unknown';
   }
 
   private getFileOwners(filePath: string): string[] {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+  }
+
+  private formatTestError(result: TestResult): TestFailure['error'] {
+    return {
+      message: result.error?.message ? stripFilePath(result.error.message) : undefined,
+      stack_trace: result.error?.stack
+        ? excapeHtmlCharacters(stripFilePath(result.error.stack))
+        : undefined,
+    };
   }
 
   public get reportRootPath(): string {
@@ -79,51 +95,100 @@ export class ScoutFailedTestReporter implements Reporter {
   }
 
   onBegin(config: FullConfig, suite: Suite) {
-    // Get plugin metadata from kibana.jsonc
+    this.suite = suite;
+
+    // Get plugin or package metadata from kibana.jsonc. Playwright 1.62+ fails the
+    // whole run if a reporter throws, so a missing/unresolvable manifest must not
+    // abort onBegin — leave kibanaModule unset and keep reporting failures.
     if (config.configFile) {
-      const metadata = getPluginManifestData(config.configFile);
-      this.plugin = {
-        id: metadata.plugin.id,
-        visibility: metadata.visibility,
-        group: metadata.group,
-      };
+      try {
+        const metadata = getKibanaModuleData(config.configFile);
+        this.kibanaModule = {
+          id: metadata.id,
+          type: metadata.type,
+          visibility: metadata.visibility,
+          group: metadata.group,
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        this.log.warning(
+          `Unable to resolve kibana.jsonc for Scout config ${config.configFile}: ${message}. Failure reports will omit kibanaModule metadata.`
+        );
+      }
     }
 
-    this.target = getRunTarget();
+    // Initialize failure tracker for GitHub issue integration
+    const reportRootPath = path.join(
+      SCOUT_REPORT_OUTPUT_ROOT,
+      `scout-playwright-test-failures-${this.runId}`
+    );
+    this.failureTracker = new ScoutFailureTracker(this.log, reportRootPath, this.runId);
   }
 
   onTestEnd(test: TestCase, result: TestResult) {
-    if (result.status === 'failed') {
-      this.report.logEvent({
-        id: getTestIDForTitle(test.titlePath().join(' ')),
-        suite: test.parent.title,
-        title: test.title,
-        target: this.target,
-        command: this.command,
-        location: stripFilePath(test.location.file),
-        owner: this.getFileOwners(path.relative(REPO_ROOT, test.location.file)),
-        plugin: this.plugin,
-        duration: result.duration,
-        error: {
-          message: result.error?.message ? stripFilePath(result.error.message) : undefined,
-          stack_trace: result.error?.stack
-            ? excapeHtmlCharacters(stripFilePath(result.error.stack))
-            : undefined,
-        },
-        stdout: result.stdout ? parseStdout(result.stdout) : undefined,
-        attachments: result.attachments.map((attachment) => ({
+    // Playwright marks timeouts and interruptions as separate statuses, but we still
+    // want to generate a Scout failure report artifact for them (e.g. global.setup.ts timeouts).
+    if (
+      result.status !== 'failed' &&
+      result.status !== 'timedOut' &&
+      result.status !== 'interrupted'
+    ) {
+      return;
+    }
+
+    const { id, filePath } = getTestIdentity(test);
+
+    const consoleErrorsAttachment = result.attachments.find(
+      (a) => a.name === BROWSER_CONSOLE_ERRORS_ATTACHMENT
+    );
+    const consoleErrors = consoleErrorsAttachment?.body?.toString('utf-8');
+
+    const testFailure: TestFailure = {
+      id,
+      suite: test.parent.title,
+      title: test.title,
+      target: this.testTarget,
+      command: this.command,
+      location: stripFilePath(test.location.file),
+      owner: this.getFileOwners(filePath),
+      kibanaModule: this.kibanaModule,
+      duration: result.duration,
+      error: this.formatTestError(result),
+      stdout: result.stdout ? parseStdout(result.stdout) : undefined,
+      consoleErrors,
+      attachments: result.attachments
+        .filter((a) => a.name !== BROWSER_CONSOLE_ERRORS_ATTACHMENT)
+        .map((attachment) => ({
           name: attachment.name,
           path: attachment.path,
           contentType: attachment.contentType,
         })),
-      });
-    }
+      // Zero-based attempt index; 0 is the first run, 1 the first retry.
+      attempt: result.retry,
+    };
+
+    this.report.logEvent(testFailure);
+
+    // Also track failure for GitHub issue integration
+    this.failureTracker?.addFailure(testFailure);
   }
 
   onEnd(result: FullResult) {
+    // A test's outcome is only knowable once every attempt has run, so flaky tests are excluded
+    // here rather than in onTestEnd. Their failing attempt still stays in the report artifact
+    // above (useful debugging material); only the GitHub-issue tracker excludes them, since it
+    // shouldn't open issues for tests that ultimately passed.
+    const flakyTestIds = new Set(
+      (this.suite?.allTests() ?? [])
+        .filter((test) => test.outcome() === 'flaky')
+        .map((test) => getTestIdentity(test).id)
+    );
+
     // Save & conclude the report
     try {
       this.report.save(this.reportRootPath);
+      // Save failure tracking file for GitHub issue integration
+      this.failureTracker?.save({ excludeTestIds: flakyTestIds });
     } finally {
       this.report.conclude();
     }

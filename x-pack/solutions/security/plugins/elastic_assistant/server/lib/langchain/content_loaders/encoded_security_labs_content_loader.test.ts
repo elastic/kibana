@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { EncodedSecurityLabsContentLoader } from './encoded_security_labs_content_loader';
 import path, { resolve } from 'path';
-import globby from 'globby';
+import { globbySync } from 'globby';
 import { PLAIN_TEXT_FILE_MICROMATCH_PATTERN } from '@kbn/ai-security-labs-content';
 
 const directoryPath = path.join(__dirname, '../../../knowledge_base/security_labs');
-const plainTextFiles: string[] = globby.sync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
+const plainTextFiles: string[] = globbySync(PLAIN_TEXT_FILE_MICROMATCH_PATTERN, {
   cwd: directoryPath,
 });
 

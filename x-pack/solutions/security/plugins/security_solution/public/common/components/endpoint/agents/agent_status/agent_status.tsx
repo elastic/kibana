@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 import { getAgentStatusText } from './translations';
 import { getEmptyTagValue } from '../../../empty_value';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
@@ -16,12 +16,6 @@ import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../../management/pages/endpoint_hosts/view/host_constants';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
 import type { AgentStatusInfo } from '../../../../../../common/endpoint/types';
-
-const EuiFlexGroupStyled = styled(EuiFlexGroup)`
-  .isolation-status {
-    margin-left: ${({ theme }) => theme.eui.euiSizeS};
-  }
-`;
 
 export interface AgentStatusProps {
   agentType: ResponseActionAgentType;
@@ -51,6 +45,7 @@ export interface AgentStatusProps {
  */
 export const AgentStatus = React.memo(
   ({ agentId, agentType, statusInfo, 'data-test-subj': dataTestSubj }: AgentStatusProps) => {
+    const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const enableApiCall = useMemo(() => {
       return !statusInfo || !agentId;
@@ -80,7 +75,7 @@ export const AgentStatus = React.memo(
     }, [agentStatus?.pendingActions]);
 
     return (
-      <EuiFlexGroupStyled
+      <EuiFlexGroup
         gutterSize="none"
         responsive={false}
         className="eui-textTruncate"
@@ -100,7 +95,13 @@ export const AgentStatus = React.memo(
           )}
         </EuiFlexItem>
         {(isCurrentlyIsolated || hasPendingActions) && (
-          <EuiFlexItem grow={false} className="eui-textTruncate isolation-status">
+          <EuiFlexItem
+            grow={false}
+            className="eui-textTruncate"
+            css={css`
+              margin-left: ${euiTheme.size.s};
+            `}
+          >
             <AgentResponseActionsStatus
               data-test-subj={getTestId('actionStatuses')}
               isIsolated={isCurrentlyIsolated}
@@ -108,7 +109,7 @@ export const AgentStatus = React.memo(
             />
           </EuiFlexItem>
         )}
-      </EuiFlexGroupStyled>
+      </EuiFlexGroup>
     );
   }
 );

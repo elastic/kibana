@@ -7,10 +7,7 @@
 import expect from 'expect';
 import { BulkRevertSkipReasonEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  deleteAllRules,
-  waitForRulePartialFailure,
-} from '../../../../../../config/services/detections_response';
+import { deleteAllRules, waitForRulePartialFailure } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -24,7 +21,7 @@ import { revertPrebuiltRule } from '../../../../utils/rules/prebuilt_rules/rever
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
-  const securitySolutionApi = getService('securitySolutionApi');
+  const detectionsApi = getService('detectionsApi');
   const log = getService('log');
 
   const ruleAsset = createRuleAssetSavedObject({
@@ -49,13 +46,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('reverts a customized prebuilt rule to original Elastic version', async () => {
-        const { body: nonCustomizedPrebuiltRule } = await securitySolutionApi
+        const { body: nonCustomizedPrebuiltRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule_1' },
           })
           .expect(200);
 
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+        const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
           body: { rule_id: 'rule_1', description: 'new description' },
         });
 
@@ -75,6 +72,8 @@ export default ({ getService }: FtrProviderContext): void => {
                   rule_source: {
                     is_customized: false,
                     type: 'external',
+                    customized_fields: [],
+                    has_base_version: true,
                   },
                   description: nonCustomizedPrebuiltRule.description, // Modified field should be set to its original asset value
                   revision: ++customizedPrebuiltRule.revision, // We increment the revision number during reversion
@@ -96,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('customization adjacent fields', () => {
         it('does not modify `exception_list` field', async () => {
-          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+          const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
             body: {
               rule_id: 'rule_1',
               description: 'new description',
@@ -122,6 +121,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               exceptions_list: [
                 expect.objectContaining({
@@ -136,7 +137,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does not modify `actions` field', async () => {
-          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+          const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
             body: {
               rule_id: 'rule_1',
               description: 'new description',
@@ -163,6 +164,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               actions: [
                 expect.objectContaining({
@@ -178,7 +181,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does not modify `execution_summary` field', async () => {
-          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+          const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
             body: {
               rule_id: 'rule_1',
               description: 'new description',
@@ -216,6 +219,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               execution_summary: body.execution_summary,
             })
@@ -223,7 +228,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('does not modify `enabled` field', async () => {
-          const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+          const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
             body: {
               rule_id: 'rule_1',
               description: 'new description',
@@ -242,6 +247,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 is_customized: false,
                 type: 'external',
+                customized_fields: [],
+                has_base_version: true,
               },
               enabled: true,
             }),
@@ -250,7 +257,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it("skips a prebuilt rule if it's not customized", async () => {
-        const { body: nonCustomizedPrebuiltRule } = await securitySolutionApi
+        const { body: nonCustomizedPrebuiltRule } = await detectionsApi
           .readRule({
             query: { rule_id: 'rule_1' },
           })
@@ -288,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it("skips a rule if it's not prebuilt", async () => {
-        const { body: customRule } = await securitySolutionApi.createRule({
+        const { body: customRule } = await detectionsApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
         });
 
@@ -324,7 +331,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('throws an error if rule base version cannot be found', async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+        const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
           body: { rule_id: 'rule_1', description: 'new description' },
         });
 
@@ -352,7 +359,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it("throws an error if version param doesn't equal the fetched rule version", async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+        const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
           body: { rule_id: 'rule_1', description: 'new description' },
         });
 
@@ -380,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it("throws an error if revision param doesn't equal the fetched rule revision", async () => {
-        const { body: customizedPrebuiltRule } = await securitySolutionApi.patchRule({
+        const { body: customizedPrebuiltRule } = await detectionsApi.patchRule({
           body: { rule_id: 'rule_1', description: 'new description' },
         });
 

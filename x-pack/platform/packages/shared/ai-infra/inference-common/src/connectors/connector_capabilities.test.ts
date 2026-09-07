@@ -18,6 +18,8 @@ const createConnector = (parts: Partial<InferenceConnector>): InferenceConnector
     connectorId: 'connectorId',
     config: {},
     capabilities: {},
+    isInferenceEndpoint: false,
+    isPreconfigured: false,
     ...parts,
   };
 };
@@ -26,7 +28,7 @@ describe('getContextWindowSize', () => {
   it('returns the value from the connector config if set', () => {
     const connector = createConnector({
       config: {
-        contextWindowSize: 100,
+        contextWindowLength: 100,
       },
     });
     expect(getContextWindowSize(connector)).toBe(100);

@@ -7,12 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TermsIndexPatternColumn } from '@kbn/lens-plugin/public';
-import type { LensApiTermsOperation } from '../../schema/bucket_ops';
-import { fromFormatAPIToLensState } from './format';
-import { isColumnOfReferableType } from './utils';
+import {
+  LENS_DOCUMENT_FIELD_NAME,
+  type FieldBasedIndexPatternColumn,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
+} from '@kbn/lens-common';
+import type {
+  LensApiTermsOperation,
+  TermOperationRankByCustomCountOperationType,
+  TermOperationRankByCustomOperationType,
+  TermOperationRankByCustomPercentileRankType,
+  TermOperationRankByCustomPercentileType,
+} from '../../schema/bucket_ops';
+import { fromFormatAPIToLensState, fromFormatLensStateToAPI } from './format';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 import type { AnyLensStateColumn } from './types';
+
+function isPercentileOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is PercentileIndexPatternColumn {
+  return orderAgg.operationType === 'percentile';
+}
+
+function isPercentileRanksOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is PercentileRanksIndexPatternColumn {
+  return orderAgg.operationType === 'percentile_rank';
+}
+
+function isCountOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is CountIndexPatternColumn {
+  return orderAgg.operationType === 'count';
+}
+
+function isBaseCustomOperation(
+  operation: string
+): operation is TermOperationRankByCustomOperationType['operation'] {
+  const ops: string[] = [
+    'min',
+    'max',
+    'average',
+    'median',
+    'standard_deviation',
+    'unique_count',
+    'sum',
+    'last_value',
+  ];
+  return ops.includes(operation);
+}
 
 function getOrderByValue(
   rankBy: LensApiTermsOperation['rank_by'],
@@ -31,7 +77,7 @@ function getOrderByValue(
     return { type: 'custom' };
   }
 
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   if (!refId) {
     return { type: 'alphabetical', fallback: true };
   }
@@ -45,7 +91,7 @@ function getOrderDirection(
   if (rankBy && 'direction' in rankBy && rankBy.direction) {
     return rankBy.direction;
   }
-  const refId = getMetricColumnIdByIndex(rankBy?.type === 'column' ? rankBy.metric ?? 0 : 0);
+  const refId = getMetricColumnIdByIndex(rankBy?.type === 'metric' ? rankBy.metric_index ?? 0 : 0);
   return refId ? 'desc' : 'asc';
 }
 
@@ -53,43 +99,140 @@ export function fromTermsLensApiToLensState(
   options: LensApiTermsOperation,
   getMetricColumnIdByIndex: (index: number) => string | undefined
 ): TermsIndexPatternColumn {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { fields, size, increase_accuracy, includes, excludes, other_bucket, rank_by } = options;
+  const { fields, limit, increase_accuracy, includes, excludes, other_bucket, rank_by } = options;
 
   const [field, ...secondaryFields] = fields;
   const orderByConfig = getOrderByValue(rank_by, getMetricColumnIdByIndex);
   const orderDirection = getOrderDirection(rank_by, getMetricColumnIdByIndex);
+
+  const format = fromFormatAPIToLensState(options.format);
 
   return {
     operationType: 'terms',
     dataType: 'string',
     ...getLensStateBucketSharedProps({ ...options, field }),
     params: {
-      secondaryFields,
-      size, // it cannot be 0 (zero)
-      accuracyMode: Boolean(increase_accuracy),
-      include: includes?.values ?? [],
-      includeIsRegex: includes?.as_regex ?? false,
-      exclude: excludes?.values ?? [],
-      excludeIsRegex: excludes?.as_regex ?? false,
-      otherBucket: Boolean(other_bucket),
-      missingBucket: other_bucket?.include_documents_without_field,
+      ...(secondaryFields.length ? { secondaryFields } : {}),
+      size: limit, // it cannot be 0 (zero)
+      ...(increase_accuracy != null ? { accuracyMode: increase_accuracy } : {}),
+      ...(includes?.values
+        ? { include: includes.values, includeIsRegex: includes?.as_regex ?? false }
+        : {}),
+      ...(excludes?.values
+        ? { exclude: excludes.values, excludeIsRegex: excludes?.as_regex ?? false }
+        : {}),
+      ...(other_bucket != null ? { otherBucket: true } : {}),
+      ...(other_bucket?.include_documents_without_field != null
+        ? { missingBucket: other_bucket?.include_documents_without_field }
+        : {}),
       orderBy: orderByConfig,
       orderDirection,
-      orderAgg:
-        rank_by?.type === 'custom'
-          ? {
-              operationType: rank_by.operation,
-              sourceField: rank_by.field ?? '',
-              dataType: 'number',
-              isBucketed: false,
-              label: '',
-            }
-          : undefined,
-      format: fromFormatAPIToLensState(options.format),
-      parentFormat: { id: 'terms' },
+      ...(rank_by?.type === 'custom' ? { orderAgg: getCustomOrderAgg(rank_by) } : {}),
+      ...(format ? { format } : {}),
+      // Mirror runtime `getParentFormatter` (`terms/index.tsx`): multi-field terms columns render
+      // through the `multi_terms` parent formatter, single-field ones through `terms`.
+      parentFormat: { id: secondaryFields.length ? 'multi_terms' : 'terms' },
     },
   };
+}
+
+function getCustomOrderAgg(
+  rankBy:
+    | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomCountOperationType
+    | TermOperationRankByCustomPercentileType
+    | TermOperationRankByCustomPercentileRankType
+): TermsIndexPatternColumn['params']['orderAgg'] {
+  if (rankBy.operation === 'percentile') {
+    const orderAgg: PercentileIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      params: { percentile: rankBy.percentile },
+    };
+    return orderAgg;
+  }
+  if (rankBy.operation === 'percentile_rank') {
+    const orderAgg: PercentileRanksIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+      params: { value: rankBy.rank },
+    };
+    return orderAgg;
+  }
+
+  if (rankBy.operation === 'count') {
+    const orderAgg: CountIndexPatternColumn = {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field || LENS_DOCUMENT_FIELD_NAME,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+    };
+    return orderAgg;
+  }
+
+  return {
+    operationType: rankBy.operation,
+    sourceField: rankBy.field,
+    dataType: 'number',
+    isBucketed: false,
+    label: '',
+  };
+}
+
+function getCustomRankByFromOrderAgg(
+  orderAgg: NonNullable<TermsIndexPatternColumn['params']['orderAgg']>,
+  orderDirection: TermsIndexPatternColumn['params']['orderDirection']
+): LensApiTermsOperation['rank_by'] {
+  const { sourceField } = orderAgg;
+
+  if (isPercentileOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomPercentileType = {
+      type: 'custom',
+      operation: 'percentile',
+      field: sourceField,
+      direction: orderDirection,
+      percentile: orderAgg.params.percentile,
+    };
+    return rankBy;
+  }
+  if (isPercentileRanksOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomPercentileRankType = {
+      type: 'custom',
+      operation: 'percentile_rank',
+      field: sourceField,
+      direction: orderDirection,
+      rank: orderAgg.params.value,
+    };
+    return rankBy;
+  }
+
+  if (isCountOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomCountOperationType = {
+      type: 'custom',
+      operation: 'count',
+      direction: orderDirection,
+      ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
+  if (isBaseCustomOperation(orderAgg.operationType)) {
+    const rankBy: TermOperationRankByCustomOperationType = {
+      type: 'custom',
+      operation: orderAgg.operationType,
+      field: sourceField,
+      direction: orderDirection,
+    };
+    return rankBy;
+  }
+  return undefined;
 }
 
 function getRankByConfig(
@@ -105,27 +248,19 @@ function getRankByConfig(
   if (params.orderBy.type === 'significant') {
     return { type: 'significant' };
   }
-  if (
-    params.orderBy.type === 'custom' &&
-    params.orderAgg &&
-    // @ts-expect-error
-    isColumnOfReferableType(params.orderAgg)
-  ) {
-    return {
-      type: 'custom',
-      operation: params.orderAgg.operationType,
-      field: params.orderAgg.sourceField,
-      direction: params.orderDirection,
-    };
+  if (params.orderBy.type === 'custom' && params.orderAgg) {
+    return getCustomRankByFromOrderAgg(params.orderAgg, params.orderDirection);
   }
   if (params.orderBy.type === 'column') {
-    const index = columns.findIndex(
-      (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
-    );
+    const index = columns
+      .filter(({ column }) => !column.isBucketed)
+      .findIndex(
+        (column) => params.orderBy.type === 'column' && column.id === params.orderBy.columnId!
+      );
     if (index > -1) {
       return {
-        type: 'column',
-        metric: index,
+        type: 'metric',
+        metric_index: index,
         direction: params.orderDirection,
       };
     }
@@ -141,28 +276,34 @@ export function fromTermsLensStateToAPI(
   return {
     operation: 'terms',
     fields: [column.sourceField].concat(column.params.secondaryFields ?? []),
-    label,
-    size: column.params.size,
+    ...(label ? { label } : {}),
+    limit: column.params.size,
     ...(column.params.accuracyMode != null
       ? { increase_accuracy: column.params.accuracyMode }
       : {}),
-    ...(column.params.include
+    ...(column.params.include?.length
       ? {
           includes: {
             as_regex: column.params.includeIsRegex,
-            values: column.params.include?.map((value) => String(value)) || [],
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the include filter.
+            values: column.params.include ?? [],
           },
         }
       : {}),
-    ...(column.params.exclude
+    ...(column.params.exclude?.length
       ? {
           excludes: {
             as_regex: column.params.excludeIsRegex,
-            values: column.params.exclude?.map((value) => String(value)) || [],
+            // Preserve the value type verbatim: numeric fields store numbers and the runtime terms
+            // agg drops stringified numbers at render (`migrateIncludeExcludeFormat` filters with
+            // `Number.isFinite`), so coercing to strings would silently lose the exclude filter.
+            values: column.params.exclude ?? [],
           },
         }
       : {}),
-    ...(column.params.otherBucket != null
+    ...(column.params.otherBucket
       ? {
           other_bucket: {
             include_documents_without_field: Boolean(column.params.missingBucket),
@@ -170,5 +311,6 @@ export function fromTermsLensStateToAPI(
         }
       : {}),
     ...(column.params.orderBy ? { rank_by: getRankByConfig(column.params, columns) } : {}),
+    ...(column.params.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),
   };
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type { Moment } from 'moment';
 
 // one second = 1 million micros
 const ONE_SECOND_AS_MICROS = 1000000;
@@ -49,27 +48,5 @@ export const formatDuration = (durationMicros: number, { noSpace }: { noSpace?: 
   return i18n.translate('xpack.synthetics.overview.durationSecondsFormatting', {
     values: { seconds },
     defaultMessage: '{seconds} s',
-  });
-};
-
-export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
-  const diffInDays = endsAt.diff(startedAt, 'days');
-  if (diffInDays > 1) {
-    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
-      defaultMessage: '{value} days',
-      values: { value: diffInDays },
-    });
-  }
-  const diffInHours = endsAt.diff(startedAt, 'hours');
-  if (diffInHours > 1) {
-    return i18n.translate('xpack.synthetics.errorDetails.errorDuration.hours', {
-      defaultMessage: '{value} hours',
-      values: { value: diffInHours },
-    });
-  }
-  const diffInMinutes = endsAt.diff(startedAt, 'minutes');
-  return i18n.translate('xpack.synthetics.errorDetails.errorDuration.mins', {
-    defaultMessage: '{value} mins',
-    values: { value: diffInMinutes },
   });
 };
