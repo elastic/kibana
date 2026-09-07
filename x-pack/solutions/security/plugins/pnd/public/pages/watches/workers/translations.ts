@@ -6,13 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+} from '@kbn/pnd-common';
 
 export const PAGE_TITLE = i18n.translate('xpack.pnd.watches.workers.pageTitle', {
   defaultMessage: 'Workers',
 });
 
 export const PAGE_SUBTITLE = i18n.translate('xpack.pnd.watches.workers.pageSubtitle', {
-  defaultMessage: 'Orchestrated work shared across Watches',
+  defaultMessage: 'Work owned by a Watch grouping',
 });
 
 export const TABLE_CAPTION = i18n.translate('xpack.pnd.watches.workers.tableCaption', {
@@ -49,91 +56,64 @@ export const enableWorkerAriaLabel = (name: string) =>
     values: { name },
   });
 
-/**
- * Name and description per worker id. The API carries ids only, so all worker copy lives here.
- * Keep in step with `WORKERS_SEED` in `@kbn/pnd-common`.
- */
-export const WORKER_NAMES: Record<string, string> = {
-  'threat-intel-enrichment': i18n.translate(
-    'xpack.pnd.watches.workers.threatIntelEnrichment.name',
-    {
-      defaultMessage: 'Threat intel enrichment',
-    }
-  ),
-  'alert-correlation': i18n.translate('xpack.pnd.watches.workers.alertCorrelation.name', {
-    defaultMessage: 'Alert correlation',
-  }),
-  'host-context': i18n.translate('xpack.pnd.watches.workers.hostContext.name', {
-    defaultMessage: 'Host context',
-  }),
-  'attack-discovery-continuation': i18n.translate(
-    'xpack.pnd.watches.workers.attackDiscoveryContinuation.name',
-    {
-      defaultMessage: 'Attack Discovery continuation',
-    }
-  ),
-  containment: i18n.translate('xpack.pnd.watches.workers.containment.name', {
-    defaultMessage: 'Containment',
-  }),
-  'case-assembly': i18n.translate('xpack.pnd.watches.workers.caseAssembly.name', {
-    defaultMessage: 'Case assembly',
-  }),
-  'rule-tuning': i18n.translate('xpack.pnd.watches.workers.ruleTuning.name', {
-    defaultMessage: 'Rule tuning',
-  }),
-  'rule-creation': i18n.translate('xpack.pnd.watches.workers.ruleCreation.name', {
-    defaultMessage: 'Rule creation',
-  }),
-  'prebuilt-rule-onboarding': i18n.translate(
-    'xpack.pnd.watches.workers.prebuiltRuleOnboarding.name',
-    {
-      defaultMessage: 'Prebuilt rule onboarding',
-    }
-  ),
-};
-
 export const WORKER_DESCRIPTIONS: Record<string, string> = {
-  'threat-intel-enrichment': i18n.translate(
-    'xpack.pnd.watches.workers.threatIntelEnrichment.description',
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAlertTriage.description',
     {
-      defaultMessage: 'Pulls external intel into alerts and drafts enrichment context for triage.',
+      defaultMessage: 'Reduces alert volume and routes what still needs a person.',
     }
   ),
-  'alert-correlation': i18n.translate('xpack.pnd.watches.workers.alertCorrelation.description', {
-    defaultMessage: 'Groups related alerts into a single proposed case or finding.',
-  }),
-  'host-context': i18n.translate('xpack.pnd.watches.workers.hostContext.description', {
-    defaultMessage: 'Attaches host, user, and asset context for investigation readiness.',
-  }),
-  'attack-discovery-continuation': i18n.translate(
-    'xpack.pnd.watches.workers.attackDiscoveryContinuation.description',
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAttackDiscovery.description',
     {
-      defaultMessage: 'Builds investigation evidence and an attack-assessment proposal from AD.',
+      defaultMessage: 'Continues Attack Discovery findings into reviewable investigation evidence.',
     }
   ),
-  containment: i18n.translate('xpack.pnd.watches.workers.containment.description', {
-    defaultMessage: 'Executes scoped response actions when a Watch is allowed to act.',
-  }),
-  'case-assembly': i18n.translate('xpack.pnd.watches.workers.caseAssembly.description', {
-    defaultMessage: 'Assembles drafted cases for human review and hand-off.',
-  }),
-  'rule-tuning': i18n.translate('xpack.pnd.watches.workers.ruleTuning.description', {
-    defaultMessage:
-      'Routes each false-positive signal to an exception, suppression, or rule-update proposal, with rule diff and expected impact. Works on rules of any type.',
-  }),
-  'rule-creation': i18n.translate('xpack.pnd.watches.workers.ruleCreation.description', {
-    defaultMessage:
-      'Drafts new-rule proposals from coverage gap signals, with ATT&CK mapping and backtest summary. Checks installed and prebuilt rules first and defers to tuning when an existing rule covers the gap. MVP supports ES|QL rule types only.',
-  }),
-  'prebuilt-rule-onboarding': i18n.translate(
-    'xpack.pnd.watches.workers.prebuiltRuleOnboarding.description',
+  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.darkContinuousThreatHunt.description',
     {
-      defaultMessage:
-        'Recommends prebuilt rules relevant to active data sources and drafts installation proposals with environment-specific configuration.',
+      defaultMessage: 'Hunts continuously for threats and coverage gaps nobody has reported yet.',
+    }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleTuning.description',
+    {
+      defaultMessage: 'Diagnoses noisy rules and applies approved query changes.',
+    }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleCreation.description',
+    {
+      defaultMessage: 'Drafts an ES|QL rule for a detection gap and creates it on approval.',
     }
   ),
 };
 
-export const workerName = (workerId: string): string => WORKER_NAMES[workerId] ?? workerId;
 export const workerDescription = (workerId: string): string | undefined =>
   WORKER_DESCRIPTIONS[workerId];
+
+export const WORKER_NAMES: Record<string, string> = {
+  [SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAlertTriage.name',
+    { defaultMessage: 'Alert Triage' }
+  ),
+  [SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.floorAttackDiscovery.name',
+    { defaultMessage: 'Attack Discovery' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.darkContinuousThreatHunt.name',
+    { defaultMessage: 'Continuous Threat Hunt' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleTuning.name',
+    { defaultMessage: 'Rule Tuning' }
+  ),
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: i18n.translate(
+    'xpack.pnd.watches.workers.detectionRuleCreation.name',
+    { defaultMessage: 'Rule Creation' }
+  ),
+};
+
+export const workerName = (workerId: string, fallbackName?: string): string =>
+  WORKER_NAMES[workerId] ?? fallbackName ?? workerId;

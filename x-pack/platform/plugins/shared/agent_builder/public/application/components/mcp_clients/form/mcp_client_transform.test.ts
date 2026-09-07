@@ -337,8 +337,35 @@ describe('deriveRedirectConfig', () => {
     });
   });
 
-  it('treats multiple URIs as local, the only variant that accepts more than one', () => {
+  it('treats multiple non-loopback HTTPS URIs as remote', () => {
     const uris = ['https://example.com/callback', 'https://other.example.com/callback'];
+
+    expect(deriveRedirectConfig(uris)).toEqual({
+      type: RedirectUriType.REMOTE,
+      uris: uris.map((value) => ({ value })),
+    });
+  });
+
+  it('treats a mixed HTTP and HTTPS set as local', () => {
+    const uris = ['https://example.com/callback', 'http://example.com/callback'];
+
+    expect(deriveRedirectConfig(uris)).toEqual({
+      type: RedirectUriType.LOCAL,
+      uris: uris.map((value) => ({ value })),
+    });
+  });
+
+  it('treats a set of loopback HTTPS URIs as local', () => {
+    const uris = ['https://localhost:3000/callback', 'https://127.0.0.1:3000/callback'];
+
+    expect(deriveRedirectConfig(uris)).toEqual({
+      type: RedirectUriType.LOCAL,
+      uris: uris.map((value) => ({ value })),
+    });
+  });
+
+  it('treats a set with a single loopback HTTPS URI as local', () => {
+    const uris = ['https://example.com/callback', 'https://localhost:3000/callback'];
 
     expect(deriveRedirectConfig(uris)).toEqual({
       type: RedirectUriType.LOCAL,

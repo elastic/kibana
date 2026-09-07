@@ -8,6 +8,7 @@
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getServices } from '../services';
 import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
@@ -26,7 +27,6 @@ export interface EditFlyoutState {
   esqlDataError: string | null;
   handleFetchData: () => Promise<void>;
   isRenderLoading: boolean;
-  hasPreviewedCurrentDraft: boolean;
   handleRender: () => Promise<void>;
 }
 
@@ -40,6 +40,7 @@ export interface UseEditFlyoutStateParams {
   projectRouting: ProjectRouting | undefined;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  esqlVariables: ESQLControlVariable[] | undefined;
   onRunPreview: (html: string) => void;
 }
 
@@ -53,6 +54,7 @@ export const useEditFlyoutState = ({
   projectRouting,
   query,
   filters,
+  esqlVariables,
   onRunPreview,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
   const [state, dispatch] = useReducer(flyoutReducer, {
@@ -62,7 +64,6 @@ export const useEditFlyoutState = ({
     esqlData: null,
     esqlDataError: null,
     isRenderLoading: false,
-    hasPreviewedCurrentDraft: false,
   });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
@@ -102,6 +103,7 @@ export const useEditFlyoutState = ({
       projectRouting,
       query,
       filters,
+      esqlVariables,
       esQueryConfig: getEsQueryConfig(core.uiSettings),
     };
 
@@ -136,6 +138,7 @@ export const useEditFlyoutState = ({
     projectRouting,
     query,
     filters,
+    esqlVariables,
     core.http,
     core.uiSettings,
     search,
@@ -154,6 +157,7 @@ export const useEditFlyoutState = ({
       projectRouting,
       query,
       filters,
+      esqlVariables,
       esQueryConfig: getEsQueryConfig(core.uiSettings),
     };
 
@@ -174,7 +178,6 @@ export const useEditFlyoutState = ({
         rawHtml = state.draftTemplate;
       }
       if (!controller.signal.aborted && draftVersionRef.current === snapVersion) {
-        dispatch({ type: 'RENDER_SUCCESS' });
         onRunPreview(applyHtmlTheme(sanitizeHtml(rawHtml), colorMode, euiTheme));
       }
     } catch (err) {
@@ -197,6 +200,7 @@ export const useEditFlyoutState = ({
     projectRouting,
     query,
     filters,
+    esqlVariables,
     core.http,
     core.uiSettings,
     search,
@@ -216,7 +220,6 @@ export const useEditFlyoutState = ({
     esqlDataError: state.esqlDataError,
     handleFetchData,
     isRenderLoading: state.isRenderLoading,
-    hasPreviewedCurrentDraft: state.hasPreviewedCurrentDraft,
     handleRender,
   };
 };

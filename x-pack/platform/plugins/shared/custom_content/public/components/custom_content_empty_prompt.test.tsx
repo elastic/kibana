@@ -16,11 +16,18 @@ describe('CustomContentEmptyPrompt', () => {
     expect(screen.getByText('Create your custom panel')).toBeInTheDocument();
   });
 
-  it('renders the body text', () => {
+  it('renders the body text when AI is not available', () => {
     render(<CustomContentEmptyPrompt isAiAvailable={false} />);
     expect(
+      screen.getByText('Use HTML, CSS, Liquid, and ES|QL to create your custom panel')
+    ).toBeInTheDocument();
+  });
+
+  it('renders example prompts when AI is available', () => {
+    render(<CustomContentEmptyPrompt isAiAvailable={true} />);
+    expect(
       screen.getByText(
-        'You can use HTML, CSS, Liquid and ES|QL or you can let chat generate it for you.'
+        'Examples: "Create a health status card for each of my hosts", "Create a banner with an animated image", "Show how data flows across my services".'
       )
     ).toBeInTheDocument();
   });

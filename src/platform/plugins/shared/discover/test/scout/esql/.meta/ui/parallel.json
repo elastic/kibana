@@ -1,21 +1,9 @@
 {
-  "sha1": "c5fe1e33c9f710268d9891f0eb4cc68a2273f8dd",
+  "sha1": "01ec7a642876d3003dcbf82659f0ee3a1434235c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6b65b70854fa803-48161d5725dd982",
-      "title": "Teardown ES|QL tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "105be4110b5c303-214247a23f937d6",
       "title": "Setup ES|QL tests data",
@@ -285,6 +273,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_save_without_close.spec.ts",
         "line": 35,
         "column": 42
+      }
+    },
+    {
+      "id": "6b65b70854fa803-48161d5725dd982",
+      "title": "Teardown ES|QL tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

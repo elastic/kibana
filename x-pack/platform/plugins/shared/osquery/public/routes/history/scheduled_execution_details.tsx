@@ -7,25 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiSkeletonText,
-  EuiEmptyPrompt,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiSkeletonText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../common/hooks/use_breadcrumbs';
 import { useRouterNavigate } from '../../common/lib/kibana';
 import { pagePathGetters } from '../../common/page_paths';
-import {
-  fullWidthContentCss,
-  WithHeaderLayout,
-  WithoutHeaderLayout,
-} from '../../components/layouts';
-import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { fullWidthContentCss, WithoutHeaderLayout } from '../../components/layouts';
 import { useGoBack } from '../../common/use_go_back';
 import {
   useScheduledExecutionDetails,
@@ -38,7 +25,6 @@ const tableWrapperCss = {
 };
 
 const ScheduledExecutionDetailsPageComponent = () => {
-  const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { scheduleId, executionCount: executionCountStr } = useParams<{
     scheduleId: string;
     executionCount: string;
@@ -67,32 +53,13 @@ const ScheduledExecutionDetailsPageComponent = () => {
     [data, scheduleId]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty iconType="chevronSingleLeft" {...historyNavProps} flush="left" size="xs">
-            <FormattedMessage
-              id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
-              defaultMessage="View history"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        {!isHistoryEnabled && (
-          <EuiFlexItem>
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.osquery.scheduledExecutionDetails.pageTitle"
-                  defaultMessage="Scheduled execution details"
-                />
-              </h1>
-            </EuiText>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
-    [historyNavProps, isHistoryEnabled]
+  const backLink = (
+    <EuiButtonEmpty iconType="chevronSingleLeft" {...historyNavProps} flush="left" size="xs">
+      <FormattedMessage
+        id="xpack.osquery.scheduledExecutionDetails.viewHistoryTitle"
+        defaultMessage="View history"
+      />
+    </EuiButtonEmpty>
   );
 
   if (!isValid) {
@@ -158,29 +125,13 @@ const ScheduledExecutionDetailsPageComponent = () => {
     </>
   );
 
-  if (isHistoryEnabled) {
-    return (
-      <WithoutHeaderLayout restrictWidth={false}>
-        <div css={fullWidthContentCss}>
-          {LeftColumn}
-          {content}
-        </div>
-      </WithoutHeaderLayout>
-    );
-  }
-
-  if (isLoading || isError) {
-    return (
-      <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-        {content}
-      </WithHeaderLayout>
-    );
-  }
-
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
-      {tableBlock}
-    </WithHeaderLayout>
+    <WithoutHeaderLayout restrictWidth={false}>
+      <div css={fullWidthContentCss}>
+        {backLink}
+        {content}
+      </div>
+    </WithoutHeaderLayout>
   );
 };
 

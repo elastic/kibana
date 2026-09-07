@@ -14,6 +14,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/streams-plugin",
     "@kbn/core",
     "@kbn/core-pricing-common",
@@ -65,6 +66,7 @@
     "@kbn/licensing-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/actions-plugin",
+    "@kbn/connector-specs",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
@@ -75,5 +77,8 @@
     "@kbn/datemath",
     "@kbn/core-http-server-utils",
     "@kbn/cps-server-utils",
+    "@kbn/inference-prompt-utils",
+    "@kbn/esql-utils",
+    "@kbn/nightshift-investigations-plugin",
   ]
 }

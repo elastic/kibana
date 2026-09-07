@@ -7,7 +7,7 @@
 
 import type { InvestigationState } from '@kbn/significant-events-schema';
 import {
-  getConclusionBody,
+  getConclusionText,
   getHypothesisStatusLabel,
   getInvestigationCompleteStatusLabel,
   getInvestigationHeadline,
@@ -33,12 +33,7 @@ const completeState: InvestigationState = {
       reason: 'No dependency latency increase observed.',
     },
   ],
-  conclusion: `# Conclusion
-Checkout deploy introduced a regression.
-
-## Next Steps
-- Roll back checkout deployment · Revert commit abc123 and monitor error rate.
-- Add canary deploy guardrail · Block deploys when error rate exceeds baseline.`,
+  conclusion: 'Checkout deploy introduced a regression.',
 };
 
 describe('investigation_presentation', () => {
@@ -125,20 +120,7 @@ describe('investigation_presentation', () => {
       ]);
     });
 
-    it('falls back to parsing next steps bullets from the conclusion markdown when recommendations is absent', () => {
-      expect(parseInvestigationRecommendations(completeState)).toEqual([
-        {
-          title: 'Roll back checkout deployment',
-          description: 'Revert commit abc123 and monitor error rate.',
-        },
-        {
-          title: 'Add canary deploy guardrail',
-          description: 'Block deploys when error rate exceeds baseline.',
-        },
-      ]);
-    });
-
-    it('falls back to ranked hypotheses when neither recommendations nor next steps bullets are present', () => {
+    it('falls back to ranked hypotheses when recommendations is absent', () => {
       const state: InvestigationState = {
         summary: 'Investigate latency spike on web-frontend.',
         hypotheses: [
@@ -177,59 +159,18 @@ describe('investigation_presentation', () => {
         },
       ]);
     });
-
-    it('keeps em-dash bullets intact and attaches code blocks to the preceding bullet', () => {
-      const state: InvestigationState = {
-        summary: 'Investigate api-gateway latency.',
-        hypotheses: [
-          {
-            candidate: 'Auth middleware regression',
-            confidence: 0.92,
-            status: 'confirmed',
-          },
-          {
-            candidate: 'Downstream dependency timeout',
-            confidence: 0.5,
-            status: 'dismissed',
-          },
-        ],
-        conclusion: `# Conclusion
-Auth middleware blocks on DB lookups.
-
-## Next Steps
-- **Immediate mitigation** — roll back api-gateway to v2.8.0:**
-\`\`\`shell
-kubectl rollout undo deployment/api-gateway
-kubectl rollout status deployment/api-gateway
-\`\`\`
-- Verify auth middleware recovery — confirm 200 responses resume and 5xx rate drops to zero:
-- Monitor web-frontend latency recovery — P95 should return to ~480ms within 5–10 minutes of gateway recovery:`,
-      };
-
-      expect(parseInvestigationRecommendations(state)).toEqual([
-        {
-          title: '**Immediate mitigation** — roll back api-gateway to v2.8.0',
-          code: 'kubectl rollout undo deployment/api-gateway\nkubectl rollout status deployment/api-gateway',
-        },
-        {
-          title:
-            'Verify auth middleware recovery — confirm 200 responses resume and 5xx rate drops to zero',
-          code: undefined,
-        },
-        {
-          title:
-            'Monitor web-frontend latency recovery — P95 should return to ~480ms within 5–10 minutes of gateway recovery',
-          code: undefined,
-        },
-      ]);
-    });
   });
 
-  describe('getConclusionBody', () => {
-    it('extracts the conclusion section body from markdown', () => {
-      expect(getConclusionBody(completeState.conclusion)).toBe(
-        'Checkout deploy introduced a regression.'
-      );
+  describe('getConclusionText', () => {
+    it('returns the trimmed conclusion prose', () => {
+      expect(
+        getConclusionText({ ...completeState, conclusion: '  Checkout deploy broke it.  ' })
+      ).toBe('Checkout deploy broke it.');
+    });
+
+    it('returns undefined for a missing or blank conclusion', () => {
+      expect(getConclusionText(undefined)).toBeUndefined();
+      expect(getConclusionText({ ...completeState, conclusion: '   ' })).toBeUndefined();
     });
   });
 

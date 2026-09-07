@@ -332,4 +332,36 @@ describe('ObjectWidget', () => {
     expect(idInput.disabled).toBe(true);
     expect(nameInput.disabled).toBe(false);
   });
+
+  it('does not add a spacer after hidden nested fields', () => {
+    const schema = z.object({
+      tokenHash: z.string().meta({ hidden: true }),
+      host: z.string().meta({ label: 'Host' }),
+    });
+
+    render(
+      <TestFormWrapper>
+        <ObjectWidget
+          meta={meta}
+          formConfig={{}}
+          path="config"
+          schema={schema}
+          fieldProps={{
+            euiFieldProps: {},
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
+      { wrapper }
+    );
+
+    expect(screen.queryByTestId('generator-field-config-tokenHash')).not.toBeInTheDocument();
+    expect(screen.getByTestId('generator-field-config-host')).toBeInTheDocument();
+  });
 });

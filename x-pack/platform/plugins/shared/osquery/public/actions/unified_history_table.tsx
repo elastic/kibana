@@ -407,6 +407,8 @@ const UnifiedHistoryTableComponent = () => {
 
     const success = row.successCount ?? 0;
     const errors = row.errorCount ?? 0;
+    // All distinct-agent counts; an agent with both outcomes is in both buckets,
+    // so the sum can exceed agentCount — the clamp keeps pending at 0 then.
     const pending = Math.max(0, row.agentCount - success - errors);
 
     const badges: Array<{ key: string; color: string; count: number }> = [];

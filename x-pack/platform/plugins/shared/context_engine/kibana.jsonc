@@ -8,8 +8,8 @@
     "id": "contextEngine",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["actions", "data", "features", "security", "share", "esql", "triggersActionsUi", "taskManager"],
-    "optionalPlugins": ["console", "spaces"],
+    "requiredPlugins": ["actions", "data", "features", "security", "share", "esql", "triggersActionsUi", "taskManager", "workflowsExtensions"],
+    "optionalPlugins": ["console", "spaces", "workflowsManagement"],
     "runtimePluginDependencies": ["agentBuilder"],
     "requiredBundles": ["kibanaReact", "actions"]
   }

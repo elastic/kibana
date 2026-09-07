@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import type {
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 
 import { deleteWorkflows } from './workflow_deletion';
 
@@ -50,10 +53,16 @@ const makeStorageClient = (
   };
 };
 
-const makeEsClient = () =>
-  ({
+const makeExecutionsDataAccess = () => {
+  const workflowExecutionsDataClient = {
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-  } as unknown as ElasticsearchClient);
+  } as unknown as WorkflowExecutionsDataClient;
+  const stepExecutionsDataClient = {
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+  } as unknown as StepExecutionsDataClient;
+
+  return { workflowExecutionsDataClient, stepExecutionsDataClient };
+};
 
 const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
 
@@ -65,13 +74,15 @@ describe('deleteWorkflows', () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
 
       const result = await deleteWorkflows({
         ids: ['wf-1'],
         spaceId: 'default',
         force: false,
         storage,
-        esClient: makeEsClient(),
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -93,6 +104,7 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
         { _id: 'wf-2', _source: makeWorkflowSource() },
       ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
 
       client.bulk.mockResolvedValue({
         items: [
@@ -106,7 +118,8 @@ describe('deleteWorkflows', () => {
         spaceId: 'default',
         force: false,
         storage,
-        esClient: makeEsClient(),
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -120,13 +133,15 @@ describe('deleteWorkflows', () => {
 
     it('returns zero deleted when no workflows found', async () => {
       const { storage } = makeStorageClient([]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
 
       const result = await deleteWorkflows({
         ids: ['wf-missing'],
         spaceId: 'default',
         force: false,
         storage,
-        esClient: makeEsClient(),
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -142,13 +157,15 @@ describe('deleteWorkflows', () => {
 
     it('only counts existing ids as deleted when the request mixes found and missing', async () => {
       const { storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
 
       const result = await deleteWorkflows({
         ids: ['wf-1', 'wf-missing'],
         spaceId: 'default',
         force: false,
         storage,
-        esClient: makeEsClient(),
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -168,14 +185,15 @@ describe('deleteWorkflows', () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
-      const esClient = makeEsClient();
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
 
       const result = await deleteWorkflows({
         ids: ['wf-1'],
         spaceId: 'default',
         force: true,
         storage,
-        esClient,
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -184,16 +202,34 @@ describe('deleteWorkflows', () => {
       expect(result.deleted).toBe(1);
       expect(result.successfulIds).toEqual(['wf-1']);
       expect(client.delete).toHaveBeenCalledWith({ id: 'wf-1' });
-      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
+      expect(workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ terms: { workflowId: ['wf-1'] } }, { term: { spaceId: 'default' } }],
+            },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        })
+      );
+      expect(stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [{ terms: { workflowId: ['wf-1'] } }, { term: { spaceId: 'default' } }],
+            },
+          },
+        })
+      );
     });
 
     it('throws when workflows have running executions', async () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
-      // Mock: running execution found
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
       const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 1, results: [{}] });
-      // Mock: bulk disable succeeds, then bulk restore succeeds
       client.bulk
         .mockResolvedValueOnce({
           items: [{ index: { _id: 'wf-1', status: 200 } }],
@@ -208,14 +244,14 @@ describe('deleteWorkflows', () => {
           spaceId: 'default',
           force: true,
           storage,
-          esClient: makeEsClient(),
+          workflowExecutionsDataClient,
+          stepExecutionsDataClient,
           taskScheduler: null,
           logger,
           getWorkflowExecutions,
         })
       ).rejects.toThrow('Cannot force-delete workflows with running executions');
 
-      // The workflow should have been disabled then restored
       expect(client.bulk).toHaveBeenCalledTimes(2);
       expect(client.delete).not.toHaveBeenCalled();
     });
@@ -224,6 +260,7 @@ describe('deleteWorkflows', () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
       client.delete.mockRejectedValue(new Error('doc delete failed'));
 
       const result = await deleteWorkflows({
@@ -231,7 +268,8 @@ describe('deleteWorkflows', () => {
         spaceId: 'default',
         force: true,
         storage,
-        esClient: makeEsClient(),
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,
@@ -245,6 +283,7 @@ describe('deleteWorkflows', () => {
       const { client, storage } = makeStorageClient([
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
       const getWorkflowExecutions = jest
         .fn()
         .mockRejectedValue(new Error('execution lookup failed'));
@@ -262,29 +301,32 @@ describe('deleteWorkflows', () => {
           spaceId: 'default',
           force: true,
           storage,
-          esClient: makeEsClient(),
+          workflowExecutionsDataClient,
+          stepExecutionsDataClient,
           taskScheduler: null,
           logger,
           getWorkflowExecutions,
         })
       ).rejects.toThrow('execution lookup failed');
 
-      // Disable bulk + restore bulk = 2 calls; no delete should have run
       expect(client.bulk).toHaveBeenCalledTimes(2);
       expect(client.delete).not.toHaveBeenCalled();
     });
 
     it('logs warning but does not throw when purge fails', async () => {
       const { storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
-      const esClient = makeEsClient();
-      (esClient.deleteByQuery as jest.Mock).mockRejectedValue(new Error('purge failed'));
+      const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
+      (workflowExecutionsDataClient.deleteByQuery as jest.Mock).mockRejectedValue(
+        new Error('purge failed')
+      );
 
       const result = await deleteWorkflows({
         ids: ['wf-1'],
         spaceId: 'default',
         force: true,
         storage,
-        esClient,
+        workflowExecutionsDataClient,
+        stepExecutionsDataClient,
         taskScheduler: null,
         logger,
         getWorkflowExecutions: noopExecutions,

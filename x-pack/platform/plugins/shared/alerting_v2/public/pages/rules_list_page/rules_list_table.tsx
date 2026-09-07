@@ -398,7 +398,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
                         content={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
-                          defaultMessage: 'Quick edit rule',
+                          defaultMessage: 'Edit rule',
                         })}
                         disableScreenReaderOutput
                       >
@@ -409,7 +409,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                           aria-label={i18n.translate(
                             'xpack.alertingV2.rulesList.action.quickEdit',
                             {
-                              defaultMessage: 'Quick edit rule',
+                              defaultMessage: 'Edit rule',
                             }
                           )}
                           data-test-subj={`quickEditRule-${rule.id}`}

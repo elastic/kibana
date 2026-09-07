@@ -31,6 +31,8 @@ export const checkoutEvent: SignificantEventResponse = {
   causal_features: [
     {
       feature_id: 'checkout-api',
+      type: 'entity',
+      subtype: 'service',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
@@ -38,6 +40,7 @@ export const checkoutEvent: SignificantEventResponse = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'checkout-api',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
@@ -45,6 +48,7 @@ export const checkoutEvent: SignificantEventResponse = {
     // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
@@ -66,6 +70,8 @@ export const inventoryEvent: SignificantEvent = {
   causal_features: [
     {
       feature_id: 'inventory-service',
+      type: 'entity',
+      subtype: 'service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
     },
@@ -73,6 +79,7 @@ export const inventoryEvent: SignificantEvent = {
   blast_radius: [
     {
       type: 'entity',
+      subtype: 'service',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',

@@ -58,14 +58,14 @@ describe('useGoBack', () => {
 
   it('pushes to fallback path when fromHistory is false', () => {
     mockLocationState = { fromHistory: false };
-    const { result } = renderHook(() => useGoBack('/live_queries'));
+    const { result } = renderHook(() => useGoBack('/history'));
     const event = createMouseEvent();
 
     act(() => {
       result.current(event);
     });
 
-    expect(mockPush).toHaveBeenCalledWith('/live_queries');
+    expect(mockPush).toHaveBeenCalledWith('/history');
     expect(mockGoBack).not.toHaveBeenCalled();
   });
 
