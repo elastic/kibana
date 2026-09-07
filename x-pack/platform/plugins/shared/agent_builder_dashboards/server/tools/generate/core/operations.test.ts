@@ -421,6 +421,203 @@ describe('executeDashboardOperations', () => {
     });
   });
 
+  describe('call-local section keys', () => {
+    it('moves existing panels and adds resolved panels into newly keyed sections', async () => {
+      const topPanel = createLensPanel('top-panel');
+      const nestedPanel = createLensPanel('nested-panel');
+      const dashboardData: DashboardAttachmentData = {
+        title: 'Test dashboard',
+        panels: [topPanel, createSection('existing-section', 'Existing', 0, [nestedPanel])],
+      };
+      const operations: DashboardOperation[] = [
+        { operation: 'add_section', key: 'overview', title: 'Metrics', grid: { y: 10 } },
+        { operation: 'add_section', key: 'details', title: 'Metrics', grid: { y: 20 } },
+        {
+          operation: 'update_panel_layouts',
+          panels: [
+            { panelId: topPanel.id, sectionId: 'overview' },
+            {
+              panelId: nestedPanel.id,
+              sectionId: 'details',
+              grid: { x: 0, y: 2, w: 48, h: 8 },
+            },
+          ],
+        },
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'markdown',
+              config: { content: 'Summary' },
+              sectionId: 'overview',
+              grid: { x: 0, y: 9, w: 48, h: 5 },
+            },
+            {
+              source: 'request',
+              type: 'vis',
+              chartType: SupportedChartType.Metric,
+              query: 'show total requests',
+              sectionId: 'details',
+              grid: { x: 0, y: 10, w: 24, h: 9 },
+            },
+          ],
+        },
+      ];
+      const originalInputs = structuredClone({ dashboardData, operations });
+
+      const result = await executeDashboardOperations({
+        dashboardData,
+        operations,
+        logger,
+        resolvePanelContent: createResolvePanelContent(),
+      });
+
+      const [existing, overview, details] = getSections(result.dashboardData.panels);
+      expect(existing.panels).toEqual([]);
+      expect(overview.panels).toEqual([
+        topPanel,
+        expect.objectContaining({ type: MARKDOWN_EMBEDDABLE_TYPE, config: { content: 'Summary' } }),
+      ]);
+      expect(details.panels).toEqual([
+        { ...nestedPanel, grid: { x: 0, y: 2, w: 48, h: 8 } },
+        expect.objectContaining({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'metric' } }),
+      ]);
+      expect(overview.id).not.toBe('overview');
+      expect(details.id).not.toBe('details');
+      expect(overview.id).not.toBe(details.id);
+      expect(overview).not.toHaveProperty('key');
+      expect(details).not.toHaveProperty('key');
+      expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
+      expect(result.failures).toEqual([]);
+      expect({ dashboardData, operations }).toEqual(originalInputs);
+    });
+
+    it('resolves a key for removal and retains the moved panel when promoting', async () => {
+      const panel = createLensPanel('panel');
+      const result = await executeDashboardOperations({
+        dashboardData: { title: 'Test', panels: [panel] },
+        operations: [
+          { operation: 'add_section', key: 'overview', title: 'Overview', grid: { y: 0 } },
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: panel.id, sectionId: 'overview' }],
+          },
+          { operation: 'remove_section', id: 'overview', panelAction: 'promote' },
+        ],
+        logger,
+      });
+
+      expect(result.dashboardData.panels).toEqual([panel]);
+    });
+
+    it.each([false, true])('rejects duplicate keys (first section removed: %s)', async (remove) => {
+      const operations: DashboardOperation[] = [
+        { operation: 'add_section', key: 'overview', title: 'Overview', grid: { y: 0 } },
+      ];
+      if (remove) {
+        operations.push({ operation: 'remove_section', id: 'overview', panelAction: 'promote' });
+      }
+      operations.push({
+        operation: 'add_section',
+        key: 'overview',
+        title: 'Another section',
+        grid: { y: 10 },
+      });
+
+      await expect(executeDashboardOperations({ operations, logger })).rejects.toThrow(
+        'Section key "overview" is already used in this call.'
+      );
+    });
+
+    it('rejects a key that would shadow an existing section id', async () => {
+      await expect(
+        executeDashboardOperations({
+          dashboardData: { title: 'Test', panels: [createSection('overview', 'Existing', 0)] },
+          operations: [
+            { operation: 'add_section', key: 'overview', title: 'New', grid: { y: 10 } },
+          ],
+          logger,
+        })
+      ).rejects.toThrow('Section key "overview" conflicts with an existing section id.');
+    });
+
+    it.each([false, true])(
+      'rejects unknown keys without changing the original panel (section created later: %s)',
+      async (createLater) => {
+        const panel = createLensPanel('panel');
+        const dashboardData: DashboardAttachmentData = { title: 'Test', panels: [panel] };
+        const operations: DashboardOperation[] = [
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: panel.id, sectionId: 'overview' }],
+          },
+        ];
+        if (createLater) {
+          operations.push({
+            operation: 'add_section',
+            key: 'overview',
+            title: 'Overview',
+            grid: { y: 0 },
+          });
+        }
+
+        await expect(
+          executeDashboardOperations({ dashboardData, operations, logger })
+        ).rejects.toThrow('Section "overview" not found.');
+        expect(dashboardData.panels).toEqual([panel]);
+      }
+    );
+
+    it('requires the generated id instead of the key in a subsequent call', async () => {
+      const panel = createLensPanel('panel');
+      const created = await executeDashboardOperations({
+        dashboardData: { title: 'Test', panels: [panel] },
+        operations: [
+          { operation: 'add_section', key: 'overview', title: 'Overview', grid: { y: 0 } },
+        ],
+        logger,
+      });
+
+      await expect(
+        executeDashboardOperations({
+          dashboardData: created.dashboardData,
+          operations: [
+            {
+              operation: 'update_panel_layouts',
+              panels: [{ panelId: panel.id, sectionId: 'overview' }],
+            },
+          ],
+          logger,
+        })
+      ).rejects.toThrow('Section "overview" not found.');
+
+      const [section] = getSections(created.dashboardData.panels);
+      const moved = await executeDashboardOperations({
+        dashboardData: created.dashboardData,
+        operations: [
+          {
+            operation: 'update_panel_layouts',
+            panels: [{ panelId: panel.id, sectionId: section.id }],
+          },
+        ],
+        logger,
+      });
+      expect(getSections(moved.dashboardData.panels)[0].panels).toEqual([panel]);
+    });
+
+    it.each(['', 'a'.repeat(257)])('rejects an empty or oversized key', (key) => {
+      expect(
+        dashboardOperationSchema.safeParse({
+          operation: 'add_section',
+          key,
+          title: 'Overview',
+          grid: { y: 0 },
+        }).success
+      ).toBe(false);
+    });
+  });
+
   it('adds a section with inline visualization panels in a single operation', async () => {
     const result = await executeDashboardOperations({
       dashboardData: {

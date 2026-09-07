@@ -23,6 +23,7 @@ jest.mock('@kbn/esql-server-utils', () => ({
 }));
 
 jest.mock('./graph_lens', () => ({
+  ...jest.requireActual('./graph_lens'),
   createVisualizationGraph: jest.fn(),
 }));
 
@@ -180,5 +181,27 @@ describe('buildLensConfig', () => {
 
     expect(mockedValidateEsqlQuery).not.toHaveBeenCalled();
     expect(invoke.mock.calls[0][0]).toMatchObject({ esqlQuery: '' });
+  });
+
+  it('seeds an appearance-only edit with the existing query so no ES|QL is generated', async () => {
+    const existingQuery = 'FROM logs-* | STATS count = COUNT(*)';
+
+    await buildLensConfig({
+      nlQuery: 'hide the title',
+      parsedExistingConfig: {
+        type: SupportedChartType.Metric,
+        data_source: { type: 'esql', query: existingQuery },
+      } as never,
+      appearanceOnly: true,
+      modelProvider,
+      logger,
+      events,
+      esClient,
+    });
+
+    expect(invoke.mock.calls[0][0]).toMatchObject({
+      appearanceOnly: true,
+      esqlQuery: existingQuery,
+    });
   });
 });

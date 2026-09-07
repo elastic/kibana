@@ -34,6 +34,23 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('at least one and at most two of those primary time-series XY');
   });
 
+  it('inlines the shared chart design guidance and the prettify workflow', () => {
+    expect(skill.content).toContain('CHART DESIGN GUIDANCE');
+    expect(skill.content).toContain('COLOR GUIDANCE');
+    expect(skill.content).toContain('Improving an Existing Dashboard (Prettify)');
+    expect(skill.content).toContain('appearanceOnly: true');
+    // Lens JSON mechanics stay with the config author.
+    expect(skill.content).not.toContain('apply_color_to');
+    expect(skill.content).not.toContain('CONFIGURATION RULES');
+  });
+
+  it('exposes the Kibana palette catalog as a referenced file', () => {
+    const catalog = skill.referencedContent?.find(({ name }) => name === 'color-palettes');
+    expect(catalog?.content).toContain('KIBANA PALETTE CATALOG');
+    expect(catalog?.content).toContain('- Status: #');
+    expect(skill.content).toContain('`color-palettes` reference file');
+  });
+
   it('inlines chart-type selection in the skill body so the dashboard agent sees it', () => {
     expect(skill.content).toContain('Chart Type Guidance');
     expect(skill.content).toContain('Available chart types');

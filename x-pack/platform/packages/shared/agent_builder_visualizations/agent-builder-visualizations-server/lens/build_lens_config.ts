@@ -11,7 +11,7 @@ import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { validateEsqlQuery } from '@kbn/agent-builder-genai-utils';
 import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
-import { createVisualizationGraph } from './graph_lens';
+import { createVisualizationGraph, getExistingEsqlQueries } from './graph_lens';
 import { getSchemaForChartType } from './schemas';
 import type { VisualizationConfig } from './types';
 
@@ -37,6 +37,11 @@ export interface BuildLensConfigParams {
   esql?: string;
   existingConfig?: string;
   parsedExistingConfig?: VisualizationConfig | null;
+  /**
+   * Appearance-only edit of `parsedExistingConfig`: skip query generation and
+   * keep the existing query and column bindings; only the presentation changes.
+   */
+  appearanceOnly?: boolean;
   modelProvider: ModelProvider;
   logger: Logger;
   events: ToolEventEmitter;
@@ -57,6 +62,7 @@ export const buildLensConfig = async ({
   esql,
   existingConfig,
   parsedExistingConfig = null,
+  appearanceOnly = false,
   modelProvider,
   logger,
   events,
@@ -93,6 +99,11 @@ export const buildLensConfig = async ({
     }
   }
 
+  // An appearance-only edit reuses the existing query, which also routes the
+  // graph straight to config generation. The graph re-pins every layer's own
+  // data_source, so the first query only seeds the prompt.
+  const [existingEsql] = appearanceOnly ? getExistingEsqlQueries(parsedExistingConfig) : [];
+
   const finalState = await graph.invoke({
     nlQuery,
     index,
@@ -100,7 +111,8 @@ export const buildLensConfig = async ({
     schema,
     existingConfig,
     parsedExistingConfig,
-    esqlQuery: providedEsql || '',
+    appearanceOnly,
+    esqlQuery: providedEsql || existingEsql || '',
     currentAttempt: 0,
     actions: [],
     validatedConfig: null,
