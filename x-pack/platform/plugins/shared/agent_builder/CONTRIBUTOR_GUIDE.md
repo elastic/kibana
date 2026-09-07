@@ -894,7 +894,7 @@ class MyPlugin {
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
-      icon: 'email',
+      icon: 'mail',
       tabs: ['security.entities', 'security.overview'],
     });
   }
@@ -933,7 +933,7 @@ class SecurityPlugin {
       name: i18n.translate('xpack.securitySolution.conversationTemplates.phishingName', {
         defaultMessage: 'Phishing Investigation',
       }),
-      icon: 'email',
+      icon: 'mail',
       tabs: ['security.overview'],
     });
   }
@@ -1289,17 +1289,18 @@ attach them to a conversation.
    Crawler state (which items have been seen) is stored in a separate
    `.chat-sml-crawler-state` index.
 3. **Search**: When the AI agent calls `sml_search`, the SML service queries
-   the data index, filtering by the user's current space and checking Kibana
-   privileges against each result's `permissions` array.
+   the data index with an authorization filter that binds space and action
+   together — a user must hold every action one of the entry's space groups
+   requires, within that single space.
 4. **Attach**: When the AI agent calls `sml_attach` with `entry_ids`, the service loads each entry, resolves the saved object via your `toAttachment()` hook, and adds the result as a conversation attachment (with `origin` when applicable).
 
 #### Security model
 
 - The crawler runs with **internal credentials** (`asInternalUser`) — it indexes
   content from all spaces.
-- Access control is enforced at **query time**: results are filtered by space
-  and by Kibana feature privileges (the `permissions` your optional
-  `getPermissions` hook returns).
+- Access control is enforced at **query time**: results are filtered by the
+  Kibana actions your optional `getPermissions` hook returns, scoped to the
+  space the entry lives in.
 
 ---
 
@@ -1312,7 +1313,7 @@ Create a file in your plugin (e.g.
 
 ```typescript
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
-import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 
 export const myAssetSmlType: SmlTypeDefinition = {
   // Unique identifier — lowercase, alphanumeric, hyphens, underscores.
@@ -1365,12 +1366,12 @@ export const myAssetSmlType: SmlTypeDefinition = {
     }
   },
 
-  // Optional: compute the permissions that gate access to the entry.
+  // Optional: compute the actions that gate access to the entry.
   // Omit for resources that are intentionally public within the space.
-  // Prefer `kibanaSavedObjectPermissions` for saved-object-backed types
-  // instead of hand-writing the privilege string.
-  getPermissions: () =>
-    kibanaSavedObjectPermissions({ savedObjectType: 'my-saved-object-type' }),
+  // Prefer `kibanaPermissions` instead of hand-writing the action string. The
+  // `kiType` is your SML type id, and it MUST match the KI type your feature
+  // declares in `aiIndex: { read: [...] }`.
+  getPermissions: () => kibanaPermissions({ kiType: 'my-sml-type' }),
 
   // Convert an SML document back into a conversation attachment.
   // Called when the AI agent wants to "attach" a search result.
@@ -1428,16 +1429,26 @@ all spaces. The crawler indexes everything; access control happens at query time
 many panels is still a single entry — its panel titles just become part of
 `content`, as in the example above).
 
-The optional `getPermissions` hook returns the Kibana saved object privileges
-required to access the underlying asset. Common patterns:
+The optional `getPermissions` hook returns the Kibana actions required to access the
+underlying asset. Every SML type uses the same helper, whatever backs it:
 
-- `kibanaSavedObjectPermissions({ savedObjectType: 'lens' })` for Lens visualizations
-- `kibanaSavedObjectPermissions({ savedObjectType: 'dashboard' })` for dashboards
-- `kibanaSavedObjectPermissions({ savedObjectType: 'search' })` for saved searches
+- `kibanaPermissions({ kiType: 'visualization' })` for Lens visualizations
+- `kibanaPermissions({ kiType: 'dashboard' })` for dashboards
+- `kibanaPermissions({ kiType: 'workflow' })` for workflows
 
-Users without the listed privileges won't see the item in `sml_search` results.
-Omit `getPermissions` only when the resource is intentionally public within
-the space.
+Each call produces one action, `ai_index:<kiType>/read`. Two things to get right:
+
+- **`kiType` is your SML type id**, not the saved object type or index name backing it.
+- **Your feature must grant that action**, by declaring `aiIndex: { read: ['<kiType>'] }` on
+  the privilege that should confer read access (see `FeatureKibanaPrivileges`). If the two
+  disagree, the action you stamp is one no privilege ever grants, and every entry of your type
+  silently disappears from every user's results.
+
+Users without the action won't see the item in `sml_search` results. Omit
+`getPermissions` only when the resource is intentionally public within the space.
+
+You return actions only. The indexer groups them per space into the stored
+`{ space, name[], count }` shape — never construct that yourself.
 
 ##### `toAttachment()` — Resolving saved objects
 
@@ -1470,7 +1481,7 @@ The visualization SML type is registered in
 It:
 - Lists all `lens` saved objects across all spaces
 - Extracts title, description, chart type, and ES|QL query as searchable content
-- Sets `permissions: { kibana: { privileges: [{ name: 'saved_object:lens/get' }] }, elasticsearch: { indices: [] } }`
+- Gates access on the `ai_index:visualization/read` action, via `kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE })`
 - Converts results back to Lens API format for the attachment renderer
 - Uses a 1-hour crawl interval
 

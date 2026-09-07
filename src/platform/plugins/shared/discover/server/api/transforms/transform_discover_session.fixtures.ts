@@ -164,9 +164,6 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
                 },
               },
               filters: [],
-              query: {
-                esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-              },
               visualization: {
                 legend: {
                   isVisible: true,
@@ -300,7 +297,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -334,7 +330,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -408,9 +403,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
               },
             },
             filters: [],
-            query: {
-              esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-            },
             visualization: {
               legend: {
                 isVisible: true,

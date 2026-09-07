@@ -39,7 +39,6 @@ import type {
 } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
 import type { LogsExtractionClient } from './domain/logs_extraction';
-import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
@@ -76,7 +75,6 @@ export interface EntityStoreApiRequestHandlerContext {
   relationshipsClient: RelationshipsClient;
   resolutionClient: ResolutionClient;
   entityResolutionRuleClient: ResolutionRulesClient;
-  remoteLogsExtractionClient: RemoteLogsExtractionClient;
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;

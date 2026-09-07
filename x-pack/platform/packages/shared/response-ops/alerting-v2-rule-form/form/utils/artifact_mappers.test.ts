@@ -6,7 +6,7 @@
  */
 
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { mapArtifacts, resolveArtifactId } from './artifact_mappers';
+import { mapArtifacts } from './artifact_mappers';
 
 describe('mapArtifacts', () => {
   it('returns undefined for an empty list', () => {
@@ -34,19 +34,5 @@ describe('mapArtifacts', () => {
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'steps' } },
       { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dash-1' } },
     ]);
-  });
-});
-
-describe('resolveArtifactId', () => {
-  it('keeps an existing id', () => {
-    expect(resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, 'runbook-1')).toBe('runbook-1');
-  });
-
-  it.each([
-    ['undefined', undefined],
-    ['empty', ''],
-    ['blank', '   '],
-  ])('generates a prefixed id when the existing id is %s', (_label, existingId) => {
-    expect(resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, existingId)).toMatch(/^runbook-.+/);
   });
 });

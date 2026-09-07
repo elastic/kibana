@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './analysis_setup_project_scope';
 export * from './initial_configuration_step';
 export * from './validation';

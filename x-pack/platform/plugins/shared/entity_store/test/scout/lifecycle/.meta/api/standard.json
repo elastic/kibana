@@ -1,8 +1,7 @@
 {
-  "sha1": "887c7d13dbe84bb22b48aec7bcf745cec645dca0",
+  "sha1": "36203c08032281beda0f7110f0741083aaeb8121",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -801,7 +800,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 70,
+        "line": 69,
         "column": 23
       }
     },
@@ -817,7 +816,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 75,
+        "line": 74,
         "column": 72
       }
     },
@@ -833,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 88,
+        "line": 87,
         "column": 74
       }
     },
@@ -849,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 108,
+        "line": 107,
         "column": 67
       }
     },
@@ -865,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 122,
+        "line": 121,
         "column": 23
       }
     },
@@ -881,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/uninstall.spec.ts",
-        "line": 166,
+        "line": 158,
         "column": 24
       }
     }

@@ -50,6 +50,7 @@ export interface GroupByState {
     | 'locationId'
     | 'monitor'
     | 'remoteName'
+    | 'origin'
     | 'none';
   order: 'asc' | 'desc';
 }

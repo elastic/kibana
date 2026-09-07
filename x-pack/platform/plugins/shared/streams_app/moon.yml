@@ -95,8 +95,6 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-markdown'
   - '@kbn/shared-ux-utility'
-  - '@kbn/significant-events-app-plugin'
-  - '@kbn/significant-events-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
