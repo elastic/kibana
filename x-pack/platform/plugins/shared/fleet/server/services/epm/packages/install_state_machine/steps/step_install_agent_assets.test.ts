@@ -6,7 +6,10 @@
  */
 
 import { getFleetPackageAgentId, parseFleetAgentYaml } from './step_install_agent_assets';
-import { substituteFleetAgentIds } from './step_install_workflow_assets';
+import {
+  substituteFleetAgentIds,
+  substituteFleetAgentIdsWithUnresolved,
+} from './step_install_workflow_assets';
 
 describe('parseFleetAgentYaml', () => {
   it('parses a valid fleet agent definition', () => {
@@ -77,5 +80,64 @@ configuration:
     expect(req.labels).toContain('managed_by_package');
     expect(req.labels).toContain('custom');
     expect(req.readonly).toBe(true);
+  });
+});
+
+describe('substituteFleetAgentIdsWithUnresolved (AB-006 collision + validation policy)', () => {
+  it('reports a placeholder as unresolved when no such agent was installed', () => {
+    const yaml = `
+steps:
+  - agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-typo-agent
+`;
+
+    const { yaml: result, unresolved } = substituteFleetAgentIdsWithUnresolved(yaml, {
+      pkgName: 'sdlc_intel',
+      spaceId: 'default',
+      installedAgentIds: ['fleet-default-sdlc-intel-sdlc-coverage-analysis'],
+    });
+
+    expect(unresolved).toEqual(['REPLACE_WITH_FLEET_AGENT_sdlc-typo-agent']);
+    // a dangling id must NOT be written into the workflow
+    expect(result).not.toContain('fleet-default-sdlc-intel-sdlc-typo-agent');
+  });
+
+  it('substitutes placeholders that match an installed agent', () => {
+    const yaml = `
+steps:
+  - agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis
+`;
+
+    const { yaml: result, unresolved } = substituteFleetAgentIdsWithUnresolved(yaml, {
+      pkgName: 'sdlc_intel',
+      spaceId: 'default',
+      installedAgentIds: ['fleet-default-sdlc-intel-sdlc-coverage-analysis'],
+    });
+
+    expect(unresolved).toEqual([]);
+    expect(result).toContain('agent-id: fleet-default-sdlc-intel-sdlc-coverage-analysis');
+  });
+
+  it('skips validation when the installed agent list is not provided (back-compat)', () => {
+    const yaml = 'agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis';
+
+    const { yaml: result, unresolved } = substituteFleetAgentIdsWithUnresolved(yaml, {
+      pkgName: 'sdlc_intel',
+      spaceId: 'default',
+    });
+
+    expect(unresolved).toEqual([]);
+    expect(result).toContain('fleet-default-sdlc-intel-sdlc-coverage-analysis');
+  });
+
+  it('enforces the fleet-* namespace: a placeholder cannot escape it', () => {
+    const yaml = 'agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-coverage-analysis';
+
+    const { yaml: result } = substituteFleetAgentIdsWithUnresolved(yaml, {
+      pkgName: 'sdlc_intel',
+      spaceId: 'default',
+    });
+
+    const id = result.split('agent-id: ')[1].trim();
+    expect(id.startsWith('fleet-')).toBe(true);
   });
 });

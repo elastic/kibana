@@ -132,11 +132,28 @@ export const getFleetPackageWorkflowId = (params: {
 
 const FLEET_AGENT_PLACEHOLDER_PREFIX = 'REPLACE_WITH_FLEET_AGENT_';
 
-export const substituteFleetAgentIds = (
+/**
+ * Resolve `REPLACE_WITH_FLEET_AGENT_*` placeholders to deterministic fleet agent
+ * ids (AB-006).
+ *
+ * When `installedAgentIds` is supplied, a placeholder whose resolved id was not
+ * installed by this package is reported as unresolved and left in place rather
+ * than substituted. Substituting it anyway would mint a well-formed but dangling
+ * `fleet-*` id: install succeeds and the workflow only fails later, at run time,
+ * with a 404 from the agent API. Callers force such workflows disabled, matching
+ * the connector placeholder policy.
+ *
+ * Resolved ids are always confined to the `fleet-` namespace by
+ * `getFleetPackageWorkflowId`, so a placeholder cannot address an arbitrary
+ * user-created agent.
+ */
+export const substituteFleetAgentIdsWithUnresolved = (
   yaml: string,
-  params: { pkgName: string; spaceId: string }
-): string => {
+  params: { pkgName: string; spaceId: string; installedAgentIds?: string[] }
+): { yaml: string; unresolved: string[] } => {
   let result = yaml;
+  const unresolved: string[] = [];
+  const known = params.installedAgentIds ? new Set(params.installedAgentIds) : undefined;
   const placeholderRegex = new RegExp(`${FLEET_AGENT_PLACEHOLDER_PREFIX}([a-z0-9_-]+)`, 'gi');
   const matches = yaml.matchAll(placeholderRegex);
 
@@ -147,11 +164,24 @@ export const substituteFleetAgentIds = (
       spaceId: params.spaceId,
       fileName: `${fileBase}.yaml`,
     });
+
+    if (known && !known.has(agentId)) {
+      if (!unresolved.includes(match[0])) {
+        unresolved.push(match[0]);
+      }
+      continue;
+    }
+
     result = result.replaceAll(match[0], agentId);
   }
 
-  return result;
+  return { yaml: result, unresolved };
 };
+
+export const substituteFleetAgentIds = (
+  yaml: string,
+  params: { pkgName: string; spaceId: string; installedAgentIds?: string[] }
+): string => substituteFleetAgentIdsWithUnresolved(yaml, params).yaml;
 
 interface WorkflowEntry {
   fileName: string;
@@ -263,6 +293,21 @@ export async function stepInstallWorkflowAssets(
       packageInfo.workflows?.dependencies
     );
 
+    // AB-006: the set of agent ids this package actually installs. Placeholders
+    // that do not resolve into this set are left unsubstituted and the workflow
+    // is forced disabled, rather than shipping a dangling fleet-* agent id.
+    const installedAgentIds: string[] = [];
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        const { file: fileName } = getPathParts(entry.path);
+        installedAgentIds.push(getFleetPackageWorkflowId({ pkgName, spaceId, fileName }));
+      },
+      (entryPath) => {
+        const parts = getPathParts(entryPath);
+        return parts.service === 'kibana' && parts.type === KibanaAssetType.agent;
+      }
+    );
+
     await pMap(
       orderedWorkflowEntries,
       async ({ fileName, yaml }) => {
@@ -272,7 +317,14 @@ export async function stepInstallWorkflowAssets(
           connectorVars,
           logger
         );
-        let workflowYaml = substituteFleetAgentIds(substitutedYaml, { pkgName, spaceId });
+        const { yaml: agentSubstitutedYaml, unresolved: unresolvedAgents } =
+          substituteFleetAgentIdsWithUnresolved(substitutedYaml, {
+            pkgName,
+            spaceId,
+            installedAgentIds,
+          });
+        let workflowYaml = agentSubstitutedYaml;
+        const allUnresolved = [...unresolved, ...unresolvedAgents];
 
         const workflowDefinition = parse(workflowYaml) as {
           enabled?: boolean;
@@ -283,9 +335,9 @@ export async function stepInstallWorkflowAssets(
           fileName
         );
 
-        if (resolvedIntent && unresolved.length > 0) {
+        if (resolvedIntent && allUnresolved.length > 0) {
           logger.warn(
-            `Workflow ${workflowId} has unresolved placeholders [${unresolved.join(
+            `Workflow ${workflowId} has unresolved placeholders [${allUnresolved.join(
               ', '
             )}] — forcing disabled`
           );
