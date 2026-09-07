@@ -118,11 +118,6 @@ export interface DiscoverDataStateContainer {
    */
   disableNextFetchOnStateChange$: BehaviorSubject<boolean>;
   /**
-   * Whether the documents warning callout is dismissed for the current result.
-   * Survives tab remounts; reset when a new documents fetch completes (not load-more).
-   */
-  isWarningCalloutDismissed$: BehaviorSubject<boolean>;
-  /**
    * Start subscribing to other observables that trigger data fetches
    */
   subscribe: () => () => void;
@@ -187,7 +182,6 @@ export function getDataStateContainer({
   const inspectorAdapters = { requests: new RequestAdapter() };
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
-  const isWarningCalloutDismissed$ = new BehaviorSubject(false);
   let numberOfFetches = 0;
   let unsubscribeIsRequested = false;
 
@@ -587,7 +581,11 @@ export function getDataStateContainer({
           });
 
           if (!abortController.signal.aborted) {
-            isWarningCalloutDismissed$.next(false);
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+                isWarningCalloutDismissed: false,
+              })
+            );
           }
 
           fetchAllTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
@@ -664,7 +662,6 @@ export function getDataStateContainer({
     refetch$,
     fetchChart$,
     disableNextFetchOnStateChange$,
-    isWarningCalloutDismissed$,
     subscribe,
     reset,
     inspectorAdapters,

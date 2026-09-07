@@ -48,6 +48,7 @@ const mockFetchDocuments = jest.mocked(fetchDocuments);
 describe('test getDataStateContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchDocuments.mockResolvedValue({ records: [] });
   });
 
   test('return is valid', async () => {
@@ -55,8 +56,6 @@ describe('test getDataStateContainer', () => {
     const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
 
     expect(dataState.refetch$).toBeInstanceOf(Subject);
-    expect(dataState.isWarningCalloutDismissed$).toBeInstanceOf(BehaviorSubject);
-    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(false);
     expect(dataState.data$.main$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.documents$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
     expect(dataState.data$.totalHits$.getValue().fetchStatus).toBe(FetchStatus.LOADING);
@@ -118,45 +117,49 @@ describe('test getDataStateContainer', () => {
 
   test('does not reset warning callout dismiss on fetch more', async () => {
     const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
 
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
-    dataState.data$.documents$ = new BehaviorSubject({
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
+    });
+
+    dataStateContainer.data$.documents$.next({
       fetchStatus: FetchStatus.COMPLETE,
       result: records.slice(0, 2),
-    }) as DataDocuments$;
-
-    const unsubscribe = dataState.subscribe();
-    dataState.isWarningCalloutDismissed$.next(true);
-
-    dataState.refetch$.next('fetch_more');
-    await waitFor(() => {
-      expect(dataState.data$.documents$.value.result).toEqual(records);
     });
-    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(true);
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
 
-    unsubscribe();
+    mockFetchDocuments.mockResolvedValue({ records: records.slice(2) });
+    dataStateContainer.refetch$.next('fetch_more');
+
+    await waitFor(() => {
+      expect(dataStateContainer.data$.documents$.value.result).toEqual(records);
+    });
+    expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(true);
   });
 
   test('resets warning callout dismiss when a new fetch completes', async () => {
-    mockFetchDocuments.mockResolvedValue({ records: [] });
-    discoverServiceMock.data.query.timefilter.timefilter.getTime = jest.fn(() => {
-      return { from: '2021-05-01T20:00:00Z', to: '2021-05-02T20:00:00Z' };
+    const toolkit = getDiscoverInternalStateMock();
+    await toolkit.initializeTabs();
+    const { dataStateContainer } = await toolkit.initializeSingleTab({
+      tabId: toolkit.getCurrentTab().id,
     });
 
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
-    const unsubscribe = dataState.subscribe();
-    dataState.isWarningCalloutDismissed$.next(true);
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setIsWarningCalloutDismissed)({
+        isWarningCalloutDismissed: true,
+      })
+    );
+    dataStateContainer.refetch$.next(undefined);
 
-    dataState.refetch$.next(undefined);
     await waitFor(() => {
-      expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
+      expect(toolkit.getCurrentTab().isWarningCalloutDismissed).toBe(false);
     });
-    expect(dataState.isWarningCalloutDismissed$.getValue()).toBe(false);
-
-    unsubscribe();
   });
 
   test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {

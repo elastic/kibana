@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useViewDetailsActionProps } from './view_details_popover';
 import { getWarningsDescription, getWarningsTitle } from './i18n_utils';
@@ -20,6 +22,7 @@ interface Props {
 }
 
 export const SearchResponseWarningsCallout = (props: Props) => {
+  const { euiTheme } = useEuiTheme();
   const viewDetailsActionProps = useViewDetailsActionProps(props.warnings);
 
   if (!props.warnings.length || props.isDismissed) {
@@ -34,6 +37,9 @@ export const SearchResponseWarningsCallout = (props: Props) => {
       actionProps={{ primary: viewDetailsActionProps }}
       data-test-subj="searchResponseWarningsCallout"
       onDismiss={props.onDismiss}
+      css={css`
+        margin: ${euiTheme.size.xxs} ${euiTheme.size.xs};
+      `}
     />
   );
 };

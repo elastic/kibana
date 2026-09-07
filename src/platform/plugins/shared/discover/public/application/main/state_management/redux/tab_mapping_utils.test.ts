@@ -169,6 +169,7 @@ describe('tab mapping utils', () => {
             "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
+          "isWarningCalloutDismissed": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
           "previousAppState": Object {
@@ -255,6 +256,7 @@ describe('tab mapping utils', () => {
             "initializationStatus": "NotStarted",
           },
           "isDataViewLoading": false,
+          "isWarningCalloutDismissed": false,
           "label": "Tab 2",
           "overriddenVisContextAfterInvalidation": undefined,
           "previousAppState": Object {

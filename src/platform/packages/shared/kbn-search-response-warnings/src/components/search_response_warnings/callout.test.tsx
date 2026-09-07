@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SearchResponseWarningsCallout } from './callout';
 import { searchResponseIncompleteWarningLocalCluster } from '../../__mocks__/search_response_warnings';
 
@@ -43,7 +44,8 @@ describe('SearchResponseWarningsCallout', () => {
     expect(screen.queryByTestId('searchResponseWarningsCallout')).not.toBeInTheDocument();
   });
 
-  it('calls onDismiss when the callout is dismissed', () => {
+  it('calls onDismiss when the callout is dismissed', async () => {
+    const user = userEvent.setup();
     const onDismiss = jest.fn();
     render(
       <SearchResponseWarningsCallout
@@ -53,7 +55,7 @@ describe('SearchResponseWarningsCallout', () => {
       />
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
+    await user.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
 });
