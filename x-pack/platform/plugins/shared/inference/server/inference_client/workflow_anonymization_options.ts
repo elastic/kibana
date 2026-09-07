@@ -16,4 +16,6 @@ export interface WorkflowAnonymizationOptions {
   /** HMAC server salt derived from xpack.inference.anonymization.encryptionKey. Undefined when the key is not configured; tokens are session-ID-derived only. */
   readonly encryptionKey?: string;
   readonly piiRegexWorker: PiiRegexWorkerService;
+  /** HMAC server salt derived from xpack.inference.anonymization.encryptionKey. Undefined when the key is not configured; tokens are session-ID-derived only. */
+  readonly encryptionKey?: string;
 }

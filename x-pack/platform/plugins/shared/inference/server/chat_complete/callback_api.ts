@@ -336,7 +336,6 @@ function createChatCompletePipeline({
           sessionId,
           agentId: metadata?.agentId,
           abortSignal,
-          saltPromise: anonymization?.saltPromise,
           regexWorker: workflowAnonymization.piiRegexWorker,
           logger,
           workflowAnonymization,
