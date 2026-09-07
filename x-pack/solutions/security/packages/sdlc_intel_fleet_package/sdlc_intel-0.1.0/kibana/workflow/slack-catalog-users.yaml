@@ -34,20 +34,14 @@ triggers:
 
 steps:
   - name: read_checkpoint
-    type: elasticsearch.search
+    type: data.loadCheckpoint
     with:
-      index: '{{ consts.syncStateIndex }}'
-      size: 1
-      ignore_unavailable: true
-      allow_no_indices: true
-      query:
-        term:
-          sync.source: '{{ consts.syncSource }}'
-
+      index: "{{ consts.syncStateIndex }}"
+      id: '{{ consts.syncSource }}'
   - name: init_cursor
     type: data.set
     with:
-      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      cursor: '{{ steps.read_checkpoint.output.cursor }}'
       pagesFetched: 0
 
   - name: paginate_users

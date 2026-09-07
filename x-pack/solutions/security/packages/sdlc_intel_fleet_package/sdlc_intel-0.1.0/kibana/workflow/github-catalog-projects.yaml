@@ -37,26 +37,14 @@ triggers:
 
 steps:
   - name: read_checkpoint
-    type: elasticsearch.search
+    type: data.loadCheckpoint
     with:
-      index: '{{ consts.syncStateIndex }}'
-      size: 1
-      ignore_unavailable: true
-      allow_no_indices: true
-      query:
-        bool:
-          must:
-            - term:
-                sync.source: '{{ consts.syncSource }}'
-            - term:
-                entity_type: '{{ consts.entityType }}'
-            - term:
-                org.login: '{{ consts.orgLogin }}'
-
+      index: "{{ consts.syncStateIndex }}"
+      id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
   - name: init_cursor
     type: data.set
     with:
-      cursor: '{{ steps.read_checkpoint.output.hits.hits.0._source.cursor }}'
+      cursor: '{{ steps.read_checkpoint.output.cursor }}'
       pagesFetched: 0
 
   - name: paginate_projects
