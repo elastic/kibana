@@ -881,8 +881,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     ? i18n.translate(
                         'xpack.agentBuilder.agents.form.settings.postRoundWorkflowAdminOnlyReason',
                         {
-                          defaultMessage:
-                            'Only administrators can configure post-round workflows.',
+                          defaultMessage: 'Only administrators can configure post-round workflows.',
                         }
                       )
                     : undefined
