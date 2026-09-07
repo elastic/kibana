@@ -43,7 +43,7 @@ const makeRound = (overrides: Partial<ConversationRound> = {}): ConversationRoun
   started_at: '2026-01-01T00:00:00.000Z',
   time_to_first_token: 100,
   time_to_last_token: 200,
-  model_usage: { prompt_tokens: 10, completion_tokens: 5, total_tokens: 15 },
+  model_usage: { connector_id: 'connector-1', llm_calls: 1, input_tokens: 10, output_tokens: 5 },
   ...overrides,
 });
 

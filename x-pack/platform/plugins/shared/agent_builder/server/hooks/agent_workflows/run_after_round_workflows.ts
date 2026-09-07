@@ -6,7 +6,11 @@
  */
 
 import type { AfterRoundHookContext } from '@kbn/agent-builder-server';
-import { ConversationRoundStatus, isToolCallStep, type ToolCallStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  isToolCallStep,
+  type ToolCallStep,
+} from '@kbn/agent-builder-common';
 import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -77,9 +81,7 @@ export const runAfterRoundWorkflows = async ({
     });
 
     if (!result.success) {
-      logger.error(
-        `Post-round workflow "${workflowId}" failed to execute: ${result.error}`
-      );
+      logger.error(`Post-round workflow "${workflowId}" failed to execute: ${result.error}`);
       continue;
     }
 
