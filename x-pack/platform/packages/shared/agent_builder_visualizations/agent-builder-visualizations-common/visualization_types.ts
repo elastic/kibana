@@ -58,6 +58,16 @@ export type VisualizationAttachmentData =
   | ChartVisualizationAttachmentData
   | CustomContentVisualizationAttachmentData;
 
+/**
+ * The renderer an attachment actually renders with.
+ *
+ * `renderer` is absent on attachments created before the field existed, and those are
+ * Lens. Callers should resolve through this rather than defaulting inline, so the rule
+ * lives in one place and a new renderer cannot be mistaken for the legacy case.
+ */
+export const getEffectiveRenderer = (data: VisualizationAttachmentData): VisualizationRenderer =>
+  data.renderer ?? 'lens';
+
 /** Narrows an attachment payload to the custom content member. */
 export const isCustomContentVisualization = (
   data: VisualizationAttachmentData

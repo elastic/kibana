@@ -13,7 +13,7 @@ export type {
   CustomContentVisualizationAttachmentData,
   VisualizationRenderer,
 } from './visualization_types';
-export { isCustomContentVisualization } from './visualization_types';
+export { getEffectiveRenderer, isCustomContentVisualization } from './visualization_types';
 
 export {
   buildVegaSavedVis,

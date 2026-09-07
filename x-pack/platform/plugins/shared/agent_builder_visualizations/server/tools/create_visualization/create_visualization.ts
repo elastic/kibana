@@ -13,6 +13,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import {
   VISUALIZATION_ATTACHMENT_TYPE,
+  getEffectiveRenderer,
   isCustomContentVisualization,
   type VisualizationAttachmentData,
   type VisualizationRenderer,
@@ -33,15 +34,13 @@ import {
 
 /**
  * Pull the prior Lens config out of an existing attachment, when it is a Lens
- * visualization. Returns null for every other renderer or unparseable data.
- *
- * Checked positively rather than as "not Vega": a custom content payload read as
- * a Lens config would be handed to the Lens builder as an existing chart.
+ * visualization. Returns null for every other renderer or unparseable data — a custom
+ * content payload read as a Lens config would reach the Lens builder as an existing chart.
  */
 const getExistingLensConfig = (
   data: VisualizationAttachmentData | undefined
 ): VisualizationConfig | null => {
-  if (!data || (data.renderer ?? 'lens') !== 'lens') {
+  if (!data || getEffectiveRenderer(data) !== 'lens') {
     return null;
   }
   const candidate = data.visualization;
@@ -56,11 +55,6 @@ const getExistingVegaSpec = (data: VisualizationAttachmentData | undefined): str
   return typeof candidate === 'string' ? candidate : undefined;
 };
 
-/**
- * The generated template can only iterate the rows it receives — it cannot group,
- * aggregate or sort them — so any shaping the content needs has to happen in the
- * query itself.
- */
 const CUSTOM_CONTENT_ESQL_INSTRUCTIONS =
   'The query results feed an HTML template that can only loop over the returned rows — it cannot aggregate, group, or sort them. Any grouping or aggregation the content needs must happen in the query itself (STATS ... BY ...), and rows should come back already sorted and limited to what the panel will display.';
 
@@ -153,8 +147,7 @@ const createVisualizationSchema = z
       });
     }
 
-    // Only checkable on create: an update omits `renderer` by design, so the renderer is
-    // not known here and the handler ignores contentMode for non-custom-content edits.
+    // An update omits `renderer` by design, so the renderer is unknown here.
     if (
       ctx.value.contentMode &&
       !ctx.value.attachment_id &&
@@ -167,7 +160,6 @@ const createVisualizationSchema = z
       });
     }
 
-    // Checked positively: "not Vega" would demand a chartType for custom content too.
     const isNewLensVisualization =
       !ctx.value.attachment_id && (ctx.value.renderer ?? 'lens') === 'lens';
 
@@ -251,27 +243,17 @@ Ground first: make sure the target index exists and every field you reference is
         // Step 2: Resolve the renderer from the caller's choice. Edits keep the
         // existing attachment's renderer; otherwise honor the explicit `renderer`
         // param and default to Lens (the common case) when it is omitted.
-        // An attachment with no discriminator predates the renderer field and is
-        // implicitly Lens, so the fallback stays Lens — but each renderer is matched
-        // explicitly rather than inferred from "not Vega".
-        let renderer: VisualizationRenderer;
-        if (existingData) {
-          renderer = existingData.renderer ?? 'lens';
-        } else {
-          renderer = requestedRenderer ?? 'lens';
-        }
+        const renderer: VisualizationRenderer = existingData
+          ? getEffectiveRenderer(existingData)
+          : requestedRenderer ?? 'lens';
 
-        // Step 3: Generate the spec/config for the chosen renderer and assemble
-        // the unified attachment data. The chart type is kept alongside rather than
-        // read back off the payload, so the tool result gets it already narrowed to
-        // SupportedChartType.
+        // Step 3: Generate the spec/config for the chosen renderer and assemble the
+        // unified attachment data.
         let visualizationData: VisualizationAttachmentData;
         let selectedChartTypeForResult: SupportedChartType | undefined;
 
         if (renderer === 'custom_content') {
-          // The template is generated here rather than written by the model: the model
-          // supplies plain-English intent and an optional ES|QL query, and never sees or
-          // authors the markup. Same resolver the dashboard path uses.
+          // The model supplies intent, never markup. Same resolver the dashboard uses.
           const resolveTemplate = createCustomContentTemplateResolver({
             modelProvider,
             esClient,
@@ -279,25 +261,19 @@ Ground first: make sure the target index exists and every field you reference is
           });
           const existingTemplate = getExistingTemplate(existingData);
           const existingEsql = existingData?.esql;
-          // Sampling the schema is only worth a round trip when the query is actually
-          // changing; a style-only edit refines the existing template in place.
+          // Sampling costs a round trip, so only when the query actually changes.
           let isQueryChanging = esql !== undefined && esql !== existingEsql;
           let mergedEsql = esql ?? existingEsql;
 
-          // A stored panel with no query is static by construction — it was created that
-          // way — so editing its wording or styling must not silently turn it into a
-          // data-backed panel, or fail because no query can be generated for content that
-          // never had one. Only `contentMode: 'data'` opts an existing static panel in.
+          // A stored panel with no query is static by construction: a styling edit must not
+          // turn it into a data panel, nor fail generating a query it never wanted.
           const isEstablishedStatic =
             Boolean(existingData) && !existingEsql && contentMode !== 'data';
 
           if (contentMode === 'static' || isEstablishedStatic) {
-            // Drop any query rather than keeping a stale one.
             mergedEsql = undefined;
             isQueryChanging = false;
           } else if (!mergedEsql) {
-            // Generated rather than left empty. A panel with no data is a deliberate
-            // choice (contentMode: 'static'), never what you get by omitting `esql`.
             const generated = await generateVisualizationEsql({
               nlQuery,
               index,
