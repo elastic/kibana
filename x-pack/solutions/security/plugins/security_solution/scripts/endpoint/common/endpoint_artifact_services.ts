@@ -156,7 +156,7 @@ export const createEndpointException = async (
   kbnClient: KbnClient,
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {
-  await ensureArtifactListExists(kbnClient, 'hostIsolationExceptions');
+  await ensureArtifactListExists(kbnClient, 'endpointExceptions');
   return createExceptionListItem(kbnClient, data);
 };
 

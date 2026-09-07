@@ -23,6 +23,7 @@ import {
   createCustomYaraSignature,
   createEventFilter,
   createHostIsolationException,
+  createEndpointException,
   createTrustedApp,
 } from '../../common/endpoint_artifact_services';
 import type { ReportProgressCallback } from './types';
@@ -330,7 +331,7 @@ export const createEndpointExceptions = async ({
 
   loop(count, () => {
     throttler.addToQueue(async () => {
-      await createHostIsolationException(kbnClient, generate.generateEndpointExceptionForCreate())
+      await createEndpointException(kbnClient, generate.generateEndpointExceptionForCreate())
         .catch((e) => {
           errorCount++;
           logError(log, 'Endpoint Exception', e);
