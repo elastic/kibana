@@ -474,10 +474,31 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
     return { osTypes, osMeta };
   }
 
+  convertOsTypeToMetaOsValue(osType: OsType): MetaOsValue {
+    switch (osType) {
+      case 'windows':
+        return MetaOsValue.WINDOWS;
+      case 'linux':
+        return MetaOsValue.LINUX;
+      case 'macos':
+        return MetaOsValue.MACOS;
+      default:
+        throw new Error(`Unknown OS type: ${osType}`);
+    }
+  }
+
   generateCustomYaraSignature(
     overrides: Partial<ExceptionListItemSchema> = {}
   ): ExceptionListItemSchema {
-    const { osTypes, osMeta } = this.generateMatchingOsTypesAndYaraOsMeta();
+    let osTypes: OsTypeArray;
+    let osMeta: MetaOsValue[];
+
+    if (overrides.os_types) {
+      osTypes = overrides.os_types;
+      osMeta = osTypes.map((osType) => this.convertOsTypeToMetaOsValue(osType));
+    } else {
+      ({ osTypes, osMeta } = this.generateMatchingOsTypesAndYaraOsMeta());
+    }
 
     const numberOfRules = this.randomN(9) + 1;
     const ruleText = Array.from({ length: numberOfRules }, () =>
@@ -496,8 +517,8 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
           value: ruleText,
         },
       ],
-      os_types: osTypes as ExceptionListItemSchema['os_types'],
       ...overrides,
+      os_types: osTypes as ExceptionListItemSchema['os_types'],
     });
   }
 
