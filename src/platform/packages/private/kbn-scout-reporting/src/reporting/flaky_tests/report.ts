@@ -40,9 +40,14 @@ export interface FlakyTestReportOptions {
   frameworks: TestFramework[];
   thresholds: FlakyTestReportThresholds;
   samplesPerTest: number;
+  /** Drop tests whose most recent run was skipped, i.e. tests someone has already disabled. */
+  excludeSkipped: boolean;
   /** Upper bound of the window; defaults to the current time. */
   now?: Date;
 }
+
+/** Statuses meaning the test did not run: mocha/Playwright `skipped`, Jest `todo`/`disabled`. */
+const SKIPPED_STATUSES: ReadonlySet<string> = new Set(['skipped', 'todo', 'disabled']);
 
 export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'now'> = {
   lookbackDays: 7,
@@ -55,6 +60,7 @@ export const DEFAULT_FLAKY_TEST_REPORT_OPTIONS: Omit<FlakyTestReportOptions, 'no
     maxTests: 200,
   },
   samplesPerTest: 3,
+  excludeSkipped: false,
 };
 
 export type FlakyTestClassification = 'flaky' | 'consistently-failing';
@@ -157,7 +163,7 @@ const buildReport = async (
   let startedAt = performance.now();
   const failingFiles = await fetchFailingFiles(es, scope, frameworks);
   warnIfTruncated('Failing files query', failingFiles.length);
-  log.info(`Found ${failingFiles.length} files with failures in ${elapsed(startedAt)}`);
+  log.info(`Found ${failingFiles.length} test files with failures in ${elapsed(startedAt)}`);
 
   const stats: TestStatsRow[] = [];
   for (const [framework, files] of groupByFramework(failingFiles)) {
@@ -172,7 +178,7 @@ const buildReport = async (
     log.info(
       `Aggregated ${rows.length} failing ${framework} tests across ${
         files.length
-      } files in ${elapsed(startedAt)}`
+      } test files in ${elapsed(startedAt)}`
     );
     stats.push(...rows);
   }
@@ -198,24 +204,46 @@ const buildReport = async (
     }
   }
 
-  const rankedFlaky = rankTests(flaky).slice(0, thresholds.maxTests);
-  const rankedConsistentlyFailing = rankTests(consistentlyFailing).slice(0, thresholds.maxTests);
-  const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
+  const testIds = (entries: readonly AggregatedEntry[]) => entries.map((entry) => entry.testId);
+  const cap = (entries: readonly AggregatedEntry[]) => entries.slice(0, thresholds.maxTests);
+
+  // Skipped tests can only be dropped once their latest run is known, and they have to be
+  // dropped before the cap so that they do not take slots from tests that are still running.
+  const capBeforeLookup = options.excludeSkipped ? (entries: AggregatedEntry[]) => entries : cap;
+  let rankedFlaky = capBeforeLookup(rankTests(flaky));
+  let rankedConsistentlyFailing = capBeforeLookup(rankTests(consistentlyFailing));
 
   let latestRuns = new Map<string, FlakyTestLatestRun>();
+  const lookupCount = rankedFlaky.length + rankedConsistentlyFailing.length;
+  if (lookupCount > 0) {
+    startedAt = performance.now();
+    latestRuns = await fetchLatestRuns(es, scope, [
+      ...testIds(rankedFlaky),
+      ...testIds(rankedConsistentlyFailing),
+    ]);
+    log.info(`Fetched latest runs for ${lookupCount} tests in ${elapsed(startedAt)}`);
+  }
+
+  if (options.excludeSkipped) {
+    const isRunning = (entry: AggregatedEntry) =>
+      !SKIPPED_STATUSES.has(latestRuns.get(entry.testId)?.status ?? '');
+    const runningFlaky = rankedFlaky.filter(isRunning);
+    const runningConsistentlyFailing = rankedConsistentlyFailing.filter(isRunning);
+    log.info(
+      `Excluded ${
+        lookupCount - runningFlaky.length - runningConsistentlyFailing.length
+      } tests whose latest run was skipped`
+    );
+    rankedFlaky = cap(runningFlaky);
+    rankedConsistentlyFailing = cap(runningConsistentlyFailing);
+  }
+
+  const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
   let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
   if (admitted.length > 0) {
-    const admittedIds = admitted.map((entry) => entry.testId);
     startedAt = performance.now();
-    [latestRuns, samples] = await Promise.all([
-      fetchLatestRuns(es, scope, admittedIds),
-      fetchSampleFailures(es, scope, admittedIds, options.samplesPerTest),
-    ]);
-    log.info(
-      `Fetched latest runs and failure samples for ${admitted.length} tests in ${elapsed(
-        startedAt
-      )}`
-    );
+    samples = await fetchSampleFailures(es, scope, testIds(admitted), options.samplesPerTest);
+    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
   }
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
@@ -233,7 +261,12 @@ const buildReport = async (
     schemaVersion: FLAKY_TEST_REPORT_SCHEMA_VERSION,
     generatedAt: new Date(),
     window: { lookbackDays: options.lookbackDays, from, to },
-    scope: { pipelines: options.pipelines, branches: options.branches, frameworks },
+    scope: {
+      pipelines: options.pipelines,
+      branches: options.branches,
+      frameworks,
+      excludeSkipped: options.excludeSkipped,
+    },
     thresholds,
     summary: {
       totalFlaky: rankedFlaky.length,

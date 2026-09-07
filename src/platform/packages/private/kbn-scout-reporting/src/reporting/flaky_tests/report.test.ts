@@ -224,6 +224,51 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     );
   });
 
+  it('drops tests whose latest run was skipped before applying the cap when excludeSkipped is set', async () => {
+    jest
+      .spyOn(queries, 'fetchFailingFiles')
+      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
+    jest
+      .spyOn(queries, 'fetchTestStats')
+      .mockResolvedValue([
+        statsRow({ testId: 'skipped-high', failedBuilds: 30 }),
+        statsRow({ testId: 'running-low', failedBuilds: 3 }),
+        statsRow({ testId: 'todo-mid', failedBuilds: 10 }),
+      ]);
+    jest.spyOn(queries, 'fetchTestMetadata').mockResolvedValue(new Map());
+    const fetchLatestRuns = jest.spyOn(queries, 'fetchLatestRuns').mockResolvedValue(
+      new Map([
+        ['skipped-high', { status: 'skipped', timestamp: new Date('2026-09-06') }],
+        ['todo-mid', { status: 'todo', timestamp: new Date('2026-09-06') }],
+        ['running-low', { status: 'passed', timestamp: new Date('2026-09-06') }],
+      ])
+    );
+    const fetchSampleFailures = jest
+      .spyOn(queries, 'fetchSampleFailures')
+      .mockResolvedValue(new Map());
+
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(
+      es,
+      { ...options, excludeSkipped: true },
+      log
+    );
+
+    // the cap (maxTests = 1) is applied after the skipped tests are removed
+    expect(report.flaky.map((entry) => entry.testId)).toEqual(['running-low']);
+    expect(report.scope.excludeSkipped).toBe(true);
+    expect(fetchLatestRuns).toHaveBeenCalledWith(es, expect.anything(), [
+      'skipped-high',
+      'todo-mid',
+      'running-low',
+    ]);
+    expect(fetchSampleFailures).toHaveBeenCalledWith(
+      es,
+      expect.anything(),
+      ['running-low'],
+      options.samplesPerTest
+    );
+  });
+
   it('skips metadata, latest run and sample queries when nothing qualifies', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
     const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
