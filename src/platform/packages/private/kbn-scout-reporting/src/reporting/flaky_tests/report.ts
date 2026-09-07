@@ -199,7 +199,10 @@ const buildReport = async (
 
   const flaky: AggregatedEntry[] = [];
   const consistentlyFailing: AggregatedEntry[] = [];
-  const candidates = stats.filter((row) => classifyTest(row, thresholds) !== undefined);
+  const candidates = stats.flatMap((row) => {
+    const classification = classifyTest(row, thresholds);
+    return classification ? [{ row, classification }] : [];
+  });
 
   let metadata = new Map<string, TestMetadataRow>();
   if (candidates.length > 0) {
@@ -209,13 +212,9 @@ const buildReport = async (
     log.info(`Fetched metadata for ${metadata.size} failing tests in ${elapsed(startedAt)}`);
   }
 
-  for (const row of candidates) {
+  for (const { row, classification } of candidates) {
     const entry = toEntry(row, metadata.get(row.testId));
-    if (classifyTest(row, thresholds) === 'flaky') {
-      flaky.push(entry);
-    } else {
-      consistentlyFailing.push(entry);
-    }
+    (classification === 'flaky' ? flaky : consistentlyFailing).push(entry);
   }
 
   const testIds = (entries: readonly AggregatedEntry[]) => entries.map((entry) => entry.testId);
