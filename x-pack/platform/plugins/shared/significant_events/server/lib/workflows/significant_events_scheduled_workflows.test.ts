@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   getManagedWorkflowDefinition,
+  SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
@@ -280,6 +281,10 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
       'space-a',
       request
     );
+    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      'space-a'
+    );
   });
 
   it('updates template values without toggling workflows that are already enabled', async () => {
@@ -368,6 +373,16 @@ describe('SignificantEventsScheduledWorkflowsService', () => {
     expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
       SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
       { spaceId: 'space-a', workflowIdSuffix: 'space-a' }
+    );
+    expect(managementApi.getWorkflow).not.toHaveBeenCalledWith(
+      `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      'space-a'
+    );
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        workflowId: `${SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID}-space-a`,
+      }),
+      'space-a'
     );
   });
 });
