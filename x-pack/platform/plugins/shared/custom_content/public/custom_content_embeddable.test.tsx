@@ -32,7 +32,7 @@ let capturedComponentProps:
   | { onGenerateWithChat?: () => void; onLoadingChange?: (isLoading: boolean) => void }
   | undefined;
 
-jest.mock('./components/custom_content_component', () => ({
+jest.mock('@kbn/custom-content-renderer', () => ({
   CustomContentComponent: (props: {
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
