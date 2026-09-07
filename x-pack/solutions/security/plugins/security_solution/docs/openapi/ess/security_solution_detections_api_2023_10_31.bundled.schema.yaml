@@ -5922,6 +5922,19 @@ components:
             100 entries per request; larger maps are rejected.
           maxProperties: 100
           type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: Optional map of runtime field name to runtime field mapping,
+            forwarded verbatim to the underlying `_update_by_query` as
+            `runtime_mappings`. Use this to attach data view runtime fields
+            (including scripted fields) so the close query can match fields not
+            natively mapped on the alerts index. Unlike `runtime_fields`, the
+            caller-supplied mapping (including any Painless `script.source`) is
+            used as-is by Elasticsearch. Limited to 100 entries combined with
+            `runtime_fields`; larger maps are rejected.
+          maxProperties: 100
+          type: object
         status:
           enum:
             - closed
@@ -9901,6 +9914,35 @@ components:
               $ref: '#/components/schemas/RunScriptOsConfigValues'
       required:
         - command
+    RuntimeFieldMapping:
+      description: A single runtime field mapping to be attached verbatim to the
+        `_update_by_query` as `runtime_mappings`. Allows the close query to
+        reference fields that are not natively mapped on the alerts index but
+        are evaluatable at query time by Elasticsearch — for example, scripted
+        fields defined on a data view.
+      type: object
+      properties:
+        format:
+          description: Optional format string for date runtime fields (e.g.
+            `strict_date_optional_time`).
+          maxLength: 100
+          type: string
+        script:
+          description: Painless script that Elasticsearch evaluates for each candidate
+            document. Only inline scripts (`source`) are accepted — stored
+            scripts are not supported for security reasons.
+          type: object
+          properties:
+            source:
+              description: Painless script source to execute.
+              maxLength: 10000
+              type: string
+          required:
+            - source
+        type:
+          $ref: '#/components/schemas/RuntimeFieldType'
+      required:
+        - type
     RuntimeFieldType:
       description: The data type for the runtime field type. Determines how the field
         value is indexed and queried.
@@ -10517,6 +10559,19 @@ components:
             `_source` that are not part of the Elastic Common Schema (ECS) of
             the alerts index mapping, for example, custom fields that the rule's
             source index defined when the alerts were created.
+          maxProperties: 100
+          type: object
+        runtime_mappings:
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: Optional map of runtime field name to runtime field mapping,
+            forwarded verbatim to the underlying `_update_by_query` as
+            `runtime_mappings`. Use this to attach data view runtime fields
+            (including scripted fields) so the close query can match fields not
+            natively mapped on the alerts index. Unlike `runtime_fields`, the
+            caller-supplied mapping (including any Painless `script.source`) is
+            used as-is by Elasticsearch. Limited to 100 entries combined with
+            `runtime_fields`; larger maps are rejected.
           maxProperties: 100
           type: object
         status:

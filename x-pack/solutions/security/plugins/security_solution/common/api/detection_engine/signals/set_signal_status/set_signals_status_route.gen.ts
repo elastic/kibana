@@ -29,6 +29,31 @@ export type RuntimeFieldType = z.infer<typeof RuntimeFieldType>;
 export type RuntimeFieldTypeEnum = typeof RuntimeFieldType.enum;
 export const RuntimeFieldTypeEnum = RuntimeFieldType.enum;
 
+/**
+ * A single runtime field mapping to be attached verbatim to the `_update_by_query` as `runtime_mappings`. Allows the close query to reference fields that are not natively mapped on the alerts index but are evaluatable at query time by Elasticsearch — for example, scripted fields defined on a data view.
+ */
+export const RuntimeFieldMapping = lazySchema(() =>
+  z.object({
+    type: RuntimeFieldType,
+    /**
+     * Painless script that Elasticsearch evaluates for each candidate document. Only inline scripts (`source`) are accepted — stored scripts are not supported for security reasons.
+     */
+    script: z
+      .object({
+        /**
+         * Painless script source to execute.
+         */
+        source: z.string().max(10000),
+      })
+      .optional(),
+    /**
+     * Optional format string for date runtime fields (e.g. `strict_date_optional_time`).
+     */
+    format: z.string().max(100).optional(),
+  })
+);
+export type RuntimeFieldMapping = z.infer<typeof RuntimeFieldMapping>;
+
 export const SetAlertsStatusByIdsBase = lazySchema(() =>
   z.object({
     /**
@@ -82,6 +107,10 @@ export const SetAlertsStatusByQueryBase = lazySchema(() =>
       .describe(
         "Optional map of field name to runtime field type. For each entry, a runtime field of the specified type is created reading its value from `_source[fieldName]` and included in the query as `runtime_mappings`. Use this to reference fields stored on the alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping, for example, custom fields that the rule's source index defined when the alerts were created."
       ),
+    /**
+     * Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.
+     */
+    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
   })
 );
 export type SetAlertsStatusByQueryBase = z.infer<typeof SetAlertsStatusByQueryBase>;
@@ -102,6 +131,10 @@ export const CloseAlertsByQuery = lazySchema(() =>
       .describe(
         "Optional map of field name to runtime field type. For each entry, the server defines a runtime field of the given type that reads its value from `_source[fieldName]` and attaches it to the underlying `_update_by_query` as `runtime_mappings`. Allows the `query` to reference non-ECS fields stored on the alert `_source` but not in the alerts index mapping — for example, runtime fields the rule's source index defined at the time the alerts were created. Limited to 100 entries per request; larger maps are rejected."
       ),
+    /**
+     * Optional map of runtime field name to runtime field mapping. For each entry the server forwards `type`, `script.source`, and `format` to the underlying `_update_by_query` as `runtime_mappings`, so the close query can match fields not natively mapped on the alerts index (e.g. data view runtime fields with Painless scripts). Unlike `runtime_fields`, the caller-supplied Painless script is preserved and executed by Elasticsearch at query time. The server always sets `on_script_error: continue` regardless of any value supplied by the caller, so a single alert that causes a script error is skipped rather than aborting the entire close. Limited to 100 unique field names combined with `runtime_fields`; larger maps are rejected.
+     */
+    runtime_mappings: z.object({}).catchall(RuntimeFieldMapping).optional(),
   })
 );
 export type CloseAlertsByQuery = z.infer<typeof CloseAlertsByQuery>;
