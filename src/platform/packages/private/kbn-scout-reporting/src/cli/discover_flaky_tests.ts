@@ -74,8 +74,8 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-const FILE_COL_WIDTH = 60;
 const TITLE_COL_WIDTH = 64;
+const FILE_COL_WIDTH = 60;
 
 // cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
 const wrapPath = (filePath: string, width: number): string => {
@@ -111,8 +111,8 @@ const buildTopFlakyTable = (
   all: readonly FlakyTestEntry[]
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Fail rate', 'File', 'Test'],
-    colWidths: [null, null, null, FILE_COL_WIDTH, TITLE_COL_WIDTH],
+    head: ['#', 'Failed builds', 'Fail rate', 'Test', 'File'],
+    colWidths: [null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -139,8 +139,8 @@ const buildTopFlakyTable = (
         rank,
         `${entry.failedBuilds}/${entry.builds}`,
         `${(entry.buildFailRate * 100).toFixed(1)}%`,
-        ...(index === 0 ? [fileCell] : []),
         entry.title,
+        ...(index === 0 ? [fileCell] : []),
       ]);
     });
   }
