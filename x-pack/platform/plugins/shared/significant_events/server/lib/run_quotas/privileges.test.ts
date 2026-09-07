@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
+import { NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 import { assertCanManageRunQuotas, canManageRunQuotas } from './privileges';
 
@@ -28,17 +28,17 @@ const createServer = (hasAllRequested: boolean) => {
 };
 
 describe('run quota global management privilege', () => {
-  it('checks Streams manage globally', async () => {
+  it('checks Context Engine manage globally', async () => {
     const { server, get, globally } = createServer(true);
 
     await expect(canManageRunQuotas({ request, server })).resolves.toBe(true);
-    expect(get).toHaveBeenCalledWith(STREAMS_API_PRIVILEGES.manage);
+    expect(get).toHaveBeenCalledWith(NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage);
     expect(globally).toHaveBeenCalledWith({
       kibana: ['streams-manage-action'],
     });
   });
 
-  it('denies settings management without Streams manage in every space', async () => {
+  it('denies settings management without Context Engine manage in every space', async () => {
     const { server } = createServer(false);
 
     await expect(assertCanManageRunQuotas({ request, server })).rejects.toMatchObject({

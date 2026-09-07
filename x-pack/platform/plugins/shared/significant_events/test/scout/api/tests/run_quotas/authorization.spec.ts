@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { significantEventsApiTest as apiTest, getStreamsUsers } from '../../fixtures';
+import { significantEventsApiTest as apiTest, getSignificantEventsUsers } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
@@ -37,9 +37,20 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
-      'allows a Streams reader to inspect the deployment-wide snapshot',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsReadOnly();
+      'allows a Nightshift reader to inspect the deployment-wide snapshot',
+      async ({ apiClient, samlAuth, config }) => {
+        const users = getSignificantEventsUsers(config);
+        const nightshiftRead = {
+          ...users.nightshiftAll,
+          kibana: [
+            {
+              base: [],
+              feature: { nightshift: ['read'] },
+              spaces: ['*'],
+            },
+          ],
+        };
+        const { cookieHeader } = await samlAuth.asInteractiveUser(nightshiftRead);
 
         const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -63,12 +74,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'denies a manager whose Streams privilege is limited to one space',
+      'denies a manager whose Context Engine privilege is limited to one space',
       async ({ apiClient, samlAuth, config }) => {
-        const streamsAdmin = getStreamsUsers(config).streamsAdmin;
+        const contextEngineAll = getSignificantEventsUsers(config).contextEngineAll;
         const oneSpaceManager = {
-          ...streamsAdmin,
-          kibana: streamsAdmin.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
+          ...contextEngineAll,
+          kibana: contextEngineAll.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
         };
         const { cookieHeader } = await samlAuth.asInteractiveUser(oneSpaceManager);
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
@@ -89,9 +100,11 @@ apiTest.describe(
     );
 
     apiTest(
-      'allows an all-spaces Streams manager to update and restore settings',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      'allows an all-spaces Context Engine manager to update and restore settings',
+      async ({ apiClient, samlAuth, config }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(
+          getSignificantEventsUsers(config).contextEngineAll
+        );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers,

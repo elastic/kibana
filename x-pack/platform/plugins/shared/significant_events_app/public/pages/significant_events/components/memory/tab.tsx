@@ -28,6 +28,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
+import { NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import {
@@ -57,11 +58,11 @@ export function MemoryTab() {
   const {
     core: {
       application: {
-        capabilities: { significantEvents },
+        capabilities: { nightshift },
       },
     },
   } = useKibana();
-  const canManage = significantEvents?.manage === true;
+  const canManage = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);

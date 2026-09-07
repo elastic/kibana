@@ -13,7 +13,8 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../common/constants';
+
+import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { QueryNotFoundError } from '../../lib/errors/query_not_found_error';
 import { queryFromLink } from '../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
 import {
@@ -91,7 +92,7 @@ const listQueriesRoute = createServerRoute({
   }),
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
     },
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
@@ -150,7 +151,7 @@ const upsertQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -229,7 +230,7 @@ const deleteQueryRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -327,7 +328,7 @@ const bulkQueriesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

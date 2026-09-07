@@ -98,7 +98,7 @@ export function createTestSuiteFactory({ getService }: DeploymentAgnosticFtrProv
         'securitySolutionSiemMigrations',
         'securitySolutionTimeline',
         'siemV5',
-        'significantEvents',
+        'nightshift',
         'slo',
         'uptime',
       ],

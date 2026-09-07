@@ -3,10 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "test/scout/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/agent-builder-plugin",
     "@kbn/app-header",
     "@kbn/charts-plugin",
@@ -19,12 +20,14 @@
     "@kbn/discover-plugin",
     "@kbn/ebt-click",
     "@kbn/ebt-tools",
+    "@kbn/features-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/investigation-output",
     "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
+    "@kbn/nightshift-shared",
     "@kbn/observability-shared-plugin",
     "@kbn/react-query",
     "@kbn/scout-oblt",

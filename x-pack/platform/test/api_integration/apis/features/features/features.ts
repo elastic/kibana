@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
             'siemV5',
             'slo',
             'streams',
-            'significantEvents',
+            'nightshift',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
             'securitySolutionCasesV3',

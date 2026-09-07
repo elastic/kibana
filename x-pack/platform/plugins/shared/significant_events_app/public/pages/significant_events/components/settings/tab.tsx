@@ -49,6 +49,10 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
+import {
+  NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
+  NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
@@ -77,14 +81,20 @@ export function SettingsTab() {
   const { core } = useKibana();
   const modelSettingsUrl = useModelSettingsUrl();
 
-  // Saving these settings hits two routes with different privileges: the
-  // significantEvents settings route (requires the significantEvents `manage`
-  // privilege) and core's UI settings routes used by `core.settings.client`/
-  // `globalClient` (require `advancedSettings.save`). Gate the whole form on
-  // both so the user never triggers a partial save that 403s halfway through.
-  const canManage = core.application.capabilities.significantEvents?.manage === true;
+  // Saving these settings hits Nightshift engine routes and core's UI settings
+  // routes used by `core.settings.client` / `globalClient` (require
+  // `advancedSettings.save`). Gate each section on the engine that owns it so
+  // the user never triggers a partial save that 403s halfway through.
+  const nightshift = core.application.capabilities.nightshift;
+  const canManageContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManageDetection =
+    nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManage = canManageContext || canManageDetection;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
-  const canEditSettings = canManage && canSaveAdvancedSettings;
+  const canEditContextSettings = canManageContext && canSaveAdvancedSettings;
+  const canEditDetectionSettings = canManageDetection && canSaveAdvancedSettings;
+  const canEditSettings = canEditContextSettings || canEditDetectionSettings;
+  const canManageSlack = core.application.capabilities.streams?.manage === true;
 
   // Pause turns these Settings toggles off (and Resume restores only those that
   // were previously on). While paused, the toggles are not editable.
@@ -95,9 +105,12 @@ export function SettingsTab() {
     status: maintenanceStatus,
     activityBlockTooltip,
   } = useBlocksNewActivity();
-  const isActivityToggleDisabled = !canEditSettings || blocksActivity;
-  const isActivityConfigDisabled = (draftEnabled: boolean) =>
-    !canEditSettings || !draftEnabled || blocksActivity;
+  const isContextActivityToggleDisabled = !canEditContextSettings || blocksActivity;
+  const isDetectionActivityToggleDisabled = !canEditDetectionSettings || blocksActivity;
+  const isContextActivityConfigDisabled = (draftEnabled: boolean) =>
+    !canEditContextSettings || !draftEnabled || blocksActivity;
+  const isDetectionActivityConfigDisabled = (draftEnabled: boolean) =>
+    !canEditDetectionSettings || !draftEnabled || blocksActivity;
 
   // getBooleanValue$ builds a new observable on every call, so memoize it —
   // otherwise useObservable re-subscribes (and re-evaluates the flag) on every
@@ -144,7 +157,9 @@ export function SettingsTab() {
   });
 
   // Dirty continuous/scheduled changes are blocked while paused (server 409).
-  const activitySettingsDirty = scheduledDiscovery.hasChanged || continuousExtraction.hasChanged;
+  const activitySettingsDirty =
+    (canEditDetectionSettings && scheduledDiscovery.hasChanged) ||
+    (canEditContextSettings && continuousExtraction.hasChanged);
   const saveBlockedByPause = blocksActivity && activitySettingsDirty;
 
   const savedConfigYaml = useMemo(() => {
@@ -175,10 +190,11 @@ export function SettingsTab() {
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
-    indexPatterns !== savedIndexPatterns ||
-    continuousExtraction.hasChanged ||
-    scheduledDiscovery.hasChanged ||
-    hasTuningConfigChanges;
+    (canEditContextSettings &&
+      (indexPatterns !== savedIndexPatterns ||
+        continuousExtraction.hasChanged ||
+        hasTuningConfigChanges)) ||
+    (canEditDetectionSettings && scheduledDiscovery.hasChanged);
 
   const handleCancel = useCallback(() => {
     setIndexPatterns(savedIndexPatterns);
@@ -193,7 +209,7 @@ export function SettingsTab() {
     try {
       const normalizedIndexPatterns = parseIndexPatterns(indexPatterns).join(', ');
       setIndexPatterns(normalizedIndexPatterns);
-      if (normalizedIndexPatterns !== savedIndexPatterns) {
+      if (canEditContextSettings && normalizedIndexPatterns !== savedIndexPatterns) {
         await core.settings.client.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
           normalizedIndexPatterns
@@ -201,15 +217,15 @@ export function SettingsTab() {
         setSavedIndexPatterns(normalizedIndexPatterns);
       }
 
-      if (continuousExtraction.hasChanged) {
+      if (canEditContextSettings && continuousExtraction.hasChanged) {
         await continuousExtraction.save();
       }
 
-      if (scheduledDiscovery.hasChanged) {
+      if (canEditDetectionSettings && scheduledDiscovery.hasChanged) {
         await scheduledDiscovery.save();
       }
 
-      if (hasTuningConfigChanges && parsedTuningConfig) {
+      if (canEditContextSettings && hasTuningConfigChanges && parsedTuningConfig) {
         const fullConfig = { ...DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG, ...parsedTuningConfig };
         await core.settings.globalClient.set(
           OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
@@ -240,6 +256,8 @@ export function SettingsTab() {
     scheduledDiscovery,
     hasTuningConfigChanges,
     parsedTuningConfig,
+    canEditContextSettings,
+    canEditDetectionSettings,
   ]);
 
   const handleSave = useCallback(() => {
@@ -287,7 +305,7 @@ export function SettingsTab() {
                 'xpack.significantEventsApp.settings.noPermissionCalloutDescription',
                 {
                   defaultMessage:
-                    'Editing these settings requires both the Significant Events "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
+                    'Editing these settings requires a Nightshift Context Engine or Detection Engine "Manage" privilege and the Advanced Settings "All" privilege. Contact your administrator if you need to make changes.',
                 }
               )}
             </p>
@@ -299,7 +317,7 @@ export function SettingsTab() {
 
       <EuiSpacer />
 
-      <StaleEventCleanupSection canManage={canManageStreams} />
+      <StaleEventCleanupSection canManage={canManageDetection} />
 
       <EuiSpacer />
 
@@ -399,7 +417,7 @@ export function SettingsTab() {
                           enabled: e.target.checked,
                         }))
                       }
-                      disabled={isActivityToggleDisabled}
+                      disabled={isDetectionActivityToggleDisabled}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -429,7 +447,9 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                        disabled={isDetectionActivityConfigDisabled(
+                          scheduledDiscovery.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -459,7 +479,9 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                        disabled={isDetectionActivityConfigDisabled(
+                          scheduledDiscovery.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -486,7 +508,9 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                        disabled={isDetectionActivityConfigDisabled(
+                          scheduledDiscovery.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -517,7 +541,9 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
                         max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                        disabled={isDetectionActivityConfigDisabled(
+                          scheduledDiscovery.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                     <EuiFormRow
@@ -547,7 +573,9 @@ export function SettingsTab() {
                         }
                         min={MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
                         max={MAX_SIG_EVENTS_SCHEDULED_REVIEW_PASSES}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
+                        disabled={isDetectionActivityConfigDisabled(
+                          scheduledDiscovery.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                   </>
@@ -606,7 +634,7 @@ export function SettingsTab() {
                     onChange={(e) => setIndexPatterns(e.target.value)}
                     placeholder={DEFAULT_INDEX_PATTERNS}
                     rows={2}
-                    disabled={!canEditSettings}
+                    disabled={!canEditContextSettings}
                   />
                 </EuiFormRow>
                 {indexPatternsMatch && (
@@ -712,7 +740,7 @@ export function SettingsTab() {
                           enabled: e.target.checked,
                         }))
                       }
-                      disabled={isActivityToggleDisabled}
+                      disabled={isContextActivityToggleDisabled}
                     />
                   </EuiToolTip>
                 </EuiFormRow>
@@ -771,7 +799,9 @@ export function SettingsTab() {
                           }))
                         }
                         min={MIN_EXTRACTION_INTERVAL_HOURS}
-                        disabled={isActivityConfigDisabled(continuousExtraction.draft.enabled)}
+                        disabled={isContextActivityConfigDisabled(
+                          continuousExtraction.draft.enabled
+                        )}
                       />
                     </EuiFormRow>
                   </>
@@ -800,7 +830,7 @@ export function SettingsTab() {
               <EuiButtonEmpty
                 size="s"
                 iconType="refresh"
-                isDisabled={!canEditSettings}
+                isDisabled={!canEditContextSettings}
                 onClick={() => {
                   const defaultYaml = configToAnnotatedYaml(
                     DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
@@ -829,7 +859,7 @@ export function SettingsTab() {
           <EuiSpacer size="m" />
           <SignificantEventsTuningConfigEditor
             value={draftConfigYaml}
-            isReadOnly={!canEditSettings}
+            isReadOnly={!canEditContextSettings}
             onChange={(yaml, parsed) => {
               setDraftConfigYaml(yaml);
               setParsedTuningConfig(parsed);
@@ -838,10 +868,8 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {/* Slack connect/disconnect and channel bind only hit SE manage routes,
-          not Advanced Settings. Gate on canManage so an SE admin can reconnect
-          a stale key without advancedSettings.save. */}
-      {isAppsEnabled && <AppsSection canEdit={canManage} />}
+      {/* Slack connect/disconnect and channel bind stay on Streams privileges. */}
+      {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal

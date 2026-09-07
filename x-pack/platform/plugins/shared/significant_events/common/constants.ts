@@ -13,18 +13,6 @@ import type { PricingProductFeature } from '@kbn/core-pricing-common';
  */
 export const SIGNIFICANT_EVENTS_APP_ROUTE = '/app/significant_events';
 
-export const SIGNIFICANT_EVENTS_FEATURE_ID = 'significantEvents';
-
-export const SIGNIFICANT_EVENTS_API_PRIVILEGES = {
-  read: 'read_significant_events',
-  manage: 'manage_significant_events',
-} as const;
-
-export const SIGNIFICANT_EVENTS_UI_PRIVILEGES = {
-  show: 'show',
-  manage: 'manage',
-} as const;
-
 /**
  * Tiered features
  */

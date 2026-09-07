@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { NightshiftInvestigationsServerStart } from '@kbn/nightshift-investigations-plugin/server';
@@ -44,7 +43,6 @@ export interface SignificantEventsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
-  features: FeaturesPluginSetup;
   alerting: AlertingServerSetup;
   /**
    * `void` is Alerting v2's actual setup contract (`alerting_v2/server/types.ts` declares

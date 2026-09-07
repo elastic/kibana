@@ -9,6 +9,10 @@ import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eu
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import {
+  NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
+  NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
@@ -60,7 +64,7 @@ export function SignificantEventsPage() {
     core: {
       application: {
         getUrlForApp,
-        capabilities: { significantEvents },
+        capabilities: { nightshift },
       },
       chrome,
       notifications: { toasts },
@@ -70,7 +74,12 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const canManage = significantEvents?.manage === true;
+  const canShowContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.show] === true;
+  const canShowDetection = nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show] === true;
+  const canManageContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManageDetection =
+    nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const canManage = canManageContext || canManageDetection;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -125,7 +134,7 @@ export function SignificantEventsPage() {
       },
     ];
 
-    if (agentBuilder) {
+    if (agentBuilder && canManageContext) {
       items.push({
         id: 'significantEventsSystemOnboarding',
         order: 2,
@@ -139,6 +148,7 @@ export function SignificantEventsPage() {
     return { items };
   }, [
     agentBuilder,
+    canManageContext,
     getUrlForApp,
     handleOpenSystemOnboarding,
     nightshiftLabel,
@@ -155,68 +165,88 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'streams',
-        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-          defaultMessage: 'Streams',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'streams' } }),
-        isSelected: tab === 'streams',
-      },
-      {
-        id: 'knowledge_indicators',
-        label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
-          defaultMessage: 'Knowledge Indicators',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
-        isSelected: tab === 'knowledge_indicators',
-      },
-      {
-        id: 'queries',
-        label: i18n.translate('xpack.significantEventsApp.queriesTab', {
-          defaultMessage: 'Rules',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'queries' } }),
-        isSelected: tab === 'queries',
-      },
+  const tabs = useMemo(() => {
+    const items: Array<{
+      id: SignificantEventsTabId;
+      label: string;
+      href: string;
+      isSelected: boolean;
+    }> = [];
 
-      {
-        id: 'detections',
-        label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
-          defaultMessage: 'Detections',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'detections' } }),
-        isSelected: tab === 'detections',
-      },
-      {
-        id: 'significant_events',
-        label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
-          defaultMessage: 'Significant Events',
-        }),
-        href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
-        isSelected: tab === 'significant_events',
-      },
-      {
+    if (canShowContext) {
+      items.push(
+        {
+          id: 'streams',
+          label: i18n.translate('xpack.significantEventsApp.streamsTab', {
+            defaultMessage: 'Streams',
+          }),
+          href: router.link('/{tab}', { path: { tab: 'streams' } }),
+          isSelected: tab === 'streams',
+        },
+        {
+          id: 'knowledge_indicators',
+          label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
+            defaultMessage: 'Knowledge Indicators',
+          }),
+          href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
+          isSelected: tab === 'knowledge_indicators',
+        }
+      );
+    }
+
+    if (canShowDetection) {
+      items.push(
+        {
+          id: 'queries',
+          label: i18n.translate('xpack.significantEventsApp.queriesTab', {
+            defaultMessage: 'Rules',
+          }),
+          href: router.link('/{tab}', { path: { tab: 'queries' } }),
+          isSelected: tab === 'queries',
+        },
+        {
+          id: 'detections',
+          label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
+            defaultMessage: 'Detections',
+          }),
+          href: router.link('/{tab}', { path: { tab: 'detections' } }),
+          isSelected: tab === 'detections',
+        },
+        {
+          id: 'significant_events',
+          label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
+            defaultMessage: 'Significant Events',
+          }),
+          href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
+          isSelected: tab === 'significant_events',
+        }
+      );
+    }
+
+    if (canShowContext) {
+      items.push({
         id: 'memory',
         label: i18n.translate('xpack.significantEventsApp.memoryTab', {
           defaultMessage: 'Memory',
         }),
         href: router.link('/{tab}', { path: { tab: 'memory' } }),
         isSelected: tab === 'memory',
-      },
-      {
+      });
+    }
+
+    if (canShowContext || canShowDetection) {
+      items.push({
         id: 'settings',
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
           defaultMessage: 'Settings',
         }),
         href: router.link('/{tab}', { path: { tab: 'settings' } }),
         isSelected: tab === 'settings',
-      },
-    ],
-    [tab, router]
-  );
+      });
+    }
+
+    return items;
+  }, [canShowContext, canShowDetection, router, tab]);
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -238,7 +268,11 @@ export function SignificantEventsPage() {
   }
 
   if (!isValidSignificantEventsTab(tab)) {
-    return <RedirectTo path="/{tab}" params={{ path: { tab: 'streams' } }} />;
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
+  }
+
+  if (!tabs.some((item) => item.id === tab)) {
+    return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
   }
 
   return (
@@ -321,7 +355,7 @@ export function SignificantEventsPage() {
                         })
                       : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
                           defaultMessage:
-                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with the Significant Events manage privilege must resume activity from Settings.',
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Nightshift manage privileges must resume activity from Settings.',
                         })}
                   </p>
                   {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (

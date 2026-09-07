@@ -34,6 +34,22 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
     ? []
     : ['manage_ilm', 'manage_data_stream_global_retention'];
 
+  const adminElasticsearch = {
+    cluster: [
+      'manage_index_templates',
+      'monitor',
+      'manage_pipeline',
+      ...statefulOnlyClusterPrivileges,
+    ],
+    indices: [
+      { names: ['logs*'], privileges: ['all'] },
+      { names: ['.ds-logs*'], privileges: ['all'] },
+      { names: ['.streams*'], privileges: ['all'] },
+      { names: ['.kibana_streams*'], privileges: ['all'] },
+      { names: ['.significant_events*'], privileges: ['all'] },
+    ],
+  };
+
   return {
     significantEventsAdmin: {
       kibana: [
@@ -43,21 +59,51 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
           spaces: ['*'],
         },
       ],
-      elasticsearch: {
-        cluster: [
-          'manage_index_templates',
-          'monitor',
-          'manage_pipeline',
-          ...statefulOnlyClusterPrivileges,
-        ],
-        indices: [
-          { names: ['logs*'], privileges: ['all'] },
-          { names: ['.ds-logs*'], privileges: ['all'] },
-          { names: ['.streams*'], privileges: ['all'] },
-          { names: ['.kibana_streams*'], privileges: ['all'] },
-          { names: ['.significant_events*'], privileges: ['all'] },
-        ],
-      },
+      elasticsearch: adminElasticsearch,
+    },
+
+    nightshiftAll: {
+      kibana: [
+        {
+          base: [],
+          feature: { nightshift: ['all'] },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
+    },
+
+    contextEngineAll: {
+      kibana: [
+        {
+          base: [],
+          feature: { nightshift: ['minimal_all', 'context_engine_all'] },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
+    },
+
+    detectionEngineAll: {
+      kibana: [
+        {
+          base: [],
+          feature: { nightshift: ['minimal_all', 'detection_engine_all'] },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
+    },
+
+    streamsOnly: {
+      kibana: [
+        {
+          base: [],
+          feature: { streams: ['all'] },
+          spaces: ['*'],
+        },
+      ],
+      elasticsearch: adminElasticsearch,
     },
 
     significantEventsReadOnly: {

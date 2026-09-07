@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Observability Alerts\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
-        'Significant Events\nAll\nRead\nNone',
+        'Nightshift\nAll\nRead\nNone',
       ]);
     });
 

@@ -8,8 +8,8 @@
 import { z } from '@kbn/zod/v4';
 import { badGateway, conflict, forbidden, notFound } from '@hapi/boom';
 import { RelayRequestError } from '@kbn/actions-plugin/server';
+import { STREAMS_API_PRIVILEGES } from '@kbn/streams-plugin/common/constants';
 import { createServerRoute } from '../../../create_server_route';
-import { SIGNIFICANT_EVENTS_API_PRIVILEGES } from '../../../../../common/constants';
 import type {
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
@@ -30,7 +30,7 @@ const connectSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -59,7 +59,7 @@ const statusSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({}),
@@ -78,7 +78,7 @@ const disconnectSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -102,7 +102,7 @@ const bindingsSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.read],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -139,7 +139,7 @@ const bindChannelSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -166,7 +166,7 @@ const unbindChannelSlackAppRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [SIGNIFICANT_EVENTS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
     },
   },
   params: z.object({

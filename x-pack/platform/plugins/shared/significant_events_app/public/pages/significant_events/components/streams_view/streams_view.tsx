@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
+import { NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { TableRow } from './utils';
 import { parseSearchQuery } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -27,11 +28,11 @@ export function StreamsView() {
   const {
     core: {
       application: {
-        capabilities: { significantEvents },
+        capabilities: { nightshift },
       },
     },
   } = useKibana();
-  const canManage = significantEvents?.manage === true;
+  const canManage = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
