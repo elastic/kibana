@@ -23,19 +23,9 @@ const FALLBACK_HEIGHT = 320;
 /** Matches the renderer's own iframe-container floor. */
 const MIN_HEIGHT = 200;
 
-/**
- * The height the chat preview renders at, from the panel's measured height when the
- * attachment carries one. The chat card is narrower than a dashboard panel, so the content
- * reflows and this is a starting point rather than an exact fit.
- */
 export const resolvePreviewHeight = (panelHeight?: number): number =>
   Math.min(MAX_PREVIEW_HEIGHT, Math.max(MIN_HEIGHT, panelHeight ?? FALLBACK_HEIGHT));
 
-/**
- * Flex column with a definite height: the panel's own root is `flex: 1 1 100%`
- * and its iframe container `flex: 1 1 0%`, so a plain block parent collapses both
- * to the container's min-height regardless of the height set on the wrapper.
- */
 const containerCss = (height: number) =>
   css({
     display: 'flex',
@@ -50,13 +40,10 @@ const containerCss = (height: number) =>
  *
  * This is a snapshot of a dashboard panel the user sent to chat, so it renders
  * read-only: the live panel keeps the unified-search context, and the Preview
- * action is what applies a version back to it. Rendering the version being viewed
- * is what makes stepping through the history legible — without it the card shows
- * only a title, and the user has to apply a version to the dashboard to see it.
+ * action is what applies a version back to it.
  */
 export const RenderPanelContext = ({ data }: { data: CustomContentContextAttachmentData }) => {
-  // "Generate with chat" on an empty panel pushes a blank template. The renderer would show
-  // its own empty prompt — dashboard copy, with an action that does nothing here.
+  // Do not render an empty panel: "Generate with chat" on an empty panel pushes a blank template.
   const hasTemplate = Boolean(data.panel_template?.trim());
   const { core, search } = getServices();
 

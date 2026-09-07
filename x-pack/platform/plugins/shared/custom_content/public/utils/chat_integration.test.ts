@@ -97,8 +97,6 @@ describe('buildCustomContentContextAttachment', () => {
     expect(attachment.data).not.toHaveProperty('panel_height');
   });
 
-  // An unresolved `?variable` makes Elasticsearch reject the query, so without these the
-  // preview renders an error card rather than merely different numbers.
   it('carries ES|QL control variables', () => {
     const attachment = buildCustomContentContextAttachment({
       template: '<div>hi</div>',
@@ -159,8 +157,6 @@ describe('buildCustomContentContextAttachment', () => {
     expect(attachment.data).not.toHaveProperty('is_approximate');
   });
 
-  // An oversized snapshot field costs a faithful preview, not the whole attachment: a
-  // rejection here would mean Refine-with-chat silently attaches nothing.
   it('drops fetch context that would carry an unbounded payload', () => {
     const hugeFilter = {
       meta: {},
@@ -178,7 +174,6 @@ describe('buildCustomContentContextAttachment', () => {
     });
 
     expect(attachment.data).not.toHaveProperty('filters');
-    // The fields are budgeted independently — a huge filter does not cost the query too.
     expect(attachment.data).toMatchObject({ query: { query: 'status:200', language: 'kuery' } });
   });
 });

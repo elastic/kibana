@@ -21,11 +21,6 @@ import {
 const getCustomContentAttachmentId = (embeddableId: string) =>
   `${CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE}-${embeddableId}`;
 
-/**
- * The parts of the panel's `fetch$` context the chat preview needs to reproduce its data.
- * Picked from `FetchContext` rather than redeclared, so it cannot drift from what the
- * embeddable actually receives.
- */
 export type CustomContentFetchContext = Partial<
   Pick<
     FetchContext,
@@ -49,7 +44,6 @@ const withinBudget = <T>(value: T | undefined): T | undefined =>
     ? value
     : undefined;
 
-/** The opaque half of the snapshot — stored as-is, handed back to the panel's own search helpers. */
 const buildSnapshotFetchContext = (fetchContext?: CustomContentFetchContext) => {
   const esqlVariables = fetchContext?.esqlVariables?.length
     ? withinBudget(fetchContext.esqlVariables)

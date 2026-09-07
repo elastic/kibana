@@ -15,8 +15,7 @@ import {
 export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_context';
 
 /**
- * Ceiling for the captured panel height. Matches what the chat preview renders at, so a
- * taller measurement is never stored only to be clamped away at render time.
+ * Ceiling for the captured panel height.
  */
 export const MAX_PREVIEW_HEIGHT = 1200;
 
@@ -24,7 +23,7 @@ export const MAX_PREVIEW_HEIGHT = 1200;
 const MAX_SHORT_FIELD_LENGTH = 256;
 
 /**
- * Serialized-size budget for the opaque fetch context (`filters`, `query`, `esql_variables`).
+ * Serialized-size budget for the opaque fetch context (`filters`, `query`, `esql_variables` etc).
  * A normal dashboard's filters are well under 1KB; past this the preview drops them and
  * renders unfiltered rather than carrying an unbounded payload into the conversation.
  */
@@ -35,16 +34,12 @@ export const customContentContextAttachmentDataSchema = z.object({
   esql_query: z.string().max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH).optional(),
   panel_title: z.string().max(MAX_SHORT_FIELD_LENGTH).optional(),
   embeddable_id: z.string().max(MAX_SHORT_FIELD_LENGTH),
-  // A snapshot of what the panel was fetching with when it was sent to chat — none of it
-  // follows the dashboard afterwards. Size is enforced when the attachment is built, not
-  // here: an oversized filter should cost a faithful preview, not the whole attachment.
   time_range: z
     .object({
       from: z.string().max(MAX_SHORT_FIELD_LENGTH),
       to: z.string().max(MAX_SHORT_FIELD_LENGTH),
     })
     .optional(),
-  /** Measured from the panel's own container, which is outside the sandboxed iframe. */
   panel_height: z.number().int().min(1).max(MAX_PREVIEW_HEIGHT).optional(),
   esql_variables: z
     .array(

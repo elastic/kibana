@@ -16,11 +16,6 @@ import type {
   CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
-/**
- * Lazy for the same reason `handle_panel_preview` is: `plugin.ts` imports this module at
- * page load, and the renderer brings dompurify, liquidjs and esql-utils with it. A static
- * import would put all of that in the page-load bundle for every user, chat or not.
- */
 const LazyRenderPanelContext = React.lazy(() =>
   import('./render_panel_context').then((module) => ({ default: module.RenderPanelContext }))
 );

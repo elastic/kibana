@@ -106,7 +106,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     // Captured when the panel is sent to chat so the preview there starts at the size the
     // user was actually looking at.
     const panelElement: { current: HTMLDivElement | null } = { current: null };
-    // The context the panel is fetching with, captured so the chat preview reproduces it.
     const currentFetchContext = (): CustomContentFetchContext => ({
       timeRange: effectiveTimeRange$.getValue(),
       esqlVariables: esqlVariables$.getValue(),
@@ -117,8 +116,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     });
     const measurePanelHeight = () => {
       const measured = panelElement.current?.getBoundingClientRect().height;
-      // Clamped to the attachment's bound rather than left to fail validation: a zoomed-out
-      // browser or a very tall panel must not stop the panel reaching chat at all.
       return measured ? Math.min(MAX_PREVIEW_HEIGHT, Math.round(measured)) : undefined;
     };
     const titleManager = initializeTitleManager(initialState);
@@ -481,8 +478,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             ref={(element) => {
               panelElement.current = element;
             }}
-            // Mirrors the flex properties the panel root expects from its parent, so
-            // inserting this measuring element does not change the height chain.
             css={panelMeasureCss}
           >
             <CustomContentComponent

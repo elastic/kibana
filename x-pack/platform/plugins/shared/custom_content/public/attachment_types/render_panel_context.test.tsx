@@ -38,13 +38,10 @@ describe('resolvePreviewHeight', () => {
     expect(resolvePreviewHeight(480)).toBe(480);
   });
 
-  // Attachments pushed before the height was captured, and panels that never rendered.
   it('falls back when the attachment carries no height', () => {
     expect(resolvePreviewHeight(undefined)).toBe(320);
   });
 
-  // The renderer's own iframe container has a 200px floor, so a shorter wrapper would be
-  // overflowed by its own content rather than shrinking with it.
   it('clamps below the renderer floor', () => {
     expect(resolvePreviewHeight(40)).toBe(200);
   });
@@ -70,8 +67,6 @@ describe('RenderPanelContext', () => {
     );
   });
 
-  // The range is part of the snapshot: without it the preview renders against a default
-  // window and shows different numbers than the dashboard the user came from.
   it('renders against the captured time range', () => {
     render(<RenderPanelContext data={makeData({ time_range: { from: 'now-7d', to: 'now' } })} />);
 
@@ -96,8 +91,6 @@ describe('RenderPanelContext', () => {
     );
   });
 
-  // The preview reproduces the panel's fetch context, so its numbers match the dashboard
-  // the user came from rather than showing an unfiltered superset.
   it('renders against the captured filters, query and approximation', () => {
     render(
       <RenderPanelContext
@@ -120,8 +113,6 @@ describe('RenderPanelContext', () => {
     );
   });
 
-  // "Generate with chat" on an empty panel pushes a blank template. Rendering it would show
-  // the panel's own empty prompt — dashboard copy with a dead action — inside the card.
   it('renders nothing until the panel has a template', () => {
     const { container } = render(<RenderPanelContext data={makeData({ panel_template: '' })} />);
 

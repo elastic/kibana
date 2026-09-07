@@ -71,7 +71,6 @@ describe('createCustomContentContextAttachmentType', () => {
       expect(result).toEqual({ valid: false, error: expect.any(String) });
     });
 
-    // Written by the browser rather than the agent, but bounded like any other input.
     it('returns invalid when panel_height is out of range', () => {
       const result = createCustomContentContextAttachmentType().validate({
         panel_template: '<div>hi</div>',
