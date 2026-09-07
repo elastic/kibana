@@ -102,6 +102,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  provenanceEnabled?: boolean;
 }
 
 export class LogsExtractionClient {
@@ -111,6 +112,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  provenanceEnabled: boolean;
   constructor({
     logger,
     namespace,
@@ -118,6 +120,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
+    provenanceEnabled = false,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -125,6 +128,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
+    this.provenanceEnabled = provenanceEnabled;
   }
 
   private async getLogExtractionConfigAndState(
@@ -759,6 +763,7 @@ export class LogsExtractionClient {
         recoveryId: recoveryIdForBounded,
         logsPageCursorStart,
         logsPageCursorEnd,
+        provenanceEnabled: this.provenanceEnabled,
       });
 
       recoveryIdForBounded = undefined;

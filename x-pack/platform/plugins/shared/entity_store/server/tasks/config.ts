@@ -26,6 +26,11 @@ export const TasksConfig = {
     title: 'Entity Store - Entity Maintainer Task',
     type: 'entity_store:v2:entity_maintainer_task',
   },
+  [EntityStoreTaskType.enum.entityProvenanceMappingMigration]: {
+    title: 'Entity Store - Entity Provenance Mapping Migration',
+    type: 'entity_store:v2:entity_provenance_mapping_migration',
+    timeout: '10m',
+  },
   [EntityStoreTaskType.enum.historySnapshot]: {
     title: 'Entity Store - History Snapshot Task',
     type: 'entity_store:v2:history_snapshot_task',
