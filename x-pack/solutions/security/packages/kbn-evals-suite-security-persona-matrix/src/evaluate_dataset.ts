@@ -500,6 +500,12 @@ export function createEvaluatePersonaMatrixDataset({
 
           const taskOutput: TaskOutput = {
             messages: response.messages,
+            // Which turn the answer came from: 'response' is the model's real
+            // closing message, 'last_assistant_step' is chat_client's fallback
+            // to an interior reasoning/output step (models that end on a tool
+            // call return an empty response.message). Without this tag, mid-run
+            // narration is indistinguishable from a final answer once stored.
+            messageSource: response.messageSource,
             steps: response.steps,
             errors: response.errors,
             traceId: response.traceId ?? null,

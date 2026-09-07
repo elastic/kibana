@@ -496,6 +496,56 @@ describe('task output shape', () => {
     const latestMessage = messages[messages.length - 1]?.message;
     expect(latestMessage).toBe('the real answer');
   });
+
+  it('forwards messageSource so a fallback answer is distinguishable from a real final turn', async () => {
+    // chat_client falls back to the last non-empty reasoning/output step when a
+    // model ends its turn on a tool call, and tags which one it used via
+    // `messageSource`. If the task drops that tag, every stored cell looks like
+    // a genuine closing answer and mid-run narration ("I will now preview the
+    // detection rule...") is scored as if it were the model's final response.
+    // Measured 2026-09-07: 0 of 2422 Sep-4+ detection-rule-edit score docs
+    // carried messageSource, because taskOutput never forwarded it.
+    const log = buildLog();
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest.fn().mockResolvedValue({
+          messages: [{ message: 'I will now preview the detection rule.' }],
+          messageSource: 'last_assistant_step',
+          steps: [],
+          errors: [],
+          traceId: 'trace-1',
+        }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: jest.fn(),
+        correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+        groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      log,
+    });
+
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+
+    expect(output.messageSource).toBe('last_assistant_step');
+  });
 });
 
 describe('task judge failure isolation', () => {
