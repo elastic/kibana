@@ -10,6 +10,7 @@ import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorCallbackRequest, ConnectorCallbackResult } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
 import { handleElasticsearchCallback } from './elasticsearch_connector';
+import { HTTP_CONNECTOR_TYPE_ID, buildHttpConnectorParams } from './http_connector_adapter';
 
 export const createConnectorCallbackHandler =
   ({
@@ -76,15 +77,27 @@ export const createConnectorCallbackHandler =
       };
     }
 
-    // Step 6: gate sub-action via connector spec (skip for legacy connectors with no spec)
-    const spec = getConnectorSpec(connector.actionTypeId);
-    if (spec !== undefined && !isToolAction(spec, cb.sub_action)) {
-      return {
-        status: 'error',
-        error_message:
-          `Sub-action '${cb.sub_action}' is not available on connector type '${connector.actionTypeId}'. ` +
-          `Check /workspace/connectors.md for valid sub-actions.`,
-      };
+    // Step 6: build execute params. The HTTP connector is not sub-action based — it takes
+    // flat params — so it gets a dedicated adapter instead of the sub-action wrapper.
+    let executeParams: Record<string, unknown>;
+    if (connector.actionTypeId === HTTP_CONNECTOR_TYPE_ID) {
+      const built = buildHttpConnectorParams(cb.sub_action, subActionParams);
+      if ('errorMessage' in built) {
+        return { status: 'error', error_message: built.errorMessage };
+      }
+      executeParams = built.params;
+    } else {
+      // Gate the sub-action via the connector spec (skipped for legacy connectors with no spec)
+      const spec = getConnectorSpec(connector.actionTypeId);
+      if (spec !== undefined && !isToolAction(spec, cb.sub_action)) {
+        return {
+          status: 'error',
+          error_message:
+            `Sub-action '${cb.sub_action}' is not available on connector type '${connector.actionTypeId}'. ` +
+            `Check /workspace/connectors.md for valid sub-actions.`,
+        };
+      }
+      executeParams = { subAction: cb.sub_action, subActionParams };
     }
 
     // Step 7: execute
@@ -92,7 +105,7 @@ export const createConnectorCallbackHandler =
     try {
       executeResult = await actionsClient.execute({
         actionId: cb.connector_id,
-        params: { subAction: cb.sub_action, subActionParams },
+        params: executeParams,
       });
     } catch (err) {
       return {

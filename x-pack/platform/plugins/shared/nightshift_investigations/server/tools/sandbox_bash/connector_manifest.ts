@@ -12,6 +12,7 @@ import type { AgentConnector } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
 import type { SandboxApiClient } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
+import { HTTP_CONNECTOR_TYPE_ID, renderHttpConnectorSection } from './http_connector_adapter';
 
 const renderElasticsearchSection = (): string => `## elasticsearch (synthetic — always available)
 
@@ -29,6 +30,10 @@ List indices matching a wildcard. Params: \`{"pattern": "logs-*"}\`
 Return field types (field_caps). Params: \`{"pattern": "logs-*", "fields": "*"}\``;
 
 const renderConnectorSection = (connector: AgentConnector): string => {
+  if (connector.actionTypeId === HTTP_CONNECTOR_TYPE_ID) {
+    return renderHttpConnectorSection(connector.name, connector.id);
+  }
+
   const spec = getConnectorSpec(connector.actionTypeId);
   const lines: string[] = [
     `## ${connector.name} (connector-id: ${connector.id}, type: ${connector.actionTypeId})`,

@@ -392,4 +392,74 @@ describe('createConnectorCallbackHandler', () => {
       expect(result.error_message).toContain('sync explosion');
     });
   });
+
+  describe('the HTTP connector, which is not sub-action based', () => {
+    const httpRequest = (subAction: string, params: Record<string, unknown>) =>
+      createCallbackRequest({
+        sub_action: subAction,
+        sub_action_params: Buffer.from(JSON.stringify(params)),
+      });
+
+    beforeEach(() => {
+      actionsClient.get.mockResolvedValue(createConnectorResult('.http'));
+      actionsClient.execute.mockResolvedValue({
+        actionId: 'slack-1',
+        status: 'ok',
+        data: { status: 200 },
+      });
+    });
+
+    it('sends flat params instead of the subAction wrapper', async () => {
+      await createHandler()(createCallContext(['slack-1']), httpRequest('GET', { path: '/json' }));
+
+      expect(actionsClient.execute).toHaveBeenCalledWith({
+        actionId: 'slack-1',
+        params: { method: 'GET', path: '/json' },
+      });
+    });
+
+    it('refuses to let the sandbox redirect the connector at another host', async () => {
+      const result = await createHandler()(
+        createCallContext(['slack-1']),
+        httpRequest('GET', { url: 'https://attacker.example', path: '/x' })
+      );
+
+      expect(result.status).toBe('error');
+      expect(result.error_message).toContain("'url' cannot be set from the sandbox");
+      expect(actionsClient.execute).not.toHaveBeenCalled();
+    });
+
+    it('rejects an invalid verb without calling the connector', async () => {
+      const result = await createHandler()(
+        createCallContext(['slack-1']),
+        httpRequest('FETCH', { path: '/json' })
+      );
+
+      expect(result.status).toBe('error');
+      expect(actionsClient.execute).not.toHaveBeenCalled();
+    });
+
+    it('still enforces the allow-list', async () => {
+      const result = await createHandler()(
+        createCallContext([]),
+        httpRequest('GET', { path: '/json' })
+      );
+
+      expect(result.status).toBe('error');
+      expect(result.error_message).toContain('is not assigned to this agent');
+      expect(actionsClient.execute).not.toHaveBeenCalled();
+    });
+
+    it('does not consult the sub-action spec gate', async () => {
+      isToolActionMock.mockReturnValue(false);
+      getConnectorSpecMock.mockReturnValue(someConnectorSpec);
+
+      const result = await createHandler()(
+        createCallContext(['slack-1']),
+        httpRequest('GET', { path: '/json' })
+      );
+
+      expect(result.status).toBe('ok');
+    });
+  });
 });
