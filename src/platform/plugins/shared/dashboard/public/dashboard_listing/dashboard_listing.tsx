@@ -25,6 +25,7 @@ import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
 import type { DashboardListingProps, DashboardListingTab } from './types';
+import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 
 export const DashboardListing = ({
   children,
@@ -103,6 +104,15 @@ export const DashboardListing = ({
     [tabs, activeTabId]
   );
 
+  const onImportSuccess = useCallback((id: string, title: string) => {
+    coreServices.notifications.toasts.addSuccess(
+      i18n.translate('dashboard.importJson.successToast', {
+        defaultMessage: 'Dashboard "{title}" imported successfully.',
+        values: { title },
+      })
+    );
+  }, []);
+
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
     const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
     const createDashboardAction = tabsByIdMap.get('dashboards')?.createAction;
@@ -163,8 +173,25 @@ export const DashboardListing = ({
               }
             : undefined,
       },
+      items: [
+        {
+          id: 'importDashboardJson',
+          order: 0,
+          label: i18n.translate('dashboard.listing.importJsonButtonLabel', {
+            defaultMessage: 'Import JSON',
+          }),
+          iconType: 'importAction',
+          testId: 'dashboardListingImportButton',
+          run: (params) => {
+            openImportDashboardJsonFlyout({
+              onImportSuccess,
+              returnFocus: params?.returnFocus,
+            });
+          },
+        },
+      ],
     };
-  }, [tabs]);
+  }, [tabs, onImportSuccess]);
 
   return (
     <I18nProvider>
