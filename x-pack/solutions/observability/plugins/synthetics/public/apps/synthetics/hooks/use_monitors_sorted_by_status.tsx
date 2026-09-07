@@ -75,6 +75,11 @@ export function useMonitorsSortedByStatus(): OverviewStatusMetaData[] {
           return moment(a.updated_at).diff(moment(b.updated_at));
         });
         return sortOrder === 'asc' ? result : result.reverse();
+      case 'created_at':
+        result = result.sort((a, b) => {
+          return moment(a.created_at).diff(moment(b.created_at));
+        });
+        return sortOrder === 'asc' ? result : result.reverse();
       case 'urls': {
         // Monitors without a URL (e.g. ICMP/TCP, or browser checks where the
         // url field is empty) are always sorted last regardless of direction —
