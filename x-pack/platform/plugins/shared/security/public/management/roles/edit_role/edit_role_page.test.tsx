@@ -9,6 +9,8 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { BuildFlavor } from '@kbn/config';
 import type { Capabilities } from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
@@ -64,13 +66,6 @@ jest.mock('./privileges/kibana/space_aware_privilege_section', () => ({
 
 jest.mock('./privileges/kibana/transform_error_section', () => ({
   TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
-}));
-
-jest.mock('./reserved_role_badge', () => ({
-  ReservedRoleBadge: ({ role }: any) =>
-    role?.metadata?._reserved ? (
-      <span data-test-subj="reservedRoleBadgeTooltip">Reserved</span>
-    ) : null,
 }));
 
 const spacesManager = spacesManagerMock.create();
@@ -169,12 +164,20 @@ const buildSpaces = () => {
   ] as Space[];
 };
 
+const TestProviders = ({ children }: { children: React.ReactNode }) => (
+  <MockAppHeaderProvider>
+    <I18nProvider>{children}</I18nProvider>
+  </MockAppHeaderProvider>
+);
+
 const expectReadOnlyFormButtons = () => {
-  expect(screen.queryByTestId('roleFormReturnButton')).toBeInTheDocument();
+  expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+  expect(screen.queryByTestId('roleFormReturnButton')).not.toBeInTheDocument();
   expect(screen.queryByTestId('roleFormSaveButton')).not.toBeInTheDocument();
 };
 
 const expectSaveFormButtons = () => {
+  expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
   expect(screen.queryByTestId('roleFormReturnButton')).not.toBeInTheDocument();
   expect(screen.queryByTestId('roleFormSaveButton')).toBeInTheDocument();
 };
@@ -252,7 +255,11 @@ function getProps({
     docLinks,
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
-    history: scopedHistoryMock.create(),
+    history: (() => {
+      const history = scopedHistoryMock.create();
+      history.createHref.mockImplementation((location) => location.pathname ?? '/');
+      return history;
+    })(),
     overlays,
     navigateToUrl: jest.fn(),
     spacesApiUi,
@@ -279,6 +286,35 @@ describe('<EditRolePage />', () => {
   });
 
   describe('with spaces enabled', () => {
+    it('keeps the header and shows a loading body while the page loads', async () => {
+      const props = getProps({
+        action: 'edit',
+        role: {
+          name: 'my custom role',
+          metadata: {},
+          elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+          kibana: [{ spaces: ['*'], base: ['all'], feature: {} }],
+        },
+      });
+      props.rolesAPIClient.getRole.mockReturnValue(new Promise(() => {}));
+
+      render(
+        <TestProviders>
+          <KibanaContextProvider services={coreStart}>
+            <EditRolePage {...props} />
+          </KibanaContextProvider>
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+          'Viewing role'
+        );
+        expect(screen.getByTestId('sectionLoading')).toBeInTheDocument();
+      });
+      expect(screen.queryByTestId('roleFormNameInput')).not.toBeInTheDocument();
+    });
+
     it('can render readonly view when not enough privileges', async () => {
       coreStart.application.capabilities = {
         ...coreStart.application.capabilities,
@@ -288,7 +324,7 @@ describe('<EditRolePage />', () => {
       };
 
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -302,7 +338,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -313,7 +349,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a reserved role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -327,12 +363,15 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
 
-      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('reservedRoleBadge')).toHaveTextContent('Reserved');
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Reserved roles are built-in and cannot be removed or modified.'
+      );
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -343,7 +382,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a user defined role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -357,12 +396,14 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Set privileges on your Elasticsearch data and control access to your Kibana spaces.'
+      );
       expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -373,11 +414,11 @@ describe('<EditRolePage />', () => {
 
     it('can render when creating a new role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...getProps({ action: 'edit' })} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -400,11 +441,11 @@ describe('<EditRolePage />', () => {
 
       const props = getProps({ action: 'edit' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -414,7 +455,7 @@ describe('<EditRolePage />', () => {
 
     it('can render when cloning an existing role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -438,7 +479,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -451,7 +492,7 @@ describe('<EditRolePage />', () => {
 
     it('renders an auth error when not authorized to manage spaces', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -466,12 +507,12 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
 
       expect(screen.getByTestId('userCannotManageSpacesCallout')).toBeInTheDocument();
 
@@ -481,7 +522,7 @@ describe('<EditRolePage />', () => {
 
     it('renders a partial read-only view when there is a transform error', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -497,7 +538,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -517,7 +558,7 @@ describe('<EditRolePage />', () => {
       };
 
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -532,7 +573,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -543,7 +584,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a reserved role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -558,12 +599,15 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
 
-      expect(screen.getByTestId('reservedRoleBadgeTooltip')).toBeInTheDocument();
+      expect(screen.getByTestId('reservedRoleBadge')).toBeInTheDocument();
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Reserved roles are built-in and cannot be removed or modified.'
+      );
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -574,7 +618,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a user defined role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -589,12 +633,12 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
 
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
       expect(screen.getByTestId('simplePrivilegeSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -605,7 +649,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a user defined role with description', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -621,7 +665,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -634,7 +678,7 @@ describe('<EditRolePage />', () => {
 
     it('can render a reserved role with description', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -652,7 +696,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -665,11 +709,11 @@ describe('<EditRolePage />', () => {
 
     it('can render when creating a new role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...getProps({ action: 'edit', spacesEnabled: false })} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -692,11 +736,11 @@ describe('<EditRolePage />', () => {
 
       const props = getProps({ action: 'edit', spacesEnabled: false });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -706,7 +750,7 @@ describe('<EditRolePage />', () => {
 
     it('can render when cloning an existing role', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -731,7 +775,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -744,7 +788,7 @@ describe('<EditRolePage />', () => {
 
     it('renders a partial read-only view when there is a transform error', async () => {
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage
               {...getProps({
@@ -761,7 +805,7 @@ describe('<EditRolePage />', () => {
               })}
             />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -773,11 +817,11 @@ describe('<EditRolePage />', () => {
 
   it('hides remote index privileges section when not supported', async () => {
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage {...getProps({ action: 'edit', canUseRemoteIndices: false })} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
@@ -791,11 +835,11 @@ describe('<EditRolePage />', () => {
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage {...props} getFeatures={getFeatures} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
@@ -808,11 +852,11 @@ describe('<EditRolePage />', () => {
     const getFeatures = jest.fn().mockRejectedValue(error);
     const props = getProps({ action: 'edit' });
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage {...props} getFeatures={getFeatures} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
@@ -827,11 +871,11 @@ describe('<EditRolePage />', () => {
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage {...{ ...getProps({ action: 'edit' }), dataViews }} />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
@@ -846,7 +890,7 @@ describe('<EditRolePage />', () => {
     dataViews.getTitles = jest.fn().mockRejectedValue({ response: { status: 403 } });
 
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage
             {...{
@@ -865,12 +909,15 @@ describe('<EditRolePage />', () => {
             }}
           />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
 
-    expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Set privileges on your Elasticsearch data and control access to your Project spaces.'
+    );
     expect(screen.getByTestId('spaceAwarePrivilegeSectionMock')).toBeInTheDocument();
     expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
     expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(true);
@@ -884,7 +931,7 @@ describe('<EditRolePage />', () => {
 
   it('render role with wildcard base privilege without edit/delete actions', async () => {
     render(
-      <I18nProvider>
+      <TestProviders>
         <KibanaContextProvider services={coreStart}>
           <EditRolePage
             {...getProps({
@@ -898,7 +945,7 @@ describe('<EditRolePage />', () => {
             })}
           />
         </KibanaContextProvider>
-      </I18nProvider>
+      </TestProviders>
     );
 
     await waitForRender();
@@ -912,11 +959,11 @@ describe('<EditRolePage />', () => {
     it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();
@@ -938,11 +985,11 @@ describe('<EditRolePage />', () => {
     it('renders an error on save of existing role name', async () => {
       const props = getProps({ action: 'edit' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       props.rolesAPIClient.saveRole.mockRejectedValue({
@@ -974,11 +1021,11 @@ describe('<EditRolePage />', () => {
     it('does not render an error for new role name', async () => {
       const props = getProps({ action: 'edit' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
@@ -1001,11 +1048,11 @@ describe('<EditRolePage />', () => {
     it('can render for serverless buildFlavor', async () => {
       const props = getProps({ action: 'edit', buildFlavor: 'serverless' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
@@ -1022,7 +1069,7 @@ describe('<EditRolePage />', () => {
       expect(
         within(formRow).queryByText('A role with this name already exists.')
       ).not.toBeInTheDocument();
-      expect(screen.queryByTestId('reservedRoleBadgeTooltip')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('reservedRoleBadge')).not.toBeInTheDocument();
       expect(screen.queryByTestId('userCannotManageSpacesCallout')).not.toBeInTheDocument();
       expect((screen.getByTestId('roleFormNameInput') as HTMLInputElement).disabled).toBe(false);
       expect(MockedElasticsearchPrivileges).toHaveBeenCalledWith(
@@ -1036,11 +1083,11 @@ describe('<EditRolePage />', () => {
     it('does not render a notification on save of new role name', async () => {
       const props = getProps({ action: 'edit' });
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
@@ -1089,11 +1136,11 @@ describe('<EditRolePage />', () => {
       props.overlays.openConfirm.mockResolvedValue(false);
 
       render(
-        <I18nProvider>
+        <TestProviders>
           <KibanaContextProvider services={coreStart}>
             <EditRolePage {...props} />
           </KibanaContextProvider>
-        </I18nProvider>
+        </TestProviders>
       );
 
       await waitForRender();

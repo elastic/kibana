@@ -10,7 +10,9 @@ import {
   getNormalizedInputs,
 } from '../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../common/services/agentless_policy_helper';
+import { isCloudProvider } from '../../../../../../../common/types';
 import type {
+  CloudProvider,
   PackageInfo,
   RegistryInput,
   RegistryVarGroup,
@@ -140,6 +142,57 @@ export function getHiddenVarGroupOptionsForPolicyTemplate(
   }
 
   return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
+}
+
+/**
+ * Compute the var_group options to hide because their cloud provider's identity federation
+ * has been disabled by feature flag. An option is hidden when its `provider` is in
+ * `disabledProviders`, unless it is already the saved selection for its var_group — an
+ * existing policy configured with identity federation must stay editable rather than being
+ * silently reset to the first visible option.
+ */
+export function getHiddenVarGroupOptionsForDisabledProviders(
+  varGroups: RegistryVarGroup[] | undefined,
+  disabledProviders: readonly CloudProvider[],
+  savedSelections?: VarGroupSelection
+): Record<string, string[]> | undefined {
+  if (!varGroups?.length || !disabledProviders.length) {
+    return undefined;
+  }
+
+  const hiddenOptions: Record<string, string[]> = {};
+  for (const varGroup of varGroups) {
+    const hiddenOptionNames = varGroup.options
+      .filter(
+        (option) =>
+          isCloudProvider(option.provider) &&
+          disabledProviders.includes(option.provider) &&
+          savedSelections?.[varGroup.name] !== option.name
+      )
+      .map((option) => option.name);
+
+    if (hiddenOptionNames.length > 0) {
+      hiddenOptions[varGroup.name] = hiddenOptionNames;
+    }
+  }
+
+  return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
+}
+
+/**
+ * Merge several hide-option maps (var_group name → hidden option names), deduplicating names.
+ * Returns undefined when nothing is hidden so callers can keep passing `undefined` through.
+ */
+export function mergeHiddenVarGroupOptions(
+  ...maps: Array<Record<string, string[]> | undefined>
+): Record<string, string[]> | undefined {
+  const merged: Record<string, string[]> = {};
+  for (const map of maps) {
+    for (const [groupName, optionNames] of Object.entries(map ?? {})) {
+      merged[groupName] = [...new Set([...(merged[groupName] ?? []), ...optionNames])];
+    }
+  }
+  return Object.keys(merged).length > 0 ? merged : undefined;
 }
 
 /**

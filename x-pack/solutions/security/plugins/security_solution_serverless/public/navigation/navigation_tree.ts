@@ -6,7 +6,6 @@
  */
 
 import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import {
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
@@ -20,11 +19,6 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { type Services } from '../common/services';
 import { createManagementFooterItemsTree } from './management_footer_items';
-
-const SOLUTION_NAME = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectType.title',
-  { defaultMessage: 'Security' }
-);
 
 export const createNavigationTree = async (
   services: Services,
@@ -46,13 +40,6 @@ export const createNavigationTree = async (
 
   return {
     body: [
-      {
-        id: 'security_solution_home',
-        link: securityLink(SecurityPageName.landing),
-        title: SOLUTION_NAME,
-        icon: 'logoSecurity',
-        renderAs: 'home',
-      },
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
       contextEngineLink,
       {
