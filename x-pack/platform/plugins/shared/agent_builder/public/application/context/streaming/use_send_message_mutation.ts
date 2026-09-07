@@ -57,7 +57,7 @@ export interface SendMessageVars {
   conversationAttachments?: VersionedAttachment[];
   resetAttachments?: () => void;
   browserApiTools?: Array<BrowserApiToolDefinition<any>>;
-  onResetToNewConversation?: (message: string) => void;
+  onResetToNewConversation?: (message: string, attachments?: ConversationAttachment[]) => void;
 }
 
 export interface SendMessageMutationBindings {
@@ -314,7 +314,7 @@ export const useSendMessageMutation = ({
             });
           }
           clearPendingMessage(vars.conversationId);
-          vars.onResetToNewConversation!(vars.message!);
+          vars.onResetToNewConversation!(vars.message!, vars.attachments);
         } else {
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();
