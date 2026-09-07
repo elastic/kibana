@@ -138,6 +138,37 @@ describe('useSendBulkToTimeline', () => {
         'KqlFilter'
       );
     });
+
+    it('should overlay kibana.alert.rule.type and kibana.alert.group.id from `data` onto `ecs` when only `ecs._id`/`ecs._index` are populated', () => {
+      // The generic alerts table's bulk-selection mapper only populates `item.ecs`
+      // with `_id`/`_index`; the real field values live in `item.data`. Reproduces
+      // https://github.com/elastic/kibana/issues/288404.
+      const eqlTimelineItems: TimelineItem[] = [
+        {
+          _id: 'eql-alert-a',
+          _index: 'test-index',
+          data: [
+            { field: 'kibana.alert.rule.type', value: ['eql'] },
+            { field: 'kibana.alert.group.id', value: ['group-a'] },
+          ],
+          ecs: { _id: 'eql-alert-a', _index: 'test-index' },
+        },
+      ];
+      const { result } = renderHookWithProviders();
+
+      act(() => {
+        result.current.sendBulkEventsToTimelineHandler(eqlTimelineItems);
+      });
+
+      const ecsData = mockSendBulkEventsToTimelineAction.mock.calls[0][1];
+      expect(ecsData).toEqual([
+        {
+          _id: 'eql-alert-a',
+          _index: 'test-index',
+          kibana: { alert: { rule: { type: ['eql'] }, group: { id: ['group-a'] } } },
+        },
+      ]);
+    });
   });
 
   describe('createTimeline', () => {

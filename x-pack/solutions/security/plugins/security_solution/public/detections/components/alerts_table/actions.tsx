@@ -305,7 +305,7 @@ export const buildAlertsKqlFilter = (
         },
         query: {
           match_phrase: {
-            _id: alertIds[0],
+            [key]: alertIds[0],
           },
         },
         $state: {
@@ -319,11 +319,9 @@ export const buildAlertsKqlFilter = (
     {
       query: {
         bool: {
-          filter: {
-            ids: {
-              values: alertIds,
-            },
-          },
+          // The `ids` query only ever matches a document's own `_id`, so it can't be used
+          // to filter on `kibana.alert.group.id`/`signal.group.id`; use `terms` for those.
+          filter: key === '_id' ? { ids: { values: alertIds } } : { terms: { [key]: alertIds } },
         },
       },
       meta: {
@@ -894,11 +892,14 @@ export const sendBulkEventsToTimelineAction = async (
 
   const { to, from } = determineToAndFrom({ ecs });
 
-  const { dataProviders, filters } = buildTimelineDataProviderOrFilter(
-    eventIds,
-    prefer,
-    label || `${ecs.length} event IDs`
-  );
+  // When every selected alert is an EQL sequence alert with a group id, expand each
+  // alert's kibana.alert.group.id (same as the single-alert path) so the correlated
+  // building-block events are included, instead of only matching the shell alert _ids.
+  const isEqlSequenceSelection = ecs.length > 0 && ecs.every(isEqlAlertWithGroupId);
+
+  const { dataProviders, filters } = isEqlSequenceSelection
+    ? buildEqlDataProviderOrFilter(eventIds, ecs)
+    : buildTimelineDataProviderOrFilter(eventIds, prefer, label || `${ecs.length} event IDs`);
 
   await createTimeline({
     from,
