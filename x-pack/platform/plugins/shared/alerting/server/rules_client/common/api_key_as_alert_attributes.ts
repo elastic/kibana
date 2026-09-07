@@ -9,6 +9,7 @@ import type { RawRule } from '../../types';
 import type { CreateAPIKeyResult } from '../types';
 import type { RuleDomain } from '../../application/rule/types';
 import { MISSING_UIAM_API_KEY_TAG } from '../../application/rule/constants';
+import { ApiKeyType } from '../../task_runner/types';
 
 export const API_KEY_ATTRIBUTES_TO_STRIP = [
   'apiKey',
@@ -106,18 +107,20 @@ export function apiKeyAsRuleDomainProperties(
  * Determines if the missing UIAM API key tag should be added to a rule.
  * The tag is added when:
  * - The environment is serverless
- * - UIAM API keys are granted in this deployment (`xpack.security.uiam.enabled`)
+ * - Rules use UIAM API keys in this deployment
  * - uiamApiKey is not set (null/undefined)
  *
- * Without the `shouldGrantUiam` check every rule would get the tag on deployments where
- * UIAM is off, since none of them has a UIAM key to begin with.
+ * The `shouldGrantUiam` and `apiKeyType` checks are the same pair the task runner uses to
+ * decide if a rule runs with a UIAM key. Without them, rules would get the tag on
+ * deployments that still use ES keys, where no rule has a UIAM key to begin with.
  */
 export function shouldAddMissingUiamKeyTag(
   uiamApiKey: string | null | undefined,
   isServerless: boolean,
-  shouldGrantUiam: boolean | undefined
+  shouldGrantUiam: boolean | undefined,
+  apiKeyType: ApiKeyType | undefined
 ): boolean {
-  return isServerless && !!shouldGrantUiam && !uiamApiKey;
+  return isServerless && !!shouldGrantUiam && apiKeyType === ApiKeyType.UIAM && !uiamApiKey;
 }
 
 /**
@@ -128,9 +131,10 @@ export function addMissingUiamKeyTagIfNeeded(
   tags: string[],
   uiamApiKey: string | null | undefined,
   isServerless: boolean,
-  shouldGrantUiam: boolean | undefined
+  shouldGrantUiam: boolean | undefined,
+  apiKeyType: ApiKeyType | undefined
 ): string[] {
-  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam)) {
+  if (shouldAddMissingUiamKeyTag(uiamApiKey, isServerless, shouldGrantUiam, apiKeyType)) {
     // Avoid duplicates
     if (!tags.includes(MISSING_UIAM_API_KEY_TAG)) {
       return [...tags, MISSING_UIAM_API_KEY_TAG];

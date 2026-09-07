@@ -162,7 +162,8 @@ async function enableWithOCC(context: RulesClientContext, params: EnableRulePara
       attributes.tags,
       existingApiKey ? attributes.uiamApiKey : apiKeyAttributes.uiamApiKey,
       context.isServerless,
-      context.shouldGrantUiam
+      context.shouldGrantUiam,
+      context.apiKeyType
     );
 
     const updateAttributes = updateMeta(context, {

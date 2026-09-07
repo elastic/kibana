@@ -270,7 +270,8 @@ async function updateAttributes({
     attributes.tags,
     apiKeyAttributes?.uiamApiKey,
     context.isServerless,
-    context.shouldGrantUiam
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   // TODO (http-versioning) Remove casts when updateMeta has been converted

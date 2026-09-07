@@ -344,7 +344,8 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     updateRuleData.tags,
     apiKeyAttributes.uiamApiKey,
     context.isServerless,
-    context.shouldGrantUiam
+    context.shouldGrantUiam,
+    context.apiKeyType
   );
 
   const notifyWhen = getRuleNotifyWhenType(

@@ -6,6 +6,7 @@
  */
 
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { ApiKeyType } from '../../../../task_runner/types';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
@@ -794,6 +795,7 @@ describe('enable()', () => {
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
@@ -836,6 +838,7 @@ describe('enable()', () => {
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
       });
@@ -886,6 +889,7 @@ describe('enable()', () => {
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({

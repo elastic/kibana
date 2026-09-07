@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { ApiKeyType } from '../../../../task_runner/types';
 import type { IntervalSchedule } from '../../../../types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
@@ -4897,6 +4898,7 @@ describe('update()', () => {
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
       });
@@ -4974,6 +4976,7 @@ describe('update()', () => {
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({

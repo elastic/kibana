@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import { RulesClient } from '../../../../rules_client';
+import { ApiKeyType } from '../../../../task_runner/types';
 import { getRulesClientMockParams } from '../../../../test_utils';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
@@ -4837,6 +4838,7 @@ This is the type of text _investigation guides_ will contain.`;
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
       });
@@ -4894,6 +4896,7 @@ This is the type of text _investigation guides_ will contain.`;
         ...rulesClientParams,
         isServerless: true,
         shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       const data = getMockData();
