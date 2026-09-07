@@ -13,8 +13,10 @@ import {
   buildEpisodeActionsHistoryQuery,
   DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
   type EpisodeActionHistoryEntry,
+  type RawEpisodeActionHistoryEntry,
 } from '../queries/episode_actions_history_query';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
+import { normalizeTags } from '../utils/normalize_tags';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -55,9 +57,9 @@ export const useFetchEpisodeActionsHistoryQuery = ({
         },
         abortSignal: signal,
       });
-      return esqlResponseToObjectRows<EpisodeActionHistoryEntry>(raw);
+      return esqlResponseToObjectRows<RawEpisodeActionHistoryEntry>(raw);
     },
-    getNextPageParam: (lastPage: EpisodeActionHistoryEntry[]) =>
+    getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
     enabled: Boolean(episodeId) && Boolean(groupHash),
   });
@@ -68,7 +70,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
     for (const entry of query.data?.pages.flat() ?? []) {
       if (seen.has(entry._id)) continue;
       seen.add(entry._id);
-      deduped.push(entry);
+      deduped.push({ ...entry, tags: normalizeTags(entry.tags) });
     }
     return deduped;
   }, [query.data]);
