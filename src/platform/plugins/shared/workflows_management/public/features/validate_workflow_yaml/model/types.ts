@@ -141,6 +141,10 @@ interface YamlValidationResultDeprecatedStep extends YamlValidationDiagnosticBas
   owner: 'deprecated-step-validation';
 }
 
+interface YamlValidationResultConnectorCapability extends YamlValidationDiagnosticBase {
+  owner: 'connector-capability-validation';
+}
+
 interface YamlValidationResultEsql extends YamlValidationDiagnosticBase {
   owner: 'esql-validation';
 }
@@ -177,6 +181,7 @@ export const CUSTOM_YAML_VALIDATION_MARKER_OWNERS = [
   'workflow-output-validation',
   'if-condition-validation',
   'deprecated-step-validation',
+  'connector-capability-validation',
   'esql-validation',
   'parallel-fan-out-validation',
   'parallel-mode-validation',
@@ -206,6 +211,7 @@ export type YamlValidationDiagnostic =
   | YamlValidationResultWorkflowOutput
   | YamlValidationResultIfConditionError
   | YamlValidationResultDeprecatedStep
+  | YamlValidationResultConnectorCapability
   | YamlValidationResultEsql
   | YamlValidationResultParallelFanOut
   | YamlValidationResultParallelMode

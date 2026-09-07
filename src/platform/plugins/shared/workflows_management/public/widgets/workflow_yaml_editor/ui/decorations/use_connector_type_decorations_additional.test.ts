@@ -10,15 +10,42 @@
 import { renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
 import { useConnectorTypeDecorations } from './use_connector_type_decorations';
 import { createMockMonacoEditor } from '../../../../shared/test_utils/mock_monaco';
 
 const mockBuiltInStepTypes = new Set(['foreach', 'if']);
 const mockConnectorsMap = new Map<string, { stability?: string }>([
   ['elasticsearch.search', { stability: 'stable' }],
+  ['slack2.searchMessages', { stability: 'stable' }],
+  ['slack2.sendMessage', { stability: 'stable' }],
   ['tech_preview_connector', { stability: 'tech_preview' }],
   ['kibana.createCase', { stability: 'stable' }],
 ]);
+
+const connectorTypes: Record<string, ConnectorTypeInfo> = {
+  '.slack2': {
+    actionTypeId: '.slack2',
+    displayName: 'Slack',
+    enabled: true,
+    enabledInConfig: true,
+    enabledInLicense: true,
+    minimumLicenseRequired: 'enterprise',
+    subActions: [
+      { name: 'searchMessages', displayName: 'Search messages' },
+      { name: 'sendMessage', displayName: 'Send message' },
+    ],
+    instances: [
+      {
+        id: 'slack-webhook',
+        name: 'Slack webhook',
+        isPreconfigured: false,
+        isDeprecated: false,
+        supportedSubActions: ['sendMessage'],
+      },
+    ],
+  },
+};
 
 jest.mock('@kbn/workflows', () => ({
   isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
@@ -159,6 +186,60 @@ describe('useConnectorTypeDecorations', () => {
     jest.advanceTimersByTime(200);
 
     expect(editor.createDecorationsCollection).toHaveBeenCalled();
+  });
+
+  it('marks connector actions unsupported by the selected connector as unavailable', () => {
+    const yamlString = [
+      'version: "1"',
+      'steps:',
+      '  - name: search_step',
+      '    type: slack2.searchMessages',
+      '    connector-id: slack-webhook',
+      '    with: {}',
+    ].join('\n');
+    const doc = parseDocument(yamlString, { keepSourceTokens: true });
+    const { editor } = createMockMonacoEditor(yamlString);
+
+    renderHook(() =>
+      useConnectorTypeDecorations({
+        editor,
+        yamlDocument: doc,
+        isEditorMounted: true,
+        connectorTypes,
+      })
+    );
+
+    jest.advanceTimersByTime(200);
+
+    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    expect(decorations[0].options.inlineClassName).toContain('type-unavailable');
+  });
+
+  it('does not mark actions supported by the selected connector as unavailable', () => {
+    const yamlString = [
+      'version: "1"',
+      'steps:',
+      '  - name: send_step',
+      '    type: slack2.sendMessage',
+      '    connector-id: slack-webhook',
+      '    with: {}',
+    ].join('\n');
+    const doc = parseDocument(yamlString, { keepSourceTokens: true });
+    const { editor } = createMockMonacoEditor(yamlString);
+
+    renderHook(() =>
+      useConnectorTypeDecorations({
+        editor,
+        yamlDocument: doc,
+        isEditorMounted: true,
+        connectorTypes,
+      })
+    );
+
+    jest.advanceTimersByTime(200);
+
+    const decorations = (editor.createDecorationsCollection as jest.Mock).mock.calls[0][0];
+    expect(decorations[0].options.inlineClassName).not.toContain('type-unavailable');
   });
 
   it('creates decorations for deprecated aliases when their canonical type exists', () => {

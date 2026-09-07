@@ -17,16 +17,21 @@ describe('ensureConfigAuthType', () => {
     });
   });
 
-  test('preserves existing config.authType when already set', () => {
+  test('replaces a stale config.authType when authentication changes', () => {
     expect(
       ensureConfigAuthType(
         { authType: 'bearer', apiUrl: 'https://example.com' },
         { authType: 'oauth_authorization_code', clientId: 'x' }
       )
     ).toEqual({
-      authType: 'bearer',
+      authType: 'oauth_authorization_code',
       apiUrl: 'https://example.com',
     });
+  });
+
+  test('preserves config when authType already matches secrets', () => {
+    const config = { authType: 'bearer', apiUrl: 'https://example.com' };
+    expect(ensureConfigAuthType(config, { authType: 'bearer', token: 't' })).toBe(config);
   });
 
   test('does not modify config when secrets.authType is absent', () => {

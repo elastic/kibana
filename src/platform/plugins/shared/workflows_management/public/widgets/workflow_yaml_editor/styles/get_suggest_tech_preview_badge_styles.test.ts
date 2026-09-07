@@ -30,7 +30,7 @@ const createMockEuiThemeContext = (): UseEuiTheme => ({
 });
 
 describe('buildSuggestTechPreviewBadgeRules', () => {
-  it('generates aria-label scoped rules with flask mask styling', () => {
+  it('generates aria-label scoped rules with flask badge styling', () => {
     const css = buildSuggestTechPreviewBadgeRules(
       ['cases.caseCreated'],
       createMockEuiThemeContext()
