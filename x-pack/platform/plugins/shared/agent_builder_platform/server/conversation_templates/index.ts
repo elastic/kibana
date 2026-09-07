@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { phishingTemplate } from './phishing';
-import { securityFindingTemplate } from './security_finding';
-import { quickNoteTemplate } from './quick_note';
+import { investigationTemplate } from './investigation';
+import { incidentTemplate } from './incident';
 import type { PluginSetupDependencies } from '../types';
 
-const BUILTIN_TEMPLATES = [phishingTemplate, securityFindingTemplate, quickNoteTemplate];
+const BUILTIN_TEMPLATES = [incidentTemplate, investigationTemplate];
 
 export const registerConversationTemplates = ({
   setupDeps,

@@ -332,6 +332,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.alert',
   'security.alerts',
   'security.entity',
+  'security.detection',
   'security.entity_analytics_dashboard',
   'security.entity_graph',
   'security.entity_risk_score_history',
@@ -339,6 +340,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
+  'investigation.artifact',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
