@@ -38,6 +38,7 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   return (
     <EuiModal
       onClose={closePopover}
+      outsideClickCloses
       initialFocus="[name='actions-menu-search']"
       aria-label={i18n.translate('workflows.actionsMenu.modalAriaLabel', {
         defaultMessage: 'Actions menu',
