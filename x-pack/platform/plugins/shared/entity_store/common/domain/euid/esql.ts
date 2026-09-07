@@ -448,9 +448,12 @@ export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  {
+    withTypeId = true,
+    definition,
+  }: { withTypeId?: boolean; definition?: EntityDefinitionWithoutId } = {}
 ): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = definition ?? getEntityDefinitionWithoutId(entityType);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 

@@ -426,12 +426,15 @@ export class AssetManagerClient {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }, globalOverrides] =
-        await Promise.all([
-          this.engineDescriptorClient.getAll(),
-          this.globalStateClient.findOrThrow(),
-          this.globalStateClient.findLogExtractionOverrides(),
-        ]);
+      const [
+        engines,
+        { historySnapshot, logsExtraction: logsExtractionConfig, excludedUserNames },
+        globalOverrides,
+      ] = await Promise.all([
+        this.engineDescriptorClient.getAll(),
+        this.globalStateClient.findOrThrow(),
+        this.globalStateClient.findLogExtractionOverrides(),
+      ]);
 
       const status = this.calculateEntityStoreStatus(engines);
       const logsExtractionConfigByType = Object.fromEntries(
@@ -451,6 +454,7 @@ export class AssetManagerClient {
           historySnapshot,
           logsExtractionConfig,
           logsExtractionConfigByType,
+          excludedUserNames,
         };
       }
 
@@ -460,6 +464,7 @@ export class AssetManagerClient {
         historySnapshot,
         logsExtractionConfig,
         logsExtractionConfigByType,
+        excludedUserNames,
       };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
