@@ -5,36 +5,43 @@
  * 2.0.
  */
 
+import { EuiPageTemplate } from '@elastic/eui';
+import { AppHeaderLoading } from '@kbn/app-header';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
-import { PageTemplate } from './page_template';
 import { PageLoading } from '../../components';
 import { useClusters } from '../hooks/use_clusters';
+import { useTitle } from '../hooks/use_title';
 import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
+import { setHasClusterListing } from './get_monitoring_back';
 
 const CODE_PATHS = [CODE_PATH_ELASTICSEARCH];
 
 export const LoadingPage = ({ staticLoadingState }: { staticLoadingState?: boolean }) => {
   const { clusters, loaded } = useClusters(null, undefined, CODE_PATHS);
-  const title = i18n.translate('xpack.monitoring.loading.pageTitle', {
-    defaultMessage: 'Loading',
-  });
+  useTitle('', '');
 
-  if (staticLoadingState) {
-    return (
-      <PageTemplate title={title}>
-        <PageLoading />
-      </PageTemplate>
-    );
+  if (staticLoadingState || loaded === false) {
+    return <MonitoringAppLoading />;
   }
 
-  return (
-    <PageTemplate title={title}>
-      {loaded === false ? <PageLoading /> : renderRedirections(clusters)}
-    </PageTemplate>
-  );
+  setHasClusterListing(clusters.length > 1);
+  return renderRedirections(clusters);
 };
+
+const MonitoringAppLoading = () => (
+  <EuiPageTemplate
+    offset={0}
+    restrictWidth={false}
+    grow={false}
+    data-test-subj="monitoringAppContainer"
+  >
+    <EuiPageTemplate.Section>
+      <AppHeaderLoading spacing="bleed" menu={{ buttonCount: 1, hasPrimary: true }} />
+      <PageLoading />
+    </EuiPageTemplate.Section>
+  </EuiPageTemplate>
+);
 
 const renderRedirections = (clusters: any) => {
   if (!clusters || !clusters.length) {

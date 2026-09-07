@@ -19,6 +19,7 @@ import type { TabMenuItem } from '../page_template';
 import { PageTemplate } from '../page_template';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { fetchClusters } from '../../../lib/fetch_clusters';
+import { setHasClusterListing } from '../get_monitoring_back';
 
 const pageTitle = i18n.translate('xpack.monitoring.cluster.listing.pageTitle', {
   defaultMessage: 'Cluster listing',
@@ -82,6 +83,10 @@ export const ClusterListing: React.FC<ComponentProps> = () => {
       setClusters(response);
     }
   }, [globalState.ccs, services.data?.query.timefilter.timefilter, services.http]);
+
+  if (clusters.length > 0) {
+    setHasClusterListing(clusters.length > 1);
+  }
 
   if (globalState.save && clusters.length === 1) {
     globalState.cluster_uuid = clusters[0].cluster_uuid;
