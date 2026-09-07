@@ -817,7 +817,7 @@ export const WorkflowYAMLEditor = ({
       },
       {
         id: 'keyboard-shortcuts',
-        content: <KeyboardShortcutsPopover />,
+        content: <KeyboardShortcutsPopover isReadOnly={isReadOnlyYaml} />,
         showInReadOnly: true,
       },
       {
@@ -826,7 +826,7 @@ export const WorkflowYAMLEditor = ({
         showInReadOnly: true,
       },
     ],
-    [openActionsPopover, editorRef]
+    [openActionsPopover, editorRef, isReadOnlyYaml]
   );
 
   // These were triggering rerendering of the actions containers on every scroll, because they were

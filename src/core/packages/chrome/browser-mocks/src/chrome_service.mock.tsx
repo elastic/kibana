@@ -17,6 +17,7 @@ import type {
   ChromeAppHeaderConfig,
   ChromeBadge,
   ChromeBreadcrumb,
+  ChromeNewsfeedHandler,
   GlobalSearchConfig,
 } from '@kbn/core-chrome-browser';
 import type {
@@ -41,7 +42,56 @@ const createStartContractMock = () => {
   const nextProjectPickerState$ = new BehaviorSubject<ReactNode>(null);
   const nextAppHeaderState$ = new BehaviorSubject<ChromeAppHeaderConfig | undefined>(undefined);
   const inlineAppHeaderState$ = new BehaviorSubject(false);
+  const nextFeedbackHandler$ = new BehaviorSubject<(() => void) | undefined>(undefined);
+  const nextNewsfeedHandler$ = new BehaviorSubject<ChromeNewsfeedHandler | undefined>(undefined);
   let appHeaderRegistrationId = 0;
+
+  const aiButton = lazyObject({
+    get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
+    register: jest.fn().mockReturnValue(() => {}),
+  });
+  const globalSearch = lazyObject({
+    set: jest.fn((config?: GlobalSearchConfig) => {
+      nextGlobalSearchState$.next(config);
+    }),
+    get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
+  });
+  const userMenu = lazyObject({
+    get$: jest.fn().mockReturnValue(nextUserMenuState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextUserMenuState$.next(content ?? null);
+    }),
+  });
+  const contextSwitcher = lazyObject({
+    get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextContextSwitcherState$.next(content ?? null);
+    }),
+  });
+  const projectPicker = lazyObject({
+    get$: jest.fn().mockReturnValue(nextProjectPickerState$),
+    set: jest.fn((content?: ReactNode) => {
+      nextProjectPickerState$.next(content ?? null);
+    }),
+  });
+  const registerFeedbackHandler = jest.fn().mockReturnValue(() => {});
+  const getFeedbackHandler$ = jest.fn().mockReturnValue(nextFeedbackHandler$);
+  const registerNewsfeedHandler = jest.fn().mockReturnValue(() => {});
+  const getNewsfeedHandler$ = jest.fn().mockReturnValue(nextNewsfeedHandler$);
+
+  const controls = lazyObject({
+    aiButton,
+    globalSearch,
+    userMenu,
+    contextSwitcher,
+    projectPicker,
+  });
+  const help = lazyObject({
+    registerFeedbackHandler,
+    getFeedbackHandler$,
+    registerNewsfeedHandler,
+    getNewsfeedHandler$,
+  });
 
   const sidebar = sidebarServiceMock.createStartContract();
 
@@ -136,35 +186,14 @@ const createStartContractMock = () => {
       getCustomizeNavigationHandler$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
       registerCustomizeNavigationHandler: jest.fn(),
     }),
+    controls,
+    help,
     next: lazyObject({
-      aiButton: lazyObject({
-        get$: jest.fn().mockReturnValue(new BehaviorSubject([])),
-        register: jest.fn().mockReturnValue(() => {}),
-      }),
-      globalSearch: lazyObject({
-        set: jest.fn((config?: GlobalSearchConfig) => {
-          nextGlobalSearchState$.next(config);
-        }),
-        get$: jest.fn().mockReturnValue(nextGlobalSearchState$),
-      }),
-      userMenu: lazyObject({
-        get$: jest.fn().mockReturnValue(nextUserMenuState$),
-        set: jest.fn((content?: ReactNode) => {
-          nextUserMenuState$.next(content ?? null);
-        }),
-      }),
-      contextSwitcher: lazyObject({
-        get$: jest.fn().mockReturnValue(nextContextSwitcherState$),
-        set: jest.fn((content?: ReactNode) => {
-          nextContextSwitcherState$.next(content ?? null);
-        }),
-      }),
-      projectPicker: lazyObject({
-        get$: jest.fn().mockReturnValue(nextProjectPickerState$),
-        set: jest.fn((content?: ReactNode) => {
-          nextProjectPickerState$.next(content ?? null);
-        }),
-      }),
+      aiButton,
+      globalSearch,
+      userMenu,
+      contextSwitcher,
+      projectPicker,
       inlineAppHeader: lazyObject({
         get$: jest.fn().mockReturnValue(inlineAppHeaderState$),
         set: jest.fn((value: boolean) => inlineAppHeaderState$.next(value)),
@@ -181,10 +210,10 @@ const createStartContractMock = () => {
           };
         }),
       }),
-      getFeedbackHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-      registerFeedbackHandler: jest.fn().mockReturnValue(() => {}),
-      getNewsfeedHandler$: jest.fn().mockReturnValue(new BehaviorSubject(undefined)),
-      registerNewsfeedHandler: jest.fn().mockReturnValue(() => {}),
+      getFeedbackHandler$,
+      registerFeedbackHandler,
+      getNewsfeedHandler$,
+      registerNewsfeedHandler,
     }),
     setGlobalFooter: jest.fn(),
     getGlobalFooter$: jest.fn().mockReturnValue(new BehaviorSubject(null)),
