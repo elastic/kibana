@@ -8,6 +8,7 @@
  */
 
 import path from 'node:path';
+import chalk from 'chalk';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
@@ -72,13 +73,15 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-const TITLE_COL_WIDTH = 50;
-const FILE_COL_WIDTH = 46;
-const OWNERS_COL_WIDTH = 34;
+// #, failed builds, flakiest branch, failed builds by branch, latest, test title
+const TEST_COL_WIDTHS = [5, 15, 18, 26, 10, 60] as const;
+/** Content width of a cell spanning every column: widths plus inner borders minus padding. */
+const FILE_ROW_WIDTH =
+  TEST_COL_WIDTHS.reduce<number>((sum, width) => sum + width, 0) + TEST_COL_WIDTHS.length - 1 - 3;
 
 /**
- * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/` and
- * owner handles on `-` ourselves, keeping the separator at the end of the broken line.
+ * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
+ * ourselves, keeping the separator at the end of the broken line.
  */
 const wrapOn = (text: string, separator: string, width: number): string => {
   const lines: string[] = [];
@@ -95,9 +98,6 @@ const wrapOn = (text: string, separator: string, width: number): string => {
   lines.push(current);
   return lines.join('\n');
 };
-
-// cell padding takes 2 columns and a broken line ends in the separator
-const contentWidth = (colWidth: number): number => colWidth - 3;
 
 const formatAge = (from: Date, to: Date): string => {
   const minutes = Math.max(0, Math.round((to.getTime() - from.getTime()) / 60_000));
@@ -155,9 +155,9 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests one per row. File, framework and owners are per-file, so their
- * cells span the rows of that file's tests (in order of first appearance) and whole-suite
- * failures stand out.
+ * Renders the top-ranked tests one per row, grouped under a full-width header row per test file
+ * (in order of first appearance) carrying the path, framework and owners, so whole-suite failures
+ * stand out and the path is never repeated.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
@@ -166,28 +166,8 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: [
-      '#',
-      'Failed builds',
-      'Flakiest branch',
-      'Failed builds by branch',
-      'Latest',
-      'Test',
-      'File',
-      'Framework',
-      'Owners',
-    ],
-    colWidths: [
-      null,
-      null,
-      null,
-      null,
-      null,
-      TITLE_COL_WIDTH,
-      FILE_COL_WIDTH,
-      null,
-      OWNERS_COL_WIDTH,
-    ],
+    head: ['#', 'Failed builds', 'Flakiest branch', 'Failed builds by branch', 'Latest', 'Test'],
+    colWidths: [...TEST_COL_WIDTHS],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -196,27 +176,16 @@ const buildTopFlakyTable = (
   for (const [filePath, entries] of groupByFile(top)) {
     const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const rowSpan = entries.length;
-    const fileCells: CliTable3.Cell[] = [
-      {
-        rowSpan,
-        content: [
-          wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
-          notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-        ]
-          .filter(Boolean)
-          .join('\n'),
-      },
-      { rowSpan, content: framework },
-      {
-        rowSpan,
-        content:
-          owners.map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH))).join('\n') ||
-          '-',
-      },
-    ];
+    const fileHeader = [
+      chalk.yellow(wrapOn(filePath, '/', FILE_ROW_WIDTH)),
+      notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+      `${framework} · ${owners.join(', ') || 'no owners'}`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    table.push([{ colSpan: TEST_COL_WIDTHS.length, content: fileHeader }]);
 
-    entries.forEach((entry, index) => {
+    for (const entry of entries) {
       rank += 1;
       table.push([
         rank,
@@ -225,9 +194,8 @@ const buildTopFlakyTable = (
         formatFailedBuildsByBranch(entry),
         formatLatestRun(entry, now),
         entry.title,
-        ...(index === 0 ? fileCells : []),
       ]);
-    });
+    }
   }
 
   return table;
