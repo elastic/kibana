@@ -16,6 +16,10 @@ import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
+import { createSecurityEntityAttachmentType } from './security_entity';
+import { createSecurityFindingAttachmentType } from './security_finding_attachment';
+import { createArtifactAttachmentType } from './artifact_attachment';
+
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -45,6 +49,9 @@ export const registerAttachmentTypes = ({
     createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
+    createSecurityEntityAttachmentType(),
+    createSecurityFindingAttachmentType(),
+    createArtifactAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {
