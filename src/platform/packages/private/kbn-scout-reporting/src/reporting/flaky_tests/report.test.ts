@@ -159,6 +159,16 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
           ],
         ])
       );
+    const fetchLatestRuns = jest
+      .spyOn(queries, 'fetchLatestRuns')
+      .mockResolvedValue(
+        new Map([
+          [
+            'jest-flaky-high',
+            { status: 'skipped', timestamp: new Date('2026-09-06T12:00:00.000Z'), branch: 'main' },
+          ],
+        ])
+      );
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
@@ -190,6 +200,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       owners: ['elastic/team'],
       passes: 90,
       buildFailRate: 0.3,
+      latestRun: { status: 'skipped', branch: 'main' },
       sampleFailures: [{ message: 'boom', buildUrl: 'https://b/1' }],
     });
 
@@ -200,20 +211,24 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
       owners: [],
       sampleFailures: [],
     });
+    expect(report.consistentlyFailing[0].latestRun).toBeUndefined();
 
-    // samples are only fetched for admitted tests
+    // per-test lookups only run for admitted tests
+    const admittedIds = ['jest-flaky-high', 'jest-broken'];
+    expect(fetchLatestRuns).toHaveBeenCalledWith(es, expect.anything(), admittedIds);
     expect(fetchSampleFailures).toHaveBeenCalledWith(
       es,
       expect.anything(),
-      ['jest-flaky-high', 'jest-broken'],
+      admittedIds,
       options.samplesPerTest
     );
   });
 
-  it('skips metadata and sample queries when nothing qualifies', async () => {
+  it('skips metadata, latest run and sample queries when nothing qualifies', async () => {
     jest.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([]);
     const fetchTestStats = jest.spyOn(queries, 'fetchTestStats');
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
+    const fetchLatestRuns = jest.spyOn(queries, 'fetchLatestRuns');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
 
     const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
@@ -222,6 +237,7 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     expect(report.consistentlyFailing).toEqual([]);
     expect(fetchTestStats).not.toHaveBeenCalled();
     expect(fetchTestMetadata).not.toHaveBeenCalled();
+    expect(fetchLatestRuns).not.toHaveBeenCalled();
     expect(fetchSampleFailures).not.toHaveBeenCalled();
   });
 });
@@ -270,6 +286,7 @@ describe('ScoutFlakyTests.writeToFile / fromFile', () => {
           failedBranches: 1,
           firstFailedAt: '2026-09-01T00:00:00.000Z',
           lastFailedAt: '2026-09-02T00:00:00.000Z',
+          latestRun: { status: 'passed', timestamp: '2026-09-03T00:00:00.000Z', branch: 'main' },
           sampleFailures: [{ message: 'boom', timestamp: '2026-09-02T00:00:00.000Z' }],
         },
       ],

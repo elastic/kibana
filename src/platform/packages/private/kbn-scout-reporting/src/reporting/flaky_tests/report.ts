@@ -14,6 +14,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   ESQL_ROW_LIMIT,
   fetchFailingFiles,
+  fetchLatestRuns,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
@@ -26,6 +27,7 @@ import {
   FlakyTestReportSchema,
   TEST_FRAMEWORKS,
   type FlakyTestEntry,
+  type FlakyTestLatestRun,
   type FlakyTestReport,
   type FlakyTestReportThresholds,
   type TestFramework,
@@ -86,10 +88,10 @@ export const rankTests = <
       b.lastFailedAt.getTime() - a.lastFailedAt.getTime()
   );
 
-const toEntry = (
-  stats: TestStatsRow,
-  metadata: TestMetadataRow | undefined
-): Omit<FlakyTestEntry, 'sampleFailures'> => ({
+/** An entry before the per-test lookups (latest run, failure samples) are attached. */
+type AggregatedEntry = Omit<FlakyTestEntry, 'latestRun' | 'sampleFailures'>;
+
+const toEntry = (stats: TestStatsRow, metadata: TestMetadataRow | undefined): AggregatedEntry => ({
   testId: stats.testId,
   framework: stats.framework,
   title: metadata?.title ?? '(unknown)',
@@ -175,8 +177,8 @@ const buildReport = async (
     stats.push(...rows);
   }
 
-  const flaky: Array<Omit<FlakyTestEntry, 'sampleFailures'>> = [];
-  const consistentlyFailing: Array<Omit<FlakyTestEntry, 'sampleFailures'>> = [];
+  const flaky: AggregatedEntry[] = [];
+  const consistentlyFailing: AggregatedEntry[] = [];
   const candidates = stats.filter((row) => classifyTest(row, thresholds) !== undefined);
 
   let metadata = new Map<string, TestMetadataRow>();
@@ -200,20 +202,25 @@ const buildReport = async (
   const rankedConsistentlyFailing = rankTests(consistentlyFailing).slice(0, thresholds.maxTests);
   const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
 
+  let latestRuns = new Map<string, FlakyTestLatestRun>();
   let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
   if (admitted.length > 0) {
+    const admittedIds = admitted.map((entry) => entry.testId);
     startedAt = performance.now();
-    samples = await fetchSampleFailures(
-      es,
-      scope,
-      admitted.map((entry) => entry.testId),
-      options.samplesPerTest
+    [latestRuns, samples] = await Promise.all([
+      fetchLatestRuns(es, scope, admittedIds),
+      fetchSampleFailures(es, scope, admittedIds, options.samplesPerTest),
+    ]);
+    log.info(
+      `Fetched latest runs and failure samples for ${admitted.length} tests in ${elapsed(
+        startedAt
+      )}`
     );
-    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
   }
 
-  const withSamples = (entry: Omit<FlakyTestEntry, 'sampleFailures'>): FlakyTestEntry => ({
+  const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
+    latestRun: latestRuns.get(entry.testId),
     sampleFailures: samples.get(entry.testId) ?? [],
   });
 
@@ -233,8 +240,8 @@ const buildReport = async (
       totalConsistentlyFailing: rankedConsistentlyFailing.length,
       flakyByFramework,
     },
-    flaky: rankedFlaky.map(withSamples),
-    consistentlyFailing: rankedConsistentlyFailing.map(withSamples),
+    flaky: rankedFlaky.map(decorate),
+    consistentlyFailing: rankedConsistentlyFailing.map(decorate),
   });
 };
 

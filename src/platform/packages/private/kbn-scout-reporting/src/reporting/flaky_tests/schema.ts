@@ -27,6 +27,19 @@ export const FlakyTestSampleFailureSchema = z.object({
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
 /**
+ * Most recent execution of the test within the report window, regardless of result. `status` is
+ * the framework's own verdict (`passed`, `failed`, `timedOut`, `skipped`, `todo`, ...); Playwright
+ * runs that passed on retry report `flaky`.
+ */
+export const FlakyTestLatestRunSchema = z.object({
+  status: z.string(),
+  timestamp: z.coerce.date(),
+  branch: z.optional(z.string()),
+  buildUrl: z.optional(z.string()),
+});
+export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
+
+/**
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
  */
@@ -56,6 +69,8 @@ export const FlakyTestEntrySchema = z.object({
   failedBranches: z.int(),
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
+  /** Absent only if the test emitted no execution events in the window (should not happen). */
+  latestRun: z.optional(FlakyTestLatestRunSchema),
   sampleFailures: z.array(FlakyTestSampleFailureSchema),
 });
 export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;

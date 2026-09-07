@@ -99,6 +99,16 @@ const wrapOn = (text: string, separator: string, width: number): string => {
 // cell padding takes 2 columns and a broken line ends in the separator
 const contentWidth = (colWidth: number): number => colWidth - 3;
 
+const formatAge = (from: Date, to: Date): string => {
+  const minutes = Math.max(0, Math.round((to.getTime() - from.getTime()) / 60_000));
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 24 * 60) return `${Math.round(minutes / 60)}h ago`;
+  return `${Math.round(minutes / (24 * 60))}d ago`;
+};
+
+const formatLatestRun = (entry: FlakyTestEntry, now: Date): string =>
+  entry.latestRun ? `${entry.latestRun.status}\n${formatAge(entry.latestRun.timestamp, now)}` : '-';
+
 const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
   const groups = new Map<string, FlakyTestEntry[]>();
   for (const entry of entries) {
@@ -114,11 +124,12 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
-  all: readonly FlakyTestEntry[]
+  all: readonly FlakyTestEntry[],
+  now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Fail rate', 'Test', 'File', 'Framework', 'Owners'],
-    colWidths: [null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
+    head: ['#', 'Failed builds', 'Fail rate', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
+    colWidths: [null, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -153,6 +164,7 @@ const buildTopFlakyTable = (
         rank,
         `${entry.failedBuilds}/${entry.builds}`,
         `${(entry.buildFailRate * 100).toFixed(1)}%`,
+        formatLatestRun(entry, now),
         entry.title,
         ...(index === 0 ? fileCells : []),
       ]);
@@ -203,7 +215,8 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
     panel.push([
       `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
         top,
-        flaky
+        flaky,
+        report.generatedAt
       ).toString()}`,
     ]);
   }

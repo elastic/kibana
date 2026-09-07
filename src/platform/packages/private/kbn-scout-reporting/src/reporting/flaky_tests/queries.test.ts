@@ -12,6 +12,7 @@ import {
   buildTestMetadataQuery,
   buildTestStatsQuery,
   fetchFailingFiles,
+  fetchLatestRuns,
   fetchSampleFailures,
   fetchTestMetadata,
   fetchTestStats,
@@ -258,5 +259,115 @@ describe('fetchSampleFailures', () => {
     );
     expect(request.aggs.by_test.terms.size).toBe(2);
     expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(3);
+  });
+});
+
+describe('fetchLatestRuns', () => {
+  const bucket = (key: string, source: object) => ({
+    key,
+    latest: { hits: { hits: [{ _source: source }] } },
+  });
+
+  it('returns an empty map without a search when there are no tests', async () => {
+    const { client, search } = mockEs([]);
+
+    await expect(fetchLatestRuns(client, scope, [])).resolves.toEqual(new Map());
+    expect(search).not.toHaveBeenCalled();
+  });
+
+  it('reports the newest verdict per test, mapping Playwright retry passes to flaky', async () => {
+    const { client, search } = mockEs([]);
+    search.mockResolvedValue({
+      aggregations: {
+        by_test: {
+          buckets: [
+            bucket('skipped', {
+              '@timestamp': '2026-09-07T10:00:00.000Z',
+              test: { status: 'skipped', outcome: 'skipped' },
+              buildkite: { branch: 'main', build: { url: 'https://buildkite.com/b/1' } },
+            }),
+            bucket('retried', {
+              '@timestamp': '2026-09-07T09:00:00.000Z',
+              test: { status: 'passed', outcome: 'flaky' },
+            }),
+            bucket('jest', {
+              '@timestamp': '2026-09-07T08:00:00.000Z',
+              test: { status: 'failed' },
+            }),
+          ],
+        },
+      },
+    });
+
+    // every test is found in the trailing day, so there is no fallback search
+    const latest = await fetchLatestRuns(client, scope, ['skipped', 'retried', 'jest']);
+
+    expect(latest.get('skipped')).toEqual({
+      status: 'skipped',
+      timestamp: new Date('2026-09-07T10:00:00.000Z'),
+      branch: 'main',
+      buildUrl: 'https://buildkite.com/b/1',
+    });
+    expect(latest.get('retried')).toMatchObject({ status: 'flaky', branch: undefined });
+    expect(latest.get('jest')).toMatchObject({ status: 'failed' });
+
+    expect(search).toHaveBeenCalledTimes(1);
+    const [request] = search.mock.calls[0];
+    expect(request.query.bool.filter).toEqual(
+      expect.arrayContaining([
+        {
+          range: { '@timestamp': { gte: '2026-09-06T00:00:00.000Z', lt: scope.to.toISOString() } },
+        },
+        { terms: { 'event.action': ['test-end', 'test-outcome'] } },
+        { terms: { 'buildkite.pipeline.slug': ['kibana-on-merge'] } },
+      ])
+    );
+    expect(request.aggs.by_test.aggs.latest.top_hits.size).toBe(1);
+  });
+
+  it('falls back to the full window for tests without a run in the trailing day', async () => {
+    const { client, search } = mockEs([]);
+    search
+      .mockResolvedValueOnce({
+        aggregations: {
+          by_test: {
+            buckets: [
+              bucket('recent', {
+                '@timestamp': '2026-09-07T10:00:00.000Z',
+                test: { status: 'passed' },
+              }),
+              bucket('no-status', { '@timestamp': '2026-09-07T09:00:00.000Z' }),
+            ],
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        aggregations: {
+          by_test: {
+            buckets: [
+              bucket('stale', {
+                '@timestamp': '2026-09-02T10:00:00.000Z',
+                test: { status: 'skipped' },
+              }),
+            ],
+          },
+        },
+      });
+
+    const latest = await fetchLatestRuns(client, scope, ['recent', 'stale', 'no-status', 'gone']);
+
+    expect(latest.get('recent')).toMatchObject({ status: 'passed' });
+    expect(latest.get('stale')).toMatchObject({ status: 'skipped' });
+    expect(latest.has('no-status')).toBe(false);
+    expect(latest.has('gone')).toBe(false);
+
+    expect(search).toHaveBeenCalledTimes(2);
+    const [, [fallback]] = search.mock.calls;
+    expect(fallback.query.bool.filter).toEqual(
+      expect.arrayContaining([
+        { range: { '@timestamp': { gte: scope.from.toISOString(), lt: scope.to.toISOString() } } },
+        { terms: { 'test.id': ['stale', 'no-status', 'gone'] } },
+      ])
+    );
   });
 });

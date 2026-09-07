@@ -9,7 +9,7 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
-import type { FlakyTestSampleFailure, TestFramework } from './schema';
+import type { FlakyTestLatestRun, FlakyTestSampleFailure, TestFramework } from './schema';
 
 /**
  * Elasticsearch silently truncates ES|QL results at this row count; callers warn when a query
@@ -299,6 +299,131 @@ export const fetchTestMetadata = async (
   );
 };
 
+const scopeFilter = (scope: FlakyTestQueryScope): object[] => {
+  const filter: object[] = [
+    { range: { '@timestamp': { gte: scope.from.toISOString(), lt: scope.to.toISOString() } } },
+  ];
+  if (scope.pipelines.length > 0) {
+    filter.push({ terms: { 'buildkite.pipeline.slug': scope.pipelines } });
+  }
+  if (scope.branches.length > 0) {
+    filter.push({ terms: { 'buildkite.branch': scope.branches } });
+  }
+  return filter;
+};
+
+interface LatestHitsBuckets<TSource> {
+  by_test: {
+    buckets: Array<{
+      key: string;
+      latest: { hits: { hits: Array<{ _source?: TSource }> } };
+    }>;
+  };
+}
+
+/** Latest `size` documents per test id, newest first. */
+const searchLatestPerTest = async <TSource>(
+  es: ESClient,
+  filter: object[],
+  testIds: readonly string[],
+  size: number,
+  sourceFields: readonly string[]
+): Promise<Map<string, TSource[]>> => {
+  const response = await es.search<TSource, LatestHitsBuckets<TSource>>({
+    index: SCOUT_TEST_EVENTS_INDEX_PATTERN,
+    size: 0,
+    query: { bool: { filter } },
+    aggs: {
+      by_test: {
+        terms: { field: 'test.id', size: testIds.length },
+        aggs: {
+          latest: {
+            top_hits: { size, sort: [{ '@timestamp': 'desc' }], _source: [...sourceFields] },
+          },
+        },
+      },
+    },
+  });
+
+  return new Map(
+    (response.aggregations?.by_test.buckets ?? []).map((bucket) => [
+      bucket.key,
+      bucket.latest.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
+    ])
+  );
+};
+
+interface LatestRunSource {
+  '@timestamp': string;
+  test?: { status?: string; outcome?: string };
+  buildkite?: { branch?: string; build?: { url?: string } };
+}
+
+const LATEST_RUN_RECENT_SLICE_MS = 24 * 60 * 60 * 1000;
+
+const searchLatestRuns = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  testIds: readonly string[]
+): Promise<Map<string, FlakyTestLatestRun>> => {
+  const hits = await searchLatestPerTest<LatestRunSource>(
+    es,
+    [
+      ...scopeFilter(scope),
+      { terms: { 'event.action': ['test-end', 'test-outcome'] } },
+      { terms: { 'test.id': testIds } },
+    ],
+    testIds,
+    1,
+    ['@timestamp', 'test.status', 'test.outcome', 'buildkite.branch', 'buildkite.build.url']
+  );
+
+  const latestRuns = new Map<string, FlakyTestLatestRun>();
+  for (const [testId, [latest]] of hits) {
+    const status = latest?.test?.outcome === 'flaky' ? 'flaky' : latest?.test?.status;
+    if (!latest || !status) continue;
+    latestRuns.set(testId, {
+      status,
+      timestamp: new Date(latest['@timestamp']),
+      branch: latest.buildkite?.branch || undefined,
+      buildUrl: latest.buildkite?.build?.url || undefined,
+    });
+  }
+  return latestRuns;
+};
+
+/**
+ * Most recent execution per test, whatever its result, so the report can tell whether a test is
+ * currently passing, failing or skipped. Playwright emits its `test-outcome` after the last
+ * attempt's `test-end`, so the newest of the two is the run verdict for every framework.
+ *
+ * Scanning every (mostly passing) event of a test over the whole window is the expensive part, so
+ * the trailing day is tried first and only tests without a run there fall back to the full window.
+ */
+export const fetchLatestRuns = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  testIds: readonly string[]
+): Promise<Map<string, FlakyTestLatestRun>> => {
+  if (testIds.length === 0) {
+    return new Map();
+  }
+
+  const recentFrom = new Date(scope.to.getTime() - LATEST_RUN_RECENT_SLICE_MS);
+  if (recentFrom <= scope.from) {
+    return searchLatestRuns(es, scope, testIds);
+  }
+
+  const latestRuns = await searchLatestRuns(es, { ...scope, from: recentFrom }, testIds);
+  const missing = testIds.filter((testId) => !latestRuns.has(testId));
+  if (missing.length > 0) {
+    for (const [testId, run] of await searchLatestRuns(es, scope, missing)) {
+      latestRuns.set(testId, run);
+    }
+  }
+  return latestRuns;
+};
+
 interface SampleFailureSource {
   '@timestamp': string;
   event?: { error?: { message?: string } };
@@ -320,61 +445,31 @@ export const fetchSampleFailures = async (
     return new Map();
   }
 
-  const filter: object[] = [
-    { range: { '@timestamp': { gte: scope.from.toISOString(), lt: scope.to.toISOString() } } },
-    { term: { 'event.action': 'test-end' } },
-    { terms: { 'test.status': ['failed', 'timedOut'] } },
-    { terms: { 'test.id': testIds } },
-  ];
-  if (scope.pipelines.length > 0) {
-    filter.push({ terms: { 'buildkite.pipeline.slug': scope.pipelines } });
-  }
-  if (scope.branches.length > 0) {
-    filter.push({ terms: { 'buildkite.branch': scope.branches } });
-  }
-
-  const response = await es.search<
-    SampleFailureSource,
-    {
-      by_test: {
-        buckets: Array<{
-          key: string;
-          latest: { hits: { hits: Array<{ _source?: SampleFailureSource }> } };
-        }>;
-      };
-    }
-  >({
-    index: SCOUT_TEST_EVENTS_INDEX_PATTERN,
-    size: 0,
-    query: { bool: { filter } },
-    aggs: {
-      by_test: {
-        terms: { field: 'test.id', size: testIds.length },
-        aggs: {
-          latest: {
-            top_hits: {
-              size: samplesPerTest,
-              sort: [{ '@timestamp': 'desc' }],
-              _source: ['@timestamp', 'event.error.message', 'buildkite.build.url'],
-            },
-          },
-        },
-      },
-    },
-  });
+  const hits = await searchLatestPerTest<SampleFailureSource>(
+    es,
+    [
+      ...scopeFilter(scope),
+      { term: { 'event.action': 'test-end' } },
+      { terms: { 'test.status': ['failed', 'timedOut'] } },
+      { terms: { 'test.id': testIds } },
+    ],
+    testIds,
+    samplesPerTest,
+    ['@timestamp', 'event.error.message', 'buildkite.build.url']
+  );
 
   const samples = new Map<string, FlakyTestSampleFailure[]>();
-  for (const bucket of response.aggregations?.by_test.buckets ?? []) {
+  for (const [testId, sources] of hits) {
     samples.set(
-      bucket.key,
-      bucket.latest.hits.hits.flatMap((hit) => {
-        const message = hit._source?.event?.error?.message?.trim();
-        if (!hit._source || !message) return [];
+      testId,
+      sources.flatMap((source) => {
+        const message = source.event?.error?.message?.trim();
+        if (!message) return [];
         return [
           {
             message,
-            buildUrl: hit._source.buildkite?.build?.url || undefined,
-            timestamp: new Date(hit._source['@timestamp']),
+            buildUrl: source.buildkite?.build?.url || undefined,
+            timestamp: new Date(source['@timestamp']),
           },
         ];
       })
