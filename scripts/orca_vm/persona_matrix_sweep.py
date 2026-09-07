@@ -247,6 +247,27 @@ SKILL_INVOCATION_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/"
     "kbn-evals/src/evaluators/trace_based/skill_invocation.ts"
 )
+# The @kbn/evals barrel. evaluate_dataset.ts imports TRACE_INDEX_PATTERN from the
+# package root, not from the module that defines it, so shipping factory.ts alone
+# is not enough: the stale barrel has no such export and the import silently
+# resolves to undefined at runtime (TS types come from the local checkout, so
+# nothing fails until ES rejects `FROM undefined`).
+PATCHED_EVALS_BARREL = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/index.ts"
+)
+EVALS_BARREL_REMOTE = "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/index.ts"
+# The trace_based sub-barrel that the package root re-exports through.
+PATCHED_TRACE_BARREL = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/index.ts"
+)
+TRACE_BARREL_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/"
+    "kbn-evals/src/evaluators/trace_based/index.ts"
+)
 RETRY_UTILS_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/retry_utils.ts"
 )
@@ -736,6 +757,8 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
     scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
     scp(str(PATCHED_SKILL_INVOCATION), ip, SKILL_INVOCATION_REMOTE)
+    scp(str(PATCHED_TRACE_BARREL), ip, TRACE_BARREL_REMOTE)
+    scp(str(PATCHED_EVALS_BARREL), ip, EVALS_BARREL_REMOTE)
     scp(str(PATCHED_CHAT_CLIENT), ip, CHAT_CLIENT_REMOTE)
     _gate = ssh(
         ip,
@@ -825,6 +848,10 @@ def deploy(ip: str) -> None:
         # consumer interpolates it (a literal `FROM traces-*` is the old form).
         f"grep -q \"export const TRACE_INDEX_PATTERN = 'traces-\\*,.ds-traces-\\*'\" ~/{TRACE_FACTORY_REMOTE}",
         f"grep -q 'FROM ${{TRACE_INDEX_PATTERN}}' ~/{SKILL_INVOCATION_REMOTE}",
+        # The barrel is the binding the suite actually imports: without this the
+        # constant is undefined at runtime even when factory.ts is correct.
+        f"grep -q TRACE_INDEX_PATTERN ~/{EVALS_BARREL_REMOTE}",
+        f"grep -q TRACE_INDEX_PATTERN ~/{TRACE_BARREL_REMOTE}",
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
