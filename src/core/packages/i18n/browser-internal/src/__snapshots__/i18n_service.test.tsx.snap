@@ -124,7 +124,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiFlyout.screenReaderFocusTrapShards\\": \\"You can still continue tabbing through other global page landmarks.\\",
     \\"euiFlyoutMenu.back\\": \\"Back\\",
     \\"euiFlyoutMenu.history\\": \\"History\\",
-    \\"euiFlyoutMenu.history.tooltip\\": \\"Recently visited\\",
     \\"euiFlyoutManaged.defaultTitle\\": \\"Unknown Flyout\\",
     \\"euiForm.addressFormErrors\\": \\"Please address the highlighted errors.\\",
     \\"euiFormControlLayoutClearButton.label\\": \\"Clear input\\",
@@ -262,7 +261,6 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiSelectable.noAvailableOptions\\": \\"No options available\\",
     \\"euiSelectable.screenReaderInstructions\\": \\"Use the Up and Down arrow keys to move focus over options. Press Enter to select. Press Escape to collapse options.\\",
     \\"euiSelectable.placeholderName\\": \\"Filter options\\",
-    \\"euiSelectableListItem.checkedOption\\": \\"Checked option.\\",
     \\"euiSelectableListItem.excludedOption\\": \\"Excluded option.\\",
     \\"euiSelectableListItem.checkOptionInstructions\\": \\"To check this option, press Enter.\\",
     \\"euiSelectableListItem.uncheckOptionInstructions\\": \\"To uncheck this option, press Enter.\\",
@@ -306,10 +304,8 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
     \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
     \\"euiContextMenuPanelTitle.ariaLabel\\": \\"Close current panel:\\",
-    \\"euiFlyoutMenu.pagination.first\\": \\"First\\",
     \\"euiFlyoutMenu.pagination.previous\\": \\"Previous\\",
-    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\",
-    \\"euiFlyoutMenu.pagination.last\\": \\"Last\\"
+    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\"
   }
 }"
 `;
