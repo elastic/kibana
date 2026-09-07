@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { test } from '../fixtures';
+import { test } from '../../fixtures';
 
 const ECOMMERCE_DATA_VIEW_INDEX = 'kibana_sample_data_ecommerce';
 const ECOMMERCE_TIME_FIELD = 'order_date';
@@ -58,7 +58,7 @@ test.describe(
       }
       await apiServices.core.settings({
         'feature_flags.overrides': {
-          'lens.apiFormat': false,
+          'lens.apiFormat': null,
         },
       });
       await uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
