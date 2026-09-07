@@ -12,6 +12,8 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { ZodTypeAny } from '@kbn/zod';
 import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
 
@@ -31,6 +33,21 @@ export interface DocViewerRestorableState {
    * Used to dedupe initial `unified_doc_viewer_viewed` event when restoring state.
    */
   initialDocViewerViewedEventKey?: string;
+}
+
+/**
+ * The URL-shareable subset of the doc viewer's state. It is a projection of the (larger)
+ * {@link DocViewerRestorableState}: only tabs that declare a `shareableStateSchema` contribute, and
+ * only the fields that schema allows.
+ */
+export interface DocViewerShareableState extends SerializableRecord {
+  /** The selected doc viewer tab id. */
+  selectedTabId?: string;
+  /**
+   * Per-tab shareable slices keyed by doc view id, each projected through that tab's
+   * `shareableStateSchema`.
+   */
+  tabsState?: SerializableRecord;
 }
 
 export interface FieldMapping {
@@ -98,5 +115,12 @@ export interface DocView<TState extends object = object> {
    * surfaces).
    */
   ebt?: EbtClickAttrs;
+  /**
+   * Optional schema describing the URL-shareable subset of this tab's restorable `TState`. When set,
+   * the doc viewer projects the tab's state through it and validates restored values
+   * against it. Keep the schema bounded (e.g. `.max()` on strings/arrays) and evolve it additively so
+   * that older shared links degrade gracefully rather than breaking.
+   */
+  shareableStateSchema?: ZodTypeAny;
   render: DocViewRenderFunction<TState>;
 }
