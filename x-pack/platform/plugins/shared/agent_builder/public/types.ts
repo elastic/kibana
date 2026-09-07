@@ -38,6 +38,8 @@ export type {
   ConversationTemplateTabRenderProps,
   ConversationTemplateTabDefinition,
   ConversationTemplateUIDefinition,
+  ConversationTemplateBriefCardRenderProps,
+  ConversationTemplateUIContext,
   ConversationTemplateServiceStartContract,
   OpenConversationSidebarReturn,
   OpenConversationDetailsOptions,
