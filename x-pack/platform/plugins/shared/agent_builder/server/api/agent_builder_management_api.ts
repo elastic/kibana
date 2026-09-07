@@ -182,4 +182,42 @@ export class AgentBuilderManagementApi {
       return false;
     }
   }
+
+  /**
+   * AB-005: list the skills owned by a Fleet package in a space.
+   *
+   * Package-managed skills are readonly, so neither the user nor package
+   * uninstall can remove one whose id is absent from the package asset refs.
+   * Install uses this to reap its own stale skills; it reads through the
+   * internal client because the user-context registry hides plugin-managed
+   * skills by default.
+   */
+  public async listPackageManagedSkills(
+    pluginId: string,
+    spaceId: string
+  ): Promise<Array<{ id: string; plugin_id?: string }>> {
+    const [coreStart] = await this.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    try {
+      const searchResult = await esClient.search<{ id: string; plugin_id?: string }>({
+        index: skillIndexName,
+        query: {
+          bool: {
+            filter: [{ term: { plugin_id: pluginId } }, { term: { space: spaceId } }],
+          },
+        },
+        size: 1000,
+      });
+      return searchResult.hits.hits
+        .map((hit) => hit._source)
+        .filter((source): source is { id: string; plugin_id?: string } => Boolean(source?.id));
+    } catch (error) {
+      this.logger.warn(
+        `Failed to list package-managed skills for ${pluginId} in space ${spaceId}: ${
+          (error as Error).message
+        }`
+      );
+      return [];
+    }
+  }
 }

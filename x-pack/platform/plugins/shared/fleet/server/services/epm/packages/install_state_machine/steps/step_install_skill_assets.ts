@@ -67,11 +67,31 @@ export async function stepInstallSkillAssets(
       return;
     }
     const assetRefs: KibanaAssetReference[] = [];
+    const installedSkillIds = new Set<string>();
     for (const { fileName, content } of skillEntries) {
       const skillId = getFleetPackageSkillId({ pkgName, spaceId, fileName });
       const definition = parseFleetSkillYaml({ fileName, content }, skillId, pkgName);
       await agentBuilderApi.createOrUpdateSkill(definition, context.request!);
       assetRefs.push({ id: skillId, type: KibanaSavedObjectType.skill });
+      installedSkillIds.add(skillId);
+    }
+
+    // Reap skills this package owns that the current archive no longer produces.
+    // Package-managed skills are readonly, so a user cannot delete one, and
+    // package uninstall only removes ids recorded in the package asset refs.
+    // Without this, an id-scheme change strands an undeletable skill forever.
+    if (typeof agentBuilderApi.listPackageManagedSkills === 'function') {
+      const pluginId = `fleet:${pkgName}`;
+      const owned = await agentBuilderApi.listPackageManagedSkills(pluginId, spaceId);
+      for (const skill of owned) {
+        if (skill.plugin_id !== pluginId || installedSkillIds.has(skill.id)) {
+          continue;
+        }
+        const deleted = await agentBuilderApi.deletePackageManagedSkill(skill.id, spaceId);
+        logger.info(
+          `Reaped stale package skill ${skill.id} for ${pkgName} (deleted=${String(deleted)})`
+        );
+      }
     }
     await saveKibanaAssetsRefs(
       savedObjectsClient as never,
