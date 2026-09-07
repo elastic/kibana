@@ -88,7 +88,7 @@ Judge each returned rule with the Match Rubric. An exact match that is enabled m
 
 ### Step 2: installable prebuilt rules
 
-Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\`. Follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name. One search, two at most.
+Only when step 1 found no exact match. Call \`load_skill\` with \`recommend-prebuilt-rules\`. Follow its search instructions. Request the \`description\`, \`query\`, and \`threat\` fields, because you must judge the behavior and the technique, not the name. One search, two at most. Unlike Step 1, the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions — use the most distinctive behavior words from the gap, not the full sentence.
 
 An exact match means \`prebuilt_available\`, with one guard first: if the single-word probe from step 1 never ran, run it now against installed rules. An installed rule always beats installing a copy of it. Only when that probe also finds nothing, return \`prebuilt_available\`. Stop. Otherwise return \`no_coverage\`, naming any close rule you noted in step 1.
 
@@ -146,7 +146,7 @@ If both searches return zero rules, say so plainly and return \`no_coverage\`. Z
 
 State which filters you used. A wrong filter looks the same as a real gap, and only the user can tell the two apart.
 
-Know one limit: free-text search does not search rule descriptions or queries. A relevant rule whose behavior is only expressed there can be missed. When step 1 finds nothing, say this in one sentence.
+Know one limit for Step 1: free-text search on installed rules does not search descriptions or queries — only names, index patterns, and MITRE fields. A relevant installed rule whose behavior is expressed only in its description can be missed. When Step 1 finds nothing, say this in one sentence. Step 2 has no such limit: the \`keywords\` filter in \`security.find_prebuilt_rules\` searches both rule names and descriptions.
 
 ## Structured Output
 

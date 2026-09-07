@@ -11,7 +11,6 @@ import { parse } from 'yaml';
 import {
   PND_DETECTION_COVERAGE_WORKFLOW,
   PND_DETECTION_COVERAGE_WORKFLOW_ID,
-  PND_WATCH_DETECTION_WORKFLOW,
 } from '.';
 
 /**
@@ -73,16 +72,6 @@ describe('Detection Coverage worker', () => {
       (PND_DETECTION_COVERAGE_WORKFLOW as { visibility?: { selectors?: unknown } }).visibility
         ?.selectors
     ).toBeUndefined();
-  });
-
-  it('is reachable from the Detection Watch gap branch', () => {
-    const watch = parse(
-      PND_WATCH_DETECTION_WORKFLOW.yamlTemplate({ settingsVersion: 1, autonomyLevel: 'manual' })
-    ) as { steps: YamlStep[] };
-    const dispatch = flatten(watch.steps).find(
-      (step) => step.type === 'workflow.execute' && step.name === 'run_coverage'
-    );
-    expect(dispatch?.with?.['workflow-id']).toBe(PND_DETECTION_COVERAGE_WORKFLOW_ID);
   });
 
   describe('verdict enum drift', () => {

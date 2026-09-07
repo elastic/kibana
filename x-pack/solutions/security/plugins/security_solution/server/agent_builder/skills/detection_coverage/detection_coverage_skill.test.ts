@@ -89,8 +89,10 @@ describe('detection-coverage', () => {
     expect(skill.content).toMatch(/Write exactly one/);
   });
 
-  it('names the free-text search limit', () => {
-    expect(skill.content).toMatch(/does not search rule descriptions or queries/);
+  it('names the free-text search limit for Step 1 and the capability for Step 2', () => {
+    expect(skill.content).toMatch(/does not search descriptions or queries/);
     expect(skill.content).toMatch(/searches rule names, index patterns, and MITRE/);
+    // Step 2 has no such limit — the prebuilt catalog search does use descriptions.
+    expect(skill.content).toMatch(/keywords.*searches both rule names and descriptions/s);
   });
 });
