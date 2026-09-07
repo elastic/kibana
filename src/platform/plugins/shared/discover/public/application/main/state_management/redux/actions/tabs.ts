@@ -380,7 +380,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       return loadDiscoverSession({
         id: discoverSessionId,
         persistence: services.discoverSessionPersistence,
-        toastNotifications: services.toastNotifications,
+        core: services.core,
       });
     };
 

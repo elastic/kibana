@@ -16,7 +16,7 @@ const session = createDiscoverSessionMock({ id: 'test-session' });
 
 describe('loadDiscoverSession', () => {
   it('warns when some content was omitted and returns the session', async () => {
-    const { toastNotifications } = createDiscoverServicesMock();
+    const { core } = createDiscoverServicesMock();
     const persistence: jest.Mocked<DiscoverSessionPersistence> = {
       get: jest.fn().mockResolvedValue({
         session,
@@ -35,14 +35,31 @@ describe('loadDiscoverSession', () => {
     const result = await loadDiscoverSession({
       id: session.id,
       persistence,
-      toastNotifications,
+      core,
     });
 
     expect(result).toBe(session);
-    expect(toastNotifications.addWarning).toHaveBeenCalledWith(
+    expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
       expect.objectContaining({
         'data-test-subj': 'discoverSessionLoadWarning',
       })
     );
+  });
+
+  it('does not warn when the session loads without warnings', async () => {
+    const { core } = createDiscoverServicesMock();
+    const persistence: jest.Mocked<DiscoverSessionPersistence> = {
+      get: jest.fn().mockResolvedValue({ session, warnings: [] }),
+      save: jest.fn(),
+    };
+
+    const result = await loadDiscoverSession({
+      id: session.id,
+      persistence,
+      core,
+    });
+
+    expect(result).toBe(session);
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
   });
 });
