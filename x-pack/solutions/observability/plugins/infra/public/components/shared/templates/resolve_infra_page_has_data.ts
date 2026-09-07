@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { TabPlaceholder } from '../tab_placeholder';
-
-export const PipelinesTab = () => (
-  <TabPlaceholder data-test-subj="streamsLayoutPipelinesPlaceholder" />
-);
+export const resolveInfraPageHasData = (
+  fetchedHasData: boolean,
+  hasDataOverride?: boolean
+): boolean => (hasDataOverride !== undefined ? hasDataOverride : fetchedHasData);
