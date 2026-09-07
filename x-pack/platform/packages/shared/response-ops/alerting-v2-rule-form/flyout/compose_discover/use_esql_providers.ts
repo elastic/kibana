@@ -11,6 +11,37 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { useEsqlCallbacks } from '../../form/hooks/use_esql_callbacks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 
+// Monaco keybinding rules are global (per language service, not per editor) and
+// cannot be un-added, so register them once for the whole page.
+let inlineSuggestTabKeybindingsAdded = false;
+
+/**
+ * Makes Tab accept the inline suggestion (ghost text) instead of the autocomplete
+ * widget when both are visible — mirroring `addTabKeybindingRules` in
+ * `@kbn/esql-editor`. Without this, Tab commits the suggestion widget item and the
+ * ghost text is ignored.
+ */
+const addInlineSuggestTabKeybindings = () => {
+  if (inlineSuggestTabKeybindingsAdded) {
+    return;
+  }
+  
+  // Unbind the default suggestion-widget accept on Tab while an inline suggestion is showing.
+  monaco.editor.addKeybindingRule({
+    keybinding: monaco.KeyCode.Tab,
+    command: '-acceptSelectedSuggestion',
+    when: 'suggestWidgetHasFocusedSuggestion && suggestWidgetVisible && textInputFocus && inlineSuggestionVisible',
+  });
+  // Bind Tab to commit the inline suggestion when it's visible.
+  monaco.editor.addKeybindingRule({
+    keybinding: monaco.KeyCode.Tab,
+    command: 'editor.action.inlineSuggest.commit',
+    when: 'inlineSuggestionVisible && textInputFocus',
+  });
+  
+  inlineSuggestTabKeybindingsAdded = true;
+};
+
 /**
  * Registers ES|QL Monaco language providers (autocomplete, signature help, hover,
  * inline completions, code actions, document highlight) for the lifetime of the
@@ -78,6 +109,7 @@ export const useEsqlAutocomplete = (services: RuleFormServices) => {
       disposables.push(
         monaco.languages.registerInlineCompletionsProvider(ESQL_LANG_ID, inlineCompletions)
       );
+      addInlineSuggestTabKeybindings();
     }
 
     // Quick fixes only surface once validation markers exist (wired separately);

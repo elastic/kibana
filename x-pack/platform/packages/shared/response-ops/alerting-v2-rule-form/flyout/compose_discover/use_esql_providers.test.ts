@@ -37,6 +37,10 @@ jest.mock('@kbn/code-editor', () => ({
       registerCodeActionProvider: jest.fn(),
       registerDocumentHighlightProvider: jest.fn(),
     },
+    editor: {
+      addKeybindingRule: jest.fn(),
+    },
+    KeyCode: { Tab: 2 },
   },
 }));
 
@@ -114,6 +118,15 @@ describe('useEsqlAutocomplete', () => {
     expect(monaco.languages.registerHoverProvider).toHaveBeenCalledWith(
       ESQL_LANG_ID,
       hoverProvider
+    );
+
+    // Tab keybindings are added once via a module-level guard, so this is asserted
+    // in the first rendering test — later renders in this file don't call it again.
+    expect(monaco.editor.addKeybindingRule).toHaveBeenCalledWith(
+      expect.objectContaining({ command: '-acceptSelectedSuggestion' })
+    );
+    expect(monaco.editor.addKeybindingRule).toHaveBeenCalledWith(
+      expect.objectContaining({ command: 'editor.action.inlineSuggest.commit' })
     );
   });
 
