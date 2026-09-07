@@ -13,7 +13,7 @@ import {
   CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE,
 } from '../../../common/constants/cloud_connector';
 
-import { extractAccountType, validateAccountType } from './integration_helpers';
+import { extractAccountType, validateAccountType, injectConnectorVarsIntoPolicy } from './integration_helpers';
 
 // Mock PackageInfo for input-level storage mode (no package-level vars defined)
 const mockPackageInfo = {
@@ -235,6 +235,65 @@ describe('cloud connector integration helpers', () => {
           CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE
         );
       });
+    });
+  });
+
+  describe('injectConnectorVarsIntoPolicy', () => {
+    // input-mode policy: credentials live in stream vars
+    const makeInputPolicy = (streamVars: Record<string, unknown> = {}): NewPackagePolicy => ({
+      name: 'test-policy',
+      namespace: 'default',
+      policy_ids: [],
+      enabled: true,
+      inputs: [
+        {
+          type: 'aws/metrics',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'metrics', dataset: 'aws.s3' },
+              vars: streamVars,
+            },
+          ],
+        },
+      ],
+    });
+
+    const awsConnectorVars = {
+      role_arn: { type: 'text' as const, value: 'arn:aws:iam::123:role/elastic' },
+    };
+
+    it('backfills role_arn into stream vars when not already set', () => {
+      const policy = makeInputPolicy({ role_arn: undefined });
+      const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+      expect(result.inputs[0].streams[0].vars?.role_arn).toEqual(awsConnectorVars.role_arn);
+    });
+
+    it('does not overwrite role_arn already present in stream vars', () => {
+      const existing = { type: 'text' as const, value: 'arn:aws:iam::456:role/existing' };
+      const policy = makeInputPolicy({ role_arn: existing });
+      const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+      expect(result.inputs[0].streams[0].vars?.role_arn).toEqual(existing);
+    });
+
+    it('returns policy unchanged when role_arn key is absent from stream vars', () => {
+      const policy = makeInputPolicy({});
+      const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+      expect(result.inputs[0].streams[0].vars).toEqual({});
+    });
+
+    it('returns policy unchanged when no enabled input exists', () => {
+      const policy: NewPackagePolicy = { ...makeInputPolicy(), inputs: [] };
+      const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+      expect(result).toEqual(policy);
+    });
+
+    it('is a no-op for non-AWS providers (TODO: extend later)', () => {
+      const azureVars = { tenant_id: { type: 'password' as const, value: { id: 'secret-1', isSecretRef: true } } } as any;
+      const policy = makeInputPolicy({ tenant_id: undefined });
+      const result = injectConnectorVarsIntoPolicy(policy, azureVars, 'azure', mockPackageInfo);
+      expect(result.inputs[0].streams[0].vars?.tenant_id).toBeUndefined();
     });
   });
 });

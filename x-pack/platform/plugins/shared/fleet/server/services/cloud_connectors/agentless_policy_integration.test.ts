@@ -199,4 +199,98 @@ describe('createAndIntegrateCloudConnector — policy group enforcement on reuse
     expect(result.wasCreated).toBe(false);
     expect(soClient.find).not.toHaveBeenCalled();
   });
+
+  describe('credential injection on connector reuse', () => {
+    const buildPolicyWithStreamVars = (streamVars: Record<string, unknown>): NewPackagePolicy => ({
+      name: 'test-policy',
+      namespace: 'default',
+      cloud_connector_id: 'connector-1',
+      inputs: [
+        {
+          type: 'aws/metrics',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'metrics', dataset: 'aws.s3' },
+              vars: streamVars,
+            },
+          ],
+        },
+      ],
+    } as any);
+
+    it('injects role_arn from connector vars into stream vars when not already set', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockConnectorUsage(soClient, []);
+      getByIdSpy.mockResolvedValue({
+        id: 'connector-1',
+        name: 'AWS Production',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123:role/elastic' } },
+      } as any);
+
+      const result = await createAndIntegrateCloudConnector({
+        packagePolicy: buildPolicyWithStreamVars({ role_arn: undefined }),
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+      });
+
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123:role/elastic',
+      });
+    });
+
+    it('does not overwrite role_arn already set in stream vars', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockConnectorUsage(soClient, []);
+      getByIdSpy.mockResolvedValue({
+        id: 'connector-1',
+        name: 'AWS Production',
+        cloudProvider: 'aws',
+        vars: { role_arn: { type: 'text', value: 'arn:aws:iam::123:role/elastic' } },
+      } as any);
+
+      const existingRoleArn = { type: 'text', value: 'arn:aws:iam::456:role/existing' };
+      const result = await createAndIntegrateCloudConnector({
+        packagePolicy: buildPolicyWithStreamVars({ role_arn: existingRoleArn }),
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+      });
+
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn).toEqual(existingRoleArn);
+    });
+
+    it('leaves stream vars unchanged when connector has no role_arn', async () => {
+      const soClient = savedObjectsClientMock.create();
+      mockConnectorUsage(soClient, []);
+      getByIdSpy.mockResolvedValue({
+        id: 'connector-1',
+        name: 'AWS Production',
+        cloudProvider: 'aws',
+        vars: {},
+      } as any);
+
+      const result = await createAndIntegrateCloudConnector({
+        packagePolicy: buildPolicyWithStreamVars({ role_arn: undefined }),
+        agentPolicy: buildAgentPolicy(),
+        policyName: 'test-policy',
+        packageInfo: buildPackageInfo('aws_securityhub'),
+        soClient,
+        esClient,
+        logger,
+      });
+
+      expect(result.packagePolicy.inputs[0].streams[0].vars?.role_arn).toBeUndefined();
+    });
+  });
 });
