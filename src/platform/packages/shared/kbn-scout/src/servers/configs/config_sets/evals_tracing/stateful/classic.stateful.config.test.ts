@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "Elastic License 2.0, Server Side Public License v 1", and the
+ * "Server Side Public License v 1" ("SSPL") - as separate files with distinct
+ * license terms. Your choice of license determines the rights and obligations
+ * associated with the software. See the LICENSE.txt file in the project root
+ * for the applicable license terms.
+ */
+
+/**
+ * Agent Builder's span processor strips `gen_ai.tool.call.arguments` and
+ * `gen_ai.tool.call.result` from every tool span unless
+ * `agentBuilder:tracing:includeToolDetails` is enabled -- it defaults to false
+ * for privacy in production.
+ *
+ * Trace-based evaluators match on those arguments (SkillInvoked looks for the
+ * skill name inside them). Without the setting the attribute is simply absent,
+ * so the evaluator scores 0 for EVERY model and the result reads as a model
+ * failure rather than a missing attribute.
+ *
+ * This is exactly what happened on the Azure sweep VMs: 8,339 load_skill spans
+ * with 0 arguments, while Buildkite CI (which boots through this config set)
+ * had 3,953/3,953 populated. The bug is invisible in the scores -- it looks
+ * like the models stopped invoking skills.
+ */
+describe('evals_tracing config set', () => {
+  const loadServerArgs = (): string[] => {
+    let servers: { kbnTestServer: { serverArgs: string[] } };
+    jest.isolateModules(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      servers = require('./classic.stateful.config').servers;
+    });
+    // @ts-expect-error assigned inside isolateModules
+    return servers.kbnTestServer.serverArgs;
+  };
+
+  const TOOL_DETAILS_ARG =
+    '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true';
+
+  describe('when tracing is enabled', () => {
+    let serverArgs: string[];
+
+    beforeAll(() => {
+      process.env.SCOUT_TRACING_ENABLED = 'true';
+      serverArgs = loadServerArgs();
+    });
+
+    afterAll(() => {
+      delete process.env.SCOUT_TRACING_ENABLED;
+    });
+
+    it('captures tool call arguments so trace-based evaluators can match on them', () => {
+      expect(serverArgs).toContain(TOOL_DETAILS_ARG);
+    });
+
+    it('enables tracing itself, so the tool-details setting is not dead config', () => {
+      expect(serverArgs).toContain('--telemetry.tracing.enabled=true');
+    });
+  });
+});

@@ -150,6 +150,13 @@ export const servers: ScoutServerConfig = {
             '--telemetry.tracing.enabled=true',
             '--telemetry.tracing.sample_rate=1',
             `--telemetry.tracing.exporters=${exporters}`,
+            '--uiSettings.overrides.agentBuilder:tracing:includeToolDetails=true',
+            // Agent Builder's span processor strips gen_ai.tool.call.arguments and
+            // .result from every tool span unless this setting is on (it defaults to
+            // false for privacy). Trace-based evaluators that match on tool call
+            // arguments -- SkillInvoked matches the skill name inside them -- then
+            // score 0 for every model, which reads as a model failure rather than a
+            // missing attribute. Evals run on synthetic data, so capture the details.
             ...(agentBuilderTracingExporters
               ? [`--xpack.agentBuilder.tracing.exporters=${agentBuilderTracingExporters}`]
               : []),

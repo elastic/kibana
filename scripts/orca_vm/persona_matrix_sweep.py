@@ -135,6 +135,12 @@ MODEL_ENV = {
     # hiding a wedge: per-request KBN_EVALS_HTTP_TIMEOUT_MS still bounds a hang.
     "openrouter-zai-glm-5-3-flash": "PERSONA_MATRIX_TIMEOUT_MINUTES=120",
     "openrouter-deepseek-v4-pro": "PERSONA_MATRIX_TIMEOUT_MINUTES=120",
+    # selfhost-qwen38 (A100 SGLang, 2xTP1 cells) is the slowest class in the
+    # sweep: 7-example shard timed out at 120 min on sweep-13 attempt 1
+    # (2026-09-06). 300 min covers the observed ~4.5 min/example with
+    # headroom for retries. The per-request AGENT_BUILDER_INFERENCE_TIMEOUT_MS
+    # (600s via run_model.sh) bounds a single-turn hang.
+    "selfhost-qwen38": "PERSONA_MATRIX_TIMEOUT_MINUTES=300",
 }
 # Vars forwarded to every VM. EVAL_CONNECTOR_ID must stay here: run_model.sh only
 # honours an override it actually receives, and otherwise re-derives its Anthropic
@@ -780,6 +786,13 @@ def deploy(ip: str) -> None:
         "grep -q AGENT_BUILDER_INFERENCE_TIMEOUT_MS ~/Projects/kibana/x-pack/platform/plugins/shared/inference/server/chat_complete/utils/inference_endpoint_executor.ts",
         f"grep -q agentBuilderTracingExporters ~/{PROFILES_REMOTE}",
         f"grep -q agentBuilderTracingExporters ~/{SCOUT_TRACING_CONFIG_REMOTE}",
+        # Agent Builder strips gen_ai.tool.call.arguments/.result from every tool
+        # span unless this uiSetting is on (default false, for privacy). Without
+        # it SkillInvoked matches nothing and scores 0 for EVERY model -- which
+        # reads as models not invoking skills rather than a missing attribute.
+        # Observed 2026-09-04..06: 8,339 load_skill spans on sweep VMs with 0
+        # arguments, vs 3,953/3,953 populated on Buildkite CI.
+        f"grep -q 'agentBuilder:tracing:includeToolDetails=true' ~/{SCOUT_TRACING_CONFIG_REMOTE}",
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
@@ -1097,6 +1110,36 @@ def self_test() -> int:
               "if exec_id is None:" in _gate_src, True)
         check("ad gate is exact",
               SUITE_PROFILES["attack-discovery-agent-builder"]["gate"], "exact")
+
+        # --- resume probe (run 13 postmortem) -------------------------------
+        # Three independent bugs made resume a silent no-op for runs 9-13; each
+        # one alone re-ran all 21 examples on every retry while looking healthy.
+        _rm = (Path(__file__).parent / "run_model.sh").read_text()
+
+        # 1. Score docs live on GOLDEN. Local scout ES is wiped by the retry and
+        #    is empty at exactly the moment resume reads it.
+        _fn = _rm[_rm.index("scored_example_ids() {"):_rm.index("for attempt in 1 2 3; do")]
+        check("resume probe queries golden, not local scout ES",
+              "localhost:9220" not in _fn and "GOLDEN_ES_URL" in _fn, True)
+
+        # 2. metadata.execution_id is ALREADY keyword-mapped. Verified against
+        #    golden: term on the bare field -> 98 docs; on .keyword -> 0.
+        # Strip comments first: the function documents the .keyword trap in a
+        # comment, and a naive substring check flags its own documentation.
+        _fn_code = "\n".join(
+            l for l in _fn.splitlines() if not l.lstrip().startswith("#")
+        )
+        check("resume probe does not use the .keyword suffix",
+              "metadata.execution_id.keyword" not in _fn_code, True)
+
+        # 3. Flush must PRECEDE the golden query, else it reads an empty index,
+        #    returns "", and skips the flush that would have populated it.
+        # .find() not .index(): a missing marker must FAIL the check, not raise
+        # and abort the whole self-test before the remaining guards run.
+        _flush_at = _rm.find("flushing partial scores")
+        _query_at = _rm.find('DONE_IDS="$(scored_example_ids)"')
+        check("resume flushes to golden before querying it",
+              _flush_at >= 0 and _query_at >= 0 and _flush_at < _query_at, True)
 
         # Unknown suite must fail loudly rather than silently sweeping persona.
         try:
