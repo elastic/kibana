@@ -18,6 +18,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
@@ -25,6 +26,7 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
 import { CasesClientFactory } from './client/factory';
@@ -142,6 +144,38 @@ describe('Cases Plugin', () => {
       pluginWithStackDisabled.setup(coreSetup, pluginsSetup);
 
       expect(pluginsSetup.features.registerKibanaFeature).not.toHaveBeenCalled();
+    });
+
+    it('registers the workflow execution route when run workflows is enabled', () => {
+      pluginsSetup.workflowsManagement = {
+        management: {},
+      } as unknown as WorkflowsServerPluginSetup;
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const registeredPostPaths = (router.post.mock.calls as Array<[{ path: string }]>).map(
+        ([options]) => options.path
+      );
+      expect(registeredPostPaths).toContain(INTERNAL_CASE_WORKFLOW_RUN_URL);
+    });
+
+    it('does not register the workflow execution route when run workflows is disabled', () => {
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({ runWorkflows: { enabled: false } })
+      );
+      const pluginWithRunWorkflowsDisabled = new CasePlugin(context);
+      pluginsSetup.workflowsManagement = {
+        management: {},
+      } as unknown as WorkflowsServerPluginSetup;
+
+      pluginWithRunWorkflowsDisabled.setup(coreSetup, pluginsSetup);
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const registeredPostPaths = (router.post.mock.calls as Array<[{ path: string }]>).map(
+        ([options]) => options.path
+      );
+      expect(registeredPostPaths).not.toContain(INTERNAL_CASE_WORKFLOW_RUN_URL);
     });
 
     it('should always register cases-attachments SO', async () => {
@@ -322,6 +356,7 @@ describe('Cases Plugin', () => {
             },
           },
           "getCasesClientWithRequest": [Function],
+          "getCasesEventBus": [Function],
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);

@@ -16,7 +16,11 @@ import { useBatchedPublishingSubjects, type FetchContext } from '@kbn/presentati
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import type { DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import { DataLoadingState, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -207,6 +211,12 @@ export function SearchEmbeddableGridComponent({
       onUpdateDataGridDensity: (newDensity: DataGridDensity | undefined) => {
         stateManager.density.next(newDensity);
       },
+      onUpdateDocumentsDisplayMode: (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+        stateManager.documentsDisplayMode.next(newDocumentsDisplayMode);
+      },
+      onUpdateJsonModeSettings: (newJsonModeSettings: JsonModeSettings) => {
+        stateManager.jsonModeSettings.next(newJsonModeSettings);
+      },
       onResize: (newGridSettings: { columnId: string; width: number | undefined }) => {
         stateManager.grid.next(onResizeGridColumn(newGridSettings, grid));
       },
@@ -222,6 +232,8 @@ export function SearchEmbeddableGridComponent({
       stateManager.sort,
       stateManager.sampleSize,
       stateManager.density,
+      stateManager.documentsDisplayMode,
+      stateManager.jsonModeSettings,
       stateManager.grid,
       grid,
     ]
@@ -237,6 +249,11 @@ export function SearchEmbeddableGridComponent({
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings: discoverServices.uiSettings, query: savedSearchQuery }),
     [discoverServices.uiSettings, savedSearchQuery]
+  );
+
+  const isDataTableJsonViewEnabled = useMemo(
+    () => discoverServices.discoverFeatureFlags.getDataTableJsonViewEnabled(),
+    [discoverServices.discoverFeatureFlags]
   );
 
   return (
@@ -277,6 +294,16 @@ export function SearchEmbeddableGridComponent({
       services={discoverServices}
       showTimeCol={showTimeCol}
       dataGridDensityState={savedSearch.density}
+      documentsDisplayModeState={
+        isDataTableJsonViewEnabled ? savedSearch.documentsDisplayMode : undefined
+      }
+      onUpdateDocumentsDisplayMode={
+        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateDocumentsDisplayMode : undefined
+      }
+      jsonModeSettingsState={isDataTableJsonViewEnabled ? savedSearch.jsonModeSettings : undefined}
+      onUpdateJsonModeSettings={
+        isDataTableJsonViewEnabled ? onStateEditedProps.onUpdateJsonModeSettings : undefined
+      }
       enableDocumentViewer={enableDocumentViewer}
       inlineEditing={inlineEditing}
       expandedDoc={expandedDoc}

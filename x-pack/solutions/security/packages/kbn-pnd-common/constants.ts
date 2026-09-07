@@ -40,11 +40,12 @@ export const PND_INVESTIGATION_URL_TEMPLATE = `${PND_INVESTIGATIONS_URL}/{id}` a
 export const buildInvestigationUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 
-export const PND_INVESTIGATION_PROPOSALS_URL_TEMPLATE =
-  `${PND_INVESTIGATIONS_URL}/{id}/proposals` as const;
-
-export const buildInvestigationProposalsUrl = (id: string) =>
-  `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}/proposals`;
+/**
+ * Shared thin AlertZero agent for all Worker `ai.agent` steps.
+ * Can expand this to multiple scoped thin agents in the future if needed.
+ * Prefer avoiding 1-1 correlation between Kibana managed agent and AZ Worker
+ */
+export const ALERTZERO_THIN_AGENT_ID = 'alertzero-thin-agent' as const;
 
 /** Managed catalog workflow ids — owned by Security. */
 export const SYSTEM_SECURITY_WATCH_FLOOR_ID = 'system-security-watch-floor' as const;
@@ -73,13 +74,13 @@ export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as con
 /**
  * Presentation metadata for the managed watch catalog.
  *
- * The managed five are compile-time constants installed at start-up, so consumers that must not wait
- * for an HTTP round trip — the app's deep links and the solution navigation tree — build their
+ * The managed five are compile-time constants, so consumers that must not wait for an HTTP round
+ * trip — the app's deep links and the solution navigation tree — build their
  * entries from this list rather than from `list_watches`.
  *
  * Deliberately free of schema and sample imports: both consumers are page-load critical, and pulling
- * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. `WATCHES_SEED` derives its
- * name, colour and lifecycle from here so the two cannot drift.
+ * `WATCHES_SEED` in would drag Zod and the mock samples into that bundle. Live placeholders and
+ * `WATCHES_SEED` both take name, colour and lifecycle from here so the two cannot drift.
  *
  * Custom (unmanaged) watches are absent by construction — they are discoverable only at runtime.
  */
@@ -127,7 +128,6 @@ export const WATCH_OFFICER_TAG = 'watch-officer' as const;
 export const WATCH_DARK_TAG = 'watch-dark' as const;
 export const WATCH_DEEP_TAG = 'watch-deep' as const;
 export const WATCH_DETECTION_TAG = 'watch-detection' as const;
-export const WATCH_CUSTOM_TAG = 'watch-custom' as const;
 
 export const WATCH_TIER_TAGS = [
   WATCH_FLOOR_TAG,
@@ -137,15 +137,68 @@ export const WATCH_TIER_TAGS = [
   WATCH_DETECTION_TAG,
 ] as const;
 
+/** Managed Worker workflow ids — tagged Watch members. Dark CTH is the externally settled id. */
+export const SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID =
+  'system-security-floor-alert-triage' as const;
+export const SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID =
+  'system-security-floor-attack-discovery' as const;
+export const SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID =
+  'system-security-dark-continuous-threat-hunt' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID =
+  'system-security-detection-rule-tuning' as const;
+export const SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID =
+  'system-security-detection-rule-creation' as const;
+
+export const SYSTEM_SECURITY_WORKER_IDS = [
+  SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+] as const;
+
+/**
+ * Static Worker catalog: Watch membership and display names for not-yet-installed Workers.
+ * Rendered YAML must still carry the matching `watch` + tier tags.
+ */
+export const SYSTEM_SECURITY_WORKER_CATALOG = [
+  {
+    id: SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+    name: 'Alert Triage',
+    watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    watchTag: WATCH_FLOOR_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+    name: 'Attack Discovery',
+    watchId: SYSTEM_SECURITY_WATCH_FLOOR_ID,
+    watchTag: WATCH_FLOOR_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DARK_CONTINUOUS_THREAT_HUNT_ID,
+    name: 'Continuous Threat Hunt',
+    watchId: SYSTEM_SECURITY_WATCH_DARK_ID,
+    watchTag: WATCH_DARK_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+    name: 'Rule Tuning',
+    watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+    watchTag: WATCH_DETECTION_TAG,
+  },
+  {
+    id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+    name: 'Rule Creation',
+    watchId: SYSTEM_SECURITY_WATCH_DETECTION_ID,
+    watchTag: WATCH_DETECTION_TAG,
+  },
+] as const;
+
+export type SystemSecurityWorkerCatalogEntry = (typeof SYSTEM_SECURITY_WORKER_CATALOG)[number];
+
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
 export const TEMPLATE_ID_PROPOSAL = 'proposal' as const;
 export const TEMPLATE_ID_INCIDENT = 'incident' as const;
-
-export const TEMPLATE_IDS = [
-  TEMPLATE_ID_INVESTIGATION,
-  TEMPLATE_ID_PROPOSAL,
-  TEMPLATE_ID_INCIDENT,
-] as const;
 
 export const API_VERSIONS = {
   internal: {
@@ -155,22 +208,12 @@ export const API_VERSIONS = {
 
 export const INTERNAL_API_ACCESS = 'internal' as const;
 
-export const RECOMMENDED_ACTIONS = ['contain', 'escalate', 'investigate', 'tune'] as const;
-
-export const PROPOSAL_STATUSES = [
-  'pending',
-  'approved',
-  'modified',
-  'dismissed',
-  'executed',
-] as const;
-
 export const CONVERSATION_CATEGORY_COLORS: Record<
   RecommendedAction,
-  'danger' | 'warning' | 'primary' | 'accent'
+  'danger' | 'warning' | 'accentSecondary' | 'accent'
 > = {
   contain: 'danger',
   escalate: 'warning',
-  investigate: 'primary',
+  investigate: 'accentSecondary',
   tune: 'accent',
 };

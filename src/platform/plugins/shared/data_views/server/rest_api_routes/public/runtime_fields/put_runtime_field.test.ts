@@ -38,6 +38,6 @@ describe('put runtime field', () => {
         type: 'keyword',
       },
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

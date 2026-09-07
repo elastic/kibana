@@ -411,9 +411,7 @@ describe('#start', () => {
 
       await elasticsearchService.setup(setupDeps);
 
-      await expect(elasticsearchService.start()).rejects.toThrowError(
-        'Inline scripting is disabled'
-      );
+      await expect(elasticsearchService.start()).rejects.toThrow('Inline scripting is disabled');
     });
 
     it('does not throw error when `skipStartupConnectionCheck` is true', async () => {

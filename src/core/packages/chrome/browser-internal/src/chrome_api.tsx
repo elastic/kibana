@@ -14,16 +14,12 @@ import type { ChromeAppHeaderConfig, GlobalHeaderAiButton } from '@kbn/core-chro
 import { SidebarServiceProvider } from '@kbn/core-chrome-sidebar-context';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import type { SidebarStart } from '@kbn/core-chrome-sidebar';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import type { InternalChromeStart } from './types';
 import type { ChromeState } from './state/chrome_state';
-import type { NavControlsService } from './services/nav_controls';
 import type { NavLinksService } from './services/nav_links';
 import type { ProjectNavigationService } from './services/project_navigation';
 import type { DocTitleService } from './services/doc_title';
 
-type NavControlsStart = ReturnType<NavControlsService['start']>;
 type NavLinksStart = ReturnType<NavLinksService['start']>;
 type ProjectNavigationStart = ReturnType<ProjectNavigationService['start']>;
 type DocTitleStart = ReturnType<DocTitleService['start']>;
@@ -32,14 +28,12 @@ type RecentlyAccessedStart = ReturnType<RecentlyAccessedService['start']>;
 export interface ChromeApiDeps {
   state: ChromeState;
   services: {
-    navControls: NavControlsStart;
     navLinks: NavLinksStart;
     recentlyAccessed: RecentlyAccessedStart;
     docTitle: DocTitleStart;
     projectNavigation: ProjectNavigationStart;
   };
   sidebar: SidebarStart;
-  featureFlags: FeatureFlagsStart;
   componentDeps: InternalChromeStart['componentDeps'];
 }
 
@@ -47,7 +41,6 @@ export function createChromeApi({
   state,
   services,
   sidebar,
-  featureFlags,
   componentDeps,
 }: ChromeApiDeps): InternalChromeStart {
   const { projectNavigation } = services;
@@ -100,7 +93,6 @@ export function createChromeApi({
     },
 
     // Sub-services
-    navControls: services.navControls,
     navLinks: services.navLinks,
     recentlyAccessed: services.recentlyAccessed,
     docTitle: services.docTitle,
@@ -152,8 +144,8 @@ export function createChromeApi({
     setHelpSupportUrl: state.help.supportUrl.set,
     getGlobalHelpExtensionMenuLinks$: () => state.help.globalMenuLinks.$,
     registerGlobalHelpExtensionMenuLink: (link) => state.help.globalMenuLinks.add(link),
-    getHelpMenuLinks$: () => services.navControls.getHelpMenuLinks$(),
-    setHelpMenuLinks: services.navControls.setHelpMenuLinks,
+    getHelpMenuLinks$: () => state.help.menuLinks.$,
+    setHelpMenuLinks: state.help.menuLinks.set,
 
     // Custom Nav Link
     getCustomNavLink$: () => state.customNavLink.$,
@@ -188,9 +180,6 @@ export function createChromeApi({
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
     next: {
-      get isEnabled() {
-        return isNextChrome(featureFlags);
-      },
       aiButton: {
         get$: () => state.aiButton.$.pipe(map((buttons) => [...buttons])),
         register: (button: GlobalHeaderAiButton) => {

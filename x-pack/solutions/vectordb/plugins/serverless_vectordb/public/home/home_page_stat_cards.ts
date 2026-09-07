@@ -18,12 +18,12 @@ interface StatCardDeps {
   isLoading: boolean;
 }
 
-/** Builds the full width data card, whose only action is promoted to a button. */
-export const getDataCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+type HomePageStats = Omit<HomePageStatPanelProps, 'newIndex'>;
+
+const showVectorCount = ({ application }: Pick<StatCardDeps, 'application'>): boolean =>
+  application.capabilities.vectordbIndexStats?.canMonitorAllIndices === true;
+
+export const getDataCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'database',
   title: i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
     defaultMessage: 'Data',
@@ -43,12 +43,16 @@ export const getDataCard = ({
       value: formatNumber(stats.documentsCount),
       isLoading,
     },
-    {
-      key: 'vectors',
-      label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorCount),
-      isLoading,
-    },
+    ...(showVectorCount({ application })
+      ? [
+          {
+            key: 'vectors',
+            label: STAT_TILE_LABELS.vectors,
+            value: formatNumber(stats.vectorCount),
+            isLoading,
+          },
+        ]
+      : []),
     {
       key: 'totalSize',
       label: STAT_TILE_LABELS.totalSize,
@@ -72,11 +76,7 @@ export const getDataCard = ({
   ],
 });
 
-const getDashboardsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getDashboardsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'productDashboard',
   title: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.title', {
     defaultMessage: 'Dashboards',
@@ -100,7 +100,7 @@ const getDashboardsCard = ({
   actions: [
     {
       key: 'createDashboard',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
         defaultMessage: 'Create a dashboard',
       }),
@@ -121,11 +121,7 @@ const getDashboardsCard = ({
   ],
 });
 
-const getWorkflowsCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getWorkflowsCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'workflow',
   title: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.title', {
     defaultMessage: 'Workflows',
@@ -149,7 +145,7 @@ const getWorkflowsCard = ({
   actions: [
     {
       key: 'createWorkflow',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
         defaultMessage: 'Create a workflow',
       }),
@@ -170,11 +166,7 @@ const getWorkflowsCard = ({
   ],
 });
 
-const getApiKeysCard = ({
-  application,
-  stats,
-  isLoading,
-}: StatCardDeps): HomePageStatPanelProps => ({
+const getApiKeysCard = ({ application, stats, isLoading }: StatCardDeps): HomePageStats => ({
   iconType: 'key',
   title: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.title', {
     defaultMessage: 'API Keys',
@@ -198,7 +190,7 @@ const getApiKeysCard = ({
   actions: [
     {
       key: 'createApiKey',
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
         defaultMessage: 'Create an API key',
       }),
@@ -223,7 +215,7 @@ const getApiKeysCard = ({
 });
 
 /** Builds the cards rendered in a row under the data card, in display order. */
-export const getSecondaryCards = (deps: StatCardDeps): HomePageStatPanelProps[] => [
+export const getSecondaryCards = (deps: StatCardDeps): HomePageStats[] => [
   getDashboardsCard(deps),
   getWorkflowsCard(deps),
   getApiKeysCard(deps),

@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
+import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -33,34 +34,36 @@ jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
 }));
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: jest.fn((token: unknown) => {
-    const tokenStr = String(token);
-    if (tokenStr.includes('application')) {
-      return {
-        navigateToUrl: mockNavigateToUrl,
-        getUrlForApp: jest.fn(
-          (appId: string, options?: { path?: string }) =>
-            `/app/${appId}${options?.path ? `/${options.path}` : ''}`
-        ),
-      };
-    }
-    if (tokenStr.includes('chrome')) {
-      return { docTitle: { change: jest.fn() } };
-    }
-    if (tokenStr.includes('http')) {
-      return { basePath: mockBasePath };
-    }
-    if (tokenStr.includes('uiSettings')) {
-      return { get: () => true };
-    }
-    if (tokenStr.includes('notifications')) {
-      return { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
-    }
-    return {};
-  }),
-  CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
-}));
+jest.mock('@kbn/core-di-browser', () => {
+  return {
+    useService: jest.fn((token: unknown) => {
+      const tokenStr = String(token);
+      if (tokenStr.includes('application')) {
+        return {
+          navigateToUrl: mockNavigateToUrl,
+          getUrlForApp: jest.fn(
+            (appId: string, options?: { path?: string }) =>
+              `/app/${appId}${options?.path ? `/${options.path}` : ''}`
+          ),
+        };
+      }
+      if (tokenStr.includes('chrome')) {
+        return { docTitle: { change: jest.fn() } };
+      }
+      if (tokenStr.includes('http')) {
+        return { basePath: mockBasePath };
+      }
+      if (tokenStr.includes('uiSettings')) {
+        return { get: () => true };
+      }
+      if (tokenStr.includes('notifications')) {
+        return { toasts: { addError: jest.fn(), addSuccess: jest.fn() } };
+      }
+      return {};
+    }),
+    CoreStart: jest.fn((name: string) => `CoreStart(${name})`),
+  };
+});
 
 const INLINE_DEFS = [
   {
@@ -115,6 +118,10 @@ const mockCreateMutateAsync = jest.fn();
 const mockUpdateMutateAsync = jest.fn();
 const mockCreateInlineWorkflows = jest.fn();
 const mockRollbackWorkflows = jest.fn();
+
+jest.mock('../../agent_builder/use_action_policy_auto_attach', () => ({
+  useActionPolicyAutoAttach: jest.fn(),
+}));
 
 jest.mock('../../hooks/use_create_action_policy', () => ({
   useCreateActionPolicy: () => ({
@@ -216,6 +223,8 @@ const renderPage = () => {
     </I18nProvider>
   );
 };
+
+const mockUseActionPolicyAutoAttach = jest.mocked(useActionPolicyAutoAttach);
 
 describe('ActionPolicyFormPage', () => {
   beforeEach(() => {
@@ -344,6 +353,12 @@ describe('ActionPolicyFormPage', () => {
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
     });
+
+    it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
+      renderPage();
+
+      expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(undefined);
+    });
   });
 
   describe('edit mode', () => {
@@ -443,6 +458,21 @@ describe('ActionPolicyFormPage', () => {
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
       expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+    });
+
+    describe('Agent Builder auto-attach', () => {
+      it('passes the loaded action policy to useActionPolicyAutoAttach', () => {
+        mockUseFetchActionPolicy.mockReturnValue({
+          data: EXISTING_POLICY,
+          isLoading: false,
+          isError: false,
+          error: null,
+        });
+
+        renderPage();
+
+        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(EXISTING_POLICY);
+      });
     });
   });
 });

@@ -6,8 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
-import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
+import { DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
@@ -399,9 +398,12 @@ const artifactSchema = z
   })
   .strict()
   .check((ctx) => {
-    const fields = Object.entries(ctx.value.data);
-
-    if (fields.length > MAX_ARTIFACT_DATA_FIELDS) {
+    // Only type-agnostic structure belongs here. How large a `data` value may be
+    // depends on the artifact type, which this schema deliberately does not know:
+    // registered types are bounded by their own `dataSchema` (applied server-side,
+    // where the artifact-type registry is available) and unregistered types pass
+    // through verbatim so a disabled or rolled-back plugin cannot fail writes.
+    if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',
         path: ['data'],
@@ -409,63 +411,29 @@ const artifactSchema = z
         input: ctx.value.data,
       });
     }
-
-    const typeSchema = ARTIFACT_DATA_SCHEMAS[ctx.value.type];
-    const declared = typeSchema ? new Set(Object.keys(typeSchema.shape)) : undefined;
-    const typeResult = typeSchema?.safeParse(ctx.value.data);
-
-    if (typeResult && !typeResult.success) {
-      for (const issue of typeResult.error.issues) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', ...issue.path],
-          message: issue.message,
-          input: issue.input,
-        });
-      }
-    }
-
-    // Fields declared by the type schema use that schema's own limits (e.g.
-    // runbook content at 50k). Everything else gets the generic default so
-    // unregistered types stay bounded without a framework change.
-    for (const [field, value] of fields) {
-      if (declared?.has(field)) {
-        continue;
-      }
-
-      const limit = DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-
-      if (typeof value === 'string') {
-        if (value.length > limit) {
-          ctx.issues.push({
-            code: 'custom',
-            path: ['data', field],
-            message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
-            input: value,
-          });
-        }
-        continue;
-      }
-
-      // Structured values are measured serialized, so nesting a payload in an
-      // object or an array cannot buy more room than a plain string field gets.
-      if ((JSON.stringify(value) ?? '').length > limit) {
-        ctx.issues.push({
-          code: 'custom',
-          path: ['data', field],
-          message: `Artifact data field "${field}" must serialize to at most ${limit} characters for type "${ctx.value.type}".`,
-          input: value,
-        });
-      }
-    }
   })
   .meta({ id: 'alerting_rule_artifact' });
 
 const artifactsSchema = z
   .array(artifactSchema)
   .max(100)
+  .check((ctx) => {
+    const seen = new Set<string>();
+    for (let index = 0; index < ctx.value.length; index++) {
+      const id = ctx.value[index].id;
+      if (seen.has(id)) {
+        ctx.issues.push({
+          code: 'custom',
+          path: [index, 'id'],
+          message: `Artifact id "${id}" must be unique within the rule.`,
+          input: id,
+        });
+      }
+      seen.add(id);
+    }
+  })
   .describe(
-    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.'
   );
 
 /** Create rule API schema */
@@ -640,7 +608,12 @@ export const updateRuleDataSchema = z
   .object({
     metadata: metadataSchema
       .partial()
-      .extend({ builder_type: z.string().max(64).optional().nullable() })
+      .extend({
+        builder_type: z.string().max(64).optional().nullable(),
+        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
+        // omitting `tags` preserves the existing ones on a partial update).
+        tags: tagsSchema.min(1).nullable().optional(),
+      })
       .optional(),
     time_field: z.string().min(1).max(128).optional(),
     schedule: scheduleSchema.partial().optional().nullable(),

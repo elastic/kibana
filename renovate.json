@@ -202,13 +202,22 @@
       "matchDepNames": [
         "@wojtekmaj/enzyme-adapter-react-17",
         "enzyme",
-        "enzyme-to-json",
         "@types/enzyme"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "matchUpdateTypes": ["patch"],
       "addLabels": ["Team:SharedUX"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "enzyme-to-json",
+      "matchDepNames": ["enzyme-to-json"],
+      "reviewers": ["team:kibana-core"],
+      "matchBaseBranches": ["main"],
+      "matchUpdateTypes": ["patch"],
+      "addLabels": ["Team:Core"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -359,10 +368,8 @@
       "groupName": "react-router dependencies",
       "matchDepNames": [
         "react-router",
-        "react-router-config",
         "react-router-dom",
         "@types/react-router",
-        "@types/react-router-config",
         "@types/react-router-dom",
         "history",
         "@types/history"
@@ -371,6 +378,15 @@
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX", "effort:high", "upgrade-risk:high"],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "groupName": "react-router-config dependencies",
+      "matchDepNames": ["react-router-config", "@types/react-router-config"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "reviewers": ["team:obs-presentation-team"],
+      "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -1516,7 +1532,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],

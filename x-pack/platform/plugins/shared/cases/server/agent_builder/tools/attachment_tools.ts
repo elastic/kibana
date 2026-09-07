@@ -96,6 +96,10 @@ const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[]
     .map(({ id }) => id)
     .sort();
 
+/**
+ * @deprecated Use `getAttachmentsTool` (read) and `manageAttachmentsTool` (write) instead.
+ * Retained for backward compatibility with agents that reference the old tool ID.
+ */
 export const attachmentsTool = (
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
@@ -127,9 +131,17 @@ export const attachmentsTool = (
   return {
     id: platformCoreCasesTools.attachments,
     type: ToolType.builtin,
-    description: `Case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`get_all\` (fetch all comments, alerts, events). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `DEPRECATED — this tool will be removed in a future release. Use these tools instead:
+- To retrieve attachments for a case: \`${platformCoreCasesTools.getAttachments}\`
+- To add attachments (comments, alerts, events, or other): \`${platformCoreCasesTools.manageAttachments}\`
+
+This tool still works but combines read and write operations. Prefer the dedicated tools above.
+
+Modes: \`add_comment\`, \`add_alerts\`, \`add_events\`, \`add_attachments\`, \`get_all\`. See \`mode\` field for required inputs.
+
+${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
-      title: 'Case Attachments',
+      title: 'Case Attachments (Deprecated)',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,

@@ -9,6 +9,7 @@ import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { escapeQuotes } from '@kbn/es-query';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { SnapshotMetricTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -50,7 +51,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   >;
 
   const { nodes, loading } = useSnapshot({
-    kuery: `"${model.fields.id}": ${node.id}`,
+    kuery: `"${model.fields.id}": "${escapeQuotes(node.id)}"`,
     metrics: requestMetrics,
     groupBy: [],
     nodeType,

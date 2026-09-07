@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
+  EpisodeRuleTagsCell,
   EpisodeSeverityCell,
 } from './episodes_table_cell_renderers';
 
@@ -81,6 +83,104 @@ describe('EpisodeTagsCell', () => {
     expect(screen.getByText('foo')).toBeInTheDocument();
     expect(screen.getByText('bar')).toBeInTheDocument();
   });
+
+  it('renders an empty value when the row has no tags', () => {
+    const row = makeRow({ group_hash: 'gh3', last_tags: [] });
+    renderWithI18n(<EpisodeTagsCell {...baseCellProps} row={row} />);
+
+    expect(screen.getByTestId('episodeTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the row has no last_tags field at all', () => {
+    const row = makeRow({ group_hash: 'gh3' });
+    renderWithI18n(<EpisodeTagsCell {...baseCellProps} row={row} />);
+
+    expect(screen.getByTestId('episodeTagsCell')).toHaveTextContent('—');
+  });
+});
+
+describe('EpisodeRuleTagsCell', () => {
+  const makeRuleWithTags = (tags?: string[]): Rule =>
+    ({ metadata: { name: 'rule name', ...(tags ? { tags } : {}) } } as unknown as Rule);
+
+  const ruleTagsCellProps = { ...baseCellProps, columnId: 'rule_tags' };
+
+  it('renders a badge for each tag of the row rule', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags(['production', 'cpu']) }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByText('production')).toBeInTheDocument();
+    expect(screen.getByText('cpu')).toBeInTheDocument();
+  });
+
+  it('renders an empty value when the rule has no tags', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags() }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the rule is not available', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders an empty value when the row has no rule id, without waiting for the rules fetch', () => {
+    const row = makeRow({ 'episode.id': 'ep1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell {...ruleTagsCellProps} row={row} rulesCache={{}} isLoadingRules />
+    );
+
+    expect(screen.getByTestId('episodeRuleTagsCell')).toHaveTextContent('—');
+  });
+
+  it('renders a skeleton while the row rule is still loading', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    renderWithI18n(
+      <EpisodeRuleTagsCell {...ruleTagsCellProps} row={row} rulesCache={{}} isLoadingRules />
+    );
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleTagsCell')).not.toBeInTheDocument();
+  });
+
+  it('does not read the episode tags of the row', () => {
+    const row = makeRow({ 'rule.id': 'r1', last_tags: ['episode-only-tag'] });
+    renderWithI18n(
+      <EpisodeRuleTagsCell
+        {...ruleTagsCellProps}
+        row={row}
+        rulesCache={{ r1: makeRuleWithTags(['production']) }}
+        isLoadingRules={false}
+      />
+    );
+
+    expect(screen.getByText('production')).toBeInTheDocument();
+    expect(screen.queryByText('episode-only-tag')).not.toBeInTheDocument();
+  });
 });
 
 describe('EpisodeSeverityCell', () => {
@@ -100,123 +200,241 @@ describe('EpisodeRuleCell', () => {
       ...(grouping ? { grouping } : {}),
     } as unknown as Rule);
 
+  const getRuleDetailsHref = (ruleId: string) => `/app/alerting/rules/${ruleId}`;
+
+  const ruleCellProps = {
+    ...baseCellProps,
+    columnId: 'rule.id',
+    getRuleDetailsHref,
+  };
+
   it('renders a skeleton when rules are loading and cache is empty', () => {
     const row = makeRow({ 'rule.id': 'r1' });
     render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={true}
-        rowHeight={2}
-      />
+      <EpisodeRuleCell {...ruleCellProps} row={row} rulesCache={{}} isLoadingRules rowHeight={2} />
     );
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  it('renders the raw ruleId when the rule id is missing from bulk get', () => {
-    const row = makeRow({ 'rule.id': 'deleted-rule' });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={1}
-      />
-    );
-    expect(screen.getByText('deleted-rule')).toBeInTheDocument();
-  });
-
-  it('renders the raw ruleId when the rule is not in cache', () => {
-    const row = makeRow({ 'rule.id': 'unknown-rule' });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByText('unknown-rule')).toBeInTheDocument();
-  });
-
-  it('renders the rule name when rule is in cache', () => {
+  it('renders the rule name as a link to the rule details page when the rule is in cache', () => {
     const row = makeRow({ 'rule.id': 'r1' });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
         isLoadingRules={false}
         rowHeight={2}
       />
     );
-    expect(screen.getByText('My Rule')).toBeInTheDocument();
+    const link = screen.getByTestId('episodeRuleCellNameLink');
+    expect(link).toHaveTextContent('My Rule');
+    expect(link).toHaveAttribute('href', '/app/alerting/rules/r1');
   });
 
-  it('renders the ES|QL query below the rule row when rowHeight > 1', () => {
-    const row = makeRow({ 'rule.id': 'r1' });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
-        isLoadingRules={false}
-        rowHeight={2}
-      />
-    );
-    expect(screen.getByText('FROM My Rule')).toBeInTheDocument();
+  describe('with onRuleNameClick', () => {
+    const mockOnRuleNameClick = jest.fn();
+
+    const renderRuleNameLink = () => {
+      render(
+        <EpisodeRuleCell
+          {...ruleCellProps}
+          row={makeRow({ 'rule.id': 'r1' })}
+          rulesCache={{ r1: makeRule('My Rule') }}
+          isLoadingRules={false}
+          rowHeight={2}
+          onRuleNameClick={mockOnRuleNameClick}
+        />
+      );
+      return screen.getByTestId('episodeRuleCellNameLink');
+    };
+
+    beforeEach(() => {
+      mockOnRuleNameClick.mockClear();
+    });
+
+    it('keeps the rule details page href on the link', () => {
+      expect(renderRuleNameLink()).toHaveAttribute('href', '/app/alerting/rules/r1');
+    });
+
+    it('calls back with the rule id and prevents navigation on a plain click', () => {
+      // fireEvent returns false when the handler called preventDefault
+      expect(fireEvent.click(renderRuleNameLink())).toBe(false);
+      expect(mockOnRuleNameClick).toHaveBeenCalledWith('r1');
+    });
+
+    it('lets a modified click follow the link', () => {
+      expect(fireEvent.click(renderRuleNameLink(), { metaKey: true })).toBe(true);
+      expect(mockOnRuleNameClick).not.toHaveBeenCalled();
+    });
+
+    it('lets a middle click follow the link', () => {
+      expect(fireEvent.click(renderRuleNameLink(), { button: 1 })).toBe(true);
+      expect(mockOnRuleNameClick).not.toHaveBeenCalled();
+    });
   });
 
-  it('renders grouping value tags after the rule name when rule has grouping.fields and episode_data', () => {
+  it('renders data.rule_name without a link when the rule SO is missing', () => {
     const row = makeRow({
-      'rule.id': 'r1',
-      episode_data: JSON.stringify({ host: { name: 'server-1' } }),
+      'rule.id': 'prometheus/HighCPU',
+      'rule.name': 'Prometheus HighCPU',
+      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
     });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
-        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        rulesCache={{}}
         isLoadingRules={false}
         rowHeight={2}
       />
     );
-    expect(screen.getByTestId('episodeRuleCellGroupingTags')).toBeInTheDocument();
-    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
-    expect(screen.getByText('server-1')).toBeInTheDocument();
+    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the event rule.name when the rule SO and data.rule_name are missing', () => {
+    const row = makeRow({
+      'rule.id': 'prometheus/HighCPU',
+      'rule.name': 'Prometheus HighCPU',
+      episode_data: JSON.stringify({}),
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByText('Prometheus HighCPU')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+  });
+
+  it('renders a shortened rule id with no link when the rule and every name are missing', () => {
+    const row = makeRow({ 'rule.id': 'deleted-rule-1234567890' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    const missingRule = screen.getByTestId('episodeRuleCellMissingRule');
+    expect(missingRule).toHaveTextContent('Unavailable rule');
+    expect(missingRule.querySelector('code')).toHaveTextContent('deleted');
+    expect(screen.queryByTestId('episodeRuleCellNameLink')).not.toBeInTheDocument();
+  });
+
+  it('copies the full rule id when the unavailable rule label is clicked', async () => {
+    const user = userEvent.setup();
+    const mockExecCommand = jest.fn().mockReturnValue(true);
+    document.execCommand = mockExecCommand;
+    const row = makeRow({ 'rule.id': 'deleted-rule-1234567890' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+
+    await user.click(screen.getByTestId('episodeRuleCellCopyRuleId'));
+
+    expect(mockExecCommand).toHaveBeenCalledWith('copy');
+    // Rendered twice: the tooltip and the screen reader live region.
+    expect(await screen.findAllByText('Rule ID copied')).not.toHaveLength(0);
+  });
+
+  it('renders an em dash when rule SO, rule.id, rule.name and data.rule_name are all absent', () => {
+    const row = makeRow({ episode_data: JSON.stringify({}) });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{}}
+        isLoadingRules={false}
+        rowHeight={1}
+      />
+    );
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.queryByTestId('episodeRuleCellMissingRule')).not.toBeInTheDocument();
+  });
+
+  it('renders the breach query below the rule name when rowHeight > 1', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
+  });
+
+  it('renders the breach query when the row height is auto', () => {
+    const row = makeRow({ 'rule.id': 'r1' });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule') }}
+        isLoadingRules={false}
+        rowHeight={-1}
+      />
+    );
+    expect(screen.getByTestId('episodeRuleCellBreachQuery')).toBeInTheDocument();
   });
 
   it('does not render the query when rowHeight is 1', () => {
     const row = makeRow({ 'rule.id': 'r1' });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
         isLoadingRules={false}
         rowHeight={1}
       />
     );
-    expect(screen.getByText('My Rule')).toBeInTheDocument();
-    expect(screen.queryByText('FROM My Rule')).not.toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellNameLink')).toHaveTextContent('My Rule');
+    expect(screen.queryByTestId('episodeRuleCellBreachQuery')).not.toBeInTheDocument();
+  });
+
+  it('renders grouping value tags inline after the rule name', () => {
+    const row = makeRow({
+      'rule.id': 'r1',
+      episode_data: JSON.stringify({ host: { name: 'server-1' } }),
+    });
+    render(
+      <EpisodeRuleCell
+        {...ruleCellProps}
+        row={row}
+        rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
+        isLoadingRules={false}
+        rowHeight={2}
+      />
+    );
+    const tags = screen.getByTestId('episodeRuleCellGroupingTags');
+    expect(screen.getByLabelText('host.name: server-1')).toBeInTheDocument();
+    expect(screen.getByText('server-1')).toBeInTheDocument();
+    // The grid clamps the cell to a line count, which only works on inline content.
+    expect(tags.tagName).toBe('SPAN');
   });
 
   it('does not render grouping tags when rule has no grouping.fields', () => {
     const row = makeRow({ 'rule.id': 'r1' });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ r1: makeRule('My Rule') }}
         isLoadingRules={false}
@@ -233,8 +451,7 @@ describe('EpisodeRuleCell', () => {
     });
     render(
       <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
+        {...ruleCellProps}
         row={row}
         rulesCache={{ r1: makeRule('My Rule', { fields: ['host.name'] }) }}
         isLoadingRules={false}
@@ -242,40 +459,6 @@ describe('EpisodeRuleCell', () => {
       />
     );
     expect(screen.queryByTestId('episodeRuleCellGroupingTags')).not.toBeInTheDocument();
-    expect(screen.getByText('FROM My Rule')).toBeInTheDocument();
-  });
-
-  it('renders data.rule_name from episode_data when the rule SO is missing', () => {
-    const row = makeRow({
-      'rule.id': 'prometheus/HighCPU',
-      episode_data: JSON.stringify({ rule_name: 'High CPU on web-01' }),
-    });
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={1}
-      />
-    );
-    expect(screen.getByText('High CPU on web-01')).toBeInTheDocument();
-  });
-
-  it('renders an em dash when rule SO, rule.name, and data.rule_name are all absent', () => {
-    const row = makeRow({ episode_data: JSON.stringify({}) });
-    delete (row.flattened as Record<string, unknown>)['rule.id'];
-    render(
-      <EpisodeRuleCell
-        {...baseCellProps}
-        columnId="rule.id"
-        row={row}
-        rulesCache={{}}
-        isLoadingRules={false}
-        rowHeight={1}
-      />
-    );
-    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.getByTestId('episodeRuleCellBreachQuery')).toHaveTextContent('FROM My Rule');
   });
 });

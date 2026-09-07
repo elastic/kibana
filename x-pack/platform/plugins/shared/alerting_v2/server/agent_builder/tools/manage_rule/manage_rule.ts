@@ -11,7 +11,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ALERTING_TOOL_IDS, DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_TOOL_IDS,
+  DASHBOARD_ARTIFACT_TYPE,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import {
@@ -90,6 +94,9 @@ ${generateRuleOperationsUsageList()}`,
         .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
         .map((artifact) => artifact.data.dashboardId)
         .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
+      const runbookAttached = (updatedData.artifacts ?? []).some(
+        (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+      );
 
       const attachmentInput = {
         id: attachmentId,
@@ -132,6 +139,7 @@ ${generateRuleOperationsUsageList()}`,
                 schedule: updatedData.schedule,
                 query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
                 ...(dashboards.length > 0 ? { dashboards } : {}),
+                ...(runbookAttached ? { runbookAttached: true } : {}),
               },
               ...(queryColumns ? { queryColumns } : {}),
             },

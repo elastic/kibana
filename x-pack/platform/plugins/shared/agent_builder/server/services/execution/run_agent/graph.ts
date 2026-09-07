@@ -11,7 +11,6 @@ import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
 import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
@@ -53,7 +52,6 @@ export const createAgentGraph = ({
   chatModel,
   toolManager,
   configuration,
-  capabilities,
   logger,
   events,
   structuredOutput = false,
@@ -68,7 +66,6 @@ export const createAgentGraph = ({
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
-  capabilities: ResolvedAgentCapabilities;
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;

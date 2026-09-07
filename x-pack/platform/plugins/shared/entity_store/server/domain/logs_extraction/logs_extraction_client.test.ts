@@ -6,8 +6,6 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { RemoteExtractionStrategy } from './remote/strategies';
-import type { RemoteLogsExtractionClient } from './remote';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -84,22 +82,6 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-type MockRemoteLogsExtractionClient = jest.Mocked<
-  Pick<RemoteLogsExtractionClient, 'extractToUpdates'>
-> & {
-  strategy: Pick<RemoteExtractionStrategy, 'id' | 'buildPatterns'>;
-};
-
-function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient {
-  return {
-    extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
-    strategy: {
-      id: 'ccs',
-      buildPatterns: jest.fn(({ remoteIndexPatterns }) => remoteIndexPatterns),
-    },
-  };
-}
-
 jest.mock('../../infra/elasticsearch/esql');
 jest.mock('../../infra/elasticsearch/ingest');
 
@@ -169,7 +151,6 @@ describe('LogsExtractionClient', () => {
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
-  let mockRemoteLogsExtractionClient: ReturnType<typeof createMockRemoteLogsExtractionClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -193,7 +174,6 @@ describe('LogsExtractionClient', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
-    mockRemoteLogsExtractionClient = createMockRemoteLogsExtractionClient();
 
     client = new LogsExtractionClient({
       logger: mockLogger,
@@ -202,8 +182,6 @@ describe('LogsExtractionClient', () => {
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      remoteLogsExtractionClient:
-        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
     });
   });
 
@@ -244,7 +222,6 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(2);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('filebeat-*');
-      expect(result.success && result.scannedIndices).toContain('.entities.v2.updates.default');
       expect(result.success && result.scannedIndices).not.toContain(
         '.alerts-security.alerts-default'
       );
@@ -301,8 +278,6 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -413,8 +388,6 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -868,7 +841,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should filter remote index patterns from the main query and run remote extraction in parallel', async () => {
+    it('should include remote index patterns in the main extraction query', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -896,79 +869,13 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      // Main path uses local patterns only; remote client runs in parallel via strategy.buildPatterns.
+      // All patterns (local and remote) flow through the main LOOKUP JOIN path.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
       // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      expect(mockRemoteLogsExtractionClient.strategy.buildPatterns).toHaveBeenCalledWith(
-        expect.objectContaining({
-          localIndexPatterns: expect.arrayContaining(['logs-*', 'metrics-*']),
-          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
-        })
-      );
-      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
-      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: 'user',
-          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
-        })
-      );
-    });
-
-    it('should store remote errors in the saved object while main execution remains unchanged', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [
-          { name: '@timestamp', type: 'date' },
-          { name: HASHED_ID_FIELD, type: 'keyword' },
-          { name: 'entity.id', type: 'keyword' },
-        ],
-        values: [['2024-01-02T10:00:00.000Z', 'hash1', 'user:u1']],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
-      };
-
-      const remoteError = new Error('remote connection failed');
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExtractSuccessSequence(mockEsqlResponse);
-      mockIngestEntities.mockResolvedValue(undefined);
-      mockRemoteLogsExtractionClient.extractToUpdates.mockResolvedValue({
-        count: 0,
-        pages: 0,
-        error: remoteError,
-      });
-
-      const result = await client.extractLogs('user');
-
-      expect(result.success).toBe(true);
-      expect(result.success && result.count).toBe(1);
-      expect(result.success && result.scannedIndices).toContain('logs-*');
-      expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
-      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
-
-      // Remote error is stored in the saved object alongside the cleared log extraction state.
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
-        'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            checkpointTimestamp: null,
-            paginationId: null,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-          error: { message: remoteError.message, action: 'extractLogs' },
-        })
-      );
     });
 
     it('should clear a previous error after a successful extraction', async () => {

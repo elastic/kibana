@@ -337,20 +337,16 @@ await openAppMenuOverflow();
 expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
 ```
 
-## Chrome Next flag and runtime checks
+## Runtime checks
 
-Chrome layout code should use `isNextChrome(featureFlags)` from `@kbn/core-chrome-feature-flags` to
-decide which layout slots are active.
-
-App-facing React code usually should not read the flag directly. `ChromeAppHeaderRegistration`
-registers only when Chrome Next is enabled and the active chrome style is project:
+`ChromeAppHeaderRegistration` registers only when the active chrome style is project:
 
 ```ts
-chrome.next.isEnabled && chrome.getChromeStyle() === 'project';
+chrome.getChromeStyle() === 'project';
 ```
 
-When this condition is false, registration is a no-op and the existing classic/project Chrome paths
-continue to own the header area.
+When this condition is false, registration is a no-op and classic Chrome continues to own the header
+area.
 
 ## Migration guidance
 
