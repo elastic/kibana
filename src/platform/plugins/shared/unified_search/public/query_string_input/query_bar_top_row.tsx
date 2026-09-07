@@ -211,7 +211,6 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
 
   esqlEditorInitialState?: ESQLEditorProps['initialState'];
   onEsqlEditorInitialStateChange?: ESQLEditorProps['onInitialStateChange'];
-  closeHistoryOnSubmit?: ESQLEditorProps['closeHistoryOnSubmit'];
 
   /**
    * Optional configuration for ES|QL variables.
@@ -1310,7 +1309,11 @@ export const QueryBarTopRow = React.memo(
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
             onInitialStateChange={props.onEsqlEditorInitialStateChange}
-            closeHistoryOnSubmit={props.closeHistoryOnSubmit}
+            isHistoryOpen={
+              props.onEsqlEditorInitialStateChange
+                ? props.esqlEditorInitialState?.isHistoryOpen
+                : undefined
+            }
             controlsContext={
               props.esqlVariablesConfig
                 ? {

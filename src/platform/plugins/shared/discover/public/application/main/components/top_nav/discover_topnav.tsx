@@ -104,12 +104,6 @@ export const DiscoverTopNav = ({
   const closeFieldEditor = useRef<() => void | undefined>();
 
   const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
-  const onQuerySubmit = useCallback(
-    (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
-      dispatch(onQuerySubmitAction({ payload, isUpdate }));
-    },
-    [dispatch, onQuerySubmitAction]
-  );
 
   // ES|QL controls logic
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
@@ -324,12 +318,35 @@ export const DiscoverTopNav = ({
     [dispatch, setEsqlEditorUiState]
   );
   const mainDataState = useDataState(dataStateContainer.data$.main$);
+  const isUninitializedEsqlTab =
+    isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED;
   const esqlEditorInitialState = useMemo(
     () =>
-      isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED
-        ? { ...esqlEditorUiState, isHistoryOpen: true }
+      isUninitializedEsqlTab
+        ? {
+            ...esqlEditorUiState,
+            isHistoryOpen: esqlEditorUiState?.isHistoryOpen ?? true,
+          }
         : esqlEditorUiState,
-    [esqlEditorUiState, isEsqlMode, mainDataState.fetchStatus]
+    [esqlEditorUiState, isUninitializedEsqlTab]
+  );
+  const onQuerySubmit = useCallback(
+    (payload: { dateRange: TimeRange; query?: AggregateQuery | Query }, isUpdate?: boolean) => {
+      if (isUninitializedEsqlTab) {
+        onEsqlEditorInitialStateChange({
+          ...esqlEditorUiState,
+          isHistoryOpen: false,
+        });
+      }
+      dispatch(onQuerySubmitAction({ payload, isUpdate }));
+    },
+    [
+      dispatch,
+      esqlEditorUiState,
+      isUninitializedEsqlTab,
+      onEsqlEditorInitialStateChange,
+      onQuerySubmitAction,
+    ]
   );
 
   const textBasedLanguageModeErrors = useMemo(
@@ -401,7 +418,6 @@ export const DiscoverTopNav = ({
         onDraftChange={onSearchDraftChange}
         esqlEditorInitialState={esqlEditorInitialState}
         onEsqlEditorInitialStateChange={onEsqlEditorInitialStateChange}
-        closeHistoryOnSubmit={isEsqlMode && mainDataState.fetchStatus === FetchStatus.UNINITIALIZED}
         esqlVariablesConfig={
           isEsqlMode
             ? {

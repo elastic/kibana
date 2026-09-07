@@ -114,7 +114,7 @@ const ESQLEditorInternal = function ESQLEditor({
   dataTestSubj,
   allowQueryCancellation,
   hideQueryHistory,
-  closeHistoryOnSubmit,
+  isHistoryOpen: controlledIsHistoryOpen,
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
@@ -226,7 +226,8 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const isSpaceReduced = Boolean(editorIsInline) && measuredEditorWidth < BREAKPOINT_WIDTH;
 
-  const [isHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
+  const [restorableIsHistoryOpen, setIsHistoryOpen] = useRestorableState('isHistoryOpen', false);
+  const isHistoryOpen = controlledIsHistoryOpen ?? restorableIsHistoryOpen;
   const [starredQueriesService, setStarredQueriesService] =
     useState<EsqlStarredQueriesService | null>(null);
   const [isCurrentQueryStarred, setIsCurrentQueryStarred] = useState(false);
@@ -330,8 +331,6 @@ const ESQLEditorInternal = function ESQLEditor({
     onTextLangQuerySubmit,
     onQueryUpdate,
     telemetryService,
-    setIsHistoryOpen,
-    closeHistoryOnSubmit,
   });
 
   // Measure keystroke to React commit by waiting for the code state update.
