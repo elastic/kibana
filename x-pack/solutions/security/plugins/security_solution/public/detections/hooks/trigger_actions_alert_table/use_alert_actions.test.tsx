@@ -126,7 +126,6 @@ describe('useBulkAlertActionItems', () => {
       await invokeOpenAction({
         runtimeMappings: {
           valid: { type: 'keyword' },
-          // @ts-expect-error -- composite is not in MappingRuntimeFields type enum in our gen.ts
           bad: { type: 'composite', fields: {} },
         },
       });

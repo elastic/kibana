@@ -218,6 +218,71 @@ export default ({ getService }: FtrProviderContext) => {
           expect(everyAlertClosingReasonMatches).to.eql(true);
         });
 
+        it('should close alerts matched by a scripted runtime field passed via runtime_mappings', async () => {
+          // Regression test for the post-merge issues on PR #288946:
+          // runtime_fields only accepted [name, type], so the server synthesised a
+          // _source[fieldName] reader and discarded the Painless script. For scripted
+          // data view runtime fields, that reader resolves nothing → 0 docs matched.
+          // runtime_mappings is the fix: the full mapping travels verbatim to ES so
+          // the actual Painless script runs at query time.
+          const rule = {
+            ...getRuleForAlertTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccess({ supertest, log, id });
+          await waitForAlertsToBePresent(supertest, log, 10, [id]);
+
+          // The script always emits "scripted_match". Without runtime_mappings reaching
+          // ES, the field would be unknown and the term filter would match 0 docs.
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              status: 'closed',
+              query: { term: { alert_test_rt: 'scripted_match' } },
+              runtime_mappings: {
+                alert_test_rt: {
+                  type: 'keyword',
+                  script: { source: "emit('scripted_match')" },
+                },
+              },
+            })
+            .expect(200);
+
+          // If the script was discarded (old bug), the term query matches 0 docs and
+          // updated would be 0. updated > 0 proves script evaluation happened.
+          expect(body.updated).to.be.greaterThan(0);
+        });
+
+        it('should close alerts matched by a scriptless runtime field passed via runtime_mappings', async () => {
+          // Regression guard: confirms the runtime_mappings passthrough code path
+          // works for scriptless entries (no script → ES reads from _source by field
+          // name). This covers the base case that PR #288946 fixed via runtime_fields,
+          // now also covered through the new runtime_mappings param.
+          const rule = {
+            ...getRuleForAlertTesting(['auditbeat-*']),
+            query: 'process.executable: "/usr/bin/sudo"',
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccess({ supertest, log, id });
+          await waitForAlertsToBePresent(supertest, log, 10, [id]);
+
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              status: 'closed',
+              query: { term: { 'process.executable': '/usr/bin/sudo' } },
+              runtime_mappings: {
+                'process.executable': { type: 'keyword' },
+              },
+            })
+            .expect(200);
+
+          expect(body.updated).to.be.greaterThan(0);
+        });
+
         it('should be able close alerts without logging in and workflow_user is set to null', async () => {
           const rule = {
             ...getRuleForAlertTesting(['auditbeat-*']),
