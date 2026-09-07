@@ -12,12 +12,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
-  buildFlakyTestReport,
   classifyTest,
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
   rankTests,
-  readFlakyTestReport,
-  writeFlakyTestReport,
+  ScoutFlakyTests,
 } from './report';
 import { FlakyTestReportSchema, FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS } from './schema';
 import * as queries from './queries';
@@ -76,7 +74,7 @@ describe('rankTests', () => {
   });
 });
 
-describe('buildFlakyTestReport', () => {
+describe('ScoutFlakyTests.fromElasticsearch', () => {
   const log = new ToolingLog();
   const es = {} as any;
   const options = {
@@ -105,7 +103,7 @@ describe('buildFlakyTestReport', () => {
 
   it('rejects windows that reach into the frozen tier', async () => {
     await expect(
-      buildFlakyTestReport(
+      ScoutFlakyTests.fromElasticsearch(
         es,
         { ...options, lookbackDays: FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS + 1 },
         log
@@ -163,7 +161,7 @@ describe('buildFlakyTestReport', () => {
         ])
       );
 
-    const report = await buildFlakyTestReport(es, options, log);
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
     expect(fetchTestStats).toHaveBeenCalledTimes(2);
     expect(fetchTestStats).toHaveBeenCalledWith(es, expect.anything(), 'jest', [
@@ -219,7 +217,7 @@ describe('buildFlakyTestReport', () => {
     const fetchTestMetadata = jest.spyOn(queries, 'fetchTestMetadata');
     const fetchSampleFailures = jest.spyOn(queries, 'fetchSampleFailures');
 
-    const report = await buildFlakyTestReport(es, options, log);
+    const { data: report } = await ScoutFlakyTests.fromElasticsearch(es, options, log);
 
     expect(report.flaky).toEqual([]);
     expect(report.consistentlyFailing).toEqual([]);
@@ -229,15 +227,22 @@ describe('buildFlakyTestReport', () => {
   });
 });
 
-describe('writeFlakyTestReport / readFlakyTestReport', () => {
+describe('ScoutFlakyTests.writeToFile / fromFile', () => {
   let tmpDir: string;
 
   beforeEach(() => {
-    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'flaky-test-report-'));
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-flaky-tests-'));
   });
 
   afterEach(() => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('fails clearly when the file does not exist', () => {
+    const missingPath = path.join(tmpDir, 'missing.json');
+    expect(() => ScoutFlakyTests.fromFile(missingPath)).toThrow(
+      `path ${missingPath} does not exist`
+    );
   });
 
   it('round-trips a report through JSON, creating parent directories', () => {
@@ -273,8 +278,8 @@ describe('writeFlakyTestReport / readFlakyTestReport', () => {
     });
 
     const outputPath = path.join(tmpDir, 'nested', 'report.json');
-    writeFlakyTestReport(report, outputPath);
+    new ScoutFlakyTests(report).writeToFile(outputPath);
 
-    expect(readFlakyTestReport(outputPath)).toEqual(report);
+    expect(ScoutFlakyTests.fromFile(outputPath).data).toEqual(report);
   });
 });

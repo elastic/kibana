@@ -12,23 +12,21 @@ import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
+  SCOUT_FLAKY_TESTS_PATH,
   SCOUT_REPORTER_ES_API_KEY,
   SCOUT_REPORTER_ES_URL,
   SCOUT_REPORTER_ES_VERIFY_CERTS,
 } from '@kbn/scout-info';
 import { getValidatedESClient } from '../helpers/elasticsearch';
 import {
-  buildFlakyTestReport,
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
   FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS,
+  ScoutFlakyTests,
   TEST_FRAMEWORKS,
-  writeFlakyTestReport,
   type FlakyTestEntry,
   type FlakyTestReport,
   type TestFramework,
 } from '../reporting/flaky_tests';
-
-const DEFAULT_OUTPUT_PATH = 'target/flaky-test-report.json';
 
 // The per-framework aggregations scan hundreds of millions of documents; the client default of
 // 60s is not enough for them.
@@ -37,6 +35,7 @@ const ES_REQUEST_TIMEOUT_MS = 300_000;
 const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
 // Short names for the help text so its lines stay readable
+const DEFAULT_OUTPUT_PATH = path.relative(REPO_ROOT, SCOUT_FLAKY_TESTS_PATH);
 const MAX_DAYS = FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS;
 const DEF_DAYS = defaults.lookbackDays;
 const DEF_PIPELINES = defaults.pipelines.join(',');
@@ -102,13 +101,25 @@ const renderSummary = (report: FlakyTestReport, limit: number): string => {
 
 export const discoverFlakyTests: Command<void> = {
   name: 'discover-flaky-tests',
-  description:
-    'Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a ' +
-    'flaky test report written as JSON. Read-only.',
+  description: `
+  Aggregate Scout test events (Jest, FTR, Cypress, Playwright) from Elasticsearch into a
+  flaky test report and store it locally under ${DEFAULT_OUTPUT_PATH}. Read-only.
+
+  Examples:
+    # Last ${DEF_DAYS} days of ${DEF_PIPELINES}, all frameworks
+    node scripts/scout discover-flaky-tests
+
+    # Include PR builds and widen the window
+    node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14
+
+    # Only Jest and FTR, custom output path, summary suppressed
+    node scripts/scout discover-flaky-tests --frameworks jest,ftr --output target/flaky.json --quiet
+  `,
   flags: {
     string: [
       'esURL',
       'esAPIKey',
+      'esMaxRetries',
       'lookbackDays',
       'pipelines',
       'branches',
@@ -123,6 +134,7 @@ export const discoverFlakyTests: Command<void> = {
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
+      esMaxRetries: '1',
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
       lookbackDays: String(defaults.lookbackDays),
       pipelines: defaults.pipelines.join(','),
@@ -135,6 +147,7 @@ export const discoverFlakyTests: Command<void> = {
     help: `
     --esURL            (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
     --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried (default: 1)
     --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     --lookbackDays     (optional)  Days to aggregate, at most ${MAX_DAYS} (default: ${DEF_DAYS})
     --pipelines        (optional)  Comma-separated Buildkite pipeline slugs (default: ${DEF_PIPELINES})
@@ -164,12 +177,12 @@ export const discoverFlakyTests: Command<void> = {
         auth: { apiKey: esAPIKey },
         tls: { rejectUnauthorized: flagsReader.boolean('verifyTLSCerts') },
         requestTimeout: ES_REQUEST_TIMEOUT_MS,
-        maxRetries: 1,
+        maxRetries: flagsReader.requiredNumber('esMaxRetries'),
       },
       { log, cli: true }
     );
 
-    const report = await buildFlakyTestReport(
+    const flakyTests = await ScoutFlakyTests.fromElasticsearch(
       es,
       {
         lookbackDays,
@@ -186,7 +199,13 @@ export const discoverFlakyTests: Command<void> = {
       log
     );
 
-    writeFlakyTestReport(report, outputPath);
+    const { data: report } = flakyTests;
+
+    log.info(
+      `Writing ${report.summary.totalFlaky} flaky and ${report.summary.totalConsistentlyFailing}` +
+        ` consistently failing tests to ${outputPath}`
+    );
+    flakyTests.writeToFile(outputPath);
 
     // `--quiet` is one of the runner's built-in log level flags; honour it for the summary too
     if (!flagsReader.boolean('quiet')) {
@@ -195,9 +214,6 @@ export const discoverFlakyTests: Command<void> = {
       log.write('');
     }
 
-    log.success(
-      `Wrote ${report.summary.totalFlaky} flaky and ${report.summary.totalConsistentlyFailing}` +
-        ` consistently failing tests to ${outputPath}`
-    );
+    log.success(`Finished in ${(performance.now() / 1000).toFixed(2)}s`);
   },
 };

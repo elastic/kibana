@@ -124,13 +124,11 @@ const elapsed = (startedAt: number): string =>
   `${((performance.now() - startedAt) / 1000).toFixed(1)}s`;
 
 /**
- * Builds the flaky test report from the Scout test events data stream.
- *
  * Failures are rare, so everything starts from them: find files with failures, aggregate
  * per-test execution and build counts scoped to those files, then decorate the tests that clear
  * the thresholds with metadata and recent failure samples.
  */
-export const buildFlakyTestReport = async (
+const buildReport = async (
   es: ESClient,
   options: FlakyTestReportOptions,
   log: ToolingLog
@@ -248,10 +246,32 @@ export const buildFlakyTestReport = async (
   });
 };
 
-export const writeFlakyTestReport = (report: FlakyTestReport, outputPath: string): void => {
-  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, JSON.stringify(report, null, 2));
-};
+/** Flaky test report backed by the Scout test events data stream, mirroring `ScoutTestConfigStats`. */
+export class ScoutFlakyTests {
+  constructor(public data: FlakyTestReport) {}
 
-export const readFlakyTestReport = (reportPath: string): FlakyTestReport =>
-  FlakyTestReportSchema.parse(JSON.parse(fs.readFileSync(reportPath, 'utf8')));
+  writeToFile(outputPath: string): void {
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    fs.writeFileSync(outputPath, JSON.stringify(this.data, null, 2));
+  }
+
+  static fromFile(reportPath: string): ScoutFlakyTests {
+    if (!fs.existsSync(reportPath)) {
+      throw new Error(
+        `Failed while trying to parse flaky tests file: path ${reportPath} does not exist`
+      );
+    }
+
+    return new ScoutFlakyTests(
+      FlakyTestReportSchema.parse(JSON.parse(fs.readFileSync(reportPath, 'utf8')))
+    );
+  }
+
+  static async fromElasticsearch(
+    es: ESClient,
+    options: FlakyTestReportOptions,
+    log: ToolingLog
+  ): Promise<ScoutFlakyTests> {
+    return new ScoutFlakyTests(await buildReport(es, options, log));
+  }
+}
