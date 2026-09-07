@@ -231,6 +231,18 @@ export async function getAgentsByKuery(
     pitId?: string;
     pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
+    /**
+     * Optional ES `_source` filtering, passed through verbatim.
+     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
+     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
+     * you know exactly which fields the caller reads.
+     */
+    _source?: estypes.SearchRequest['_source'];
+    /**
+     * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
+     * requires. Defaults to true. Forced on when `getStatusSummary` is true.
+     */
+    includeStatusRuntimeField?: boolean;
   }
 ): Promise<{
   agents: Agent[];
@@ -257,6 +269,8 @@ export async function getAgentsByKuery(
     pitKeepAlive = '1m',
     aggregations,
     spaceId,
+    _source,
+    includeStatusRuntimeField = true,
   } = options;
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
 
@@ -299,8 +313,9 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
+  const shouldIncludeStatusRuntimeField = includeStatusRuntimeField || getStatusSummary;
   const runtimeFields = {
-    ...(await buildAgentStatusRuntimeField(soClient)),
+    ...(shouldIncludeStatusRuntimeField ? await buildAgentStatusRuntimeField(soClient) : {}),
     ...SIGNALS_RUNTIME_FIELD,
     ...(appContextService.getExperimentalFeatures().enableOpAMP
       ? PIPELINE_CONFIG_RUNTIME_FIELD
@@ -374,6 +389,7 @@ export async function getAgentsByKuery(
           },
         };
       })(),
+      ...(_source !== undefined ? { _source } : {}),
       ...(currentPitId
         ? {
             pit: {
@@ -403,7 +419,10 @@ export async function getAgentsByKuery(
 
   currentPitId = res.pit_id ?? currentPitId;
 
-  let agents = res.hits.hits.map(searchHitToAgent);
+  const toAgent = (hit: (typeof res.hits.hits)[number]) =>
+    searchHitToAgent(hit, { requireStatusRuntimeField: shouldIncludeStatusRuntimeField });
+
+  let agents = res.hits.hits.map(toAgent);
   let total = res.hits.total as number;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
@@ -416,7 +435,7 @@ export async function getAgentsByKuery(
       const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
       currentPitId = response.pit_id ?? currentPitId;
       agents = response.hits.hits
-        .map(searchHitToAgent)
+        .map(toAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
       total = agents.length;
       const start = (page - 1) * perPage;
@@ -543,7 +562,7 @@ export async function fetchAllAgentsByKuery(
         ...query,
       },
       resultsMapper: (data): Agent[] => {
-        return data.hits.hits.map(searchHitToAgent);
+        return data.hits.hits.map((hit) => searchHitToAgent(hit));
       },
     });
   } catch (err) {
@@ -662,7 +681,7 @@ async function _filterAgents(
     appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
   }
-  const agents = res.hits.hits.map(searchHitToAgent);
+  const agents = res.hits.hits.map((hit) => searchHitToAgent(hit));
   const total = res.hits.total as number;
 
   return {

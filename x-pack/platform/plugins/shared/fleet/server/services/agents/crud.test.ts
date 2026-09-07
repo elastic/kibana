@@ -570,6 +570,39 @@ describe('Agents CRUD test', () => {
       expect(searchMock.mock.calls.at(-1)[0].sort).toEqual([{ policy_id: { order: 'desc' } }]);
     });
 
+    it('should not include _source in the search body by default', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+      });
+      expect(searchMock.mock.calls[0][0]).not.toHaveProperty('_source');
+    });
+
+    it('should pass _source through when provided', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        _source: ['last_checkin', 'local_metadata.host.memory'],
+      });
+      expect(searchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: ['last_checkin', 'local_metadata.host.memory'],
+        })
+      );
+    });
+
+    it('should omit the status runtime mapping when includeStatusRuntimeField is false', async () => {
+      searchMock.mockResolvedValueOnce(getEsResponse(['1'], 1, 'online'));
+      await getAgentsByKuery(esClientMock, soClientMock, {
+        showAgentless: true,
+        showInactive: false,
+        includeStatusRuntimeField: false,
+      });
+      expect(searchMock.mock.calls[0][0].runtime_mappings).not.toHaveProperty('status');
+    });
+
     describe('status filters', () => {
       beforeEach(() => {
         searchMock.mockImplementationOnce(() => Promise.resolve(getEsResponse([], 0, 'online')));
