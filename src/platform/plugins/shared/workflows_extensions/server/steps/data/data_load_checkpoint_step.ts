@@ -12,10 +12,14 @@ import { dataLoadCheckpointStepCommonDefinition } from '../../../common/steps/da
 import { createServerStepDefinition } from '../../step_registry/types';
 
 export const buildCheckpointId = (input: {
-  source: string;
-  entity_type: string;
-  org: string;
-}): string => [input.source, input.entity_type, input.org].map(encodeURIComponent).join(':');
+  source?: string;
+  entity_type?: string;
+  org?: string;
+  id?: string;
+}): string =>
+  [input.source, input.entity_type, input.org]
+    .map((part) => encodeURIComponent(String(part)))
+    .join(':');
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -24,7 +28,8 @@ export const dataLoadCheckpointStepDefinition = createServerStepDefinition({
   ...dataLoadCheckpointStepCommonDefinition,
   handler: async (context) => {
     const { index, ...identity } = context.input;
-    const id = buildCheckpointId(identity);
+    const id =
+      'id' in identity && identity.id ? identity.id : buildCheckpointId({ ...identity, id: undefined });
 
     try {
       const response = await context.contextManager.getScopedEsClient().get({ index, id });

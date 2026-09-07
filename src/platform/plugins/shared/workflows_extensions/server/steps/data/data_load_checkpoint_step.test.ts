@@ -93,4 +93,25 @@ describe('dataLoadCheckpointStepDefinition', () => {
 
     expect(result.error?.message).toBe('cluster unavailable');
   });
+  it('addresses a checkpoint by an explicit id when one is supplied', async () => {
+    // Real SDLC sync-state ids are workflow-defined and not always a
+    // source/entity_type/org triple, e.g. github-catalog-project-items scopes
+    // per project number: "github-catalog-project-items-elastic-526".
+    const explicit = {
+      index: 'github-intel-sync-state',
+      id: 'github-catalog-project-items-elastic-526',
+    };
+    const get = jest.fn().mockResolvedValue({ _source: { cursor: 'page-7' } });
+    const context = createContext(get);
+    (context as any).input = explicit;
+    (context as any).rawInput = explicit;
+
+    const result = await dataLoadCheckpointStepDefinition.handler(context);
+
+    expect(get).toHaveBeenCalledWith({
+      index: 'github-intel-sync-state',
+      id: 'github-catalog-project-items-elastic-526',
+    });
+    expect(result).toEqual({ output: { cursor: 'page-7' } });
+  });
 });
