@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 import os
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -312,6 +313,62 @@ class WriteGithubTest(unittest.TestCase):
                 number=None,
                 run_gh=run_gh,
             )
+
+
+CLI = Path(__file__).resolve().parent / "file-bug.py"
+
+
+def run_cli(*argv, stdin=None):
+    return subprocess.run(
+        [sys.executable, str(CLI), *argv],
+        input=stdin,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+
+class FileBugCliTest(unittest.TestCase):
+    def test_decide_no_matches_json(self):
+        result = subprocess.run(
+            [sys.executable, str(CLI), "decide", "--matches", "-"],
+            input='{"matches":[]}',
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(json.loads(result.stdout)["action"], "create")
+
+    def test_decide_two_matches_exits_2_with_candidates(self):
+        result = run_cli(
+            "decide",
+            "--matches",
+            "-",
+            stdin=json.dumps(
+                {
+                    "matches": [
+                        {"number": 1, "state": "open", "title": "A"},
+                        {"number": 2, "state": "closed", "title": "B"},
+                    ]
+                }
+            ),
+        )
+        self.assertEqual(result.returncode, 2)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["action"], "ask")
+        self.assertEqual(len(payload["candidates"]), 2)
+
+    def test_render_body_prints_template_headings(self):
+        result = run_cli(
+            "render-body",
+            "--finding",
+            str(FIXTURES / "finding.json"),
+            "--config",
+            str(FIXTURES / "session-config.json"),
+        )
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("**Steps to reproduce:**", json.loads(result.stdout)["body"])
 
 
 if __name__ == "__main__":
