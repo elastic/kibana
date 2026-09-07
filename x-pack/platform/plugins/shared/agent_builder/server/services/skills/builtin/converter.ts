@@ -6,8 +6,15 @@
  */
 
 import type { SkillDefinition, InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
+import type { AvailabilityCache } from '../../common/availability_cache';
 
-export const convertBuiltinSkill = (skill: SkillDefinition): InternalSkillDefinition => ({
+export const convertBuiltinSkill = ({
+  skill,
+  cache,
+}: {
+  skill: SkillDefinition;
+  cache: AvailabilityCache;
+}): InternalSkillDefinition => ({
   id: skill.id,
   name: skill.name,
   description: skill.description,
@@ -21,4 +28,7 @@ export const convertBuiltinSkill = (skill: SkillDefinition): InternalSkillDefini
   basePath: skill.basePath,
   getRegistryTools: () => skill.getRegistryTools?.() ?? [],
   getInlineTools: skill.getInlineTools,
+  isAvailable: skill.availability
+    ? (ctx) => cache.getOrCompute(skill.id, skill.availability!, ctx)
+    : undefined,
 });

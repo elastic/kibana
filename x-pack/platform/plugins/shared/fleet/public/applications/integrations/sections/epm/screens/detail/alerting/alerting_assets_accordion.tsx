@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 
-import { useStartServices } from '../../../../../hooks';
+import { useAlertingV2RuleLibraryLocator, useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
 import { AssetsAccordion, type DisplayedAssetType } from '../assets/assets_accordion';
 
@@ -49,8 +49,15 @@ const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaL
 };
 
 const getAlertingAssetTitleHref = (
-  asset: Pick<AlertingAsset, 'attributes' | 'appLink'>
-): string | undefined => (isV2AlertingAsset(asset) ? undefined : asset.appLink);
+  asset: Pick<AlertingAsset, 'id' | 'attributes' | 'appLink'>,
+  type: DisplayedAssetType,
+  getRuleLibraryRedirectUrl?: (params: { templateId?: string }) => string | undefined
+): string | undefined => {
+  if (type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)) {
+    return getRuleLibraryRedirectUrl?.({ templateId: asset.id });
+  }
+  return asset.appLink;
+};
 
 const listAlertingAssets = (
   savedObjects: AlertingAsset[],
@@ -142,6 +149,7 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
   type: DisplayedAssetType;
   savedObjects: AlertingAsset[];
 }> = ({ savedObjects, type }) => {
+  const ruleLibraryLocator = useAlertingV2RuleLibraryLocator();
   const {
     listedSavedObjects,
     visibleSavedObjects,
@@ -172,7 +180,11 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
           ? (asset) => <AlertingEngineBadge engine={asset.attributes?.engine} />
           : undefined
       }
-      getTitleHref={getAlertingAssetTitleHref}
+      getTitleHref={(asset) =>
+        getAlertingAssetTitleHref(asset, type, (params) =>
+          ruleLibraryLocator?.getRedirectUrl(params)
+        )
+      }
     />
   );
 };

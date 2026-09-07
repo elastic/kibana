@@ -21,6 +21,7 @@ import {
 import { toEntries } from 'fp-ts/Record';
 
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { ALERT_ENTITY_ID } from '../../../../common/field_maps/field_names';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -479,8 +480,37 @@ export const buildRiskScoreBucket =
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
+ * Painless runtime mapping for `entity_id` that reads from the pre-stamped
+ * `kibana.alert.entity.id` field when present (O(1) doc-value read), falling
+ * back to the full Painless EUID derivation for older alerts that predate the
+ * stamp. The stored field is an array; only the value matching the entity
+ * type's prefix (e.g. "host:") is used so multi-entity alerts are handled
+ * correctly.
+ */
+export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
+  entityType: EntityType
+): { type: 'keyword'; script: { source: string } } => {
+  const evalScript = euid.painless.getEuidEvaluation(entityType);
+  const typePrefix = `${entityType}:`;
+
+  const source = [
+    `String ___euid_rt_eval(def doc) { ${evalScript} }`,
+    `if (doc.containsKey('${ALERT_ENTITY_ID}') && doc['${ALERT_ENTITY_ID}'].size() > 0) {`,
+    `  for (def __id : doc['${ALERT_ENTITY_ID}']) {`,
+    `    if (__id != null && __id.startsWith('${typePrefix}')) { emit(__id); return; }`,
+    `  }`,
+    `}`,
+    `String ___euid = ___euid_rt_eval(doc); if (___euid != null) { emit(___euid); }`,
+  ].join(' ');
+
+  return { type: 'keyword', script: { source } };
+};
+
+/**
  * Builds a composite aggregation that paginates by entity_id (EUID).
- * Uses a Painless runtime mapping from euid.painless.getEuidRuntimeMapping() to compute entity_id server-side.
+ * Uses a Painless runtime mapping that first checks the pre-stamped
+ * `kibana.alert.entity.id` field (fast path) and falls back to full
+ * derivation for alerts without it.
  * Returns bounds (first and last EUID on the page) that are passed to getBaseScoreESQL().
  */
 export const getEuidCompositeQuery = (
@@ -493,7 +523,7 @@ export const getEuidCompositeQuery = (
     runtimeMappings?: MappingRuntimeFields;
   }
 ) => {
-  const runtimeMapping = euid.painless.getEuidRuntimeMapping(entityType);
+  const runtimeMapping = buildEuidRuntimeMappingWithStoredFieldFastPath(entityType);
 
   return {
     index: params.index,
@@ -561,6 +591,19 @@ export const getBaseScoreESQL = (
     : undefined;
   const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
 
+  // Prefer the pre-stamped field over the EVAL-derived value. The array holds at most one EUID
+  // per entity type (host/user/service), so at most 3 elements. Scan all positions with
+  // MV_SLICE so multi-entity alerts are handled regardless of write order, mirroring the
+  // Painless loop in buildEuidRuntimeMappingWithStoredFieldFastPath.
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  const storedEuidCoalesceClause =
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
+    `entity_id)`;
+
   // Filter on entity_id (computed from cheap field evals) BEFORE the
   // CONCAT/base64 builders run, so non-matching alerts skip the per-row
   // string-allocation work.
@@ -570,6 +613,7 @@ export const getBaseScoreESQL = (
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
     ${euidEvalClause}
+    ${storedEuidCoalesceClause}
     | WHERE ${rangeClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
@@ -649,9 +693,18 @@ export const getResolutionScoreESQLByIds = (
 
   const idsClause = resolutionTargetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
 
-  // Compute entity_id (cheap), then LOOKUP JOIN to recover
-  // resolution_target_id, then filter on resolution_target_id BEFORE the
-  // CONCAT/base64 builders run so per-row string-allocation work only
+  const f = ALERT_ENTITY_ID;
+  const p = `"${entityType}:"`;
+  const storedEuidCoalesceClause =
+    `| EVAL entity_id = CASE(` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 0, 0)), ${p}), MV_FIRST(MV_SLICE(${f}, 0, 0)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 1, 1)), ${p}), MV_FIRST(MV_SLICE(${f}, 1, 1)), ` +
+    `STARTS_WITH(MV_FIRST(MV_SLICE(${f}, 2, 2)), ${p}), MV_FIRST(MV_SLICE(${f}, 2, 2)), ` +
+    `entity_id)`;
+
+  // Compute entity_id (cheap), then override with the pre-stamped field when present,
+  // then LOOKUP JOIN to recover resolution_target_id, then filter on resolution_target_id
+  // BEFORE the CONCAT/base64 builders run so per-row string-allocation work only
   // happens for alerts that survive the IN-clause.
   const query = /* esql */ `
   SET unmapped_fields="nullify";
@@ -659,6 +712,7 @@ export const getResolutionScoreESQLByIds = (
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
     ${euidEvalClause}
+    ${storedEuidCoalesceClause}
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
            relationship_type = COALESCE(relationship_type, "self")

@@ -136,7 +136,12 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
                 defaultMessage: 'Create component template',
               })
         }
-        back="/app/management/data/index_management/component_templates"
+        back={{
+          href: '/app/management/data/index_management/component_templates',
+          label: i18n.translate('xpack.idxMgmt.createComponentTemplate.backToListLabel', {
+            defaultMessage: 'Component templates',
+          }),
+        }}
         spacing="bleed"
       />
 

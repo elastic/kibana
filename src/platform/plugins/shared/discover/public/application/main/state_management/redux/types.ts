@@ -10,7 +10,7 @@
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { RefreshInterval, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableColumnsMeta, DataTableRecord, DiscoverTabType } from '@kbn/discover-utils';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -19,7 +19,12 @@ import type {
   DiscoverSession,
   VIEW_MODE,
 } from '@kbn/saved-search-plugin/common';
-import type { DataGridDensity, UnifiedDataTableRestorableState } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+  UnifiedDataTableRestorableState,
+} from '@kbn/unified-data-table';
 import type {
   UnifiedFieldListRestorableState,
   UnifiedFieldListSidebarContainerProps,
@@ -131,6 +136,14 @@ export interface DiscoverAppState {
    */
   density?: DataGridDensity;
   /**
+   * Documents display mode: 'table' or 'json'
+   */
+  documentsDisplayMode?: DocumentsDisplayMode;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode
+   */
+  jsonModeSettings?: JsonModeSettings;
+  /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
   esqlApproximation?: boolean;
@@ -205,6 +218,7 @@ export interface TabState extends TabItem {
   initialInternalState?: {
     serializedSearchSource?: SerializedSearchSourceFields;
     searchSessionId?: string;
+    tabType?: DiscoverTabType;
   };
 
   // Persistable attributes of the tab (stored in Discover Session and in local storage).

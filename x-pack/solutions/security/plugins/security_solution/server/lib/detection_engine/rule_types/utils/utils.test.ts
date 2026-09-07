@@ -639,7 +639,7 @@ describe('utils', () => {
           lists: getListArrayMock(),
           shouldFilterOutEndpointExceptions: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
       );
     });

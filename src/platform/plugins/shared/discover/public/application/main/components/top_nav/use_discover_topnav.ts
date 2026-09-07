@@ -19,7 +19,6 @@ import {
   useCurrentDataView,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
 export const useDiscoverTopNav = ({
   onOpenSaveModal,
@@ -47,7 +46,6 @@ export const useDiscoverTopNav = ({
   const dataView = useCurrentDataView();
   const adHocDataViews = useAdHocDataViews();
   const isEsqlMode = useIsEsqlMode();
-  const hasShareIntegration = useHasShareIntegration(services);
 
   const { menu: topNavMenu, shareAction } = useTopNavLinks({
     dataView,
@@ -55,7 +53,6 @@ export const useDiscoverTopNav = ({
     hasUnsavedChanges,
     isEsqlMode,
     adHocDataViews,
-    hasShareIntegration,
     persistedDiscoverSession,
     onOpenSaveModal,
     onOpenSaveAsModal,

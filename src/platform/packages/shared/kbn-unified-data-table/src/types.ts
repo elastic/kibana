@@ -16,6 +16,7 @@ import type {
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
@@ -65,7 +66,15 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
-export type SourceDisplayMode = 'summary' | 'json';
+export type DocumentsDisplayMode = 'table' | 'json';
+
+/**
+ * Settings that only apply while the source column is rendered in JSON mode.
+ */
+export interface JsonModeSettings extends SerializableRecord {
+  hideNulls?: boolean;
+  wrapLines?: boolean;
+}
 
 export type CustomBulkActions = Array<
   Omit<React.ComponentProps<typeof EuiContextMenuItem>, 'onClick'> & {

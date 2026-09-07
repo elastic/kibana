@@ -39,7 +39,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
@@ -52,7 +55,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base/app/dashboards" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base/app/dashboards', label: 'Dashboards' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',

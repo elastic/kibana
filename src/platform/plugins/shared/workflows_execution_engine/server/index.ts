@@ -19,10 +19,23 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
+  DataClient,
+  GetStepExecutionsByIdsOptions,
+  GetWorkflowExecutionsByIdsOptions,
+  StepExecutionsDataClient,
   TriggerEventsContract,
+  WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginSetup,
   WorkflowsExecutionEnginePluginStart,
 } from './types';
+
+export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
+
+export {
+  registerHitlLifecycleAuditor,
+  type HitlLifecycleAuditor,
+  type HitlLifecycleEvent,
+} from './step/wait_for_input_step/hitl_lifecycle_auditor';
 
 export type {
   LogsRepository,

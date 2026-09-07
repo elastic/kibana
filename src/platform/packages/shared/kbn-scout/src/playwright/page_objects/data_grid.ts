@@ -84,9 +84,7 @@ export class DataGrid {
   }
 
   async changeRowsPerPageTo(rowsPerPage: number) {
-    await this.getPaginationContainer()
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .click();
+    await this.getRowsPerPageButton().click();
     const option = this.page.testSubj.locator(`tablePagination-${rowsPerPage}-rows`);
     await option.waitFor({ state: 'visible' });
     await option.click();
@@ -195,6 +193,30 @@ export class DataGrid {
     );
   }
 
+  /** The "Rows per page: N" toolbar button. Absent in `singlePage` pagination mode. */
+  getRowsPerPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="tablePaginationPopoverButton"]');
+  }
+
+  getPreviousPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="pagination-button-previous"]');
+  }
+
+  getNextPageButton(): Locator {
+    return this.getPaginationContainer().locator('[data-test-subj="pagination-button-next"]');
+  }
+
+  /**
+   * Returns an additional leading control for a single row, e.g. a control contributed by a
+   * Discover profile. Row-scoped on purpose: the controls share a test subject across rows, so
+   * indexing a page-wide list would depend on how many rows and grids the page happens to render.
+   */
+  getRowLeadingControl(rowIndex: number, controlTestSubj: string): Locator {
+    return this.page.locator(
+      `[data-grid-visible-row-index="${rowIndex}"] [data-test-subj="${controlTestSubj}"]`
+    );
+  }
+
   async getCurrentRowHeight(scope: 'row' | 'header' = 'row'): Promise<DataGridRowHeight> {
     const buttonGroup = this.page.testSubj.locator(
       `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
@@ -208,9 +230,7 @@ export class DataGrid {
   }
 
   async getCurrentRowsPerPage(): Promise<number> {
-    const buttonText = await this.getPaginationContainer()
-      .locator('[data-test-subj="tablePaginationPopoverButton"]')
-      .innerText();
+    const buttonText = await this.getRowsPerPageButton().innerText();
     const rowsPerPage = buttonText.match(/Rows per page:\s*(\d+)/)?.[1];
 
     if (!rowsPerPage) {
@@ -605,7 +625,7 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+    await expect(table).toHaveAttribute('data-table-loaded', 'true', {
       timeout: totalTimeoutMs,
     });
   }

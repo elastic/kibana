@@ -204,6 +204,38 @@
       "reason": "OAS accuracy fix: the Zod converter now collapses .nullable() to `nullable: true` instead of leaving a half-converted `anyOf: [T, { nullable: true }]` wrapper. Same set of accepted values, canonical OAS 3.0 spelling. No runtime behavior change.",
       "approvedBy": "@elastic/security-entity-analytics",
       "oasdiffId": "request-property-any-of-removed"
+    },
+    {
+      "path": "/api/detection_engine/rules/preview",
+      "method": "post",
+      "reason": "Security Solution sets max_signals default value in applyRuleDefaults and Zod schema. The latter started breaking rule PATCH API after Zod v4 migration by defaulting max_signals to 100 and overriding any existing value. Removing max_signals default value from the Zod schema to fix the issue,",
+      "approvedBy": "@elastic/security-detection-engineering",
+      "oasdiffId": "request-body-any-of-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/286518"
+    },
+    {
+      "path": "/api/agent_builder/converse",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/converse/async",
+      "method": "post",
+      "reason": "Param was only used by the Kibana UI and feature is removed",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-removed",
+      "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/conversations",
+      "method": "post",
+      "reason": "agent_id maxLength validation added to route, it was already done in the request.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/286654"
     }
   ]
 }

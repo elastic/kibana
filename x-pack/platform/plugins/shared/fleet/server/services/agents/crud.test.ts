@@ -885,6 +885,55 @@ describe('Agents CRUD test', () => {
 
       expect(searchMock).toHaveBeenCalledTimes(3);
     });
+
+    it('should not include _source in the search body by default', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {})) {
+        // consume to trigger search
+      }
+      expect(searchMock.mock.calls[0][0]).not.toHaveProperty('_source');
+    });
+
+    it('should pass _source through when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ _source: ['policy_id'] }));
+    });
+
+    it('should pass fetchFields through as fields param when provided', async () => {
+      searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+      for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        fetchFields: ['status'],
+      })) {
+        // consume to trigger search
+      }
+      expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ fields: ['status'] }));
+    });
+
+    it('should map agents correctly from filtered _source', async () => {
+      const mock = createEsSearchResultMock(['agent-1']);
+      mock.hits.hits[0]._source = {
+        policy_id: 'p1',
+        local_metadata: { host: { hostname: 'h1' } },
+      } as any;
+      searchMock.mockResolvedValueOnce(mock).mockResolvedValueOnce(createEsSearchResultMock([]));
+
+      const agents: Agent[] = [];
+      for await (const page of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+        _source: ['policy_id', 'local_metadata.host.hostname'],
+      })) {
+        agents.push(...page);
+      }
+
+      expect(agents[0].id).toBe('agent-1');
+      expect(agents[0].policy_id).toBe('p1');
+      expect(agents[0].status).toBe('online');
+      expect((agents[0] as any).type).toBeUndefined();
+    });
   });
 });
 

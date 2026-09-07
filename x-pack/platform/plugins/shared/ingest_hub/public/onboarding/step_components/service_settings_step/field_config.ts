@@ -81,15 +81,17 @@ export function resolveFieldMeta(
  */
 export function toTyped(raw: string | undefined, meta: FieldMeta): string | boolean | string[] {
   if (meta.isBool) return raw === undefined ? meta.def.default === true : raw === 'true';
-  if (meta.multi)
-    return raw
-      ? raw
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-  // For unset text/duration/etc fields, surface the manifest default so the flyout pre-fills.
-  if (raw === undefined && typeof meta.def.default === 'string') return meta.def.default;
+  if (meta.multi) {
+    if (raw)
+      return raw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    if (raw === undefined && Array.isArray(meta.def.default)) return meta.def.default as string[];
+    return [];
+  }
+  // For unset fields, surface the manifest default (string or number/duration) so the flyout pre-fills.
+  if (raw === undefined && meta.def.default != null) return String(meta.def.default);
   return raw ?? '';
 }
 
@@ -111,6 +113,10 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
   return service?.defaultEnabledInputs?.[0] ?? service?.inputs?.[0] ?? null;
 }
 
+// TODO: add the "Create dedicated index template for custom dataset (recommended)" switch
+// that Fleet shows in advanced options for input packages when data_stream.dataset is customised
+// (package_policy_input_stream.tsx, rendered after advancedVars when showPipelinesAndMappings is true).
+// It is a Fleet UI construct, not a manifest var — needs Fleet's useIndexTemplateExists hook.
 export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeInput: string | null
@@ -119,23 +125,34 @@ export function getFlyoutFields(
   return allFields.filter((f) => {
     const meta = resolveFieldMeta(service, activeInput, f);
     if (!meta) return false;
-    if (!meta.showUser) return false;
     // Bool fields are rendered as switches in their own section; exclude from text flyout fields.
     if (meta.isBool) return false;
+    // show_user:false vars intentionally surface here (under Advanced options via isAdvancedVar)
+    // to match the Integrations UI which shows all vars regardless of show_user.
     return true;
   });
 }
 
 export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
+function hasConfigurableFlyoutFieldsForInput(
+  service: AwsServiceMatrixEntry,
+  activeInput: string | null
+): boolean {
+  if (getRequiredTextFields(service, activeInput).length > 0) return true;
+  if (getRequiredBooleanFields(service, activeInput).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, activeInput);
+  const requiredSet = new Set(getRequiredTextFields(service, activeInput));
+  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+}
+
 /** Returns true when the flyout has at least one visible field for the given service. */
 export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
-  const defaultInput = getDefaultInput(service);
-  if (getRequiredTextFields(service, defaultInput).length > 0) return true;
-  if (getRequiredBooleanFields(service, defaultInput).length > 0) return true;
-  const flyoutFields = getFlyoutFields(service, defaultInput);
-  const requiredSet = new Set(getRequiredTextFields(service, defaultInput));
-  return flyoutFields.some((f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f));
+  const allInputs = service.inputs;
+  if (!allInputs || allInputs.length === 0) {
+    return hasConfigurableFlyoutFieldsForInput(service, getDefaultInput(service));
+  }
+  return allInputs.some((input) => hasConfigurableFlyoutFieldsForInput(service, input));
 }
 
 export function getRegionFieldName(
@@ -146,6 +163,7 @@ export function getRegionFieldName(
   if (activeInput === 'aws-s3' && rc.includes('region')) return 'region';
   if (activeInput === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
   if (rc.includes('aws_region')) return 'aws_region';
+  if (rc.includes('region')) return 'region'; // input packages (e.g. otelcol)
   return 'aws_region';
 }
 

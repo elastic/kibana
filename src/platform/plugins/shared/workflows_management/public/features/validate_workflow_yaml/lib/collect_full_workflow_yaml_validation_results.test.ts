@@ -12,6 +12,7 @@ import { monaco } from '@kbn/code-editor';
 const structuralResult: YamlValidationResult = {
   id: 'structural-error',
   owner: 'variable-validation',
+  ruleId: 'invalidVariableReference',
   severity: 'error',
   message: 'Structural error',
   startLineNumber: 1,
@@ -25,6 +26,7 @@ const structuralResult: YamlValidationResult = {
 const connectorResult: YamlValidationResult = {
   id: 'connector-error',
   owner: 'connector-id-validation',
+  ruleId: 'connectorNotFound',
   severity: 'error',
   message: 'Missing connector',
   startLineNumber: 2,
@@ -38,6 +40,7 @@ const connectorResult: YamlValidationResult = {
 const graphResult: YamlValidationResult = {
   id: 'graph-error',
   owner: 'graph-build-validation',
+  ruleId: 'graphBuildError',
   severity: 'error',
   message: 'Graph build failed',
   startLineNumber: 3,
@@ -51,6 +54,7 @@ const graphResult: YamlValidationResult = {
 const workflowInputResult: YamlValidationResult = {
   id: 'workflow-input-error',
   owner: 'workflow-inputs-validation',
+  ruleId: 'unknownInputKey',
   severity: 'error',
   message: 'Invalid workflow input',
   startLineNumber: 5,
@@ -64,6 +68,7 @@ const workflowInputResult: YamlValidationResult = {
 const stepPropertyResult: YamlValidationResult = {
   id: 'step-property-error',
   owner: 'step-property-validation',
+  ruleId: 'invalidStepProperty',
   severity: 'error',
   message: 'Invalid step property',
   startLineNumber: 4,
@@ -77,6 +82,7 @@ const stepPropertyResult: YamlValidationResult = {
 const esqlResult: YamlValidationResult = {
   id: 'esql-error',
   owner: 'esql-validation',
+  ruleId: 'esqlDiagnostic',
   severity: 'error',
   message: 'Invalid ES|QL',
   startLineNumber: 6,
@@ -142,6 +148,10 @@ describe('collectFullWorkflowYamlValidationResults', () => {
 
   const computed = performComputation(yaml);
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('layers contextual validators on top of structural validation', async () => {
     const model = monaco.editor.createModel(yaml, 'yaml');
 
@@ -155,7 +165,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
-        connectorTypes: {},
+        connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
         getPropertyHandler: () => null,
@@ -182,6 +192,39 @@ describe('collectFullWorkflowYamlValidationResults', () => {
     model.dispose();
   });
 
+  it.each([
+    { label: 'loading', connectorTypes: { status: 'loading' as const } },
+    {
+      label: 'failed',
+      connectorTypes: { status: 'failed' as const, error: 'Connector request failed' },
+    },
+  ])('defers connector checks when metadata is $label', async ({ connectorTypes }) => {
+    const model = monaco.editor.createModel(yaml, 'yaml');
+
+    const results = await collectFullWorkflowYamlValidationResults({
+      yamlString: yaml,
+      model,
+      yamlDocument: computed.yamlDocument!,
+      lineCounter: computed.yamlLineCounter!,
+      workflowLookup: computed.workflowLookup,
+      workflowGraph: computed.workflowGraph,
+      workflowDefinition: computed.workflowDefinition ?? undefined,
+      graphBuildError: computed.graphBuildError,
+      context: {
+        connectorTypes,
+        connectorsManagementUrl: 'http://test/connectors',
+        workflows: { workflows: {}, totalWorkflows: 0 },
+        getPropertyHandler: () => null,
+        esqlCallbacks: {},
+      },
+    });
+
+    expect(validateConnectorIds).not.toHaveBeenCalled();
+    expect(results).not.toContain(connectorResult);
+
+    model.dispose();
+  });
+
   it('includes step-property validation when step property items are collected', async () => {
     mockCollectAllStepPropertyItems.mockReturnValueOnce([{ stepId: 'hello' }]);
     mockValidateStepProperties.mockResolvedValueOnce([stepPropertyResult]);
@@ -198,7 +241,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
-        connectorTypes: {},
+        connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
         getPropertyHandler: () => null,
@@ -228,7 +271,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
-        connectorTypes: {},
+        connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
         getPropertyHandler: () => null,
@@ -260,7 +303,7 @@ describe('collectFullWorkflowYamlValidationResults', () => {
       workflowDefinition: computed.workflowDefinition ?? undefined,
       graphBuildError: computed.graphBuildError,
       context: {
-        connectorTypes: {},
+        connectorTypes: { status: 'ready', value: {} },
         connectorsManagementUrl: 'http://test/connectors',
         workflows: { workflows: {}, totalWorkflows: 0 },
         getPropertyHandler: () => null,
