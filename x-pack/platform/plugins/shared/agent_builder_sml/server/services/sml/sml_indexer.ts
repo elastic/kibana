@@ -97,6 +97,27 @@ export interface SmlIndexer {
   }) => Promise<void>;
 }
 
+const withNamespace = (
+  client: SavedObjectsClientContract,
+  namespace: string
+): SavedObjectsClientContract => {
+  const wrapped = Object.create(client) as SavedObjectsClientContract;
+  wrapped.get = (type, id, opts) => client.get(type, id, { ...opts, namespace });
+  wrapped.bulkGet = (objects, opts) =>
+    client.bulkGet(
+      objects.map(({ namespaces: _namespaces, ...object }) => object),
+      { ...opts, namespace }
+    );
+  wrapped.resolve = (type, id, opts) => client.resolve(type, id, { ...opts, namespace });
+  wrapped.bulkResolve = (objects, opts) => client.bulkResolve(objects, { ...opts, namespace });
+  return wrapped;
+};
+
+const namespaceForSpaces = (spaces: string[]): string | undefined => {
+  const [firstSpace] = spaces;
+  return !firstSpace || firstSpace === 'default' || firstSpace === '*' ? undefined : firstSpace;
+};
+
 export const createSmlIndexer = ({ registry, logger }: SmlIndexerDeps): SmlIndexer => {
   return new SmlIndexerImpl({ registry, logger });
 };
@@ -119,6 +140,7 @@ class SmlIndexerImpl implements SmlIndexer {
       esClient,
       savedObjectsClient,
       logger: contextLogger,
+      clientHasSpacesExtension = false,
     } = params;
     const originUri = `${attachmentType}://${originId}`;
 
@@ -159,9 +181,15 @@ class SmlIndexerImpl implements SmlIndexer {
       }
     }
 
+    // Internal repos need an explicit namespace to access non-default spaces
+    const internalNamespace = clientHasSpacesExtension ? undefined : namespaceForSpaces(spaces);
+    const wrappedClient = internalNamespace
+      ? withNamespace(savedObjectsClient as SavedObjectsClientContract, internalNamespace)
+      : (savedObjectsClient as SavedObjectsClientContract);
+
     const context: SmlContext = {
       esClient,
-      savedObjectsClient: savedObjectsClient as SavedObjectsClientContract,
+      savedObjectsClient: wrappedClient,
       logger: contextLogger,
     };
 
