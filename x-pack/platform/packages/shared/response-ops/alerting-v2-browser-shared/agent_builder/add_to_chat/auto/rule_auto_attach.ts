@@ -14,10 +14,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { registerAutoAttach } from './auto_attach';
 import type { AttachmentConverter } from '../../types/attachment_converter';
 
-type PendingRuleAttachment = AttachmentInput<
-  typeof RULE_ATTACHMENT_TYPE,
-  RuleAttachmentData
->;
+type PendingRuleAttachment = AttachmentInput<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
 export const ruleAttachmentConverter: AttachmentConverter<RuleResponse> = {
   toAttachment: (rule): PendingRuleAttachment => ({

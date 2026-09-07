@@ -134,9 +134,7 @@ describe('useAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'test:item-2' })
-    );
+    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'test:item-2' }));
   });
 
   it('does not stage when item is undefined', () => {

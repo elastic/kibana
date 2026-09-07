@@ -106,9 +106,7 @@ describe('useManualAddToChat', () => {
       result.current.addToChat();
     });
 
-    expect(addAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'test:item-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ id: 'test:item-1' }));
     expect(openChat).not.toHaveBeenCalled();
   });
 

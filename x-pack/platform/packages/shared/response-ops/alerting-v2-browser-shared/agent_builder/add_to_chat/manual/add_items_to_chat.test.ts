@@ -113,13 +113,7 @@ describe('addItemsToChat', () => {
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ id: 'test:a' })
-    );
-    expect(addAttachment).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ id: 'test:b' })
-    );
+    expect(addAttachment).toHaveBeenNthCalledWith(1, expect.objectContaining({ id: 'test:a' }));
+    expect(addAttachment).toHaveBeenNthCalledWith(2, expect.objectContaining({ id: 'test:b' }));
   });
 });

@@ -6,10 +6,7 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import {
-  EPISODE_ATTACHMENT_TYPE,
-  type EpisodeAttachmentData,
-} from '@kbn/alerting-v2-schemas';
+import { EPISODE_ATTACHMENT_TYPE, type EpisodeAttachmentData } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import type { AttachmentConverter } from './attachment_converter';
 import type { FocusedEpisode } from './focused_episode';

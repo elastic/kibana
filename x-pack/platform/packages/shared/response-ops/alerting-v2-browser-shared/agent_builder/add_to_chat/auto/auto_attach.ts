@@ -8,7 +8,6 @@
 import { combineLatest, Subscription, type Observable } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { AttachmentConverter } from '../../types/attachment_converter';
 
