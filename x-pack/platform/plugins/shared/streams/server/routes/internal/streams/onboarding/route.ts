@@ -65,7 +65,7 @@ export const onboardingTaskRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient, streamsClient } = await getScopedClients({
       request,
     });
 
@@ -76,6 +76,8 @@ export const onboardingTaskRoute = createServerRoute({
       query,
       body,
     } = params;
+
+    await streamsClient.ensureStream(streamName);
 
     const { saveQueries } = query;
 
@@ -128,7 +130,7 @@ export const onboardingStatusRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient, streamsClient } = await getScopedClients({
       request,
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -137,6 +139,9 @@ export const onboardingStatusRoute = createServerRoute({
       path: { streamName },
       query: { saveQueries },
     } = params;
+
+    await streamsClient.assertReadAccess(streamName);
+
     const taskId = getOnboardingTaskId(streamName, saveQueries);
 
     return taskClient.getStatus<OnboardingTaskParams, OnboardingResult>(taskId);
