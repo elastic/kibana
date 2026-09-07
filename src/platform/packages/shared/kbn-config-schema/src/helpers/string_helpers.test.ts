@@ -123,7 +123,7 @@ test('preserves custom validation, coercion, defaults and metadata in reporting 
   expect(validate).toHaveBeenCalledWith('123');
   expect(() => reporting.validate('xxx')).toThrow('invalid prefix');
   expect(reporting.validate(undefined)).toBe('id');
-  expect(reporting.getSchema().describe().flags?.description).toBe('An ID');
+  expect(reporting.getSchema().describe()).toMatchObject({ flags: { description: 'An ID' } });
 });
 
 test('exports accurate OpenAPI length metadata in both modes', () => {
