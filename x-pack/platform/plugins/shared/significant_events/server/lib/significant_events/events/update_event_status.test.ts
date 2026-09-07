@@ -123,6 +123,7 @@ describe('updateSignificantEventStatus', () => {
       severity: '60-high',
       severity_assessments: severityAssessments,
     });
+
     const { client, dataStreamClient } = createEventClient([existing]);
 
     await updateSignificantEventStatus({
@@ -136,6 +137,21 @@ describe('updateSignificantEventStatus', () => {
       severity: '60-high',
       severity_assessments: severityAssessments,
     });
+  });
+
+  it('records an assessment note with an automated status change', async () => {
+    const existing = createSignificantEvent({ event_uuid: 'event-1', status: 'open' });
+    const { client, dataStreamClient } = createEventClient([existing]);
+
+    await updateSignificantEventStatus({
+      eventClient: client,
+      eventUuid: 'event-1',
+      status: 'closed',
+      assessmentNote: 'Automatically closed by cleanup.',
+    });
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    expect(callArg.documents[0].assessment_note).toBe('Automatically closed by cleanup.');
   });
 
   it('ignores when the event is not found', async () => {

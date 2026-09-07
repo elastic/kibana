@@ -58,6 +58,16 @@ consts:
   INVESTIGATABLE_SEVERITIES: ['80-critical', '60-high']
 
 steps:
+  - name: bootstrap_cleanup_workflow
+    type: kibana.request
+    with:
+      method: POST
+      path: '/s/{{ workflow.spaceId }}/internal/significant_events/maintenance/cleanup/_bootstrap'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+    on-failure:
+      continue: true
+
   - name: check_budget
     type: kibana.request
     if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
