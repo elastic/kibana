@@ -181,7 +181,7 @@ exports[`LoginPage disabled form states renders as expected when a connection to
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -243,7 +243,7 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -305,7 +305,7 @@ exports[`LoginPage disabled form states renders as expected when login is not en
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -367,7 +367,7 @@ exports[`LoginPage disabled form states renders as expected when secure connecti
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -429,7 +429,7 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -491,7 +491,7 @@ exports[`LoginPage disabled form states renders warning when cookies are disable
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+          class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
         >
           <div
             class="euiText emotion-euiText-s-euiTextColor-danger"
@@ -553,7 +553,7 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
           data-test-subj="loginForm"
         >
           <form>
@@ -756,7 +756,7 @@ exports[`LoginPage enabled form state renders as expected when loginAssistanceMe
           </div>
         </div>
         <div
-          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
           data-test-subj="loginForm"
         >
           <form>
@@ -940,7 +940,7 @@ exports[`LoginPage enabled form state renders as expected when loginHelp is set 
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
           data-test-subj="loginForm"
         >
           <form>
@@ -1138,7 +1138,7 @@ exports[`LoginPage page renders as expected 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
           data-test-subj="loginForm"
         >
           <form>
@@ -1329,7 +1329,7 @@ exports[`LoginPage page renders with custom branding 1`] = `
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent"
+          class="euiPanel euiPanel--transparent euiPanel--paddingMedium emotion-euiPanel-grow-m-m-transparent-hasBorder"
           data-test-subj="loginForm"
         >
           <form>
