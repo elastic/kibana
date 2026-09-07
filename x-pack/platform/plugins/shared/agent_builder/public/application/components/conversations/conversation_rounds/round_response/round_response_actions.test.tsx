@@ -125,29 +125,13 @@ describe('RoundResponseActions', () => {
     expect(screen.queryByRole('button', { name: 'Regenerate response' })).not.toBeInTheDocument();
   });
 
-  it('renders the feedback actions for a completed round', () => {
-    render(
-      <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
-    );
-
-    expect(screen.getByRole('button', { name: 'Good response' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Bad response' })).toBeInTheDocument();
-  });
-
-  it('hides the feedback actions for read-only conversations', () => {
-    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: true, isLoading: false });
-
-    render(
-      <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
-    );
-
-    expect(screen.queryByRole('button', { name: 'Good response' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Bad response' })).not.toBeInTheDocument();
-  });
-
-  it('hides the feedback actions while read-only state is loading', () => {
-    useConversationReadOnlyMock.mockReturnValue({ isReadOnly: false, isLoading: true });
-
+  // Round feedback is temporarily hidden while it isn't modelled in the events
+  // timeline (see ROUND_FEEDBACK_ENABLED in round_response_actions.tsx): a vote
+  // can't survive the events->rounds projection yet. It stays hidden even for a
+  // completed, editable round — the case that previously rendered the controls.
+  // TODO(agent-builder): when feedback is re-enabled, restore the read-only /
+  // loading gating coverage that used to live here.
+  it('does not render the feedback actions while feedback is disabled', () => {
     render(
       <RoundResponseActions content="the answer" isVisible rawRound={createCompletedRound()} />
     );

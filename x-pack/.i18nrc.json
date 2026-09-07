@@ -176,7 +176,10 @@
     "xpack.watcher": "platform/plugins/private/watcher",
     "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace",
     "xpack.notificationCenter": "platform/plugins/shared/notification_center",
-    "xpack.customContent": "platform/plugins/shared/custom_content"
+    "xpack.customContent": [
+      "platform/packages/shared/custom-content/custom-content-renderer",
+      "platform/plugins/shared/custom_content"
+    ]
   },
   "exclude": ["examples"],
   "translations": [

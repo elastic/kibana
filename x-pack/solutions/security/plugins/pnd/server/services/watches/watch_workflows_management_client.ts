@@ -16,7 +16,7 @@ import type {
 } from '@kbn/workflows';
 
 /**
- * Structural subset of WorkflowsManagementApi used by the Watches projection.
+ * Structural subset of WorkflowsManagementApi used by PND Worker enablement and recent runs.
  * Typed locally to avoid a tsconfig project-reference cycle.
  */
 export interface WatchWorkflowsManagementClient {
@@ -52,9 +52,10 @@ export interface WatchWorkflowsManagementClient {
   ): Promise<void>;
 
   /**
-   * Only `{ enabled }` is safe to send for a managed watch — the Workflows API treats an
+   * Only `{ enabled }` is safe to send for a managed workflow — the Workflows API treats an
    * enablement-only update as permitted and throws `ManagedWorkflowUpdateForbiddenError` for
-   * anything else unless `allowManagedWorkflowMutation` is set.
+   * anything else unless `allowManagedWorkflowMutation` is set. After a settings install this
+   * call also resynchronizes Task Manager.
    */
   updateWorkflow(
     id: string,
