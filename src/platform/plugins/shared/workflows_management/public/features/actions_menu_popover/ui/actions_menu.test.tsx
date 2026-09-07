@@ -178,6 +178,12 @@ describe('ActionsMenu', () => {
     expect(searchInput).toBeInTheDocument();
   });
 
+  it('allows text selection in the preview pane', () => {
+    renderComponent();
+
+    expect(fireEvent.mouseDown(screen.getByText('Select a step to get started'))).toBe(true);
+  });
+
   describe('keyboard navigation', () => {
     beforeEach(() => {
       Element.prototype.scrollIntoView = jest.fn();
@@ -202,6 +208,30 @@ describe('ActionsMenu', () => {
       fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
       // Wrap: from first Up goes to last actionable root item
       expect(getKeyboardActiveLabel()).toContain('If Condition');
+    });
+
+    it('scrolls each newly active option into view', () => {
+      renderComponent();
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      const scrollIntoView = Element.prototype.scrollIntoView as jest.Mock;
+      const expectActiveOptionScrolled = () => {
+        const activeOption = document.getElementById(
+          searchInput.getAttribute('aria-activedescendant') ?? ''
+        );
+        expect(scrollIntoView.mock.contexts[scrollIntoView.mock.contexts.length - 1]).toBe(
+          activeOption
+        );
+      };
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      expectActiveOptionScrolled();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
+      expectActiveOptionScrolled();
     });
 
     it('wraps from the last item back to the first on ArrowDown', () => {

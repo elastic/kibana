@@ -22,11 +22,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { componentStyles } from './actions_menu.styles';
-import {
-  getOptionActionId,
-  KEYBOARD_ACTIVE_CLASS,
-  renderActionOption,
-} from './actions_menu_option';
+import { getOptionActionId, renderActionOption } from './actions_menu_option';
 import { ActionsMenuPreviewPanel } from './actions_menu_preview_panel';
 import { useKibana } from '../../../hooks/use_kibana';
 import { flattenOptions, getActionOptions } from '../lib/get_action_options';
@@ -242,14 +238,6 @@ export function ActionsMenu({
     const idx = actionable.findIndex((option) => getOptionActionId(option) === pending.optionId);
     setKeyboardIndexAndPreview(idx >= 0 ? idx : null);
   }, [displayOptions, currentPath, setKeyboardIndexAndPreview]);
-
-  // Keep the keyboard-active row visible while wrapping through long lists.
-  useEffect(() => {
-    if (keyboardIndex == null) return;
-    const active = menuContainerRef.current?.querySelector(`.${KEYBOARD_ACTIVE_CLASS}`);
-    const activeListItem = active?.closest('[role="option"]');
-    activeListItem?.scrollIntoView({ block: 'nearest' });
-  }, [keyboardIndex, currentPath]);
 
   const isSearching =
     searchTerm.trim().length > 0 &&
@@ -578,6 +566,10 @@ export function ActionsMenu({
     activeOptionIndex === undefined
       ? undefined
       : `${SELECTABLE_ID}_listbox_option-${activeOptionIndex}`;
+  useEffect(() => {
+    if (!activeOptionId) return;
+    document.getElementById(activeOptionId)?.scrollIntoView({ block: 'nearest' });
+  }, [activeOptionId]);
   const isSearchVirtualized =
     searchTerm.length > 0 && displayOptions.length > SEARCH_VIRTUALIZATION_THRESHOLD;
 
@@ -648,7 +640,7 @@ export function ActionsMenu({
       height="full"
     >
       {(list, search) => (
-        <div ref={menuContainerRef} css={styles.container} onMouseDown={keepSearchFocused}>
+        <div ref={menuContainerRef} css={styles.container}>
           <div css={styles.header}>
             <EuiTitle size="xxs">
               <h3 css={styles.title}>
@@ -659,7 +651,11 @@ export function ActionsMenu({
           </div>
 
           <EuiFlexGroup gutterSize="none" css={styles.body}>
-            <EuiFlexItem css={styles.leftColumn} onMouseMove={handleListMouseMove}>
+            <EuiFlexItem
+              css={styles.leftColumn}
+              onMouseDown={keepSearchFocused}
+              onMouseMove={handleListMouseMove}
+            >
               {showBreadcrumbs && (
                 <div css={styles.breadcrumbRow}>
                   <EuiBreadcrumbs

@@ -86,6 +86,7 @@ export const componentStyles = {
     css({
       flex: 1,
       overflow: 'hidden',
+      userSelect: 'text',
       backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     }),
   selectable: ({ euiTheme }: UseEuiTheme) =>
