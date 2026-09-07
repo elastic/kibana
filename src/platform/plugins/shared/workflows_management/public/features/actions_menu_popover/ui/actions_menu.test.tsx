@@ -320,6 +320,21 @@ describe('ActionsMenu', () => {
       );
     });
 
+    it('activates the option hovered after keyboard navigation', () => {
+      const onActionSelected = jest.fn();
+      renderComponent({ onActionSelected });
+      const searchInput = screen.getByPlaceholderText('Search step, command or # to go to a step');
+      searchInput.focus();
+
+      fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
+      fireEvent.mouseMove(screen.getByText('If Condition'));
+      fireEvent.keyDown(searchInput, { key: 'Enter' });
+
+      expect(onActionSelected).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'if', label: 'If Condition' })
+      );
+    });
+
     it('returns to search and clears selection when typing', () => {
       renderComponent();
       const searchInput = screen.getByPlaceholderText(

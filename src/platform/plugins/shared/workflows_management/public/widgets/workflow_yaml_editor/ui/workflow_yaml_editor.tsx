@@ -23,6 +23,7 @@ import { useWorkflowsMonacoTheme, WORKFLOW_MONACO_LAYOUT_OPTIONS } from '@kbn/wo
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
+  type StepLineRange,
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
   useFocusedStepDecoration,
@@ -37,7 +38,6 @@ import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
 import { useFixWithAi } from './hooks/use_fix_with_ai';
-import { useStepReorder } from './hooks/use_step_reorder';
 import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import { StepActions } from './step_actions';
@@ -270,19 +270,7 @@ export const WorkflowYAMLEditor = ({
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
-  const {
-    canMoveUp,
-    canMoveDown,
-    insertedStepRange,
-    highlightStepRange,
-    moveStepUp,
-    moveStepDown,
-  } = useStepReorder({
-    editorRef,
-    focusedStepInfo,
-    isReadOnly: isReadOnlyYaml,
-    yamlDocument,
-  });
+  const [insertedStepRange, setInsertedStepRange] = useState<StepLineRange | null>(null);
 
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
@@ -441,8 +429,6 @@ export const WorkflowYAMLEditor = ({
           }
           saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
         },
-        moveStepUp,
-        moveStepDown,
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -560,6 +546,14 @@ export const WorkflowYAMLEditor = ({
   }, []);
 
   useFocusedStepDecoration(editorRef.current, insertedStepRange);
+
+  useEffect(() => {
+    if (!insertedStepRange) {
+      return;
+    }
+    const timeoutId = window.setTimeout(() => setInsertedStepRange(null), 3000);
+    return () => window.clearTimeout(timeoutId);
+  }, [insertedStepRange]);
 
   // Decorations
   useTriggerTypeDecorations({
@@ -707,7 +701,7 @@ export const WorkflowYAMLEditor = ({
           editor
         );
         if (insertedRange) {
-          highlightStepRange(insertedRange);
+          setInsertedStepRange(insertedRange);
           editor.revealLineInCenter(insertedRange.lineStart);
           editor.setPosition({ lineNumber: insertedRange.lineStart, column: 1 });
           editor.focus();
@@ -715,7 +709,7 @@ export const WorkflowYAMLEditor = ({
       }
       dismissActionsPopover();
     },
-    [dismissActionsPopover, highlightStepRange, isReadOnlyYaml]
+    [dismissActionsPopover, isReadOnlyYaml]
   );
 
   const editorCommands: EditorCommand[] = useMemo(() => {
@@ -916,13 +910,7 @@ export const WorkflowYAMLEditor = ({
           style={positionStyles ?? {}}
           data-test-subj={`workflowStepActionsContainer-${focusedStepInfo?.stepId}`}
         >
-          <StepActions
-            onStepRun={onStepRun}
-            onMoveStepUp={keyboardHandlers.moveStepUp}
-            onMoveStepDown={keyboardHandlers.moveStepDown}
-            canMoveUp={canMoveUp}
-            canMoveDown={canMoveDown}
-          />
+          <StepActions onStepRun={onStepRun} />
         </div>
       )}
       <div css={styles.editorAreaWrapper}>

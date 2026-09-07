@@ -252,14 +252,16 @@ export function ActionsMenu({
   const handleListMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       const el = e.target as HTMLElement;
-
-      if (keyboardIndexRef.current != null) {
-        setKeyboardIndex(null);
-      }
+      const actionableOptions = actionableDisplayOptionsRef.current;
 
       const jumpTarget = el.closest('[data-jump-id]');
       if (jumpTarget) {
         const jumpId = jumpTarget.getAttribute('data-jump-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'jump' && itemData.entry.id === jumpId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
         const entry = jumpToStepEntries?.find((j) => j.id === jumpId);
         if (entry && entry.id !== hoveredJumpEntry?.id) {
           setHoveredJumpEntry(entry);
@@ -268,7 +270,14 @@ export function ActionsMenu({
         return;
       }
 
-      if (el.closest('[data-command-id]')) {
+      const commandTarget = el.closest('[data-command-id]');
+      if (commandTarget) {
+        const commandId = commandTarget.getAttribute('data-command-id');
+        const index = actionableOptions.findIndex((option) => {
+          const itemData = getMenuItemData(option);
+          return itemData?.kind === 'command' && itemData.command.id === commandId;
+        });
+        setKeyboardIndex(index >= 0 ? index : null);
         return;
       }
 
@@ -276,6 +285,8 @@ export function ActionsMenu({
       if (!optionTarget) return;
       const optionId = optionTarget.getAttribute('data-option-id');
       if (!optionId) return;
+      const index = actionableOptions.findIndex((option) => getOptionActionId(option) === optionId);
+      setKeyboardIndex(index >= 0 ? index : null);
       const found = flatOptions.find((o) => o.id === optionId);
       if (found && found.id !== hoveredOption?.id) {
         setHoveredOption(found);
