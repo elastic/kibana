@@ -160,6 +160,48 @@ GOLDEN_ENV_LOCAL = next(
 SWEEP_DIR = Path.home() / "persona-sweep"
 KIBANA_MAIN = Path.home() / "Projects" / "kibana"
 
+
+def _golden_count_local(exec_id: str, phrase: bool = False):
+    """Count docs for an execution id by querying golden FROM THE DRIVER.
+
+    The gate used to run this over ssh on the eval VM, but units are parked
+    ("[park] ... deallocating") as soon as the eval exits and before the gate
+    runs, so the ssh lands on a deallocated host and returns nothing. That is
+    indistinguishable from "no docs written" and failed 18/18 complete units as
+    `docs=0/98` while golden actually held all 294 docs per model.
+
+    Golden is reachable from the driver, so ask it directly. Returns None when
+    the driver cannot reach golden, letting the caller fall back to the VM.
+    """
+    env = {}
+    try:
+        with open(GOLDEN_ENV_LOCAL) as fh:
+            for line in fh:
+                line = line.strip()
+                if line.startswith("export "):
+                    line = line[len("export "):]
+                if "=" in line and not line.startswith("#"):
+                    k, _, v = line.partition("=")
+                    env[k.strip()] = v.strip().strip('"').strip("'")
+    except OSError:
+        return None
+    url, key = env.get("GOLDEN_ES_URL"), env.get("GOLDEN_ES_API_KEY")
+    if not url or not key:
+        return None
+    op = "match_phrase" if phrase else "term"
+    body = json.dumps({"query": {op: {"metadata.execution_id": exec_id}}})
+    try:
+        out = subprocess.run(
+            ["curl", "-sS", "-m", "60", "-H", f"Authorization: ApiKey {key}",
+             f"{url}/.evaluation-scores/_count",
+             "-H", "Content-Type: application/json", "-d", body],
+            capture_output=True, text=True, timeout=90,
+        ).stdout
+        return int(json.loads(out)["count"])
+    except Exception:
+        return None
+
+
 # Patched sources overlaid onto each VM before the run.
 PATCHED_EVALUATOR = (
     KIBANA_MAIN.parent
@@ -1487,18 +1529,27 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     # apart from "no docs written" (2026-09-07: a complete 98-doc shard failed as
     # docs=0/98). Query the field directly.
     q = json.dumps({"query": {"term": {"metadata.execution_id": exec_id}}})
-    out = ssh(
-        ip,
-        f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
-        f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
-        f'"$GOLDEN_ES_URL/.evaluation-scores/_count" '
-        f"-H 'Content-Type: application/json' --data @/tmp/q.json",
-    )
-    try:
-        result = json.loads(out.splitlines()[-1])
-    except Exception:
-        return {"count": -1, "error": out[:200]}
-    if result.get("count", 0) == 0:
+    # Ask golden from the driver first: by the time the gate runs, this unit's
+    # VM is already parked, so the ssh path below reaches a deallocated host.
+    _local_n = _golden_count_local(exec_id)
+    if _local_n is not None:
+        result: dict = {"count": _local_n}
+        if _local_n == 0:
+            _phrase_n = _golden_count_local(exec_id, phrase=True)
+            result = {"count": _phrase_n if _phrase_n is not None else 0}
+    else:
+        out = ssh(
+            ip,
+            f"source /tmp/golden-cluster-env.sh; printf '%s' '{q}' > /tmp/q.json; "
+            f'curl -sS -H "Authorization: ApiKey $GOLDEN_ES_API_KEY" '
+            f'"$GOLDEN_ES_URL/.evaluation-scores/_count" '
+            f"-H 'Content-Type: application/json' --data @/tmp/q.json",
+        )
+        try:
+            result = json.loads(out.splitlines()[-1])
+        except Exception:
+            return {"count": -1, "error": out[:200]}
+    if result.get("count", 0) == 0 and _local_n is None:
         # mapping without a .keyword subfield — match_phrase works on text
         q = json.dumps({"query": {"match_phrase": {"metadata.execution_id": exec_id}}})
         out = ssh(
