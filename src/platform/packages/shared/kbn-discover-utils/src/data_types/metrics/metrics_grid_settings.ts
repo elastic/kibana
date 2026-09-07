@@ -24,6 +24,14 @@ export type SimpleAggregation =
   | `${FunctionNames.MIN}`
   | `${FunctionNames.MAX}`;
 
+export enum HistogramPercentileValue {
+  P50 = 'p50',
+  P75 = 'p75',
+  P90 = 'p90',
+  P95 = 'p95',
+  P99 = 'p99',
+}
+
 /**
  * Which percentile bucket to use when the metric's aggregation is
  * `PERCENTILE(field, N)`. There is no per-percentile ES|QL function name to
@@ -32,16 +40,20 @@ export type SimpleAggregation =
  * literal union; the function name itself is sourced from `FunctionNames`
  * wherever it's used to build the aggregation expression.
  */
-export type HistogramPercentile = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
+export type HistogramPercentile = `${HistogramPercentileValue}`;
 
 export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
   gaugeAggregation: SimpleAggregation;
   histogramPercentile: HistogramPercentile;
+  dimensions: string[];
+  searchTerm: string;
 }
 
 export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   counterAggregation: FunctionNames.SUM,
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
+  dimensions: [],
+  searchTerm: '',
 };

@@ -17,8 +17,7 @@ const mockGetResultCountsForActions = jest.requireMock('../../lib/get_result_cou
 
 const mockRequest = httpServerMock.createKibanaRequest();
 
-const createMockOsqueryContext = (cpsEnabled = false) => ({
-  cpsEnabled,
+const createMockOsqueryContext = () => ({
   getStartServices: jest.fn().mockResolvedValue([
     {
       elasticsearch: {
@@ -235,8 +234,8 @@ describe('processLiveHistory', () => {
 
     await processLiveHistory({
       liveHits: [createLiveHit()],
+      cpsActive: true,
       osqueryContext: {
-        cpsEnabled: true,
         getStartServices: jest.fn().mockResolvedValue([
           {
             elasticsearch: {
