@@ -25,6 +25,7 @@ import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
   ScoutFlakyTests,
   TEST_FRAMEWORKS,
+  type FlakyTestBranchStats,
   type FlakyTestEntry,
   type FlakyTestReport,
   type TestFramework,
@@ -108,33 +109,41 @@ const formatAge = (from: Date, to: Date): string => {
 const formatLatestRun = (entry: FlakyTestEntry, now: Date): string =>
   entry.latestRun ? `${entry.latestRun.status}\n${formatAge(entry.latestRun.timestamp, now)}` : '-';
 
-const BRANCH_LABEL_WIDTH = 6;
-const BUILDS_COL_WIDTH = BRANCH_LABEL_WIDTH + 8 + 2 + 6 + 2;
+const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
+
 /** PR pipelines have a branch per PR; keep the cell to the branches that matter. */
 const MAX_BRANCH_LINES = 5;
 
-const formatBuildsLine = (label: string, failedBuilds: number, builds: number): string => {
-  const rate = builds > 0 ? `${((failedBuilds / builds) * 100).toFixed(1)}%` : '-';
-  const counts = `${failedBuilds}/${builds}`.padStart(8);
-  return `${label.padEnd(BRANCH_LABEL_WIDTH)}${counts}  ${rate.padStart(6)}`;
+/**
+ * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
+ * count when no branch has enough, so one failure on a barely exercised branch does not win.
+ */
+const flakiestBranch = (
+  byBranch: FlakyTestEntry['byBranch'],
+  minBuilds: number
+): FlakyTestBranchStats | undefined => {
+  const exercised = byBranch.filter((stats) => stats.builds >= minBuilds);
+  return [...(exercised.length > 0 ? exercised : byBranch)].sort(
+    (a, b) => b.buildFailRate - a.buildFailRate
+  )[0];
 };
 
-/**
- * `failed/total  rate` over all branches, followed by one aligned line per branch the test ran
- * on. A test that only ran on one branch gets a single line labelled with that branch.
- */
-const formatBuilds = (entry: FlakyTestEntry): string => {
-  const { byBranch, failedBuilds, builds } = entry;
-  if (byBranch.length === 1) {
-    return formatBuildsLine(byBranch[0].branch, failedBuilds, builds);
-  }
-  const shown = byBranch.slice(0, MAX_BRANCH_LINES);
-  const notShown = byBranch.length - shown.length;
-  return [
-    formatBuildsLine('all', failedBuilds, builds),
-    ...shown.map((stats) => formatBuildsLine(stats.branch, stats.failedBuilds, stats.builds)),
-    ...(notShown > 0 ? [`+${notShown} more branches`] : []),
-  ].join('\n');
+const formatFlakiestBranch = (entry: FlakyTestEntry, minBuilds: number): string => {
+  const flakiest = flakiestBranch(entry.byBranch, minBuilds);
+  return flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-';
+};
+
+/** `branch: failed/total` for every branch the test failed on (already sorted by failed builds). */
+const formatFailedBuildsByBranch = (entry: FlakyTestEntry): string => {
+  const failing = entry.byBranch.filter((stats) => stats.failedBuilds > 0);
+  const shown = failing.slice(0, MAX_BRANCH_LINES);
+  const notShown = failing.length - shown.length;
+  return (
+    [
+      ...shown.map((stats) => `${stats.branch}: ${stats.failedBuilds}/${stats.builds}`),
+      ...(notShown > 0 ? [`+${notShown} more branches`] : []),
+    ].join('\n') || '-'
+  );
 };
 
 const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
@@ -153,13 +162,26 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
   all: readonly FlakyTestEntry[],
+  minBuilds: number,
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
+    head: [
+      '#',
+      'Failed builds',
+      'Flakiest branch',
+      'Failed builds by branch',
+      'Latest',
+      'Test',
+      'File',
+      'Framework',
+      'Owners',
+    ],
     colWidths: [
       null,
-      BUILDS_COL_WIDTH,
+      null,
+      null,
+      null,
       null,
       TITLE_COL_WIDTH,
       FILE_COL_WIDTH,
@@ -198,7 +220,9 @@ const buildTopFlakyTable = (
       rank += 1;
       table.push([
         rank,
-        formatBuilds(entry),
+        `${entry.failedBuilds}/${entry.builds}\n${formatRate(entry.buildFailRate)}`,
+        formatFlakiestBranch(entry, minBuilds),
+        formatFailedBuildsByBranch(entry),
         formatLatestRun(entry, now),
         entry.title,
         ...(index === 0 ? fileCells : []),
@@ -251,6 +275,7 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
       `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
         top,
         flaky,
+        report.thresholds.minBuilds,
         report.generatedAt
       ).toString()}`,
     ]);
