@@ -152,21 +152,21 @@ const fieldLibrarySolutionTelemetrySchema: FieldLibrarySolutionTelemetrySchema =
     type: 'long',
     _meta: {
       description:
-        'Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it',
+        'Number of field definitions in the Field Library for this scope. The all scope spans every owner, including owners outside the three reported solutions, so the solution scopes need not sum to it. Reports 0 when featureEnabled is false, whether or not definitions exist',
     },
   },
   totalGlobal: {
     type: 'long',
     _meta: {
       description:
-        'Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones',
+        'Number of field definitions applied to every case. Includes the global definitions created by the templates v1 to v2 migration to mirror pre-existing custom fields, which cannot be distinguished from author-created ones. Reports 0 when featureEnabled is false, whether or not definitions exist',
     },
   },
   totalReusable: {
     type: 'long',
     _meta: {
       description:
-        'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references',
+        'Number of field definitions available to be referenced by a template rather than applied to every case. Counts availability, not actual template references. Reports 0 when featureEnabled is false, whether or not definitions exist',
     },
   },
 };

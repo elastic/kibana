@@ -87,7 +87,7 @@ describe('createCasesTelemetry', () => {
      * the definitions a deployment kept after disabling the feature.
      */
     it.each([true, false])(
-      'reads field definitions regardless of the flag being %s',
+      'keeps the field definition type readable regardless of the flag being %s',
       async (enabled) => {
         const { allowedSavedObjectTypes } = await runTelemetryTask({ enabled });
 

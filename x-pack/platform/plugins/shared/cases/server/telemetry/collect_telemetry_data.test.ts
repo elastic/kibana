@@ -17,10 +17,7 @@ import { getConnectorsTelemetryData } from './queries/connectors';
 import { getPushedTelemetryData } from './queries/push';
 import { getUserActionsTelemetryData } from './queries/user_actions';
 import { getEmptyTemplatesTelemetry, getTemplatesTelemetryData } from './queries/templates';
-import {
-  getEmptyFieldLibraryTelemetry,
-  getFieldLibraryTelemetryData,
-} from './queries/field_definitions';
+import { getFieldLibraryTelemetryData } from './queries/field_definitions';
 
 jest.mock('./queries/alerts');
 jest.mock('./queries/cases');
@@ -44,18 +41,12 @@ jest.mock('./queries/templates', () => {
   };
 });
 
-// The read is mocked outright, but the zeroed-shape builder keeps its real implementation so the
-// flag-off assertions check the shape the payload contract actually declares. It is still wrapped
-// in a `jest.fn` so one test can make it throw.
-jest.mock('./queries/field_definitions', () => {
-  const actual = jest.requireActual('./queries/field_definitions');
-
-  return {
-    ...actual,
-    getFieldLibraryTelemetryData: jest.fn(),
-    getEmptyFieldLibraryTelemetry: jest.fn(actual.getEmptyFieldLibraryTelemetry),
-  };
-});
+// Only the read is mocked. The zeroed-shape builder keeps its real implementation, so the flag-off
+// assertions check the shape the payload contract actually declares.
+jest.mock('./queries/field_definitions', () => ({
+  ...jest.requireActual('./queries/field_definitions'),
+  getFieldLibraryTelemetryData: jest.fn(),
+}));
 
 const getAlertsMock = getAlertsTelemetryData as jest.Mock;
 const getCasesMock = getCasesTelemetryData as jest.Mock;
@@ -70,9 +61,6 @@ const getEmptyTemplatesMock = getEmptyTemplatesTelemetry as jest.Mock;
 const realGetEmptyTemplates = jest.requireActual('./queries/templates')
   .getEmptyTemplatesTelemetry as typeof getEmptyTemplatesTelemetry;
 const getFieldLibraryMock = getFieldLibraryTelemetryData as jest.Mock;
-const getEmptyFieldLibraryMock = getEmptyFieldLibraryTelemetry as jest.Mock;
-const realGetEmptyFieldLibrary = jest.requireActual('./queries/field_definitions')
-  .getEmptyFieldLibraryTelemetry as typeof getEmptyFieldLibraryTelemetry;
 
 const preExistingAreas = {
   cases: getCasesMock,
@@ -153,7 +141,6 @@ describe('collectTelemetryData', () => {
 
     // `resetAllMocks` drops the wrapped real implementation, so restore it.
     getEmptyTemplatesMock.mockImplementation(realGetEmptyTemplates);
-    getEmptyFieldLibraryMock.mockImplementation(realGetEmptyFieldLibrary);
 
     // Each pre-existing area resolves to its own key name, so an assertion that one area
     // survived cannot pass on another area's value.

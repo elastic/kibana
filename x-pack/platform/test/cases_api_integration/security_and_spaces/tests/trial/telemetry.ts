@@ -22,6 +22,7 @@ import {
   deleteAllCaseItems,
   deleteFieldDefinitions,
   createCase,
+  getSpaceUrlPrefix,
   getTelemetry,
   runTelemetryTask,
   createComment,
@@ -488,10 +489,11 @@ export default ({ getService }: FtrProviderContext): void => {
       const createFieldDefinition = async (
         name: string,
         owner: string,
-        overrides: Record<string, unknown> = {}
+        overrides: Record<string, unknown> = {},
+        space?: string
       ) => {
         await supertest
-          .post(INTERNAL_FIELD_DEFINITIONS_URL)
+          .post(`${getSpaceUrlPrefix(space)}${INTERNAL_FIELD_DEFINITIONS_URL}`)
           .set('kbn-xsrf', 'true')
           .set('x-elastic-internal-origin', 'foo')
           .send({
@@ -535,6 +537,15 @@ export default ({ getService }: FtrProviderContext): void => {
           isGlobal: true,
         });
 
+        // The type is `multiple-isolated`, so a definition outside the default space is only
+        // counted while the query keeps searching every namespace.
+        await createFieldDefinition(
+          'space1_global',
+          'securitySolution',
+          { isGlobal: true },
+          'space1'
+        );
+
         await deleteTelemetrySnapshot();
         await runTelemetryTask(supertest);
 
@@ -548,8 +559,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(casesTelemetry.fieldLibrary).toEqual({
             featureEnabled: true,
-            all: { total: 4, totalGlobal: 2, totalReusable: 2 },
-            sec: { total: 3, totalGlobal: 1, totalReusable: 2 },
+            all: { total: 5, totalGlobal: 3, totalReusable: 2 },
+            sec: { total: 4, totalGlobal: 2, totalReusable: 2 },
             obs: zeroedScope,
             main: zeroedScope,
           });
