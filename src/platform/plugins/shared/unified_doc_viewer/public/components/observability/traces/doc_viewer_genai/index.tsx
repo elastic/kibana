@@ -55,13 +55,16 @@ export function DocViewerObsTracesGenAi({
   }
 
   // Whether values were dropped is unknowable without `_ignored`, so this is
-  // phrased as a possibility. Suppressed once a conversation renders, to avoid
-  // pointing at an absent `system_instructions` on an otherwise complete span.
-  const conversationEmpty =
+  // phrased as a possibility. Suppressed once any long-field content renders,
+  // so a span missing only e.g. `system_instructions` stays quiet.
+  const nothingRendered =
     genAi.inputMessages.length === 0 &&
     genAi.outputMessages.length === 0 &&
-    !genAi.systemInstructions;
-  const showMetadataHint = unrecoverableLongFields && conversationEmpty;
+    !genAi.systemInstructions &&
+    genAi.toolDefinitions == null &&
+    genAi.toolCallArguments == null &&
+    genAi.toolCallResult == null;
+  const showMetadataHint = unrecoverableLongFields && nothingRendered;
 
   return (
     <div
@@ -85,13 +88,13 @@ export function DocViewerObsTracesGenAi({
             title={
               <FormattedMessage
                 id="unifiedDocViewer.observability.traces.genAi.metadataHint.title"
-                defaultMessage="Messages may be incomplete"
+                defaultMessage="Content may be incomplete"
               />
             }
             text={
               <FormattedMessage
                 id="unifiedDocViewer.observability.traces.genAi.metadataHint.description"
-                defaultMessage="Messages longer than 1024 characters aren't indexed and must be read from the document source. Add {metadata} to your query to load them."
+                defaultMessage="Values longer than 1024 characters aren't indexed and must be read from the document source. Add {metadata} to your query to load them."
                 values={{
                   metadata: (
                     <EuiCode css={{ display: 'inline-block' }}>{'METADATA _id, _index'}</EuiCode>

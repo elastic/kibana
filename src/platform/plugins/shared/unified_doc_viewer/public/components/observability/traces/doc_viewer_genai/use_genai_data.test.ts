@@ -8,6 +8,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { GEN_AI_LONG_MESSAGE_FIELDS } from '@kbn/apm-ui-shared';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { of } from 'rxjs';
 import { useGenAiData } from './use_genai_data';
@@ -487,11 +488,9 @@ describe('useGenAiData', () => {
           index: '.ds-traces-otel-default-000001',
           size: 1,
           query: { bool: { filter: [{ ids: { values: ['span-42'] } }] } },
-          _source: [
-            INPUT_MESSAGES_FIELD,
-            OUTPUT_MESSAGES_FIELD,
-            'attributes.gen_ai.system_instructions',
-          ],
+          // Asserted against the constant so adding a long field here does not
+          // break this test.
+          _source: [...GEN_AI_LONG_MESSAGE_FIELDS],
         },
       },
       expect.objectContaining({ abortSignal: expect.anything() })

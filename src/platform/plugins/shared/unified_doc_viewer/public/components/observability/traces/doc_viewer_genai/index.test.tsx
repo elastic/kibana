@@ -147,6 +147,19 @@ describe('DocViewerObsTracesGenAi', () => {
     expect(screen.queryByTestId(HINT)).not.toBeInTheDocument();
   });
 
+  it('does not hint when only tool content rendered', () => {
+    // Tool payloads are long fields too, so a tool span with no messages still
+    // has content on screen and needs no advice.
+    renderTab({
+      hit: buildHit({}),
+      textBasedHits: [],
+      unrecoverableLongFields: true,
+      genAi: { ...emptyConversation, toolDefinitions: [{ name: 'get_weather' }] },
+    });
+
+    expect(screen.queryByTestId(HINT)).not.toBeInTheDocument();
+  });
+
   it('does not hint when a conversation rendered despite the missing metadata', () => {
     // e.g. only `system_instructions` is absent — the span is otherwise whole,
     // so advising the user to add METADATA would be noise.
