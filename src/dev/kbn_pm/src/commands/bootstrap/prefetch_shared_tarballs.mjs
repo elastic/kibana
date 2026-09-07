@@ -156,7 +156,7 @@ export async function prefetchSharedTarballs(log) {
     missing.push(tarball);
   }
   if (!missing.length) {
-    log.debug(`all ${shared.length} shared tarball(s) already present in the offline mirror`);
+    log.info(`all ${shared.length} shared tarball(s) already present in the offline mirror`);
     return;
   }
 
