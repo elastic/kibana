@@ -86,6 +86,7 @@ export const RuleAttributesIncludedInAAD = [
 // update from AAD
 export type RuleAttributesNotPartiallyUpdatable =
   | 'apiKey'
+  | 'uiamApiKey'
   | 'enabled'
   | 'name'
   | 'tags'

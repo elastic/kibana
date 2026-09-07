@@ -431,6 +431,20 @@
       ]
     },
     {
+      "id": "detection-watch-rule-creation",
+      "name": "Detection Watch Rule Creation",
+      "slackChannel": "#security-generative-ai-evals",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/playwright.config.ts",
+      "tags": [
+        "security",
+        "detection-engineering"
+      ],
+      "ciLabels": [
+        "evals:detection-watch-rule-creation"
+      ],
+      "serverConfigSet": "evals_detection_watch_rule_creation"
+    },
+    {
       "id": "skill-selection-benchmark",
       "name": "Skill Selection Benchmark",
       "slackChannel": "#agent-builder-alerts",

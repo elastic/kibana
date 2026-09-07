@@ -17,6 +17,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser, FakeRawRequest } from '@kbn/core/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const mockTask = {
   id: 'task',
@@ -475,7 +476,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -505,7 +506,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
           userName: 'testUser',
         },
@@ -541,7 +542,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -578,7 +579,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userName: 'testUser',
         },
@@ -636,7 +637,7 @@ describe('api_key_utils', () => {
         apiKey: 'Y2xvbmVkQXBpS2V5SWQ6Y2xvbmVkQXBpS2V5',
         userScope: {
           apiKeyId: 'clonedApiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_enriched',
         },
@@ -668,7 +669,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: false,
           userProfileId: 'u_profile_12345',
           userName: 'testUser',
@@ -700,7 +701,7 @@ describe('api_key_utils', () => {
         apiKey: 'YXBpS2V5SWQ6YXBpS2V5',
         userScope: {
           apiKeyId: 'apiKeyId',
-          spaceId: 'default',
+          spaceId: asSpaceId('default'),
           apiKeyCreatedByUser: true,
           userProfileId: 'u_profile_12345',
           userName: 'testUser',
