@@ -271,7 +271,12 @@ describe('cloud connector integration helpers', () => {
     it('backfills role_arn into stream vars when entry exists with no value', () => {
       // varsReducer always creates an entry object; empty var has value: undefined
       const policy = makeInputPolicy({ role_arn: { type: 'text' as const, value: undefined } });
-      const result = injectConnectorVarsIntoPolicy(policy, awsConnectorVars, 'aws', mockPackageInfo);
+      const result = injectConnectorVarsIntoPolicy(
+        policy,
+        awsConnectorVars,
+        'aws',
+        mockPackageInfo
+      );
       expect(result.inputs[0].streams[0].vars?.role_arn).toEqual(awsConnectorVars.role_arn);
     });
 
