@@ -110,7 +110,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.contextEngine.landing.managedRow.integratedViaLabel"
-              defaultMessage="Integrated via"
+              defaultMessage="Integration"
             />
           </EuiText>
           <EuiText size="s" data-test-subj="contextAiIndexManagedRowIntegratedVia">
