@@ -20,6 +20,11 @@ export interface MatrixProvenance {
   branch?: string;
   /** Lookback window in days used to select experiments. */
   lookbackDays?: number;
+  /**
+   * Epoch-ms cutoff the matrix was rendered at, when not "now". A time-boxed
+   * matrix that does not say so reads as current data.
+   */
+  asOf?: number;
   /** Suite ids the scores were drawn from. */
   suiteIds?: string[];
   /** Commit the generator ran against, when known. */
@@ -149,6 +154,9 @@ export const renderMatrix = (
     `Generated ${generatedAt}`,
     provenance.branch ? `branch \`${provenance.branch}\`` : undefined,
     provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
+    provenance.asOf !== undefined
+      ? `as of ${new Date(provenance.asOf).toISOString().slice(0, 10)} (later runs excluded)`
+      : undefined,
     provenance.commitSha ? `commit \`${provenance.commitSha}\`` : undefined,
     provenance.buildUrl ? `[build](${provenance.buildUrl})` : undefined,
   ]

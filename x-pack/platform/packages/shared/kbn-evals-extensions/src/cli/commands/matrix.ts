@@ -392,6 +392,7 @@ export const matrixCmd: Command<void> = {
       {
         branch,
         lookbackDays,
+        asOf,
         suiteIds,
         commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
         dirtyWorkingTree: localGit.dirty,
@@ -422,6 +423,7 @@ export const matrixCmd: Command<void> = {
         {
           branch,
           lookbackDays,
+          asOf,
           suiteIds,
           commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
           dirtyWorkingTree: localGit.dirty,
@@ -436,6 +438,7 @@ export const matrixCmd: Command<void> = {
       const reliabilityHtml = renderReliabilityHtml(matrix, traces, {
         branch,
         lookbackDays,
+        asOf,
         commitSha: process.env.BUILDKITE_COMMIT ?? localGit.sha,
         dirtyWorkingTree: localGit.dirty,
       });
