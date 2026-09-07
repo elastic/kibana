@@ -22,7 +22,7 @@ FAILURES_BEFORE_KILL=3     # ~3min unresponsive before we act
   --elasticsearch.password=changeme \
   --server.port=5621 \
   --server.host=127.0.0.1 \
-  --mockIdpPlugin.enabled=false \\
+  --mockIdpPlugin.enabled=false \
   --xpack.fleet.internal.skipUploadPackageValidation=true &
 KIBANA_PID=$!
 
