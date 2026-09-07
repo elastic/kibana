@@ -684,6 +684,16 @@ export function ComposeDiscoverFlyout({
     },
     [onRecoveryCompletionMount, onRecoveryValidationMount]
   );
+  // Base tab and single editor hold a complete query (no locked base prefix),
+  // so validation runs verbatim with an empty base.
+  const { onEditorMount: onBaseEditorMount } = useSplitQueryValidation({
+    baseQuery: '',
+    callbacks: esqlCallbacks,
+  });
+  const { onEditorMount: onSingleEditorMount } = useSplitQueryValidation({
+    baseQuery: '',
+    callbacks: esqlCallbacks,
+  });
 
   const isAlertRef = useRef(isAlert);
   isAlertRef.current = isAlert;
@@ -1441,6 +1451,8 @@ export function ComposeDiscoverFlyout({
                 onTabChange={handleSandboxTabChange}
                 onAlertEditorMount={onAlertEditorMount}
                 onRecoveryEditorMount={onRecoveryEditorMount}
+                onBaseEditorMount={onBaseEditorMount}
+                onSingleEditorMount={onSingleEditorMount}
                 onClose={handleSandboxClose}
                 helpText={sandboxHelpText}
                 headerActions={sandboxHeaderActions}
