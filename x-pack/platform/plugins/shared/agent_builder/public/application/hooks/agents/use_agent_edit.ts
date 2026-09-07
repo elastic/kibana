@@ -48,6 +48,7 @@ const emptyState = (): AgentEditState => ({
     tools: defaultToolSelection,
     enable_elastic_capabilities: false,
     workflow_ids: [],
+    post_round_workflow_ids: [],
     plugin_ids: [],
   },
 });
