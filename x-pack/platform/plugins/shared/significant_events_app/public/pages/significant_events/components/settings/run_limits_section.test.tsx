@@ -151,7 +151,7 @@ describe('RunLimitsSection', () => {
     expect(save).not.toHaveBeenCalled();
   });
 
-  it('warns before lowering a finite limit below the current count', async () => {
+  it('warns before lowering a finite limit to the current count', async () => {
     setup(
       response({
         counts: {
@@ -162,17 +162,17 @@ describe('RunLimitsSection', () => {
       })
     );
     fireEvent.change(screen.getByTestId('significantEventsRunLimitInput-detection'), {
-      target: { value: '5' },
+      target: { value: '84' },
     });
     fireEvent.click(screen.getByTestId('significantEventsSaveRunLimitsButton'));
 
-    expect(await screen.findByText('Lower limits below today’s count?')).toBeInTheDocument();
+    expect(await screen.findByText('Lower limits to values already reached?')).toBeInTheDocument();
     expect(save).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Save lower limits' }));
 
     await waitFor(() =>
       expect(save).toHaveBeenCalledWith({
-        limits: { detection: 5 },
+        limits: { detection: 84 },
       })
     );
   });
@@ -247,7 +247,7 @@ describe('RunLimitsSection', () => {
     expect(screen.queryByText(/critical exception/i)).not.toBeInTheDocument();
   });
 
-  it('clears the exhaustion banner immediately when a draft raises the reached limit', () => {
+  it('keeps the active exhaustion banner while a raised limit is unsaved', () => {
     setup(
       response({
         counts: {
@@ -263,7 +263,7 @@ describe('RunLimitsSection', () => {
       target: { value: '101' },
     });
 
-    expect(screen.queryByTestId('significantEventsRunLimitsBanner')).not.toBeInTheDocument();
+    expect(screen.getByTestId('significantEventsRunLimitsBanner')).toBeInTheDocument();
   });
 
   it('shows the UTC reset value supplied by the API window', () => {

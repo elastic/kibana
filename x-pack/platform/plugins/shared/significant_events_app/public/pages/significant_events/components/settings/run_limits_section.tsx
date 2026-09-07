@@ -100,7 +100,7 @@ export const RunLimitsSection = () => {
       return (
         next !== draftState.saved.limits[group] &&
         isLowerFiniteLimit(draftState.saved.limits[group], next) &&
-        response.counts[group] > next
+        response.counts[group] >= next
       );
     });
 
@@ -181,7 +181,7 @@ export const RunLimitsSection = () => {
         defaultMessage: 'Enable enforcement with reached limits?',
       })
     : i18n.translate('xpack.significantEventsApp.settings.runLimits.loweringConfirmTitle', {
-        defaultMessage: 'Lower limits below today’s count?',
+        defaultMessage: 'Lower limits to values already reached?',
       });
 
   const confirmationButtonText = warnings.disabling
@@ -285,8 +285,8 @@ export const RunLimitsSection = () => {
               {draftState.draft.enabled && (
                 <>
                   <RunQuotaExhaustionCallout
-                    enabled
-                    limits={draftState.draft.limits}
+                    enabled={response.enabled}
+                    limits={response.limits}
                     counts={response.counts}
                   />
 
