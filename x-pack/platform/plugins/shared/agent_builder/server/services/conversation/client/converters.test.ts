@@ -1642,6 +1642,8 @@ describe('conversation model converters', () => {
           data: {
             prompt_requested_event_id: 'mr::execution_terminated',
             responses: { p1: { allow: true } },
+            // the resume carried its own message; the folded round.input.message becomes this
+            input: { message: 'resume follow-up' },
           },
         },
         {
@@ -1737,6 +1739,8 @@ describe('conversation model converters', () => {
           data: {
             prompt_requested_event_id: 'mr::execution_terminated',
             responses: { p1: { allow: true } },
+            // the resume carried its own message; the folded round.input.message becomes this
+            input: { message: 'resume follow-up' },
           },
         },
         {
@@ -1785,11 +1789,13 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((e) => e.id)).toEqual(
         expect.arrayContaining(['mr::execution::1::execution_terminated'])
       );
-      // ...and the preserved user_message now reflects the new attachment_refs (reaches events).
+      // ...and the preserved user_message now reflects the new attachment_refs (reaches events)...
       const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
       expect((userMessage?.data as { attachment_refs?: unknown }).attachment_refs).toEqual([
         { attachment_id: 'att-1', version: 1 },
       ]);
+      // ...while the user's ORIGINAL message is preserved (not overwritten by the resume message).
+      expect((userMessage?.data as { message: string }).message).toBe('do it');
     });
 
     it('regenerates round-derived events when rounds change', () => {

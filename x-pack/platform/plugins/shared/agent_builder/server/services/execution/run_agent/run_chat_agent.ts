@@ -128,7 +128,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } = context;
 
   // Reconstruct the context once from the event timeline (legacy docs fall back to stored rounds)
-  // and feed it to every context consumer, so message building, pending-round detection and
+  // so message building, pending-round detection and preflight all read the same folded view.
   const previousRounds = conversation ? roundsForContext(conversation) : [];
 
   ensureValidInput({ input: nextInput, previousRounds, action });

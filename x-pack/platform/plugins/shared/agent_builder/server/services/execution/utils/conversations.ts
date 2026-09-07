@@ -301,6 +301,7 @@ export const appendResumeExecution$ = ({
   roundCompletedEvents$,
   input,
   author,
+  title$,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -308,6 +309,8 @@ export const appendResumeExecution$ = ({
   /** The converse input for this resume; `input.prompts` carries the human's responses. */
   input: ConverseInput;
   author?: ConversationRoundAuthor;
+  /** When provided, its resolved value is persisted as the title alongside the resume append. */
+  title$?: Observable<string>;
 }): Observable<ChatEvent> => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) =>
@@ -360,11 +363,14 @@ export const appendResumeExecution$ = ({
             conversation,
           });
 
+          const resolvedTitle = title$ ? await firstValueFrom(title$) : undefined;
+
           return conversationClient.appendEvents(
             {
               id: conversation.id,
               events: [promptResponse, ...executionEvents],
               status: round.status,
+              ...(resolvedTitle !== undefined ? { title: resolvedTitle } : {}),
               ...(conversationState ? { state: conversationState } : {}),
               ...(attachments
                 ? {

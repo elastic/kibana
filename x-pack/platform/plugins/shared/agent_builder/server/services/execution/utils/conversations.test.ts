@@ -844,5 +844,31 @@ describe('conversations utils', () => {
         })
       ).rejects.toThrow(/no prior execution stored/);
     });
+
+    it('persists a resolved title alongside the resume append when title$ is provided', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = pausedConversation();
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      await lastValueFrom(
+        appendResumeExecution$({
+          conversation,
+          conversationClient,
+          roundCompletedEvents$: of<RoundCompleteEvent>({
+            type: ChatEventType.roundComplete,
+            data: {
+              round: createRound({ id: 'round-1', status: ConversationRoundStatus.completed }),
+              resumed: true,
+              resume_execution: { follow_up_round: followUpRound() },
+            },
+          }),
+          input: { prompts: { 'tools.my_tool.confirmation': { allow: true } } },
+          title$: of('Generated title'),
+        }).pipe(toArray())
+      );
+
+      const [args] = conversationClient.appendEvents.mock.calls[0];
+      expect(args.title).toBe('Generated title');
+    });
   });
 });

@@ -9,6 +9,7 @@ import {
   merge,
   of,
   filter,
+  map,
   tap,
   catchError,
   throwError,
@@ -341,6 +342,9 @@ const handleConversationExecution = async ({
 
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         filter((event) => !isRoundStartedEvent(event)),
+        // `resume_execution` is persistence-layer plumbing consumed by buildPersistenceEvents; strip
+        // it from the client-facing stream so it doesn't duplicate the follow-up round's steps.
+        map(stripResumeExecution),
         handleCancellation(abortSignal),
         tap((event) => {
           if (isConversationCreatedEvent(event) && !author) {
@@ -514,6 +518,14 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
 const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
   !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
 
+const stripResumeExecution = (event: ChatEvent): ChatEvent => {
+  if (!isRoundCompleteEvent(event) || !event.data.resume_execution) {
+    return event;
+  }
+  const { resume_execution: _resumeExecution, ...data } = event.data;
+  return { ...event, data };
+};
+
 const isPendingResumeConversation = (conversation: ConversationWithOperation): boolean => {
   const lastRound = conversation.rounds[conversation.rounds.length - 1];
   return lastRound?.status === ConversationRoundStatus.awaitingPrompt;
@@ -573,6 +585,7 @@ const buildPersistenceEvents = ({
       roundCompletedEvents$,
       input: nextInput,
       author,
+      title$: conversationNeedsTitle(conversation) ? title$ : undefined,
     });
   }
 

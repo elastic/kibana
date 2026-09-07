@@ -12,6 +12,7 @@ import type {
   ConversationRoundStep,
   ConversationWithoutRounds,
   CurrentUser,
+  RoundInput,
   ToolResult,
   TimelineEvent,
   UserIdAndName,
@@ -60,12 +61,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import {
-  isRoundDerivedEventId,
-  roundToEvents,
-  roundsToEvents,
-  userMessageEvent,
-} from './rounds_to_events';
+import { isRoundDerivedEventId, roundToEvents, roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -108,11 +104,18 @@ const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
       (event) => event.id.startsWith(`${round.id}::`) && isRoundDerivedEventId(event.id)
     );
     if (hasResumeExecution(round.id, storedForRound)) {
-      const refreshedUserMessage = userMessageEvent(round, merged);
+      const userMessageId = `${round.id}::user_message`;
       roundDerived.push(
-        ...storedForRound.map((event) =>
-          event.id === refreshedUserMessage.id ? refreshedUserMessage : event
-        )
+        ...storedForRound.map((event) => {
+          if (event.id !== userMessageId || !round.input.attachment_refs) {
+            return event;
+          }
+          const data = event.data as RoundInput;
+          return {
+            ...event,
+            data: { ...data, attachment_refs: round.input.attachment_refs },
+          } as TimelineEvent;
+        })
       );
     } else {
       roundDerived.push(...roundToEvents(round, merged));
