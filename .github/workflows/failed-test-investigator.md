@@ -361,7 +361,7 @@ A `###` heading followed by one summary sentence — nothing else, no standing m
 | `ci-environment`    | CI environment issue   |
 | `inconclusive`      | Inconclusive           |
 
-For Security Cypress `migrate` (or a new Scout spec), use `### Test needs an update — migrate to Scout`. For a new API/unit destination, use `### Test needs an update — move to API/unit`. Do not put a Cypress-wait reason in the heading.
+For Security Cypress `migrate` (or a new Scout spec), use `### Test needs an update — migrate to Scout`. For a new API/unit destination, use `### Test needs an update — move to API/unit`.
 
 Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the _failure_, not the test.
 
@@ -395,7 +395,7 @@ Wrap **everything after the summary** in a single `<details>` block so the issue
 
 #### Proposed fix (required)
 
-For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action). Do not fill it with a Cypress wait/`file:line` unless the action is `cypress-fix` or `fix-app`.
+For Security Cypress, this section is the doctor action from [Security Cypress: doctor action](#security-cypress-doctor-action).
 
 State only _what to change_ — the "why" belongs in Root cause & evidence, so do not restate the failure or the reasoning here.
 
