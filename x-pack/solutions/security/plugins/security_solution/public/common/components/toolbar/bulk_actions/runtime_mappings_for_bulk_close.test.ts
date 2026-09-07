@@ -77,9 +77,9 @@ describe('toBulkCloseRuntimeMappings', () => {
     expect(result?.event_date?.format).toBe('strict_date_optional_time');
   });
 
-  it('strips fetch_fields, input_field, target_field, target_index from lookup-type entries that slip through (guard)', () => {
-    // This shouldn't happen in practice because lookup is filtered, but shows
-    // that unknown keys do not propagate.
+  it('strips unknown keys from supported-type entries', () => {
+    // Only type, script, and format are forwarded — extra properties from the
+    // ES client types (fetch_fields, input_field, target_field, etc.) are dropped.
     const result = toBulkCloseRuntimeMappings({
       valid_keyword: {
         type: 'keyword',
