@@ -6,7 +6,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type {
   AggregateQuery,
   EsQueryConfig,
