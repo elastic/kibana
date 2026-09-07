@@ -398,4 +398,53 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(onChangeJsonModeSettings).toHaveBeenCalledWith({ hideNulls: true, wrapLines: true });
     });
   });
+
+  describe('defaultRenderedNodes', () => {
+    const renderJsonMode = (props: Partial<UnifiedDataTableAdditionalDisplaySettingsProps> = {}) =>
+      renderDisplaySettings({
+        documentsDisplayMode: 'json',
+        onChangeDocumentsDisplayMode: jest.fn(),
+        onChangeJsonModeSettings: jest.fn(),
+        ...props,
+      });
+
+    const getLinesShownInput = () =>
+      screen.getByTestId(
+        (id, el) =>
+          id === 'unifiedDataTableRenderedNodesInput' && el?.getAttribute('type') === 'number'
+      );
+
+    it('is not rendered in table mode', () => {
+      renderJsonMode({ documentsDisplayMode: 'table' });
+
+      expect(screen.queryByTestId('unifiedDataTableRenderedNodesInput')).not.toBeInTheDocument();
+    });
+
+    it('defaults to 50 when unset', () => {
+      renderJsonMode({ jsonModeSettings: {} });
+
+      expect(screen.getByText('Lines shown')).toBeVisible();
+      expect(getLinesShownInput()).toHaveValue(50);
+    });
+
+    it('clamps values above the maximum before propagating', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+      renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
+
+      await replaceNumberInputValue(getLinesShownInput(), '999');
+
+      expect(getLinesShownInput()).toHaveValue(200);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 200 });
+    });
+
+    it('clamps values below the minimum before propagating', async () => {
+      const onChangeJsonModeSettings = jest.fn();
+      renderJsonMode({ jsonModeSettings: {}, onChangeJsonModeSettings });
+
+      await replaceNumberInputValue(getLinesShownInput(), '3');
+
+      expect(getLinesShownInput()).toHaveValue(10);
+      expect(onChangeJsonModeSettings).toHaveBeenLastCalledWith({ defaultRenderedNodes: 10 });
+    });
+  });
 });
