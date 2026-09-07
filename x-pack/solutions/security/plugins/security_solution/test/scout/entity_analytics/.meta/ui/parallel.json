@@ -1,0 +1,32 @@
+{
+  "sha1": "f73f9e1440c69df2c41380dfade1e8f69aacabef",
+  "tests": [
+    {
+      "id": "2bb84514b03b333-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "f40c7a013c2336f-b421a7b50b12d02",
+      "title": "Entity analytics dashboard page enables risk score followed by the store",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/dashboard.spec.ts",
+        "line": 26,
+        "column": 14
+      }
+    }
+  ]
+}

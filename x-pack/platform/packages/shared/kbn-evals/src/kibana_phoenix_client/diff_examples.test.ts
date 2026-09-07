@@ -7,7 +7,7 @@
 
 import { diffExamples } from './diff_examples';
 import type { ExampleWithId } from '../types';
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 
 function withId(example: Example, id: string): ExampleWithId {
   return { ...(example as unknown as ExampleWithId), id };

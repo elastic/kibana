@@ -3880,7 +3880,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -5291,7 +5291,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -6339,7 +6339,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -7855,7 +7855,7 @@ paths:
                               description: Indicates whether the action is a summary.
                               type: boolean
                             throttle:
-                              description: 'The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if ''notify_when'' is set to ''onThrottleInterval''. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.'
+                              description: "The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if 'notify_when' is set to 'onThrottleInterval'. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values."
                               nullable: true
                               type: string
                           required:
@@ -14402,7 +14402,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -14464,7 +14464,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14576,7 +14576,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14663,7 +14663,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 3m
                             investigation_fields:
                               field_names:
@@ -14760,7 +14760,7 @@ paths:
                               - packetbeat-*
                               - traces-apm*
                               - winlogbeat-*
-                              - '-*elastic-cloud-logs-*'
+                              - -*elastic-cloud-logs-*
                             interval: 5m
                             language: kuery
                             license: ''
@@ -15537,7 +15537,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       - bulk: 0,
                       - search: 0
@@ -15848,7 +15848,7 @@ paths:
                     deleted: 0,
                     failures: []
                     noops: 0,
-                    requests_per_second: '-1,'
+                    requests_per_second: -1,
                     retries:
                       bulk: 0,
                       search: 0
@@ -16994,7 +16994,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    args: '-param1 value1 -param2 value2'
+                    args: -param1 value1 -param2 value2
                     scriptName: my-script.ps1
               SentinelOne:
                 description: SentinelOne runscript
@@ -17004,7 +17004,7 @@ paths:
                   endpoint_ids:
                     - ed518850-681a-4d60-bb98-e22640cae2a8
                   parameters:
-                    inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+                    inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
                     script: 1111-2222-3333-4444-5555-6666-7777-8888
             schema:
               $ref: '#/components/schemas/Security_Endpoint_Management_API_RunScriptRouteRequestBody'
@@ -19056,7 +19056,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -19184,7 +19184,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -19406,7 +19406,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -19672,7 +19675,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type: Invalid enum value. Expected ''agnostic'' | ''single'', received ''foo'''
+                    message: "[request query]: namespace_type: Invalid enum value. Expected 'agnostic' | 'single', received 'foo'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -19992,7 +19995,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -20276,7 +20279,7 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                  message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -20413,7 +20416,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21129,7 +21132,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21264,7 +21267,7 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: '[request query]: namespace_type.0: Invalid enum value. Expected ''agnostic'' | ''single'', received ''blob'''
+                    message: "[request query]: namespace_type.0: Invalid enum value. Expected 'agnostic' | 'single', received 'blob'"
                     statusCode: 400
               schema:
                 oneOf:
@@ -21408,7 +21411,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Exceptions_API_PlatformErrorResponse'
@@ -51314,7 +51320,10 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/Security_Lists_API_PlatformErrorResponse'
@@ -56145,7 +56154,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: Array of anonymization fields to update.
@@ -57614,7 +57623,7 @@ paths:
                       type: array
                     query:
                       description: Query to filter the bulk action.
-                      example: 'status: ''inactive'''
+                      example: "status: 'inactive'"
                       type: string
                 update:
                   description: List of prompts to be updated.
@@ -89498,7 +89507,10 @@ components:
       summary: Two anomaly detection jobs required synchronization in this example.
       value:
         error: Unauthorized
-        message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]"
+        message: |-
+          [security_exception
+          	Root causes:
+          		security_exception: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]]: unable to authenticate user [ml_viewer] for REST request [/_security/_authenticate]
         statusCode: 401
     Machine_learning_APIs_mlSyncExample:
       summary: Two anomaly detection jobs required synchronization in this example.
@@ -100801,7 +100813,7 @@ components:
               - 10.0.2.15
               - fe80::21a6:63d3:d70e:e3ad
               - 127.0.0.1
-              - '::1'
+              - ::1
             mac:
               - 08:00:27:b1:1d:5a
             name: WinDev2104Eval
@@ -101460,7 +101472,7 @@ components:
       properties: {}
     Security_Endpoint_Management_API_Kuery:
       description: A KQL string.
-      example: 'united.endpoint.host.os.name : ''Windows'''
+      example: "united.endpoint.host.os.name : 'Windows'"
       type: string
     Security_Endpoint_Management_API_MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft Defender Endpoint agent type.
@@ -101469,7 +101481,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          args: '-param1 value1 -param2 value2'
+          args: -param1 value1 -param2 value2
           scriptName: my-script.ps1
       properties:
         args:
@@ -101681,7 +101693,7 @@ components:
                 id: 0cfead88e2024bd8a27476352b5ab264
                 ip:
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                   - 10.0.2.15
                   - fe80::2ac7:8e15:b957:2fa1
                 mac:
@@ -101765,7 +101777,7 @@ components:
                   - 10.0.2.15
                   - fe80::21a6:63d3:d70e:e3ad
                   - 127.0.0.1
-                  - '::1'
+                  - ::1
                 mac:
                   - 08:00:27:b1:1d:5a
                 name: WinDev2104Eval
@@ -102231,7 +102243,7 @@ components:
         endpoint_ids:
           - endpoint-id-1
         parameters:
-          inputParams: '--delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt'
+          inputParams: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
           script: 1111-2222-3333-4444-5555-6666-7777-8888
       properties:
         inputParams:
@@ -103461,17 +103473,22 @@ components:
                 $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -103479,6 +103496,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -103487,6 +103505,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     Security_Entity_Analytics_API_MonitoringEngineDescriptor:
       type: object
@@ -103505,10 +103524,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -103817,6 +103838,7 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
                     description: The source where this label was created (api, csv, or index_sync)
@@ -103827,13 +103849,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
     Security_Exceptions_API_CreateExceptionListItemComment:
       type: object
@@ -106194,7 +106219,7 @@ components:
           example: Bad Request
           type: string
         message:
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
           type: string
         statusCode:
           example: 400
@@ -106211,7 +106236,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 401
@@ -106228,7 +106256,10 @@ components:
           example: Unauthorized
           type: string
         message:
-          example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"
+          example: |-
+            [security_exception
+            	Root causes:
+            		security_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]
           type: string
         statusCode:
           example: 403

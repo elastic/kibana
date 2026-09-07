@@ -11,7 +11,6 @@ const Path = require('path');
 const webpack = require('webpack');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const UiSharedDepsNpm = require('.');
 
@@ -126,10 +125,6 @@ module.exports = (_, argv) => {
             },
           ],
         },
-        {
-          test: /\.css$/,
-          use: [MiniCssExtractPlugin.loader, 'css-loader'],
-        },
       ],
     },
 
@@ -177,16 +172,7 @@ module.exports = (_, argv) => {
 
     plugins: [
       new NodeLibsBrowserPlugin(),
-      new CleanWebpackPlugin({
-        protectWebpackAssets: false,
-        cleanAfterEveryBuildPatterns: [
-          'kbn-ui-shared-deps-npm.v8.{dark,light}.{dll.js,dll.js.map}',
-          'kbn-ui-shared-deps-npm.v8.{dark,light}-manifest.json',
-        ],
-      }),
-      new MiniCssExtractPlugin({
-        filename: '[name].css',
-      }),
+      new CleanWebpackPlugin(),
       new webpack.DllPlugin({
         context: REPO_ROOT,
         entryOnly: false,

@@ -14,7 +14,7 @@ import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public'
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
-import type { ESQLControlState } from '@kbn/esql-types';
+import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { VIEW_MODE, NEW_TAB_ID } from './constants';
 
 export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
@@ -127,6 +127,16 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
    * Optionally add some ESQL controls
    */
   esqlControls?: ControlPanelsState<ESQLControlState> & SerializableRecord;
+  /**
+   * Resolved ES|QL control variable values, so the reporting server can bind named
+   * params (e.g. ?crew_id) at export time.
+   *
+   * Note: this overlaps with `esqlControls` (control definitions, from which variable
+   * values could be derived), but it exists separately because some callers — e.g. the
+   * dashboard panel CSV export action — only have access to the resolved variable
+   * values, not the controls state.
+   */
+  esqlVariables?: ESQLControlVariable[] & SerializableRecord;
 }
 
 export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;

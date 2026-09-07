@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -77,7 +77,13 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+  }
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
@@ -88,6 +94,7 @@ export async function getFullAgentPolicy(
   );
 
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -211,7 +218,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          standalone,
+          redactProxySecrets
         );
         return acc;
       }, {}),
@@ -226,7 +234,7 @@ export async function getFullAgentPolicy(
     ],
     revision: agentPolicy.revision,
     agent: {
-      download: getBinarySourceSettings(downloadSource, downloadSourceProxy),
+      download: getBinarySourceSettings(downloadSource, downloadSourceProxy, redactProxySecrets),
       monitoring: getFullMonitoringSettings(agentPolicy, monitoringOutput),
       features,
       protection: {
@@ -343,7 +351,7 @@ export async function getFullAgentPolicy(
 
   // only add fleet server hosts if not in standalone
   if (!standalone && fleetServerHost) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies, redactProxySecrets);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -410,7 +418,8 @@ export async function getFullAgentPolicy(
 
 export function generateFleetConfig(
   fleetServerHost: FleetServerHost,
-  proxies: FleetProxy[]
+  proxies: FleetProxy[],
+  redactProxySecrets = false
 ): FullAgentPolicy['fleet'] {
   const config: FullAgentPolicy['fleet'] = {
     hosts: fleetServerHost.host_urls,
@@ -448,7 +457,7 @@ export function generateFleetConfig(
     : null;
   if (fleetServerHostproxy) {
     config.proxy_url = fleetServerHostproxy.url;
-    if (fleetServerHostproxy.proxy_headers) {
+    if (!redactProxySecrets && fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
     if (
@@ -463,7 +472,8 @@ export function generateFleetConfig(
           certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         }),
         ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
-        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
+        ...(!redactProxySecrets &&
+          fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }
@@ -507,7 +517,8 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -521,7 +532,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -634,7 +645,7 @@ export function transformOutputToFullPolicyOutput(
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -653,7 +664,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -673,7 +684,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;
@@ -831,7 +842,8 @@ function buildShipperQueueData(shipper: ShipperOutput) {
 
 export function getBinarySourceSettings(
   downloadSource: DownloadSource,
-  downloadSourceProxy: FleetProxy | undefined
+  downloadSourceProxy: FleetProxy | undefined,
+  redactProxySecrets = false
 ) {
   const config: FullAgentPolicyDownload = {
     sourceURI: downloadSource.host,
@@ -866,7 +878,7 @@ export function getBinarySourceSettings(
     if (downloadSourceProxy.url) {
       config.proxy_url = downloadSourceProxy.url;
     }
-    if (downloadSourceProxy.proxy_headers) {
+    if (!redactProxySecrets && downloadSourceProxy.proxy_headers) {
       config.proxy_headers = downloadSourceProxy.proxy_headers;
     }
     // if the proxy is configured, get the ssl settings from it
@@ -877,9 +889,10 @@ export function getBinarySourceSettings(
       ...(downloadSourceProxy?.certificate && {
         certificate: downloadSourceProxy.certificate,
       }),
-      ...(downloadSourceProxy?.certificate_key && {
-        key: downloadSourceProxy?.certificate_key,
-      }),
+      ...(!redactProxySecrets &&
+        downloadSourceProxy?.certificate_key && {
+          key: downloadSourceProxy?.certificate_key,
+        }),
     };
   }
 

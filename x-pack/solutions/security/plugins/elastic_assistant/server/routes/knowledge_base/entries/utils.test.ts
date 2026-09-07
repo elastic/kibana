@@ -6,9 +6,52 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import { getKBUserFilter } from './utils';
+import { getCreateKnowledgeBaseEntrySchemaMock } from '../../../__mocks__/knowledge_base_entry_schema.mock';
+import { getKBUserFilter, isGlobalEntry } from './utils';
 
 describe('Utils', () => {
+  describe('isGlobalEntry', () => {
+    it('returns true when global is true', () => {
+      expect(
+        isGlobalEntry(
+          getCreateKnowledgeBaseEntrySchemaMock({
+            global: true,
+            users: [{ id: 'u1', name: 'user' }],
+          })
+        )
+      ).toEqual(true);
+    });
+
+    it('returns false when global is false and users is undefined', () => {
+      expect(isGlobalEntry(getCreateKnowledgeBaseEntrySchemaMock({ global: false }))).toEqual(
+        false
+      );
+    });
+
+    it('returns true when global is false but users is an empty array', () => {
+      expect(
+        isGlobalEntry(getCreateKnowledgeBaseEntrySchemaMock({ global: false, users: [] }))
+      ).toEqual(true);
+    });
+
+    it('returns true when global is missing and users is an empty array', () => {
+      const entry = getCreateKnowledgeBaseEntrySchemaMock({ users: [] });
+      delete entry.global;
+      expect(isGlobalEntry(entry)).toEqual(true);
+    });
+
+    it('returns false when global is false and users has an owner', () => {
+      expect(
+        isGlobalEntry(
+          getCreateKnowledgeBaseEntrySchemaMock({
+            global: false,
+            users: [{ id: 'u1', name: 'user' }],
+          })
+        )
+      ).toEqual(false);
+    });
+  });
+
   describe('getKBUserFilter', () => {
     it('should return global filter when user is null', () => {
       const filter = getKBUserFilter(null);

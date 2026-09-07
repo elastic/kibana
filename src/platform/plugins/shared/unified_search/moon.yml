@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/split-button'
   - '@kbn/cps'
   - '@kbn/css-utils'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -74,6 +75,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -362,6 +362,72 @@
           "metrics"
         ],
         "type": "object"
+      },
+      "enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "active": {
+            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
+            "type": "boolean"
+          },
+          "api_key": {
+            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
+            "type": "string"
+          },
+          "api_key_id": {
+            "description": "The ID of the API key in the Security API.",
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "expire_at": {
+            "description": "The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.",
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the enrollment API key.",
+            "type": "string"
+          },
+          "policy_id": {
+            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "api_key_id",
+          "api_key",
+          "active",
+          "created_at"
+        ],
+        "type": "object"
+      },
+      "new_enrollment_api_key": {
+        "additionalProperties": false,
+        "properties": {
+          "expiration": {
+            "description": "The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.",
+            "maxLength": 20,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "policy_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_id"
+        ],
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -871,6 +937,7 @@
             "name": "feature_id",
             "required": false,
             "schema": {
+              "maxLength": 100,
               "type": "string"
             }
           }
@@ -22433,6 +22500,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "enrollment_token": {
                     "type": "string"
                   },
@@ -22508,16 +22578,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22612,6 +22698,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "user_info": {
                     "additionalProperties": false,
                     "properties": {
@@ -22648,16 +22737,32 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22748,6 +22853,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -22770,16 +22878,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22871,6 +22995,9 @@
                   },
                   "batchSize": {
                     "type": "number"
+                  },
+                  "dryRun": {
+                    "type": "boolean"
                   }
                 },
                 "required": [
@@ -22886,16 +23013,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -22990,6 +23133,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -23018,20 +23164,37 @@
                   }
                 },
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionIds": {
-                      "items": {
-                        "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionIds": {
+                          "items": {
+                            "maxLength": 36,
+                            "type": "string"
+                          },
+                          "maxItems": 10000,
+                          "type": "array"
+                        }
                       },
-                      "maxItems": 10000,
-                      "type": "array"
+                      "required": [
+                        "actionIds"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionIds"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23124,6 +23287,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "description": "Unenrolls hosted agents too",
                     "type": "boolean"
@@ -23150,16 +23316,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23242,6 +23424,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "includeInactive": {
                     "default": false,
                     "type": "boolean"
@@ -23274,16 +23459,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -23366,6 +23567,9 @@
                   "batchSize": {
                     "type": "number"
                   },
+                  "dryRun": {
+                    "type": "boolean"
+                  },
                   "force": {
                     "type": "boolean"
                   },
@@ -23404,16 +23608,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -25702,16 +25922,32 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": false,
-                  "properties": {
-                    "actionId": {
-                      "type": "string"
+                  "anyOf": [
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "actionId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "actionId"
+                      ],
+                      "type": "object"
+                    },
+                    {
+                      "additionalProperties": false,
+                      "properties": {
+                        "count": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "count"
+                      ],
+                      "type": "object"
                     }
-                  },
-                  "required": [
-                    "actionId"
-                  ],
-                  "type": "object"
+                  ]
                 }
               }
             },
@@ -27367,46 +27603,7 @@
                   "properties": {
                     "items": {
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27414,46 +27611,7 @@
                     "list": {
                       "deprecated": true,
                       "items": {
-                        "additionalProperties": false,
-                        "properties": {
-                          "active": {
-                            "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                            "type": "boolean"
-                          },
-                          "api_key": {
-                            "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                            "type": "string"
-                          },
-                          "api_key_id": {
-                            "description": "The ID of the API key in the Security API.",
-                            "type": "string"
-                          },
-                          "created_at": {
-                            "type": "string"
-                          },
-                          "hidden": {
-                            "type": "boolean"
-                          },
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "description": "The name of the enrollment API key.",
-                            "type": "string"
-                          },
-                          "policy_id": {
-                            "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "api_key_id",
-                          "api_key",
-                          "active",
-                          "created_at"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/enrollment_api_key"
                       },
                       "maxItems": 10000,
                       "type": "array"
@@ -27537,22 +27695,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "expiration": {
-                    "type": "string"
-                  },
-                  "name": {
-                    "type": "string"
-                  },
-                  "policy_id": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "policy_id"
-                ],
-                "type": "object"
+                "$ref": "#/components/schemas/new_enrollment_api_key"
               }
             }
           }
@@ -27571,46 +27714,7 @@
                       "type": "string"
                     },
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -27766,46 +27870,7 @@
                   "additionalProperties": false,
                   "properties": {
                     "item": {
-                      "additionalProperties": false,
-                      "properties": {
-                        "active": {
-                          "description": "When false, the enrollment API key is revoked and cannot be used for enrolling Elastic Agents.",
-                          "type": "boolean"
-                        },
-                        "api_key": {
-                          "description": "The enrollment API key (token) used for enrolling Elastic Agents.",
-                          "type": "string"
-                        },
-                        "api_key_id": {
-                          "description": "The ID of the API key in the Security API.",
-                          "type": "string"
-                        },
-                        "created_at": {
-                          "type": "string"
-                        },
-                        "hidden": {
-                          "type": "boolean"
-                        },
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "description": "The name of the enrollment API key.",
-                          "type": "string"
-                        },
-                        "policy_id": {
-                          "description": "The ID of the agent policy the Elastic Agent will be enrolled in.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "api_key_id",
-                        "api_key",
-                        "active",
-                        "created_at"
-                      ],
-                      "type": "object"
+                      "$ref": "#/components/schemas/enrollment_api_key"
                     }
                   },
                   "required": [
@@ -51377,7 +51442,9 @@
           }
         },
         "summary": "Get space settings",
-        "tags": [],
+        "tags": [
+          "Fleet internals"
+        ],
         "x-state": "Generally available; added in 9.1.0"
       },
       "put": {
@@ -51452,7 +51519,9 @@
           }
         },
         "summary": "Create space settings",
-        "tags": [],
+        "tags": [
+          "Fleet internals"
+        ],
         "x-state": "Generally available; added in 9.1.0"
       }
     },

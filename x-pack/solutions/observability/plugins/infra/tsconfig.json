@@ -8,7 +8,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "types/**/*"
+    "types/**/*",
+    "test/scout/api/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -131,7 +132,8 @@
     "@kbn/observability-agent-builder-plugin",
     "@kbn/presentation-publishing",
     "@kbn/inspector-plugin",
-    "@kbn/es-query-constants"
+    "@kbn/es-query-constants",
+    "@kbn/scout-oblt"
   ],
   "exclude": ["target/**/*"]
 }

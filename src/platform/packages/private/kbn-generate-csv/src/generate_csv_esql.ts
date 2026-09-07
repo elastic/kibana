@@ -15,7 +15,13 @@ import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-ty
 import { ESQL_SEARCH_STRATEGY, cellHasFormulas, getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
-import { getTimeFieldFromESQLQuery, getStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
+import {
+  getTimeFieldFromESQLQuery,
+  appendLimitToQuery,
+  getNamedParams,
+  fixESQLQueryWithVariables,
+} from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
@@ -38,6 +44,7 @@ export interface JobParamsCsvESQL {
   browserTimezone?: string;
   forceNow?: string;
   timeFieldName?: string;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 interface Clients {
@@ -74,20 +81,14 @@ export class CsvESQLGenerator {
     let reportingError: undefined | ReportingError;
     const warnings: string[] = [];
 
-    const { maxSizeBytes, maxRows, bom, escapeFormulaValues } = settings;
+    const { maxSizeBytes, maxRows, bom, escapeFormulaValues, timezone } = settings;
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
 
-    // it will return undefined if there are no _tstart, _tend named params in the query
-    const timeFieldName = getTimeFieldFromESQLQuery(this.job.query.esql);
-    const params = [];
-    if (timeFieldName && this.job.filters) {
-      const { timeRange } = extractTimeRange(this.job.filters, timeFieldName);
-      if (timeRange) {
-        const namedParams = getStartEndParams(this.job.query.esql, timeRange);
-        params.push(...namedParams);
-      }
-    }
+    // Rewrite identifier-type (FIELDS/FUNCTIONS) variables (e.g. ?var → ??var) for ES compatibility
+    const esqlQuery = fixESQLQueryWithVariables(this.job.query.esql, this.job.esqlVariables);
 
+    // Override filters with forceNow first so that _tstart/_tend named params are built
+    // from the already-resolved (forceNow-anchored) time range rather than wall-clock "now".
     let currentFilters = this.job.filters;
     if (this.job.forceNow) {
       this.logger.debug(`Overriding time range filter using forceNow: ${this.job.forceNow}`, {
@@ -101,6 +102,7 @@ export class CsvESQLGenerator {
         forceNow: this.job.forceNow,
         logger: this.logger,
         timeFieldName: this.job.timeFieldName,
+        timezone,
       });
       this.logger.debug(() => `Updated filters: ${JSON.stringify(updatedFilters)}`, {
         tags: [this.jobId],
@@ -109,6 +111,15 @@ export class CsvESQLGenerator {
         currentFilters = updatedFilters;
       }
     }
+
+    // Builds _tstart/_tend params (from the potentially forceNow-updated time range) and
+    // user-defined variable params
+    const timeFieldName = getTimeFieldFromESQLQuery(esqlQuery);
+    let timeRange;
+    if (timeFieldName && currentFilters) {
+      ({ timeRange } = extractTimeRange(currentFilters, timeFieldName));
+    }
+    const params = getNamedParams(esqlQuery, timeRange, this.job.esqlVariables);
 
     const filter =
       currentFilters &&
@@ -119,13 +130,9 @@ export class CsvESQLGenerator {
         getEsQueryConfig(this.clients.uiSettings as Parameters<typeof getEsQueryConfig>[0])
       );
 
-    let query = this.job.query.esql;
-    if (query && maxRows) {
-      query = appendLimitToQuery(this.job.query.esql, maxRows);
-    }
     const searchParams: IKibanaSearchRequest<ESQLSearchParams> = {
       params: {
-        query,
+        query: esqlQuery && maxRows ? appendLimitToQuery(esqlQuery, maxRows) : esqlQuery,
         filter,
         // locale can be used for number/date formatting
         locale: i18n.getLocale(),

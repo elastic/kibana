@@ -75,6 +75,8 @@ dependsOn:
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/visualizations-common'
   - '@kbn/core-http-browser'
+  - '@kbn/scout'
+  - '@kbn/rison'
 tags:
   - plugin
   - prod
@@ -92,6 +94,7 @@ fileGroups:
     - server/**/*
     - storybook/**/*
     - tasks/mocks/*
+    - test/scout/**/*
     - types/**/*
     - '!target/**/*'
   jest-config:

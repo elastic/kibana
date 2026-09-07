@@ -7,12 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getFailures } from './get_failures';
+import { getCodeOwnersEntries, getOwningTeamsForPath } from '@kbn/code-owners';
+
+import { getFailures, getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import { parseTestReport } from './test_report';
-import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT } from './__fixtures__';
+import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, TRANSFORMED_CYPRESS_REPORT } from './__fixtures__';
+
+jest.mock('@kbn/code-owners', () => ({
+  getCodeOwnersEntries: jest.fn(() => []),
+  // Deterministic owner so the fallback (used for Jest/Cypress) is testable
+  // without depending on the real CODEOWNERS file.
+  getOwningTeamsForPath: jest.fn(() => ['elastic/fake-team']),
+}));
+
+const getOwningTeamsForPathMock = getOwningTeamsForPath as jest.MockedFunction<
+  typeof getOwningTeamsForPath
+>;
+const getCodeOwnersEntriesMock = getCodeOwnersEntries as jest.MockedFunction<
+  typeof getCodeOwnersEntries
+>;
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  getCodeOwnersEntriesMock.mockReturnValue([]);
+  getOwningTeamsForPathMock.mockReturnValue(['elastic/fake-team']);
+});
+
+describe('classname parsing', () => {
+  it.each([
+    {
+      classname: 'Jest Tests.x-pack/platform/example/example·test·ts',
+      reportName: 'Jest Tests',
+      location: 'x-pack/platform/example/example.test.ts',
+    },
+    {
+      classname: 'Jest Tests',
+      reportName: 'Jest Tests',
+      location: '',
+    },
+    {
+      classname: 'Jest Tests.unknown',
+      reportName: 'Jest Tests',
+      location: 'unknown',
+    },
+  ])('parses $classname', ({ classname, reportName, location }) => {
+    expect(getReportNameFromClassname(classname)).toBe(reportName);
+    expect(getLocationFromClassname(classname)).toBe(location);
+  });
+});
 
 it('discovers failures in ftr report', async () => {
   const failures = getFailures(await parseTestReport(FTR_REPORT));
+  expect(getOwningTeamsForPathMock).not.toHaveBeenCalled();
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -27,6 +73,7 @@ it('discovers failures in ftr report', async () => {
         at onFailure (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-ciGroup7/node/immutable/kibana/test/common/services/retry/retry_for_success.ts:68:13)
           ",
         "likelyIrrelevant": false,
+        "location": "x-pack/platform/test/functional/apps/maps/sample_data.js",
         "name": "maps app  maps loaded from sample data ecommerce \\"before all\\" hook",
         "owners": "elastic/kibana-presentation",
         "system-out": "
@@ -36,6 +83,7 @@ it('discovers failures in ftr report', async () => {
     [00:15:02]                   │
 
           ",
+        "testType": "ftr",
         "time": "154.378",
       },
       Object {
@@ -48,6 +96,7 @@ it('discovers failures in ftr report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/platform/test/functional/apps/maps",
         "metadata-json": "{\\"messages\\":[\\"foo\\"],\\"screenshots\\":[{\\"name\\":\\"failure[dashboard app using current data dashboard snapshots compare TSVB snapshot]\\",\\"url\\":\\"https://storage.googleapis.com/kibana-ci-artifacts/jobs/elastic+kibana+7.x/1632/kibana-oss-tests/test/functional/screenshots/failure/dashboard%20app%20using%20current%20data%20dashboard%20snapshots%20compare%20TSVB%20snapshot.png\\"}]}",
         "name": "maps app \\"after all\\" hook",
         "owners": "elastic/kibana-presentation",
@@ -57,6 +106,7 @@ it('discovers failures in ftr report', async () => {
     ...
 
           ",
+        "testType": "ftr",
         "time": "0.179",
       },
       Object {
@@ -68,9 +118,11 @@ it('discovers failures in ftr report', async () => {
         at Executor.execute (/dev/shm/workspace/kibana/node_modules/selenium-webdriver/lib/http.js:489:26)
         at process._tickCallback (internal/process/next_tick.js:68:7) name: 'NoSuchSessionError', remoteStacktrace: '' }",
         "likelyIrrelevant": true,
+        "location": "x-pack/platform/test/functional/apps/machine_learning/anomaly_detection/saved_search_job.ts",
         "name": "machine learning anomaly detection saved search  with lucene query job creation opens the advanced section",
         "owners": "elastic/ml-ui",
         "system-out": "[00:21:57]         └-: machine learning...",
+        "testType": "ftr",
         "time": "6.040",
       },
     ]
@@ -79,6 +131,10 @@ it('discovers failures in ftr report', async () => {
 
 it('discovers failures in jest report', async () => {
   const failures = getFailures(await parseTestReport(JEST_REPORT));
+  expect(getOwningTeamsForPathMock).toHaveBeenCalledWith(
+    'x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts',
+    []
+  );
   expect(failures).toMatchInlineSnapshot(`
     Array [
       Object {
@@ -89,13 +145,88 @@ it('discovers failures in jest report', async () => {
         at Object.<anonymous>.test (/var/lib/jenkins/workspace/elastic+kibana+master/JOB/x-pack-intake/node/immutable/kibana/x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts:166:10)
           ",
         "likelyIrrelevant": false,
+        "location": "x-pack/legacy/plugins/code/server/lsp/abstract_launcher.test.ts",
         "name": "launcher can reconnect if process died",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "",
+        "testType": "jest",
         "time": "7.060",
       },
     ]
   `);
+});
+
+it('discovers failures in transformed cypress report', async () => {
+  const failures = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+  const location =
+    'x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate.cy.ts';
+
+  expect(getOwningTeamsForPathMock).toHaveBeenCalledWith(location, []);
+  expect(failures).toEqual([
+    expect.objectContaining({
+      classname:
+        'Security Solution Cypress.x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/response_actions/isolate·cy·ts',
+      location,
+      owners: 'elastic/fake-team',
+      testType: 'cypress',
+    }),
+  ]);
+});
+
+it('leaves owners undefined when no CODEOWNERS entry matches', async () => {
+  getOwningTeamsForPathMock.mockReturnValueOnce([]);
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('handles errors while loading CODEOWNERS', async () => {
+  getCodeOwnersEntriesMock.mockImplementationOnce(() => {
+    throw new Error('CODEOWNERS unavailable');
+  });
+  getOwningTeamsForPathMock.mockReturnValueOnce([]);
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('handles errors while resolving code owners', async () => {
+  getOwningTeamsForPathMock.mockImplementationOnce(() => {
+    throw new Error('Unable to resolve owners');
+  });
+
+  const [failure] = getFailures(await parseTestReport(TRANSFORMED_CYPRESS_REPORT));
+
+  expect(failure.owners).toBeUndefined();
+});
+
+it('associates each Jest failure with its enclosing suite', async () => {
+  const report = await parseTestReport(`
+    <testsuites name="jest">
+      <testsuite name="path/to/first.test.ts" timestamp="2026-07-15T12:00:00" time="1" tests="1" failures="1" skipped="0">
+        <testcase classname="Jest Tests.path/to" name="first test" time="1">
+          <failure>first failure</failure>
+        </testcase>
+      </testsuite>
+      <testsuite name="other/path/second.test.ts" timestamp="2026-07-15T12:00:01" time="2" tests="1" failures="1" skipped="0">
+        <testcase classname="Jest Tests.other/path" name="second test" time="2">
+          <failure>second failure</failure>
+        </testcase>
+      </testsuite>
+    </testsuites>
+  `);
+
+  expect(
+    getFailures(report).map(({ name, location }) => ({
+      name,
+      location,
+    }))
+  ).toEqual([
+    { name: 'first test', location: 'path/to/first.test.ts' },
+    { name: 'second test', location: 'other/path/second.test.ts' },
+  ]);
 });
 
 it('discovers failures in mocha report', async () => {
@@ -119,11 +250,13 @@ it('discovers failures in mocha report', async () => {
         at process._tickCallback (internal/process/next_tick.js:68:7)
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/legacy/plugins/code/server/__tests__/multi_node.ts",
         "name": "code in multiple nodes \\"before all\\" hook",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "
             
           ",
+        "testType": undefined,
         "time": "0.121",
       },
       Object {
@@ -135,11 +268,13 @@ it('discovers failures in mocha report', async () => {
         at process.topLevelDomainCallback (domain.js:120:23)
           ",
         "likelyIrrelevant": true,
+        "location": "x-pack/legacy/plugins/code/server/__tests__/multi_node.ts",
         "name": "code in multiple nodes \\"after all\\" hook",
-        "owners": undefined,
+        "owners": "elastic/fake-team",
         "system-out": "
             
           ",
+        "testType": undefined,
         "time": "0.003",
       },
     ]

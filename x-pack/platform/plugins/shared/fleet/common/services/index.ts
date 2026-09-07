@@ -7,6 +7,7 @@
 
 export * from './routes';
 export { validateFleetSavedObjectId } from './validate_fleet_id';
+export { isValidDuration, isValidEnrollmentKeyExpiration } from './validate_duration';
 export * as AgentStatusKueryHelper from './agent_status';
 export * from './package_helpers';
 export {
@@ -45,6 +46,7 @@ export {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
   hasMultipleEnabledPolicyTemplates,
 } from './policy_template';
@@ -108,3 +110,11 @@ export {
 export { removeSOAttributes, getSortConfig, checkTargetVersionsValidity } from './agent_utils';
 
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
+
+export type { YamlModule } from './yaml_utils';
+export { createYamlKeysSorter, toYaml } from './yaml_utils';
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

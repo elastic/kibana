@@ -7,6 +7,7 @@
 
 import type { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/server';
 import {
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   validateRuleTypeParams,
@@ -149,6 +150,10 @@ export async function updateRuleInMemory<Params extends RuleParams>(
     rule.attributes.params,
     ruleType.validate.params
   );
+  await authorizeRuleTypeParams(validatedMutatedAlertTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: rule.attributes.params,
+  });
 
   const {
     references,

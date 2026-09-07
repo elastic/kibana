@@ -115,10 +115,8 @@ class ConversationClientImpl implements ConversationClient {
 
   async exists(conversationId: string): Promise<boolean> {
     const document = await this._get(conversationId);
-    if (!document) {
-      return false;
-    }
-    return hasAccess({ conversation: document, user: this.user });
+
+    return document !== undefined;
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -132,10 +130,19 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    await this.storage.getClient().index({
-      id,
-      document: attributes,
-    });
+    try {
+      await this.storage.getClient().index({
+        id,
+        document: attributes,
+        op_type: 'create',
+      });
+    } catch (error) {
+      if (error?.statusCode === 409) {
+        throw createConversationNotFoundError({ conversationId: id });
+      }
+
+      throw error;
+    }
 
     return this.get(id);
   }

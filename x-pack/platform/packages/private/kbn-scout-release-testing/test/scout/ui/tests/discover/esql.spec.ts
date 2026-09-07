@@ -6,8 +6,9 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { test, tags, type ScoutPage } from '@kbn/scout';
-import { SavedObjectsTracker, installLogsSampleData, removeLogsSampleData } from '../../helpers';
+import type { ScoutPage } from '@kbn/scout';
+import { test, tags } from '@kbn/scout';
+import { SavedObjectsTracker } from '../../helpers';
 
 // Inlined ES|QL + Monaco editor + doc-viewer helpers.
 //
@@ -155,11 +156,6 @@ const closeDocViewerFlyout = async (page: ScoutPage) => {
   await page.testSubj.waitForSelector('kbnDocViewer', { state: 'hidden' });
 };
 
-const defaultSettings = {
-  defaultIndex: 'kibana_sample_data_logs',
-  'dateFormat:tz': 'UTC',
-};
-
 // Sample data for `kibana_sample_data_logs` is generated relative to the install
 // time and spans roughly three weeks in the past and one week in the future, so
 // a wide default time range guarantees the histogram and aggregations have data
@@ -193,10 +189,6 @@ const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 const tracker = new SavedObjectsTracker();
 
 test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ kbnClient, apiServices }) => {
-    await installLogsSampleData({ apiServices, kbnClient, settings: defaultSettings });
-  });
-
   test.beforeEach(async ({ browserAuth, pageObjects, uiSettings }) => {
     await browserAuth.loginAsAdmin();
     await uiSettings.set({
@@ -207,10 +199,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
   test.afterEach(async ({ kbnClient }) => {
     await tracker.cleanup(kbnClient);
-  });
-
-  test.afterAll(async ({ kbnClient, apiServices }) => {
-    await removeLogsSampleData({ apiServices, kbnClient });
   });
 
   test('should switch the query bar to ES|QL and display the default sample query', async ({

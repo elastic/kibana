@@ -19,7 +19,12 @@ import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { MonitorSummaryTLSRule } from './types';
 import type { TLSLatestPing } from './tls_rule_executor';
-import { ALERT_DETAILS_URL } from '../action_variables';
+import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
+import {
+  generateAlertMessage,
+  getRelativeCertificatesViewInAppUrl,
+  getViewInAppUrl,
+} from '../common';
 import type { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
 import type { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
@@ -40,7 +45,6 @@ import {
   SERVICE_NAME,
   URL_FULL,
 } from '../../../common/field_names';
-import { generateAlertMessage } from '../common';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
 interface TLSContent {
   summary: string;
@@ -118,6 +122,48 @@ export const getCertSummary = (
   };
 };
 
+interface TlsCertIdentity {
+  commonName?: string;
+  issuer?: string;
+}
+
+const getTlsCertIdentity = (state: { commonName?: string; issuer?: string }): TlsCertIdentity => ({
+  commonName: state.commonName,
+  issuer: state.issuer,
+});
+
+const getTlsViewInAppUrl = (
+  basePath: IBasePath,
+  spaceId: string,
+  { commonName, issuer }: TlsCertIdentity
+) =>
+  getViewInAppUrl(basePath, spaceId, getRelativeCertificatesViewInAppUrl({ commonName, issuer }));
+
+const getTlsAlertUrlContext = async (
+  basePath: IBasePath,
+  spaceId: string,
+  alertUuid: string,
+  certIdentity: TlsCertIdentity
+) => ({
+  [ALERT_DETAILS_URL]: await getAlertDetailsUrl(basePath, spaceId, alertUuid),
+  [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId, certIdentity),
+});
+
+export const getTLSAlertContext = async ({
+  basePath,
+  spaceId,
+  summary,
+  alertUuid,
+}: {
+  basePath: IBasePath;
+  spaceId: string;
+  summary: CertSummary;
+  alertUuid: string;
+}) => ({
+  ...(await getTlsAlertUrlContext(basePath, spaceId, alertUuid, summary)),
+  ...summary,
+});
+
 export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uuid: string) => ({
   [CERT_COMMON_NAME]: cert.common_name,
   [CERT_ISSUER_NAME]: cert.issuer,
@@ -168,6 +214,7 @@ export const setTLSRecoveredAlertsContext = async ({
 
     const state = recoveredAlert.alert.getState();
     const alertUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
+    const certIdentity = getTlsCertIdentity(state);
 
     const configId = state.configId;
     const latestPing = latestPings.find((ping) => ping.config_id === configId);
@@ -207,6 +254,7 @@ export const setTLSRecoveredAlertsContext = async ({
       previousStatus,
       summary: newSummary,
       [ALERT_DETAILS_URL]: alertUrl,
+      [VIEW_IN_APP_URL]: getTlsViewInAppUrl(basePath, spaceId, certIdentity),
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }

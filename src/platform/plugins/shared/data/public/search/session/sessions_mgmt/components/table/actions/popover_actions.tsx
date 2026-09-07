@@ -73,7 +73,7 @@ export const PopoverActionsMenu = ({
   const items = actions.reduce((itemSet, actionType) => {
     const actionDef = getAction(api, actionType, session, core);
     if (actionDef) {
-      const { label, iconType, onClick } = actionDef;
+      const { label, icon, onClick } = actionDef;
 
       // add a line above the delete action (when there are multiple)
       // NOTE: Delete action MUST be the final action[] item
@@ -86,7 +86,7 @@ export const PopoverActionsMenu = ({
         {
           key: `action-${actionType}`,
           name: label,
-          icon: iconType,
+          icon,
           'data-test-subj': `sessionManagementPopoverAction-${actionType}`,
           onClick: async () => {
             closePopover();

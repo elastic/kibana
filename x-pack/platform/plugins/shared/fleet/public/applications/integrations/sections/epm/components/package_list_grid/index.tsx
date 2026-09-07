@@ -43,11 +43,13 @@ import { MissingIntegrationContent } from './missing_integrations';
 import { SearchBox } from './search_box';
 
 const StickySidebar = styled(EuiFlexItem)`
-  position: sticky;
-  top: calc(
-    var(--kbn-application--sticky-headers-offset, 96px) +
-      ${(props) => props.theme.eui.euiSizeL /* 24px */}
-  );
+  @media (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    position: sticky;
+    top: calc(
+      var(--kbn-application--sticky-headers-offset, 96px) +
+        ${(props) => props.theme.eui.euiSizeL /* 24px */}
+    );
+  }
 `;
 
 export interface PackageListGridProps {

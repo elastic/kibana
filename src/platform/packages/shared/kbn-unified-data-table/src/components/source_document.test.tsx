@@ -9,11 +9,12 @@
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithIntl, renderWithI18n } from '@kbn/test-jest-helpers';
 import React from 'react';
 import SourceDocument from './source_document';
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { screen, within } from '@testing-library/dom';
 
 const mockServices = {
   fieldFormats: {
@@ -84,5 +85,41 @@ describe('Unified data table source document cell rendering', function () {
 
     expect(mockConvert).toHaveBeenCalled();
     expect(component.html()).toContain('my bar value');
+  });
+
+  it('does not let null fields consume the ES|QL document summary limit', () => {
+    const row = build({
+      _id: 'doc-001',
+      _source: {
+        field_1: null,
+        field_2: null,
+        field_3: null,
+        field_4: null,
+        field_5: null,
+        source: 'void_realm',
+        status: 'missing_in_action',
+      },
+    });
+
+    renderWithI18n(
+      <SourceDocument
+        columnId="_source"
+        dataView={dataViewMock}
+        fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
+        isPlainRecord={true}
+        maxEntries={2}
+        row={row}
+        shouldShowFieldHandler={() => true}
+        useTopLevelObjectColumns={false}
+      />
+    );
+
+    const descriptionList = screen.getByTestId('discoverCellDescriptionList');
+    expect(within(descriptionList).getByText('source')).toBeVisible();
+    expect(within(descriptionList).getByText('void_realm')).toBeVisible();
+    expect(within(descriptionList).getByText('status')).toBeVisible();
+    expect(within(descriptionList).getByText('missing_in_action')).toBeVisible();
+    expect(within(descriptionList).queryByText('field_1')).not.toBeInTheDocument();
+    expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
   });
 });

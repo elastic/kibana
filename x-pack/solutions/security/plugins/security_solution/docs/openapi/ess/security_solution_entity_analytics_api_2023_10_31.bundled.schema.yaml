@@ -2626,17 +2626,22 @@ components:
                 $ref: '#/components/schemas/MonitoringLabel'
               type: array
         id:
+          maxLength: 256
           type: string
         labels:
           type: object
           properties:
             source_ids:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             source_integrations:
               items:
+                maxLength: 256
                 type: string
+              maxItems: 100
               type: array
             sources:
               items:
@@ -2644,6 +2649,7 @@ components:
                   - csv
                   - index_sync
                   - api
+              maxItems: 100
               type: array
         user:
           type: object
@@ -2652,6 +2658,7 @@ components:
               description: Indicates if the user is privileged.
               type: boolean
             name:
+              maxLength: 512
               type: string
     MonitoringEngineDescriptor:
       type: object
@@ -2671,10 +2678,12 @@ components:
       type: object
       properties:
         field:
+          maxLength: 256
           type: string
         source:
           type: string
         value:
+          maxLength: 256
           type: string
       required:
         - field
@@ -2985,6 +2994,7 @@ components:
                 properties:
                   field:
                     description: The field name for the label
+                    maxLength: 256
                     type: string
                   source:
                     description: The source where this label was created (api, csv, or index_sync)
@@ -2995,13 +3005,16 @@ components:
                     type: string
                   value:
                     description: The value of the label
+                    maxLength: 256
                     type: string
+              maxItems: 100
               type: array
         user:
           type: object
           properties:
             name:
               description: The name of the user.
+              maxLength: 512
               type: string
   securitySchemes:
     BasicAuth:

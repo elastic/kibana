@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { MAX_SHORT_STRING_LENGTH } from './schema_limits';
 
 const startDescription =
   'The start time of the query window using Elasticsearch date math (e.g., "now-24h", "now-15m").';
@@ -16,19 +17,21 @@ export const indexDescription =
   'Concrete index or index pattern to analyze (for example `logs-payments.api-default`).';
 
 export const timeRangeSchemaRequired = {
-  start: z.string().describe(startDescription),
-  end: z.string().describe(endDescription),
+  start: z.string().max(MAX_SHORT_STRING_LENGTH).describe(startDescription),
+  end: z.string().max(MAX_SHORT_STRING_LENGTH).describe(endDescription),
 };
 
 export function timeRangeSchemaOptional(defaultTimeRange: { start: string; end: string }) {
   return {
     start: z
       .string()
+      .max(MAX_SHORT_STRING_LENGTH)
       .describe(`${startDescription} Defaults to ${defaultTimeRange.start}.`)
       .default(defaultTimeRange.start),
 
     end: z
       .string()
+      .max(MAX_SHORT_STRING_LENGTH)
       .describe(`${endDescription} Defaults to ${defaultTimeRange.end}.`)
       .default(defaultTimeRange.end),
   };

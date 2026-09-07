@@ -2,9 +2,12 @@
 plugins:
   enabled:
     - apm
+    - canvas
     - data
     - data_views
     - console
+    - content_management
+    - cross_cluster_replication
     - dashboard
     - data_view_management
     - discover_enhanced
@@ -32,6 +35,7 @@ plugins:
     - transform
     - uptime
     - ux
+    - watcher
     - workflows_extensions
   disabled:
 

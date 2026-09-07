@@ -40,6 +40,8 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
+  - '@kbn/security-plugin-types-server'
+  - '@kbn/workflows'
 tags:
   - plugin
   - prod

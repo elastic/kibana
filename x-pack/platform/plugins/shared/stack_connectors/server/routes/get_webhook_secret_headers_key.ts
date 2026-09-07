@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { CONNECTOR_ID_MAX_LENGTH } from '@kbn/actions-plugin/common';
 import type {
   IRouter,
   RequestHandlerContext,
@@ -52,7 +53,7 @@ export const getWebhookSecretHeadersKeyRoute = (
       },
       validate: {
         params: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: CONNECTOR_ID_MAX_LENGTH }),
         }),
       },
       options: {

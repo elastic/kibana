@@ -150,6 +150,7 @@ test('creates a rules client with proper constructor arguments when security is 
   );
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
+    request,
     auditLogger: {
       enabled: true,
       includeSavedObjectNames: false,
@@ -209,6 +210,7 @@ test('creates a rules client with proper constructor arguments', async () => {
   expect(alertingAuthorizationClientFactory.create).toHaveBeenCalledWith(request);
 
   expect(jest.requireMock('./rules_client').RulesClient).toHaveBeenCalledWith({
+    request,
     unsecuredSavedObjectsClient: savedObjectsClient,
     authorization: alertingAuthorization,
     actionsAuthorization,

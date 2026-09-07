@@ -60,18 +60,23 @@ export const getShareAppMenuItem = ({
   }) => {
     const { dataView, isEsqlMode } = discoverParams;
 
+    const { locator, discoverFeatureFlags } = services;
+    const { timefilter } = services.data.query.timefilter;
+    const timeRange = timefilter.getTime();
+    // Use the absolute time range captured at the most recent on-screen fetch so the export
+    // covers the exact window the user saw, rather than re-resolving "now" at click time.
+    const absoluteTimeRange =
+      currentTab.dataRequestParams.timeRangeAbsolute ?? timefilter.getAbsoluteTime();
+    const refreshInterval = timefilter.getRefreshInterval();
+
     const searchSourceSharingData = await getSharingData(
       stateContainer.savedSearchState.getState().searchSource,
       currentTab.appState,
       services,
-      isEsqlMode
+      isEsqlMode,
+      absoluteTimeRange
     );
 
-    const { locator, discoverFeatureFlags } = services;
-    const { timefilter } = services.data.query.timefilter;
-    const timeRange = timefilter.getTime();
-    const absoluteTimeRange = timefilter.getAbsoluteTime();
-    const refreshInterval = timefilter.getRefreshInterval();
     const filters = services.filterManager.getFilters();
 
     // Share -> Get links -> Snapshot
@@ -151,7 +156,20 @@ export const getShareAppMenuItem = ({
       },
       sharingData: {
         isTextBased: isEsqlMode,
-        locatorParams: [{ id: locator.id, params }],
+        locatorParams: [
+          {
+            id: locator.id,
+            params:
+              isEsqlMode && currentTab.esqlVariables?.length
+                ? {
+                    ...params,
+                    // Resolved variable values so the reporting server can bind named params (e.g. ?crew_id).
+                    esqlVariables:
+                      currentTab.esqlVariables as DiscoverAppLocatorParams['esqlVariables'],
+                  }
+                : params,
+          },
+        ],
         ...searchSourceSharingData,
         // CSV reports can be generated without a saved search so we provide a fallback title
         title:

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import {
   loggingSystemMock,
@@ -55,6 +56,7 @@ const taskManager = taskManagerMock.createStart();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 
 const rulesClientContext: RulesClientContext = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,

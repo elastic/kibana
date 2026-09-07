@@ -279,6 +279,7 @@ function renderParameterTemplates(
     ...renderMustacheObject(logger, params, variables),
     // message however, needs to escaped as markdown
     message: renderMustacheString(logger, params.message, variables, 'markdown'),
+    messageHTML: renderMustacheString(logger, params.messageHTML, variables, 'html'),
   };
 }
 

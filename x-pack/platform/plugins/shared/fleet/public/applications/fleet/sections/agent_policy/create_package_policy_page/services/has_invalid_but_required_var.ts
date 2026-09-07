@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
-
 import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
 
 import { validatePackagePolicyConfig } from '.';
 
+export type YamlParseFn = (value: string) => unknown;
+
 export const hasInvalidButRequiredVar = (
+  parse: YamlParseFn,
   registryVars?: RegistryVarsEntry[],
   packagePolicyVars?: PackagePolicyConfigRecord
 ): boolean => {
@@ -28,7 +29,8 @@ export const hasInvalidButRequiredVar = (
                 packagePolicyVars[registryVar.name],
                 registryVar,
                 registryVar.name,
-                load
+                parse,
+                undefined
               )?.length)
         )
     )

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/types/datasets';
 import {
   createQuantitativeCorrectnessEvaluators,
   type DefaultEvaluators,
@@ -20,7 +20,7 @@ import {
   type RetrievedDoc,
 } from '@kbn/evals';
 import type { ExperimentTask } from '@kbn/evals/src/types';
-import type { TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { TaskOutput } from '@arizeai/phoenix-client/types/experiments';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { OnechatEvaluationChatClient } from './chat_client';

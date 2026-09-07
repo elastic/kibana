@@ -62,6 +62,7 @@ jest.mock('../../app_context', () => {
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
+      getKibanaVersion: jest.fn(() => '1.0.0'),
     },
   };
 });

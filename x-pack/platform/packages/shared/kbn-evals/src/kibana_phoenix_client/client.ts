@@ -7,8 +7,14 @@
 import pLimit from 'p-limit';
 import type { PhoenixClient } from '@arizeai/phoenix-client';
 import { createClient } from '@arizeai/phoenix-client';
-import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import { createDataset } from '@arizeai/phoenix-client/datasets';
+import { runExperiment as runPhoenixExperiment } from '@arizeai/phoenix-client/experiments';
+import type {
+  EvaluatorParams,
+  RanExperiment,
+  TaskOutput,
+} from '@arizeai/phoenix-client/types/experiments';
+import type { DatasetInfo, Example } from '@arizeai/phoenix-client/types/datasets';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { Model } from '@kbn/inference-common';
 import { withInferenceContext } from '@kbn/inference-tracing';
@@ -36,8 +42,6 @@ export class KibanaPhoenixClient {
   }
 
   private async syncDataSet(dataset: EvaluationDataset): Promise<{ datasetId: string }> {
-    const datasets = await import('@arizeai/phoenix-client/datasets');
-
     const getDatasetsByNameResponse = await this.phoenixClient.GET('/v1/datasets', {
       params: {
         query: {
@@ -47,7 +51,7 @@ export class KibanaPhoenixClient {
     });
 
     if (!getDatasetsByNameResponse.data?.data.length) {
-      const { datasetId } = await datasets.createDataset({
+      const { datasetId } = await createDataset({
         client: this.phoenixClient,
         name: dataset.name,
         description: dataset.description,
@@ -110,9 +114,7 @@ export class KibanaPhoenixClient {
     return withInferenceContext(async () => {
       const { datasetId } = await this.syncDataSet(dataset);
 
-      const experiments = await import('@arizeai/phoenix-client/experiments');
-
-      const ranExperiment = await experiments.runExperiment({
+      const ranExperiment = await runPhoenixExperiment({
         client: this.phoenixClient,
         dataset: { datasetId },
         experimentName: `Run ID: ${this.options.runId} - Dataset: ${dataset.name}`,
@@ -126,7 +128,7 @@ export class KibanaPhoenixClient {
         evaluators: evaluators.map((evaluator) => {
           return {
             ...evaluator,
-            evaluate: ({ input, output, expected, metadata }) => {
+            evaluate: ({ input, output, expected, metadata }: EvaluatorParams) => {
               return evaluator.evaluate({
                 expected: expected ?? null,
                 input,
@@ -140,6 +142,9 @@ export class KibanaPhoenixClient {
           error: this.options.log.error.bind(this.options.log),
           info: this.options.log.info.bind(this.options.log),
           log: this.options.log.info.bind(this.options.log),
+          warn: this.options.log.info.bind(this.options.log),
+          debug: this.options.log.debug.bind(this.options.log),
+          table: () => {},
         },
         repetitions: this.options.repetitions ?? 1,
         concurrency,

@@ -13,6 +13,7 @@ pageLoadAssetSize:
   canvas: 15142
   cases: 153204
   charts: 40269
+  clientApps: 4688
   cloud: 10648
   cloudConnect: 9149
   cloudDataMigration: 5687
@@ -25,8 +26,8 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 547485
-  cps: 5918
+  core: 546992
+  cps: 6515
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000

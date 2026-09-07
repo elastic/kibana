@@ -11,6 +11,7 @@ import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { resolveSelector } from '../utils/locator_helper';
 
 export class DiscoverApp {
   constructor(private readonly page: ScoutPage) {}
@@ -42,6 +43,43 @@ export class DiscoverApp {
 
   private async waitForDataViewSwitch() {
     await this.getVisibleDataViewSwitch();
+  }
+
+  private async clickAppMenuItem(
+    testId: string,
+    { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
+  ) {
+    const item = this.page.testSubj.locator(testId);
+    if (!isInOverflowMenu && (await item.isVisible())) {
+      await item.click();
+      return;
+    }
+    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
+    const popover = this.page.testSubj.locator('app-menu-popover');
+
+    // Dismiss any stale popovers
+    if (await popover.isVisible()) {
+      await overflowButton.click();
+      await expect(popover).toBeHidden();
+    }
+
+    await expect(overflowButton).toBeVisible();
+    await overflowButton.click();
+
+    // If the click was consumed by closing a stale overlay, the popover won't be open.
+    // Click the overflow button again if needed.
+    const popoverOpened = await popover
+      .waitFor({ state: 'visible', timeout: 2000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!popoverOpened) {
+      await overflowButton.click();
+    }
+
+    await expect(popover).toBeVisible();
+    const menuItem = this.page.testSubj.locator(testId);
+    await expect(menuItem).toBeVisible();
+    await menuItem.click();
   }
 
   async selectDataView(name: string) {
@@ -310,8 +348,10 @@ export class DiscoverApp {
   }
 
   async dragFieldToGrid(fieldName: string[]) {
+    const gridLocator = this.page.testSubj.locator('euiDataGridBody');
     for (const field of fieldName) {
-      await this.page.testSubj.dragTo(`field-${field}`, 'euiDataGridBody');
+      // Fields can appear in both "Popular fields" and the full field list.
+      await resolveSelector(this.page, `field-${field}`).dragTo(gridLocator);
     }
   }
 
@@ -324,8 +364,8 @@ export class DiscoverApp {
   }
 
   async exportAsCsv(): Promise<Download> {
-    // 1. Navigate to the export menu
-    await this.page.testSubj.click('exportTopNavButton');
+    // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
+    await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
 
     // 2. Trigger the report generation

@@ -15,6 +15,7 @@ import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../..
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
+  authorizeRuleTypeParams,
   getRuleNotifyWhenType,
   getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
@@ -43,6 +44,7 @@ import { validateScheduleLimit } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;
+  initialRevision?: number;
 }
 
 export interface CreateRuleParams<Params extends RuleParams = never> {
@@ -131,6 +133,9 @@ export async function createRule<Params extends RuleParams = never>(
   const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+  });
   const username = await context.getUserName();
 
   let createdAPIKey = null;
@@ -218,7 +223,7 @@ export async function createRule<Params extends RuleParams = never>(
       throttle,
       executionStatus: getRuleExecutionStatusPending(lastRunTimestamp.toISOString()),
       monitoring: getDefaultMonitoringRuleDomainProperties(lastRunTimestamp.toISOString()),
-      revision: 0,
+      revision: options?.initialRevision ?? 0,
       running: false,
     },
     params: {

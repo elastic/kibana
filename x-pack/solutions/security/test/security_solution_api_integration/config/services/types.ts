@@ -63,6 +63,7 @@ export interface SecuritySolutionESSUtilsInterface {
   createSearch: (role?: string) => Promise<SearchService>;
   createSuperTest: (role?: string, password?: string) => Promise<TestAgent<any>>;
   createSuperTestWithUser: (user: User) => Promise<TestAgent<any>>;
+  createSuperTestWithCustomRole: (role: Role) => Promise<TestAgent<any>>;
   cleanUpCustomRole: () => Promise<void>;
   createUser: (user: User) => Promise<any>;
   deleteUsers: (userNames: string[]) => Promise<any>;

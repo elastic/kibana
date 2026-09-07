@@ -22,7 +22,7 @@ import { doesPackageHaveIntegrations } from '.';
 import {
   getNormalizedDataStreams,
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
 } from './policy_template';
 
 type PackagePolicyStream = RegistryStream & {
@@ -114,13 +114,15 @@ export const packageToPackagePolicyInputs = (
 
   packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
     const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    // Scope stream resolution to this policy template's own data stream(s). For input packages
+    // with several templates that share the same input type, this prevents each template's input
+    // from picking up every template's stream (which duplicated stream vars like data_stream.dataset).
+    const dataStreamPaths = getPolicyTemplateDataStreamPaths(packageInfo, packagePolicyTemplate);
     normalizedInputs?.forEach((packageInput) => {
       const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
       const input = {
         ...packageInput,
-        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
-          ? { data_streams: packagePolicyTemplate.data_streams }
-          : {}),
+        ...(dataStreamPaths.length ? { data_streams: dataStreamPaths } : {}),
         policy_template: packagePolicyTemplate.name,
       };
       packageInputsByPolicyTemplateAndType[inputKey] = input;
