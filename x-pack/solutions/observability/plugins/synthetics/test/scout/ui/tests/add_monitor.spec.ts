@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { FormMonitorType, monitorConfigurations } from '../fixtures/constants';
 
-test.describe('AddMonitor', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/257849
+test.describe.skip('AddMonitor', { tag: tags.stateful.classic }, () => {
   let locationLabel: string;
   let configs: ReturnType<typeof monitorConfigurations>;
 
