@@ -472,7 +472,10 @@ describe('ActionPolicyFormPage', () => {
 
         renderPage();
 
-        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(EXISTING_POLICY, expect.any(Object));
+        expect(mockUseActionPolicyAutoAttach).toHaveBeenCalledWith(
+          EXISTING_POLICY,
+          expect.any(Object)
+        );
       });
     });
   });

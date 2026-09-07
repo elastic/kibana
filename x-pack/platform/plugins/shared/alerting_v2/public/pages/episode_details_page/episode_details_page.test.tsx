@@ -484,10 +484,14 @@ describe('EpisodeDetailsPage', () => {
     it('passes the loaded episode to useEpisodeAutoAttach', () => {
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
-        ruleName: 'Rule A',
-        groupingFields: ['host.name'],
-      }, expect.any(Object));
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+        mockEpisode,
+        {
+          ruleName: 'Rule A',
+          groupingFields: ['host.name'],
+        },
+        expect.any(Object)
+      );
     });
 
     it('omits grouping fields when the rule is not loaded', () => {
@@ -502,10 +506,14 @@ describe('EpisodeDetailsPage', () => {
 
       renderPage();
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
-        ruleName: undefined,
-        groupingFields: undefined,
-      }, expect.any(Object));
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(
+        mockEpisode,
+        {
+          ruleName: undefined,
+          groupingFields: undefined,
+        },
+        expect.any(Object)
+      );
     });
 
     it('passes the next episode when the episode id changes', () => {
@@ -536,10 +544,14 @@ describe('EpisodeDetailsPage', () => {
         </MockChromeContextProvider>
       );
 
-      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(nextEpisode, {
-        ruleName: 'Rule A',
-        groupingFields: ['host.name'],
-      }, expect.any(Object));
+      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(
+        nextEpisode,
+        {
+          ruleName: 'Rule A',
+          groupingFields: ['host.name'],
+        },
+        expect.any(Object)
+      );
     });
   });
 });
