@@ -42,7 +42,6 @@ import {
   MIN_COMMENTS_DEFERRED_KIBANA_VERSION,
   SUB_CASE_SAVED_OBJECT,
 } from './constants';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v1';
 
 interface UnsanitizedComment {
@@ -65,7 +64,6 @@ interface SanitizedCommentWithAssociation {
 }
 
 export interface CreateCommentsMigrationsDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 

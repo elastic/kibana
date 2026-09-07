@@ -15,7 +15,13 @@ import { createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
 import { runDefaultAgentMode } from './run_chat_agent';
-import { prepareConversation, selectTools, extractRound, getPendingRound } from './utils';
+import {
+  prepareConversation,
+  selectTools,
+  selectSkills,
+  extractRound,
+  getPendingRound,
+} from './utils';
 import { createAgentGraph } from './graph';
 
 jest.mock('./utils', () => ({
@@ -51,6 +57,7 @@ jest.mock('./convert_graph_events', () => ({
 
 const prepareConversationMock = prepareConversation as jest.MockedFn<typeof prepareConversation>;
 const selectToolsMock = selectTools as jest.MockedFn<typeof selectTools>;
+const selectSkillsMock = selectSkills as jest.MockedFn<typeof selectSkills>;
 const extractRoundMock = extractRound as jest.MockedFn<typeof extractRound>;
 const getPendingRoundMock = getPendingRound as jest.MockedFn<typeof getPendingRound>;
 const createAgentGraphMock = createAgentGraph as jest.MockedFn<typeof createAgentGraph>;
@@ -190,5 +197,86 @@ describe('runDefaultAgentMode', () => {
     );
 
     expect(context.toolManager.setMaxToolResultTokens).toHaveBeenCalledWith(20_000);
+  });
+
+  describe('plugin skill id filtering', () => {
+    const setupBase = async (context: ReturnType<typeof createAgentHandlerContextMock>) => {
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingRoundMock.mockReturnValue(undefined);
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
+      prepareConversationMock.mockResolvedValue({
+        previousRounds: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+    };
+
+    it('passes all plugin skill ids to selectSkills when no skill_ids override is set', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.plugins.resolveSkillIds.mockResolvedValue(['skill-a', 'skill-b', 'skill-c']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], plugin_ids: ['plugin-1'] } as any,
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['skill-a', 'skill-b', 'skill-c'] })
+      );
+    });
+
+    it('filters plugin skill ids to the override list when skill_ids override is set', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.plugins.resolveSkillIds.mockResolvedValue(['skill-a', 'skill-b', 'skill-c']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], plugin_ids: ['plugin-1'] } as any,
+          configurationOverrides: { skill_ids: ['skill-a', 'skill-c'] },
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: ['skill-a', 'skill-c'] })
+      );
+    });
+
+    it('passes an empty list to selectSkills when no plugin skill ids match the override', async () => {
+      const context = createAgentHandlerContextMock();
+      await setupBase(context);
+
+      context.plugins.resolveSkillIds.mockResolvedValue(['skill-a', 'skill-b']);
+
+      await runDefaultAgentMode(
+        {
+          nextInput: { message: 'hello' },
+          agentConfiguration: { tools: [], plugin_ids: ['plugin-1'] } as any,
+          configurationOverrides: { skill_ids: ['skill-c'] },
+        },
+        context
+      );
+
+      expect(selectSkillsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ additionalSkillIds: [] })
+      );
+    });
   });
 });

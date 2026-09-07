@@ -2846,9 +2846,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3305,9 +3315,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -11321,8 +11341,8 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get dashboards
-      operationId: get-dashboards-redirect
+      summary: Search dashboards
+      operationId: search-dashboards
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11334,7 +11354,7 @@ paths:
       tags:
         - Dashboards
       summary: Create a dashboard
-      operationId: create-dashboard-redirect
+      operationId: create-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11347,7 +11367,7 @@ paths:
       tags:
         - Dashboards
       summary: Get a dashboard
-      operationId: get-dashboard-redirect
+      operationId: get-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11358,8 +11378,8 @@ paths:
     put:
       tags:
         - Dashboards
-      summary: Update a dashboard
-      operationId: update-dashboard-redirect
+      summary: Upsert a dashboard
+      operationId: upsert-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11371,7 +11391,7 @@ paths:
       tags:
         - Dashboards
       summary: Delete a dashboard
-      operationId: delete-dashboard-redirect
+      operationId: delete-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -19219,6 +19239,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19226,7 +19247,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+        **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -19261,6 +19282,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19268,7 +19290,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+        **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -19290,6 +19312,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/init:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19297,7 +19320,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+        **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -19332,6 +19355,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19339,7 +19363,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+        **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -19380,6 +19404,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19387,7 +19412,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+        **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
       operationId: PrivMonHealth
       responses:
         '200':
@@ -19437,14 +19462,17 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/privileges</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Check if the current user has all required permissions for Privilege Monitoring
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Check if the current user has all required permissions for Privilege Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -19471,12 +19499,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       operationId: CreatePrivMonUser
@@ -19528,12 +19559,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
@@ -19597,12 +19631,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/{id}:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
@@ -19642,12 +19679,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Updates the details of an existing monitored privileged user by their document ID.
       operationId: UpdatePrivMonUser
@@ -19707,12 +19747,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/list:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       operationId: ListPrivMonUsers
@@ -26390,6 +26433,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -33689,7 +33749,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Install a package by uploading a .zip or .tar.gz archive (max 100MB). Only available to superusers.<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
+        Install a package by uploading a .zip or .tar.gz archive (max 100MB).<br/><br/>[Required authorization] Route required privileges: integrations-all AND fleet-agent-policies-all.
       operationId: post-fleet-epm-packages
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -34430,6 +34490,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -34502,6 +34563,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -34609,6 +34671,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -34724,6 +34787,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -38744,6 +38808,23 @@ paths:
                   - message
                   - attributes
           description: Bad Request
+        '404':
+          content:
+            application/json:
+              examples:
+                notFoundErrorResponseExample:
+                  description: Example of a not found error response
+                  value:
+                    message: Agentless policy d52a7812-5736-4fdc-aed8-72152afa1ffa not found
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  message:
+                    type: string
+                required:
+                  - message
+          description: Not Found
         '409':
           content:
             application/json:
@@ -39773,7 +39854,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all OR fleet-agent-policies-all.
+        Update output by ID.<br/><br/>[Required authorization] Route required privileges: fleet-settings-all.
       operationId: put-fleet-outputs-outputid
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -63682,8 +63763,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get visualizations
-      operationId: get-visualizations-redirect
+      summary: Search visualizations
+      operationId: search-visualizations
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63694,8 +63775,8 @@ paths:
     post:
       tags:
         - Visualizations
-      summary: Create a visualization
-      operationId: create-visualization-redirect
+      summary: Create visualization
+      operationId: create-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63707,8 +63788,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get a visualization
-      operationId: get-visualization-redirect
+      summary: Get visualization
+      operationId: get-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63719,8 +63800,8 @@ paths:
     put:
       tags:
         - Visualizations
-      summary: Update a visualization
-      operationId: update-visualization-redirect
+      summary: Upsert visualization
+      operationId: upsert-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63731,8 +63812,8 @@ paths:
     delete:
       tags:
         - Visualizations
-      summary: Delete a visualization
-      operationId: delete-visualization-redirect
+      summary: Delete visualization
+      operationId: delete-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65413,7 +65494,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -65526,7 +65607,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -66120,7 +66201,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -72935,6 +73016,53 @@ components:
                 type: array
               success:
                 type: boolean
+              warnings:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    baseTemplateName:
+                      maxLength: 1000
+                      type: string
+                    conflictingTemplates:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          conflictType:
+                            enum:
+                              - overrides_fleet
+                              - blocked_by_same_priority
+                              - overridden_by_fleet
+                            type: string
+                          name:
+                            maxLength: 1000
+                            type: string
+                          priority:
+                            type: number
+                        required:
+                          - name
+                          - priority
+                          - conflictType
+                      maxItems: 100
+                      type: array
+                    dataStreamName:
+                      maxLength: 1000
+                      type: string
+                    namespace:
+                      maxLength: 255
+                      type: string
+                    nsTemplateName:
+                      maxLength: 1000
+                      type: string
+                  required:
+                    - dataStreamName
+                    - namespace
+                    - baseTemplateName
+                    - nsTemplateName
+                    - conflictingTemplates
+                maxItems: 100
+                type: array
             required:
               - name
               - success
@@ -86760,6 +86888,8 @@ components:
                         - comparator
                         - value
                     type: array
+                  maxItems: 2
+                  minItems: 2
                   type: array
                 groupBy:
                   items:
@@ -104469,6 +104599,53 @@ components:
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
+        warnings:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              baseTemplateName:
+                maxLength: 1000
+                type: string
+              conflictingTemplates:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    conflictType:
+                      enum:
+                        - overrides_fleet
+                        - blocked_by_same_priority
+                        - overridden_by_fleet
+                      type: string
+                    name:
+                      maxLength: 1000
+                      type: string
+                    priority:
+                      type: number
+                  required:
+                    - name
+                    - priority
+                    - conflictType
+                maxItems: 100
+                type: array
+              dataStreamName:
+                maxLength: 1000
+                type: string
+              namespace:
+                maxLength: 255
+                type: string
+              nsTemplateName:
+                maxLength: 1000
+                type: string
+            required:
+              - dataStreamName
+              - namespace
+              - baseTemplateName
+              - nsTemplateName
+              - conflictingTemplates
+          maxItems: 100
+          type: array
       required:
         - item
       title: update_package_response
@@ -115523,9 +115700,8 @@ components:
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_MachineLearningRuleCreateFields'
     Security_Detections_API_MaxSignals:
-      default: 100
       description: |
-        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value).
+        Maximum number of alerts the rule can create during a single run (the rule’s Max alerts per run [advanced setting](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-detection-rule#rule-ui-advanced-params) value). Defaults to `100`.
         > info
         > This setting can be superseded by the [Kibana configuration setting](https://www.elastic.co/docs/reference/kibana/configuration-reference/alerting-settings) `xpack.alerting.rules.run.alerts.max`, which determines the maximum alerts generated by any rule in the Kibana alerting framework. For example, if `xpack.alerting.rules.run.alerts.max` is set to 1000, the rule can generate no more than 1000 alerts even if `max_signals` is set higher.
       minimum: 1
@@ -120950,7 +121126,6 @@ components:
             parameters:
               oneOf:
                 - description: Dump the entire kernel memory.
-                  type: object
                   properties:
                     type:
                       enum:
@@ -120958,8 +121133,19 @@ components:
                       type: string
                   required:
                     - type
-                - description: Dump the entire memory of a process using the PID.
+                  title: kernel
                   type: object
+                - description: Dump the entire raw memory.
+                  properties:
+                    type:
+                      enum:
+                        - raw
+                      type: string
+                  required:
+                    - type
+                  title: raw
+                  type: object
+                - description: Dump the entire memory of a process using the PID.
                   properties:
                     pid:
                       type: number
@@ -120970,8 +121156,9 @@ components:
                   required:
                     - type
                     - pid
-                - description: Dump the entire memory of a process using the entity ID.
+                  title: Process PID
                   type: object
+                - description: Dump the entire memory of a process using the entity ID.
                   properties:
                     entity_id:
                       type: string
@@ -120982,6 +121169,8 @@ components:
                   required:
                     - type
                     - entity_id
+                  title: Process Entity ID
+                  type: object
           required:
             - parameters
     Security_Endpoint_Management_API_MetadataListResponse:
@@ -126260,6 +126449,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:
@@ -126538,7 +126732,7 @@ components:
       type: object
       properties:
         agentCount:
-          description: The number of agents targeted by the query.
+          description: For live queries, the number of agents targeted by the query. For scheduled rows, the number of distinct agents that responded.
           type: integer
         errorCount:
           description: The number of agent responses with errors.

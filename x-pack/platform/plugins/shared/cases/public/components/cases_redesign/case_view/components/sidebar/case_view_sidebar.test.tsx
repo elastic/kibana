@@ -93,7 +93,6 @@ const useGetCasesFeaturesRes = {
   metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
   pushToServiceAuthorized: true,
   caseAssignmentAuthorized: true,
-  isAlertsEnabled: true,
   isSyncAlertsEnabled: true,
 };
 
@@ -491,9 +490,7 @@ describe('CaseViewSidebar (redesign)', () => {
     // announceOnMount can duplicate content into a live region with the same text,
     // so take the first (visible) match.
     expect(
-      within(callout).getAllByText(
-        /Contact your administrator to confirm the fields have been migrated/i
-      )[0]
+      within(callout).getAllByText(/Contact your administrator to remove the deprecated fields/i)[0]
     ).toBeInTheDocument();
   });
 

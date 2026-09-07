@@ -68,6 +68,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           conversation_id: conversationId,
           attachments,
           metadata,
+          configuration_overrides: configurationOverrides,
         } = context.input;
 
         const {
@@ -137,6 +138,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             storeConversation,
             structuredOutput: !!schema,
             outputSchema: schema,
+            configurationOverrides,
             nextInput: {
               message,
               attachments,

@@ -12,7 +12,7 @@ import { useBulkSelect } from './use_bulk_select';
 const pageItems = [{ id: 'rule-1' }];
 
 describe('useBulkSelect', () => {
-  it('caps selectedCount at BULK_FILTER_MAX_RULES when select-all and total exceeds cap', () => {
+  it('reports the full logical count in select-all mode without an artificial cap', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: BULK_FILTER_MAX_RULES + 500,
@@ -25,7 +25,7 @@ describe('useBulkSelect', () => {
     });
 
     expect(result.current.isAllSelected).toBe(true);
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES + 500);
   });
 
   it('does not cap selectedCount when total is at or below BULK_FILTER_MAX_RULES', () => {
@@ -43,7 +43,7 @@ describe('useBulkSelect', () => {
     expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
   });
 
-  it('uses logical count when exclusions bring match set below bulk cap', () => {
+  it('subtracts exclusions from the select-all logical count', () => {
     const { result } = renderHook(() =>
       useBulkSelect({
         totalItemCount: BULK_FILTER_MAX_RULES + 1000,
@@ -54,7 +54,7 @@ describe('useBulkSelect', () => {
     act(() => {
       result.current.onSelectAll();
     });
-    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES);
+    expect(result.current.selectedCount).toBe(BULK_FILTER_MAX_RULES + 1000);
 
     act(() => {
       for (let i = 0; i < 1500; i++) {
@@ -158,6 +158,117 @@ describe('useBulkSelect', () => {
 
     act(() => {
       result.current.onSelectAll();
+    });
+
+    expect(result.current.selectedCount).toBe(0);
+  });
+
+  it('counts the full inclusion set across pages, not only the visible page', () => {
+    const { result, rerender } = renderHook(
+      ({ items }) => useBulkSelect({ totalItemCount: 40, items }),
+      { initialProps: { items: [{ id: 'rule-1' }, { id: 'rule-2' }] } }
+    );
+
+    act(() => {
+      result.current.onSelectRow('rule-1');
+      result.current.onSelectRow('rule-2');
+    });
+    expect(result.current.selectedCount).toBe(2);
+
+    // Navigate to another page — previously selected IDs must still count.
+    rerender({ items: [{ id: 'rule-3' }, { id: 'rule-4' }] });
+    expect(result.current.selectedCount).toBe(2);
+
+    act(() => {
+      result.current.onSelectRow('rule-3');
+    });
+    expect(result.current.selectedCount).toBe(3);
+    expect(result.current.getBulkParams()).toEqual({
+      ids: expect.arrayContaining(['rule-1', 'rule-2', 'rule-3']),
+    });
+  });
+
+  it('clears selection when the filter scope changes', () => {
+    const { result, rerender } = renderHook(
+      ({ filter }) =>
+        useBulkSelect({
+          totalItemCount: 50,
+          items: pageItems,
+          filter,
+        }),
+      { initialProps: { filter: undefined as string | undefined } }
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+      result.current.onSelectRow('rule-1');
+    });
+    expect(result.current.isAllSelected).toBe(true);
+    expect(result.current.selectedCount).toBe(49);
+
+    rerender({ filter: 'enabled: false' });
+
+    expect(result.current.isAllSelected).toBe(false);
+    expect(result.current.selectedCount).toBe(0);
+    expect(result.current.getBulkParams()).toEqual({ ids: [] });
+  });
+
+  it('clears selection when the search scope changes', () => {
+    const { result, rerender } = renderHook(
+      ({ search }) =>
+        useBulkSelect({
+          totalItemCount: 10,
+          items: pageItems,
+          search,
+        }),
+      { initialProps: { search: undefined as string | undefined } }
+    );
+
+    act(() => {
+      result.current.onSelectRow('rule-1');
+    });
+    expect(result.current.selectedCount).toBe(1);
+
+    rerender({ search: 'prod' });
+
+    expect(result.current.selectedCount).toBe(0);
+  });
+
+  it('does not clear selection when only the visible page changes', () => {
+    const { result, rerender } = renderHook(
+      ({ items }) =>
+        useBulkSelect({
+          totalItemCount: 40,
+          items,
+          filter: 'kind: alert',
+          search: 'host',
+        }),
+      { initialProps: { items: [{ id: 'rule-1' }] } }
+    );
+
+    act(() => {
+      result.current.onSelectRow('rule-1');
+    });
+
+    rerender({ items: [{ id: 'rule-21' }] });
+
+    expect(result.current.selectedCount).toBe(1);
+    expect(result.current.getBulkParams()).toEqual({ ids: ['rule-1'] });
+  });
+
+  it('clamps select-all selectedCount at zero when exclusions exceed total', () => {
+    const { result } = renderHook(() =>
+      useBulkSelect({
+        totalItemCount: 3,
+        items: pageItems,
+      })
+    );
+
+    act(() => {
+      result.current.onSelectAll();
+      for (let i = 0; i < 10; i++) {
+        result.current.onSelectRow(`ex-${i}`);
+      }
     });
 
     expect(result.current.selectedCount).toBe(0);

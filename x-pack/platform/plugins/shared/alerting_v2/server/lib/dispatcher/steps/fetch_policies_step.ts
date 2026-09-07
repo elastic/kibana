@@ -50,7 +50,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         groupingMode: doc.attributes.groupingMode ?? undefined,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
-        apiKey: doc.attributes.auth.apiKey,
+        apiKey: doc.attributes.apiKey,
       });
     }
 

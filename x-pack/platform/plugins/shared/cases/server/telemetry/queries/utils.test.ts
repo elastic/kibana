@@ -12,17 +12,12 @@ import {
   OBSERVABLE_TYPE_IPV4,
   OBSERVABLE_TYPE_HOSTNAME,
 } from '../../../common/constants/observables';
-import type {
-  AttachmentAggregationResult,
-  AttachmentFrameworkAggsResult,
-  CaseAggregationResult,
-  FileAttachmentAggregationResults,
-} from '../types';
+import type { CaseAggregationResult, FileAttachmentAggregationResults } from '../types';
+import type { AttachmentsByTypeRaw } from './attachments_by_type';
 import {
   findValueInBuckets,
   getAggregationsBuckets,
   getAlertsCountsFromBuckets,
-  getAttachmentsFrameworkStats,
   getBucketFromAggregation,
   getConnectorsCardinalityAggregationQuery,
   getCountsAggregationQuery,
@@ -156,66 +151,23 @@ describe('utils', () => {
       },
     };
 
-    const attachmentFramework: AttachmentFrameworkAggsResult = {
-      externalReferenceTypes: {
-        buckets: [
-          {
-            doc_count: 5,
-            key: '.osquery',
-            references: {
-              cases: {
-                max: {
-                  value: 10,
-                },
-              },
-            },
-          },
-          {
-            doc_count: 5,
-            key: '.files',
-            references: {
-              cases: {
-                max: {
-                  value: 10,
-                },
-              },
-            },
-          },
-        ],
+    // `byType` keys are already unified type names (legacy keys are mapped in
+    // the collector before this stage); `security.alert` is sanitized to
+    // `security_alert` by the framework builder.
+    const rawScope = (): AttachmentsByTypeRaw['all'] => ({
+      byType: {
+        osquery: { total: 5 },
+        file: { total: 5 },
+        'security.alert': { total: 20 },
       },
-      persistableReferenceTypes: {
-        buckets: [
-          {
-            doc_count: 5,
-            key: '.ml',
-            references: {
-              cases: {
-                max: {
-                  value: 10,
-                },
-              },
-            },
-          },
-          {
-            doc_count: 5,
-            key: '.files',
-            references: {
-              cases: {
-                max: {
-                  value: 10,
-                },
-              },
-            },
-          },
-        ],
-      },
-    };
+      bySavedObject: { legacy: { total: 8 }, unified: { total: 2 } },
+    });
 
-    const attachmentAggsResult: AttachmentAggregationResult = {
-      securitySolution: { ...attachmentFramework },
-      observability: { ...attachmentFramework },
-      cases: { ...attachmentFramework },
-      ...attachmentFramework,
+    const attachmentsByType: AttachmentsByTypeRaw = {
+      all: rawScope(),
+      securitySolution: rawScope(),
+      observability: rawScope(),
+      cases: rawScope(),
     };
 
     const filesRes: FileAttachmentAggregationResults = {
@@ -278,635 +230,68 @@ describe('utils', () => {
         ],
       },
     };
-    it('constructs the solution values correctly', () => {
-      expect(
-        getSolutionValues({
-          caseAggregations: caseAggsResult,
-          attachmentAggregations: attachmentAggsResult,
-          filesAggregations: filesRes,
-          owner: 'securitySolution',
-          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "assignees": Object {
-            "total": 5,
-            "totalWithAtLeastOne": 0,
-            "totalWithZero": 100,
-          },
-          "attachmentFramework": Object {
-            "externalAttachments": Array [
-              Object {
-                "average": 1,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".osquery",
-              },
-              Object {
-                "average": 1,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-            "files": Object {
-              "average": 1,
-              "averageSize": 500,
-              "maxOnACase": 10,
-              "topMimeTypes": Array [
-                Object {
-                  "count": 5,
-                  "name": "image/png",
-                },
-                Object {
-                  "count": 1,
-                  "name": "application/json",
-                },
-              ],
-              "total": 5,
-            },
-            "persistableAttachments": Array [
-              Object {
-                "average": 1,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".ml",
-              },
-              Object {
-                "average": 1,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-          },
-          "daily": 3,
-          "monthly": 1,
-          "observables": Object {
-            "auto": Object {
-              "custom": 0,
-              "default": 1,
-            },
-            "manual": Object {
-              "custom": 0,
-              "default": 0,
-            },
-            "total": 1,
-          },
-          "status": Object {
-            "closed": 0,
-            "inProgress": 0,
-            "open": 0,
-          },
-          "total": 5,
-          "totalWithAlerts": 20,
-          "totalWithMaxObservables": 0,
-          "weekly": 2,
-        }
-      `);
-      expect(
-        getSolutionValues({
-          caseAggregations: caseAggsResult,
-          attachmentAggregations: attachmentAggsResult,
-          filesAggregations: filesRes,
-          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
-          owner: 'cases',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "assignees": Object {
-            "total": 5,
-            "totalWithAtLeastOne": 0,
-            "totalWithZero": 100,
-          },
-          "attachmentFramework": Object {
-            "externalAttachments": Array [
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".osquery",
-              },
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-            "files": Object {
-              "average": 5,
-              "averageSize": 500,
-              "maxOnACase": 10,
-              "topMimeTypes": Array [
-                Object {
-                  "count": 5,
-                  "name": "image/png",
-                },
-                Object {
-                  "count": 1,
-                  "name": "application/json",
-                },
-              ],
-              "total": 5,
-            },
-            "persistableAttachments": Array [
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".ml",
-              },
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-          },
-          "daily": 3,
-          "monthly": 1,
-          "observables": Object {
-            "auto": Object {
-              "custom": 0,
-              "default": 1,
-            },
-            "manual": Object {
-              "custom": 0,
-              "default": 0,
-            },
-            "total": 1,
-          },
-          "status": Object {
-            "closed": 0,
-            "inProgress": 0,
-            "open": 0,
-          },
-          "total": 1,
-          "totalWithAlerts": 10,
-          "totalWithMaxObservables": 0,
-          "weekly": 2,
-        }
-      `);
-      expect(
-        getSolutionValues({
-          caseAggregations: caseAggsResult,
-          attachmentAggregations: attachmentAggsResult,
-          filesAggregations: filesRes,
-          totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
-          owner: 'observability',
-        })
-      ).toMatchInlineSnapshot(`
-        Object {
-          "assignees": Object {
-            "total": 5,
-            "totalWithAtLeastOne": 0,
-            "totalWithZero": 100,
-          },
-          "attachmentFramework": Object {
-            "externalAttachments": Array [
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".osquery",
-              },
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-            "files": Object {
-              "average": 5,
-              "averageSize": 500,
-              "maxOnACase": 10,
-              "topMimeTypes": Array [
-                Object {
-                  "count": 5,
-                  "name": "image/png",
-                },
-                Object {
-                  "count": 1,
-                  "name": "application/json",
-                },
-              ],
-              "total": 5,
-            },
-            "persistableAttachments": Array [
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".ml",
-              },
-              Object {
-                "average": 5,
-                "maxOnACase": 10,
-                "total": 5,
-                "type": ".files",
-              },
-            ],
-          },
-          "daily": 3,
-          "monthly": 1,
-          "observables": Object {
-            "auto": Object {
-              "custom": 0,
-              "default": 1,
-            },
-            "manual": Object {
-              "custom": 0,
-              "default": 0,
-            },
-            "total": 1,
-          },
-          "status": Object {
-            "closed": 0,
-            "inProgress": 0,
-            "open": 0,
-          },
-          "total": 1,
-          "totalWithAlerts": 5,
-          "totalWithMaxObservables": 0,
-          "weekly": 2,
-        }
-      `);
-    });
-  });
+    it('constructs the solution values correctly for a solution owner', () => {
+      const res = getSolutionValues({
+        caseAggregations: caseAggsResult,
+        attachmentsByType,
+        filesAggregations: filesRes,
+        owner: 'securitySolution',
+        totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
+      });
 
-  describe('getAttachmentsFrameworkStats', () => {
-    it('returns empty stats if the aggregation is undefined', () => {
-      expect(getAttachmentsFrameworkStats({ totalCasesForOwner: 0 })).toMatchInlineSnapshot(`
-        Object {
-          "attachmentFramework": Object {
-            "externalAttachments": Array [],
-            "files": Object {
-              "average": 0,
-              "averageSize": 0,
-              "maxOnACase": 0,
-              "topMimeTypes": Array [],
-              "total": 0,
-            },
-            "persistableAttachments": Array [],
-          },
-        }
-      `);
-    });
-
-    describe('externalAttachments', () => {
-      const attachmentFramework: AttachmentFrameworkAggsResult = {
-        externalReferenceTypes: {
-          buckets: [
-            {
-              doc_count: 5,
-              key: '.osquery',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-            {
-              doc_count: 10,
-              key: '.files',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
+      // securitySolution has 5 cases (from totalsByOwner), so average = round(total / 5).
+      expect(res.attachmentFramework).toEqual({
+        attachmentsByType: {
+          osquery: { total: 5, average: 1 },
+          file: { total: 5, average: 1 },
+          // keys are sanitized: `security.alert` -> `security_alert`
+          security_alert: { total: 20, average: 4 },
+        },
+        bySavedObject: { legacy: { total: 8 }, unified: { total: 2 } },
+        files: {
+          averageSize: 500,
+          topMimeTypes: [
+            { count: 5, name: 'image/png' },
+            { count: 1, name: 'application/json' },
           ],
         },
-        persistableReferenceTypes: {
-          buckets: [],
-        },
-      };
-
-      it('populates the externalAttachments array', () => {
-        const stats = getAttachmentsFrameworkStats({
-          attachmentAggregations: attachmentFramework,
-          totalCasesForOwner: 5,
-        });
-
-        expect(stats.attachmentFramework.externalAttachments[0]).toEqual({
-          // the average is 5 from the aggs result / 5 from the function parameter
-          average: 1,
-          maxOnACase: 10,
-          total: 5,
-          type: '.osquery',
-        });
-
-        expect(stats.attachmentFramework.externalAttachments[1]).toEqual({
-          // the average is 10 from the aggs result / 5 from the function parameter
-          average: 2,
-          maxOnACase: 10,
-          total: 10,
-          type: '.files',
-        });
       });
+      expect(res.total).toBe(5);
+      expect(res.totalWithAlerts).toBe(20);
     });
 
-    describe('persistableAttachments', () => {
-      const attachmentFramework: AttachmentFrameworkAggsResult = {
-        persistableReferenceTypes: {
-          buckets: [
-            {
-              doc_count: 5,
-              key: '.osquery',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-            {
-              doc_count: 10,
-              key: '.files',
-              references: {
-                cases: {
-                  max: {
-                    value: 10,
-                  },
-                },
-              },
-            },
-          ],
-        },
-        externalReferenceTypes: {
-          buckets: [],
-        },
-      };
-
-      it('populates the externalAttachments array', () => {
-        const stats = getAttachmentsFrameworkStats({
-          attachmentAggregations: attachmentFramework,
-          totalCasesForOwner: 5,
-        });
-
-        expect(stats.attachmentFramework.persistableAttachments[0]).toEqual({
-          // the average is 5 from the aggs result / 5 from the function parameter
-          average: 1,
-          maxOnACase: 10,
-          total: 5,
-          type: '.osquery',
-        });
-
-        expect(stats.attachmentFramework.persistableAttachments[1]).toEqual({
-          // the average is 10 from the aggs result / 5 from the function parameter
-          average: 2,
-          maxOnACase: 10,
-          total: 10,
-          type: '.files',
-        });
+    it('uses the per-owner case total for the average (owner with a single case)', () => {
+      const res = getSolutionValues({
+        caseAggregations: caseAggsResult,
+        attachmentsByType,
+        filesAggregations: filesRes,
+        owner: 'cases',
+        totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
       });
+
+      // cases has 1 case, so average === total.
+      expect(res.attachmentFramework.attachmentsByType).toEqual({
+        osquery: { total: 5, average: 5 },
+        file: { total: 5, average: 5 },
+        security_alert: { total: 20, average: 20 },
+      });
+      expect(res.total).toBe(1);
+      expect(res.totalWithAlerts).toBe(10);
     });
 
-    describe('files', () => {
-      it('rounds the average file size when it is a decimal', () => {
-        const attachmentFramework: AttachmentFrameworkAggsResult = {
-          externalReferenceTypes: {
-            buckets: [
-              {
-                doc_count: 5,
-                key: '.files',
-                references: {
-                  cases: {
-                    max: {
-                      value: 10,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          persistableReferenceTypes: {
-            buckets: [],
-          },
-        };
-
-        expect(
-          getAttachmentsFrameworkStats({
-            attachmentAggregations: attachmentFramework,
-            totalCasesForOwner: 5,
-            filesAggregations: {
-              averageSize: { value: 1.1 },
-              topMimeTypes: {
-                buckets: [],
-              },
-            },
-          }).attachmentFramework.files
-        ).toMatchInlineSnapshot(`
-          Object {
-            "average": 1,
-            "averageSize": 1,
-            "maxOnACase": 10,
-            "topMimeTypes": Array [],
-            "total": 5,
-          }
-        `);
+    it('returns an empty attachmentsByType map when the scope has no data', () => {
+      const res = getSolutionValues({
+        caseAggregations: caseAggsResult,
+        attachmentsByType: undefined,
+        filesAggregations: filesRes,
+        owner: 'securitySolution',
+        totalWithAlertsByOwner: { securitySolution: 20, observability: 5, cases: 10 },
       });
 
-      it('sets the average file size to 0 when the aggregation does not exist', () => {
-        const attachmentFramework: AttachmentFrameworkAggsResult = {
-          externalReferenceTypes: {
-            buckets: [
-              {
-                doc_count: 5,
-                key: '.files',
-                references: {
-                  cases: {
-                    max: {
-                      value: 10,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          persistableReferenceTypes: {
-            buckets: [],
-          },
-        };
-
-        expect(
-          getAttachmentsFrameworkStats({
-            attachmentAggregations: attachmentFramework,
-            totalCasesForOwner: 5,
-          }).attachmentFramework.files
-        ).toMatchInlineSnapshot(`
-          Object {
-            "average": 1,
-            "averageSize": 0,
-            "maxOnACase": 10,
-            "topMimeTypes": Array [],
-            "total": 5,
-          }
-        `);
-      });
-
-      it('sets the files stats to empty when the file aggregation results is the empty version', () => {
-        const attachmentFramework: AttachmentFrameworkAggsResult = {
-          externalReferenceTypes: {
-            buckets: [
-              {
-                doc_count: 5,
-                key: '.osquery',
-                references: {
-                  cases: {
-                    max: {
-                      value: 10,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          persistableReferenceTypes: {
-            buckets: [],
-          },
-        };
-
-        expect(
-          getAttachmentsFrameworkStats({
-            attachmentAggregations: attachmentFramework,
-            totalCasesForOwner: 5,
-            filesAggregations: {
-              averageSize: { value: 0 },
-              topMimeTypes: {
-                buckets: [],
-              },
-            },
-          }).attachmentFramework.files
-        ).toMatchInlineSnapshot(`
-          Object {
-            "average": 0,
-            "averageSize": 0,
-            "maxOnACase": 0,
-            "topMimeTypes": Array [],
-            "total": 0,
-          }
-        `);
-      });
-
-      it('sets the files stats using the file aggregation result', () => {
-        const attachmentFramework: AttachmentFrameworkAggsResult = {
-          externalReferenceTypes: {
-            buckets: [
-              {
-                doc_count: 5,
-                key: '.files',
-                references: {
-                  cases: {
-                    max: {
-                      value: 10,
-                    },
-                  },
-                },
-              },
-            ],
-          },
-          persistableReferenceTypes: {
-            buckets: [],
-          },
-        };
-
-        expect(
-          getAttachmentsFrameworkStats({
-            attachmentAggregations: attachmentFramework,
-            filesAggregations: {
-              averageSize: { value: 500 },
-              topMimeTypes: {
-                buckets: [
-                  {
-                    doc_count: 5,
-                    key: 'image/png',
-                  },
-                  {
-                    doc_count: 1,
-                    key: 'application/json',
-                  },
-                ],
-              },
-            },
-            totalCasesForOwner: 5,
-          }).attachmentFramework.files
-        ).toMatchInlineSnapshot(`
-          Object {
-            "average": 1,
-            "averageSize": 500,
-            "maxOnACase": 10,
-            "topMimeTypes": Array [
-              Object {
-                "count": 5,
-                "name": "image/png",
-              },
-              Object {
-                "count": 1,
-                "name": "application/json",
-              },
-            ],
-            "total": 5,
-          }
-        `);
-      });
-
-      it('sets the top mime types when a file entry is not found', () => {
-        const attachmentFramework: AttachmentFrameworkAggsResult = {
-          externalReferenceTypes: {
-            buckets: [],
-          },
-          persistableReferenceTypes: {
-            buckets: [],
-          },
-        };
-
-        expect(
-          getAttachmentsFrameworkStats({
-            attachmentAggregations: attachmentFramework,
-            filesAggregations: {
-              averageSize: { value: 0 },
-              topMimeTypes: {
-                buckets: [
-                  {
-                    doc_count: 5,
-                    key: 'image/png',
-                  },
-                  {
-                    doc_count: 1,
-                    key: 'application/json',
-                  },
-                ],
-              },
-            },
-            totalCasesForOwner: 5,
-          }).attachmentFramework.files
-        ).toMatchInlineSnapshot(`
-          Object {
-            "average": 0,
-            "averageSize": 0,
-            "maxOnACase": 0,
-            "topMimeTypes": Array [
-              Object {
-                "count": 5,
-                "name": "image/png",
-              },
-              Object {
-                "count": 1,
-                "name": "application/json",
-              },
-            ],
-            "total": 0,
-          }
-        `);
+      expect(res.attachmentFramework.attachmentsByType).toEqual({});
+      expect(res.attachmentFramework.bySavedObject).toEqual({
+        legacy: { total: 0 },
+        unified: { total: 0 },
       });
     });
   });

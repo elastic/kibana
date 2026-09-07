@@ -2190,7 +2190,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         return isExportPopoverOpen;
       });
 
-      await testSubjects.click(`exportMenuItem-${label}`);
+      await testSubjects.clickWhenNotDisabled(`exportMenuItem-${label}`);
     },
 
     async getUrl() {

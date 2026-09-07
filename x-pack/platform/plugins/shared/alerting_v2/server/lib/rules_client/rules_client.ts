@@ -62,6 +62,7 @@ import type {
 } from './types';
 import {
   assertImmutableUnchanged,
+  validateMergedRuleAttributes,
   buildUpdateRuleAttributes,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
@@ -363,6 +364,8 @@ export class RulesClient {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
+
+    validateMergedRuleAttributes(id, nextAttrs);
 
     await this.validateSchedule({
       updatedEvery: nextAttrs.schedule.every,

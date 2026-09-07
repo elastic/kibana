@@ -29,7 +29,7 @@ jest.mock('../project_monitor/add_monitor_project', () => ({
 }));
 
 jest.mock('../monitor_locations_utils', () => ({
-  assertCanUpdateMonitorInAllSpaces: jest.fn().mockResolvedValue(undefined),
+  assertCanPerformMonitorBulkActionInAllSpaces: jest.fn().mockResolvedValue(undefined),
   validateMonitorPrivateLocationSpaces: jest.fn().mockReturnValue(null),
 }));
 
@@ -156,9 +156,9 @@ describe('UpdateMonitorAPI', () => {
       canManagePrivateLocations: true,
     });
 
-    const { assertCanUpdateMonitorInAllSpaces, validateMonitorPrivateLocationSpaces } =
+    const { assertCanPerformMonitorBulkActionInAllSpaces, validateMonitorPrivateLocationSpaces } =
       jest.requireMock('../monitor_locations_utils');
-    assertCanUpdateMonitorInAllSpaces.mockResolvedValue(undefined);
+    assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(undefined);
     validateMonitorPrivateLocationSpaces.mockReturnValue(null);
 
     const { getPrivateLocationsForNamespaces } = jest.requireMock(
@@ -562,8 +562,10 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('records multi-space privilege failures (without leaking the response object)', async () => {
-      const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
-      assertCanUpdateMonitorInAllSpaces.mockResolvedValue({ status: 403 });
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+        '../monitor_locations_utils'
+      );
+      assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue({ status: 403 });
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
@@ -694,7 +696,9 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('checks bulk_update space privileges once per unique space set', async () => {
-      const { assertCanUpdateMonitorInAllSpaces } = jest.requireMock('../monitor_locations_utils');
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = jest.requireMock(
+        '../monitor_locations_utils'
+      );
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
@@ -720,7 +724,7 @@ describe('UpdateMonitorAPI', () => {
 
       expect(result.survivors).toHaveLength(3);
       // two distinct space sets -> two privilege checks, not three
-      expect(assertCanUpdateMonitorInAllSpaces).toHaveBeenCalledTimes(2);
+      expect(assertCanPerformMonitorBulkActionInAllSpaces).toHaveBeenCalledTimes(2);
     });
   });
 

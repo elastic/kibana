@@ -186,7 +186,8 @@ export interface PackagePolicyClient {
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
     },
-    currentVersion?: string
+    /** Request context so update callbacks can use the caller's Elasticsearch client. */
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy>;
 
   delete(
@@ -340,7 +341,15 @@ export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
+  /**
+   * When true, skip unassigning from surviving agent policies and skip the agent policy revision
+   * bump. This also suppresses the agentless agent policy cascade-delete. Use only when the caller
+   * manages those side-effects itself.
+   */
   skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  /** Bypass `is_managed` and hosted-agent-policy guards. */
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;

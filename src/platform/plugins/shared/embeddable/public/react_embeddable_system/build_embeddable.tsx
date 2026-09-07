@@ -8,9 +8,13 @@
  */
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { v4 as generateId } from 'uuid';
-import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
+import {
+  apiPublishesFetchOnlyVisible,
+  type HasPanelCapabilities,
+  type HasSerializedChildState,
+} from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import type {
   DefaultEmbeddableApi,
@@ -37,6 +41,14 @@ export async function buildEmbeddable<
   type: string;
 }) {
   const uuid = maybeId ?? generateId();
+  const isVisible$ = new BehaviorSubject<boolean>(false);
+  const internalApi = {
+    setVisibility: (isVisible: boolean) => {
+      if (isVisible !== isVisible$.getValue()) {
+        isVisible$.next(isVisible);
+      }
+    },
+  };
 
   const finalizeApi = (apiRegistration: EmbeddableApiRegistration<SerializedState, Api>) => {
     const hasLockedHoverActions$ = new BehaviorSubject(false);
@@ -51,6 +63,17 @@ export async function buildEmbeddable<
       // Spread default panel capabilities first, allow apiRegistration to override them
       ...panelCapabilitiesDefaults,
       ...apiRegistration,
+      ...(apiPublishesFetchOnlyVisible(parentApi) && {
+        isFetchPaused$: parentApi.fetchOnlyVisible$.pipe(
+          combineLatestWith(isVisible$),
+          map(([parentFetchOnlyVisible, isVisible]) => {
+            return parentFetchOnlyVisible
+              ? !isVisible
+              : // If the fetch setting is 'all', we do not pause the fetch
+                false;
+          })
+        ),
+      }),
       uuid,
       phase$: phaseTracker.getPhase$(),
       parentApi,
@@ -79,7 +102,7 @@ export async function buildEmbeddable<
       parentApi,
       initializeDrilldownsManager,
     });
-    return { componentApi: api, Component };
+    return { componentApi: api, Component, internalApi };
   } catch (e) {
     /**
      * critical error encountered when trying to build the api / embeddable;
@@ -90,6 +113,7 @@ export async function buildEmbeddable<
         blockingError$: new BehaviorSubject(e),
       } as unknown as EmbeddableApiRegistration<SerializedState, Api>),
       Component: () => <span />,
+      internalApi,
     };
   }
 }

@@ -104,7 +104,7 @@ export const TemplateYamlEditor = ({
     handleErrorClick,
   } = useValidationAccordionPositioning();
 
-  useFieldNameValidation(editorRef.current, value);
+  useFieldNameValidation(editorRef.current, value, savedValue);
   useUserPickerValidation(editorRef.current, value, security);
   useSemanticValidation(editorRef.current, value);
   useRefFieldCompletion(editorRef.current, owner[0]);

@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/evals'
-  - '@kbn/evals-phoenix-executor'
   - '@kbn/tooling-log'
   - '@kbn/streams-ai'
   - '@kbn/scout'

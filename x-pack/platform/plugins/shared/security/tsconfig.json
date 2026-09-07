@@ -105,6 +105,8 @@
     "@kbn/licensing-types",
     "@kbn/lazy-object",
     "@kbn/scout",
+    "@kbn/dev-utils",
+    "@kbn/security-api-integration-helpers",
     "@kbn/mock-idp-utils",
     "@kbn/core-user-activity-server",
     "@kbn/core-user-activity-server-mocks",
@@ -115,6 +117,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/core-user-profile-common",
     "@kbn/core-chrome-browser-components",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": ["target/**/*"]
 }

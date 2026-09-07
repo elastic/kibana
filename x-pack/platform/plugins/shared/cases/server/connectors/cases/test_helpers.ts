@@ -16,14 +16,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: ['alert-id-0', 'alert-id-2'],
-        index: ['alert-index-0', 'alert-index-2'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-0', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-0', 'alert-index-2'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -32,14 +34,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: ['alert-id-1'],
-        index: ['alert-index-1'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-1'],
+        metadata: {
+          index: ['alert-index-1'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -48,14 +52,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGrouping = (
     caseId: 'mock-id-3',
     attachments: [
       {
-        alertId: ['alert-id-3'],
-        index: ['alert-index-3'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-3'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -70,14 +76,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-1',
     attachments: [
       {
-        alertId: ['alert-id-1'],
-        index: ['alert-index-1'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-1'],
+        metadata: {
+          index: ['alert-index-1'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -86,14 +94,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-2',
     attachments: [
       {
-        alertId: ['alert-id-3'],
-        index: ['alert-index-3'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-3'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -102,14 +112,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCo
     caseId: 'mock-id-4',
     attachments: [
       {
-        alertId: ['alert-id-0', 'alert-id-2'],
-        index: ['alert-index-0', 'alert-index-2'],
-        owner: 'securitySolution',
-        rule: {
-          id: 'rule-test-id',
-          name: 'Test rule',
+        attachmentId: ['alert-id-0', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-0', 'alert-index-2'],
+          rule: {
+            id: 'rule-test-id',
+            name: 'Test rule',
+          },
         },
-        type: 'alert',
+        owner: 'securitySolution',
+        type: 'security.alert',
       },
     ],
   });
@@ -123,13 +135,15 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
     caseId: 'mock-id-1',
     attachments: [
-      { comment: 'comment-1', owner: 'securitySolution', type: 'user' },
+      { data: { content: 'comment-1' }, owner: 'securitySolution', type: 'comment' },
       {
-        alertId: ['alert-id-1', 'alert-id-2'],
-        index: ['alert-index-1', 'alert-index-1'],
+        attachmentId: ['alert-id-1', 'alert-id-2'],
+        metadata: {
+          index: ['alert-index-1', 'alert-index-1'],
+          rule: { id: null, name: null },
+        },
         owner: 'securitySolution',
-        rule: { id: null, name: null },
-        type: 'alert',
+        type: 'security.alert',
       },
     ],
   });
@@ -137,14 +151,16 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
   expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
     caseId: 'mock-id-2',
     attachments: [
-      { comment: 'comment-2', owner: 'securitySolution', type: 'user' },
-      { comment: 'comment-3', owner: 'securitySolution', type: 'user' },
+      { data: { content: 'comment-2' }, owner: 'securitySolution', type: 'comment' },
+      { data: { content: 'comment-3' }, owner: 'securitySolution', type: 'comment' },
       {
-        alertId: ['alert-id-3', 'alert-id-4'],
-        index: ['alert-index-2', 'alert-index-2'],
+        attachmentId: ['alert-id-3', 'alert-id-4'],
+        metadata: {
+          index: ['alert-index-2', 'alert-index-2'],
+          rule: { id: null, name: null },
+        },
         owner: 'securitySolution',
-        rule: { id: null, name: null },
-        type: 'alert',
+        type: 'security.alert',
       },
     ],
   });
@@ -153,11 +169,13 @@ export const expectCasesToHaveTheCorrectAlertsAttachedWithPredefinedGrouping = (
     caseId: 'mock-id-3',
     attachments: [
       {
-        alertId: ['alert-id-5'],
-        index: ['alert-index-3'],
+        attachmentId: ['alert-id-5'],
+        metadata: {
+          index: ['alert-index-3'],
+          rule: { id: null, name: null },
+        },
         owner: 'securitySolution',
-        rule: { id: null, name: null },
-        type: 'alert',
+        type: 'security.alert',
       },
     ],
   });

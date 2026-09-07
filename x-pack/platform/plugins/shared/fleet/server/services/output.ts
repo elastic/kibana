@@ -69,6 +69,8 @@ import {
   FleetError,
 } from '../errors';
 
+import { OUTPUT_ENCRYPTED_FIELDS } from '../saved_objects';
+
 import type { OutputType } from '../types';
 
 import { agentPolicyService } from './agent_policy';
@@ -839,6 +841,43 @@ class OutputService {
       total,
       page,
       perPage,
+    };
+  }
+
+  public async listPreconfigured() {
+    // Use the plain (non-decrypting) soClient to avoid the cost of decrypting every output.
+    // is_preconfigured is mapped with index:false so it cannot be used in a KQL filter;
+    // filter client-side instead.
+    const outputs = await this.soClient.find<OutputSOAttributes>({
+      type: SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
+
+    const preconfigured = outputs.saved_objects.filter(
+      (so) => so.attributes.is_preconfigured === true
+    );
+
+    for (const output of preconfigured) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
+
+    const encryptedFieldKeys = [...OUTPUT_ENCRYPTED_FIELDS].map((f) => f.key);
+
+    return {
+      items: preconfigured.map<Output>((so) =>
+        outputSavedObjectToOutput({
+          ...so,
+          attributes: omit(so.attributes, encryptedFieldKeys) as OutputSOAttributes,
+        })
+      ),
+      total: preconfigured.length,
+      page: 1,
+      perPage: preconfigured.length,
     };
   }
 

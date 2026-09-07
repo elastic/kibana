@@ -29,7 +29,7 @@ import type {
   FormBasedLayer,
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
-import type { TextBasedLayer } from '@kbn/lens-common';
+import type { TextBasedLayer, TextBasedLayerColumn } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
@@ -354,6 +354,55 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+
+  describe('ES|QL Control Variable reconstruction', () => {
+    const buildEsqlColumns = (
+      query: string,
+      columns: TextBasedLayerColumn[]
+    ): TextBasedLayerColumn[] => {
+      const results = buildDatasourceStates(
+        {
+          type: 'metric',
+          title: 'test',
+          data_source: { type: 'esql', query },
+          metrics: [{ type: 'primary', label: 'test', column: 'test' }],
+          styling: { primary: { value: { sizing: 'auto' } } },
+          sampling: 1,
+          ignore_global_filters: true,
+        },
+        () => undefined,
+        () => columns
+      );
+      const layers = results.layers.textBased?.layers ?? {};
+      return Object.values(layers).flatMap((layer) => layer.columns);
+    };
+
+    it('stamps `variable` (prefix stripped) on a column backed by a genuine Identifier Control', () => {
+      const columns = buildEsqlColumns('FROM logs | STATS COUNT(*) BY ??field', [
+        { columnId: 'a', fieldName: '??field' },
+        { columnId: 'b', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??field')?.variable).toBe('field');
+      expect(columns.find((c) => c.fieldName === 'COUNT(*)')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` on a real column merely named `??x` (not a query parameter)', () => {
+      const columns = buildEsqlColumns('FROM logs | EVAL `??x` = bytes | STATS m = SUM(`??x`)', [
+        { columnId: 'a', fieldName: '??x' },
+      ]);
+
+      expect(columns.find((c) => c.fieldName === '??x')?.variable).toBeUndefined();
+    });
+
+    it('does NOT stamp `variable` for Value (`?`) controls (they are literals, not columns)', () => {
+      const columns = buildEsqlColumns('FROM logs | WHERE os == ?os | STATS COUNT(*)', [
+        { columnId: 'a', fieldName: 'COUNT(*)' },
+      ]);
+
+      expect(columns.every((c) => c.variable === undefined)).toBe(true);
+    });
   });
 });
 
