@@ -96,12 +96,14 @@ export const resolveWorkflowAnonymizationOptions = ({
   enabled,
   failureMode,
   preLLMTimeoutMs,
+  encryptionKey,
   provider,
   logger,
 }: {
   enabled: boolean;
   failureMode: WorkflowAnonymizationOptions['failureMode'];
   preLLMTimeoutMs: number;
+  encryptionKey?: string;
   provider?: WorkflowAnonymizationProvider;
   logger: Pick<Logger, 'error'>;
 }): WorkflowAnonymizationOptions | undefined => {
@@ -114,7 +116,7 @@ export const resolveWorkflowAnonymizationOptions = ({
     );
     return undefined;
   }
-  return { provider, failureMode, preLLMTimeoutMs };
+  return { provider, failureMode, preLLMTimeoutMs, encryptionKey };
 };
 
 export class InferencePlugin
@@ -204,6 +206,7 @@ export class InferencePlugin
       enabled: this.config.anonymization.workflowDriven,
       failureMode: this.config.anonymization.failureMode,
       preLLMTimeoutMs: this.config.anonymization.preLLMTimeoutMs,
+      encryptionKey: this.config.anonymization.encryptionKey,
       provider: this.workflowAnonymizationProvider,
       logger: this.logger,
     });
@@ -289,9 +292,9 @@ export class InferencePlugin
         })(),
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
-          saltPromise: this.config.anonymization.encryptionKey
-            ? Promise.resolve(this.config.anonymization.encryptionKey)
-            : undefined,
+          // Legacy salt path — always undefined today (ANONYMIZATION_FEATURE_ACTIVE is hardcoded
+          // false). Will be removed when the anonymization plugin is deleted.
+          saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
           resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
             if (!anonymizationEnabled || !policyService || !target) {
               return undefined;
