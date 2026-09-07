@@ -127,15 +127,21 @@ export class LogsExtractionClient {
     this.globalStateClient = globalStateClient;
   }
 
-  private async getLogExtractionConfigAndState(
-    type: EntityType
-  ): Promise<{ config: LogExtractionConfig; engineState: EngineLogExtractionState }> {
+  private async getLogExtractionConfigAndState(type: EntityType): Promise<{
+    config: LogExtractionConfig;
+    engineState: EngineLogExtractionState;
+    excludedUserNames: string[];
+  }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
     const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    return {
+      config: globalState.logsExtraction,
+      engineState: engineDescriptor.logExtractionState,
+      excludedUserNames: globalState.excludedUserNames,
+    };
   }
 
   public async extractLogs(
@@ -147,8 +153,10 @@ export class LogsExtractionClient {
     let isRemote = false;
 
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
-      const entityDefinition = getEntityDefinition(type, this.namespace);
+      const { config, engineState, excludedUserNames } = await this.getLogExtractionConfigAndState(
+        type
+      );
+      const entityDefinition = getEntityDefinition(type, this.namespace, { excludedUserNames });
       const {
         isRemote: resolvedIsRemote,
         count,
@@ -204,13 +212,22 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
+  public async updateConfig(
+    params: LogExtractionUpdateParams,
+    excludedUserNames?: string[]
+  ): Promise<LogExtractionConfig> {
     const globalState = await this.globalStateClient.findOrThrow();
     const mergedConfig = LogExtractionConfigSchema.parse({
       ...globalState.logsExtraction,
       ...params,
     });
-    await this.globalStateClient.update({ logsExtraction: mergedConfig });
+    const updates: Parameters<typeof this.globalStateClient.update>[0] = {
+      logsExtraction: mergedConfig,
+    };
+    if (excludedUserNames !== undefined) {
+      updates.excludedUserNames = excludedUserNames;
+    }
+    await this.globalStateClient.update(updates);
     return mergedConfig;
   }
 

@@ -58,6 +58,7 @@ export class EntityStoreGlobalStateClient {
     const defaultState: EntityStoreGlobalState = {
       historySnapshot,
       logsExtraction,
+      excludedUserNames: initialState?.excludedUserNames ?? [],
     };
     const parsed = EntityStoreGlobalState.parse(defaultState);
 
