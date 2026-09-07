@@ -62,6 +62,8 @@ export const getAgentInfo = async (
         perPage,
         page,
         kuery: `policy_id:"${agentPolicyId}"`,
+        includeStatusRuntimeField: false,
+        _source: ['last_checkin', 'local_metadata.host.memory'],
       });
 
     if (agents.length === 0) {

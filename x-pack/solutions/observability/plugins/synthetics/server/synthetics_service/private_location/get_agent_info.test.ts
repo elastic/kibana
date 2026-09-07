@@ -140,6 +140,8 @@ describe('getAgentInfo', () => {
         perPage: 1000,
         page: 2,
         kuery: 'policy_id:"policy-1"',
+        includeStatusRuntimeField: false,
+        _source: ['last_checkin', 'local_metadata.host.memory'],
       })
     );
   });
