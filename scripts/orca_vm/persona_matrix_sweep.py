@@ -224,6 +224,29 @@ PATCHED_RETRY_UTILS = (
     / "kibana.worktrees/evals-ext-matrix"
     / "x-pack/platform/packages/shared/kbn-evals/src/utils/retry_utils.ts"
 )
+# Trace-based evaluators. The VM checkout is main and predates the ES|QL index
+# pattern fix, so its skill_invocation.ts interpolates an undefined constant and
+# every SkillInvoked query hits `on indices [undefined]` -> security_exception.
+# factory.ts owns TRACE_INDEX_PATTERN; skill_invocation.ts consumes it. Ship both
+# or the consumer resolves the constant from the stale module.
+PATCHED_TRACE_FACTORY = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/factory.ts"
+)
+TRACE_FACTORY_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/"
+    "kbn-evals/src/evaluators/trace_based/factory.ts"
+)
+PATCHED_SKILL_INVOCATION = (
+    KIBANA_MAIN.parent
+    / "kibana.worktrees/evals-ext-matrix"
+    / "x-pack/platform/packages/shared/kbn-evals/src/evaluators/trace_based/skill_invocation.ts"
+)
+SKILL_INVOCATION_REMOTE = (
+    "Projects/kibana/x-pack/platform/packages/shared/"
+    "kbn-evals/src/evaluators/trace_based/skill_invocation.ts"
+)
 RETRY_UTILS_REMOTE = (
     "Projects/kibana/x-pack/platform/packages/shared/kbn-evals/src/utils/retry_utils.ts"
 )
@@ -711,6 +734,8 @@ def deploy(ip: str) -> None:
     scp(str(PATCHED_EXECUTOR_TYPES), ip, EXECUTOR_TYPES_REMOTE)
     scp(str(PATCHED_HTTP_HANDLER), ip, HTTP_HANDLER_REMOTE)
     scp(str(PATCHED_RETRY_UTILS), ip, RETRY_UTILS_REMOTE)
+    scp(str(PATCHED_TRACE_FACTORY), ip, TRACE_FACTORY_REMOTE)
+    scp(str(PATCHED_SKILL_INVOCATION), ip, SKILL_INVOCATION_REMOTE)
     scp(str(PATCHED_CHAT_CLIENT), ip, CHAT_CLIENT_REMOTE)
     _gate = ssh(
         ip,
@@ -793,6 +818,13 @@ def deploy(ip: str) -> None:
         # Observed 2026-09-04..06: 8,339 load_skill spans on sweep VMs with 0
         # arguments, vs 3,953/3,953 populated on Buildkite CI.
         f"grep -q 'agentBuilder:tracing:includeToolDetails=true' ~/{SCOUT_TRACING_CONFIG_REMOTE}",
+        # The stale main checkout resolves TRACE_INDEX_PATTERN to undefined, so
+        # every SkillInvoked ES|QL query runs `FROM undefined` and dies with a
+        # security_exception on `indices [undefined]` — which reads as a missing
+        # privilege, not stale code. Assert the constant is exported AND that the
+        # consumer interpolates it (a literal `FROM traces-*` is the old form).
+        f"grep -q \"export const TRACE_INDEX_PATTERN = 'traces-\\*,.ds-traces-\\*'\" ~/{TRACE_FACTORY_REMOTE}",
+        f"grep -q 'FROM ${{TRACE_INDEX_PATTERN}}' ~/{SKILL_INVOCATION_REMOTE}",
     ]
     persona_checks = [
         f"grep -q skillPredicate ~/{PATCHED_EVALUATOR_REMOTE}",
