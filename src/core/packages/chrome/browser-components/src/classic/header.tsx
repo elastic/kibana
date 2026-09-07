@@ -26,12 +26,12 @@ import { HeaderAppMenu } from '../shared/header_app_menu';
 import { HeaderActionMenu } from '../shared/header_action_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../shared/breadcrumbs_with_extensions';
 import { HeaderPageAnnouncer } from '../shared/header_page_announcer';
-import { HeaderNavControls } from '../shared/header_nav_controls';
 import {
   useClassicBreadcrumbs,
   useContextSwitcher,
   useHasAppMenuConfig,
   useHasInlineAppHeader,
+  useProjectPicker,
   useUserMenu,
 } from '../shared/chrome_hooks';
 import { SearchButton } from '../chrome_next/global_header/search_button';
@@ -51,6 +51,7 @@ export const ClassicHeader = React.memo(() => {
   const hasInlineAppHeader = useHasInlineAppHeader();
   const userMenu = useUserMenu();
   const contextSwitcher = useContextSwitcher();
+  const projectPicker = useProjectPicker();
   const isSmall = useIsWithinMaxBreakpoint('s');
   const search = dark(<SearchButton layout={isSmall ? 'compact' : 'expanded'} />);
   const rightGroup = (
@@ -116,7 +117,7 @@ export const ClassicHeader = React.memo(() => {
               {contextSwitcher ? (
                 <EuiHeaderSectionItem>{contextSwitcher}</EuiHeaderSectionItem>
               ) : null}
-              <HeaderNavControls position="left" />
+              {projectPicker ? <EuiHeaderSectionItem>{projectPicker}</EuiHeaderSectionItem> : null}
             </EuiHeaderSection>
 
             <BreadcrumbsWithExtensionsWrapper>{Breadcrumbs}</BreadcrumbsWithExtensionsWrapper>
