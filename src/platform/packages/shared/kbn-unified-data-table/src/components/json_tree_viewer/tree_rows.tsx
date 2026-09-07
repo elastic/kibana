@@ -267,7 +267,6 @@ const PrimitiveValue = memo(function PrimitiveValue({
   trailingComma: boolean;
 }) {
   const styles = useEuiMemoizedStyles(treeStyles);
-  // Keep the comma in this box so wrap-mode flex layout cannot push it to the row's trailing edge.
   const comma = trailingComma ? <Comma /> : null;
   if (primitiveType === 'string') {
     return (
