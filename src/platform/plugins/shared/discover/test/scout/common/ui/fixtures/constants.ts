@@ -109,8 +109,7 @@ export const INVALID_SCRIPTED_FIELD_KBN_ARCHIVE =
 export const DASHBOARD_DRILLDOWNS_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_drilldowns/drilldowns';
 
-export const ECOMMERCE_ES_ARCHIVE =
-  'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce';
+export const ECOMMERCE_ES_ARCHIVE = 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce';
 
 export const ECOMMERCE_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
