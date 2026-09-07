@@ -100,6 +100,7 @@ export class AgentBuilderPlugin
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
+  private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -181,7 +182,14 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const agentBuilderSidebar = core.chrome.sidebar.getApp('agentBuilder');
+    this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
+      if (!isOpen) {
+        this.activeSidebarRef = null;
+        this.sidebarCallbacks = null;
+        clearSidebarRuntimeContext();
+      }
+    });
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
       const { conversationId, ...openOptions } = options ?? {};
@@ -194,7 +202,7 @@ export class AgentBuilderPlugin
       }
 
       // If already open, update props instead of creating new
-      if (this.activeSidebarRef && this.sidebarCallbacks) {
+      if (agentBuilderSidebar.isOpen() && this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
       }
@@ -205,22 +213,12 @@ export class AgentBuilderPlugin
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
-        onClose: () => {
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
       });
 
-      sidebar.open();
+      agentBuilderSidebar.open();
 
       const sidebarRef: ConversationSidebarRef = {
-        close: () => {
-          sidebar.close();
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
+        close: agentBuilderSidebar.close,
       };
 
       this.activeSidebarRef = sidebarRef;
@@ -374,13 +372,8 @@ export class AgentBuilderPlugin
         return openSidebarInternal(options);
       },
       toggleChat: (options?: OpenConversationSidebarOptions) => {
-        if (this.activeSidebarRef) {
-          const sidebarRef = this.activeSidebarRef;
-          // Be defensive: clear local references immediately in case the sidebar doesn't
-          // synchronously invoke our onClose callback.
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          sidebarRef.close();
+        if (agentBuilderSidebar.isOpen()) {
+          agentBuilderSidebar.close();
           return;
         }
 
@@ -411,5 +404,6 @@ export class AgentBuilderPlugin
 
   stop() {
     this.experimentalDeepLinksSubscription?.unsubscribe();
+    this.sidebarOpenSubscription?.unsubscribe();
   }
 }
