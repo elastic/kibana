@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   useEuiTheme,
@@ -27,68 +27,57 @@ import { isMac } from '@kbn/shared-ux-utility';
 
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
-const listItems = [
+interface Shortcut {
+  keys: readonly string[];
+  label: string;
+}
+
+const shortcuts: Shortcut[] = [
   {
-    title: (
-      <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>Enter</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.runKeyboardShortcutsLabel', {
+    keys: [COMMAND_KEY, 'Enter'],
+    label: i18n.translate('esqlEditor.query.runKeyboardShortcutsLabel', {
       defaultMessage: 'Run query',
     }),
   },
   {
-    title: (
-      <>
-        <kbd>⇧</kbd> <kbd>Enter</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.newLineKeyboardShortcutsLabel', {
+    keys: ['⇧', 'Enter'],
+    label: i18n.translate('esqlEditor.query.newLineKeyboardShortcutsLabel', {
       defaultMessage: 'New line',
     }),
   },
   {
-    title: (
-      <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>/</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.commentKeyboardShortcutsLabel', {
+    keys: [COMMAND_KEY, '/'],
+    label: i18n.translate('esqlEditor.query.commentKeyboardShortcutsLabel', {
       defaultMessage: 'Comment/uncomment line',
     }),
   },
   {
-    title: (
-      <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>K</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
+    keys: [COMMAND_KEY, 'K'],
+    label: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
       defaultMessage: 'Open quick search',
     }),
   },
   {
-    title: (
-      <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>I</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
+    keys: [COMMAND_KEY, 'I'],
+    label: i18n.translate('esqlEditor.query.prettifyKeyboardShortcutsLabel', {
       defaultMessage: 'Prettify query',
     }),
   },
   {
-    title: (
-      <>
-        <kbd>{COMMAND_KEY}</kbd> <kbd>J</kbd>
-      </>
-    ),
-    description: i18n.translate('esqlEditor.query.generateFromCommentKeyboardShortcutsLabel', {
+    keys: [COMMAND_KEY, 'J'],
+    label: i18n.translate('esqlEditor.query.generateFromCommentKeyboardShortcutsLabel', {
       defaultMessage: 'Generate ES|QL from comment',
     }),
   },
 ];
+
+const renderShortcutKeys = (keys: readonly string[]) =>
+  keys.map((key, index) => (
+    <Fragment key={`${key}-${index}`}>
+      {index > 0 ? ' ' : null}
+      <kbd>{key}</kbd>
+    </Fragment>
+  ));
 
 export interface KeyboardShortcutsProps {
   display?: 'popover' | 'inline';
@@ -105,15 +94,10 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
   });
   const labelId = useGeneratedHtmlId();
 
-  const cheatsheetItems = listItems.map(({ title, description }) => ({
-    title: description,
-    description: title,
-  }));
-
   if (display === 'inline') {
     return (
       <EuiText
-        size="s"
+        size="m"
         data-test-subj="editorKeyboardShortcutsInline"
         css={css`
           min-width: ${mathWithUnits(euiTheme.size.xxl, (x) => x * 7)};
@@ -124,11 +108,12 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
           aria-labelledby={labelId}
           type="column"
           columnWidths={['auto', 'auto']}
+          columnGutterSize="m"
           compressed
-          listItems={cheatsheetItems}
-          css={css`
-            row-gap: ${euiTheme.size.xs};
-          `}
+          listItems={shortcuts.map(({ keys, label: shortcutLabel }) => ({
+            title: shortcutLabel,
+            description: renderShortcutKeys(keys),
+          }))}
         />
       </EuiText>
     );
@@ -179,7 +164,10 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
             columnWidths={['auto', 'auto']}
             align="center"
             compressed
-            listItems={listItems}
+            listItems={shortcuts.map(({ keys, label: shortcutLabel }) => ({
+              title: renderShortcutKeys(keys),
+              description: shortcutLabel,
+            }))}
           />
         </EuiText>
       </EuiPopover>
