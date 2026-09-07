@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicyConfigRecord } from '../../types';
+import type { NewPackagePolicy, PackageInfo } from '../../types';
+import type { PackagePolicyConfigRecord } from '../../../common/types';
 
 import {
   SINGLE_ACCOUNT,
