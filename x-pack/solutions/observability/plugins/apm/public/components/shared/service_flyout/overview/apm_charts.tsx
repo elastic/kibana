@@ -51,8 +51,6 @@ export function ServiceFlyoutApmCharts({
       rangeTo,
       transactionType,
       setRange,
-      comparisonEnabled = false,
-      offset = '',
     },
   } = useServiceFlyoutContext();
 
@@ -83,8 +81,8 @@ export function ServiceFlyoutApmCharts({
     end,
     transactionType,
     comparisonChartTheme,
-    comparisonEnabled,
-    offset,
+    comparisonEnabled: false,
+    offset: '',
     timeZone,
     showAlertAnnotations: false,
     showChartActions: false,

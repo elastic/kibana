@@ -19,7 +19,4 @@ export interface ServiceFlyoutOptions {
   rangeTo?: string;
   /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
   latencyAggregationType?: LatencyAggregationType;
-  /** Previous-period comparison, matching the host page's comparison toggle. */
-  comparisonEnabled?: boolean;
-  offset?: string;
 }

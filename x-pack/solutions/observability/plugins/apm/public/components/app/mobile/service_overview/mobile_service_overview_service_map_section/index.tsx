@@ -25,8 +25,6 @@ export function MobileServiceOverviewServiceMapSection() {
       appVersion,
       netConnectionType,
       latencyAggregationType,
-      comparisonEnabled,
-      offset,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
 
@@ -44,10 +42,8 @@ export function MobileServiceOverviewServiceMapSection() {
     () => ({
       transactionType,
       latencyAggregationType,
-      comparisonEnabled,
-      offset,
     }),
-    [transactionType, latencyAggregationType, comparisonEnabled, offset]
+    [transactionType, latencyAggregationType]
   );
 
   if (!serviceName || !rangeFrom || !rangeTo) {

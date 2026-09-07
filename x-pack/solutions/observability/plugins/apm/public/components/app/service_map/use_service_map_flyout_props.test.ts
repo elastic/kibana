@@ -93,8 +93,6 @@ describe('useServiceMapFlyoutProps', () => {
         selectedServiceNodeForFlyout: node,
         flyoutOptions: {
           latencyAggregationType: LatencyAggregationType.p95,
-          comparisonEnabled: true,
-          offset: '1d',
         },
       })
     );
@@ -105,8 +103,6 @@ describe('useServiceMapFlyoutProps', () => {
       rangeTo: BASE_ARGS.end,
       transactionType: undefined,
       latencyAggregationType: LatencyAggregationType.p95,
-      comparisonEnabled: true,
-      offset: '1d',
     });
   });
 

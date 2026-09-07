@@ -20,8 +20,6 @@ export function ServiceOverviewServiceMapSection() {
       rangeFrom,
       rangeTo,
       latencyAggregationType,
-      comparisonEnabled,
-      offset,
     },
   } = useApmParams('/services/{serviceName}/overview');
 
@@ -31,10 +29,8 @@ export function ServiceOverviewServiceMapSection() {
     () => ({
       transactionType,
       latencyAggregationType,
-      comparisonEnabled,
-      offset,
     }),
-    [transactionType, latencyAggregationType, comparisonEnabled, offset]
+    [transactionType, latencyAggregationType]
   );
 
   if (!serviceName || !rangeFrom || !rangeTo) {

@@ -77,9 +77,6 @@ interface ServiceFlyoutProps {
     transactionType?: string;
     /** Initial latency aggregation type, e.g. inherited from a rule or the host page. */
     latencyAggregationType?: LatencyAggregationType;
-    /** Previous-period comparison, matching the host page's comparison toggle. */
-    comparisonEnabled?: boolean;
-    offset?: string;
   };
   telemetry: ServiceFlyoutTelemetry;
   onClose: () => void;
@@ -105,7 +102,7 @@ export function ServiceFlyout({
 }: ServiceFlyoutProps) {
   const { euiTheme } = useEuiTheme();
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
-  const { latencyAggregationType, comparisonEnabled, offset } = filters;
+  const { latencyAggregationType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
   const [flyoutEnvironment, setFlyoutEnvironment] = useState(environment);
@@ -186,8 +183,6 @@ export function ServiceFlyout({
             transactionType: flyoutTransactionType,
             setTransactionType: setFlyoutTransactionType,
             latencyAggregationType,
-            comparisonEnabled,
-            offset,
           },
         }}
       >

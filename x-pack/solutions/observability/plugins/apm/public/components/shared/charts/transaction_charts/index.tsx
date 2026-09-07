@@ -86,10 +86,8 @@ export function TransactionCharts({
     () => ({
       transactionType,
       latencyAggregationType,
-      comparisonEnabled,
-      offset,
     }),
-    [transactionType, latencyAggregationType, comparisonEnabled, offset]
+    [transactionType, latencyAggregationType]
   );
 
   const latencyChart = (

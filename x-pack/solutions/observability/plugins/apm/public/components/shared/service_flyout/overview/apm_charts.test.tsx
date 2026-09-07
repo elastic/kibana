@@ -157,14 +157,6 @@ describe('ServiceFlyoutApmCharts', () => {
     );
   });
 
-  it('inherits comparison settings from the flyout filters', () => {
-    renderCharts({ comparisonEnabled: true, offset: '1d' });
-
-    expect(mockLatencyChart).toHaveBeenCalledWith(
-      expect.objectContaining({ comparisonEnabled: true, offset: '1d' })
-    );
-  });
-
   it('translates chart brushes into the flyout time range instead of a URL change', () => {
     renderCharts();
 

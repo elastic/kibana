@@ -75,8 +75,6 @@ export interface ServiceFlyoutContextValue {
     setTransactionType?: (transactionType: string) => void;
     // Initial values inherited from the host (read-only — the flyout owns changes)
     latencyAggregationType?: LatencyAggregationType;
-    comparisonEnabled?: boolean;
-    offset?: string;
   };
 }
 
