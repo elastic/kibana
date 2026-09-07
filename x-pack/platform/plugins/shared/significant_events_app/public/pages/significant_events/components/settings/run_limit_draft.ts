@@ -7,18 +7,15 @@
 
 import {
   DEFAULT_RUN_LIMITS,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  RUN_QUOTA_GROUPS,
   type RunQuotaGroup,
   type RunQuotaSettingsUpdate,
   type RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
 
-export const RUN_QUOTA_GROUPS = [
-  'detection',
-  'investigation',
-  'ki_extraction',
-] as const satisfies readonly RunQuotaGroup[];
-export const MIN_RUN_LIMIT = 0;
-export const MAX_RUN_LIMIT = 10_000;
+export { MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS };
 
 export type RunLimitDraft = number | '';
 
