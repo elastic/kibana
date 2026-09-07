@@ -16,18 +16,26 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
+import type { SortOrder } from '../../../common/ui/types';
 import type {
   Bucket,
   Buckets,
   CollectTelemetryDataParams,
   TemplatesSolutionTelemetry,
   TemplatesTelemetry,
+  TemplatesVersionPercentiles,
 } from '../types';
 import type { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 import { findValueInBuckets, getCountsAggregationQuery, getCountsFromBuckets } from './utils';
 
 const SO = CASE_TEMPLATE_SAVED_OBJECT;
 
+/**
+ * Caps distinct version keys read for percentile estimation. The saved-objects find API
+ * does not allow a `percentiles` metric aggregation, so versions are read as terms and
+ * the percentiles are computed in process. The payload stays three numbers either way.
+ */
+const MAX_VERSION_BUCKETS = 1000;
 const MAX_FIELD_TYPE_BUCKETS = 20;
 
 /**
@@ -60,10 +68,11 @@ const getInventoryAggregations = () => ({
   migratedFromV1: {
     filter: { exists: { field: `${SO}.attributes.legacyKey` } },
   },
-  versionPercentiles: {
-    percentiles: {
+  versions: {
+    terms: {
       field: `${SO}.attributes.templateVersion`,
-      percents: [50, 90, 99],
+      size: MAX_VERSION_BUCKETS,
+      order: { _key: 'asc' as SortOrder },
     },
   },
   totalFieldCount: { sum: { field: `${SO}.attributes.fieldCount` } },
@@ -144,7 +153,7 @@ const getByOwnerAggregations = <T extends object>(
 interface InventoryScopeAggregationResult {
   enabledStates?: Buckets<number>;
   migratedFromV1?: { doc_count: number };
-  versionPercentiles?: { values?: Record<string, number | null> };
+  versions?: Buckets<number>;
   totalFieldCount?: { value: number | null };
   maxFieldCount?: { value: number | null };
   averageFieldCount?: { value: number | null };
@@ -232,11 +241,37 @@ const bucketsToRecord = (buckets?: Array<Bucket<string>>): Record<string, number
   return record;
 };
 
-const getVersionPercentiles = (values?: Record<string, number | null>) => ({
-  p50: Math.round(values?.['50.0'] ?? 0),
-  p90: Math.round(values?.['90.0'] ?? 0),
-  p99: Math.round(values?.['99.0'] ?? 0),
-});
+/**
+ * Nearest-rank percentile over a weighted discrete distribution. Rank is
+ * `ceil(percent / 100 * total)`, then the value at that 1-based rank.
+ */
+const getNearestRankPercentile = (buckets: Array<Bucket<number>>, percent: number): number => {
+  const total = buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
+  if (total === 0) {
+    return 0;
+  }
+
+  const rank = Math.ceil((percent / 100) * total);
+  let cumulative = 0;
+  for (const bucket of buckets) {
+    cumulative += bucket.doc_count;
+    if (cumulative >= rank) {
+      return bucket.key;
+    }
+  }
+
+  return buckets[buckets.length - 1]?.key ?? 0;
+};
+
+const getVersionPercentiles = (buckets?: Array<Bucket<number>>): TemplatesVersionPercentiles => {
+  const sorted = [...(buckets ?? [])].sort((left, right) => left.key - right.key);
+
+  return {
+    p50: getNearestRankPercentile(sorted, 50),
+    p90: getNearestRankPercentile(sorted, 90),
+    p99: getNearestRankPercentile(sorted, 99),
+  };
+};
 
 const buildSolutionTelemetry = ({
   inventory,
@@ -259,7 +294,7 @@ const buildSolutionTelemetry = ({
     totalDisabled: findValueInBuckets(enabledBuckets, 0),
     totalSoftDeleted,
     totalMigratedFromV1: inventory?.migratedFromV1?.doc_count ?? 0,
-    versionPercentiles: getVersionPercentiles(inventory?.versionPercentiles?.values),
+    versionPercentiles: getVersionPercentiles(inventory?.versions?.buckets),
     fieldCount: {
       total: inventory?.totalFieldCount?.value ?? 0,
       max: inventory?.maxFieldCount?.value ?? 0,

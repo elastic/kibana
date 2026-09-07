@@ -383,7 +383,7 @@ export default ({ getService }: FtrProviderContext): void => {
           field('a2', TOGGLE),
         ]);
 
-        // Guards the version-distribution expectation below against a change in how an edit
+        // Guards the version-percentile expectation below against a change in how an edit
         // numbers versions.
         expect(latest.templateVersion).toBe(3);
 

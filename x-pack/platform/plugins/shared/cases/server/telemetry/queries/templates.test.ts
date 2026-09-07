@@ -47,7 +47,7 @@ const emptyInventoryScope = {
   doc_count: 0,
   enabledStates: { buckets: [] },
   migratedFromV1: { doc_count: 0 },
-  versionPercentiles: { values: { '50.0': null, '90.0': null, '99.0': null } },
+  versions: { buckets: [] },
   totalFieldCount: { value: 0 },
   maxFieldCount: { value: null },
   averageFieldCount: { value: null },
@@ -71,8 +71,12 @@ const securitySolutionInventory = {
     ],
   },
   migratedFromV1: { doc_count: 2 },
-  versionPercentiles: {
-    values: { '50.0': 1, '90.0': 3.6, '99.0': 4 },
+  // Eight templates on version 1 and two on version 4 → nearest-rank p50=1, p90=4, p99=4.
+  versions: {
+    buckets: [
+      { key: 1, doc_count: 8 },
+      { key: 4, doc_count: 2 },
+    ],
   },
   totalFieldCount: { value: 12 },
   maxFieldCount: { value: 8 },
@@ -101,8 +105,12 @@ const inventoryFindResponse = {
       ],
     },
     migratedFromV1: { doc_count: 3 },
-    versionPercentiles: {
-      values: { '50.0': 1, '90.0': 4.6, '99.0': 5 },
+    // Eight templates on version 1 and two on version 5 → nearest-rank p50=1, p90=5, p99=5.
+    versions: {
+      buckets: [
+        { key: 1, doc_count: 8 },
+        { key: 5, doc_count: 2 },
+      ],
     },
     totalFieldCount: { value: 21 },
     maxFieldCount: { value: 8 },
@@ -307,10 +315,11 @@ describe('templates', () => {
           terms: { field: 'cases-templates.attributes.isEnabled', missing: true },
         },
         migratedFromV1: { filter: { exists: { field: 'cases-templates.attributes.legacyKey' } } },
-        versionPercentiles: {
-          percentiles: {
+        versions: {
+          terms: {
             field: 'cases-templates.attributes.templateVersion',
-            percents: [50, 90, 99],
+            size: 1000,
+            order: { _key: 'asc' },
           },
         },
         totalFieldCount: { sum: { field: 'cases-templates.attributes.fieldCount' } },
