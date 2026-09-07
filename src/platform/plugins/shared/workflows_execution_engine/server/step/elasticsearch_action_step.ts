@@ -25,7 +25,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
  * Whether the connector for `stepType` defaults to HEAD, which the ES transport resolves to a
  * scalar boolean instead of the JSON object every other API returns.
  */
-const isHeadConnector = (stepType: string): boolean =>
+const isHeadMethod = (stepType: string): boolean =>
   getElasticsearchConnectors().find(({ type }) => type === stepType)?.methods[0] === 'HEAD';
 
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
@@ -84,7 +84,7 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
       // Keep the output object-shaped so it matches the storage mapping and workflows can branch
       // on `output.result`. The scalar check also covers a user overriding the method to GET.
       const isScalar = result !== null && typeof result !== 'object';
-      const output = isScalar && isHeadConnector(stepType) ? { result } : result;
+      const output = isScalar && isHeadMethod(stepType) ? { result } : result;
 
       return { input: stepWith, output, error: undefined };
     } catch (error) {
