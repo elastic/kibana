@@ -7,6 +7,7 @@
 
 import type { AlertClosingReason } from '../../../../../common/types';
 import type { Status } from '../../../../../common/api/detection_engine';
+import type { RuntimeFieldType } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 
 export interface BasicSignals {
   signal: AbortSignal;
@@ -44,6 +45,7 @@ export interface UpdateAlertStatusByQueryProps {
   status: Status;
   signal?: AbortSignal;
   reason?: AlertClosingReason;
+  runtimeFields?: Record<string, RuntimeFieldType>;
 }
 
 export interface UpdateAlertStatusByIdsProps {
