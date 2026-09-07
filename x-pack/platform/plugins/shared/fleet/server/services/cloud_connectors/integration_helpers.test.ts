@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackageInfo } from '../../types';
+import type { NewPackagePolicy, PackageInfo, PackagePolicyConfigRecord } from '../../types';
 
 import {
   SINGLE_ACCOUNT,
@@ -244,7 +244,7 @@ describe('cloud connector integration helpers', () => {
 
   describe('injectConnectorVarsIntoPolicy', () => {
     // input-mode policy: credentials live in stream vars
-    const makeInputPolicy = (streamVars: Record<string, unknown> = {}): NewPackagePolicy => ({
+    const makeInputPolicy = (streamVars: PackagePolicyConfigRecord = {}): NewPackagePolicy => ({
       name: 'test-policy',
       namespace: 'default',
       policy_ids: [],
