@@ -35,42 +35,6 @@ configuration:
   });
 });
 
-describe('AB-002: platform-only tool allowlist', () => {
-  const agentYaml = (toolIds: string[]) => [
-    'name: SDLC test agent',
-    'description: test agent',
-    'configuration:',
-    '  tools:',
-    '    - tool_ids:',
-    ...toolIds.map((t: string) => '        - ' + t),
-    '',
-  ].join('\n');
-
-  it('accepts platform-owned tools', () => {
-    const definition = parseFleetAgentYaml(
-      agentYaml(['platform.core.execute_esql', 'platform.core.integration_knowledge']),
-      'fleet-default-sdlc_intel-agent',
-      { pkgName: 'sdlc_intel' }
-    );
-    expect(definition.configuration.tools[0].tool_ids).toEqual([
-      'platform.core.execute_esql',
-      'platform.core.integration_knowledge',
-    ]);
-  });
-
-  it('rejects solution-owned tools so packaged agents cannot depend on a solution plugin', () => {
-    // A package binding a solution tool would silently reintroduce the
-    // security_solution coupling that package agents exist to avoid.
-    expect(() =>
-      parseFleetAgentYaml(
-        agentYaml(['platform.core.execute_esql', 'security_solution.alerts']),
-        'fleet-default-sdlc_intel-agent',
-        { pkgName: 'sdlc_intel' }
-      )
-    ).toThrow(/security_solution\.alerts/);
-  });
-});
-
 describe('substituteFleetAgentIds', () => {
   it('replaces fleet agent placeholders with deterministic fleet ids', () => {
     const yaml = `

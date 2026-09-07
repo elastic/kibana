@@ -32,6 +32,9 @@ export const getFleetPackageAgentId = (params: {
   fileName: string;
 }): string => getFleetPackageWorkflowId(params);
 
+/** AB-002: only platform-owned tools may be bound by a packaged agent. */
+export const PLATFORM_TOOL_PREFIX = 'platform.';
+
 interface FleetPackageAgentYaml {
   name: string;
   description: string;
@@ -51,6 +54,21 @@ export const parseFleetAgentYaml = (
   if (!parsed.name || !parsed.description || !parsed.configuration?.tools?.length) {
     throw new Error(
       `Invalid agent asset ${agentId}: name, description, and configuration.tools are required`
+    );
+  }
+  // AB-002: package agents may only bind platform-owned tools. Binding a
+  // solution-owned tool (security_solution.*, observability.*, ...) makes the
+  // package depend on a solution plugin being installed and enabled, which is the
+  // coupling package-managed agents exist to avoid. Fail the install loudly rather
+  // than let the agent resolve to a missing tool at converse time.
+  const foreignToolIds = parsed.configuration.tools
+    .flatMap((toolGroup) => toolGroup.tool_ids ?? [])
+    .filter((toolId) => !toolId.startsWith(PLATFORM_TOOL_PREFIX));
+
+  if (foreignToolIds.length) {
+    throw new Error(
+      `Invalid agent asset ${agentId}: package agents may only use platform tools ` +
+        `(${PLATFORM_TOOL_PREFIX}*), got ${foreignToolIds.join(', ')}`
     );
   }
 

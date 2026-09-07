@@ -252,6 +252,15 @@ export interface AgentBuilderManagementSetup {
   deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
   createOrUpdateSkill(params: PersistedSkillCreateRequest, request: KibanaRequest): Promise<unknown>;
   deletePackageManagedSkill(skillId: string, spaceId: string): Promise<boolean>;
+  /**
+   * List the skills a package owns, so install can reap the ones the current
+   * archive no longer produces. Package-managed skills are readonly, so an
+   * orphan left behind by an id-scheme change is otherwise undeletable.
+   */
+  listPackageManagedSkills(
+    pluginId: string,
+    spaceId: string
+  ): Promise<Array<{ id: string; plugin_id?: string }>>;
 }
 
 export interface AgentBuilderPluginSetup {
