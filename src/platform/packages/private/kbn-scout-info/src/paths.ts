@@ -148,9 +148,14 @@ export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 ];
 
 /**
- * Scout `fixtures/` directories, excluded from the "tests-only" fast path: their
- * entry points (e.g. page objects) can be imported by other plugins, so a change
- * must run downstream configs (dependency-tree mode) rather than tests-only.
+ * Scout `fixtures/` directories: their entry points (e.g. page objects) can be
+ * imported by other plugins. Kept in sync with the standalone copy in
+ * `.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts`,
+ * which uses it to decide whether a diff can affect OAS/API-contract checks.
+ *
+ * The Scout selector's own "tests-only" fast path no longer uses this exclude
+ * list — it uses the `SCOUT_TESTS_ONLY_SAFE_GLOBS` allow-list below, which
+ * subsumes it.
  *
  * The globstar is kept only at the end; a globstar-before-`fixtures` form is
  * avoided because minimatch fails to match a single trailing segment when a
@@ -159,6 +164,29 @@ export const SCOUT_TESTS_ONLY_SCOPE_GLOBS: readonly string[] = [
 export const SCOUT_TESTS_ONLY_EXCLUDE_GLOBS: readonly string[] = [
   `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/fixtures/**`,
   `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/fixtures/**`,
+];
+
+/**
+ * Files inside a Scout test scope that are provably local to that scope and
+ * therefore safe for the "tests-only" fast path:
+ *   - spec files under `tests/` and `parallel_tests/` (owned by exactly one config)
+ *   - the scope's own Playwright config files
+ *   - generated `.meta/` manifests
+ *
+ * Everything else in a scope — fixtures, helpers, services, es archives, test
+ * data, root-level constants — can be consumed by *other* scopes, either via
+ * imports (page objects, helpers) or by string path (e.g. a `global.setup.ts`
+ * loading another scope's archive), so a change there must fall through to
+ * dependency-tree mode and run every config of the affected module instead of
+ * only the configs of the file's own namespace.
+ */
+export const SCOUT_TESTS_ONLY_SAFE_GLOBS: readonly string[] = [
+  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/{tests,parallel_tests}/**`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/{tests,parallel_tests}/**`,
+  `**/test/scout{_*,}/{${SCOUT_TEST_CATEGORIES.join(',')}}/{,parallel.}playwright.config.ts`,
+  `**/test/scout{_*,}/*/{${SCOUT_TEST_CATEGORIES.join(',')}}/{,parallel.}playwright.config.ts`,
+  `**/test/scout{_*,}/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
+  `**/test/scout{_*,}/*/.meta/{${SCOUT_TEST_CATEGORIES.join(',')}}/**`,
 ];
 
 /**
@@ -198,4 +226,10 @@ export const CRITICAL_FILES_SCOUT: readonly string[] = [
   '.buildkite/pipeline-utils/ci-stats/**/*.{ts,js}',
   // Controls which directories Moon scans for projects.
   '.moon/workspace.yml',
+  // Scout es archives are referenced across plugins by string path (e.g. a
+  // global.setup.ts in another plugin loading these via esArchiver), which no
+  // dependency graph can see. Changes here are rare, so a full run is cheap
+  // insurance against silently breaking the consumers.
+  '**/test/scout{_*,}/**/es_archiver/**',
+  '**/test/scout{_*,}/**/es_archives/**',
 ];
