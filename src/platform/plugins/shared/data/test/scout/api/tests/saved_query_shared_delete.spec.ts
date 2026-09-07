@@ -58,7 +58,8 @@ apiTest.describe('Saved query deletion across spaces', { tag: tags.deploymentAgn
         body: attributes,
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({ id: expect.any(String), attributes });
+      expect(response.body).toMatchObject({ attributes });
+      expect(typeof response.body.id).toBe('string');
       const { id }: { id: string } = response.body;
       return id;
     });
