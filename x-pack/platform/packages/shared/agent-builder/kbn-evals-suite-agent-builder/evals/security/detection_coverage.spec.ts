@@ -19,8 +19,8 @@ import { COVERAGE_RULE_NAMES, seedDetectionCoverageFixtures } from './detection_
  *    exactly one of four verdict tokens for a seeded situation, and name the rule that
  *    justifies it. These read the answer text and the `security.find_rules` /
  *    `security.find_prebuilt_rules` tool calls, so a right verdict for the wrong reason
- *    still fails. Two of them are traps that previously produced wrong verdicts:
- *    behaviour-in-description-only, and same-technique-different-behaviour.
+ *    still fails. The same-technique-different-behaviour case traps a verdict based on
+ *    ATT&CK metadata alone instead of an exact behavioral match.
  *
  * 2. **Intent routing** (`evaluateDataset`). The skill owns exactly one intent: someone
  *    WANTS coverage to exist. Questions *about* coverage are reporting intents that
@@ -196,25 +196,6 @@ evaluate.describe(
           toolCalls((response.steps ?? []) as ToolCallStep[], CREATE_RULE_TOOL_ID)
         ).toHaveLength(0);
         expect(answerOf(response)).not.toMatch(/\bI (?:have )?enabled\b/i);
-      }
-    );
-
-    evaluate(
-      'a behaviour described only in a rule description is still found',
-      async ({ chatClient }) => {
-        // Trap: the rule name says nothing about DNS. A name-only search returns nothing
-        // here, and the skill then reports a false gap over a rule the user already runs.
-        const response = await chatClient.converse({
-          messages: [
-            {
-              message: 'I need coverage for attackers exfiltrating data over DNS TXT tunneling.',
-            },
-          ],
-        });
-
-        expectCoverageSkillRan((response.steps ?? []) as ToolCallStep[]);
-        expectSingleVerdict(answerOf(response), 'covered_enabled');
-        expect(mentionsRule(answerOf(response), COVERAGE_RULE_NAMES.dnsTunneling)).toBe(true);
       }
     );
 

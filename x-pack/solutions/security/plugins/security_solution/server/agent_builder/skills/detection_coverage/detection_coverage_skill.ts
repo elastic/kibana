@@ -58,7 +58,7 @@ Do not run a search then. Do not ask whether it is already covered. The user has
 
 **Run the check** when the request names an outcome with no logic attached: a gap statement, a technique id alone, a behavior description, or a hunt finding.
 
-If the request has an imperative verb but no logic ("create a rule for credential dumping"), run the check, keep it short, and lead with the answer. If nothing matches, hand off to \`detection-rule-edit\` in the same turn. Never make the user ask twice.
+If the request has an imperative verb but no logic ("create a rule for credential dumping"), run the check, keep it short, and lead with the answer. If nothing matches and the request had an imperative verb, hand off to \`detection-rule-edit\` in the same turn. Otherwise offer. Never make the user ask twice for the same intent.
 
 Automated callers, such as a workflow step, always run the full check. There is no user in the loop who has decided anything.
 
@@ -67,7 +67,7 @@ Automated callers, such as a workflow step, always run the full check. There is 
 - Coverage and existence questions ("do we have a rule for X?", "do we detect X?", "show me", "how many") -> \`find-security-rules\`. Answering a question does not close a gap.
 - Deployment-wide coverage ("which MITRE tactics am I missing?", "what should I install?") -> \`recommend-prebuilt-rules\`. It has a dedicated installed-coverage tool. Do not rebuild that answer here.
 - Writing or editing the rule itself -> \`detection-rule-edit\`.
-- Tuning a noisy rule -> \`rule-tuning\`.
+- Tuning a noisy rule -> \`investigate-rule\`.
 
 ## Role
 
@@ -82,7 +82,7 @@ Load the sibling skills and follow their search instructions. Do it in this orde
 Call \`load_skill\` with \`find-security-rules\`. Follow that skill's instructions to search installed rules. Two constraints from this skill on top of its instructions:
 
 - Do not pass \`enabled\`. You need enabled and disabled rules in one result.
-- Up to three searches: one by technique id if you have one, one by the distinctive behavior words, and, when both return nothing, one with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl"). Free text is word-AND matched, so extra intent words like "attackers" or "exfiltrating" hide real matches. The single-word probe is what finds a rule whose description says it differently.
+- Up to three searches: one by technique id if you have one, one by the distinctive behavior words, and, when both return nothing, one with the **single most distinctive word** (a protocol, product, or tool word: "SMB", "DNS", "kubectl"). Free text searches rule names, index patterns, and MITRE tactic and technique fields. Extra intent words like "attackers" or "exfiltrating" can hide real matches, so use the single-word probe to broaden the search.
 
 Judge each returned rule with the Match Rubric. An exact match that is enabled means \`covered_enabled\`. Stop. An exact match that is disabled means \`covered_disabled\`. Stop. A close but insufficient rule is not coverage: note it for the final explanation and continue.
 
@@ -119,7 +119,7 @@ Report exactly one verdict. Each verdict has one route and one owner. You decide
 | \`prebuilt_available\` | An Elastic prebuilt rule detects this and is not installed | install | the user, in the Add Elastic Rules page |
 | \`no_coverage\` | Nothing matches | create | the \`detection-rule-edit\` skill |
 
-Always carry the supporting rule with the verdict: its name, its \`id\` (installed rules) or \`rule_id\` (prebuilt rules), and one sentence saying why it matches or why nothing does. \`no_coverage\` carries no rule.
+Always carry the supporting rule with the verdict: its name, its \`rule_id\` (signature rule ID for both installed and prebuilt rules), and one sentence saying why it matches or why nothing does. \`no_coverage\` carries no rule.
 
 ## After the Verdict
 
@@ -146,7 +146,7 @@ If both searches return zero rules, say so plainly and return \`no_coverage\`. Z
 
 State which filters you used. A wrong filter looks the same as a real gap, and only the user can tell the two apart.
 
-Know one limit: free-text search matches exact words in rule names and descriptions. A rule described with different words for the same behavior can be missed. When step 1 finds nothing, say this in one sentence.
+Know one limit: free-text search does not search rule descriptions or queries. A relevant rule whose behavior is only expressed there can be missed. When step 1 finds nothing, say this in one sentence.
 
 ## Structured Output
 

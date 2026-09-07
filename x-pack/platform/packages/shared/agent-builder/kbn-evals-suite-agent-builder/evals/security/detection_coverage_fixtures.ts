@@ -23,8 +23,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
  * - `SMB` — an exact match that is **disabled**. The single most valuable verdict:
  *   `covered_disabled` means "you already own this, switch it on" instead of authoring
  *   a duplicate.
- * - `DNS_TUNNELING` — the behaviour appears **only in the description**, never the name.
- *   Traps a name-only search, which historically returned a false `no_coverage`.
  * - `OFFICE_CMD` — shares technique T1059 with `POWERSHELL` but detects a different
  *   behaviour on a different parent process. Traps "same technique means covered".
  * - `KUBECTL_STAGING` — scoped to the staging namespace only, so a production ask is a
@@ -33,7 +31,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const ENDPOINT_INDEX = 'logs-endpoint.events.*';
 const WINLOG_INDEX = 'winlogbeat-*';
-const NETWORK_INDEX = 'logs-network_traffic.*';
 const KUBERNETES_INDEX = 'logs-kubernetes.audit_logs-*';
 
 const DETECTION_RULES_URL = '/api/detection_engine/rules';
@@ -92,23 +89,6 @@ export const COVERAGE_FIXTURE_RULES: CoverageFixtureRule[] = [
     },
   },
   {
-    name: 'Anomalous Outbound Connection Burst',
-    description:
-      'Detects potential DNS tunneling via high-frequency TXT record queries from a single host',
-    query: 'dns.question.type:TXT',
-    index: NETWORK_INDEX,
-    enabled: true,
-    severity: 'medium',
-    riskScore: 47,
-    tags: ['MITRE', 'Domain: Network'],
-    threat: {
-      tacticId: 'TA0011',
-      tacticName: 'Command and Control',
-      techniqueId: 'T1071',
-      techniqueName: 'Application Layer Protocol',
-    },
-  },
-  {
     name: 'Office Spawning Windows Command Shell',
     description: 'Detects winword.exe or excel.exe spawning cmd.exe on Windows endpoints',
     query: 'process.parent.name:("winword.exe" or "excel.exe") and process.name:cmd.exe',
@@ -148,7 +128,6 @@ export const COVERAGE_FIXTURE_RULES: CoverageFixtureRule[] = [
 export const COVERAGE_RULE_NAMES = {
   powershell: 'Suspicious PowerShell Execution',
   smb: 'Lateral Movement via SMB',
-  dnsTunneling: 'Anomalous Outbound Connection Burst',
   officeCmd: 'Office Spawning Windows Command Shell',
   kubectlStaging: 'Suspicious kubectl exec in Staging Namespace',
 } as const;

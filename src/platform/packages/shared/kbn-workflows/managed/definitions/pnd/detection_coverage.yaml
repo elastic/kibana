@@ -37,6 +37,8 @@ outputs:
     type: string
   - name: existing_rule
     type: string
+  - name: coverage_confirmed
+    type: boolean
   - name: rule_enabled
     type: boolean
   - name: rule_installed
@@ -48,6 +50,8 @@ outputs:
   - name: enable_approved_not_applied
     type: boolean
   - name: install_approved_not_applied
+    type: boolean
+  - name: installed_not_enabled
     type: boolean
   - name: check_error
     type: string
@@ -87,6 +91,9 @@ steps:
               - no_coverage
           rule_id:
             type: string
+            description: >-
+              Signature rule ID (the ruleId field from the find-rules tool result).
+              Never use the `id` field, which is the Saved Object ID.
           rule_name:
             type: string
           prebuilt_version:
@@ -106,6 +113,8 @@ steps:
         steps:
           - name: run_rule_creation
             type: workflow.execute
+            on-failure:
+              continue: true
             with:
               workflow-id: system-security-rule-creation
               inputs:
@@ -147,7 +156,7 @@ steps:
                 elastic-api-version: "2023-10-31"
                 Content-Type: application/json
               body:
-                id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
+                rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
                 enabled: true
       - match: prebuilt_available
         steps:
@@ -195,7 +204,8 @@ steps:
             on-failure:
               continue: true
             if: >-
-              ${{ steps.install_prebuilt_rule.output.summary.succeeded > 0 }}
+              ${{ steps.install_prebuilt_rule.output.summary.succeeded > 0
+                or steps.install_prebuilt_rule.output.summary.skipped > 0 }}
             with:
               method: PATCH
               path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
@@ -207,8 +217,28 @@ steps:
                 rule_id: "{{ steps.coverage_check.output.structured_output.rule_id }}"
                 enabled: true
 
+      - match: covered_enabled
+        steps:
+          - name: confirm_coverage
+            type: waitForApproval
+            timeout: "72h"
+            with:
+              approveLabel: Coverage confirmed
+              rejectLabel: Dismiss
+              message: |-
+                An enabled rule already covers this gap. Please confirm that it fully addresses the reported behavior.
+
+                Rule: {{ steps.coverage_check.output.structured_output.rule_name }}
+                Why it covers: {{ steps.coverage_check.output.structured_output.rationale }}
+
+                Detection gap: {{ inputs.gap_description }}
+
+                Note: This check does not account for rule exceptions, which may limit coverage.
+
+                Review the check: /app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
+
     default:
-      # Only covered_enabled (nothing to do) and unexpected verdicts land here.
+      # Only unexpected verdicts land here (all canonical verdicts have dedicated cases above).
       - name: report_only
         type: data.set
         with:
@@ -222,6 +252,9 @@ steps:
     with:
       verdict: "{{ steps.coverage_check.output.structured_output.verdict }}"
       existing_rule: "{{ steps.coverage_check.output.structured_output.rule_name }}"
+      # Only meaningful for covered_enabled. False on every other verdict and when the
+      # analyst dismisses the confirmation instead of accepting the coverage judgement.
+      coverage_confirmed: "${{ steps.confirm_coverage.output.response.approved == true }}"
       # Each flag asserts EVIDENCE OF THE MUTATION from the API response, never
       # `error == null`. A step whose `if` was false is skipped, and a skipped step has no
       # error, so an `error == null` check reports success for work that never ran. A
@@ -234,11 +267,15 @@ steps:
       # action tells the caller which approval went unhonoured.
       enable_approved_not_applied: >-
         ${{ steps.review_enable.output.response.approved == true
-          and steps.enable_existing_rule.output.enabled != true }}
+          and not (steps.enable_existing_rule.output.enabled == true) }}
       install_approved_not_applied: >-
         ${{ steps.review_install.output.response.approved == true
-          and (steps.install_prebuilt_rule.output.summary.succeeded == null
-            or steps.install_prebuilt_rule.output.summary.succeeded == 0) }}
+          and not (steps.install_prebuilt_rule.output.summary.succeeded > 0
+            or steps.install_prebuilt_rule.output.summary.skipped > 0) }}
+      installed_not_enabled: >-
+        ${{ (steps.install_prebuilt_rule.output.summary.succeeded > 0
+          or steps.install_prebuilt_rule.output.summary.skipped > 0)
+          and not (steps.enable_installed_rule.output.enabled == true) }}
       # Empty when the check produced a verdict; set when it failed or returned nothing, so
       # upstream automation can tell "no gap found" from "no decision made".
       check_error: >-

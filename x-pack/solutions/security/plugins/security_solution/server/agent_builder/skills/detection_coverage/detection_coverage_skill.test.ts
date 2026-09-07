@@ -89,7 +89,8 @@ describe('detection-coverage', () => {
     expect(skill.content).toMatch(/Write exactly one/);
   });
 
-  it('names the word-match search limit', () => {
-    expect(skill.content).toMatch(/matches exact words in rule names and descriptions/);
+  it('names the free-text search limit', () => {
+    expect(skill.content).toMatch(/does not search rule descriptions or queries/);
+    expect(skill.content).toMatch(/searches rule names, index patterns, and MITRE/);
   });
 });

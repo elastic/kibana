@@ -27,8 +27,13 @@ const VERDICTS = [
   'no_coverage',
 ] as const;
 
-/** Verdicts that must have a dedicated switch case, i.e. an automated action path. */
-const ACTIONABLE_VERDICTS = ['no_coverage', 'covered_disabled', 'prebuilt_available'] as const;
+/** Verdicts that must have a dedicated switch case. */
+const ACTIONABLE_VERDICTS = [
+  'no_coverage',
+  'covered_disabled',
+  'prebuilt_available',
+  'covered_enabled',
+] as const;
 
 interface YamlStep {
   name: string;
@@ -101,7 +106,9 @@ describe('Detection Coverage worker', () => {
       const uncased = VERDICTS.filter(
         (verdict) => !(ACTIONABLE_VERDICTS as readonly string[]).includes(verdict)
       );
-      expect(uncased).toEqual(['covered_enabled']);
+      // All canonical verdicts now have dedicated cases; the default arm handles only
+      // unexpected verdicts (e.g. a model hallucinating outside the enum).
+      expect(uncased).toEqual([]);
       expect((verdictSwitch?.default ?? []).map((step) => step.name)).toEqual(['report_only']);
     });
 
@@ -116,12 +123,14 @@ describe('Detection Coverage worker', () => {
   describe('failure containment', () => {
     // A step that dies takes the run with it, so the human never learns what happened.
     // Every step that calls out must let the run reach `emit_result` and report the truth.
-    it.each(['coverage_check', 'enable_existing_rule', 'install_prebuilt_rule'])(
-      '%s continues on failure so the run still reports',
-      (name) => {
-        expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
-      }
-    );
+    it.each([
+      'coverage_check',
+      'enable_existing_rule',
+      'install_prebuilt_rule',
+      'run_rule_creation',
+    ])('%s continues on failure so the run still reports', (name) => {
+      expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
+    });
 
     it('gates every mutation behind an approval response', () => {
       for (const [action, gate] of [
@@ -149,14 +158,34 @@ describe('Detection Coverage worker', () => {
       expect(emit?.[flag]).not.toContain('error == null');
     });
 
-    // One field per action rather than one combined flag: an `or` chain across steps that
-    // did not run in this branch evaluates to null and swallows the true case.
+    // One field per action tells the caller exactly which approved operation was not applied.
     it.each([
       ['enable_approved_not_applied', 'review_enable', 'enable_existing_rule'],
       ['install_approved_not_applied', 'review_install', 'install_prebuilt_rule'],
     ])('%s flags an approval the guards did not honour', (flag, gate, action) => {
       expect(emit?.[flag]).toContain(`steps.${gate}.output.response.approved == true`);
       expect(emit?.[flag]).toContain(`steps.${action}.output`);
+    });
+
+    it('treats an installation skipped because the rule is already present as available', () => {
+      expect(emit?.install_approved_not_applied).toContain(
+        'steps.install_prebuilt_rule.output.summary.skipped > 0'
+      );
+      expect(emit?.installed_not_enabled).toContain(
+        'steps.install_prebuilt_rule.output.summary.succeeded > 0'
+      );
+      expect(emit?.installed_not_enabled).toContain(
+        'steps.install_prebuilt_rule.output.summary.skipped > 0'
+      );
+      expect(emit?.installed_not_enabled).toContain(
+        'not (steps.enable_installed_rule.output.enabled == true)'
+      );
+    });
+
+    it('reports whether the analyst confirmed an enabled rule covers the gap', () => {
+      expect(emit?.coverage_confirmed).toContain(
+        'steps.confirm_coverage.output.response.approved == true'
+      );
     });
 
     it('separates "no decision made" from "no gap found"', () => {
@@ -192,7 +221,14 @@ describe('Detection Coverage worker', () => {
   it('reports an outcome flag for every action path', () => {
     const outputs = (workerDefinition.outputs ?? []).map((output) => output.name);
     expect(outputs).toEqual(
-      expect.arrayContaining(['verdict', 'existing_rule', 'rule_enabled', 'rule_installed'])
+      expect.arrayContaining([
+        'verdict',
+        'existing_rule',
+        'coverage_confirmed',
+        'rule_enabled',
+        'rule_installed',
+        'installed_not_enabled',
+      ])
     );
   });
 });
