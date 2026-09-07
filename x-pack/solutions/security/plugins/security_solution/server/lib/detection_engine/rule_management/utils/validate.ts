@@ -11,7 +11,7 @@ import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   RuleResponse,
   type RuleUpdateProps,
-  type SharedPatchRuleRequestBody,
+  type UnresolvedRulePatchProps,
 } from '../../../../../common/api/detection_engine';
 import { hasValidRuleType, type RuleParams } from '../../rule_schema';
 import { type BulkError, createBulkErrorObject } from '../../routes/utils';
@@ -57,7 +57,7 @@ export const validateNonCustomizableUpdateFields = (
 };
 
 export const validateNonCustomizablePatchFields = (
-  rulePatch: SharedPatchRuleRequestBody,
+  rulePatch: UnresolvedRulePatchProps,
   existingRule: RuleResponse
 ) => {
   // We don't allow non-customizable fields to be changed for prebuilt rules

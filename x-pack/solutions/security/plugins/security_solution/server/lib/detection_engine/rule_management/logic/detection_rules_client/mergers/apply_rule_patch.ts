@@ -38,7 +38,7 @@ import {
   ThreatMatchRulePatchFields,
   ThresholdRulePatchFields,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import type { SharedPatchRuleRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
+import type { UnresolvedRulePatchProps } from '../../../../../../../common/api/detection_engine/rule_management';
 import { validateThresholdBase } from '../../../../../../../common/utils/request_validation/threshold';
 import { validateThreatMapping } from '../../../../../../../common/utils/request_validation/indicator_match';
 import {
@@ -52,7 +52,7 @@ import { calculateRuleSource } from './rule_source/calculate_rule_source';
 interface ApplyRulePatchProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
-  rulePatch: SharedPatchRuleRequestBody;
+  rulePatch: UnresolvedRulePatchProps;
 }
 
 // eslint-disable-next-line complexity
@@ -274,7 +274,7 @@ const assertNoValidationErrors = (errors: string[]): void => {
 };
 
 export const patchTypeSpecificParams = (
-  params: SharedPatchRuleRequestBody,
+  params: UnresolvedRulePatchProps,
   existingRule: RuleResponse
 ): TypeSpecificResponse => {
   // Here we do the validation of patch params by rule type to ensure that the fields that are

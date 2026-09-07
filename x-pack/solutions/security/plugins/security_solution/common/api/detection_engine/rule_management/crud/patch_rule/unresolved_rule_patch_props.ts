@@ -9,7 +9,8 @@ import type { z } from '@kbn/zod/v4';
 import { SharedPatchProps } from '../../../model/rule_schema';
 
 /**
- * A PATCH rule request body with its type-independent (shared) props validated.
+ * A rule patch with its type-independent (shared) props validated. The rule type is not
+ * resolved yet, so type-specific fields are preserved as-is and validated once it is known.
  */
-export const SharedPatchRuleRequestBody = SharedPatchProps.loose();
-export type SharedPatchRuleRequestBody = z.infer<typeof SharedPatchRuleRequestBody>;
+export const UnresolvedRulePatchProps = SharedPatchProps.loose();
+export type UnresolvedRulePatchProps = z.infer<typeof UnresolvedRulePatchProps>;

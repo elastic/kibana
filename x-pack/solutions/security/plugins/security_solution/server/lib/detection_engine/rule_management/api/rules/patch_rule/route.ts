@@ -18,7 +18,7 @@ import {
 import { validateRuleResponseActions } from '../../../../../../endpoint/services';
 import type { PatchRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
-  SharedPatchRuleRequestBody,
+  UnresolvedRulePatchProps,
   validatePatchRuleRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
@@ -59,7 +59,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
             // bodies, so the type-specific union cannot be resolved until the existing rule is
             // fetched. Type-specific fields are preserved and validated further down the stack,
             // once the rule type is known.
-            body: buildRouteValidationWithZod(SharedPatchRuleRequestBody),
+            body: buildRouteValidationWithZod(UnresolvedRulePatchProps),
           },
         },
       },

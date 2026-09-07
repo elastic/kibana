@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { SharedPatchRuleRequestBody } from './patch_rule_request_body';
+import type { UnresolvedRulePatchProps } from './unresolved_rule_patch_props';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
-export const validatePatchRuleRequestBody = (rule: SharedPatchRuleRequestBody): string[] => {
+export const validatePatchRuleRequestBody = (rule: UnresolvedRulePatchProps): string[] => {
   return [...validateId(rule), ...validateTimelineId(rule), ...validateTimelineTitle(rule)];
 };
 
-const validateId = (rule: SharedPatchRuleRequestBody): string[] => {
+const validateId = (rule: UnresolvedRulePatchProps): string[] => {
   if (rule.id != null && rule.rule_id != null) {
     return ['both "id" and "rule_id" cannot exist, choose one or the other'];
   } else if (rule.id == null && rule.rule_id == null) {
@@ -24,7 +24,7 @@ const validateId = (rule: SharedPatchRuleRequestBody): string[] => {
   }
 };
 
-const validateTimelineId = (rule: SharedPatchRuleRequestBody): string[] => {
+const validateTimelineId = (rule: UnresolvedRulePatchProps): string[] => {
   if (rule.timeline_id != null) {
     if (rule.timeline_title == null) {
       return ['when "timeline_id" exists, "timeline_title" must also exist'];
@@ -37,7 +37,7 @@ const validateTimelineId = (rule: SharedPatchRuleRequestBody): string[] => {
   return [];
 };
 
-const validateTimelineTitle = (rule: SharedPatchRuleRequestBody): string[] => {
+const validateTimelineTitle = (rule: UnresolvedRulePatchProps): string[] => {
   if (rule.timeline_title != null) {
     if (rule.timeline_id == null) {
       return ['when "timeline_title" exists, "timeline_id" must also exist'];
