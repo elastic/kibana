@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isToolAction, isSystemCallableAction } from '@kbn/connector-specs';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import type { AgentConnector } from './agent_connectors';
 import { listAgentConnectors } from './agent_connectors';
@@ -50,21 +50,47 @@ const renderConnectorSection = (connector: AgentConnector): string => {
   const toolActions = Object.entries(spec.actions ?? {}).filter(([name]) =>
     isToolAction(spec, name)
   );
+  const systemActions = Object.entries(spec.actions ?? {}).filter(([name]) =>
+    isSystemCallableAction(spec, name)
+  );
 
   if (toolActions.length === 0) {
     lines.push('', '*No tool sub-actions available for this connector type.*');
-    return lines.join('\n');
+  } else {
+    for (const [name, action] of toolActions) {
+      lines.push('', `### ${name}`);
+      if (action.description) lines.push(action.description);
+      if (action.scope) lines.push(`Scope: ${action.scope}`);
+      try {
+        const paramSchema = formatSchemaForLlm(action.input);
+        if (paramSchema) lines.push(`Params schema: ${paramSchema}`);
+      } catch {
+        // formatSchemaForLlm may throw for complex schemas — skip gracefully
+      }
+    }
   }
 
-  for (const [name, action] of toolActions) {
-    lines.push('', `### ${name}`);
-    if (action.description) lines.push(action.description);
-    if (action.scope) lines.push(`Scope: ${action.scope}`);
-    try {
-      const paramSchema = formatSchemaForLlm(action.input);
-      if (paramSchema) lines.push(`Params schema: ${paramSchema}`);
-    } catch {
-      // formatSchemaForLlm may throw for complex schemas — skip gracefully
+  if (systemActions.length > 0) {
+    lines.push(
+      '',
+      '### System sub-actions (server-side use only)',
+      'These sub-actions return sensitive data and must not be passed directly to tools or stored in files.'
+    );
+    for (const [name] of systemActions) {
+      if (name === 'getToken') {
+        lines.push(
+          '',
+          `#### ${name}`,
+          'Returns the raw Bearer token for this connector. Use it to authenticate git or other CLI tools:',
+          '```bash',
+          `TOKEN=$(sandbox-cb --connector-id ${connector.id} --sub-action getToken | jq -r '.token')`,
+          `git clone "https://x-access-token:$TOKEN@github.com/org/repo"`,
+          '```',
+          'Never store or echo the token beyond the current shell command.'
+        );
+      } else {
+        lines.push('', `#### ${name}`);
+      }
     }
   }
 

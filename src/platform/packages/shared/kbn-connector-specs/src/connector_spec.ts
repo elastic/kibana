@@ -231,6 +231,13 @@ export type ActionScope = 'read' | 'write' | 'destroy';
 
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
+  /**
+   * When true, marks this action as callable by privileged server-side system integrations
+   * (e.g. sandbox connector callbacks) even though it is not exposed to the LLM as a tool.
+   * Implies `isTool: false`. Use for actions that return sensitive data (e.g. raw credentials)
+   * that must never be offered to the agent for direct invocation.
+   */
+  isSystemAction?: boolean;
   input: z.ZodSchema<TInput>;
   output?: z.ZodSchema<TOutput>;
   error?: z.ZodSchema<TError>;
@@ -383,4 +390,9 @@ export function getActionNames(connector: ConnectorSpec): string[] {
 
 export function isToolAction(connector: ConnectorSpec, actionName: string): boolean {
   return connector.actions[actionName]?.isTool ?? false;
+}
+
+/** Returns true for actions that are callable by privileged server-side integrations but not exposed to the LLM. */
+export function isSystemCallableAction(connector: ConnectorSpec, actionName: string): boolean {
+  return connector.actions[actionName]?.isSystemAction ?? false;
 }

@@ -6,7 +6,7 @@
  */
 
 import type { Logger, KibanaRequest } from '@kbn/core/server';
-import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
+import { getConnectorSpec, isToolAction, isSystemCallableAction } from '@kbn/connector-specs';
 import type { ConnectorCallbackRequest, ConnectorCallbackResult } from './grpc_client';
 import type { SandboxCallContext } from './tool_utils';
 import { handleElasticsearchCallback } from './elasticsearch_connector';
@@ -89,7 +89,11 @@ export const createConnectorCallbackHandler =
     } else {
       // Gate the sub-action via the connector spec (skipped for legacy connectors with no spec)
       const spec = getConnectorSpec(connector.actionTypeId);
-      if (spec !== undefined && !isToolAction(spec, cb.sub_action)) {
+      if (
+        spec !== undefined &&
+        !isToolAction(spec, cb.sub_action) &&
+        !isSystemCallableAction(spec, cb.sub_action)
+      ) {
         return {
           status: 'error',
           error_message:

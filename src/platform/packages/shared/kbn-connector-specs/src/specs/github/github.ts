@@ -706,6 +706,16 @@ export const GithubConnector: ConnectorSpec = {
         return callToolContent(ctx, input.name, input.arguments);
       },
     },
+
+    getToken: {
+      isTool: false,
+      isSystemAction: true,
+      scope: 'read',
+      description:
+        'Returns the raw Bearer token for this connector. For privileged server-side use only (e.g. git clone in the sandbox). Never exposed to the LLM.',
+      input: z.object({}),
+      handler: async (ctx) => ({ token: ctx.secrets?.token as string }),
+    },
   },
 
   test: {
