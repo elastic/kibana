@@ -255,11 +255,19 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.updated).to.be.greaterThan(0);
         });
 
-        it('should close alerts matched by a scriptless runtime field passed via runtime_mappings', async () => {
-          // Regression guard: confirms the runtime_mappings passthrough code path
-          // works for scriptless entries (no script → ES reads from _source by field
-          // name). This covers the base case that PR #288946 fixed via runtime_fields,
-          // now also covered through the new runtime_mappings param.
+        it('should close alerts matched by a _source-reading runtime field passed via runtime_mappings', async () => {
+          // Regression guard: confirms the runtime_mappings passthrough code path works
+          // for entries that read from _source (equivalent to a scriptless runtime field,
+          // but using a unique field name so ES cannot resolve it without runtime_mappings
+          // being applied — making the test fail under the old behavior).
+          //
+          // A truly scriptless runtime field (no script property at all) reads from
+          // _source by the field name. Using an existing indexed field name as the
+          // runtime field name would succeed even without runtime_mappings, making the
+          // test vacuous. Using a unique name with a script that explicitly reads from
+          // _source via params._source gives the same semantics while proving the param
+          // reaches ES: without runtime_mappings, the field is unknown and the term
+          // filter matches 0 docs.
           const rule = {
             ...getRuleForAlertTesting(['auditbeat-*']),
             query: 'process.executable: "/usr/bin/sudo"',
@@ -273,13 +281,22 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send({
               status: 'closed',
-              query: { term: { 'process.executable': '/usr/bin/sudo' } },
+              query: { term: { exec_from_source_rt: '/usr/bin/sudo' } },
               runtime_mappings: {
-                'process.executable': { type: 'keyword' },
+                exec_from_source_rt: {
+                  type: 'keyword',
+                  // Reads process.executable from _source — equivalent to what ES
+                  // does internally for a scriptless runtime field with that name.
+                  script: {
+                    source: "def v = params._source['process.executable']; if (v != null) emit(v);",
+                  },
+                },
               },
             })
             .expect(200);
 
+          // Without runtime_mappings reaching ES, exec_from_source_rt is an unknown
+          // field and the term filter matches 0 docs → updated would be 0.
           expect(body.updated).to.be.greaterThan(0);
         });
 
