@@ -18,6 +18,7 @@ import type {
   AiIndexFeedbackAnalysis,
   AiIndexProperties,
   CreateAiIndexResponse,
+  DeleteAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
@@ -108,3 +109,18 @@ export const putAiIndexFeedbackAnalysis = (
       body: JSON.stringify(feedbackAnalysis),
     }
   );
+
+interface DeleteAiIndexArgs {
+  aiIndexId: string;
+}
+
+/**
+ * Deletes an AI index. Only the entry is removed — backing indices are left untouched.
+ */
+export const deleteAiIndex = (
+  http: HttpStart,
+  { aiIndexId }: DeleteAiIndexArgs
+): Promise<DeleteAiIndexResponse> =>
+  http.delete<DeleteAiIndexResponse>(buildPath(aiIndexByIdPath, { aiIndexId }), {
+    version: AI_INDEX_API_VERSION,
+  });

@@ -11,6 +11,7 @@ import {
   useContentListItems,
   useContentListPhase,
   useContentListSearch,
+  useDeleteConfirmation,
 } from '@kbn/content-list-provider';
 import React from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
@@ -26,6 +27,7 @@ export const AiIndexCardGrid = () => {
   const phase = useContentListPhase();
   const { items, totalItems, hasNoResults } = useContentListItems();
   const { setQueryFromText } = useContentListSearch();
+  const { requestDelete, deleteModal } = useDeleteConfirmation();
 
   if (phase === 'initialLoad') {
     return <AiIndexListSkeleton />;
@@ -91,10 +93,12 @@ export const AiIndexCardGrid = () => {
               key={aiIndex.id}
               aiIndex={aiIndex}
               href={createContextEngineUrl(getAiIndexDetailPath(aiIndex.id))}
+              onDeleteClick={() => requestDelete([item])}
             />
           );
         })}
       </EuiFlexGrid>
+      {deleteModal}
     </>
   );
 };

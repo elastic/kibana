@@ -7,7 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { AiIndexCard } from './ai_index_card';
@@ -26,12 +26,13 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
 
 const renderAiIndexCard = (
   aiIndex: AiIndexHttpItem,
-  href = '/app/context_engine/ai_index/my-ai-index'
+  href = '/app/context_engine/ai_index/my-ai-index',
+  onDeleteClick = jest.fn()
 ) =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <AiIndexCard aiIndex={aiIndex} href={href} />
+        <AiIndexCard aiIndex={aiIndex} href={href} onDeleteClick={onDeleteClick} />
       </EuiProvider>
     </I18nProvider>
   );
@@ -126,5 +127,26 @@ describe('AiIndexCard', () => {
 
     expect(screen.getByTestId('contextAiIndexCardUpdated')).toHaveTextContent('Updated');
     expect(screen.queryByTestId('contextAiIndexCardManaged')).not.toBeInTheDocument();
+  });
+
+  it('calls onDeleteClick when the delete action is selected', () => {
+    const onDeleteClick = jest.fn();
+    renderAiIndexCard(buildAiIndex({ managed: false }), undefined, onDeleteClick);
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
+
+    expect(onDeleteClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the delete action when the AI index is managed', () => {
+    const onDeleteClick = jest.fn();
+    renderAiIndexCard(buildAiIndex({ managed: true }), undefined, onDeleteClick);
+
+    fireEvent.click(screen.getByTestId('contextAiIndexCardActionsButton'));
+
+    expect(screen.getByTestId('contextAiIndexCardDeleteAction')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('contextAiIndexCardDeleteAction'));
+    expect(onDeleteClick).not.toHaveBeenCalled();
   });
 });

@@ -20,6 +20,7 @@ import {
 } from './components/ai_index_list';
 import { CreateAiIndexButton } from './components/create_ai_index_button';
 import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
+import { useDeleteAiIndex } from './hooks/use_delete_ai_index';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
 import { useKibana } from './hooks/use_kibana';
 import {
@@ -105,6 +106,7 @@ const ContextLandingPageContent = ({
 export const ContextLandingPage = () => {
   const { services } = useKibana();
   const { findItems, hasCustomAiIndices, isLoading } = useListAiIndices();
+  const { deleteAiIndex } = useDeleteAiIndex();
 
   return (
     <ContentListClientProvider
@@ -112,6 +114,21 @@ export const ContextLandingPage = () => {
       core={services}
       labels={AI_INDEX_LIST_LABELS}
       findItems={findItems}
+      item={{
+        actions: {
+          delete: {
+            onBulkAction: async (items) => {
+              await Promise.all(items.map((item) => deleteAiIndex(item.id)));
+            },
+            restriction: (item) =>
+              item.managed
+                ? i18n.translate('xpack.contextEngine.landing.card.managedDeleteRestriction', {
+                    defaultMessage: "Managed AI Indexes can't be deleted.",
+                  })
+                : undefined,
+          },
+        },
+      }}
       features={{
         sorting: false,
         selection: false,
