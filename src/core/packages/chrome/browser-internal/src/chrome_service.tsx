@@ -26,7 +26,6 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SidebarService } from '@kbn/core-chrome-sidebar-internal';
 
 import { DocTitleService } from './services/doc_title';
-import { NavControlsService } from './services/nav_controls';
 import { NavLinksService } from './services/nav_links';
 import { ProjectNavigationService } from './services/project_navigation';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
@@ -68,7 +67,6 @@ export interface StartDeps {
 /** @internal */
 export class ChromeService {
   private readonly stop$ = new ReplaySubject<void>(1);
-  private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
@@ -140,7 +138,6 @@ export class ChromeService {
     });
 
     // 4. Start sub-services
-    const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();
@@ -174,7 +171,6 @@ export class ChromeService {
     const chrome = createChromeApi({
       state,
       services: {
-        navControls,
         navLinks,
         recentlyAccessed,
         docTitle,
@@ -192,7 +188,6 @@ export class ChromeService {
   }
 
   public stop() {
-    this.navControls.stop();
     this.navLinks.stop();
     this.projectNavigation.stop();
     this.sidebar.stop();
