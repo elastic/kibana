@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-
-const PILL_WIDTH = 72;
-const PILL_HEIGHT = 32;
+import { ATTACHMENT_PILL_WIDTH, ATTACHMENT_PILL_HEIGHT } from './image_upload_styles';
 
 const removeAriaLabel = i18n.translate(
   'xpack.agentBuilder.thumbnailAttachmentPill.removeAriaLabel',
@@ -48,9 +46,9 @@ export const ThumbnailAttachmentPill: React.FC<ThumbnailAttachmentPillProps> = (
     <div
       css={css`
         position: relative;
-        width: ${PILL_WIDTH}px;
-        height: ${PILL_HEIGHT}px;
-        aspect-ratio: ${PILL_WIDTH} / ${PILL_HEIGHT};
+        width: ${ATTACHMENT_PILL_WIDTH}px;
+        height: ${ATTACHMENT_PILL_HEIGHT}px;
+        aspect-ratio: ${ATTACHMENT_PILL_WIDTH} / ${ATTACHMENT_PILL_HEIGHT};
         border-radius: ${euiTheme.size.s};
         background-color: ${euiTheme.colors.backgroundBaseSubdued};
         box-shadow: 0 0 0 ${euiTheme.border.width.thin}
