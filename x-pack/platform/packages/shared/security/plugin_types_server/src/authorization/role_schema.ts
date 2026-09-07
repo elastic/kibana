@@ -88,6 +88,7 @@ const globalPrivilegeEntrySchema = schema.object(
     ),
     // Present on some built-in roles; currently empty in responses.
     role: schema.maybe(
+      // allowing unknowns in order that the content is preserved without needing to know the full schema
       schema.object({}, { meta: { description: 'Global role privileges.' }, unknowns: 'allow' })
     ),
     data_source: schema.maybe(schema.arrayOf(dataSourcePrivilegesEntrySchema, { maxSize: 1000 })),
