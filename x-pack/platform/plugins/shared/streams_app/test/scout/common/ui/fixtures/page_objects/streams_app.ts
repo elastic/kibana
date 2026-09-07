@@ -68,7 +68,6 @@ export class StreamsApp {
   // Streams layout
   public readonly streamsSourcesTable;
   public readonly streamsAddSourceButton;
-  public readonly streamsLayoutPipelinesPlaceholder;
   public readonly streamsDestinationsTable;
   public readonly streamsDestinationsSearch;
 
@@ -133,9 +132,6 @@ export class StreamsApp {
     // Streams layout locators
     this.streamsSourcesTable = this.page.testSubj.locator('streamsSourcesTable');
     this.streamsAddSourceButton = this.page.testSubj.locator('streamsAddSourceButton');
-    this.streamsLayoutPipelinesPlaceholder = this.page.testSubj.locator(
-      'streamsLayoutPipelinesPlaceholder'
-    );
     this.streamsDestinationsTable = this.page.testSubj.locator('streamsDestinationsTable');
     this.streamsDestinationsSearch = this.page.testSubj.locator('streamsDestinationsSearch');
   }

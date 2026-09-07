@@ -22,7 +22,13 @@ import { useWorkflowBottomBarState } from '@kbn/workflows-ui';
 const COMMAND_KEY = isMac ? '⌘' : 'Ctrl';
 const ALT_KEY = isMac ? '⌥' : 'Alt';
 
-const shortcuts: Array<{ label: string; keys: string[] }> = [
+interface KeyboardShortcut {
+  label: string;
+  keys: string[];
+  showInReadOnly?: boolean;
+}
+
+const shortcuts: KeyboardShortcut[] = [
   {
     label: i18n.translate('workflows.yamlEditor.shortcuts.run', {
       defaultMessage: 'Run workflow',
@@ -54,6 +60,13 @@ const shortcuts: Array<{ label: string; keys: string[] }> = [
     keys: [COMMAND_KEY, 'K'],
   },
   {
+    label: i18n.translate('workflows.yamlEditor.shortcuts.find', {
+      defaultMessage: 'Find',
+    }),
+    keys: [COMMAND_KEY, 'F'],
+    showInReadOnly: true,
+  },
+  {
     label: i18n.translate('workflows.yamlEditor.shortcuts.findAndReplace', {
       defaultMessage: 'Find & replace',
     }),
@@ -72,14 +85,20 @@ const shortcuts: Array<{ label: string; keys: string[] }> = [
     keys: [COMMAND_KEY, ALT_KEY, 'Shift', '↓'],
   },
 ];
+const readOnlyShortcuts = shortcuts.filter(({ showInReadOnly }) => showInReadOnly);
 
 const PANEL_CLASS = 'workflowKeyboardShortcutsPopoverPanel';
 const BUTTON_TEST_SUBJ = 'workflowYamlEditorKeyboardShortcutsButton';
 
-export function KeyboardShortcutsPopover() {
+interface KeyboardShortcutsPopoverProps {
+  isReadOnly: boolean;
+}
+
+export function KeyboardShortcutsPopover({ isReadOnly }: KeyboardShortcutsPopoverProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const popoverTitleId = useGeneratedHtmlId();
+  const visibleShortcuts = isReadOnly ? readOnlyShortcuts : shortcuts;
 
   const label = i18n.translate('workflows.yamlEditor.shortcuts.label', {
     defaultMessage: 'Keyboard shortcuts',
@@ -149,7 +168,7 @@ export function KeyboardShortcutsPopover() {
       </div>
       {/* Body */}
       <div css={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {shortcuts.map(({ label: shortcutLabel, keys }) => (
+        {visibleShortcuts.map(({ label: shortcutLabel, keys }) => (
           <div
             key={shortcutLabel}
             css={{
