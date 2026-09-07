@@ -26547,12 +26547,12 @@ mime-db@1.52.0:
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.52.0.tgz#bbabcdc02859f4987301c856e3387ce5ec43bf70"
   integrity sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg==
 
-mime-db@1.53.0, mime-db@^1.52.0:
+mime-db@1.53.0:
   version "1.53.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.53.0.tgz#3cb63cd820fc29896d9d4e8c32ab4fcd74ccb447"
   integrity sha512-oHlN/w+3MQ3rba9rqFr6V/ypF10LSkdwUysQL7GkXoTgIWeV+tcXGA852TBxH+gsh8UWoyhR1hKcoMJTuWflpg==
 
-"mime-db@>= 1.43.0 < 2", mime-db@^1.54.0:
+"mime-db@>= 1.43.0 < 2", mime-db@^1.52.0, mime-db@^1.54.0:
   version "1.54.0"
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.54.0.tgz#cddb3ee4f9c64530dff640236661d42cb6a314f5"
   integrity sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ==
@@ -32659,20 +32659,10 @@ terminal-link@^5.0.0:
     ansi-escapes "^7.0.0"
     supports-hyperlinks "^4.1.0"
 
-terser-webpack-plugin@5.6.1:
+terser-webpack-plugin@5.6.1, terser-webpack-plugin@^5.3.1, terser-webpack-plugin@^5.3.10:
   version "5.6.1"
   resolved "https://registry.yarnpkg.com/terser-webpack-plugin/-/terser-webpack-plugin-5.6.1.tgz#47bc41bd8b8fab8383b62ec763b7394829097e7b"
   integrity sha512-201R5j+sJpK8nFWwKVyNfZot8FaJbLZDq5evriVzbV1wDtSXDjRUDRfJzHpAaxFDMEhsZL1QkeqM61wgsS3KaQ==
-  dependencies:
-    "@jridgewell/trace-mapping" "^0.3.25"
-    jest-worker "^27.4.5"
-    schema-utils "^4.3.0"
-    terser "^5.31.1"
-
-terser-webpack-plugin@^5.3.1, terser-webpack-plugin@^5.3.10:
-  version "5.3.17"
-  resolved "https://registry.yarnpkg.com/terser-webpack-plugin/-/terser-webpack-plugin-5.3.17.tgz#75ea98876297fbb190d2fbb395e982582b859a67"
-  integrity sha512-YR7PtUp6GMU91BgSJmlaX/rS2lGDbAF7D+Wtq7hRO+MiljNmodYvqslzCFiYVAgW+Qoaaia/QUIP4lGXufjdZw==
   dependencies:
     "@jridgewell/trace-mapping" "^0.3.25"
     jest-worker "^27.4.5"
