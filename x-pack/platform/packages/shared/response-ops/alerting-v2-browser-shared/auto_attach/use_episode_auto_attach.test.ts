@@ -20,7 +20,8 @@ import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useEpisodeAutoAttach } from './use_episode_auto_attach';
 
 jest.mock('@kbn/core-di-browser');
-jest.mock('../common/episode_mappers', () => ({
+jest.mock('@kbn/alerting-v2-utils', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-utils'),
   alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
     ...(episode as Record<string, unknown>),
     __mapped: true,

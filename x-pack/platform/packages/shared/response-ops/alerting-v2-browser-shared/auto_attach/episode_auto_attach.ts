@@ -14,7 +14,7 @@ import {
   type AlertEpisode,
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
-import { alertEpisodeToEpisodeAttachment } from '../common/episode_mappers';
+import { alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
 
 export interface FocusedEpisode {

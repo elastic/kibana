@@ -12,9 +12,8 @@ import {
   type EpisodeAttachmentData,
   type RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
+import { parseEpisodeDataJson, alertEpisodeToEpisodeAttachment } from '@kbn/alerting-v2-utils';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { alertEpisodeToEpisodeAttachment } from '../common/episode_mappers';
 import { AddToChatButton } from './add_to_chat_button';
 import type { AttachmentConverter } from './attachment_converter';
 

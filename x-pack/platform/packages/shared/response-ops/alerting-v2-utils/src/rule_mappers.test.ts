@@ -39,20 +39,20 @@ describe('buildRulePayload', () => {
   it('passes through state_transition when provided', () => {
     const result = buildRulePayload({
       ...minimalData,
-      state_transition: { breach: { min_events: 1, lookback: '5m' } },
+      state_transition: { pending_count: 3, pending_timeframe: '5m' },
     });
 
-    expect(result.state_transition).toEqual({ breach: { min_events: 1, lookback: '5m' } });
+    expect(result.state_transition).toEqual({ pending_count: 3, pending_timeframe: '5m' });
   });
 
   it('includes optional fields only when present in data', () => {
     const result = buildRulePayload({
       ...minimalData,
-      recovery_strategy: { strategy: 'manual' },
+      recovery_strategy: 'no_breach',
       grouping: { fields: ['host.name'] },
     });
 
-    expect(result).toHaveProperty('recovery_strategy', { strategy: 'manual' });
+    expect(result).toHaveProperty('recovery_strategy', 'no_breach');
     expect(result).toHaveProperty('grouping', { fields: ['host.name'] });
     expect(result).not.toHaveProperty('no_data_strategy');
     expect(result).not.toHaveProperty('artifacts');

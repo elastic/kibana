@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-plugin'
-  - '@kbn/alerting-v2-constants'
   - '@kbn/alerting-v2-schemas'
   - '@kbn/alerting-v2-utils'
   - '@kbn/core'

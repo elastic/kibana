@@ -14,7 +14,7 @@ import {
 } from '@kbn/agent-builder-browser/attachments';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { buildRulePayload } from '../../../common/agent_builder/rule_mappers';
+import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import {
   RuleHeaderDescription,
