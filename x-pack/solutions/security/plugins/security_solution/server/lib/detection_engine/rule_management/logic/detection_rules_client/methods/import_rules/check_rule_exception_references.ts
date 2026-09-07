@@ -8,7 +8,7 @@ import type { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts
 
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine/rule_management';
 import { createRuleImportErrorObject } from './errors';
-import type { RuleImportErrorObject } from './types';
+import type { ImportRuleError } from './types';
 
 /**
  * Helper to check if all the exception lists referenced on a
@@ -27,9 +27,9 @@ export const checkRuleExceptionReferences = ({
 }: {
   rule: RuleToImport;
   existingLists: Record<string, ExceptionListSchema>;
-}): [RuleImportErrorObject[], ListArray] => {
+}): [ImportRuleError[], ListArray] => {
   let ruleExceptions: ListArray = [];
-  let errors: RuleImportErrorObject[] = [];
+  let errors: ImportRuleError[] = [];
   const { rule_id: ruleId } = rule;
   const exceptionLists = rule.exceptions_list ?? [];
 

@@ -56,6 +56,7 @@ import {
 import { sendRuleLifecycleTelemetryEvent } from './rule_lifecycle_telemetry';
 import {
   DETECTION_RULE_REVERT_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_INSTALL_EVENT,
 } from '../../../../telemetry/event_based/events';
 
@@ -239,7 +240,7 @@ export const createDetectionRulesClient = ({
 
     async importRules(args: ImportRulesArgs): Promise<ImportRulesResult> {
       return withSecuritySpan('DetectionRulesClient.importRules', async () => {
-        return importRules({
+        const result = await importRules({
           rules: args.rules,
           options: {
             overwriteRules: args.overwriteRules,
@@ -253,6 +254,19 @@ export const createDetectionRulesClient = ({
             mlAuthz,
           },
         });
+
+        if (analytics) {
+          for (const { telemetry } of result.successes) {
+            sendRuleLifecycleTelemetryEvent(
+              analytics,
+              DETECTION_RULE_IMPORT_EVENT,
+              telemetry,
+              logger
+            );
+          }
+        }
+
+        return result;
       });
     },
 

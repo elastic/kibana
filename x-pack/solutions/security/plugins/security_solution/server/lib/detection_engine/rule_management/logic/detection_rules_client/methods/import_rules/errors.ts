@@ -6,7 +6,7 @@
  */
 
 import { has } from 'lodash';
-import type { RuleImportErrorObject, RuleImportErrorType } from './types';
+import type { ImportRuleError, RuleImportErrorType } from './types';
 
 export const createRuleImportErrorObject = ({
   ruleId,
@@ -16,7 +16,7 @@ export const createRuleImportErrorObject = ({
   ruleId: string;
   message: string;
   type?: RuleImportErrorType;
-}): RuleImportErrorObject => ({
+}): ImportRuleError => ({
   error: {
     ruleId,
     message,
@@ -24,7 +24,7 @@ export const createRuleImportErrorObject = ({
   },
 });
 
-export const isRuleImportError = (obj: unknown): obj is RuleImportErrorObject =>
+export const isRuleImportError = (obj: unknown): obj is ImportRuleError =>
   has(obj, 'error') &&
   has(obj, 'error.ruleId') &&
   has(obj, 'error.type') &&

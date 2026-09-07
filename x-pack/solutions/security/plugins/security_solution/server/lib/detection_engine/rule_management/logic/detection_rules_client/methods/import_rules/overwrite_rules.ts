@@ -18,7 +18,12 @@ import { toggleRuleEnabledOnUpdate } from '../../utils';
 import { createRuleImportErrorObject, isRuleImportError } from './errors';
 import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { RULE_IMPORT_BULK_UPDATE_CONCURRENCY } from '../../../../api/constants';
-import type { ImportRuleSuccess, ImportableRuleData, RuleImportErrorObject } from './types';
+import type {
+  ImportRuleSuccess,
+  ImportRuleError,
+  ImportableRuleData,
+  ImportRulesResult,
+} from './types';
 
 interface OverwriteRulesParams {
   rules: ImportableRuleData[];
@@ -37,18 +42,15 @@ export async function overwriteRules({
   rules,
   existingRules,
   deps,
-}: OverwriteRulesParams): Promise<Array<ImportRuleSuccess | RuleImportErrorObject>> {
+}: OverwriteRulesParams): Promise<ImportRulesResult> {
   const { actionsClient, rulesClient, savedObjectsClient, changeTracking } = deps;
   const prebuiltRuleAssetClient = createPrebuiltRuleAssetsClient(savedObjectsClient);
+  const successes: ImportRuleSuccess[] = [];
+  const errors: ImportRuleError[] = [];
 
-  return pMap(
+  await pMap(
     rules,
-    async ({
-      rule,
-      immutable,
-      ruleSource,
-      exceptionsList,
-    }): Promise<ImportRuleSuccess | RuleImportErrorObject> => {
+    async ({ rule, immutable, ruleSource, exceptionsList }) => {
       try {
         const existingRule = existingRules[rule.rule_id];
         let ruleWithUpdates = await applyRuleUpdate({
@@ -73,18 +75,27 @@ export async function overwriteRules({
 
         await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleWithUpdates);
 
-        return { rule_id: updatedRule.params.ruleId };
-      } catch (err) {
-        if (isRuleImportError(err)) {
-          return err;
-        }
-
-        return createRuleImportErrorObject({
-          ruleId: rule.rule_id,
-          message: err?.message ?? 'unknown error',
+        successes.push({
+          rule_id: updatedRule.params.ruleId,
+          telemetry: {
+            id: existingRule.id,
+            type: rule.type,
+            rule_source: ruleSource,
+          },
         });
+      } catch (err) {
+        errors.push(
+          isRuleImportError(err)
+            ? err
+            : createRuleImportErrorObject({
+                ruleId: rule.rule_id,
+                message: err?.message ?? 'unknown error',
+              })
+        );
       }
     },
     { concurrency: RULE_IMPORT_BULK_UPDATE_CONCURRENCY }
   );
+
+  return { successes, errors };
 }

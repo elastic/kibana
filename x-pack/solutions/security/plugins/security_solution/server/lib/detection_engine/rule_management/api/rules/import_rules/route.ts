@@ -20,12 +20,7 @@ import {
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
-import {
-  buildSiemResponse,
-  createBulkErrorObject,
-  isBulkError,
-  isImportRegular,
-} from '../../../../routes/utils';
+import { buildSiemResponse, createBulkErrorObject } from '../../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
 import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
@@ -184,7 +179,7 @@ export const importRulesRoute = (
                 ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
-          const importRuleResponse = await importRules({
+          const { successes, errors: importErrors } = await importRules({
             rules: validatedResponseActionsRules,
             changeTracking: {
               action: SecurityRuleChangeTrackingAction.ruleImport,
@@ -203,7 +198,6 @@ export const importRulesRoute = (
               message: error.message,
             })
           );
-          const importErrors = importRuleResponse.filter(isBulkError);
           const errors = [
             ...parseErrors,
             ...duplicateIdErrors,
@@ -211,14 +205,6 @@ export const importRulesRoute = (
             ...missingActionErrors,
             ...responseActionsErrors,
           ];
-
-          const successes = importRuleResponse.filter((resp) => {
-            if (isImportRegular(resp)) {
-              return resp.status_code === 200;
-            } else {
-              return false;
-            }
-          });
 
           const importRulesResponse: ImportRulesResponse = {
             success: errors.length === 0,

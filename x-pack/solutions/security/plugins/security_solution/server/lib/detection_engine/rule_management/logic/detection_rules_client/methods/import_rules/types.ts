@@ -10,13 +10,16 @@ import type {
   RuleToImport,
   ValidatedRuleToImport,
 } from '../../../../../../../../common/api/detection_engine';
+import type { RuleLifecycleTelemetryData } from '../../rule_lifecycle_telemetry';
 
-export interface ImportRuleSuccess {
+export type ImportRuleSuccess = {
   rule_id: string;
-}
+  telemetry: RuleLifecycleTelemetryData;
+};
 
 export interface ImportRulesResult {
-  responses: Array<ImportRuleSuccess | RuleImportErrorObject>;
+  successes: ImportRuleSuccess[];
+  errors: ImportRuleError[];
 }
 
 export type RuleImportErrorType = 'conflict' | 'unknown';
@@ -27,7 +30,7 @@ export type RuleImportErrorType = 'conflict' | 'unknown';
  *
  * NOTE that this does not inherit from Error
  */
-export interface RuleImportErrorObject {
+export interface ImportRuleError {
   error: {
     ruleId: string;
     message: string;

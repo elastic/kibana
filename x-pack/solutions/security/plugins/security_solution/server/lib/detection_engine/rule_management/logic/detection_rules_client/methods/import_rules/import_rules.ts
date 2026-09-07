@@ -11,7 +11,7 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../../../common/api/detection_engine';
 import type { MlAuthz } from '../../../../../../machine_learning/authz';
-import { createRuleImportErrorObject, isRuleImportError } from './errors';
+import { createRuleImportErrorObject } from './errors';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
 import { fetchPrebuiltImportContext } from './fetch_prebuilt_import_context';
 import { findInstalledRulesByRuleIds } from './find_installed_rules_by_rule_ids';
@@ -20,7 +20,7 @@ import { validateRulesToImport } from './validate_rules_to_import';
 import { splitIntoGroups } from './split_into_groups';
 import { overwriteRules } from './overwrite_rules';
 import { createRules } from './create_rules';
-import type { ImportRuleSuccess, ImportRulesResult, RuleImportErrorObject } from './types';
+import type { ImportRuleSuccess, ImportRulesResult, ImportRuleError } from './types';
 
 interface ImportRulesParams {
   rules: RuleToImport[];
@@ -49,10 +49,11 @@ export async function importRules({
   const { actionsClient, rulesClient, savedObjectsClient, mlAuthz } = deps;
 
   if (rules.length === 0) {
-    return { responses: [] };
+    return { successes: [], errors: [] };
   }
 
-  const responses: Array<ImportRuleSuccess | RuleImportErrorObject> = [];
+  const successes: ImportRuleSuccess[] = [];
+  const errors: ImportRuleError[] = [];
 
   // Contain any throw so one batch can't reject and abort the multi-batch loop mid-import.
   try {
@@ -72,10 +73,10 @@ export async function importRules({
         prebuiltContext,
       },
     });
-    responses.push(...validationErrors);
+    errors.push(...validationErrors);
 
     if (importableRules.length === 0) {
-      return { responses };
+      return { successes, errors };
     }
 
     const ruleGroups = splitIntoGroups({
@@ -85,7 +86,7 @@ export async function importRules({
     });
 
     for (const { rule } of ruleGroups.conflicts) {
-      responses.push(
+      errors.push(
         createRuleImportErrorObject({
           ruleId: rule.rule_id,
           type: 'conflict',
@@ -95,47 +96,48 @@ export async function importRules({
     }
 
     if (ruleGroups.toOverwrite.length > 0) {
-      responses.push(
-        ...(await overwriteRules({
-          rules: ruleGroups.toOverwrite,
-          existingRules,
-          deps: {
-            actionsClient,
-            rulesClient,
-            savedObjectsClient,
-            changeTracking: importOptions.changeTracking,
-          },
-        }))
-      );
+      const overwritten = await overwriteRules({
+        rules: ruleGroups.toOverwrite,
+        existingRules,
+        deps: {
+          actionsClient,
+          rulesClient,
+          savedObjectsClient,
+          changeTracking: importOptions.changeTracking,
+        },
+      });
+      successes.push(...overwritten.successes);
+      errors.push(...overwritten.errors);
     }
 
     if (ruleGroups.toCreate.length > 0) {
-      responses.push(
-        ...(await createRules({
-          rules: ruleGroups.toCreate,
-          options: {
-            allowMissingConnectorSecrets: importOptions.allowMissingConnectorSecrets,
-            changeTracking: importOptions.changeTracking,
-          },
-          deps: {
-            actionsClient,
-            rulesClient,
-          },
-        }))
-      );
+      const created = await createRules({
+        rules: ruleGroups.toCreate,
+        options: {
+          allowMissingConnectorSecrets: importOptions.allowMissingConnectorSecrets,
+          changeTracking: importOptions.changeTracking,
+        },
+        deps: {
+          actionsClient,
+          rulesClient,
+        },
+      });
+      successes.push(...created.successes);
+      errors.push(...created.errors);
     }
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    const responded = new Set(
-      responses.map((r) => (isRuleImportError(r) ? r.error.ruleId : r.rule_id))
-    );
+    const responded = new Set([
+      ...successes.map((item) => item.rule_id),
+      ...errors.map((item) => item.error.ruleId),
+    ]);
 
     for (const rule of rules) {
       if (!responded.has(rule.rule_id)) {
-        responses.push(createRuleImportErrorObject({ ruleId: rule.rule_id, message }));
+        errors.push(createRuleImportErrorObject({ ruleId: rule.rule_id, message }));
       }
     }
   }
 
-  return { responses };
+  return { successes, errors };
 }

@@ -11,16 +11,18 @@ import type { BulkCreateRulesParams, RulesClient } from '@kbn/alerting-plugin/se
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../../common';
 import type { SecurityRuleChangeTracking } from '../../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
-import type {
-  RuleObjectId,
-  RuleSignatureId,
-} from '../../../../../../../../common/api/detection_engine';
+import type { RuleObjectId } from '../../../../../../../../common/api/detection_engine';
 import type { RuleParams } from '../../../../../rule_schema';
 import { convertRuleResponseToAlertingRule } from '../../converters/convert_rule_response_to_alerting_rule';
 import { applyRuleDefaults } from '../../mergers/apply_rule_defaults';
 import { createRuleImportErrorObject } from './errors';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../../../api/constants';
-import type { ImportRuleSuccess, RuleImportErrorObject, ImportableRuleData } from './types';
+import type {
+  ImportRuleSuccess,
+  ImportRuleError,
+  ImportableRuleData,
+  ImportRulesResult,
+} from './types';
 
 interface CreateRulesParams {
   rules: ImportableRuleData[];
@@ -38,18 +40,17 @@ interface CreateRulesDeps {
   rulesClient: RulesClient;
 }
 
-type CreateRulesResult = Array<ImportRuleSuccess | RuleImportErrorObject>;
-
 export async function createRules({
   rules,
   options,
   deps,
-}: CreateRulesParams): Promise<CreateRulesResult> {
+}: CreateRulesParams): Promise<ImportRulesResult> {
   const { actionsClient, rulesClient } = deps;
 
   const bulkInputs: BulkCreateRulesParams<RuleParams>['rules'] = [];
-  const ruleIdsMap = new Map<RuleObjectId, RuleSignatureId>();
-  const result: CreateRulesResult = [];
+  const pending = new Map<RuleObjectId, ImportRuleSuccess>();
+  const successes: ImportRuleSuccess[] = [];
+  const errors: ImportRuleError[] = [];
 
   for (const { rule, immutable, ruleSource, exceptionsList } of rules) {
     const id = uuidv4();
@@ -74,9 +75,16 @@ export async function createRules({
         options: { id },
         allowMissingConnectorSecrets: options.allowMissingConnectorSecrets,
       });
-      ruleIdsMap.set(id, rule.rule_id);
+      pending.set(id, {
+        rule_id: rule.rule_id,
+        telemetry: {
+          id,
+          type: rule.type,
+          rule_source: ruleSource,
+        },
+      });
     } catch (e) {
-      result.push(
+      errors.push(
         createRuleImportErrorObject({
           ruleId: rule.rule_id,
           message: e instanceof Error ? e.message : String(e),
@@ -86,7 +94,7 @@ export async function createRules({
   }
 
   if (bulkInputs.length === 0) {
-    return result;
+    return { successes, errors };
   }
 
   const { successfulIds, errors: bulkErrors } = await rulesClient.bulkCreateRules<RuleParams>({
@@ -96,25 +104,25 @@ export async function createRules({
   });
 
   for (const id of successfulIds) {
-    const ruleId = ruleIdsMap.get(id);
+    const created = pending.get(id);
 
-    if (ruleId != null) {
-      result.push({ rule_id: ruleId });
+    if (created != null) {
+      successes.push(created);
     }
   }
 
   for (const err of bulkErrors) {
-    const ruleId = ruleIdsMap.get(err.rule.id);
+    const failed = pending.get(err.rule.id);
 
-    if (ruleId != null) {
-      result.push(
+    if (failed != null) {
+      errors.push(
         createRuleImportErrorObject({
-          ruleId,
+          ruleId: failed.rule_id,
           message: err.message,
         })
       );
     }
   }
 
-  return result;
+  return { successes, errors };
 }

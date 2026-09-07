@@ -8,11 +8,10 @@
 import { chunk } from 'lodash/fp';
 import type { SecurityRuleChangeTracking } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
-import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
+import { type BulkError, createBulkErrorObject } from '../../../routes/utils';
 import type {
   IDetectionRulesClient,
-  ImportRuleSuccess,
-  RuleImportErrorObject,
+  ImportRuleError,
 } from '../detection_rules_client/detection_rules_client_interface';
 import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../api/constants';
 
@@ -34,41 +33,34 @@ export const importRules = async ({
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   allowMissingConnectorSecrets?: boolean;
-}): Promise<ImportRuleResponse[]> => {
-  const response: ImportRuleResponse[] = [];
-
+}): Promise<{ successes: Array<{ rule_id: string }>; errors: BulkError[] }> => {
   if (rules.length === 0) {
-    return response;
+    return { successes: [], errors: [] };
   }
 
+  const successes: Array<{ rule_id: string }> = [];
+  const errors: BulkError[] = [];
+
   for (const batch of chunk(RULE_IMPORT_BULK_CREATE_BATCH_SIZE, rules)) {
-    const { responses } = await detectionRulesClient.importRules({
+    const result = await detectionRulesClient.importRules({
       allowMissingConnectorSecrets,
       overwriteRules,
       rules: batch,
       changeTracking,
     });
-    response.push(...responses.map(toImportRuleResponse));
+    successes.push(...result.successes.map(({ rule_id }) => ({ rule_id })));
+    errors.push(...result.errors.map(toErrorResponse));
   }
 
-  return response;
+  return { successes, errors };
 };
 
-const toImportRuleResponse = (
-  response: ImportRuleSuccess | RuleImportErrorObject
-): ImportRuleResponse => {
-  if ('error' in response) {
-    const { ruleId, message, type } = response.error;
+const toErrorResponse = (item: ImportRuleError): BulkError => {
+  const { ruleId, message, type } = item.error;
 
-    return createBulkErrorObject({
-      message,
-      statusCode: type === 'conflict' ? 409 : 400,
-      ruleId,
-    });
-  }
-
-  return {
-    rule_id: response.rule_id,
-    status_code: 200,
-  };
+  return createBulkErrorObject({
+    message,
+    statusCode: type === 'conflict' ? 409 : 400,
+    ruleId,
+  });
 };

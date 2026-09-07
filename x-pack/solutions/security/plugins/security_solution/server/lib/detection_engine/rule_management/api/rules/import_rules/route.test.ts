@@ -64,7 +64,17 @@ describe.skip('Import rules route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     clients.detectionRulesClient.importRules.mockResolvedValue({
-      responses: [{ rule_id: 'rule-1' }],
+      successes: [
+        {
+          rule_id: 'rule-1',
+          telemetry: {
+            id: 'id-rule-1',
+            type: 'query',
+            rule_source: { type: 'internal' },
+          },
+        },
+      ],
+      errors: [],
     });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
@@ -109,7 +119,8 @@ describe.skip('Import rules route', () => {
   describe('unhappy paths', () => {
     test('returns a 403 error object if ML Authz fails', async () => {
       clients.detectionRulesClient.importRules.mockResolvedValueOnce({
-        responses: [
+        successes: [],
+        errors: [
           createRuleImportErrorObject({ ruleId: 'rule-1', message: 'mocked validation message' }),
         ],
       });
@@ -164,7 +175,10 @@ describe.skip('Import rules route', () => {
 
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
-        clients.detectionRulesClient.importRules.mockResolvedValueOnce({ responses: [] });
+        clients.detectionRulesClient.importRules.mockResolvedValueOnce({
+          successes: [],
+          errors: [],
+        });
         clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
           isRulesCustomizationEnabled: true,
         });
@@ -238,7 +252,8 @@ describe.skip('Import rules route', () => {
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // extant rule
         clients.detectionRulesClient.importRules.mockResolvedValue({
-          responses: [
+          successes: [],
+          errors: [
             createRuleImportErrorObject({
               ruleId: 'rule-1',
               type: 'conflict',
@@ -459,7 +474,8 @@ describe.skip('Import rules route', () => {
 
       test('returns with reported conflict if `overwrite` is set to `false`', async () => {
         clients.detectionRulesClient.importRules.mockResolvedValueOnce({
-          responses: [
+          successes: [],
+          errors: [
             createRuleImportErrorObject({
               ruleId: 'rule-1',
               type: 'conflict',

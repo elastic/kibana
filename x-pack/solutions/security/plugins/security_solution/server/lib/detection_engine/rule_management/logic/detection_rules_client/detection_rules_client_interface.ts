@@ -25,10 +25,10 @@ import type { RuleAlertType } from '../../../rule_schema';
 import type {
   ImportRuleSuccess,
   ImportRulesResult,
-  RuleImportErrorObject,
+  ImportRuleError,
 } from './methods/import_rules/types';
 
-export type { ImportRuleSuccess, ImportRulesResult, RuleImportErrorObject };
+export type { ImportRuleSuccess, ImportRulesResult, ImportRuleError };
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;

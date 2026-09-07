@@ -21,7 +21,7 @@ describe('importRules', () => {
     jest.clearAllMocks();
 
     detectionRulesClient = detectionRulesClientMock.create();
-    detectionRulesClient.importRules.mockResolvedValue({ responses: [] });
+    detectionRulesClient.importRules.mockResolvedValue({ successes: [], errors: [] });
     ruleToImport = getImportRulesSchemaMock();
   });
 
@@ -32,7 +32,7 @@ describe('importRules', () => {
       detectionRulesClient,
     });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual({ successes: [], errors: [] });
   });
 
   it('sends all rules within a single batch to one importRules call', async () => {
@@ -41,7 +41,21 @@ describe('importRules', () => {
     const r3 = { ...ruleToImport, rule_id: 'r3' };
 
     detectionRulesClient.importRules.mockResolvedValueOnce({
-      responses: [{ rule_id: 'r1' }, { rule_id: 'r2' }, { rule_id: 'r3' }],
+      successes: [
+        {
+          rule_id: 'r1',
+          telemetry: { id: 'id-r1', type: 'query', rule_source: { type: 'internal' } },
+        },
+        {
+          rule_id: 'r2',
+          telemetry: { id: 'id-r2', type: 'query', rule_source: { type: 'internal' } },
+        },
+        {
+          rule_id: 'r3',
+          telemetry: { id: 'id-r3', type: 'query', rule_source: { type: 'internal' } },
+        },
+      ],
+      errors: [],
     });
 
     const result = await importRules({
@@ -53,11 +67,10 @@ describe('importRules', () => {
     expect(detectionRulesClient.importRules).toHaveBeenCalledTimes(1);
     const args = detectionRulesClient.importRules.mock.calls[0][0];
     expect(args.rules.map((r) => r.rule_id)).toEqual(['r1', 'r2', 'r3']);
-    expect(result).toEqual([
-      { rule_id: 'r1', status_code: 200 },
-      { rule_id: 'r2', status_code: 200 },
-      { rule_id: 'r3', status_code: 200 },
-    ]);
+    expect(result).toEqual({
+      successes: [{ rule_id: 'r1' }, { rule_id: 'r2' }, { rule_id: 'r3' }],
+      errors: [],
+    });
   });
 
   it('chunks the outer loop at RULE_IMPORT_BULK_CREATE_BATCH_SIZE', async () => {
@@ -67,7 +80,7 @@ describe('importRules', () => {
       rule_id: `r${i}`,
     }));
 
-    detectionRulesClient.importRules.mockResolvedValue({ responses: [] });
+    detectionRulesClient.importRules.mockResolvedValue({ successes: [], errors: [] });
 
     await importRules({
       rules: manyRules,
@@ -83,9 +96,14 @@ describe('importRules', () => {
 
   it('maps per-rule errors from importRules to 4xx import responses', async () => {
     detectionRulesClient.importRules.mockResolvedValueOnce({
-      responses: [
+      successes: [
+        {
+          rule_id: 'rule-b',
+          telemetry: { id: 'id-rule-b', type: 'query', rule_source: { type: 'internal' } },
+        },
+      ],
+      errors: [
         createRuleImportErrorObject({ ruleId: 'rule-a', message: 'boom' }),
-        { rule_id: 'rule-b' },
         createRuleImportErrorObject({
           ruleId: 'rule-c',
           message: 'conflict',
@@ -100,10 +118,12 @@ describe('importRules', () => {
       detectionRulesClient,
     });
 
-    expect(result).toEqual([
-      { error: { message: 'boom', status_code: 400 }, rule_id: 'rule-a' },
-      { rule_id: 'rule-b', status_code: 200 },
-      { error: { message: 'conflict', status_code: 409 }, rule_id: 'rule-c' },
-    ]);
+    expect(result).toEqual({
+      successes: [{ rule_id: 'rule-b' }],
+      errors: [
+        { error: { message: 'boom', status_code: 400 }, rule_id: 'rule-a' },
+        { error: { message: 'conflict', status_code: 409 }, rule_id: 'rule-c' },
+      ],
+    });
   });
 });

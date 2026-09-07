@@ -18,7 +18,7 @@ import { createRuleImportErrorObject } from './errors';
 import { calculateRuleSourceForImport } from './calculate_rule_source_for_import';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import { validateMlAuth } from '../../utils';
-import type { ImportableRuleData, RuleImportErrorObject } from './types';
+import type { ImportableRuleData, ImportRuleError } from './types';
 
 interface ValidateRulesToImportParams {
   rules: RuleToImport[];
@@ -34,7 +34,7 @@ interface ValidateRulesToImportDeps {
 
 interface ValidateRulesToImportResult {
   importableRules: ImportableRuleData[];
-  errors: RuleImportErrorObject[];
+  errors: ImportRuleError[];
 }
 
 export async function validateRulesToImport({
@@ -46,7 +46,7 @@ export async function validateRulesToImport({
   const { prebuiltContext, mlAuthz } = deps;
 
   const importableRules: ImportableRuleData[] = [];
-  const errors: RuleImportErrorObject[] = [];
+  const errors: ImportRuleError[] = [];
 
   for (const rule of rules) {
     const isKnownPrebuiltRule = prebuiltContext.availableRuleAssetIds.has(rule.rule_id);
@@ -89,7 +89,7 @@ export async function validateRulesToImport({
   return { importableRules, errors };
 }
 
-function missingVersionError(ruleId: string): RuleImportErrorObject {
+function missingVersionError(ruleId: string): ImportRuleError {
   return createRuleImportErrorObject({
     ruleId,
     message: i18n.translate(
