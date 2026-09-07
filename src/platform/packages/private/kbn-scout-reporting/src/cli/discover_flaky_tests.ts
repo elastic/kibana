@@ -74,17 +74,21 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-const TITLE_COL_WIDTH = 64;
-const FILE_COL_WIDTH = 60;
+const TITLE_COL_WIDTH = 50;
+const FILE_COL_WIDTH = 46;
+const OWNERS_COL_WIDTH = 34;
 
-// cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
-const wrapPath = (filePath: string, width: number): string => {
+/**
+ * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/` and
+ * owner handles on `-` ourselves, keeping the separator at the end of the broken line.
+ */
+const wrapOn = (text: string, separator: string, width: number): string => {
   const lines: string[] = [];
   let current = '';
-  for (const segment of filePath.split('/')) {
-    const candidate = current ? `${current}/${segment}` : segment;
+  for (const segment of text.split(separator)) {
+    const candidate = current ? `${current}${separator}${segment}` : segment;
     if (candidate.length > width && current) {
-      lines.push(`${current}/`);
+      lines.push(`${current}${separator}`);
       current = segment;
     } else {
       current = candidate;
@@ -93,6 +97,9 @@ const wrapPath = (filePath: string, width: number): string => {
   lines.push(current);
   return lines.join('\n');
 };
+
+// cell padding takes 2 columns and a broken line ends in the separator
+const contentWidth = (colWidth: number): number => colWidth - 3;
 
 const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
   const groups = new Map<string, FlakyTestEntry[]>();
@@ -103,16 +110,17 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests one per row, with the file cell spanning the rows of its tests
- * (in order of first appearance) so whole-suite failures stand out.
+ * Renders the top-ranked tests one per row. File, framework and owners are per-file, so their
+ * cells span the rows of that file's tests (in order of first appearance) and whole-suite
+ * failures stand out.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
   all: readonly FlakyTestEntry[]
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Fail rate', 'Test', 'File'],
-    colWidths: [null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
+    head: ['#', 'Failed builds', 'Fail rate', 'Test', 'File', 'Framework', 'Owners'],
+    colWidths: [null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -121,17 +129,25 @@ const buildTopFlakyTable = (
   for (const [filePath, entries] of groupByFile(top)) {
     const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const fileCell: CliTable3.Cell = {
-      rowSpan: entries.length,
-      content: [
-        // cell padding takes 2 columns and a broken line ends in `/`
-        wrapPath(filePath, FILE_COL_WIDTH - 3),
-        `[${framework}] ${owners.join(', ') || '-'}`,
-        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    };
+    const rowSpan = entries.length;
+    const fileCells: CliTable3.Cell[] = [
+      {
+        rowSpan,
+        content: [
+          wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
+          notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      },
+      { rowSpan, content: framework },
+      {
+        rowSpan,
+        content:
+          owners.map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH))).join('\n') ||
+          '-',
+      },
+    ];
 
     entries.forEach((entry, index) => {
       rank += 1;
@@ -140,7 +156,7 @@ const buildTopFlakyTable = (
         `${entry.failedBuilds}/${entry.builds}`,
         `${(entry.buildFailRate * 100).toFixed(1)}%`,
         entry.title,
-        ...(index === 0 ? [fileCell] : []),
+        ...(index === 0 ? fileCells : []),
       ]);
     });
   }
