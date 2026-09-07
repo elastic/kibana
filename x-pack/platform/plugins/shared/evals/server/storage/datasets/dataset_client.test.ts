@@ -763,6 +763,80 @@ describe('DatasetClient', () => {
     );
   });
 
+  it('copies a dataset with new identifiers', async () => {
+    const { client, datasetsStorage } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+      tags: ['source-tag'],
+      maturity: 'golden',
+    });
+    await client.addExamples(source.id, [baseExampleA, baseExampleB]);
+    const sourceBeforeCopy = await client.get(source.id);
+    (datasetsStorage.client.index as jest.Mock).mockClear();
+
+    const copy = await client.copy(source.id, { name: 'copied-dataset' });
+    const sourceAfterCopy = await client.get(source.id);
+
+    expect(copy).toBeDefined();
+    expect(copy?.id).not.toBe(source.id);
+    expect(copy).toMatchObject({
+      name: 'copied-dataset',
+      description: 'Source description',
+      tags: ['source-tag'],
+      maturity: 'golden',
+      examples_count: 2,
+    });
+    expect(
+      copy?.examples.map(({ input, output, metadata }) => ({ input, output, metadata }))
+    ).toEqual(
+      sourceBeforeCopy?.examples.map(({ input, output, metadata }) => ({ input, output, metadata }))
+    );
+    copy?.examples.forEach(({ id }, index) => {
+      expect(id).not.toBe(sourceBeforeCopy?.examples[index].id);
+    });
+    expect(sourceAfterCopy?.updated_at).toBe(sourceBeforeCopy?.updated_at);
+    expect(sourceAfterCopy?.examples_count).toBe(sourceBeforeCopy?.examples_count);
+    expect(datasetsStorage.client.index).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: source.id })
+    );
+  });
+
+  it('uses an overridden description when copying a dataset', async () => {
+    const { client } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+    });
+
+    const copy = await client.copy(source.id, {
+      name: 'copied-dataset',
+      description: 'Copy description',
+    });
+
+    expect(copy?.description).toBe('Copy description');
+  });
+
+  it('throws DatasetAlreadyExistsError when copying with the source dataset name', async () => {
+    const { client } = createClient();
+    const source = await client.create({
+      name: 'source-dataset',
+      description: 'Source description',
+    });
+
+    await expect(client.copy(source.id, { name: source.name })).rejects.toThrow(
+      DatasetAlreadyExistsError
+    );
+  });
+
+  it('returns undefined when copying a missing dataset', async () => {
+    const { client } = createClient();
+
+    await expect(
+      client.copy('missing-dataset', { name: 'copied-dataset' })
+    ).resolves.toBeUndefined();
+  });
+
   it('upsert diffs examples and reports added removed unchanged', async () => {
     const { client } = createClient();
 

@@ -395,6 +395,30 @@ export class DatasetClient {
     };
   }
 
+  async copy(
+    sourceDatasetId: string,
+    { name, description }: { name: string; description?: string }
+  ): Promise<DatasetWithExamples | undefined> {
+    const sourceDataset = await this.get(sourceDatasetId);
+    if (!sourceDataset) {
+      return undefined;
+    }
+
+    const examples = sourceDataset.examples.map(({ input, output, metadata }) => ({
+      input,
+      output,
+      metadata,
+    }));
+
+    return this.create({
+      name,
+      description: description ?? sourceDataset.description,
+      tags: sourceDataset.tags,
+      maturity: sourceDataset.maturity,
+      examples,
+    });
+  }
+
   /**
    * Whether a dataset already holds `name` in any space the new one would show
    * up in. An id only encodes the space creating it, so the write itself catches

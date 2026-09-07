@@ -69,6 +69,7 @@ import {
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { CopyDatasetFlyout } from '../../components/copy_dataset_flyout';
 import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
 import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import {
@@ -166,6 +167,7 @@ export const DatasetDetailPage: React.FC = () => {
   const [createOutput, setCreateOutput] = useState('{}');
   const [createMetadata, setCreateMetadata] = useState('{}');
   const [deletingExample, setDeletingExample] = useState<DatasetExample | null>(null);
+  const [isCopyDatasetFlyoutOpen, setIsCopyDatasetFlyoutOpen] = useState(false);
   const [isDeleteDatasetModalOpen, setIsDeleteDatasetModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -778,6 +780,18 @@ export const DatasetDetailPage: React.FC = () => {
                   </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.COPY_DATASET_BUTTON} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="copy"
+                      display="base"
+                      size="m"
+                      onClick={() => setIsCopyDatasetFlyoutOpen(true)}
+                      aria-label={i18n.COPY_DATASET_BUTTON}
+                      data-test-subj="copyDatasetButton"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiToolTip content={i18n.DELETE_DATASET_BUTTON} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="trash"
@@ -908,6 +922,16 @@ export const DatasetDetailPage: React.FC = () => {
           </>
         ) : null}
       </EuiPageSection>
+
+      {isCopyDatasetFlyoutOpen && dataset ? (
+        <CopyDatasetFlyout
+          datasetId={dataset.id}
+          datasetName={dataset.name}
+          datasetDescription={dataset.description}
+          onClose={() => setIsCopyDatasetFlyoutOpen(false)}
+          onCopied={(newDatasetId) => history.push(`/datasets/${newDatasetId}`)}
+        />
+      ) : null}
 
       {/* Example detail flyout (read-only / edit mode) */}
       {selectedExample ? (
