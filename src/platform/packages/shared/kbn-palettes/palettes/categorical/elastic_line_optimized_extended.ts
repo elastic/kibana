@@ -11,25 +11,17 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { KbnPalette } from '../../constants';
 import { KbnColorFnPalette } from '../../classes/color_fn_palette';
+import { visPaletteSize } from './elastic';
+import { getLineOptimizedColors, repeatColors } from './elastic_line_optimized';
 
-export const visPaletteSize = euiPaletteColorBlind().length;
-
-export const elasticPalette = new KbnColorFnPalette({
-  id: KbnPalette.Default,
+export const elasticLineOptimizedExtendedPalette = new KbnColorFnPalette({
+  id: KbnPalette.ElasticLineOptimized,
   type: 'categorical',
-  aliases: [
-    KbnPalette.Default, // needed when switching between new and old themes
-    'elastic_borealis', // placeholder - not yet used
-    KbnPalette.Amsterdam, // to assign to existing default palettes
-  ],
+  aliases: [],
   colorCount: visPaletteSize,
   defaultNumberOfColors: visPaletteSize * 3,
-  name: i18n.translate('palettes.elastic.name', {
-    defaultMessage: 'Elastic',
+  name: i18n.translate('palettes.elasticLineOptimizedExtended.name', {
+    defaultMessage: 'Elastic (line optimized)',
   }),
-  tag: i18n.translate('palettes.elastic.tag', {
-    defaultMessage: 'Default',
-  }),
-  // Return exact colors requested given enough rotations
-  colorFn: (n) => euiPaletteColorBlind({ rotations: Math.ceil(n / visPaletteSize) }).slice(0, n),
+  colorFn: (n) => repeatColors(getLineOptimizedColors(euiPaletteColorBlind()), n),
 });
