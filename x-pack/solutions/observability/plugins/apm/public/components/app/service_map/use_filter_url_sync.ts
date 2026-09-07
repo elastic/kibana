@@ -13,7 +13,19 @@ import { decode as decodeRison } from '@kbn/rison';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { ApmPluginStartDeps } from '../../../plugin';
+import {
+  ALERT_STATUS_VALUES,
+  ANOMALY_SEVERITY_VALUES,
+  CONNECTION_VALUES,
+  MAP_ORIENTATION_VALUES,
+  SLO_STATUS_VALUES,
+} from '../../../../common/embeddable/service_map_embeddable_schema';
+import type { SloStatus } from '../../../../common/service_inventory';
+import type { ConnectionFilter, ServiceMapViewFilters } from './apply_service_map_visibility';
+import type { ServiceMapOrientation } from './service_map_options_panel';
 
 const APP_STATE_KEY = '_a';
 
@@ -29,6 +41,13 @@ export type ControlSelections = Record<string, string[]>;
 interface AppFilterState {
   filters?: Filter[];
   controlSelections?: ControlSelections;
+  viewFilters?: Partial<{
+    alertStatusFilter: string[];
+    sloStatusFilter: string[];
+    connectionFilter: string[];
+    anomalySeverityFilter: string[];
+  }>;
+  mapOrientation?: string;
 }
 
 function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
@@ -40,6 +59,57 @@ function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
     ...f,
     $state: { store: FilterStateStore.APP_STATE },
   }));
+}
+
+function filterKnownValues<T extends string>(values: unknown, allowed: readonly T[]): T[] {
+  if (!Array.isArray(values)) return [];
+  const allowedSet = new Set<string>(allowed);
+  return values.filter((v): v is T => typeof v === 'string' && allowedSet.has(v));
+}
+
+/**
+ * Validates and merges `_a.viewFilters` into a full `ServiceMapViewFilters`.
+ * Unknown values are dropped so malicious / stale URL state can't break the map.
+ */
+export function parseViewFiltersFromAppState(
+  initialState: AppFilterState | null
+): ServiceMapViewFilters | undefined {
+  const raw = initialState?.viewFilters;
+  if (!raw || typeof raw !== 'object') return undefined;
+
+  const next: ServiceMapViewFilters = {
+    alertStatusFilter: filterKnownValues(
+      raw.alertStatusFilter,
+      ALERT_STATUS_VALUES
+    ) as AlertStatus[],
+    sloStatusFilter: filterKnownValues(raw.sloStatusFilter, SLO_STATUS_VALUES) as SloStatus[],
+    connectionFilter: filterKnownValues(
+      raw.connectionFilter,
+      CONNECTION_VALUES
+    ) as ConnectionFilter[],
+    anomalySeverityFilter: filterKnownValues(
+      raw.anomalySeverityFilter,
+      ANOMALY_SEVERITY_VALUES
+    ) as ML_ANOMALY_SEVERITY[],
+  };
+
+  const hasAny =
+    next.alertStatusFilter.length > 0 ||
+    next.sloStatusFilter.length > 0 ||
+    next.connectionFilter.length > 0 ||
+    next.anomalySeverityFilter.length > 0;
+
+  return hasAny ? next : undefined;
+}
+
+export function parseMapOrientationFromAppState(
+  initialState: AppFilterState | null
+): ServiceMapOrientation | undefined {
+  const raw = initialState?.mapOrientation;
+  if (typeof raw !== 'string') return undefined;
+  return (MAP_ORIENTATION_VALUES as readonly string[]).includes(raw)
+    ? (raw as ServiceMapOrientation)
+    : undefined;
 }
 
 /**

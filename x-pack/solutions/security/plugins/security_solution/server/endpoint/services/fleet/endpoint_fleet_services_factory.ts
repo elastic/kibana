@@ -15,6 +15,7 @@ import type {
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type Agent,
   type PackagePolicy,
   type AgentPolicy,
 } from '@kbn/fleet-plugin/common';
@@ -24,6 +25,10 @@ import {
   PackagePolicyNotFoundError,
 } from '@kbn/fleet-plugin/server/errors';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common/services/version_specific_policies_utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { catchAndWrapError } from '../../utils';
 import { stringify } from '../../utils/stringify';
@@ -36,6 +41,11 @@ import type { SavedObjectsClientFactory } from '../saved_objects';
 export interface EndpointFleetServicesInterface {
   /** The space id used to initialize the current `EndpointFleetServicesInterface` instance */
   spaceId: string;
+
+  /**
+   * IMPORTANT: USE AGENT METHODS EXPOSED DIRECTLY ON `EndpointFleetServicesInterface` FOR
+   * RETRIEVING AGENT DATA FROM FLEET INSTEAD OF THESE SERVICES PROVIDED BY FLEET.
+   */
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
   packages: PackageClient;
@@ -76,6 +86,33 @@ export interface EndpointFleetServicesInterface {
 
   /** Checks to see if the Endpoint (Elastic Defend) package is installed */
   isEndpointPackageInstalled: () => Promise<boolean>;
+
+  /**
+   *  Fetch single agent from Fleet.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned agent.
+   */
+  fetchAgent: (
+    ...props: Parameters<AgentClient['getAgent']>
+  ) => ReturnType<AgentClient['getAgent']>;
+
+  /**
+   *  Fetch list of agents from Fleet.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned list of agents.
+   */
+  fetchAgentList: (
+    ...props: Parameters<AgentClient['listAgents']>
+  ) => ReturnType<AgentClient['listAgents']>;
+
+  /**
+   *  Fetch list of agents from Fleet usign their UUIDs.
+   *  Method differs from the one provided by Fleet's `AgentClinet` in that it removes the
+   *  suffix from `policy_id` from the returned list of agents.
+   */
+  fetchAgentsById: (
+    ...props: Parameters<AgentClient['getByIds']>
+  ) => ReturnType<AgentClient['getByIds']>;
 }
 
 export interface EndpointInternalFleetServicesInterface extends EndpointFleetServicesInterface {
@@ -157,6 +194,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
         agentService: agent,
         agentPolicyService: agentPolicy,
         packagePolicyService: packagePolicy,
+        logger: this.logger,
         options,
         integrationPolicyIds,
         agentPolicyIds,
@@ -217,6 +255,10 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       getIntegrationNamespaces,
       getSoClient,
       isEndpointPackageInstalled,
+
+      fetchAgent: fetchFleetAgent.bind(null, agent, this.logger),
+      fetchAgentsById: fetchFleetAgentsById.bind(null, agent, this.logger),
+      fetchAgentList: fetchFleetAgentList.bind(null, agent, this.logger),
     };
   }
 }
@@ -226,6 +268,7 @@ interface CheckInCurrentSpaceOptions {
   agentService: AgentClient;
   agentPolicyService: AgentPolicyServiceInterface;
   packagePolicyService: PackagePolicyClient;
+  logger: Logger;
   options?: {
     /**
      * Ensures that all IDs passed on input MUST be accessible in active space. When set to `false`,
@@ -259,6 +302,7 @@ const checkInCurrentSpace = async ({
   agentService,
   agentPolicyService,
   packagePolicyService,
+  logger,
   integrationPolicyIds = [],
   agentPolicyIds = [],
   agentIds = [],
@@ -279,8 +323,7 @@ const checkInCurrentSpace = async ({
 
   await Promise.all([
     agentIds.length
-      ? agentService
-          .getByIds(agentIds, { ignoreMissing: !matchAll })
+      ? fetchFleetAgentsById(agentService, logger, agentIds, { ignoreMissing: !matchAll })
           .catch(handlePromiseErrors)
           .then((response) => {
             // When `matchAll` is false, the results must have at least matched 1 id
@@ -505,4 +548,61 @@ const fetchIntegrationNamespaces = async ({
   logger.debug(() => `Integration namespaces in use:\n${stringify(response)}`);
 
   return response;
+};
+
+// Note that this function will possibly mutate the Agent record
+const adjustAgentData = (data: Agent | Agent[], methodName: string, _logger: Logger): void => {
+  const logger = _logger.get('adjustAgentData');
+  const agentsData = Array.isArray(data) ? data : [data];
+  const updatesDone: string[] = [];
+
+  for (const agentRecord of agentsData) {
+    // Remove version suffix from `policy_id` field
+    // Issue caused by: https://github.com/elastic/package-spec/issues/165
+    if (hasVersionSuffix(agentRecord.policy_id ?? '')) {
+      const updatedPolicyId = removeVersionSuffixFromPolicyId(agentRecord.policy_id ?? '');
+
+      updatesDone.push(
+        `Agent [${agentRecord.id}][${agentRecord.local_metadata?.host?.hostname}]: adjusted 'policy_id' property value from [${agentRecord.policy_id}] to [${updatedPolicyId}]`
+      );
+
+      agentRecord.policy_id = updatedPolicyId;
+    }
+  }
+
+  if (updatesDone.length) {
+    logger
+      .get(methodName)
+      .debug(`Adjusted ${updatesDone.length} agent records:\n${updatesDone.join('\n')}`);
+  }
+};
+
+const fetchFleetAgent = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['getAgent']>
+): ReturnType<AgentClient['getAgent']> => {
+  const agent = await agentClient.getAgent(...props);
+  adjustAgentData(agent, 'getAgent', logger);
+  return agent;
+};
+
+const fetchFleetAgentList = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['listAgents']>
+): ReturnType<AgentClient['listAgents']> => {
+  const agents = await agentClient.listAgents(...props);
+  adjustAgentData(agents.agents, 'listAgents', logger);
+  return agents;
+};
+
+const fetchFleetAgentsById = async (
+  agentClient: AgentClient,
+  logger: Logger,
+  ...props: Parameters<AgentClient['getByIds']>
+): ReturnType<AgentClient['getByIds']> => {
+  const agents = await agentClient.getByIds(...props);
+  adjustAgentData(agents, 'getByIds', logger);
+  return agents;
 };

@@ -8,13 +8,14 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 
 import {
+  CHAINED_DATE_MATH_RE,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
   DATE_TYPE_RELATIVE,
-  NOW_KEYWORD,
   ROUND_UNIT_MAP,
 } from '../constants';
 import type {
@@ -27,165 +28,72 @@ import type {
   TimeRangeBoundsOption,
 } from '../types';
 import { isValidTimeRange } from '../utils';
+import {
+  ENGLISH_GRAMMAR,
+  findDelimiterSplits,
+  getCompiledGrammar,
+  normalizeDigits,
+  resolveUnit,
+  type CompiledGrammar,
+  type CompiledTemplate,
+  type DelimiterSpec,
+} from './locale_grammar';
 
 // ---------------------------------------------------------------------------
-// Parser config (English-only, not exposed to consumers)
+// Absolute-date formats — deliberately locale-invariant (localized absolute-
+// date parsing is a deferred phase; see the i18n plan doc).
 // ---------------------------------------------------------------------------
 
-interface ParserConfig {
-  nowKeyword: string;
-  delimiters: string[];
-  namedRanges: Record<string, { start: string; end: string }>;
-  /** Maps shorthand aliases to canonical named range keys (e.g. `td` → `today`). */
-  namedRangeAliases: Record<string, string>;
-  unitAliases: Record<string, TimeUnit>;
-  durationTemplates: { past: string[]; future: string[] };
-  instantTemplates: { past: string[]; future: string[] };
-  absoluteFormats: string[];
-}
+const ABSOLUTE_FORMATS: string[] = [
+  // Canonical Kibana (with @ separator)
+  'MMM D, YYYY @ HH:mm:ss.SSS',
+  'MMM D, YYYY @ HH:mm:ss',
+  'MMM D, YYYY @ HH:mm',
+  'MMM D, YYYY @ HH',
 
-const DEFAULT_CONFIG: ParserConfig = {
-  nowKeyword: NOW_KEYWORD,
-  delimiters: ['to', 'until'],
-  namedRanges: {
-    today: { start: 'now/d', end: 'now/d' },
-    yesterday: { start: 'now-1d/d', end: 'now-1d/d' },
-    tomorrow: { start: 'now+1d/d', end: 'now+1d/d' },
-    'this week': { start: 'now/w', end: 'now/w' },
-    'this month': { start: 'now/M', end: 'now/M' },
-    'this year': { start: 'now/y', end: 'now/y' },
-    'last week': { start: 'now-1w/w', end: 'now-1w/w' },
-    'last month': { start: 'now-1M/M', end: 'now-1M/M' },
-    'last year': { start: 'now-1y/y', end: 'now-1y/y' },
-  },
-  namedRangeAliases: {
-    td: 'today',
-    yd: 'yesterday',
-    tmr: 'tomorrow',
-  },
-  unitAliases: {
-    ms: 'ms',
-    s: 's',
-    m: 'm',
-    h: 'h',
-    d: 'd',
-    w: 'w',
-    M: 'M',
-    y: 'y',
-    millisecond: 'ms',
-    milliseconds: 'ms',
-    second: 's',
-    seconds: 's',
-    sec: 's',
-    secs: 's',
-    minute: 'm',
-    minutes: 'm',
-    min: 'm',
-    mins: 'm',
-    hour: 'h',
-    hours: 'h',
-    hr: 'h',
-    hrs: 'h',
-    day: 'd',
-    days: 'd',
-    week: 'w',
-    weeks: 'w',
-    wk: 'w',
-    wks: 'w',
-    month: 'M',
-    months: 'M',
-    mo: 'M',
-    mos: 'M',
-    year: 'y',
-    years: 'y',
-    yr: 'y',
-    yrs: 'y',
-  },
-  durationTemplates: {
-    past: ['last {count} {unit}', 'past {count} {unit}'],
-    future: ['next {count} {unit}'],
-  },
-  instantTemplates: {
-    past: ['{count} {unit} ago'],
-    future: ['{count} {unit} from now', 'in {count} {unit}'],
-  },
-  absoluteFormats: [
-    // Canonical Kibana (with @ separator)
-    'MMM D, YYYY @ HH:mm:ss.SSS',
-    'MMM D, YYYY @ HH:mm:ss',
-    'MMM D, YYYY @ HH:mm',
-    'MMM D, YYYY @ HH',
+  // DateRangePicker default (milliseconds → minutes, with and without comma after day)
+  'MMM D, YYYY, HH:mm:ss.SSS',
+  'MMM D YYYY, HH:mm:ss.SSS',
+  'MMM D, YYYY, HH:mm:ss',
+  'MMM D YYYY, HH:mm:ss',
+  'MMM D, YYYY, HH:mm',
+  'MMM D YYYY, HH:mm',
+  'MMM D, YYYY',
+  'MMM D YYYY',
+  'MMM D, HH:mm',
+  'MMM D',
 
-    // DateRangePicker default (milliseconds → minutes, with and without comma after day)
-    'MMM D, YYYY, HH:mm:ss.SSS',
-    'MMM D YYYY, HH:mm:ss.SSS',
-    'MMM D, YYYY, HH:mm:ss',
-    'MMM D YYYY, HH:mm:ss',
-    'MMM D, YYYY, HH:mm',
-    'MMM D YYYY, HH:mm',
-    'MMM D, YYYY',
-    'MMM D YYYY',
-    'MMM D, HH:mm',
-    'MMM D',
+  // ISO 8601 date with simple time
+  'YYYY-MM-DD H:mm',
 
-    // ISO 8601 date with simple time
-    'YYYY-MM-DD H:mm',
+  // US-style (M/D handles 1- and 2-digit month/day)
+  'M/D/YYYY H:mm',
+  'M/D H:mm',
+  'M/D/YYYY',
+  'M/D',
 
-    // US-style (M/D handles 1- and 2-digit month/day)
-    'M/D/YYYY H:mm',
-    'M/D H:mm',
-    'M/D/YYYY',
-    'M/D',
-
-    // RFC 2822 (with/without day-of-week, with/without seconds, with/without numeric offset)
-    'ddd, DD MMM YYYY HH:mm:ss ZZ',
-    'ddd, DD MMM YYYY HH:mm ZZ',
-    'DD MMM YYYY HH:mm:ss ZZ',
-    'DD MMM YYYY HH:mm ZZ',
-    'ddd, DD MMM YYYY HH:mm:ss',
-    'ddd, DD MMM YYYY HH:mm',
-    'DD MMM YYYY HH:mm:ss',
-    'DD MMM YYYY HH:mm',
-  ],
-};
-
-// ---------------------------------------------------------------------------
-// Compiled config (cached by object identity)
-// ---------------------------------------------------------------------------
-
-interface CompiledTemplate {
-  regex: RegExp;
-  countGroup: number;
-  unitGroup: number;
-}
-
-interface CompiledConfig {
-  shorthandRegex: RegExp;
-  durationPast: CompiledTemplate[];
-  durationFuture: CompiledTemplate[];
-  instantPast: CompiledTemplate[];
-  instantFuture: CompiledTemplate[];
-  absoluteFormats: string[];
-  delimiterPatterns: RegExp[];
-}
-
-const configCache = new WeakMap<ParserConfig, CompiledConfig>();
-
-/** Escapes regex metacharacters in `input` so it can be embedded verbatim in a pattern. */
-export const escapeRegExp = (input: string) => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** The word delimiters recognised by the parser (excluding the universal dash). */
-export const PARSER_DELIMITERS: readonly string[] = DEFAULT_CONFIG.delimiters;
+  // RFC 2822 (with/without day-of-week, with/without seconds, with/without numeric offset)
+  'ddd, DD MMM YYYY HH:mm:ss ZZ',
+  'ddd, DD MMM YYYY HH:mm ZZ',
+  'DD MMM YYYY HH:mm:ss ZZ',
+  'DD MMM YYYY HH:mm ZZ',
+  'ddd, DD MMM YYYY HH:mm:ss',
+  'ddd, DD MMM YYYY HH:mm',
+  'DD MMM YYYY HH:mm:ss',
+  'DD MMM YYYY HH:mm',
+];
 
 /**
  * Builds a reverse map from `"start|end"` bounds keys to the shortest alias
  * that resolves to those bounds. When multiple aliases point to the same
- * canonical named range, the shortest one wins.
+ * canonical named range, the shortest one wins. English-only — aliases like
+ * `td`/`yd`/`tmr` are English mnemonics; locales don't define their own
+ * unless one clearly wants them (none do today).
  */
-function buildBoundsToAliasMap(config: ParserConfig): ReadonlyMap<string, string> {
+function buildBoundsToAliasMap(): ReadonlyMap<string, string> {
   const map = new Map<string, string>();
-  for (const [alias, canonical] of Object.entries(config.namedRangeAliases)) {
-    const range = config.namedRanges[canonical];
+  for (const [alias, canonical] of Object.entries(ENGLISH_GRAMMAR.namedRangeAliases)) {
+    const range = ENGLISH_GRAMMAR.namedRanges[canonical];
     if (!range) continue;
     const key = `${range.start}|${range.end}`;
     const existing = map.get(key);
@@ -196,7 +104,7 @@ function buildBoundsToAliasMap(config: ParserConfig): ReadonlyMap<string, string
   return map;
 }
 
-const boundsToAlias = buildBoundsToAliasMap(DEFAULT_CONFIG);
+const boundsToAlias = buildBoundsToAliasMap();
 
 /**
  * Returns the shorthand alias for a named range identified by its bounds,
@@ -213,7 +121,8 @@ export function getNamedRangeAlias(start: string, end: string): string | null {
 
 /**
  * Resolves a named range alias to its canonical name, or returns the
- * input unchanged if it is not an alias.
+ * input unchanged if it is not an alias. English-only — see
+ * {@link buildBoundsToAliasMap}.
  *
  * @example
  * resolveNamedRangeAlias('td')    // "today"
@@ -221,69 +130,7 @@ export function getNamedRangeAlias(start: string, end: string): string | null {
  * resolveNamedRangeAlias('today') // "today"
  */
 export function resolveNamedRangeAlias(text: string): string {
-  return DEFAULT_CONFIG.namedRangeAliases[text.toLowerCase()] ?? text;
-}
-
-/** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
-export function buildDelimiterPattern(delimiter: string): RegExp | null {
-  const trimmed = delimiter.trim();
-  return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
-}
-
-/**
- * Converts a natural-language template (e.g. `'{count} {unit} ago'`)
- * into a regex, tracking capture-group positions for count and unit.
- */
-function compileTemplate(template: string): CompiledTemplate {
-  const parts = template.split(/(\{count}|\{unit})/);
-  let pattern = '';
-  let groupIdx = 0;
-  let countGroup = -1;
-  let unitGroup = -1;
-
-  for (const part of parts) {
-    if (part === '{count}') {
-      countGroup = ++groupIdx;
-      pattern += '(\\d+)';
-    } else if (part === '{unit}') {
-      unitGroup = ++groupIdx;
-      pattern += '(\\w+)';
-    } else {
-      pattern += escapeRegExp(part).replace(/ /g, '\\s+');
-    }
-  }
-
-  return { regex: new RegExp(`^${pattern}$`, 'i'), countGroup, unitGroup };
-}
-
-function compileConfig(config: ParserConfig): CompiledConfig {
-  const unitKeys = Object.keys(config.unitAliases)
-    .sort((a, b) => b.length - a.length)
-    .map(escapeRegExp)
-    .join('|');
-
-  const delimiterPatterns = [...config.delimiters, '-']
-    .map(buildDelimiterPattern)
-    .filter((p): p is RegExp => p !== null);
-
-  return {
-    shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitKeys})(\\/[smhdwMy])?$`),
-    durationPast: config.durationTemplates.past.map(compileTemplate),
-    durationFuture: config.durationTemplates.future.map(compileTemplate),
-    instantPast: config.instantTemplates.past.map(compileTemplate),
-    instantFuture: config.instantTemplates.future.map(compileTemplate),
-    absoluteFormats: config.absoluteFormats,
-    delimiterPatterns,
-  };
-}
-
-function getCompiledConfig(config: ParserConfig): CompiledConfig {
-  let compiled = configCache.get(config);
-  if (!compiled) {
-    compiled = compileConfig(config);
-    configCache.set(config, compiled);
-  }
-  return compiled;
+  return ENGLISH_GRAMMAR.namedRangeAliases[text.toLowerCase()] ?? text;
 }
 
 // ---------------------------------------------------------------------------
@@ -302,71 +149,93 @@ export function matchPreset(
 /**
  * Parses free-form text into a structured {@link TimeRange}.
  *
- * Supports presets, named ranges, natural durations/instants,
- * shorthand datemath, unix timestamps, and absolute dates.
+ * Supports presets, named ranges, natural durations/instants, shorthand
+ * datemath, unix timestamps, and absolute dates. Named ranges, durations,
+ * instants, and delimiters are matched against `options.locale` merged with
+ * English, so English is always parseable alongside whichever locale is
+ * active. Shorthand datemath, unix timestamps, and absolute dates are
+ * locale-invariant.
  */
 export function textToTimeRange(text: string, options?: TimeRangeTransformOptions): TimeRange {
-  const trimmed = text.trim();
+  const trimmed = normalizeDigits(text.trim());
   if (!trimmed) return buildInvalidRange(text);
 
-  const config = DEFAULT_CONFIG;
-  const compiled = getCompiledConfig(config);
-  const { presets = [], delimiter, dateFormat, roundRelativeTime } = options ?? {};
-  const formats = dateFormat ? [dateFormat, ...compiled.absoluteFormats] : compiled.absoluteFormats;
+  const {
+    presets = [],
+    delimiter,
+    inputDateFormats = [],
+    roundRelativeTime,
+    locale,
+  } = options ?? {};
+  const compiled = getCompiledGrammar(locale ?? i18n.getLocale());
+  const formats = [...inputDateFormats, ...ABSOLUTE_FORMATS];
 
   // (1) Preset label match
   const preset = matchPreset(trimmed, presets);
   if (preset) {
-    const roundedStart = applyStartBoundRounding(preset.start, roundRelativeTime);
-    return buildRange(text, roundedStart, preset.end, formats, true);
+    const roundedStart = applyRelativeRounding(preset.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(preset.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
   // (2) Named range ("today", "yesterday", "this week", ...) or alias ("td", "yd", "tmr")
   const lower = trimmed.toLowerCase();
-  const canonicalKey = config.namedRangeAliases[lower] ?? lower;
-  const named = config.namedRanges[canonicalKey];
+  const canonicalKey = compiled.namedRangeAliases[lower] ?? lower;
+  const named = compiled.namedRanges[canonicalKey];
   if (named) {
     return buildRange(text, named.start, named.end, formats, true);
   }
 
   // (3) Natural duration ("last 7 minutes", "next 3 days")
-  const duration = matchNaturalDuration(trimmed, config, compiled);
+  const duration = matchNaturalDuration(trimmed, compiled);
   if (duration) {
-    const roundedStart = applyStartBoundRounding(duration.start, roundRelativeTime);
-    return buildRange(text, roundedStart, duration.end, formats, true);
+    const roundedStart = applyRelativeRounding(duration.start, roundRelativeTime);
+    const roundedEnd = applyRelativeRounding(duration.end, roundRelativeTime);
+    return buildRange(text, roundedStart, roundedEnd, formats, true);
   }
 
-  // (4) Try splitting on delimiters (config + universal dash + extra)
-  const parts = trySplit(trimmed, compiled, delimiter);
-  if (parts) {
-    const startDateString = instantToDateString(parts[0], config, compiled, formats);
-    const endDateString = instantToDateString(parts[1], config, compiled, formats);
-    if (startDateString && endDateString) {
-      const roundedStart = applyStartBoundRounding(startDateString, roundRelativeTime);
-      return buildRange(text, roundedStart, endDateString, formats, false);
+  // (4) Try splitting on delimiters (extra + locale grammar + universal dash).
+  // Every occurrence of every delimiter is a CANDIDATE, accepted only when
+  // both sides parse — a delimiter word may equally appear inside a phrase
+  // (French "il y a 3 jours" contains the accent-less delimiter "a"), in which
+  // case the wrong occurrences fail side-parsing and the right one (or the
+  // whole-text instant path below) wins.
+  const splitDelimiters: DelimiterSpec[] = [
+    ...(delimiter ? [{ text: delimiter }] : []),
+    ...compiled.delimiters,
+    { text: '-' },
+  ];
+  for (const splitDelimiter of splitDelimiters) {
+    for (const candidate of findDelimiterSplits(trimmed, splitDelimiter)) {
+      const startDateString = instantToDateString(candidate.left, compiled, formats);
+      const endDateString = instantToDateString(
+        stripRangeEndSuffix(candidate.right, compiled),
+        compiled,
+        formats
+      );
+      if (startDateString && endDateString) {
+        const roundedStart = applyRelativeRounding(startDateString, roundRelativeTime);
+        const roundedEnd = applyRelativeRounding(endDateString, roundRelativeTime);
+        return buildRange(text, roundedStart, roundedEnd, formats, false);
+      }
     }
-    return buildInvalidRange(text);
   }
 
-  // (5) Single instant (no delimiter found)
-  const dateString = instantToDateString(trimmed, config, compiled, formats);
+  // (5) Single instant (no delimiter candidate produced two parseable sides)
+  const dateString = instantToDateString(trimmed, compiled, formats);
   if (!dateString) return buildInvalidRange(text);
 
   if (dateString.startsWith('now+')) {
-    return buildRange(text, 'now', dateString, formats, false);
+    const roundedEnd = applyRelativeRounding(dateString, roundRelativeTime);
+    return buildRange(text, 'now', roundedEnd, formats, false);
   }
-  const roundedStart = applyStartBoundRounding(dateString, roundRelativeTime);
+  const roundedStart = applyRelativeRounding(dateString, roundRelativeTime);
   return buildRange(text, roundedStart, 'now', formats, false);
 }
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-/** Resolves a user-typed unit string through aliases (exact first, then lowercase). */
-function resolveUnit(text: string, aliases: Record<string, TimeUnit>): TimeUnit | null {
-  return aliases[text] ?? aliases[text.toLowerCase()] ?? null;
-}
 
 /** Parses a unix timestamp string (10-digit seconds or 13-digit milliseconds) to a `Date`. */
 function unixTimestampToDate(text: string): Date | null {
@@ -394,72 +263,94 @@ function dateStringToOffset(dateString: DateString): DateOffset | null {
 }
 
 /**
- * Applies or strips the rounding suffix on a relative datemath `start` string.
+ * Applies the rounding suffix on a relative datemath bound (`start` or `end`)
+ * when `roundRelativeTime` is `true`.
  *
  * - `true` — keeps existing rounding; when absent, appends `/{roundUnit}`
- *   inferred from the offset unit via {@link ROUND_UNIT_MAP}.
- * - `false` — removes any trailing rounding suffix.
- * - `undefined` — returns the string unchanged.
+ *   inferred from the bound's own offset unit via {@link ROUND_UNIT_MAP}.
+ * - `false` / `undefined` — returns the string unchanged (preserves any
+ *   rounding the user or a preset provided).
  *
  * Bare `'now'` and non-relative strings are always returned as-is.
  */
-function applyStartBoundRounding(
-  start: DateString,
+function applyRelativeRounding(
+  bound: DateString,
   roundRelativeTime: boolean | undefined
 ): DateString {
-  if (roundRelativeTime === undefined) return start;
-  if (start === 'now' || !start.includes('now')) return start;
+  if (!roundRelativeTime) return bound;
+  if (bound === 'now' || !bound.includes('now')) return bound;
 
-  const offset = dateStringToOffset(start);
-  if (!offset) return start;
-
-  if (roundRelativeTime === false) {
-    return start.replace(/\/[smhdwMy]$/, '');
-  }
-
-  if (offset.roundTo) return start;
+  const offset = dateStringToOffset(bound);
+  if (!offset) return bound;
+  if (offset.roundTo) return bound;
 
   const roundUnit = ROUND_UNIT_MAP[offset.unit];
-  if (!roundUnit) return start;
+  if (!roundUnit) return bound;
 
-  return `${start}/${roundUnit}`;
+  return `${bound}/${roundUnit}`;
+}
+
+/**
+ * Parses chained Elasticsearch date math (e.g. `now/y+3M`, `-1y/y+3M`).
+ */
+function parseChainedDateMath(text: string): DateString | null {
+  const match = text.match(CHAINED_DATE_MATH_RE);
+  if (!match) return null;
+
+  const [, nowPrefix, ops] = match;
+  // A leading rounding with no `now` (`/d`) is not a valid standalone expression.
+  if (!nowPrefix && ops.startsWith('/')) return null;
+
+  const expression = `now${ops}`;
+  const parsed = dateMath.parse(expression);
+  return parsed?.isValid() ? expression : null;
 }
 
 /**
  * Converts a single text fragment into a {@link DateString}.
  * Tries (in order): "now", shorthand, natural instant, unix timestamp,
- * absolute formats, and finally dateMath/ISO fallback.
+ * chained/rounding-only date math, absolute formats, and dateMath/ISO fallback.
  */
 function instantToDateString(
   text: string,
-  config: ParserConfig,
-  compiled: CompiledConfig,
+  compiled: CompiledGrammar,
   formats: string[]
 ): DateString | null {
   const trimmed = text.trim();
 
-  if (trimmed.toLowerCase() === config.nowKeyword) return 'now';
+  if (compiled.nowKeywords.includes(trimmed.toLowerCase())) return 'now';
 
   // Shorthand: "7d", "-7d", "+7d", "now-7d/d", "500ms"
   const shorthandMatch = trimmed.match(compiled.shorthandRegex);
   if (shorthandMatch) {
-    const unit = resolveUnit(shorthandMatch[4], config.unitAliases);
-    if (unit) {
+    const unit = resolveUnit(shorthandMatch[4], compiled.unitAliases);
+    // A bare count+unit in a prefix-required unit reads as a calendar date
+    // ("22日" is the 22nd, "2025年" is the year 2025), never a duration —
+    // only the unambiguous now/sign-prefixed forms parse as shorthand. The
+    // bare form falls through and rejects via the vocabulary guard below.
+    const hasPrefix = Boolean(shorthandMatch[1]) || shorthandMatch[2] !== '';
+    if (unit && (hasPrefix || !compiled.shorthandPrefixRequired.has(shorthandMatch[4]))) {
       const operator = shorthandMatch[2] === '+' ? '+' : '-';
       return `now${operator}${shorthandMatch[3]}${unit}${shorthandMatch[5] ?? ''}`;
     }
   }
 
   // Natural instant: "7 minutes ago", "in 7 minutes"
-  const instant = matchNaturalInstant(trimmed, config, compiled);
+  const instant = matchNaturalInstant(trimmed, compiled);
   if (instant) return instant;
 
   const unixDate = unixTimestampToDate(trimmed);
   if (unixDate) return unixDate.toISOString();
 
-  // DateMath with rounding only (e.g. "now/d", "now/w") — preserve as-is.
-  // These aren't caught by the shorthand regex which expects a count.
-  if (/^now\/[smhdwMy]$/.test(trimmed)) return trimmed;
+  // Before the vocabulary guard: unit letters in these expressions are also grammar words.
+  const chained = parseChainedDateMath(trimmed);
+  if (chained) return chained;
+
+  // Natural-language vocabulary (a unit word, direction word, or instant
+  // marker) that reached this point is a failed PHRASE, not an absolute
+  // date — reject it rather than let the forgiving absolute-date fallback
+  // misread it ("5 minutes to spare" would otherwise parse as May 1).
+  if (containsGrammarVocabulary(trimmed, compiled)) return null;
 
   // Absolute date / ISO fallback — normalize to ISO so that
   // timeRange.start/end and onChange always emit ISO or dateMath strings.
@@ -467,6 +358,39 @@ function instantToDateString(
   if (absoluteDate !== null) return absoluteDate.toISOString();
 
   return null;
+}
+
+/**
+ * Strips a locale range-end suffix from the END side of a delimited range —
+ * the Japanese circumfix "から…まで": "3日前から今まで" splits on the から
+ * delimiter, then まで is stripped here so the side parses as "今". No-ops
+ * when no suffix matches or nothing would remain.
+ */
+function stripRangeEndSuffix(text: string, compiled: CompiledGrammar): string {
+  const trimmed = text.trim();
+  for (const suffix of compiled.rangeEndSuffixes) {
+    if (trimmed.length > suffix.length && trimmed.endsWith(suffix)) {
+      return trimmed.slice(0, -suffix.length).trim();
+    }
+  }
+  return trimmed;
+}
+
+/**
+ * True when any standalone word of `text` is part of the grammar's natural
+ * language, or when `text` CONTAINS a CJK vocabulary word. CJK needs the
+ * substring check because its text has no inter-word spacing — a glued failed
+ * phrase ("最近7天啊") or an unsupported CJK date ("2024年1月22日", deferred)
+ * never splits into a matchable standalone word.
+ */
+function containsGrammarVocabulary(text: string, compiled: CompiledGrammar): boolean {
+  const lower = text.toLowerCase();
+  return (
+    lower
+      .split(/[^\p{L}\p{M}\p{N}]+/u)
+      .some((word) => word !== '' && compiled.vocabulary.has(word)) ||
+    compiled.cjkVocabulary.some((word) => lower.includes(word))
+  );
 }
 
 /**
@@ -478,7 +402,7 @@ function instantToDateString(
 function dateStringToDate(
   dateString: DateString,
   formats: string[],
-  options?: { roundUp?: boolean }
+  options?: { roundUp?: boolean; forceNow?: Date }
 ): Date | null {
   const strict = moment(dateString, formats, true);
   if (strict.isValid()) return strict.toDate();
@@ -513,12 +437,14 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
+  // Anchor both bounds to the same instant
+  const forceNow = new Date();
   const range: TimeRange = {
     value: text,
     start,
     end,
-    startDate: dateStringToDate(start, formats),
-    endDate: dateStringToDate(end, formats, { roundUp: true }),
+    startDate: dateStringToDate(start, formats, { forceNow }),
+    endDate: dateStringToDate(end, formats, { roundUp: true, forceNow }),
     type: [startType, endType],
     isNaturalLanguage,
     startOffset: startType === DATE_TYPE_RELATIVE ? dateStringToOffset(start) : null,
@@ -544,26 +470,6 @@ function buildInvalidRange(text: string): TimeRange {
   };
 }
 
-/**
- * Attempts to split text into two parts using available delimiters.
- * Tries in order: extra delimiter, then compiled config + universal dash patterns.
- */
-function trySplit(text: string, compiled: CompiledConfig, extra?: string): [string, string] | null {
-  const patterns = extra
-    ? [buildDelimiterPattern(extra), ...compiled.delimiterPatterns].filter(
-        (p): p is RegExp => p !== null
-      )
-    : compiled.delimiterPatterns;
-
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match && match[1].trim() && match[2].trim()) {
-      return [match[1].trim(), match[2].trim()];
-    }
-  }
-  return null;
-}
-
 /** Tries each compiled template against the text, returning the first successful match or `null`. */
 function matchTemplates(
   text: string,
@@ -583,13 +489,12 @@ function matchTemplates(
 
 function matchNaturalDuration(
   text: string,
-  config: ParserConfig,
-  compiled: CompiledConfig
+  compiled: CompiledGrammar
 ): { start: DateString; end: DateString } | null {
   const past = matchTemplates(
     text,
     compiled.durationPast,
-    config.unitAliases,
+    compiled.unitAliases,
     (count, unit) => `now-${count}${unit}`
   );
   if (past) return { start: past, end: 'now' };
@@ -597,7 +502,7 @@ function matchNaturalDuration(
   const future = matchTemplates(
     text,
     compiled.durationFuture,
-    config.unitAliases,
+    compiled.unitAliases,
     (count, unit) => `now+${count}${unit}`
   );
   if (future) return { start: 'now', end: future };
@@ -605,22 +510,18 @@ function matchNaturalDuration(
   return null;
 }
 
-function matchNaturalInstant(
-  text: string,
-  config: ParserConfig,
-  compiled: CompiledConfig
-): DateString | null {
+function matchNaturalInstant(text: string, compiled: CompiledGrammar): DateString | null {
   return (
     matchTemplates(
       text,
       compiled.instantPast,
-      config.unitAliases,
+      compiled.unitAliases,
       (count, unit) => `now-${count}${unit}`
     ) ??
     matchTemplates(
       text,
       compiled.instantFuture,
-      config.unitAliases,
+      compiled.unitAliases,
       (count, unit) => `now+${count}${unit}`
     )
   );

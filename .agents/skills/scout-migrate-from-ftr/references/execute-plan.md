@@ -28,8 +28,10 @@ The plan answers _what_ and _why_; this file answers _how_.
 - `parallel_tests/`: ingest via `parallel_tests/global.setup.ts` + `globalSetupHook` (don't use `esArchiver` in spec files).
 - Use the correct Scout package for the test location (`@kbn/scout` vs `@kbn/scout-security`/`@kbn/scout-oblt`/`@kbn/scout-search`) and import `expect` from `/ui` or `/api`.
 - **TypeScript layout for Scout tests** (pick one; see **Where Scout tests are typechecked** under step 6): either fold `test/scout/**/*` into the **plugin root** `tsconfig.json` and add Scout `kbn_references` (like `discover_enhanced`), or keep **dedicated** `test/scout/{ui,api}/tsconfig.json` files. Only the latter forbids relative imports into `server/` / `public/`.
-- Replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)`.
+- **Prefer Scout's default servers config**: replace FTR config nesting / per-suite server args with `uiSettings` / `scoutSpace.uiSettings` and (when needed) `apiServices.core.settings(...)` runtime settings. Only create a custom server config set when the plan calls for it (a setting that must apply at Kibana boot) — custom configs run only in local pipelines (no Cloud) and add CI cost.
 - Auth/roles are fixture-driven: `browserAuth` (UI), `requestAuth` (API key), `samlAuth` (cookie / `cookieHeader`), plus custom roles. Avoid FTR-style role mutation. For Scout **API** tests, see **Scout API auth (`cookieHeader` vs API key)** under step 4.
+- **Prefer default Cloud-compatible roles over custom ones.** For general user flows, use the least-privileged built-in role (`browserAuth.loginAsViewer()` → `loginAsPrivilegedUser()` → `loginAsAdmin()`). Reach for `loginWithCustomRole(roleDescriptor)` only when the test specifically validates permission-scoped behavior that no built-in role expresses — don't port FTR custom roles 1:1, as many were scoped incidentally and work fine on a default role. `loginAs(role)` (built-in role by name) is stateful-only and isn't supported on serverless (ensure the tests aren't targeting serverless).
+- **Check stateful/serverless mirrors before cleanup.** Before deleting or unwiring any FTR file, verify the plan's "Stateful/serverless mirror FTR files" table. If the table is missing or says no mirrors but you see comments that mark an FTR file as the original counterpart for a Scout migration, or a matching basename/test title in serverless/stateful suites, pause and update the plan instead of deleting only one side.
 
 ## Core workflow
 
@@ -44,13 +46,13 @@ For each FTR file the plan marked as **API test**, **UI test**, or **unit test (
 
 - UI: `<module-root>/test/scout*/ui/{tests,parallel_tests}/**/*.spec.ts`
 - API: `<module-root>/test/scout*/api/{tests,parallel_tests}/**/*.spec.ts`
-- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](../../../../docs/extend/scout/parallelism.md) for details on when to choose parallel vs sequential.
+- UI: use `ui/parallel_tests/` + `spaceTest` when the flow can be space-isolated (state is scoped to a Kibana space) and should run in parallel; otherwise use `ui/tests/` + `test`. See [Scout parallelism](../../../../docs/extend/testing/parallelism.md) for details on when to choose parallel vs sequential.
 - API: default to `api/tests/` (sequential). Use `api/parallel_tests/` + `parallel.playwright.config.ts` only when the test is safe to run in parallel (no shared state) and you need the speedup.
 - Parallel UI: avoid hardcoded saved object IDs (they can differ per space) and make names unique when needed (often suffix with `scoutSpace.id`).
 
 #### Tags when the FTR suite was "deployment agnostic"
 
-For available tag helpers and their meaning, see [Deployment tags](../../../../docs/extend/scout/deployment-tags.md).
+For available tag helpers and their meaning, see [Deployment tags](../../../../docs/extend/testing/deployment-tags.md).
 
 FTR **deployment-agnostic** configs often load the same files under both stateful and serverless. In Scout, **do not assume** `tags.deploymentAgnostic` is the right default for every migrated spec. Instead:
 
@@ -58,6 +60,8 @@ FTR **deployment-agnostic** configs often load the same files under both statefu
 - **Platform modules** (`src/platform/**`, `x-pack/platform/**`): `tags.deploymentAgnostic` is appropriate when the original intent was "run everywhere."
 
 API and UI specs should both carry tags that match the intended `run-tests` / CI targets; see step 9.
+
+**Prefer tags inline.** Avoid wrapping tags in a named constant unless the same tag set is reused across multiple suites. Never change an existing tag constant's value to fit a different suite. Apply per-issue tag instructions inline and only to the tests specified.
 
 ### 3) Translate the test structure
 
@@ -72,6 +76,8 @@ API and UI specs should both carry tags that match the intended `run-tests` / CI
 
 FTR often has **separate but near-identical** test files under `test/*api_integration*/` (stateful) and `test/serverless/` (or similar directories). Before migrating each file individually, compare them: if the test flow is identical or almost identical, **combine into a single Scout spec** with tags covering both deployment targets (e.g. `[...tags.stateful.classic, ...tags.serverless.observability.complete]`). Extract any deployment-specific differences into conditional helpers or small branching within the spec. Only keep separate specs when the flows genuinely diverge.
 
+Use the plan's mirror table as the source of truth. If it is incomplete, search again by basename, distinctive test titles, and comments that identify an original FTR test counterpart for Scout migration before choosing tags or cleanup.
+
 #### `it` blocks are sometimes steps (not full test cases)
 
 In FTR it's common for multiple `it(...)` blocks in one `describe(...)` to behave like a single user journey (shared browser state across `it`s).
@@ -81,6 +87,9 @@ Guideline:
 
 - If the FTR suite uses multiple `it(...)` blocks as sequential steps of one flow, combine them into a single `test(...)` and convert the step boundaries into `test.step(...)`.
 - If an `it(...)` block is already an independent test case, keep it as its own `test(...)` and ensure it sets up its own preconditions.
+- `test.step(...)` is reporting structure only: every step shares the same page, browser context, DOM, and cumulative application state. It does not run `beforeEach`/`afterEach` or reset state between steps.
+- Before combining `it(...)` blocks, inspect the original `beforeEach`/`afterEach` hooks and record the expected state at the start and end of each block. If a hook reset state between blocks, reproduce that reset explicitly at the corresponding step boundary, or keep separate Scout tests and reconstruct their prerequisites.
+- Inventory all UI and application state that can carry into later steps, such as form values, selections, navigation context, persisted settings, resources created through the UI, and unsaved changes. Reopen or reset the application only when the original test boundary requires it, using a source-verified page object method or `page.gotoApp()` rather than assuming an app-specific reset method exists.
 
 Minimal sketch:
 
@@ -102,7 +111,19 @@ test('create and edit entity', async () => {
 - Replace other FTR services with Scout fixtures (`pageObjects`, `browserAuth`, `apiServices`, `kbnClient`, `esArchiver`).
 - Use `apiServices`/`kbnClient` for setup/teardown and verifying side effects.
 - **Audit FTR before/after hooks carefully**—don't copy them verbatim. Review every call in `before`/`beforeEach`/`after`/`afterEach` and verify it is still correct for Scout: replace FTR-specific APIs with their Scout equivalents, remove unnecessary calls (e.g. FTR service initialization that Scout fixtures handle automatically), and add any missing setup or cleanup that the FTR suite neglected. Ensure every resource created in `beforeAll`/`beforeEach` has matching cleanup in `afterAll`/`afterEach`—FTR suites frequently lack proper teardown. Place `kbnClient.savedObjects.cleanStandardList()` (or `scoutSpace.savedObjects.cleanStandardList()`) in **`afterAll`**, not `beforeAll`; `beforeAll` cleanup masks missing teardown and hides leaked state from previous runs.
-- Replace webdriver waits with Playwright/page object methods.
+- Run domain-specific cleanup before `cleanStandardList()`, which is only an `afterAll` catch-all. Explicitly reset every UI setting, saved object, index, data stream, or other resource created by the suite. Order targeted cleanup according to resource dependencies rather than following a fixed global sequence. State shared across the whole parallel suite belongs in `global.teardown.ts`; per-test and per-spec state belongs in `afterEach`/`afterAll`.
+- Replace FTR webdriver waits (`retry.waitFor`, `testSubjects.existOrFail`, `find.*` with timeouts) with `locator.waitFor({ state: 'visible' })` / `page.testSubj.waitForSelector(..., { state: 'visible' })` to synchronize. Reserve `await expect(locator).toBeVisible()` for spec assertions on Scout's default timeouts — don't use it as a wait or pass `{ timeout }` overrides without a justifying comment.
+- **Attribute waits in page objects** — FTR helpers that checked element attributes (e.g. `testSubjects.getAttribute` + assertion) must **not** be migrated with `expect(el).toHaveAttribute(...)` inside a page object. Use Playwright's `.and()` locator composition with `.waitFor()` instead:
+  ```ts
+  // ✅ page object — wait for aria-checked without asserting
+  await toggle.click();
+  await toggle
+    .and(this.page.locator('[aria-checked="true"]'))
+    .waitFor({ state: 'visible' });
+  ```
+  This pattern works for any boolean/string attribute: `aria-pressed`, `aria-selected`, `aria-expanded`, `disabled`, `data-*`, etc. The `.and()` composition auto-retries until both selectors match simultaneously.
+- **Page objects — before writing any page object code:** (1) read the FTR page object's actual source; never infer a method's selectors or steps from its name (this is what produces hallucinated, non-existent methods). (2) Check for an existing equivalent in `src/platform/packages/shared/kbn-scout/src/playwright/page_objects/` (and the solution package, e.g. `@kbn/scout-oblt`) and reuse it rather than recreating it locally. (3) When a method is genuinely missing, place it per the plan's exists/wrong-scope/missing classification: contribute it to the global `kbn-scout` package (exported from that dir's `index.ts`) if it drives platform-wide UI (Discover, Dashboard, Lens, etc.); only keep it in the plugin's `test/scout*/ui/fixtures/page_objects/` (registered in that fixtures `index.ts`) if it's plugin-specific.
+- **Before calling any existing Scout page object method, read its implementation.** Follow exports to the defining source and verify: (1) the exact `data-test-subj` or locator pattern it constructs; (2) which readiness, navigation, or visibility conditions it waits for—and which it does not; and (3) its parameters and return type (`Locator`, string, object, or `void`). Never infer these contracts from the method name. Check shared page objects under `src/platform/packages/shared/kbn-scout/src/playwright/page_objects/`, the applicable solution Scout package, and plugin-local page objects.
 - Move UI selectors/actions into Scout page objects; register new page objects in the plugin fixtures index.
 - If the test needs API setup/cleanup, add a scoped API service and use it in `beforeAll/afterAll`.
 - Replace per-suite FTR config flags with `uiSettings` / `scoutSpace.uiSettings`, and (when needed) `apiServices.core.settings(...)`.
@@ -111,7 +132,7 @@ test('create and edit entity', async () => {
 
 #### Scout API auth (`cookieHeader` vs API key)
 
-For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](../../../../docs/extend/scout/api-auth.md).
+For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, code examples), see [Authentication in Scout API tests](../../../../docs/extend/testing/api-auth.md).
 
 **FTR mapping:** FTR `roleScopedSupertest` with `useCookieHeader: true` / `withInternalHeaders` maps to **`samlAuth`** + **`cookieHeader`** merged with common headers on `apiClient` requests. FTR `supertest` with API key auth maps to **`requestAuth.getApiKey(...)`** + **`apiKeyHeader`**.
 
@@ -130,7 +151,7 @@ For general Scout API auth patterns (`requestAuth`, `samlAuth`, common headers, 
 ### 6) Add helpers and constants
 
 - Put shared helpers in `test/scout*/ui/fixtures/helpers.ts` (or API helpers in API fixtures).
-- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects.
+- Add test-subject constants in `fixtures/constants.ts` for reuse across tests and page objects. For other shared values (archive paths, time ranges, etc.), follow the plan's "Shared constants to extract" list rather than introducing new constants during execution.
 - For `parallel_tests/` ingestion, use `parallel_tests/global.setup.ts` + `globalSetupHook` (no `esArchiver` in spec files).
 - For suite-wide Elasticsearch/Kibana state reset (e.g. reverting feature flags or global `uiSettings`, dropping hand-indexed data that affects other Scout configs sharing the cluster), use the **optional** `globalTeardownHook` in `parallel_tests/global.teardown.ts`. Picked up automatically when `runGlobalSetup: true` — no extra config flag. Use `esClient.indices.delete` / `deleteDataStream` / `deleteByQuery`, `kbnClient.uiSettings.unset(...)`, and `apiServices.core.settings(...)` to reset state. Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`.
 
@@ -172,15 +193,17 @@ Keep Scout tests for what **requires a real browser and running server**: naviga
 
 ### 8) Clean up FTR wiring
 
-- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files.
-- Delete old FTR test files once Scout coverage is verified.
+- Before removing FTR wiring, verify every migrated spec is included by the config in its UI/API directory: `playwright.config.ts` with `testDir: './tests'`, or `parallel.playwright.config.ts` with `testDir: './parallel_tests'`. Run the config or spec locally to confirm Playwright discovery.
+- Remove `loadTestFile` entries from any stateful and serverless FTR configs/index files identified in the plan's mirror table.
+- Delete old FTR test files once Scout coverage is verified. If a mirrored stateful/serverless file remains, either delete it too (when covered by the same Scout spec) or document why it still needs separate coverage.
 - For staged migrations, mark remaining FTR suites as `describe.skip` to avoid duplicate coverage.
 
 ### 9) Verify and run tests locally
 
 - **Typecheck:** For **Pattern A**, run **`node scripts/type_check --project <plugin-root>/tsconfig.json`**. For **Pattern B**, run **`node scripts/type_check --project <plugin>/test/scout/api/tsconfig.json`** (and UI project if present). Use full **`node scripts/type_check`** when shared types changed broadly. Huge **`TS6059` / `TS6307`** counts under a **Scout-only** project usually mean **Pattern B** + forbidden **`server/`** relatives—switch to **Pattern A** or fix imports (step 6).
-- Use `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <path>` and
-  `node scripts/scout.js run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
+- **Lint:** run **`node scripts/eslint $(git diff --name-only)`**. A clean run is not enough on its own—also check that you did not buy it with a suppression: `git diff -U0 | grep '^+.*eslint-disable'` must come back empty. Scout lint rules encode migration conventions (`playwright/no-nth-methods`, `playwright/expect-expect`, `@kbn/eslint/scout_*`), so disabling one reintroduces the FTR habit the rule exists to catch. Fix the code instead; see **Locate UI elements reliably** and **Avoid selecting elements by index or position** in [`ui-best-practices.md`](../../../../docs/extend/testing/ui-best-practices.md) for the index-free replacements. The only sanctioned disable is a single-line one with a stated reason (`// eslint-disable-next-line <rule> -- <why>`) for a case the rule genuinely can't express — for `no-nth-methods`, bound it with a preceding `toHaveCount` assertion; never a file-level `/* eslint-disable <rule> */`.
+- Use `node scripts/scout run-tests --arch stateful --domain classic --testFiles <path>` and
+  `node scripts/scout run-tests --arch serverless --domain observability_complete --testFiles <path>` (adjust serverless domain).
 - If the tests are under `test/scout_<configSet>/...`, `run-tests` auto-detects the server config set from the Playwright config path.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <configSet>` when your tests require a custom config set.
 - Each test must include assertions in the test body (not hidden inside page objects; page objects should return state).
@@ -213,12 +236,16 @@ Once the new specs typecheck and run, control returns to the parent skill. Step 
 - Ignoring existing parallel Scout config (mixing `tests/` with `parallel_tests/`).
 - Using the wrong Scout package (solution tests in security/observability/search must import from their solution Scout package, not `@kbn/scout`).
 - Using `tags.deploymentAgnostic` for specs under a **solution** plugin/package when the FTR suite was only "deployment agnostic" in the sense of shared stateful+serverless **observability** (or security/search) configs—those jobs still differ from the broad `deploymentAgnostic` tag set; use **explicit `tags.stateful.*` + `tags.serverless.<solution>`** instead (see step 2).
+- Deleting only the stateful FTR file and leaving a mirrored serverless FTR variant (or vice versa). Always search and clean up both sides when one Scout spec replaces both.
 - Importing `expect` from the wrong entrypoint (use `/ui` for UI, `/api` for API).
 - Using `esArchiver` in `parallel_tests/` spec files (ingest in `parallel_tests/global.setup.ts` instead).
 - Using nested `describe` blocks or `*.describe.configure()` (split into separate specs, or flatten small files into `test` + `test.step`—see step 3).
 - Migrating near-identical stateful and serverless FTR files as two separate Scout specs instead of combining them into one spec with appropriate tags (see step 3).
 - Spreading one user journey across multiple Scout `test(...)` blocks (fresh browser context per test).
-- Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert).
+- Hiding assertions inside page objects (ESLint `expect-expect` requires assertions in the test body; page objects should return state, not assert). Common offender: using `expect(el).toHaveAttribute('aria-checked', 'true')` in a page object instead of `el.and(this.page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' })`.
+- Calling an existing Scout page object method without reading its implementation to verify its locator pattern, wait behavior, parameters, and return type.
+- Reaching an element by position (`.first()`, `.nth()`, `.last()`) instead of by identity. FTR suites leaned on index access, but Scout runs against a shared, non-clean environment where extra data shifts the ordering. Identify the element instead: `filter({ hasText })`, `getByRole('row', { name })`, an ordered `toHaveText([...])` assertion, or a new `data-test-subj` on the component.
+- Silencing `playwright/no-nth-methods` (or any Scout lint rule) with an `eslint-disable` comment. It makes CI green without fixing the selector, so nothing catches it in review—see the lint gate in step 9.
 - Packing too many `test(...)` blocks into a single spec file. Keep specs focused: 4–5 short scenarios or 2–3 long scenarios per file. Oversized specs create bottlenecks in parallel execution.
 - Using **`requestAuth.getApiKey('admin')`** for **internal** routes whose handlers **create nested API keys**—often **HTTP 500**; use **`samlAuth.asInteractiveUser`** and merge **`cookieHeader`** (see step 4).
 - Using **`getApiKeyForCustomRole`** for FTR parity on **scoped saved-object / RBAC** assertions that used **cookie + custom role**—prefer **`samlAuth.asInteractiveUser(customRoleDescriptor)`** + **`cookieHeader`** so outcomes match FTR (e.g. **404** vs **200**).

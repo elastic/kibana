@@ -10,15 +10,17 @@
 import { once } from 'lodash';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest } from '@kbn/as-code-utils';
+import { ZodError, prettifyError } from '@kbn/zod';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext } from '@kbn/core/server';
+import { asCodeSearchRequestSchema } from '@kbn/as-code-shared-schemas';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { getRouteConfig } from '../get_route_config';
-import { logRequest } from '../log_request';
-import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
-import { search } from './search';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getRouteConfig } from '../get_route_config';
+import { searchResponseBodySchema } from './schemas';
+import { search } from './search';
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -50,9 +52,12 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          query: searchRequestParamsSchema,
+          query: asCodeSearchRequestSchema,
         },
         response: {
+          400: {
+            description: 'bad request',
+          },
           200: {
             body: () => searchResponseBodySchema,
             description: 'success',
@@ -67,18 +72,27 @@ export function registerSearchRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const result = await search(ctx, req.query, getCachedDashboardStateSchema());
+
           return res.ok({ body: result });
         } catch (e) {
+          if (e instanceof ZodError) {
+            const message = prettifyError(e);
+            logRequest(logger, req, 'warn', message);
+            return res.badRequest({ body: { message } });
+          }
+
           if (e.isBoom && e.output.statusCode === 403) {
             logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
 
-          logRequest(logger, req, 'error', e.message);
-          return res.customError({ statusCode: 500, body: { message: e.message } });
+          const message = e.stack ?? e.message;
+          logRequest(logger, req, 'error', message);
+          // Throw so Kibana returns a 500 HTTP response on any uncaught errors.
+          throw e;
         }
       })
   );

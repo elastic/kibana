@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 
 import { CaseDetailsAppHeader } from './case_details_app_header';
 import { renderWithTestingProviders } from '../../../../../common/mock';
@@ -15,6 +17,7 @@ import { useGetCaseConnectors } from '../../../../../containers/use_get_case_con
 import { useDeleteCases } from '../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../actions/status/use_should_disable_status';
 import { useStatusAction } from '../../../../actions/status/use_status_action';
+import { useAddCaseToChat } from '../../../../../agent_builder/use_add_case_to_chat';
 
 jest.mock('../../../../../containers/use_get_case_connectors');
 jest.mock('../../../../../containers/use_delete_cases');
@@ -22,22 +25,14 @@ jest.mock('../../../../actions/status/use_should_disable_status');
 jest.mock('../../../../actions/status/use_status_action');
 jest.mock('../../../../../common/navigation/hooks');
 jest.mock('../../../../../common/lib/kibana');
+jest.mock('../../../../../agent_builder/use_add_case_to_chat');
 jest.mock('../../../../case_view/use_on_refresh_case_view_page');
-
-jest.mock('@kbn/app-header', () => ({
-  AppHeader: ({ title, badges, menu }: { title: string; badges: unknown[]; menu: unknown }) => (
-    <div data-test-subj="app-header">
-      <span data-test-subj="app-header-title">{title}</span>
-      <span data-test-subj="app-header-badges">{JSON.stringify(badges)}</span>
-    </div>
-  ),
-}));
 
 jest.mock('../../../../confirm_delete_case', () => ({
   ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
 }));
 
-jest.mock('../case_settings_popover', () => ({
+jest.mock('./case_settings_popover', () => ({
   CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
 }));
 
@@ -45,6 +40,11 @@ jest.mock('../case_settings_popover', () => ({
 (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
 (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
 (useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+(useAddCaseToChat as jest.Mock).mockReturnValue({
+  addToChat: jest.fn(),
+  summarizeCase: jest.fn(),
+  isAddToChatAvailable: false,
+});
 
 describe('CaseDetailsAppHeader', () => {
   const onUpdateField = jest.fn();
@@ -63,28 +63,39 @@ describe('CaseDetailsAppHeader', () => {
     (useDeleteCases as jest.Mock).mockReturnValue({ mutate: jest.fn() });
     (useShouldDisableStatus as jest.Mock).mockReturnValue(() => false);
     (useStatusAction as jest.Mock).mockReturnValue({ handleUpdateCaseStatus: jest.fn() });
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: false,
+    });
   });
 
   it('renders the app header with case title', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    expect(await screen.findByTestId('app-header')).toBeInTheDocument();
-    expect(screen.getByTestId('app-header-title')).toHaveTextContent(basicCase.title);
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(basicCase.title);
+  });
+
+  it('renders metadata with reporter name', async () => {
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    const metadata = await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.metadata);
+    expect(metadata.textContent).toContain('Reported by');
+    expect(metadata.textContent).toContain(basicCase.createdBy.fullName!);
   });
 
   it('renders badges in the header', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    const badges = await screen.findByTestId('app-header-badges');
-    expect(badges).toBeInTheDocument();
-    expect(badges.textContent).toContain('case-view-severity-badge');
-    expect(badges.textContent).toContain('case-view-status-badge');
+    expect(await screen.findByTestId('case-view-severity-badge')).toBeInTheDocument();
+    expect(screen.getByTestId('case-view-status-badge')).toBeInTheDocument();
   });
 
   it('does not render delete modal by default', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    await screen.findByTestId('app-header');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
 
     expect(screen.queryByTestId('confirm-delete-modal')).not.toBeInTheDocument();
   });
@@ -92,7 +103,7 @@ describe('CaseDetailsAppHeader', () => {
   it('does not render settings popover by default', async () => {
     renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
 
-    await screen.findByTestId('app-header');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
 
     expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
   });
@@ -117,10 +128,41 @@ describe('CaseDetailsAppHeader', () => {
       },
     });
 
-    await screen.findByTestId('app-header');
+    await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.root);
 
     await waitFor(() => {
       expect(screen.queryByTestId('case-settings-popover')).not.toBeInTheDocument();
     });
+  });
+
+  it('adds the case to chat from the chat actions dropdown', async () => {
+    const addToChat = jest.fn();
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat,
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+    fireEvent.click(await screen.findByTestId('case-chat-action-add-to-chat'));
+
+    expect(addToChat).toHaveBeenCalled();
+  });
+
+  it('renders summarize case in the chat actions dropdown', async () => {
+    (useAddCaseToChat as jest.Mock).mockReturnValue({
+      addToChat: jest.fn(),
+      summarizeCase: jest.fn(),
+      isAddToChatAvailable: true,
+    });
+
+    renderWithTestingProviders(<CaseDetailsAppHeader {...defaultProps} />);
+
+    await userEvent.click(await screen.findByTestId('case-chat-actions'));
+
+    expect(await screen.findByTestId('case-chat-action-add-to-chat')).toBeInTheDocument();
+    expect(screen.getByTestId('case-chat-action-summarize')).toBeInTheDocument();
   });
 });

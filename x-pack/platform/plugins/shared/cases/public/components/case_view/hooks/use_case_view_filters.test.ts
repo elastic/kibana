@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 
 import type { CaseUI } from '../../../../common';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import { basicCase, basicComment, elasticUser } from '../../../containers/mock';
+import { TestProviders } from '../../../common/mock';
 import { useCaseViewFilters } from './use_case_view_filters';
 
 const otherUser = {
@@ -25,9 +28,19 @@ const caseWithTwoAuthors: CaseUI = {
   ],
 };
 
+const wrapper = ({ children }: { children: React.ReactNode }) =>
+  React.createElement(TestProviders, null, children);
+
+// TestProviders defaults the owner to `securitySolution`, which prefixes the key.
+const localStorageKey = `securitySolution.${LOCAL_STORAGE_KEYS.attachmentFilters}`;
+
 describe('useCaseViewFilters', () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it('returns inactive flags and the input caseData by default', () => {
-    const { result } = renderHook(() => useCaseViewFilters(basicCase));
+    const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
 
     expect(result.current.selectedAttachmentTypes).toEqual([]);
     expect(result.current.selectedAuthors).toEqual([]);
@@ -38,7 +51,7 @@ describe('useCaseViewFilters', () => {
   });
 
   it('isTypeVisible returns true for every id when no type is selected', () => {
-    const { result } = renderHook(() => useCaseViewFilters(basicCase));
+    const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
 
     expect(result.current.isTypeVisible('anything')).toBe(true);
     expect(result.current.isTypeVisible('user')).toBe(true);
@@ -46,7 +59,7 @@ describe('useCaseViewFilters', () => {
 
   describe('attachment type filter', () => {
     it('flips isTypeFilterActive and narrows isTypeVisible when types are selected', () => {
-      const { result } = renderHook(() => useCaseViewFilters(basicCase));
+      const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
 
       act(() => {
         result.current.setSelectedAttachmentTypes(['user']);
@@ -59,7 +72,7 @@ describe('useCaseViewFilters', () => {
     });
 
     it('clearing the selection restores the inactive state', () => {
-      const { result } = renderHook(() => useCaseViewFilters(basicCase));
+      const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
 
       act(() => {
         result.current.setSelectedAttachmentTypes(['user']);
@@ -74,7 +87,7 @@ describe('useCaseViewFilters', () => {
     });
 
     it('does not mutate caseData when only the type filter is active', () => {
-      const { result } = renderHook(() => useCaseViewFilters(basicCase));
+      const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
 
       act(() => {
         result.current.setSelectedAttachmentTypes(['user']);
@@ -86,7 +99,7 @@ describe('useCaseViewFilters', () => {
 
   describe('author filter', () => {
     it('filters comments down to the selected author', () => {
-      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
 
       act(() => {
         result.current.setSelectedAuthors([elasticUser.username]);
@@ -99,7 +112,7 @@ describe('useCaseViewFilters', () => {
     });
 
     it('supports multiple selected authors', () => {
-      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
 
       act(() => {
         result.current.setSelectedAuthors([elasticUser.username, otherUser.username]);
@@ -109,7 +122,7 @@ describe('useCaseViewFilters', () => {
     });
 
     it('clearing the selection restores the original caseData reference', () => {
-      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
 
       act(() => {
         result.current.setSelectedAuthors([elasticUser.username]);
@@ -135,7 +148,7 @@ describe('useCaseViewFilters', () => {
         ],
       };
 
-      const { result } = renderHook(() => useCaseViewFilters(caseWithUnknownAuthor));
+      const { result } = renderHook(() => useCaseViewFilters(caseWithUnknownAuthor), { wrapper });
 
       act(() => {
         result.current.setSelectedAuthors([elasticUser.username]);
@@ -146,7 +159,7 @@ describe('useCaseViewFilters', () => {
   });
 
   it('clearFilters resets every active filter in a single call', () => {
-    const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+    const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
 
     act(() => {
       result.current.setSelectedAttachmentTypes(['user']);
@@ -164,7 +177,7 @@ describe('useCaseViewFilters', () => {
   });
 
   it('type and author filters compose: hasActiveFilter reflects either being active', () => {
-    const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors));
+    const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
 
     act(() => {
       result.current.setSelectedAttachmentTypes(['user']);
@@ -177,5 +190,52 @@ describe('useCaseViewFilters', () => {
     expect(result.current.isTypeVisible('user')).toBe(true);
     expect(result.current.isTypeVisible('alert')).toBe(false);
     expect(result.current.filteredCaseData.comments.map((c) => c.id)).toEqual(['c-1']);
+  });
+
+  describe('local storage persistence', () => {
+    it('persists selections under the attachment filters key', () => {
+      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
+
+      act(() => {
+        result.current.setSelectedAttachmentTypes(['user']);
+      });
+      act(() => {
+        result.current.setSelectedAuthors([elasticUser.username]);
+      });
+
+      expect(JSON.parse(localStorage.getItem(localStorageKey) ?? '{}')).toEqual({
+        selectedAttachmentTypes: ['user'],
+        selectedAuthors: [elasticUser.username],
+      });
+    });
+
+    it('restores persisted selections on mount', () => {
+      localStorage.setItem(
+        localStorageKey,
+        JSON.stringify({ selectedAttachmentTypes: ['file'], selectedAuthors: ['elastic'] })
+      );
+
+      const { result } = renderHook(() => useCaseViewFilters(basicCase), { wrapper });
+
+      expect(result.current.selectedAttachmentTypes).toEqual(['file']);
+      expect(result.current.selectedAuthors).toEqual(['elastic']);
+      expect(result.current.hasActiveFilter).toBe(true);
+    });
+
+    it('clearFilters wipes the persisted selections', () => {
+      const { result } = renderHook(() => useCaseViewFilters(caseWithTwoAuthors), { wrapper });
+
+      act(() => {
+        result.current.setSelectedAttachmentTypes(['user']);
+      });
+      act(() => {
+        result.current.clearFilters();
+      });
+
+      expect(JSON.parse(localStorage.getItem(localStorageKey) ?? '{}')).toEqual({
+        selectedAttachmentTypes: [],
+        selectedAuthors: [],
+      });
+    });
   });
 });

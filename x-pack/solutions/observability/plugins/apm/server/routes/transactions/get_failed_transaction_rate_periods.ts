@@ -5,23 +5,11 @@
  * 2.0.
  */
 import type { BoolQuery } from '@kbn/es-query';
+import type { FailedTransactionRateResponse } from '@kbn/apm-api-shared';
+import type { RollupInterval, ApmServiceTransactionDocumentType } from '@kbn/apm-types';
 import { getFailedTransactionRate } from '../../lib/transaction_groups/get_failed_transaction_rate';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { Coordinate } from '../../../typings/timeseries';
-import type { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import type { RollupInterval } from '../../../common/rollup';
-
-export interface FailedTransactionRateResponse {
-  currentPeriod: {
-    timeseries: Coordinate[];
-    average: number | null;
-  };
-  previousPeriod: {
-    timeseries: Coordinate[];
-    average: number | null;
-  };
-}
 
 export async function getFailedTransactionRatePeriods({
   environment,

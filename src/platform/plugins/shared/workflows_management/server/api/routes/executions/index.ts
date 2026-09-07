@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isHitlExternalResumeEnabled } from '@kbn/workflows';
+
 import { registerCancelExecutionRoute } from './cancel_execution';
 import { registerCancelWorkflowExecutionsRoute } from './cancel_workflow_executions';
 import { registerGetChildrenExecutionsRoute } from './get_children_executions';
@@ -16,7 +18,13 @@ import { registerGetStepExecutionRoute } from './get_step_execution';
 import { registerGetWorkflowExecutionsRoute } from './get_workflow_executions';
 import { registerGetWorkflowStepExecutionsRoute } from './get_workflow_step_executions';
 import { registerResumeExecutionRoute } from './resume_execution';
+import {
+  registerExternalResumeExecutionGetRoute,
+  registerExternalResumeExecutionPostRoute,
+} from './resume_execution_external';
+import { registerExternalResumeFormRoute } from './resume_execution_external_form';
 import { registerRunWorkflowRoute } from './run_workflow';
+import { registerSearchExecutionsRoute } from './search_executions';
 import { registerTestStepRoute } from './test_step';
 import { registerTestWorkflowRoute } from './test_workflow';
 import type { RouteDependencies } from '../types';
@@ -26,6 +34,7 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerTestWorkflowRoute(deps);
   registerTestStepRoute(deps);
   registerGetWorkflowExecutionsRoute(deps);
+  registerSearchExecutionsRoute(deps);
   registerGetWorkflowStepExecutionsRoute(deps);
   registerGetExecutionRoute(deps);
   registerGetExecutionLogsRoute(deps);
@@ -33,5 +42,10 @@ export function registerExecutionRoutes(deps: RouteDependencies) {
   registerCancelWorkflowExecutionsRoute(deps);
   registerGetStepExecutionRoute(deps);
   registerResumeExecutionRoute(deps);
+  if (isHitlExternalResumeEnabled(deps.config?.hitlExternalResume?.enabled)) {
+    registerExternalResumeExecutionGetRoute(deps);
+    registerExternalResumeExecutionPostRoute(deps);
+    registerExternalResumeFormRoute(deps);
+  }
   registerGetChildrenExecutionsRoute(deps);
 }

@@ -16,7 +16,8 @@ project:
   sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
-  - '@kbn/dashboard-plugin'
+  - '@kbn/app-header'
+  - '@kbn/content-list-common'
   - '@kbn/expressions-plugin'
   - '@kbn/saved-objects-management-plugin'
   - '@kbn/telemetry-plugin'
@@ -61,7 +62,6 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/data-grid-in-table-search'
   - '@kbn/scout-info'
-  - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -69,7 +69,6 @@ dependsOn:
   - '@kbn/ai-assistant-management-plugin'
   - '@kbn/setup-node-env'
   - '@kbn/visualizations-common'
-  - '@kbn/unified-data-table'
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'

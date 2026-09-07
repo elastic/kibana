@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,14 @@ import { i18n } from '@kbn/i18n';
 
 import type { FleetServerHost } from '../../../../types';
 import { useAuthz, useLink } from '../../../../hooks';
+import { SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID } from '../../../../../../../common/constants';
+
+function getPrivateLinkProvider(urls: string[]): string {
+  const url = urls[0] ?? '';
+  if (url.includes('.azure.')) return 'Azure Private Link';
+  if (url.includes('.gcp.')) return 'GCP Private Service Connect';
+  return 'AWS PrivateLink';
+}
 
 export interface FleetServerHostsTableProps {
   fleetServerHosts: FleetServerHost[];
@@ -48,7 +57,7 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
     return [
       {
         render: (fleetServerHost: FleetServerHost) => (
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" gutterSize="xs" wrap={false}>
             <NameFlexItemWithMaxWidth grow={false}>
               <p title={fleetServerHost.name} className={`eui-textTruncate`}>
                 {fleetServerHost.name}
@@ -70,9 +79,29 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                 />
               </EuiFlexItem>
             )}
+            {fleetServerHost.id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID && (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.fleet.settings.fleetServerHostsTable.privateLinkBadgeTooltip',
+                    {
+                      defaultMessage:
+                        'This Fleet Server host uses {provider} for private network connectivity.',
+                      values: {
+                        provider: getPrivateLinkProvider(fleetServerHost.host_urls),
+                      },
+                    }
+                  )}
+                >
+                  <EuiBadge tabIndex={0}>
+                    {getPrivateLinkProvider(fleetServerHost.host_urls)}
+                  </EuiBadge>
+                </EuiToolTip>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         ),
-        width: '288px',
+        width: '380px',
         name: i18n.translate('xpack.fleet.settings.fleetServerHostsTable.nameColumnTitle', {
           defaultMessage: 'Name',
         }),

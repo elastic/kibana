@@ -86,6 +86,7 @@ import type {
   ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
   ALERT_ORIGINAL_DATA_STREAM_TYPE,
   ALERT_ATTACK_IDS,
+  ALERT_ENTITY_ID,
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import type { SearchTypes } from '../../../../detection_engine/types';
@@ -101,6 +102,7 @@ type Version8160 = '8.16.0';
 type Version8180 = '8.18.0';
 type Version8190 = '8.19.0';
 type Version930 = '9.3.0';
+type Version960 = '9.6.0';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type AlertAncestorSchema = {
@@ -276,7 +278,8 @@ type DetectionAlertSchema = {
           | 'endpoint_trusted_devices'
           | 'endpoint_events'
           | 'endpoint_host_isolation_exceptions'
-          | 'endpoint_blocklists';
+          | 'endpoint_blocklists'
+          | 'endpoint_custom_yara_signatures';
         version: Version800;
       };
     };
@@ -592,6 +595,10 @@ type DetectionAlertSchema = {
   [ALERT_ATTACK_IDS]?: {
     type: string[] | undefined;
     version: Version930;
+  };
+  [ALERT_ENTITY_ID]?: {
+    type: string[] | undefined;
+    version: Version960;
   };
 };
 

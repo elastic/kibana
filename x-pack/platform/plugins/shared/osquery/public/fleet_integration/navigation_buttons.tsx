@@ -11,6 +11,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { PLUGIN_ID } from '../../common';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+import { pagePathGetters } from '../common/page_paths';
 
 interface NavigationButtonsProps {
   isDisabled?: boolean;
@@ -29,28 +30,26 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     () => agentPolicyIds?.map((id) => `agentPolicyId=${id}`).join('&'),
     [agentPolicyIds]
   );
-  const liveQueryHref = useMemo(
+  const newQueryPath = useMemo(
     () =>
-      getUrlForApp(PLUGIN_ID, {
-        path: agentPolicyIds?.length
-          ? `/live_queries/new?${agentPolicyIdsQueryParam}`
-          : '/live_queries/new',
-      }),
-    [agentPolicyIdsQueryParam, agentPolicyIds?.length, getUrlForApp]
+      agentPolicyIds?.length
+        ? `${pagePathGetters.new_query()}?${agentPolicyIdsQueryParam}`
+        : pagePathGetters.new_query(),
+    [agentPolicyIdsQueryParam, agentPolicyIds?.length]
+  );
+  const liveQueryHref = useMemo(
+    () => getUrlForApp(PLUGIN_ID, { path: newQueryPath }),
+    [getUrlForApp, newQueryPath]
   );
 
   const liveQueryClick = useCallback(
     (event: any) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
-        navigateToApp(PLUGIN_ID, {
-          path: agentPolicyIds?.length
-            ? `/live_queries/new?${agentPolicyIdsQueryParam}`
-            : '/live_queries/new',
-        });
+        navigateToApp(PLUGIN_ID, { path: newQueryPath });
       }
     },
-    [agentPolicyIdsQueryParam, agentPolicyIds?.length, navigateToApp]
+    [navigateToApp, newQueryPath]
   );
 
   const packsHref = getUrlForApp(PLUGIN_ID, {
@@ -73,7 +72,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
     <EuiFlexGroup gutterSize="l">
       <EuiFlexItem>
         <EuiCard
-          icon={<EuiIcon size="xl" type="commandLine" />}
+          icon={<EuiIcon size="xl" type="commandLine" aria-hidden={true} />}
           title={i18n.translate('xpack.osquery.fleetIntegration.runLiveQueriesButtonText', {
             defaultMessage: 'Run live queries',
           })}
@@ -85,7 +84,7 @@ const NavigationButtonsComponent: React.FC<NavigationButtonsProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiCard
-          icon={<EuiIcon size="xl" type="clock" />}
+          icon={<EuiIcon size="xl" type="clock" aria-hidden={true} />}
           title={i18n.translate('xpack.osquery.fleetIntegration.packsButtonText', {
             defaultMessage: 'Packs',
           })}

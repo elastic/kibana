@@ -20,11 +20,6 @@ test.describe(
       await pageObjects.rulesPage.clickCustomThresholdRuleType();
     });
 
-    test('should render the empty chart only once at bootstrap', async ({ page }) => {
-      const previewChart = page.testSubj.locator(CUSTOM_THRESHOLD_RULE_TEST_SUBJECTS.PREVIEW_CHART);
-      await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
-    });
-
     test('should show an error message when the equation is invalid', async ({ page }) => {
       const customEquation = page.testSubj.locator('customEquation');
       const customEquationField = page.testSubj.locator(

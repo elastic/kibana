@@ -19,15 +19,12 @@ import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDashboardViewPath, isDetectionsPath } from '../../../helpers';
+import { isDashboardViewPath, isDetectionsPath, isRuleChangesHistoryPath } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import {
-  getScopeFromPath,
-  showDataViewPickerByPath,
-} from '../../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath, showDataViewPickerByPath } from '../../../data_view_manager/utils/paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 
@@ -60,29 +57,44 @@ export const GlobalHeader = React.memo(() => {
   const pageScope = getScopeFromPath(pathname);
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
+  const changesHistoryPath = isRuleChangesHistoryPath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
-    if (setHeaderActionMenu) {
-      setHeaderActionMenu((element) => {
-        const mount = toMountPoint(<OutPortal node={portalNode} />, {
-          theme,
-          i18n: kibanaServiceI18n,
-        });
-        return mount(element);
-      });
-
-      return () => {
-        /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
-        if (dashboardViewPath) {
-          return;
-        }
-        portalNode.unmount();
-        setHeaderActionMenu(undefined);
-      };
+    if (!setHeaderActionMenu) {
+      return;
     }
-  }, [portalNode, setHeaderActionMenu, theme, kibanaServiceI18n, dashboardViewPath]);
+
+    if (changesHistoryPath) {
+      setHeaderActionMenu(undefined);
+      return;
+    }
+
+    setHeaderActionMenu((element) => {
+      const mount = toMountPoint(<OutPortal node={portalNode} />, {
+        theme,
+        i18n: kibanaServiceI18n,
+      });
+      return mount(element);
+    });
+
+    return () => {
+      /* Dashboard mounts an edit toolbar, it should be restored when leaving dashboard editing page */
+      if (dashboardViewPath) {
+        return;
+      }
+      portalNode.unmount();
+      setHeaderActionMenu(undefined);
+    };
+  }, [
+    portalNode,
+    setHeaderActionMenu,
+    theme,
+    kibanaServiceI18n,
+    dashboardViewPath,
+    changesHistoryPath,
+  ]);
 
   return (
     <InPortal node={portalNode}>

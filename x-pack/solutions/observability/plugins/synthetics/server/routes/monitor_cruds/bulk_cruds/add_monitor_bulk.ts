@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import pMap from 'p-map';
 import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
@@ -113,7 +114,9 @@ const handlePrivateConfigErrors = async (
     const vars = stream?.vars;
     const monitorId = vars?.[ConfigKey.CONFIG_ID]?.value;
     const monitor = createdMonitors.find(
-      (savedObject) => savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
+      (savedObject): savedObject is MonitorSavedObject =>
+        !isSavedObjectErrorResult(savedObject) &&
+        savedObject.attributes[ConfigKey.CONFIG_ID] === monitorId
     );
     if (monitor) {
       failedMonitors.push({ monitor, error });
@@ -145,10 +148,13 @@ const rollBackNewMonitorBulk = async (
 
 const sendNewMonitorTelemetry = (
   server: SyntheticsServerSetup,
-  monitors: Array<SavedObject<EncryptedSyntheticsMonitorAttributes>>,
+  monitors: CreatedMonitors,
   errors?: ServiceLocationErrors | null
 ) => {
   for (const monitor of monitors) {
+    if (isSavedObjectErrorResult(monitor)) {
+      continue;
+    }
     sendTelemetryEvents(
       server.logger,
       server.telemetry,

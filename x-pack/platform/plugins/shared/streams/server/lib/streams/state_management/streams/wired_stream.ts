@@ -176,7 +176,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     this._changes.processing = computeChange({
       isExistingStream,
-      hasMeaningfulValue: (this._definition.ingest.processing.steps || []).length > 0,
+      hasMeaningfulValue: this._definition.ingest.processing.steps.length > 0,
       hasChanged: () =>
         !_.isEqual(
           _.omit(this._definition.ingest.processing, ['updated_at']),

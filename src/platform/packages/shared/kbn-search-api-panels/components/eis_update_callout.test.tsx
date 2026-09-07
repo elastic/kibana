@@ -26,8 +26,6 @@ describe('EisUpdateCallout', () => {
   const promoId = 'testPromo';
   const dataId = `${promoId}-eis-update-callout`;
   const ctaLink = 'https://example.com';
-  const direction: EisUpdateCalloutProps['direction'] = 'row';
-
   const mockOnDismissPromo = jest.fn();
   const mockHandleOnClick = jest.fn();
 
@@ -38,7 +36,6 @@ describe('EisUpdateCallout', () => {
           promoId={promoId}
           ctaLink={ctaLink}
           shouldShowEisUpdateCallout={true}
-          direction={direction}
           hasUpdatePrivileges={true}
           handleOnClick={mockHandleOnClick}
           {...props}
@@ -75,7 +72,7 @@ describe('EisUpdateCallout', () => {
   it('calls onDismissPromo when dismiss button is clicked', () => {
     renderEisUpdateCallout();
 
-    const dismissButton = screen.getByTestId('euiDismissCalloutButton');
+    const dismissButton = screen.getByTestId(`${dataId}-dismiss`);
     fireEvent.click(dismissButton);
 
     expect(mockOnDismissPromo).toHaveBeenCalledTimes(1);
@@ -119,7 +116,7 @@ describe('EisUpdateCallout', () => {
   it('renders documentation link with correct href', () => {
     renderEisUpdateCallout();
 
-    const docLink = screen.getByText(EIS_CALLOUT_DOCUMENTATION_BTN);
+    const docLink = screen.getByTestId(`${dataId}-secondaryAction`);
     expect(docLink).toHaveAttribute('href', ctaLink);
   });
 });

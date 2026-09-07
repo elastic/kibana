@@ -19,6 +19,7 @@ import {
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { StatusPopoverButton, type StatusPopoverButtonFieldInfo } from './status_popover_button';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
+import { isRulePreviewDocument } from '../../../shared/utils/is_rule_preview_document';
 
 const WORKFLOW_STATUS_FIELD_DATA = {
   field: ALERT_WORKFLOW_STATUS,
@@ -48,12 +49,15 @@ interface StatusProps {
  */
 export const Status = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated }: StatusProps) => {
+    const isPreview = useMemo(() => isRulePreviewDocument(hit), [hit]);
     const eventId = hit.raw._id as string;
     const isRemoteDocument = useMemo(
       () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
     const statusFieldInfo = useMemo<StatusPopoverButtonFieldInfo | null>(() => {
+      if (isPreview) return null;
+
       const workflowStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
       const statusValue = Array.isArray(workflowStatus)
         ? (workflowStatus[0] as string)
@@ -67,7 +71,7 @@ export const Status = memo(
         data: WORKFLOW_STATUS_FIELD_DATA,
         values: [statusValue],
       };
-    }, [eventId, hit]);
+    }, [isPreview, eventId, hit]);
 
     return (
       <FlyoutHeaderBlock

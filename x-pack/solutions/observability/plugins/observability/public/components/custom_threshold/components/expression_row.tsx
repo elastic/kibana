@@ -6,22 +6,25 @@
  */
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHealth,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
-import { debounce } from 'lodash';
+import { debounce, omit } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import { builtInComparatorsWithInclusive } from '../../../constants/comparators';
@@ -64,9 +67,24 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     kql,
   } = props;
 
-  const { metrics, comparator = COMPARATORS.GREATER_THAN, threshold = [] } = expression;
+  const {
+    metrics,
+    comparator = COMPARATORS.GREATER_THAN,
+    threshold = [],
+    warningThreshold = [],
+    warningComparator,
+  } = expression;
   const isMetricPct = useMemo(() => isPercent(metrics), [metrics]);
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
+  const [displayWarningThreshold, setDisplayWarningThreshold] = useState(
+    Boolean(warningThreshold?.length)
+  );
+  // Only true for the render where the user just clicked "Add warning
+  // threshold" in this session — distinct from displayWarningThreshold, which
+  // is also true when opening the form for a rule that already has one
+  // configured. Drives whether the new row's value popover auto-opens: we
+  // want that on first add, not every time the form happens to render.
+  const [warningJustAdded, setWarningJustAdded] = useState(false);
 
   // Keep a ref that always points to the latest expression prop so debounced
   // callbacks never close over a stale snapshot.
@@ -96,6 +114,46 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     [expressionId, expression, convertThreshold, setRuleParams]
   );
 
+  const updateWarningComparator = useCallback(
+    (c?: string) => {
+      setRuleParams(expressionId, { ...expression, warningComparator: c as COMPARATORS });
+    },
+    [expressionId, expression, setRuleParams]
+  );
+
+  const updateWarningThreshold = useCallback(
+    (enteredThreshold: any) => {
+      const t = convertThreshold(enteredThreshold);
+      if (t.join() !== expression.warningThreshold?.join()) {
+        setRuleParams(expressionId, { ...expression, warningThreshold: t });
+      }
+    },
+    [expressionId, expression, convertThreshold, setRuleParams]
+  );
+
+  const toggleWarningThreshold = useCallback(() => {
+    if (!displayWarningThreshold) {
+      setDisplayWarningThreshold(true);
+      setWarningJustAdded(true);
+      setRuleParams(expressionId, {
+        ...expression,
+        warningComparator: comparator,
+        warningThreshold: [],
+      });
+    } else {
+      setDisplayWarningThreshold(false);
+      setWarningJustAdded(false);
+      setRuleParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+    }
+  }, [
+    displayWarningThreshold,
+    setDisplayWarningThreshold,
+    setRuleParams,
+    comparator,
+    expression,
+    expressionId,
+  ]);
+
   const handleCustomMetricChange = useCallback(
     (exp: any) => {
       setRuleParams(expressionId, exp);
@@ -122,6 +180,44 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
       updateThreshold={updateThreshold}
       errors={(errors.critical as IErrorObject) ?? {}}
       isMetricPct={isMetricPct}
+      badge={
+        displayWarningThreshold && (
+          <EuiHealth color="danger" style={{ marginLeft: 8 }}>
+            <span>
+              <FormattedMessage
+                id="xpack.observability.customThreshold.rule.alertFlyout.criticalThreshold"
+                defaultMessage="Alert"
+              />{' '}
+              <span style={{ fontSize: '0.8em', opacity: 0.65 }}>
+                <FormattedMessage
+                  id="xpack.observability.customThreshold.rule.alertFlyout.criticalThresholdSeverityLabel"
+                  defaultMessage="(severity: critical)"
+                />
+              </span>
+            </span>
+          </EuiHealth>
+        )
+      }
+    />
+  );
+
+  const warningThresholdExpression = displayWarningThreshold && (
+    <ThresholdElement
+      comparator={warningComparator || comparator}
+      threshold={warningThreshold}
+      updateComparator={updateWarningComparator}
+      updateThreshold={updateWarningThreshold}
+      errors={(errors.warning as IErrorObject) ?? {}}
+      isMetricPct={isMetricPct}
+      initialPopoverOpen={warningJustAdded}
+      badge={
+        <EuiHealth color="warning" style={{ marginLeft: 8 }}>
+          <FormattedMessage
+            id="xpack.observability.customThreshold.rule.alertFlyout.warningThreshold"
+            defaultMessage="Warning"
+          />
+        </EuiHealth>
+      }
     />
   );
 
@@ -186,7 +282,66 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               dataView={dataView}
               kql={kql}
             />
-            {criticalThresholdExpression}
+            {!displayWarningThreshold && criticalThresholdExpression}
+            {!displayWarningThreshold && (
+              <EuiFlexGroup alignItems="center">
+                <EuiButtonEmpty
+                  data-test-subj="o11yExpressionRowAddWarningThresholdButton"
+                  color={'primary'}
+                  flush={'left'}
+                  size="xs"
+                  iconType={'plusCircle'}
+                  onClick={toggleWarningThreshold}
+                >
+                  <FormattedMessage
+                    id="xpack.observability.customThreshold.rule.alertFlyout.addWarningThreshold"
+                    defaultMessage="Add warning threshold"
+                  />
+                </EuiButtonEmpty>
+              </EuiFlexGroup>
+            )}
+            {displayWarningThreshold && (
+              <>
+                {criticalThresholdExpression}
+                {/* Not a flex sibling: EuiExpression's "columns" display sizes its
+                    description column as a percentage of its OWN container, so
+                    sharing this row with another flex item (even grow={false})
+                    narrows that container and shifts the text left relative to
+                    the other rows. Overlaying keeps this box's width identical
+                    to the others. */}
+                <div style={{ position: 'relative' }}>
+                  {warningThresholdExpression}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      right: 8,
+                      transform: 'translateY(-50%)',
+                    }}
+                  >
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.observability.customThreshold.rule.alertFlyout.removeWarningThreshold',
+                        { defaultMessage: 'Remove warning threshold' }
+                      )}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        data-test-subj="o11yExpressionRowRemoveWarningThresholdButton"
+                        aria-label={i18n.translate(
+                          'xpack.observability.customThreshold.rule.alertFlyout.removeWarningThreshold',
+                          { defaultMessage: 'Remove warning threshold' }
+                        )}
+                        iconSize="s"
+                        color="text"
+                        iconType={'minusCircle'}
+                        onClick={toggleWarningThreshold}
+                      />
+                    </EuiToolTip>
+                  </div>
+                </div>
+              </>
+            )}
             <EuiSpacer size={'s'} />
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -218,8 +373,26 @@ const ThresholdElement: React.FC<{
   isMetricPct: boolean;
   comparator: MetricExpression['comparator'];
   errors: IErrorObject;
+  // Only relevant when this row can be toggled on/off (the warning row):
+  // open the value popover immediately on mount so the newly-added row isn't
+  // left showing an empty, unexplained invalid state. Must only be passed as
+  // true for the render where the row was just added, not on every mount
+  // (e.g. opening the form for a rule that already has one configured).
+  initialPopoverOpen?: boolean;
+  // Rendered inside the threshold expression's own button, right after the
+  // value — must stay non-interactive (see ThresholdExpressionProps.badge).
+  badge?: React.ReactNode;
   // eslint-disable-next-line react/function-component-definition
-}> = ({ updateComparator, updateThreshold, threshold, isMetricPct, comparator, errors }) => {
+}> = ({
+  updateComparator,
+  updateThreshold,
+  threshold,
+  isMetricPct,
+  comparator,
+  errors,
+  initialPopoverOpen,
+  badge,
+}) => {
   const displayedThreshold = useMemo(() => {
     if (isMetricPct) return threshold.map((v) => decimalToPct(v));
     return threshold;
@@ -241,7 +414,9 @@ const ThresholdElement: React.FC<{
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
         display="fullWidth"
+        initialPopoverOpen={initialPopoverOpen}
         unit={isMetricPct ? '%' : ''}
+        badge={badge}
       />
     </>
   );

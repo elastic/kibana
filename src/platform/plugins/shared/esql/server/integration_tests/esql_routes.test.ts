@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
+import {
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  JOIN_INDICES_AUTOCOMPLETE_ROUTE,
+  TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE,
+} from '@kbn/esql-types';
 import { EsqlServiceTestbed } from './testbed';
 
 describe('ESQL routes', () => {
@@ -17,6 +21,7 @@ describe('ESQL routes', () => {
     await testbed.start();
     await testbed.setupLookupIndices();
     await testbed.setupTimeseriesIndices();
+    await testbed.setupClosedLookupIndex();
   });
 
   afterAll(async () => {
@@ -24,7 +29,7 @@ describe('ESQL routes', () => {
   });
 
   it('can load ES|QL Autocomplete/Validation indices for JOIN command', async () => {
-    const url = '/internal/esql/autocomplete/join/indices';
+    const url = JOIN_INDICES_AUTOCOMPLETE_ROUTE;
     const result = await testbed.GET(url).send().expect(200);
 
     const item1 = result.body.indices.find((item: any) => item.name === 'lookup_index1');
@@ -45,8 +50,29 @@ describe('ESQL routes', () => {
     });
   });
 
+  it('returns closed lookup indices with status: closed in JOIN indices response', async () => {
+    const url = JOIN_INDICES_AUTOCOMPLETE_ROUTE;
+    const result = await testbed.GET(url).send().expect(200);
+
+    const closedItem = result.body.indices.find((item: any) => item.name === 'closed_lookup_index');
+
+    expect(closedItem).toMatchObject({
+      name: 'closed_lookup_index',
+      mode: 'Lookup',
+      isClosed: true,
+    });
+  });
+
+  it('does not include closed lookup indices in sources endpoint', async () => {
+    const url = '/internal/esql/autocomplete/sources/local';
+    const result = await testbed.GET(url).send().expect(200);
+
+    const closedItem = result.body.find((item: any) => item.name === 'closed_lookup_index');
+    expect(closedItem).toBeUndefined();
+  });
+
   it('can load ES|QL Autocomplete/Validation indices for TS command', async () => {
-    const url = '/internal/esql/autocomplete/timeseries/indices';
+    const url = TIMESERIES_INDICES_AUTOCOMPLETE_ROUTE;
     const result = await testbed.GET(url).send().expect(200);
 
     const item1 = result.body.indices.find((item: any) => item.name === 'ts_index1');

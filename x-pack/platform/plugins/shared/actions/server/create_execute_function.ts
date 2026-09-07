@@ -10,6 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';
@@ -34,6 +35,12 @@ export interface ExecuteOptions
   spaceId: string;
   apiKeyId?: string;
   apiKey: string | null;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId: string;
   actionTypeId: string;
   priority?: TaskPriority;
@@ -173,6 +180,9 @@ export function createBulkExecutionEnqueuerFunction({
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
           apiKeyId: actionToExecute.apiKeyId,
+          ...(actionToExecute.uiamApiKeyExternal !== undefined
+            ? { uiamApiKeyExternal: actionToExecute.uiamApiKeyExternal }
+            : {}),
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
@@ -183,6 +193,9 @@ export function createBulkExecutionEnqueuerFunction({
       await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
 
     const taskInstances = actionTaskParamsRecords.saved_objects.map((so, index) => {
+      if (isSavedObjectErrorResult(so)) {
+        throw so.error;
+      }
       const actionId = so.attributes.actionId;
       return {
         taskType: `actions:${actionTypeIds[actionId]}`,
@@ -281,7 +294,7 @@ async function getConnectors(
     );
 
     for (const item of bulkGetResult.saved_objects) {
-      if (item.error) throw item.error;
+      if (isSavedObjectErrorResult(item)) throw item.error;
       result.push({
         isInMemory: false,
         connector: item.attributes,

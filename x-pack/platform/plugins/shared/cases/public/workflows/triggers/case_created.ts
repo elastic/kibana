@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { caseCreatedTriggerCommonDefinition } from '../../../common/workflows/triggers';
+import { casesWorkflowIcon } from '../shared';
 
 export const caseCreatedTriggerPublicDefinition: PublicTriggerDefinition = {
   ...caseCreatedTriggerCommonDefinition,
-  icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/app_cases').then(({ icon }) => ({
-      default: icon,
-    }))
-  ),
+  icon: casesWorkflowIcon,
 };

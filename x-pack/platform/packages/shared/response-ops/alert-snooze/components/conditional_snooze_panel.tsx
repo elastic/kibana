@@ -33,7 +33,7 @@ import {
 import { TimeConditionPanel } from './time_condition_panel';
 import type { TimeConditionState } from './time_condition_panel';
 import { DataConditionPanel } from './data_condition_panel';
-import { DEFAULT_DATA_CONDITION_TYPES } from './built_in_data_conditions';
+import { buildDataConditionTypes } from './built_in_data_conditions';
 import * as i18n from './translations';
 
 export type { ConditionalSnoozeSchedule, SnoozeCondition };
@@ -46,10 +46,13 @@ export interface ConditionalSnoozePanelProps {
    */
   onScheduleChange: (schedule: ConditionalSnoozeSchedule | undefined) => void;
   /**
-   * Set of data-condition descriptors available in the type dropdown.
-   * Pass a custom list to add domain-specific types.
+   * Leaf-level scalar alert field names offered in the `field_change` condition's
+   * field dropdown. Consumers fetch these and pass them down; the package itself
+   * stays data-agnostic.
    */
-  dataConditionTypes?: readonly DataConditionTypeDescriptor[];
+  fieldOptions?: string[];
+  /** Whether the alert field names are still being fetched by the consumer. */
+  isLoadingFields?: boolean;
 }
 
 const newEntry = (
@@ -65,9 +68,15 @@ const newEntry = (
 
 export const ConditionalSnoozePanel = ({
   onScheduleChange,
-  dataConditionTypes = DEFAULT_DATA_CONDITION_TYPES,
+  fieldOptions,
+  isLoadingFields = false,
 }: ConditionalSnoozePanelProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const dataConditionTypes = useMemo(
+    () => buildDataConditionTypes({ fields: fieldOptions, isLoading: isLoadingFields }),
+    [fieldOptions, isLoadingFields]
+  );
   const logicalOperatorCss = useMemo(
     () =>
       css({

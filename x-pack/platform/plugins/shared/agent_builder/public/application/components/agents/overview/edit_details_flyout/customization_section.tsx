@@ -21,18 +21,23 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../../utils/i18n';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
+import { AiIndicesSection } from './ai_indices_section';
 import type { EditDetailsFormData } from './types';
 
 const { editDetails: flyoutLabels } = labels.agentOverview;
 
 interface CustomizationSectionProps {
   showWorkflowSection: boolean;
+  agentId: string;
 }
 
 export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
   showWorkflowSection,
+  agentId,
 }) => {
   const { control } = useFormContext<EditDetailsFormData>();
+  const { isAdmin } = useUiPrivileges();
 
   return (
     <>
@@ -79,6 +84,8 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
         </EuiFlexGroup>
       </EuiPanel>
 
+      <AiIndicesSection agentId={agentId} />
+
       {showWorkflowSection && (
         <>
           <EuiSpacer size="m" />
@@ -97,9 +104,14 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
                   {labels.common.optional}
                 </EuiText>
               }
+              helpText={!isAdmin ? flyoutLabels.workflowAdminOnlyReason : undefined}
               fullWidth
             >
-              <WorkflowPicker name="configuration.workflow_ids" singleSelection={false} />
+              <WorkflowPicker
+                name="configuration.workflow_ids"
+                singleSelection={false}
+                isDisabled={!isAdmin}
+              />
             </EuiFormRow>
           </EuiPanel>
         </>

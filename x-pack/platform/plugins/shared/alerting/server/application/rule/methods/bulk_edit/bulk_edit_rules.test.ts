@@ -7,33 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { v4 as uuidv4 } from 'uuid';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import type { RuleTypeParams } from '../../../../../common';
 import { RecoveredActionGroup } from '../../../../../common';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter } from '../../../../connector_adapters/types';
 import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { bulkEditOperationsSchema } from './schemas';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import type { RawRule } from '../../../../types';
 import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
@@ -60,51 +45,26 @@ const { getActiveSnoozeIfExist } = jest.requireMock(
 );
 const { validateScheduleLimit } = jest.requireMock('../get_schedule_frequency');
 
-const taskManager = taskManagerMock.createStart();
-const ruleTypeRegistry = ruleTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertingAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-const auditLogger = auditLoggerMock.create();
-const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = jest.fn();
 const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
-const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+const {
+  rulesClientParams,
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
-  authorization: authorization as unknown as AlertingAuthorization,
-  actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: createAPIKeyMock,
-  cloneAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  internalSavedObjectsRepository,
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
+  encryptedSavedObjects,
+  authorization,
+  actionsAuthorization,
   auditLogger,
-  maxScheduledPerMinute: 10000,
-  minimumScheduleInterval: { value: '1m', enforce: false },
+} = getRulesClientMockParams({
+  kibanaVersion,
+  createAPIKey: createAPIKeyMock,
   isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
   getAuthenticationAPIKey: getAuthenticationApiKeyMock,
-  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  isSystemAction: jest.fn(),
-  getAlertIndicesAlias: jest.fn(),
-  alertsService: null,
-  backfillClient: backfillClientMock.create(),
-  uiSettings: uiSettingsServiceMock.createStartContract(),
-  featureFlags: coreFeatureFlagsMock.createStart(),
-  isServerless: false,
-};
+});
 const paramsModifier = jest.fn();
 
 const MOCK_API_KEY = Buffer.from('123:abc').toString('base64');
@@ -3051,6 +3011,51 @@ describe('bulkEdit()', () => {
       expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
     });
 
+    test('runs the rule type params authorizer', async () => {
+      // The generic bulk-edit path authorizes params; a throwing authorizer surfaces
+      // as an error for the rule.
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        validate: {
+          params: schema.object({}, { unknowns: 'allow' }),
+        },
+        authorize: {
+          params: {
+            authorize: async () => {
+              throw new Error('Not authorized to edit params');
+            },
+          },
+        },
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        solution: 'stack',
+        category: 'test',
+        validLegacyConsumers: [],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]).toHaveProperty('message', 'Not authorized to edit params');
+    });
+
     test('should validate mutatedParams for rules', async () => {
       ruleTypeRegistry.get.mockReturnValue({
         id: '123',
@@ -3436,10 +3441,11 @@ describe('bulkEdit()', () => {
   });
 
   describe('change tracking', () => {
-    const updatedRuleSO = (id: string, error?: SavedObject<RawRule>['error']) =>
+    const updatedRuleSO = (id: string, error?: SavedObjectError) =>
       ({
         id,
         type: RULE_SAVED_OBJECT_TYPE,
+        updated_at: '2023-03-05T10:30:00.000Z',
         attributes: {
           ...existingRule.attributes,
           tags: ['foo', 'test-1'],
@@ -3502,7 +3508,7 @@ describe('bulkEdit()', () => {
       );
     });
 
-    test('captures the full post-edit attributes and references of each rule', async () => {
+    test('captures the full post-edit attributes of each rule', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -3516,23 +3522,68 @@ describe('bulkEdit()', () => {
 
       expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
         [
-          {
-            // setGlobalDate pins Date.now() to mockedDateString.
-            timestamp: '2019-02-12T21:01:22.479Z',
-            objectId: '1',
-            objectType: RULE_SAVED_OBJECT_TYPE,
-            module: 'stack',
-            snapshot: {
-              attributes: updated.attributes,
-              references: updated.references,
-            },
-          },
+          expect.objectContaining({
+            snapshot: expect.objectContaining({
+              id: updated.id,
+              name: updated.attributes.name,
+              tags: updated.attributes.tags,
+              alertTypeId: updated.attributes.alertTypeId,
+              createdAt: updated.attributes.createdAt,
+              updatedAt: updated.attributes.updatedAt,
+            }),
+          }),
         ],
         expect.any(Object)
       );
     });
 
-    test('stamps every change with the time captured immediately before the bulkCreate', async () => {
+    test('captures the context of each rule', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            objectId: '1',
+            objectType: RULE_SAVED_OBJECT_TYPE,
+            module: 'stack',
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('captures rule.revision in object.sequence ', async () => {
+      const changeTrackingService = createChangeTrackingService();
+      const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
+      setRuleType();
+      const updated = updatedRuleSO('1');
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [updated] });
+
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
+
+      expect(changeTrackingService.logBulk).toHaveBeenCalledWith(
+        [
+          expect.objectContaining({
+            sequence: 1,
+          }),
+        ],
+        expect.any(Object)
+      );
+    });
+
+    test('stamps every change with updated_at from the saved object', async () => {
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();
@@ -3547,25 +3598,17 @@ describe('bulkEdit()', () => {
         saved_objects: [updatedRuleSO('1'), updatedRuleSO('2')],
       });
 
-      const startTimeMs = Date.parse('2030-06-01T08:00:00.000Z');
-      const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(startTimeMs);
+      await trackingClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
+      });
 
-      try {
-        await trackingClient.bulkEdit({
-          filter: '',
-          operations: [{ field: 'tags', operation: 'add', value: ['test-1'] }],
-        });
-
-        expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
-        const [changes] = changeTrackingService.logBulk.mock.calls[0];
-        // All rules share the same operation timestamp.
-        expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
-          '2030-06-01T08:00:00.000Z',
-          '2030-06-01T08:00:00.000Z',
-        ]);
-      } finally {
-        dateNowSpy.mockRestore();
-      }
+      expect(changeTrackingService.logBulk).toHaveBeenCalledTimes(1);
+      const [changes] = changeTrackingService.logBulk.mock.calls[0];
+      expect(changes.map((c: { timestamp: string }) => c.timestamp)).toEqual([
+        '2023-03-05T10:30:00.000Z',
+        '2023-03-05T10:30:00.000Z',
+      ]);
     });
 
     test('skips rules whose saved object update failed (partial bulk failures)', async () => {

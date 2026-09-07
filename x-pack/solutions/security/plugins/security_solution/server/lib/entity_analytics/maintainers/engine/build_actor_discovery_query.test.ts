@@ -8,6 +8,9 @@
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 
 import { buildActorDiscoveryQuery, buildActorPageFilter } from './build_actor_discovery_query';
+import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
+import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from '../communicates_with/configs';
+import { ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS } from '../accesses/configs';
 import type { RelationshipIntegrationConfig, CompositeBucket } from './types';
 
 const HOST_EUID_FILTER = euid.dsl.getEuidDocumentsContainsIdFilter('host');
@@ -47,6 +50,22 @@ describe('buildActorDiscoveryQuery (actor discovery)', () => {
       (f) => (f.range as Record<string, unknown> | undefined)?.['@timestamp']
     );
     expect(hasRange).toBe(true);
+  });
+
+  it('omits the timestamp range filter when disableLookbackWindow is true', () => {
+    const config: RelationshipIntegrationConfig = {
+      ...accessesConfig,
+      disableLookbackWindow: true,
+    };
+    const filters = (
+      buildActorDiscoveryQuery(config, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      }
+    ).query.bool.filter;
+    const hasRange = filters.some(
+      (f) => (f.range as Record<string, unknown> | undefined)?.['@timestamp']
+    );
+    expect(hasRange).toBe(false);
   });
 
   it('includes the user-EUID-exists DSL filter (deep-equality, not substring)', () => {
@@ -369,4 +388,51 @@ describe('buildActorPageFilter (page filter)', () => {
       expect(byField['user.email']).toBeUndefined();
     });
   });
+});
+
+describe('hostScopedUsersOnly configs: Step 1 actor fields agree with Step 2', () => {
+  // The host-scoped EUID reads `user.name` only, so Step 1 must bucket on exactly
+  // that. Listing extra fields (e.g. `user.email`) multiplies composite buckets —
+  // `missing_bucket: true` emits a bucket per (null, name) AND (email, null)
+  // combination — surfacing actors Step 2 discards when it cannot build an EUID.
+  const hostScopedConfigs = [
+    ...COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
+    ...ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
+  ].filter((c) => c.hostScopedUsersOnly);
+
+  it('covers the shipped host-scoped configs', () => {
+    expect(hostScopedConfigs.map((c) => c.id).sort()).toEqual([
+      'system_auth',
+      'system_auth',
+      'system_security',
+      'system_security',
+    ]);
+  });
+
+  it.each(hostScopedConfigs.map((c) => [c.id, c] as const))(
+    '%s buckets on user.name alone',
+    (_id, config) => {
+      expect(config.customActor?.fields).toEqual(['user.name']);
+
+      const { aggs } = buildActorDiscoveryQuery(config, undefined) as {
+        aggs: { users: { composite: { sources: Array<Record<string, unknown>> } } };
+      };
+      expect(aggs.users.composite.sources).toHaveLength(1);
+      expect(Object.keys(aggs.users.composite.sources[0])).toEqual(['user.name']);
+    }
+  );
+
+  it.each(hostScopedConfigs.map((c) => [c.id, c] as const))(
+    '%s Step 1 presence filter references no field the Step 2 EUID ignores',
+    (_id, config) => {
+      const { query } = buildActorDiscoveryQuery(config, undefined) as {
+        query: { bool: { filter: Array<Record<string, unknown>> } };
+      };
+      const step2 = buildTargetsPerActorQuery(config, 'default');
+
+      // `user.email` must appear in neither step for these configs.
+      expect(JSON.stringify(query.bool.filter)).not.toContain('user.email');
+      expect(step2).not.toContain('user.email');
+    }
+  );
 });

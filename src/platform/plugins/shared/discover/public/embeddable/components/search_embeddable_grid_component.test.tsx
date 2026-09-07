@@ -16,7 +16,13 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DataTableColumnsMeta, SortOrder, DataGridDensity } from '@kbn/unified-data-table';
+import type {
+  DataTableColumnsMeta,
+  SortOrder,
+  DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
@@ -45,6 +51,8 @@ const createStateManager = (): SearchEmbeddableStateManager => ({
   sort: new BehaviorSubject<SortOrder[] | undefined>(undefined),
   viewMode: new BehaviorSubject<VIEW_MODE | undefined>(undefined),
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
+  documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
+  jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),
@@ -102,7 +110,7 @@ describe('SearchEmbeddableGridComponent', () => {
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
 
-    return render(
+    render(
       <DiscoverTestProvider services={services}>
         <SearchEmbeddableGridComponent
           api={api}
@@ -121,6 +129,8 @@ describe('SearchEmbeddableGridComponent', () => {
         />
       </DiscoverTestProvider>
     );
+
+    return { stateManager };
   };
 
   describe('onUpdateSampleSize', () => {
@@ -145,6 +155,28 @@ describe('SearchEmbeddableGridComponent', () => {
       const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
       expect(lastCallProps?.onUpdateSampleSize).toBeDefined();
       expect(typeof lastCallProps?.onUpdateSampleSize).toBe('function');
+    });
+  });
+
+  describe('onResize', () => {
+    it('should update the embeddable grid state', async () => {
+      const { stateManager } = renderComponent({ isEsql: false });
+
+      await waitFor(() => {
+        expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();
+      });
+
+      const lastCallProps = mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0];
+      const onResize = lastCallProps?.onResize as (params: {
+        columnId: string;
+        width: number | undefined;
+      }) => void;
+
+      onResize({ columnId: '_source', width: 250 });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: { width: 250 } } });
+
+      onResize({ columnId: '_source', width: undefined });
+      expect(stateManager.grid.getValue()).toEqual({ columns: { _source: {} } });
     });
   });
 });

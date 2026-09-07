@@ -25,7 +25,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
     app: ['infra', 'logs', 'kibana', 'observability-logs-explorer'],
     catalogue: ['infralogging', 'logs'],
     management: {
-      insightsAndAlerting: ['triggersActions'],
+      insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
     },
     alerting: logsAlertingFeatures,
     privileges: {
@@ -49,7 +49,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         ui: ['show', 'configureSource', 'save'],
       },
@@ -66,7 +66,7 @@ export const getLogsFeature = (): KibanaFeatureConfig => {
           },
         },
         management: {
-          insightsAndAlerting: ['triggersActions'],
+          insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
         },
         savedObject: {
           all: [],

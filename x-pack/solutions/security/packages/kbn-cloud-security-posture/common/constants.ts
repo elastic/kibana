@@ -112,13 +112,14 @@ export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
  * Relationship fields available in the generic entities index.
  * These represent static/configuration-based relationships between entities.
  *
- * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
- * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
- * to batch the FORK queries.
+ * NOTE: ES|QL FORK supports a maximum of 8 branches. The relationship fetching logic in
+ * fetch_entity_relationships_graph.ts batches this list into groups of at most 8 fields, each
+ * issued as its own ES|QL query, so this list may grow past 8 entries without further changes.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
   'accesses_frequently',
   'accesses_infrequently',
+  'administers',
   'communicates_with',
   'depends_on',
   'owns',
@@ -133,6 +134,7 @@ export const ENTITY_RELATIONSHIP_LABELS: Record<
 > = {
   accesses_frequently: 'Accesses frequently',
   accesses_infrequently: 'Accesses infrequently',
+  administers: 'Administers',
   communicates_with: 'Communicates with',
   depends_on: 'Depends on',
   owns: 'Owns',
@@ -196,3 +198,58 @@ export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
 };
 
 export type EuidSourceFields = ReturnType<typeof getGraphActorEuidSourceFields>;
+
+export const GRAPH_SUPPORTED_RUNTIME_MAPPINGS_INTEGRATIONS = [
+  'aws_bedrock',
+  'aws_bedrock_agentcore',
+  'aws_cloudtrail_otel',
+  'aws_securityhub',
+  'aws_vpcflow_otel',
+  'azure_ai_foundry',
+  'azure_app_service',
+  'azure_openai',
+  'checkpoint_email',
+  'cisco_meraki',
+  'cisco_secure_email_gateway',
+  'cisco_umbrella',
+  'citrix_waf',
+  'corelight',
+  'cyera',
+  'darktrace',
+  'entityanalytics_ad',
+  'entityanalytics_okta',
+  'extrahop',
+  'forgerock',
+  'fortinet_fortigate',
+  'gcp_vertexai',
+  'gitlab',
+  'greenhouse',
+  'infoblox_bloxone_ddi',
+  'jamf_pro',
+  'linux',
+  'm365_defender',
+  'microsoft_dhcp',
+  'microsoft_intune',
+  'openai',
+  'osquery',
+  'ping_federate',
+  'ping_one',
+  'prisma_cloud',
+  'qualys_vmdr',
+  'salesforce',
+  'servicenow',
+  'slack',
+  'snort',
+  'snyk',
+  'suricata',
+  'sysdig',
+  'tanium',
+  'ti_misp',
+  'wiz',
+  'zscaler_zia',
+] as const;
+
+export const isGraphSupportedRuntimeMappingsIntegration = (dataset: string): boolean =>
+  GRAPH_SUPPORTED_RUNTIME_MAPPINGS_INTEGRATIONS.some(
+    (integration) => dataset === integration || dataset.startsWith(`${integration}.`)
+  );

@@ -12,7 +12,18 @@ import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
 export interface SpacesApiService {
-  create: (space: { id: string; name?: string; disabledFeatures?: string[] }) => Promise<void>;
+  create: (space: {
+    id: string;
+    name?: string;
+    disabledFeatures?: string[];
+    /** Cross-project search default NPRE for the space (serverless CPS). */
+    projectRouting?: string;
+  }) => Promise<void>;
+  get: (id: string) => Promise<{
+    id: string;
+    name: string;
+    projectRouting?: string;
+  }>;
   delete: (id: string) => Promise<void>;
   setSolutionView: (params: { id: string; solution: SpaceSolutionView }) => Promise<void>;
   resetViewToClassic: (id: string) => Promise<void>;
@@ -34,13 +45,32 @@ export const getSpacesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): Spac
   };
 
   return {
-    create: async ({ id, name = id, disabledFeatures = [] }) => {
+    create: async ({ id, name = id, disabledFeatures = [], projectRouting }) => {
       await measurePerformanceAsync(log, `spacesApi.create(${id})`, async () => {
         await kbnClient.request({
           method: 'POST',
           path: '/api/spaces/space',
-          body: { id, name, disabledFeatures },
+          body: {
+            id,
+            name,
+            disabledFeatures,
+            ...(projectRouting !== undefined ? { projectRouting } : {}),
+          },
         });
+      });
+    },
+
+    get: async (id) => {
+      return measurePerformanceAsync(log, `spacesApi.get(${id})`, async () => {
+        const { data } = await kbnClient.request<{
+          id: string;
+          name: string;
+          projectRouting?: string;
+        }>({
+          method: 'GET',
+          path: `/api/spaces/space/${encodeURIComponent(id)}`,
+        });
+        return data;
       });
     },
 

@@ -17,6 +17,7 @@ project:
   owner: '@elastic/response-ops'
   sourceRoot: x-pack/platform/plugins/shared/actions
 dependsOn:
+  - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/core'
   - '@kbn/human-readable-id'
   - '@kbn/spaces-plugin'
@@ -68,6 +69,7 @@ dependsOn:
   - '@kbn/encrypted-saved-objects-shared'
   - '@kbn/usage-api-plugin'
   - '@kbn/core-security-server'
+  - '@kbn/core-test-helpers-model-versions'
 tags:
   - plugin
   - prod

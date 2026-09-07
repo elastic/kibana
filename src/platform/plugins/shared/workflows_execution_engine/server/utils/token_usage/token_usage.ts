@@ -14,7 +14,8 @@ import type { WorkflowTokenUsage } from '@kbn/workflows';
  * can aggregate it uniformly. Steps emit usage under `output.metadata.usage`
  * (the contract established by the `ai.agent` step); this helper reads that
  * shape defensively and returns a `WorkflowTokenUsage` only when at least one
- * of `inputTokens` / `outputTokens` is present and valid.
+ * of `inputTokens` / `outputTokens` is present and valid. `cachedTokens`, when
+ * present, is preserved as a subset of input tokens.
  *
  * Returns `undefined` for any step that did not report usage (the common
  * case), so callers can treat "no usage" and "zero usage" distinctly and avoid
@@ -44,6 +45,7 @@ export const extractTokenUsage = (output: unknown): WorkflowTokenUsage | undefin
 
   const inputTokens = toFiniteNumber((usage as { inputTokens?: unknown }).inputTokens);
   const outputTokens = toFiniteNumber((usage as { outputTokens?: unknown }).outputTokens);
+  const cachedTokens = toFiniteNumber((usage as { cachedTokens?: unknown }).cachedTokens);
 
   // A step reported usage only if at least one of the token fields is a valid
   // number. Otherwise treat it as "no usage" so we don't tag the step.
@@ -57,6 +59,7 @@ export const extractTokenUsage = (output: unknown): WorkflowTokenUsage | undefin
   return {
     inputTokens: normalizedInput,
     outputTokens: normalizedOutput,
+    ...(cachedTokens !== undefined && { cachedTokens }),
     totalTokens: normalizedInput + normalizedOutput,
   };
 };
@@ -80,8 +83,31 @@ export const sumTokenUsage = (
   return {
     inputTokens: (current?.inputTokens ?? 0) + (next?.inputTokens ?? 0),
     outputTokens: (current?.outputTokens ?? 0) + (next?.outputTokens ?? 0),
+    cachedTokens: (current?.cachedTokens ?? 0) + (next?.cachedTokens ?? 0),
     totalTokens: (current?.totalTokens ?? 0) + (next?.totalTokens ?? 0),
   };
+};
+
+/**
+ * Reads the LLM connector id a step reported under
+ * `output.metadata.usage.connectorId`. Separate from `extractTokenUsage`
+ * because a connector belongs to the per-step breakdown, not the summed
+ * aggregate. Returns `undefined` when the step reported no connector.
+ */
+export const extractConnectorId = (output: unknown): string | undefined => {
+  if (output == null || typeof output !== 'object') {
+    return undefined;
+  }
+  const metadata = (output as { metadata?: unknown }).metadata;
+  if (metadata == null || typeof metadata !== 'object') {
+    return undefined;
+  }
+  const usage = (metadata as { usage?: unknown }).usage;
+  if (usage == null || typeof usage !== 'object') {
+    return undefined;
+  }
+  const connectorId = (usage as { connectorId?: unknown }).connectorId;
+  return typeof connectorId === 'string' && connectorId.length > 0 ? connectorId : undefined;
 };
 
 const toFiniteNumber = (value: unknown): number | undefined => {

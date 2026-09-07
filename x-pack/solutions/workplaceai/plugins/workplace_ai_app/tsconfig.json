@@ -40,6 +40,7 @@
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/core-application-browser",
     "@kbn/zod",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*"

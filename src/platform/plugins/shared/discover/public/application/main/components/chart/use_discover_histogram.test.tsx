@@ -231,6 +231,33 @@ describe('useDiscoverHistogram', () => {
       });
     });
 
+    it('should clear a stale lens request adapter when a new api reports an undefined one', async () => {
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      const staleLensRequestAdapter = new RequestAdapter();
+      const inspectorAdapters = {
+        requests: new RequestAdapter(),
+        lensRequests: staleLensRequestAdapter,
+      };
+      dataStateContainer.inspectorAdapters = inspectorAdapters;
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const state = {
+        chartHidden: false,
+        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+        totalHitsResult: undefined,
+      } as unknown as UnifiedHistogramState;
+      const api = createMockUnifiedHistogramApi();
+
+      api.state$ = new BehaviorSubject<UnifiedHistogramState>({
+        ...state,
+        lensRequestAdapter: undefined,
+      });
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      expect(inspectorAdapters.lensRequests).toBeUndefined();
+    });
+
     it('should not sync Unified Histogram state with the state container if there are no changes', async () => {
       const { toolkit } = await setup();
       const updateAppStateSpy = jest.spyOn(internalStateActions, 'updateAppState').mockClear();
@@ -459,6 +486,31 @@ describe('useDiscoverHistogram', () => {
           query,
           filters: [],
           searchSessionId: '123',
+        })
+      );
+    });
+
+    it('should pass esqlApproximation from the app state to the histogram as isApproximate', async () => {
+      const fetch$ = new Subject<DiscoverLatestFetchDetails>();
+      const { toolkit } = await setup();
+      const dataStateContainer = toolkit.getCurrentTabDataStateContainer();
+      dataStateContainer.fetchChart$ = fetch$;
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.updateAppState)({
+          appState: { query: { esql: 'from *' }, esqlApproximation: true },
+        })
+      );
+      const { hook } = await renderUseDiscoverHistogram({ toolkit });
+      const api = createMockUnifiedHistogramApi();
+      act(() => {
+        hook.result.current.setUnifiedHistogramApi(api);
+      });
+      act(() => {
+        fetch$.next({});
+      });
+      expect(api.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isApproximate: true,
         })
       );
     });

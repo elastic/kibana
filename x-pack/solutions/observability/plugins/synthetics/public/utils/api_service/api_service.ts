@@ -72,6 +72,25 @@ class ApiService {
     return response;
   }
 
+  private getCpsHeaders(): Record<string, string> | undefined {
+    const projectRouting = kibanaService.startPlugins?.cps?.cpsManager?.getProjectRouting();
+    return projectRouting ? { 'x-project-routing': projectRouting } : undefined;
+  }
+
+  private withCpsHeaders(options?: FetchOptions): FetchOptions | undefined {
+    const cpsHeaders = this.getCpsHeaders();
+    if (!cpsHeaders) {
+      return options;
+    }
+    return {
+      ...options,
+      headers: {
+        ...options?.headers,
+        ...cpsHeaders,
+      },
+    };
+  }
+
   private parseApiUrl(apiUrl: string, spaceId?: string) {
     // `*` is the all-spaces marker used by saved object `namespaces`; it is not
     // a real space ID we can route to, so callers should fall back to the
@@ -106,7 +125,7 @@ class ApiService {
       path: this.parseApiUrl(apiUrl, spaceId),
       query: queryParams,
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -127,6 +146,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
+      ...this.withCpsHeaders(),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -153,7 +173,7 @@ class ApiService {
       body: JSON.stringify(data),
       query: queryParams,
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 
@@ -168,7 +188,7 @@ class ApiService {
       query: queryParams,
       body: JSON.stringify(data),
       version,
-      ...(options ?? {}),
+      ...this.withCpsHeaders(options),
       ...(this.shouldSkipBasePath(spaceId) ? { prependBasePath: false } : {}),
     });
 

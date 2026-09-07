@@ -73,7 +73,7 @@ export const PostAttackDiscoveryGenerationsDismissResponse = lazySchema(() =>
     /**
      * A human-readable message describing the current state or progress of the generation process. Provides context about what the AI is analyzing.
      */
-    loading_message: z.string(),
+    loading_message: z.string().optional(),
     /**
      * Additional context or reasoning provided when a generation fails or encounters issues. This field helps diagnose problems with the generation process.
      */

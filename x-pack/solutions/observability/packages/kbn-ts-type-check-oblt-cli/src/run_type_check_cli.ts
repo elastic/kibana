@@ -130,17 +130,23 @@ run(
     } else {
       await updateRootRefsConfig(log);
 
-      if (!projectFilter) {
-        const strategy = await resolveRestoreStrategy(log, TS_PROJECTS);
-        if (strategy.shouldRestore && strategy.bestSha) {
-          await restoreTSBuildArtifacts(log, strategy.bestSha, {
-            staleProjects: strategy.staleProjects,
-            prNumber: strategy.prNumber,
-            prTipSha: strategy.prTipSha,
-            skipCacheServer: !strategy.cacheServerAvailable,
-          });
-          didRestore = true;
-        }
+      // Restore is decided from repo-wide staleness vs the local artifact state,
+      // independent of which project(s) we ultimately check — so it applies to
+      // `--project` runs too. This matters most for heavy closures (e.g. the
+      // synthetics plugin pulls in ~930 upstream projects): on a cold cache a
+      // scoped run would otherwise build the whole closure from scratch instead
+      // of restoring it from GCS. The HEAD artifacts-state write stays gated on
+      // `!projectFilter` below, so a scoped run never falsely marks every project
+      // fresh.
+      const strategy = await resolveRestoreStrategy(log, TS_PROJECTS);
+      if (strategy.shouldRestore && strategy.bestSha) {
+        await restoreTSBuildArtifacts(log, strategy.bestSha, {
+          staleProjects: strategy.staleProjects,
+          prNumber: strategy.prNumber,
+          prTipSha: strategy.prTipSha,
+          skipCacheServer: !strategy.cacheServerAvailable,
+        });
+        didRestore = true;
       }
     }
 

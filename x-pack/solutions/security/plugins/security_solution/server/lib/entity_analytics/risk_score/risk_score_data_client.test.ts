@@ -21,6 +21,11 @@ import { createDataStream } from '../utils/create_datastream';
 
 import * as transforms from '../utils/transforms';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import {
+  DEFAULT_MAX_TERMS_QUERY_COUNT,
+  estimateLookbackDays,
+  riskScoreSeriesEntityBatchSize,
+} from '../utils/elasticsearch_terms_limits';
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateComponentTemplate: jest.fn(),
@@ -152,6 +157,133 @@ describe('RiskScoreDataClient', () => {
     });
   });
 
+  describe('getDailyAverageRiskScoreNormSeries', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns an empty map without querying ES when entityIds is empty', async () => {
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: [],
+      });
+
+      expect(result.size).toBe(0);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('parses daily average scores per entity, dropping null buckets', async () => {
+      esClient.search.mockResolvedValueOnce({
+        aggregations: {
+          by_entity: {
+            buckets: [
+              {
+                key: 'server-1',
+                scores_over_time: {
+                  buckets: [
+                    { avg_score: { value: 42 } },
+                    { avg_score: { value: null } },
+                    { avg_score: { value: 55 } },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      } as never);
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: ['server-1'],
+      });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(result.get('server-1')).toEqual([42, 55]);
+    });
+
+    // Elasticsearch's default `search.max_buckets`; a request whose aggregations
+    // generate more than this is rejected with `too_many_buckets_exception`.
+    const ES_DEFAULT_MAX_BUCKETS = 65536;
+    const DEFAULT_LOOKBACK_RANGE = { gte: 'now-90d', lte: 'now' } as const;
+
+    const chunkOf = (params: unknown): string[] => {
+      const query = (params as Record<string, unknown>).query as {
+        bool: { filter: Array<Record<string, unknown>> };
+      };
+      const termsFilter = query.bool.filter.find(
+        (f) => (f.terms as Record<string, unknown> | undefined)?.['host.risk.id_value']
+      ) as { terms: Record<string, string[]> };
+      return termsFilter.terms['host.risk.id_value'];
+    };
+
+    // Echo a bucket for every entity in the chunk, so a dropped batch would leave a
+    // detectable gap in the merged result.
+    const echoChunkBuckets = (params: unknown) =>
+      Promise.resolve({
+        aggregations: {
+          by_entity: {
+            buckets: chunkOf(params).map((key) => ({
+              key,
+              scores_over_time: { buckets: [{ avg_score: { value: 10 } }] },
+            })),
+          },
+        },
+      } as never);
+
+    it('batches so a single request stays under both the terms-query and max_buckets limits', async () => {
+      const totalEntities = DEFAULT_MAX_TERMS_QUERY_COUNT + 2000;
+      const entityIds = Array.from({ length: totalEntities }, (_, i) => `host-${i}`);
+      esClient.search.mockImplementation(echoChunkBuckets);
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds,
+      });
+
+      // With the default 90-day daily histogram the batch is bucket-bound (~652), far
+      // below the terms limit, so many more than the naive 2 requests are issued.
+      const expectedBatchSize = riskScoreSeriesEntityBatchSize(DEFAULT_LOOKBACK_RANGE);
+      expect(esClient.search).toHaveBeenCalledTimes(Math.ceil(totalEntities / expectedBatchSize));
+
+      const bucketsPerEntity = estimateLookbackDays(DEFAULT_LOOKBACK_RANGE) + 2;
+      for (const [params] of esClient.search.mock.calls) {
+        const chunk = chunkOf(params);
+        expect(chunk.length).toBeLessThanOrEqual(DEFAULT_MAX_TERMS_QUERY_COUNT);
+        // The projected bucket count for this request must fit under the ES ceiling.
+        expect(chunk.length * bucketsPerEntity).toBeLessThanOrEqual(ES_DEFAULT_MAX_BUCKETS);
+      }
+
+      // Every batch's results must survive the merge — spot-check the first and last entity.
+      expect(result.has('host-0')).toBe(true);
+      expect(result.has(`host-${totalEntities - 1}`)).toBe(true);
+    });
+
+    it('shrinks the batch further for longer lookbacks so buckets stay bounded', async () => {
+      const longRange = { gte: 'now-2y', lte: 'now' };
+      const batchSize = riskScoreSeriesEntityBatchSize(longRange);
+      const totalEntities = batchSize * 2 + 5;
+      const entityIds = Array.from({ length: totalEntities }, (_, i) => `host-${i}`);
+      esClient.search.mockImplementation(echoChunkBuckets);
+
+      await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds,
+        lookbackRange: longRange,
+      });
+
+      // A 2-year daily window packs far fewer entities per request than a 90-day one.
+      expect(batchSize).toBeLessThan(riskScoreSeriesEntityBatchSize(DEFAULT_LOOKBACK_RANGE));
+      expect(esClient.search).toHaveBeenCalledTimes(Math.ceil(totalEntities / batchSize));
+
+      const bucketsPerEntity = estimateLookbackDays(longRange) + 2;
+      for (const [params] of esClient.search.mock.calls) {
+        expect(chunkOf(params).length * bucketsPerEntity).toBeLessThanOrEqual(
+          ES_DEFAULT_MAX_BUCKETS
+        );
+      }
+    });
+  });
+
   describe('tearDown', () => {
     it('deletes all resources', async () => {
       const errors = await riskScoreDataClient.tearDown();
@@ -178,21 +310,38 @@ describe('RiskScoreDataClient', () => {
   });
 
   describe('getRiskScoreHistory', () => {
-    const mockSearchHits = (
-      hits: Array<{ timestamp: string; entityType: string; risk: Record<string, unknown> }>
+    // Each bucket carries a single `top_hits` hit — the max-scoring document for
+    // that bucket (ES selects it via the `desc` sort in the query).
+    const mockAggResponse = (
+      buckets: Array<{
+        timestamp: string;
+        entityType: string;
+        risk: Record<string, unknown>;
+      } | null>
     ) => ({
-      hits: {
-        hits: hits.map((h) => ({
-          _source: {
-            '@timestamp': h.timestamp,
-            [h.entityType]: {
-              risk: {
-                '@timestamp': h.timestamp,
-                ...h.risk,
+      aggregations: {
+        scores_over_time: {
+          buckets: buckets.map((b) => ({
+            key: b === null ? 0 : new Date(b.timestamp).getTime(),
+            top_score: {
+              hits: {
+                hits:
+                  b === null
+                    ? []
+                    : [
+                        {
+                          _source: {
+                            '@timestamp': b.timestamp,
+                            [b.entityType]: {
+                              risk: { '@timestamp': b.timestamp, ...b.risk },
+                            },
+                          },
+                        },
+                      ],
               },
             },
-          },
-        })),
+          })),
+        },
       },
     });
 
@@ -200,12 +349,12 @@ describe('RiskScoreDataClient', () => {
       entityType: 'host',
       entityId: 'host:test-id',
       range: { gte: 'now-90d', lte: 'now' } as const,
-      pageSize: 100,
+      interval: { value: 1, unit: 'd' } as const,
     };
 
-    it('returns mapped history entries from ES hits', async () => {
+    it('returns mapped history entries from bucket top hits, oldest to newest', async () => {
       esClient.search.mockResolvedValueOnce(
-        mockSearchHits([
+        mockAggResponse([
           {
             timestamp: '2026-01-01T00:00:00.000Z',
             entityType: 'host',
@@ -245,12 +394,14 @@ describe('RiskScoreDataClient', () => {
       ]);
     });
 
-    it('queries the time-series index with correct filters', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+    it('issues an aggregation-only query (size 0) with the correct filters', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
       const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      expect(searchCall.size).toBe(0);
+
       const filters = (searchCall.query as { bool: { filter: Array<Record<string, unknown>> } })
         .bool.filter;
 
@@ -263,8 +414,71 @@ describe('RiskScoreDataClient', () => {
       );
     });
 
+    it('selects the max-scoring document per bucket via a top_hits sub-aggregation', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+      await riskScoreDataClient.getRiskScoreHistory(defaultParams);
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const scoresOverTime = (
+        searchCall.aggs as {
+          scores_over_time: {
+            date_histogram: Record<string, unknown>;
+            aggs: { top_score: { top_hits: Record<string, unknown> } };
+          };
+        }
+      ).scores_over_time;
+
+      expect(scoresOverTime.date_histogram).toEqual({
+        field: '@timestamp',
+        fixed_interval: '1d',
+        min_doc_count: 1,
+      });
+      expect(scoresOverTime.aggs.top_score.top_hits).toEqual({
+        size: 1,
+        sort: [{ 'host.risk.calculated_score_norm': 'desc' }],
+        _source: ['@timestamp', 'host.risk'],
+      });
+    });
+
+    it('uses fixed_interval for sub-day units', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+      await riskScoreDataClient.getRiskScoreHistory({
+        ...defaultParams,
+        interval: { value: 3, unit: 'h' },
+      });
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const dateHistogram = (
+        searchCall.aggs as { scores_over_time: { date_histogram: Record<string, unknown> } }
+      ).scores_over_time.date_histogram;
+
+      expect(dateHistogram).toEqual(expect.objectContaining({ fixed_interval: '3h' }));
+      expect(dateHistogram).not.toHaveProperty('calendar_interval');
+    });
+
+    it('uses calendar_interval for week/month/year units', async () => {
+      for (const unit of ['w', 'M', 'y'] as const) {
+        esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+        await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          interval: { value: 1, unit },
+        });
+
+        const searchCall = esClient.search.mock.lastCall?.[0] as Record<string, unknown>;
+        const dateHistogram = (
+          searchCall.aggs as { scores_over_time: { date_histogram: Record<string, unknown> } }
+        ).scores_over_time.date_histogram;
+
+        expect(dateHistogram).toEqual(expect.objectContaining({ calendar_interval: `1${unit}` }));
+        expect(dateHistogram).not.toHaveProperty('fixed_interval');
+      }
+    });
+
     it('includes score_type filter when provided', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -281,7 +495,7 @@ describe('RiskScoreDataClient', () => {
     });
 
     it('handles base score_type with OR for missing field', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -307,42 +521,16 @@ describe('RiskScoreDataClient', () => {
       );
     });
 
-    it('caps page size at 1000', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
-
-      await riskScoreDataClient.getRiskScoreHistory({
-        ...defaultParams,
-        pageSize: 5000,
-      });
-
-      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
-      expect(searchCall.size).toBe(1000);
-    });
-
-    it('excludes hits with missing _source', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _source: undefined }] },
-      } as never);
+    it('excludes buckets whose top hit has no _source', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([null]) as never);
 
       const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
       expect(result).toEqual([]);
     });
 
-    it('uses shared RISK_SCORE_HISTORY_PAGE_SIZE_MAX constant for cap', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
-
-      await riskScoreDataClient.getRiskScoreHistory({
-        ...defaultParams,
-        pageSize: 500,
-      });
-
-      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
-      expect(searchCall.size).toBe(500);
-    });
-
     it('uses user entity type for field paths', async () => {
-      esClient.search.mockResolvedValueOnce(mockSearchHits([]) as never);
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       await riskScoreDataClient.getRiskScoreHistory({
         ...defaultParams,
@@ -360,18 +548,118 @@ describe('RiskScoreDataClient', () => {
           { term: { 'user.risk.id_value': 'user:alice' } },
         ])
       );
+
+      const topHits = (
+        searchCall.aggs as {
+          scores_over_time: { aggs: { top_score: { top_hits: Record<string, unknown> } } };
+        }
+      ).scores_over_time.aggs.top_score.top_hits;
+      expect(topHits.sort).toEqual([{ 'user.risk.calculated_score_norm': 'desc' }]);
     });
 
-    it('returns empty array when no hits', async () => {
-      esClient.search.mockResolvedValueOnce({ hits: { hits: [] } } as never);
+    it('returns empty array when there are no buckets', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
 
       const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
 
       expect(result).toEqual([]);
     });
+
+    describe('includeContributions', () => {
+      const contributionRisk = {
+        calculated_score_norm: 42,
+        calculated_level: 'Low',
+        inputs: [
+          {
+            id: 'alert-1',
+            index: '.alerts-security.alerts-default',
+            category: 'category_1',
+            description: 'Rule: test',
+          },
+        ],
+        modifiers: [{ type: 'asset_criticality', contribution: 5 }],
+        category_2_score: 5,
+        category_2_count: 1,
+        criticality_level: 'high_impact',
+      };
+
+      it('excludes contribution fields by default', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockAggResponse([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: contributionRisk,
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory(defaultParams);
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            calculated_score_norm: 42,
+            calculated_level: 'Low',
+          },
+        ]);
+      });
+
+      it('includes contribution fields when includeContributions is true', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockAggResponse([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: contributionRisk,
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          includeContributions: true,
+        });
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            ...contributionRisk,
+          },
+        ]);
+      });
+
+      it('omits contribution fields absent on the document', async () => {
+        esClient.search.mockResolvedValueOnce(
+          mockAggResponse([
+            {
+              timestamp: '2026-01-01T00:00:00.000Z',
+              entityType: 'host',
+              risk: {
+                calculated_score_norm: 42,
+                calculated_level: 'Low',
+              },
+            },
+          ]) as never
+        );
+
+        const result = await riskScoreDataClient.getRiskScoreHistory({
+          ...defaultParams,
+          includeContributions: true,
+        });
+
+        expect(result).toEqual([
+          {
+            '@timestamp': '2026-01-01T00:00:00.000Z',
+            calculated_score_norm: 42,
+            calculated_level: 'Low',
+          },
+        ]);
+      });
+    });
   });
 
-  describe('getDailyAverageRiskScoreNormSeries', () => {
+  describe('getDailyAverageRiskScoreNormSeries (EUID query contract)', () => {
     const mockAggResponse = (
       buckets: Array<{ key: string; scores: number[] }> = []
     ): { aggregations: { by_entity: { buckets: unknown[] } } } => ({
@@ -487,6 +775,39 @@ describe('RiskScoreDataClient', () => {
       });
 
       expect(result.size).toBe(0);
+    });
+  });
+});
+
+describe('getDailyAverageRiskScoreNormSeries batching helpers', () => {
+  describe('estimateLookbackDays', () => {
+    it('parses relative day/week/year ranges to an upper-bound day span', () => {
+      expect(estimateLookbackDays({ gte: 'now-90d', lte: 'now' })).toBe(90);
+      expect(estimateLookbackDays({ gte: 'now-12w', lte: 'now' })).toBe(84);
+      expect(estimateLookbackDays({ gte: 'now-2y', lte: 'now' })).toBe(732);
+    });
+
+    it('never returns less than one day', () => {
+      expect(estimateLookbackDays({ gte: 'now', lte: 'now' })).toBe(1);
+    });
+
+    it('falls back to a conservative one-year span for unparseable ranges', () => {
+      expect(estimateLookbackDays({ gte: 'now-90d/d', lte: 'now' })).toBe(366);
+    });
+  });
+
+  describe('riskScoreSeriesEntityBatchSize', () => {
+    it('keeps projected buckets under the ES max_buckets ceiling', () => {
+      const range = { gte: 'now-90d', lte: 'now' };
+      const batchSize = riskScoreSeriesEntityBatchSize(range);
+      const bucketsPerEntity = estimateLookbackDays(range) + 2;
+      expect(batchSize * bucketsPerEntity).toBeLessThanOrEqual(65536);
+    });
+
+    it('shrinks as the lookback window grows', () => {
+      const shortWindow = riskScoreSeriesEntityBatchSize({ gte: 'now-30d', lte: 'now' });
+      const longWindow = riskScoreSeriesEntityBatchSize({ gte: 'now-2y', lte: 'now' });
+      expect(longWindow).toBeLessThan(shortWindow);
     });
   });
 });

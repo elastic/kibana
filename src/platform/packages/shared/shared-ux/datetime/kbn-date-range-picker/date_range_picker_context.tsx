@@ -27,11 +27,13 @@ import type {
   TimeRangeBounds,
   TimeRangeBoundsOption,
   TimeRange,
+  TimeRangeTransformOptions,
   InitialFocus,
   CalendarOptions,
   DateRangePickerSettings,
 } from './types';
 import { DATE_RANGE_INPUT_DELIMITER } from './constants';
+import { hasRoundedOffset } from './utils';
 import { textToTimeRange } from './parse';
 import { prettifyValue } from './parse/prettify_value';
 import {
@@ -76,8 +78,20 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   presets: TimeRangeBoundsOption[];
   /** Recently used time ranges shown in the Recent section. */
   recent: TimeRangeBoundsOption[];
+  /**
+   * Assembled `{ presets, inputDateFormats, roundRelativeTime, timePrecision, locale }`
+   * passed to `textToTimeRange`/`prettifyValue`/`timeRangeToDisplayText` and to
+   * the part-level parser. Single source of truth so every call site forwards
+   * the same options instead of rebuilding (and risking dropping) them by hand.
+   */
+  transformOptions: TimeRangeTransformOptions;
   /** Human-readable display text for the current time range (shown when idle). */
   displayText: string;
+  /**
+   * Whether a relative bound of the current range is rounded (e.g. `now-1y/y`).
+   * Shown as a suffix next to `displayText` when idle, never in the input.
+   */
+  isRounded: boolean;
   /** Full formatted text including absolute dates, used for tooltips. */
   displayFullFormattedText: string;
   /** Short duration label (e.g., "15m"), or `null` if duration cannot be computed. */
@@ -109,6 +123,8 @@ interface DateRangePickerInternalContextValue extends DateRangePickerContextValu
   width: NonNullable<DateRangePickerProps['width']>;
   /** Whether the picker is disabled. */
   disabled: boolean;
+  /** Whether the picker shows its value but can't be edited. */
+  readOnly: boolean;
   /** Whether a loading spinner is shown inside the form control. */
   isLoading: boolean;
   /** Calendar-specific options (e.g. first day of week). */
@@ -156,9 +172,11 @@ export function DateRangePickerProvider({
   value,
   defaultValue,
   onChange,
-  dateFormat,
+  inputDateFormats,
+  locale,
   isInvalid = false,
   disabled = false,
+  readOnly = false,
   isLoading = false,
   compressed = true,
   collapsed = false,
@@ -170,7 +188,7 @@ export function DateRangePickerProvider({
   onInputChange,
   width = 'auto',
   calendarOptions,
-  settings = { roundRelativeTime: true },
+  settings = { roundRelativeTime: false },
   onSettingsChange,
   timeZone,
   onRefresh,
@@ -182,6 +200,17 @@ export function DateRangePickerProvider({
     (path: string) => (prependBasePathProp ? prependBasePathProp(path) : path),
     [prependBasePathProp]
   );
+  const timePrecision = settings.timePrecision ?? 's';
+  const transformOptions: TimeRangeTransformOptions = useMemo(
+    () => ({
+      presets,
+      inputDateFormats,
+      roundRelativeTime: settings.roundRelativeTime,
+      timePrecision,
+      locale,
+    }),
+    [presets, inputDateFormats, settings.roundRelativeTime, timePrecision, locale]
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement | null>(null);
@@ -191,22 +220,21 @@ export function DateRangePickerProvider({
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() =>
-    prettifyValue(value ?? defaultValue ?? '', { presets })
+    prettifyValue(value ?? defaultValue ?? '', transformOptions)
   );
   const timeRange: TimeRange = useMemo(
-    () =>
-      textToTimeRange(text, { presets, dateFormat, roundRelativeTime: settings.roundRelativeTime }),
-    [text, presets, dateFormat, settings.roundRelativeTime]
+    () => textToTimeRange(text, transformOptions),
+    [text, transformOptions]
   );
-  const timePrecision = settings.timePrecision ?? 's';
   const displayText = useMemo(
-    () => timeRangeToDisplayText(timeRange, { timePrecision }),
-    [timeRange, timePrecision]
+    () => timeRangeToDisplayText(timeRange, transformOptions),
+    [timeRange, transformOptions]
   );
   const displayFullFormattedText = useMemo(
-    () => timeRangeToFullFormattedText(timeRange, { timePrecision: 'ms' }),
-    [timeRange]
+    () => timeRangeToFullFormattedText(timeRange, { ...transformOptions, timePrecision: 'ms' }),
+    [timeRange, transformOptions]
   );
+  const isRounded = hasRoundedOffset(timeRange);
   const duration =
     timeRange.startDate && timeRange.endDate
       ? { startDate: timeRange.startDate, endDate: timeRange.endDate }
@@ -217,9 +245,9 @@ export function DateRangePickerProvider({
 
   useEffect(() => {
     if (typeof value === 'string' && !isEditingRef.current) {
-      setText(prettifyValue(value, { presets }));
+      setText(prettifyValue(value, transformOptions));
     }
-  }, [value, presets]);
+  }, [value, transformOptions]);
 
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
@@ -238,7 +266,7 @@ export function DateRangePickerProvider({
       }
       if (!editing) {
         if (typeof value === 'string') {
-          setText(prettifyValue(value, { presets }));
+          setText(prettifyValue(value, transformOptions));
         } else if (lastValidText.current) {
           setText(lastValidText.current);
         }
@@ -246,7 +274,7 @@ export function DateRangePickerProvider({
       }
       setIsEditing(editing);
     },
-    [text, value, presets]
+    [text, value, transformOptions]
   );
 
   const hasAutoRefresh = !!onRefresh;
@@ -284,11 +312,7 @@ export function DateRangePickerProvider({
       if (range) {
         const rangeText =
           textOverride ?? `${range.start} ${DATE_RANGE_INPUT_DELIMITER} ${range.end}`;
-        rangeToApply = textToTimeRange(rangeText, {
-          presets,
-          dateFormat,
-          roundRelativeTime: settings.roundRelativeTime,
-        });
+        rangeToApply = textToTimeRange(rangeText, transformOptions);
         setText(rangeText);
       } else {
         rangeToApply = timeRange;
@@ -309,7 +333,7 @@ export function DateRangePickerProvider({
       } satisfies DateRangePickerOnChangeProps);
       setIsEditing(false);
     },
-    [onChange, timeRange, presets, dateFormat, settings.roundRelativeTime]
+    [onChange, timeRange, transformOptions]
   );
 
   const contextValue = useMemo<DateRangePickerInternalContextValue>(
@@ -323,6 +347,7 @@ export function DateRangePickerProvider({
       compressed,
       collapsed,
       displayText,
+      isRounded,
       displayFullFormattedText,
       displayShortDuration,
       inputRef,
@@ -333,11 +358,13 @@ export function DateRangePickerProvider({
       timeWindowButtonsConfig,
       presets,
       recent,
+      transformOptions,
       onPresetSave,
       onPresetDelete,
       onInputChange,
       width,
       disabled,
+      readOnly,
       isLoading,
       calendarOptions,
       settings,
@@ -358,6 +385,7 @@ export function DateRangePickerProvider({
       compressed,
       collapsed,
       displayText,
+      isRounded,
       displayFullFormattedText,
       displayShortDuration,
       panelId,
@@ -365,11 +393,13 @@ export function DateRangePickerProvider({
       timeWindowButtonsConfig,
       presets,
       recent,
+      transformOptions,
       onPresetSave,
       onPresetDelete,
       onInputChange,
       width,
       disabled,
+      readOnly,
       isLoading,
       calendarOptions,
       settings,

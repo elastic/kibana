@@ -9,9 +9,11 @@ import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository } from '@kbn/es-snapshot-loader';
+import type { KbnClient } from '@kbn/test';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import { ensureLogsIndexTemplate } from './logs_index_template';
+import { SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM } from './snapshot_indices';
 
 const LOGS_STREAM_NAME = 'logs';
 const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
@@ -27,7 +29,7 @@ const TIMESTAMP_TRANSFORM_SCRIPT = `
     Instant maxTime = Instant.parse(params.max_timestamp);
     Instant originalTime = Instant.parse(ctx['@timestamp'].toString());
     long deltaMillis = maxTime.toEpochMilli() - originalTime.toEpochMilli();
-    Instant now = Instant.ofEpochMilli(System.currentTimeMillis());
+    Instant now = Instant.parse(params.replay_now);
     ctx['@timestamp'] = now.minusMillis(deltaMillis).toString();
   }
 `;
@@ -36,7 +38,28 @@ export interface ReplayStats {
   total: number;
   created: number;
   skipped: number;
+  /** Snapshot-time max `@timestamp` across the replayed logs indices. */
+  maxTimestamp: string;
+  /** Wall-clock instant the snapshot max was shifted onto — the fixed `now` used by the transform. */
+  replayNow: string;
 }
+
+/**
+ * Maps a snapshot-time timestamp onto the replayed timeline using the same shift the
+ * replay pipeline applied to every log document: `replayNow - (maxTimestamp - timestamp)`.
+ */
+export const shiftSnapshotTimestamp = ({
+  timestamp,
+  maxTimestamp,
+  replayNow,
+}: {
+  timestamp: string;
+  maxTimestamp: string;
+  replayNow: string;
+}): string =>
+  new Date(
+    Date.parse(replayNow) - (Date.parse(maxTimestamp) - Date.parse(timestamp))
+  ).toISOString();
 
 interface ReplayArtifacts {
   runId: number;
@@ -82,8 +105,12 @@ const getLogsIndicesFromSnapshot = async ({
     throw new Error(`Snapshot "${snapshotName}" not found in repository "${repoName}"`);
   }
 
+  // Restrict to the `logs` data stream's own backing indices (`.ds-logs-<date>-<gen>`). The hyphen
+  // matters: `.startsWith('.ds-logs')` would also match sibling streams like `logs.ecs`
+  // (`.ds-logs.ecs-…`), which the discovery eval does not target — and restoring those extra backing
+  // indices is what trips `index_not_found` at reindex. The agent reads `FROM logs`, so only `logs`.
   const logsIndices = (snapshot.indices ?? []).filter(
-    (indexName) => indexName.startsWith('.ds-logs') || indexName === LOGS_STREAM_NAME
+    (indexName) => indexName.startsWith('.ds-logs-') || indexName === LOGS_STREAM_NAME
   );
   if (logsIndices.length === 0) {
     throw new Error(`No logs indices found in snapshot "${snapshotName}"`);
@@ -117,6 +144,11 @@ const restoreLogsIndicesToTemp = async ({
     include_global_state: false,
     rename_pattern: '(.+)',
     rename_replacement: `${tempPrefix}$1`,
+    // The snapshot's backing indices carry `index.lifecycle.*`; if restored intact, the cluster's
+    // lifecycle sweep reaps the temp index (its origination date is already past the delete age)
+    // before we can reindex from it — surfacing as `index_not_found` mid-replay on serverless.
+    // Strip lifecycle so the temp index stays inert until cleanup deletes it.
+    ignore_index_settings: ['index.lifecycle.name', 'index.lifecycle.prefer_ilm'],
   });
 
   return logsIndices.map((indexName) => `${tempPrefix}${indexName}`);
@@ -236,11 +268,13 @@ const createReplayPipeline = async ({
   esClient,
   pipelineName,
   maxTimestamp,
+  replayNow,
   chainedPipelineName,
 }: {
   esClient: Client;
   pipelineName: string;
   maxTimestamp: string;
+  replayNow: string;
   chainedPipelineName?: string;
 }): Promise<void> => {
   await esClient.ingest.putPipeline({
@@ -249,7 +283,7 @@ const createReplayPipeline = async ({
       {
         script: {
           lang: 'painless',
-          params: { max_timestamp: maxTimestamp },
+          params: { max_timestamp: maxTimestamp, replay_now: replayNow },
           source: TIMESTAMP_TRANSFORM_SCRIPT,
         },
       },
@@ -312,7 +346,7 @@ const reindexTempIndicesIntoManagedStream = async ({
   esClient: Client;
   tempIndices: string[];
   log: ToolingLog;
-}): Promise<ReplayStats> => {
+}): Promise<Omit<ReplayStats, 'maxTimestamp' | 'replayNow'>> => {
   log.debug('Reindexing into managed logs stream via default_pipeline');
   const reindexResult = await esClient.reindex(
     {
@@ -495,10 +529,12 @@ export async function replayIntoManagedStream(
       previousDefaultPipeline,
     });
 
+    const replayNow = new Date().toISOString();
     await createReplayPipeline({
       esClient,
       pipelineName: artifacts.pipelineName,
       maxTimestamp,
+      replayNow,
       chainedPipelineName,
     });
 
@@ -519,8 +555,54 @@ export async function replayIntoManagedStream(
     log.info(
       `Replay complete: ${stats.created}/${stats.total} docs indexed, ${stats.skipped} skipped`
     );
-    return stats;
+    return { ...stats, maxTimestamp, replayNow };
   } finally {
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }
 }
+
+export const resetMemoryPages = async ({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  // Delete the data stream instead of deleting through its write alias. The memory stream is
+  // versioned and stale documents in older backing indices can otherwise remain searchable.
+  await esClient.indices
+    .deleteDataStream({ name: SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM })
+    .catch((error: unknown) => {
+      if (!isNotFoundError(error)) throw error;
+    });
+  log.debug('Reset significant events memory data stream');
+};
+
+export const replayIntoMemoryPages = async ({
+  log,
+  memoryPages,
+  kbnClient,
+}: {
+  log: ToolingLog;
+  kbnClient: KbnClient;
+  memoryPages: Array<{ name: string; content: string }>;
+}): Promise<void> => {
+  // Seed through the memory API so the data stream is provisioned and each page
+  // is embedded (with lexical fallback) exactly as production pages are.
+  await Promise.all(
+    memoryPages.map(async (page) => {
+      const response = await kbnClient.request<{
+        id: string;
+        name: string;
+      }>({
+        path: '/internal/streams/memory/entries',
+        method: 'POST',
+        body: page,
+      });
+      if (response.data.name !== page.name || !response.data.id) {
+        throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
+      }
+      log.info(`Seeded memory page "${page.name}"`);
+    })
+  );
+};

@@ -19,17 +19,17 @@
  * Use the three exported helpers together to reconstruct DataViewSpec field state.
  */
 
-import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import { type DataViewSpec, RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
-import type {
-  AsCodeCompositeRuntimeField,
-  AsCodeDataViewSpec,
-  AsCodeFieldSettings,
-  AsCodeRuntimeField,
-  AsCodeSavedCompositeRuntimeField,
-  AsCodeSavedDataView,
-  AsCodeSavedFieldSettings,
-  AsCodeSavedRuntimeField,
+import type { DataViewSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
+import {
+  RUNTIME_FIELD_COMPOSITE_TYPE,
+  type AsCodeCompositeRuntimeField,
+  type AsCodeDataViewSpec,
+  type AsCodeFieldSettings,
+  type AsCodeRuntimeField,
+  type AsCodeSavedCompositeRuntimeField,
+  type AsCodeSavedDataView,
+  type AsCodeSavedFieldSettings,
+  type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
 
 export function isRuntimeField(
@@ -92,14 +92,17 @@ export function toStoredFieldFormats(
   const fieldFormats: DataViewSpec['fieldFormats'] = {};
   for (const [name, field] of Object.entries(fieldSettings)) {
     if ('format' in field && field.format) {
-      fieldFormats[name] = { id: field.format.type, params: field.format.params };
+      fieldFormats[name] = {
+        id: field.format.type,
+        ...(field.format.params ? { params: field.format.params } : {}),
+      };
     }
     if (!isCompositeRuntimeField(field)) continue;
     for (const [subName, subField] of Object.entries(field.fields)) {
       if ('format' in subField && subField.format) {
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          params: subField.format.params,
+          ...(subField.format.params ? { params: subField.format.params } : {}),
         };
       }
     }
@@ -109,8 +112,8 @@ export function toStoredFieldFormats(
 
 /**
  * Convert as-code `field_settings` to the `fieldAttrs` entry of a DataViewSpec.
- * Indexed field settings without attrs are skipped. Runtime fields and composite runtime subfields
- * always produce an entry (possibly empty) to preserve current stored shape.
+ * Only fields with at least one attribute (`customLabel`, `customDescription`, or `count`) produce
+ * an entry.
  * Composite subfields are written under the fully-qualified `parent.child` key.
  *
  * @param fieldSettings Map of field name → indexed overrides or inline runtime definition
@@ -120,32 +123,34 @@ export function toStoredFieldAttributes(
   fieldSettings: AsCodeDataViewSpec['field_settings'] | AsCodeSavedDataView['field_settings'] = {}
 ): DataViewSpec['fieldAttrs'] {
   const fieldAttrs: DataViewSpec['fieldAttrs'] = {};
+
+  const assignAttrs = (key: string, field: AsCodeFieldSettings | AsCodeSavedFieldSettings) => {
+    const attrs = buildFieldAttrs(field);
+    if (Object.keys(attrs).length > 0) {
+      fieldAttrs[key] = attrs;
+    }
+  };
+
   for (const [name, field] of Object.entries(fieldSettings)) {
-    if (isRuntimeField(field)) {
-      if (!isCompositeRuntimeField(field)) {
-        fieldAttrs[name] = {
-          ...(field.custom_label && { customLabel: field.custom_label }),
-          ...(field.custom_description && { customDescription: field.custom_description }),
-          ...getPopularity(field),
-        };
-      } else {
-        for (const [subName, subField] of Object.entries(field.fields)) {
-          fieldAttrs[`${name}.${subName}`] = {
-            ...(subField.custom_label && { customLabel: subField.custom_label }),
-            ...(subField.custom_description && { customDescription: subField.custom_description }),
-            ...getPopularity(subField),
-          };
-        }
+    if (isCompositeRuntimeField(field)) {
+      for (const [subName, subField] of Object.entries(field.fields)) {
+        assignAttrs(`${name}.${subName}`, subField);
       }
-    } else if ('custom_label' in field || 'custom_description' in field || 'popularity' in field) {
-      fieldAttrs[name] = {
-        ...(field.custom_label && { customLabel: field.custom_label }),
-        ...(field.custom_description && { customDescription: field.custom_description }),
-        ...getPopularity(field),
-      };
+    } else {
+      assignAttrs(name, field);
     }
   }
+
   return fieldAttrs;
+}
+
+function buildFieldAttrs(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {
+  return {
+    ...('custom_label' in field && field.custom_label && { customLabel: field.custom_label }),
+    ...('custom_description' in field &&
+      field.custom_description && { customDescription: field.custom_description }),
+    ...getPopularity(field),
+  };
 }
 
 function getPopularity(field: AsCodeFieldSettings | AsCodeSavedFieldSettings) {

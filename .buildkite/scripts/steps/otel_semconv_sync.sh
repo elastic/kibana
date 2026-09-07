@@ -25,7 +25,7 @@ generate_resolved_yaml() {
     --env HOME=/home/weaver \
     --mount type=bind,source=./model,target=/home/weaver/source,readonly \
     --mount type=bind,source=./weaver_output,target=/home/weaver/out \
-    docker.io/otel/weaver:v0.17.1@sha256:32523b5e44fb44418786347e9f7dde187d8797adb6d57a2ee99c245346c3cdfe \
+    docker.io/otel/weaver:v0.24.2@sha256:d1fb16d279f39810c340fbbf1cf9e5e995a3a9cefa531938e9012437e3bc00c1 \
     registry resolve \
     --registry=/home/weaver/source \
     --output=/home/weaver/out/resolved_semconv.yaml
@@ -107,14 +107,14 @@ create_pull_request() {
     echo "Author: $KIBANA_MACHINE_USERNAME"
     echo ""
     echo "=== LABELS ==="
-    echo "- Team:obs-onboarding"
+    echo "- Team:streams-ui"
     echo "- release_note:skip"
     echo "- backport:skip"
     echo "- otel-semantic-conventions"
     echo ""
     echo "=== ASSIGNEES & REVIEWERS ==="
-    echo "Assignee: elastic/obs-onboarding-team"
-    echo "Reviewer: elastic/obs-onboarding-team"
+    echo "Assignee: elastic/streams-ui"
+    echo "Reviewer: elastic/streams-ui"
     echo ""
     echo "=== FILES TO COMMIT ==="
     echo "- $OTEL_PACKAGE_DIR/assets/resolved-semconv.yaml"
@@ -184,7 +184,7 @@ create_pull_request() {
     --body "$PR_BODY" \
     --base main \
     --head "$BRANCH_NAME" \
-    --label 'Team:obs-onboarding' \
+    --label 'Team:streams-ui' \
     --label 'release_note:skip' \
     --label 'backport:skip' \
     --label 'otel-semantic-conventions'

@@ -8,7 +8,7 @@
 /* eslint-env jest */
 
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
@@ -16,7 +16,7 @@ import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/m
 import { I18nProvider } from '@kbn/i18n-react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { ILicense, LicenseType } from '@kbn/licensing-types';
-import type { CombinedState, PreloadedState } from 'redux';
+import type { CombinedState, PreloadedState } from 'redux-v4';
 import { licenseManagementStore } from '../../public/application/store/store';
 import type { ThunkServices, LicenseManagementState } from '../../public/application/store/types';
 import { AppContextProvider, type AppDependencies } from '../../public/application/app_context';

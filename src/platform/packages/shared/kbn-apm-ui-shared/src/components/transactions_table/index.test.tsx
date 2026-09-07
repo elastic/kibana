@@ -22,12 +22,30 @@ jest.mock('@elastic/eui', () => ({
   useIsWithinMaxBreakpoint: jest.fn(),
 }));
 
+jest.mock('../sparkline', () => ({
+  Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
+    isLoading ? (
+      <div data-test-subj="sparkline-loading" />
+    ) : (
+      <div data-test-subj="sparkline-chart" />
+    ),
+}));
+
 const items: TransactionGroup[] = [
   {
     name: 'GET /api',
     latency: { value: 100000 },
     throughput: { value: 10 },
     errorRate: { value: 0.01 },
+  },
+];
+
+const itemsWithSeries: TransactionGroup[] = [
+  {
+    name: 'GET /api',
+    latency: { value: 100000, series: { value: [{ x: 1, y: 200 }] } },
+    throughput: { value: 10, series: { value: [{ x: 1, y: 5 }] } },
+    errorRate: { value: 0.01, series: { value: [{ x: 1, y: 0.01 }] } },
   },
 ];
 
@@ -51,18 +69,33 @@ describe('TransactionsTable', () => {
   });
 
   it('renders the loading message when isLoading is true', () => {
-    renderWithIntl(<TransactionsTable items={[]} isLoading={true} maxCountExceeded={false} />);
+    renderWithIntl(
+      <TransactionsTable
+        data-test-subj="transactions-table"
+        items={[]}
+        isLoading={true}
+        maxCountExceeded={false}
+      />
+    );
     expect(screen.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('renders the no-results message when items are empty and not loading', () => {
-    renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+    renderWithIntl(
+      <TransactionsTable
+        data-test-subj="transactions-table"
+        items={[]}
+        isLoading={false}
+        maxCountExceeded={false}
+      />
+    );
     expect(screen.getByText('No transactions found')).toBeInTheDocument();
   });
 
   it('shows the cardinality warning when maxCountExceeded and showMaxTransactionGroupsExceededWarning are true', () => {
     renderWithIntl(
       <TransactionsTable
+        data-test-subj="transactions-table"
         items={items}
         isLoading={false}
         maxCountExceeded={true}
@@ -77,6 +110,7 @@ describe('TransactionsTable', () => {
   it('does not show the cardinality warning when maxCountExceeded is false', () => {
     renderWithIntl(
       <TransactionsTable
+        data-test-subj="transactions-table"
         items={items}
         isLoading={false}
         maxCountExceeded={false}
@@ -90,13 +124,21 @@ describe('TransactionsTable', () => {
 
   describe('title and header actions', () => {
     it('renders the default title "Transactions"', () => {
-      renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={[]}
+          isLoading={false}
+          maxCountExceeded={false}
+        />
+      );
       expect(screen.getByRole('heading', { name: 'Transactions' })).toBeInTheDocument();
     });
 
     it('renders a custom title when the title prop is provided', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={[]}
           isLoading={false}
           maxCountExceeded={false}
@@ -107,13 +149,21 @@ describe('TransactionsTable', () => {
     });
 
     it('does not render header action links when headerActions is not provided', () => {
-      renderWithIntl(<TransactionsTable items={[]} isLoading={false} maxCountExceeded={false} />);
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={[]}
+          isLoading={false}
+          maxCountExceeded={false}
+        />
+      );
       expect(screen.queryByRole('link')).not.toBeInTheDocument();
     });
 
     it('renders header action links when headerActions is provided', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={[]}
           isLoading={false}
           maxCountExceeded={false}
@@ -133,6 +183,7 @@ describe('TransactionsTable', () => {
       const onClick = jest.fn();
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={[]}
           isLoading={false}
           maxCountExceeded={false}
@@ -153,14 +204,24 @@ describe('TransactionsTable', () => {
   describe('remaining transactions row', () => {
     it('renders "Remaining Transactions" for the _other item', () => {
       renderWithIntl(
-        <TransactionsTable items={itemsWithOther} isLoading={false} maxCountExceeded={false} />
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={itemsWithOther}
+          isLoading={false}
+          maxCountExceeded={false}
+        />
       );
       expect(screen.getByText('Remaining Transactions')).toBeInTheDocument();
     });
 
     it('opens the popover with default content when the warning button is clicked', () => {
       renderWithIntl(
-        <TransactionsTable items={itemsWithOther} isLoading={false} maxCountExceeded={false} />
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={itemsWithOther}
+          isLoading={false}
+          maxCountExceeded={false}
+        />
       );
       fireEvent.click(
         screen.getByRole('button', { name: 'More information about remaining transactions' })
@@ -173,6 +234,7 @@ describe('TransactionsTable', () => {
     it('shows custom tooltip content when remainingTransactionsCellTooltipContent is provided', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={itemsWithOther}
           isLoading={false}
           maxCountExceeded={false}
@@ -190,6 +252,7 @@ describe('TransactionsTable', () => {
     it('renders the error callout with the provided message', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={[]}
           isLoading={false}
           maxCountExceeded={false}
@@ -202,6 +265,7 @@ describe('TransactionsTable', () => {
     it('does not render the table when errorMessage is set', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={items}
           isLoading={false}
           maxCountExceeded={false}
@@ -214,6 +278,7 @@ describe('TransactionsTable', () => {
     it('keeps the title and header actions visible when errorMessage is set', () => {
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={[]}
           isLoading={false}
           maxCountExceeded={false}
@@ -232,6 +297,71 @@ describe('TransactionsTable', () => {
     });
   });
 
+  describe('isSparklineLoading', () => {
+    it('shows a loading indicator in each metric cell when isSparklineLoading is true and items have no series', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.getAllByTestId('sparkline-loading')).toHaveLength(3);
+      expect(screen.queryByTestId('sparkline-chart')).not.toBeInTheDocument();
+    });
+
+    it('shows no sparkline slot when isSparklineLoading is false and items have no series', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={false}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sparkline-chart')).not.toBeInTheDocument();
+    });
+
+    it('renders the sparkline chart (not loading) when the item already has series data', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={itemsWithSeries}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={true}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
+      expect(screen.getAllByTestId('sparkline-chart')).toHaveLength(3);
+    });
+
+    it('suppresses loading indicators when showSparklines is false', () => {
+      renderWithIntl(
+        <TransactionsTable
+          data-test-subj="transactions-table"
+          items={items}
+          isLoading={false}
+          maxCountExceeded={false}
+          showSparklines={false}
+          isSparklineLoading={true}
+        />
+      );
+
+      expect(screen.queryByTestId('sparkline-loading')).not.toBeInTheDocument();
+    });
+  });
+
   describe('search behavior', () => {
     beforeEach(() => {
       jest.useFakeTimers();
@@ -245,6 +375,7 @@ describe('TransactionsTable', () => {
       const onSearchQueryChange = jest.fn();
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={items}
           isLoading={false}
           maxCountExceeded={false}
@@ -273,6 +404,7 @@ describe('TransactionsTable', () => {
       const onSearchQueryChange = jest.fn();
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={items}
           isLoading={false}
           maxCountExceeded={false}
@@ -299,6 +431,7 @@ describe('TransactionsTable', () => {
       const onSearchQueryChange = jest.fn();
       renderWithIntl(
         <TransactionsTable
+          data-test-subj="transactions-table"
           items={items}
           isLoading={false}
           maxCountExceeded={true}

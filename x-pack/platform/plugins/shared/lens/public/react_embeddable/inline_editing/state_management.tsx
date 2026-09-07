@@ -37,7 +37,7 @@ export function getStateManagementForInlineEditing(
     visualizationType?: string,
     datasourceId?: LensDatasourceId
   ) => {
-    const viz = getAttributes();
+    const vis = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
     const datasourceStates: DatasourceStates = {
       [activeDatasourceId]: {
@@ -45,24 +45,24 @@ export function getStateManagementForInlineEditing(
         state: datasourceState,
       },
     };
-    const newViz = mergeToNewDoc(
-      viz,
+    const newVis = mergeToNewDoc(
+      vis,
       {
-        activeId: visualizationType || viz.visualizationType,
+        activeId: visualizationType || vis.visualizationType,
         state: visualizationState,
         selectedLayerId: null,
       },
       datasourceStates,
-      viz.state.query,
-      viz.state.filters,
+      vis.state.query,
+      vis.state.filters,
       activeDatasourceId,
-      viz.state.adHocDataViews || {},
+      vis.state.adHocDataViews || {},
       { visualizationMap, datasourceMap, extractFilterReferences }
     );
     const newDoc: TypedLensSerializedState['attributes'] = {
-      ...viz,
-      ...newViz,
-      visualizationType: newViz?.visualizationType ?? viz.visualizationType,
+      ...vis,
+      ...newVis,
+      visualizationType: newVis?.visualizationType ?? vis.visualizationType,
     };
 
     if (newDoc.state) {

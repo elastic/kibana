@@ -30,8 +30,10 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  PackageInfo,
   RegistryElasticsearch,
 } from '../../../../types';
+import { isOtelDataStream } from '../../packages/namespace_template_utils';
 import { appContextService } from '../../..';
 import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
 import {
@@ -305,9 +307,12 @@ export function getNamespaceFromTemplateId(id: string): string | undefined {
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
+ * @param packageInfo package context used to detect OTel input data streams, which carry a
+ * `.otel` dataset suffix. Callers that omit it get unsuffixed patterns.
  */
 export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
 ): Record<string, string> {
   if (!dataStreams) {
     return {};
@@ -315,7 +320,10 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(
+      dataStream,
+      packageInfo ? isOtelDataStream(dataStream, packageInfo) : undefined
+    );
   }
   return patterns;
 }
@@ -439,12 +447,25 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   "[enabled] parameter can't be updated for the object mapping",
 ];
 
+/**
+ * Returns true when the ES error indicates that the mapping change is incompatible with the
+ * current write index and a data-stream rollover is the right recovery action.
+ *
+ * `total_fields` limit breaches are deliberately excluded: they surface as
+ * `illegal_argument_exception` but a rollover cannot fix them — the new write index is built
+ * from the same index template and inherits the same field-count limit, so the oversized
+ * mapping would fail again immediately.  Callers should surface those errors clearly instead.
+ */
 function errorNeedRollover(err: any): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
     err.body?.error?.type === 'illegal_argument_exception'
   ) {
+    // total_fields limit errors cannot be resolved by a rollover — skip them.
+    if (isTotalFieldsLimitError(err)) {
+      return false;
+    }
     return true;
   }
   if (
@@ -457,6 +478,15 @@ function errorNeedRollover(err: any): boolean {
     return true;
   }
   return false;
+}
+
+/**
+ * Returns true when the error is an ES `total_fields` limit breach
+ * (`index.mapping.total_fields.limit` exceeded).
+ */
+export function isTotalFieldsLimitError(err: any): boolean {
+  const reason: string = err.body?.error?.reason ?? '';
+  return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
 }
 
 const rolloverDataStream = (
@@ -594,6 +624,20 @@ const updateExistingDataStream = async ({
         await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
+    }
+    // total_fields limit errors cannot be resolved by a rollover (the new write index inherits
+    // the same limit from the index template).  Log clearly and skip the rollover so we don't
+    // add churn to an already-overloaded cluster.
+    if (isTotalFieldsLimitError(err)) {
+      logger.warn(
+        `Mappings update for ${dataStreamName} failed because the index mapping total_fields limit has been exceeded. ` +
+          `Skipping rollover as it would not resolve the issue. ` +
+          `The total_fields limit must be raised on the index template to allow this mapping update: ${err}`
+      );
+      if (options?.ignoreMappingUpdateErrors !== true) {
+        throw err;
+      }
+      return;
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
     logger.trace(`Attempted mappings: ${mappings}`);

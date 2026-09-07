@@ -55,6 +55,8 @@ export {
   AGENT_POLICY_API_ROUTES,
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
+  DATA_STREAM_INDEX_PATTERN_REGEX,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -74,6 +76,7 @@ export {
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
+  OBLT_DEFAULT_CATEGORIES,
 } from './constants';
 export {
   // Route services
@@ -106,6 +109,11 @@ export {
   getAllVarKeys,
   getAllSupportedVarNames,
   findFirstVarEntry,
+  // Version-specific policies helpers
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
 } from './services';
 
 export type {
@@ -178,11 +186,14 @@ export type {
   TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
+  AgentlessAgentPolicyConfig,
+  AgentlessPolicy,
   Installation,
   NewPackagePolicy,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   UpdatePackagePolicy,
+  UpdatePackagePolicyWithId,
   PackagePolicy,
   PackagePolicyPackage,
   Installable,
@@ -230,6 +241,7 @@ export type {
   RegistryImage,
   RegistryDataStream,
   RegistryDataStreamPrivileges,
+  RegistryProviderPermissions,
   RegistryStream,
   RegistryInputGroup,
   BundledPackage,
@@ -251,6 +263,29 @@ export { ElasticsearchAssetType } from './types';
 
 export { FleetError } from './errors';
 
+export {
+  AWS_ONBOARDING_EVENTS,
+  AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
+  AWS_ONBOARDING_PACKAGE_NAME,
+  AWS_ONBOARDING_FLOW_ENTERED_EVENT,
+  AWS_ONBOARDING_CREDENTIALS_ADDED_EVENT,
+  AWS_ONBOARDING_DEPLOY_CLICKED_EVENT,
+  AWS_ONBOARDING_AGENTLESS_ENROLLMENT_SUCCEEDED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_ARRIVED_EVENT,
+  AWS_ONBOARDING_FIRST_DATA_TIMEOUT_EVENT,
+  registerAwsOnboardingEvents,
+  reportAwsOnboardingFlowEntered,
+  reportAwsOnboardingCredentialsAdded,
+  reportAwsOnboardingDeployClicked,
+  reportAwsOnboardingEnrollmentSucceeded,
+  reportAwsOnboardingFirstDataArrived,
+  reportAwsOnboardingFirstDataTimeout,
+} from './telemetry/aws_onboarding_events';
+export type {
+  AwsOnboardingDeployPath,
+  AwsOnboardingAnalyticsClient,
+} from './telemetry/aws_onboarding_events';
+
 // Cloud connector test subjects - needed by E2E tests and unit tests
 export {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
@@ -263,3 +298,4 @@ export {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from './services/cloud_connectors/test_subjects';
+export { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from './services/policy_template';

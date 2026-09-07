@@ -34,7 +34,7 @@ export const SubscriptionBadge: React.FC<SubscriptionBadgeProps> = ({ subscripti
             />
           }
         >
-          <EuiBadge color="default" iconType="info" iconSide="right">
+          <EuiBadge color="default" iconType="info" iconSide="right" tabIndex={0}>
             {capitalizedSubscription}
           </EuiBadge>
         </EuiToolTip>

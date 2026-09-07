@@ -14,6 +14,7 @@ import type {
   CaseCreatedEventPayload,
   CaseUpdatedEventPayload,
   AttachmentsAddedEventPayload,
+  AlertStatusChangedEventPayload,
 } from './types';
 import type { Case } from '../../common';
 import type { CaseSavedObjectTransformed } from '../common/types/case';
@@ -22,6 +23,7 @@ export const CASE_CREATED_EVENT = 'caseCreated';
 export const CASE_UPDATED_EVENT = 'caseUpdated';
 export const ATTACHMENTS_ADDED_EVENT = 'attachmentsAdded';
 export const CASE_STATUS_CHANGED_EVENT = 'caseStatusChanged';
+export const ALERT_STATUS_CHANGED_EVENT = 'alertStatusChanged';
 
 interface CaseUpdatedExtraInfo {
   previousCase?: CaseSavedObjectTransformed;
@@ -71,5 +73,28 @@ export class CasesEventBus extends EventEmitter {
 
   onAttachmentsAdded(listener: CasesEventBusListener<'attachmentsAdded'>) {
     this.on(ATTACHMENTS_ADDED_EVENT, listener);
+  }
+
+  emitAlertStatusChanged(request: KibanaRequest, payload: AlertStatusChangedEventPayload) {
+    this.emit(ALERT_STATUS_CHANGED_EVENT, { type: 'alertStatusChanged', payload, request });
+  }
+
+  onAlertStatusChanged(listener: CasesEventBusListener<'alertStatusChanged'>) {
+    this.on(ALERT_STATUS_CHANGED_EVENT, (event: CasesEventPayload<'alertStatusChanged'>) => {
+      try {
+        const result = listener(event);
+        if (result instanceof Promise) {
+          // Prevent async listener rejections from becoming unhandled rejections.
+          // The Cases mutation has already completed at this point.
+          result.catch(() => {});
+        }
+      } catch {
+        // Isolate sync exceptions so later subscribers still receive the event.
+      }
+    });
+  }
+
+  hasAlertStatusChangedListeners(): boolean {
+    return this.listenerCount(ALERT_STATUS_CHANGED_EVENT) > 0;
   }
 }

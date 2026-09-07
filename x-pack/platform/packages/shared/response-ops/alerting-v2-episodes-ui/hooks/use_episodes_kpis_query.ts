@@ -9,11 +9,16 @@ import { useQuery } from '@kbn/react-query';
 import type { TimeRange } from '@kbn/es-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { CoreStart } from '@kbn/core/public';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
-import { buildEpisodesKpisQuery, type EpisodesFilterState } from '../queries/episodes_query';
+import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
+import { fetchFromSource } from '../utils/fetch_from_sources';
+import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
 
 export interface EpisodesKpisData {
@@ -39,6 +44,7 @@ export interface UseEpisodesKpisQueryOptions {
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     userProfile: CoreStart['userProfile'];
+    http: HttpStart;
   };
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -55,6 +61,7 @@ export const useEpisodesKpisQuery = ({
   filterState,
   timeRange,
 }: UseEpisodesKpisQueryOptions): UseEpisodesKpisQueryResult => {
+  const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
   const spaceId = useSpaceId(services.spaces);
 
   // The current user profile is only needed to compute the "assigned to me"
@@ -71,19 +78,33 @@ export const useEpisodesKpisQuery = ({
     isLoading: isKpisLoading,
     error,
   } = useQuery<EpisodesKpisRow[], Error, EpisodesKpisData | undefined>({
-    queryKey: queryKeys.kpis(spaceId, filterState, timeRange, currentUserUid),
-    queryFn: ({ signal }) => {
-      const query = buildEpisodesKpisQuery(spaceId, currentUserUid, filterState);
-      return executeEsqlQuery<EpisodesKpisRow>({
-        expressions: services.expressions,
-        query,
-        input: {
-          type: 'kibana_context' as const,
-          esqlVariables: [],
-          ...(timeRange ? { timeRange } : {}),
-        },
-        abortSignal: signal,
-      });
+    queryKey: queryKeys.kpis(
+      spaceId,
+      filterState,
+      timeRange,
+      currentUserUid,
+      additionalEpisodesDataSource?.id
+    ),
+    queryFn: async ({ signal }) => {
+      const [v2Rows, sourceKpis] = await Promise.all([
+        executeEsqlQuery<EpisodesKpisRow>({
+          expressions: services.expressions,
+          query: buildEpisodesKpisQuery(spaceId, currentUserUid, filterState),
+          input: {
+            type: 'kibana_context' as const,
+            esqlVariables: [],
+            ...(timeRange ? { timeRange } : {}),
+          },
+          abortSignal: signal,
+        }),
+        fetchFromSource(additionalEpisodesDataSource, (source) =>
+          source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal })
+        ),
+      ]);
+
+      const merged = mergeKpis([v2Rows[0], ...sourceKpis.results]);
+
+      return merged ? [merged] : [];
     },
     select: (rows) => {
       const row = rows[0];

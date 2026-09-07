@@ -54,21 +54,14 @@ cd "$KIBANA_ROOT" && NODE_ENV=production BUILD_OUTPUT_DIR="$OUTPUT_DIR" yarn web
 cd "$CONSOLE_PACKAGING_DIR"
 
 echo "Build react TS definitions..."
-# tsc --outFile wraps everything in 'declare module "types" { ... }' which is
-# not usable as a package declaration. Compile first, then strip the wrapper,
-# dedent, and append the OneConsole component export.
-"$KIBANA_ROOT/node_modules/.bin/tsc" "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outFile "$OUTPUT_DIR/index.d.ts" --skipLibCheck
+# types.ts has no imports (see its own comment), so --outDir emits it flat as
+# types.d.ts with no module wrapper — no unwrapping/dedenting needed. Compile,
+# rename, and append the OneConsole component export.
+"$KIBANA_ROOT/node_modules/.bin/tsc" "$CONSOLE_PACKAGING_DIR/react/types.ts" --declaration --emitDeclarationOnly --outDir "$OUTPUT_DIR" --skipLibCheck --ignoreConfig
+mv "$OUTPUT_DIR/types.d.ts" "$OUTPUT_DIR/index.d.ts"
 node -e "
   const fs = require('fs');
-  let src = fs.readFileSync('$OUTPUT_DIR/index.d.ts', 'utf8');
-  // Strip 'declare module \"types\" {' header line and closing '}'
-  src = src
-    .split('\n')
-    .filter(l => !l.match(/^declare module \"types\" \{/))
-    .join('\n')
-    .replace(/\n\}\n?$/, '\n');
-  // Dedent 4 spaces added by the module wrapper
-  src = src.split('\n').map(l => l.startsWith('    ') ? l.slice(4) : l).join('\n').trimEnd();
+  let src = fs.readFileSync('$OUTPUT_DIR/index.d.ts', 'utf8').trimEnd();
   // Append the component export (no React import needed — 'any' keeps it portable)
   src += '\nexport declare function OneConsole(props: OneConsoleProps): any;\n';
   fs.writeFileSync('$OUTPUT_DIR/index.d.ts', src);

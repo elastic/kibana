@@ -12,6 +12,7 @@ import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import type { WorkflowYAMLEditorProps } from './workflow_yaml_editor';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
@@ -23,32 +24,46 @@ import {
 } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { saveYamlThunk } from '../../../entities/workflows/store/workflow_detail/thunks/save_yaml_thunk';
+import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
-import type { YamlEditorProps } from '../../../shared/ui';
+import { createMockWorkflowExecutionDto } from '../../../shared/test_utils/mock_workflow_factories';
 import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_item_provider';
 
-// Mock the YamlEditor component to avoid Monaco complexity in tests
-jest.mock('../../../shared/ui/yaml_editor', () => ({
-  YamlEditor: ({ value, onChange, editorDidMount, options }: YamlEditorProps) => (
-    <div data-testid="yaml-editor">
-      <textarea
-        ref={(el) => {
-          const editorMock = {
-            getModel: jest.fn(),
-            dispose: jest.fn(),
-          } as unknown as monaco.editor.IStandaloneCodeEditor;
-          if (el) {
-            editorDidMount?.(editorMock);
-          }
-        }}
-        value={value || ''}
-        onChange={(e: any) => onChange?.(e.target.value)}
-        readOnly={Boolean(options?.readOnly)}
-        data-testid="yaml-textarea"
-      />
-    </div>
-  ),
-}));
+// Mock the YamlEditor component to avoid Monaco complexity in tests.
+// Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
+// revealLineInCenter, etc.) instead of a hand-rolled inline mock, so the minimap's
+// viewport-tracking code path is exercised without needing the real Monaco environment.
+jest.mock('../../../shared/ui/yaml_editor', () => {
+  // require() is mandatory here: jest.mock factories run before ES-import transforms.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createElement } = require('react');
+  return {
+    YamlEditor: ({ value, onChange, editorDidMount, options }: any) => {
+      return createElement(
+        'div',
+        { 'data-testid': 'yaml-editor' },
+        createElement('textarea', {
+          ref: (el: HTMLTextAreaElement | null): void => {
+            if (el) {
+              // getModel returns undefined so handleEditorDidMount skips provider
+              // registration (the `if (!model) return` guard). This keeps the
+              // YamlEditor mock minimal — provider registration is separately mocked.
+              editorDidMount?.(
+                createMockMonacoEditor(value ?? '', { getModel: jest.fn() } as any).editor
+              );
+            }
+          },
+          value: value || '',
+          onChange: (e: any) => onChange?.(e.target.value),
+          readOnly: Boolean(options?.readOnly),
+          'data-testid': 'yaml-textarea',
+        })
+      );
+    },
+  };
+});
 
 // Mock the validation hook
 jest.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => ({
@@ -79,10 +94,15 @@ jest.mock('../../../entities/connectors/model/use_available_connectors', () => (
 
 const mockSaveYaml = jest.fn();
 const mockUseSaveYaml = useSaveYaml as jest.MockedFunction<typeof useSaveYaml>;
+const mockUseParams = jest.fn();
 
 // Mock the useSaveYaml hook - now returns just the function, not an array
 jest.mock('../../../entities/workflows/model/use_save_yaml', () => ({
   useSaveYaml: jest.fn(),
+}));
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => mockUseParams(),
 }));
 
 const mockKqlStart = kqlPluginMock.createStartContract();
@@ -163,8 +183,13 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
 
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
   useWorkflowsMonacoTheme: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 jest.mock('../styles/use_dynamic_type_icons', () => ({
   useDynamicTypeIcons: jest.fn(),
@@ -230,9 +255,15 @@ jest.mock('@kbn/monaco', () => ({
   monaco: {
     editor: {
       setModelMarkers: jest.fn(),
+      registerCommand: jest.fn().mockReturnValue({
+        dispose: jest.fn(),
+      }),
     },
     languages: {
       registerCompletionItemProvider: jest.fn().mockReturnValue({
+        dispose: jest.fn(),
+      }),
+      registerCodeActionProvider: jest.fn().mockReturnValue({
         dispose: jest.fn(),
       }),
     },
@@ -260,9 +291,10 @@ describe('WorkflowYAMLEditor', () => {
 
   const renderWithProviders = (
     component: React.ReactElement,
-    store?: ReturnType<typeof createMockStore>
+    store?: ReturnType<typeof createMockStore>,
+    initialEntries?: string[]
   ) => {
-    return render(component, { wrapper: getTestProvider({ store }) });
+    return render(component, { wrapper: getTestProvider({ store, initialEntries }) });
   };
 
   beforeEach(() => {
@@ -271,6 +303,8 @@ describe('WorkflowYAMLEditor', () => {
     mockSaveYaml.mockResolvedValue(undefined);
     // useSaveYaml now returns just the function, not an array
     mockUseSaveYaml.mockReturnValue(mockSaveYaml);
+    mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
+    mockUseParams.mockReturnValue({ id: 'test-123' });
   });
 
   it('renders without crashing', async () => {
@@ -332,6 +366,62 @@ describe('WorkflowYAMLEditor', () => {
     });
   });
 
+  it('renders workflow YAML as read-only without update privileges', async () => {
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...mockWorkflowsManagementCapabilities,
+      canUpdateWorkflow: false,
+    });
+
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+
+    await waitFor(() => {
+      const textarea = document.querySelector(
+        '[data-testid="yaml-textarea"]'
+      ) as HTMLTextAreaElement;
+      expect(textarea.readOnly).toBe(true);
+    });
+  });
+
+  it('renders workflow YAML as read-only on the executions tab without a selection', async () => {
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setActiveTab('executions'));
+
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, ['/?tab=executions']);
+
+    await waitFor(() => {
+      const textarea = document.querySelector(
+        '[data-testid="yaml-textarea"]'
+      ) as HTMLTextAreaElement;
+      expect(textarea.readOnly).toBe(true);
+    });
+  });
+
+  it('keeps cached execution YAML read-only while the selection is cleared', async () => {
+    const store = createMockStore();
+    store.dispatch(setWorkflow(mockWorkflow));
+    store.dispatch(setActiveTab('executions'));
+    store.dispatch(
+      setExecution(
+        createMockWorkflowExecutionDto({
+          id: 'test-execution-id',
+          yaml: mockWorkflow.yaml,
+        })
+      )
+    );
+
+    renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, ['/?tab=executions']);
+
+    await waitFor(() => {
+      const textarea = document.querySelector(
+        '[data-testid="yaml-textarea"]'
+      ) as HTMLTextAreaElement;
+      expect(textarea.readOnly).toBe(true);
+    });
+  });
+
   describe('alert trigger decorations', () => {
     const yamlWithAlertTrigger = `
 version: "1"
@@ -358,21 +448,27 @@ steps:
       });
     });
 
-    it('renders in readOnly mode when isExecutionYaml is true', async () => {
+    it('renders selected execution YAML as read-only', async () => {
       const store = createMockStore();
       store.dispatch(setActiveTab('executions'));
       store.dispatch(
-        setExecution({
-          id: 'test-execution-id',
-          yaml: yamlWithAlertTrigger,
-        } as any)
+        setExecution(
+          createMockWorkflowExecutionDto({
+            id: 'test-execution-id',
+            yaml: yamlWithAlertTrigger,
+          })
+        )
       );
 
-      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store);
+      renderWithProviders(<WorkflowYAMLEditor {...defaultProps} />, store, [
+        '/?tab=executions&executionId=test-execution-id',
+      ]);
 
-      // Wait for async state updates (setTimeout in handleEditorDidMount)
       await waitFor(() => {
-        expect(document.querySelector('[data-testid="yaml-editor"]')).toBeInTheDocument();
+        const textarea = document.querySelector(
+          '[data-testid="yaml-textarea"]'
+        ) as HTMLTextAreaElement;
+        expect(textarea.readOnly).toBe(true);
       });
     });
 

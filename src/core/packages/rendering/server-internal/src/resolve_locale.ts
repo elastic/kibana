@@ -8,6 +8,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { LocaleSource } from '@kbn/core-injected-metadata-common-internal';
+import { EN_LOCALE } from '@kbn/i18n';
 
 /**
  * Name of the browser-side cookie used to remember the resolved locale across
@@ -29,12 +31,6 @@ export interface ResolveLocaleArgs {
   configuredLocales: readonly string[];
   /** Map of locale id → translation hash for locales we can serve. */
   translationHashes: Record<string, string>;
-  /**
-   * When true, Accept-Language header is consulted as a fallback. Currently
-   * gated to serverless deployments — non-serverless deployments stay
-   * deterministic for existing users.
-   */
-  isServerless: boolean;
   /** Server-wide base path for the cookie's Path attribute. */
   serverBasePath: string;
   /**
@@ -52,14 +48,23 @@ export interface ResolveLocaleResult {
    * Always present — the cookie is rewritten on every render.
    */
   setCookieHeader: string;
+  /**
+   * The normalized locale the browser's Accept-Language header resolves to,
+   * regardless of what the display language resolved to. Undefined when the
+   * browser's preference cannot be served.
+   */
+  browserPreferredLocale: string | undefined;
+  /** Which step of the priority chain produced {@link locale}. */
+  source: LocaleSource;
 }
 
 /**
  * Resolves the effective locale for a render using the following priority chain:
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
- *   3. Accept-Language header (serverless only; strict match against `configuredLocales`)
- *   4. `configLocale`
+ *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
+ *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
+ *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
   const {
@@ -68,35 +73,46 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
     configLocale,
     configuredLocales,
     translationHashes,
-    isServerless,
     serverBasePath,
     allowLocaleCookie,
   } = args;
 
+  // Computed for every render so telemetry sees the browser preference even when
+  // a higher-priority step wins.
+  const browserPreferredLocale = pickFromAcceptLanguage(
+    getHeader(request, 'accept-language'),
+    configuredLocales,
+    translationHashes
+  );
+
+  const resolved = (locale: string, source: LocaleSource): ResolveLocaleResult => ({
+    ...finalize(locale, request, serverBasePath),
+    browserPreferredLocale,
+    source,
+  });
+
   if (userSettingLocale && translationHashes[userSettingLocale]) {
-    return finalize(userSettingLocale, request, serverBasePath);
+    return resolved(userSettingLocale, 'profile');
   }
 
   if (allowLocaleCookie) {
     const cookieLocale = readCookie(getHeader(request, 'cookie'), KBN_LOCALE_COOKIE_NAME);
     if (cookieLocale && translationHashes[cookieLocale]) {
-      return finalize(cookieLocale, request, serverBasePath);
+      return resolved(cookieLocale, 'cookie');
     }
   }
 
-  if (isServerless) {
-    const headerLocale = pickFromAcceptLanguage(
-      getHeader(request, 'accept-language'),
-      configuredLocales
-    );
-    // Match the profile/cookie paths above: only return a header-derived
-    // locale if we can actually serve translations for it.
-    if (headerLocale && translationHashes[headerLocale]) {
-      return finalize(headerLocale, request, serverBasePath);
-    }
+  // An explicitly-configured default locale (any value other than the built-in
+  // EN_LOCALE) outranks Accept-Language detection.
+  if (configLocale !== EN_LOCALE) {
+    return resolved(configLocale, 'config');
   }
 
-  return finalize(configLocale, request, serverBasePath);
+  if (browserPreferredLocale) {
+    return resolved(browserPreferredLocale, 'browser');
+  }
+
+  return resolved(configLocale, 'default');
 };
 
 const getHeader = (request: KibanaRequest, name: string): string => {
@@ -132,18 +148,31 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
 
 /**
  * Walks a weighted Accept-Language header and returns the highest-weight
- * entry that is a strict (case-insensitive) match in `allowed`. Returns
- * `undefined` if no entry matches. Entries with `q=0` are ignored.
+ * servable candidate, matched case-insensitively (exact, else primary-subtag
+ * fallback). Returns `undefined` if no entry yields a servable candidate.
+ * Entries with `q=0` are ignored.
+ *
+ * Must stay synchronous and allocation-light: it runs on the render path for
+ * every request, so any I/O or async lookup here is paid per response.
  */
 export const pickFromAcceptLanguage = (
   header: string,
-  allowed: readonly string[]
+  allowed: readonly string[],
+  translationHashes: Record<string, string>
 ): string | undefined => {
   if (!header || allowed.length === 0) return undefined;
 
   const allowedByLowerCase = new Map<string, string>();
+  // Primary subtag → first configured locale with that subtag (config order
+  // wins ties).
+  const allowedByPrimarySubtag = new Map<string, string>();
   for (const id of allowed) {
-    allowedByLowerCase.set(id.toLowerCase(), id);
+    const lower = id.toLowerCase();
+    allowedByLowerCase.set(lower, id);
+    const primary = lower.split('-')[0];
+    if (!allowedByPrimarySubtag.has(primary)) {
+      allowedByPrimarySubtag.set(primary, id);
+    }
   }
 
   const entries = header
@@ -168,8 +197,13 @@ export const pickFromAcceptLanguage = (
     .sort((a, b) => b.q - a.q);
 
   for (const { locale } of entries) {
-    const match = allowedByLowerCase.get(locale);
-    if (match) return match;
+    const exact = allowedByLowerCase.get(locale);
+    if (exact && translationHashes[exact]) return exact;
+    // No exact match: fall back to a configured locale sharing the primary
+    // subtag, regardless of region (`fr-CH` may resolve to `fr-FR`).
+    const primary = locale.split('-')[0];
+    const fallback = allowedByPrimarySubtag.get(primary);
+    if (fallback && translationHashes[fallback]) return fallback;
   }
   return undefined;
 };
@@ -178,7 +212,7 @@ const finalize = (
   locale: string,
   request: KibanaRequest,
   serverBasePath: string
-): ResolveLocaleResult => {
+): Pick<ResolveLocaleResult, 'locale' | 'setCookieHeader'> => {
   const isHttps = request.url.protocol === 'https:';
   const path = serverBasePath || '/';
   const parts = [

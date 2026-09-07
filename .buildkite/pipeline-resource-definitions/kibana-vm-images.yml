@@ -24,6 +24,11 @@ spec:
       default_branch: main
       repository: elastic/ci-agent-images
       pipeline_file: vm-images/.buildkite/pipeline.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - vm-images/.buildkite/pipeline.yml
+            cleanup_sparse_state: true
       provider_settings:
         trigger_mode: none
       schedules:
@@ -49,6 +54,13 @@ spec:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
           message: '[24.04] Daily build of Kibana cache-warmed VM image'
+
+        "[ubuntu26.04] 6-Hourly Minimal Image Build":
+          branch: main
+          cronline: '0 */6 * * *'
+          env:
+            IMAGES_CONFIG: kibana/minimal.tpl.yml
+          message: '[26.04] 6-hourly build of Kibana minimal VM image'
 
         "[ubuntu24.04] Daily FIPS Image Build":
           branch: main

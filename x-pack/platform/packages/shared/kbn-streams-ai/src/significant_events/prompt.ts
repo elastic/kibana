@@ -17,18 +17,22 @@ import {
   SIGNIFICANT_EVENT_TYPE_SECURITY,
 } from './types';
 import { SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES } from './tools/features_tool';
+import { createGetStreamFeaturesTool } from '../features/tool';
 
 export { significantEventsSystemPrompt as significantEventsPrompt };
 
 export function createGenerateSignificantEventsPrompt({
   systemPrompt,
   additionalTools,
+  requireQueryIntent = false,
 }: {
   systemPrompt: string;
   additionalTools?: Record<string, ToolDefinition>;
+  /** Eval-only: advertise `expects_matches` on add_queries items. */
+  requireQueryIntent?: boolean;
 }) {
   return createPrompt({
-    name: 'generate_significant_events',
+    name: 'generate_significant_events_ki_queries',
     input: z.object({
       name: z.string(),
       description: z.string(),
@@ -49,31 +53,7 @@ export function createGenerateSignificantEventsPrompt({
         },
       },
       tools: {
-        get_stream_features: {
-          description:
-            'Fetches extracted stream features for this stream. Supports optional filtering by type, confidence, and limit.',
-          schema: {
-            type: 'object',
-            properties: {
-              feature_types: {
-                type: 'array',
-                items: {
-                  type: 'string',
-                  enum: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES,
-                },
-              },
-              min_confidence: {
-                type: 'number',
-                minimum: 0,
-                maximum: 100,
-              },
-              limit: {
-                type: 'number',
-                minimum: 1,
-              },
-            },
-          },
-        },
+        get_stream_features: createGetStreamFeaturesTool(SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES),
         add_queries: {
           description: `Add queries to suggest to the user`,
           schema: {
@@ -127,6 +107,15 @@ export function createGenerateSignificantEventsPrompt({
                       description:
                         'If this query replaces an existing one (same detection intent but updated ES|QL), set this to the ID of the existing query from `existing_queries`.',
                     },
+                    ...(requireQueryIntent
+                      ? {
+                          expects_matches: {
+                            type: 'boolean',
+                            description:
+                              'true: this query is grounded in evidence currently present and should match rows in the evaluation window. false: this query deliberately watches for a plausible future condition not present in the current evidence.',
+                          },
+                        }
+                      : {}),
                     feature_ids: {
                       type: 'array',
                       items: {

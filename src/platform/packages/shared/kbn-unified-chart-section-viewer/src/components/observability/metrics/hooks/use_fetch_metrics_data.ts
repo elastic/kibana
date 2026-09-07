@@ -10,7 +10,7 @@
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { buildJoinedFilter, buildMetricsInfoQuery, escapeStringValue } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
@@ -49,8 +49,6 @@ export function useFetchMetricsData({
   const reportError = useReportChartSectionError();
   const esql = getEsqlQuery(fetchParams.query);
 
-  const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
-
   // Pre-fetch defense against dimensions the active stream does not map.
   // Pushing a field name that is not in the dataView into the
   // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
@@ -70,10 +68,18 @@ export function useFetchMetricsData({
     [appliedDimensions]
   );
 
-  const metricsInfoQuery = useMemo(
-    () => buildMetricsInfoQuery(esql, appliedDimensionNames),
-    [esql, appliedDimensionNames]
-  );
+  const metricsInfoQuery = useMemo(() => {
+    // `dimension_fields` is the multivalue column returned by METRICS_INFO; this
+    // caller owns that response-schema knowledge, so it builds the post-filter
+    // (AND = metric must declare every selected dimension) and passes it in.
+    const declaredDimensionFilter = buildJoinedFilter(
+      appliedDimensionNames,
+      (dimension) => `MV_CONTAINS(dimension_fields, ${escapeStringValue(dimension)})`
+    );
+    return buildMetricsInfoQuery(esql, appliedDimensionNames, declaredDimensionFilter);
+  }, [esql, appliedDimensionNames]);
+
+  const shouldFetch = isComponentVisible && !!metricsInfoQuery;
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
@@ -114,19 +120,13 @@ export function useFetchMetricsData({
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
-      const sortedMetrics: ParsedMetrics = {
-        metricItems: [...parsed.metricItems].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-      };
-
       if (!signal.aborted) {
         trackMetricsInfo(parsed.telemetry);
       }
 
       return {
-        ...sortedMetrics,
+        metricItems: parsed.metricItems,
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
         activeDimensions: appliedDimensions ?? [],
       };
     },
@@ -183,8 +183,11 @@ export function useFetchMetricsData({
     });
   }, [error, profileId, reportError]);
 
+  const isInitialState = !loading && !value && !error;
+  const isPendingResponse = isComponentVisible && isInitialState;
+
   return {
-    loading,
+    loading: loading || isPendingResponse,
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],

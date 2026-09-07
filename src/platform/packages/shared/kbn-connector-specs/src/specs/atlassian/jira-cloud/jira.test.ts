@@ -8,12 +8,16 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
+import { toAdf } from './adf';
 import { JiraConnector } from './jira';
+import { CreateIssueInputSchema } from './types';
 
 describe('JiraConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
   };
 
   const mockContext = {
@@ -46,7 +50,7 @@ describe('JiraConnector', () => {
         defaults: {
           authorizationUrl: 'https://auth.atlassian.com/authorize',
           tokenUrl: 'https://auth.atlassian.com/oauth/token',
-          scope: 'read:jira-work read:jira-user offline_access',
+          scope: 'read:jira-work read:jira-user write:jira-work offline_access',
         },
       });
     });
@@ -236,6 +240,24 @@ describe('JiraConnector', () => {
     });
   });
 
+  describe('getProject action', () => {
+    it('should fetch a single project by key and return response data', async () => {
+      const mockResponse = {
+        data: { id: '10000', key: 'MYPROJ', name: 'My Project', projectTypeKey: 'software' },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getProject.handler(mockContext, {
+        projectId: 'MYPROJ',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/project/MYPROJ'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
   describe('searchUsers action', () => {
     it('should search users by query and return response data', async () => {
       const mockResponse = {
@@ -299,6 +321,534 @@ describe('JiraConnector', () => {
           },
         }
       );
+    });
+  });
+
+  // ===========================================================================
+  // toAdf helper
+  // ===========================================================================
+
+  describe('toAdf helper', () => {
+    it('wraps a single line in a paragraph node', () => {
+      expect(toAdf('hello world')).toEqual({
+        version: 1,
+        type: 'doc',
+        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'hello world' }] }],
+      });
+    });
+
+    it('splits on newlines into separate paragraphs', () => {
+      const result = toAdf('line one\nline two');
+      expect(result.content).toHaveLength(2);
+      expect(result.content[0]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'line one' }],
+      });
+      expect(result.content[1]).toEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'line two' }],
+      });
+    });
+
+    it('emits empty content array for blank lines — not an empty text node (Jira rejects those)', () => {
+      const result = toAdf('first\n\nsecond');
+      expect(result.content[1]).toEqual({ type: 'paragraph', content: [] });
+    });
+  });
+
+  // ===========================================================================
+  // Must-have write actions
+  // ===========================================================================
+
+  describe('createIssue action', () => {
+    it('posts required fields and returns response data', async () => {
+      const mockResponse = { data: { id: '10042', key: 'PROJ-42', self: 'https://...' } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.createIssue.handler(mockContext, {
+        projectKey: 'PROJ',
+        summary: 'Fix login bug',
+        issueType: 'Bug',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue',
+        {
+          fields: {
+            project: { key: 'PROJ' },
+            summary: 'Fix login bug',
+            issuetype: { name: 'Bug' },
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('wraps description in ADF', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: '10042', key: 'PROJ-42' } });
+
+      await JiraConnector.actions.createIssue.handler(mockContext, {
+        projectKey: 'PROJ',
+        summary: 'Bug',
+        issueType: 'Bug',
+        description: 'Steps to reproduce:\nOpen the app',
+      });
+
+      const body = mockClient.post.mock.calls[0][1] as { fields: Record<string, unknown> };
+      expect(body.fields.description).toEqual(toAdf('Steps to reproduce:\nOpen the app'));
+    });
+
+    it('uses { id } for a numeric issueType and { name } for a string issueType', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: '10042', key: 'PROJ-42' } });
+
+      await JiraConnector.actions.createIssue.handler(mockContext, {
+        projectKey: 'PROJ',
+        summary: 'Bug',
+        issueType: '10001',
+      });
+      expect(
+        (mockClient.post.mock.calls[0][1] as { fields: Record<string, unknown> }).fields.issuetype
+      ).toEqual({ id: '10001' });
+
+      mockClient.post.mockClear();
+      mockClient.post.mockResolvedValue({ data: { id: '10043', key: 'PROJ-43' } });
+
+      await JiraConnector.actions.createIssue.handler(mockContext, {
+        projectKey: 'PROJ',
+        summary: 'Task',
+        issueType: 'Bug',
+      });
+      expect(
+        (mockClient.post.mock.calls[0][1] as { fields: Record<string, unknown> }).fields.issuetype
+      ).toEqual({ name: 'Bug' });
+    });
+
+    it('always includes issuetype and omits other optional fields when not provided', async () => {
+      mockClient.post.mockResolvedValue({ data: { id: '10042', key: 'PROJ-42' } });
+
+      await JiraConnector.actions.createIssue.handler(mockContext, {
+        projectKey: 'PROJ',
+        summary: 'Minimal issue',
+        issueType: 'Task',
+      });
+
+      const { fields } = mockClient.post.mock.calls[0][1] as { fields: Record<string, unknown> };
+      expect(fields).toHaveProperty('issuetype', { name: 'Task' });
+      expect(fields).not.toHaveProperty('description');
+      expect(fields).not.toHaveProperty('priority');
+      expect(fields).not.toHaveProperty('labels');
+      expect(fields).not.toHaveProperty('assignee');
+      expect(fields).not.toHaveProperty('parent');
+    });
+
+    it('rejects input when issueType is omitted', () => {
+      const result = CreateIssueInputSchema.safeParse({
+        projectKey: 'PROJ',
+        summary: 'Missing issue type',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('updateIssue action', () => {
+    it('puts updated fields and returns { updated: true, issueId }', async () => {
+      mockClient.put.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.updateIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        summary: 'Updated summary',
+        priority: 'High',
+      });
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42',
+        { fields: { summary: 'Updated summary', priority: { name: 'High' } } }
+      );
+      expect(result).toEqual({ updated: true, issueId: 'PROJ-42' });
+    });
+
+    it('wraps description in ADF', async () => {
+      mockClient.put.mockResolvedValue({ status: 204, data: '' });
+
+      await JiraConnector.actions.updateIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        description: 'New description',
+      });
+
+      const { fields } = mockClient.put.mock.calls[0][1] as { fields: Record<string, unknown> };
+      expect(fields.description).toEqual(toAdf('New description'));
+    });
+
+    it('sends null assignee to unassign', async () => {
+      mockClient.put.mockResolvedValue({ status: 204, data: '' });
+
+      await JiraConnector.actions.updateIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        assigneeAccountId: null,
+      });
+
+      const { fields } = mockClient.put.mock.calls[0][1] as { fields: Record<string, unknown> };
+      expect(fields.assignee).toBeNull();
+    });
+  });
+
+  describe('addComment action', () => {
+    it('posts ADF comment body and returns response data', async () => {
+      const mockResponse = { data: { id: '10001', created: '2024-01-01T00:00:00.000Z' } };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.addComment.handler(mockContext, {
+        issueId: 'PROJ-42',
+        body: 'This is a comment',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/comment',
+        { body: toAdf('This is a comment') }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('transitionIssue action', () => {
+    it('posts transition id and returns synthesized result', async () => {
+      mockClient.post.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.transitionIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        transitionId: '31',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/transitions',
+        { transition: { id: '31' } }
+      );
+      expect(result).toEqual({ transitioned: true, issueId: 'PROJ-42', transitionId: '31' });
+    });
+  });
+
+  // ===========================================================================
+  // Should-have actions
+  // ===========================================================================
+
+  describe('getTransitions action', () => {
+    it('fetches available transitions for an issue', async () => {
+      const mockResponse = {
+        data: {
+          transitions: [
+            { id: '11', name: 'To Do', to: { name: 'To Do' } },
+            { id: '21', name: 'In Progress', to: { name: 'In Progress' } },
+            { id: '31', name: 'Done', to: { name: 'Done' } },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getTransitions.handler(mockContext, {
+        issueId: 'PROJ-42',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/transitions'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getIssueTypes action', () => {
+    it('fetches issue types for a project', async () => {
+      const mockResponse = {
+        data: {
+          issueTypes: [
+            { id: '10001', name: 'Bug' },
+            { id: '10002', name: 'Task' },
+          ],
+        },
+      };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getIssueTypes.handler(mockContext, {
+        projectKey: 'PROJ',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/createmeta/PROJ/issuetypes'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('getCreateMetadata action', () => {
+    it('fetches field metadata for a project + issue type', async () => {
+      const mockResponse = { data: { fields: [{ fieldId: 'summary', required: true }] } };
+      mockClient.get.mockResolvedValue(mockResponse);
+
+      const result = await JiraConnector.actions.getCreateMetadata.handler(mockContext, {
+        projectKey: 'PROJ',
+        issueTypeId: '10001',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/createmeta/PROJ/issuetypes/10001'
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  describe('assignIssue action', () => {
+    it('puts accountId and returns { assigned: true }', async () => {
+      mockClient.put.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.assignIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/assignee',
+        { accountId: '5b10ac8d82e05b22cc7d4ef5' }
+      );
+      expect(result).toEqual({
+        assigned: true,
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+    });
+
+    it('sends null accountId to unassign', async () => {
+      mockClient.put.mockResolvedValue({ status: 204, data: '' });
+
+      await JiraConnector.actions.assignIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        accountId: null,
+      });
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/assignee',
+        { accountId: null }
+      );
+    });
+  });
+
+  describe('addAttachment action', () => {
+    it('posts a FormData body with X-Atlassian-Token header', async () => {
+      const mockResponse = { data: [{ id: '10001', filename: 'screenshot.png' }] };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const fileContent = Buffer.from('fake image data').toString('base64');
+      const result = await JiraConnector.actions.addAttachment.handler(mockContext, {
+        issueId: 'PROJ-42',
+        file: fileContent,
+        filename: 'screenshot.png',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/attachments',
+        expect.any(FormData),
+        { headers: { 'X-Atlassian-Token': 'no-check' } }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+  });
+
+  // ===========================================================================
+  // Nice-to-have actions
+  // ===========================================================================
+
+  describe('getAttachment action', () => {
+    it('fetches arraybuffer content and returns base64 with content type', async () => {
+      // Pass a Buffer directly — Buffer.buffer is a shared pool and gives wrong base64
+      const fileBuffer = Buffer.from('PDF content');
+      mockClient.get.mockResolvedValue({
+        data: fileBuffer,
+        headers: { 'content-type': 'application/pdf' },
+      });
+
+      const result = await JiraConnector.actions.getAttachment.handler(mockContext, {
+        attachmentId: '10001',
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/attachment/content/10001',
+        { responseType: 'arraybuffer' }
+      );
+      expect(result).toEqual({
+        content: fileBuffer.toString('base64'),
+        contentType: 'application/pdf',
+        attachmentId: '10001',
+      });
+    });
+
+    it('falls back to application/octet-stream when content-type header is missing', async () => {
+      mockClient.get.mockResolvedValue({
+        data: Buffer.from('data'),
+        headers: {},
+      });
+
+      const result = (await JiraConnector.actions.getAttachment.handler(mockContext, {
+        attachmentId: '10002',
+      })) as { contentType: string };
+
+      expect(result.contentType).toBe('application/octet-stream');
+    });
+  });
+
+  describe('linkIssues action', () => {
+    it('posts issue link and returns synthesized result', async () => {
+      mockClient.post.mockResolvedValue({ status: 201, data: '' });
+
+      const result = await JiraConnector.actions.linkIssues.handler(mockContext, {
+        inwardIssueKey: 'PROJ-10',
+        outwardIssueKey: 'PROJ-20',
+        linkType: 'relates to',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issueLink',
+        {
+          type: { name: 'relates to' },
+          inwardIssue: { key: 'PROJ-10' },
+          outwardIssue: { key: 'PROJ-20' },
+        }
+      );
+      expect(result).toEqual({
+        linked: true,
+        inwardIssueKey: 'PROJ-10',
+        outwardIssueKey: 'PROJ-20',
+        linkType: 'relates to',
+      });
+    });
+
+    it('includes ADF comment when provided', async () => {
+      mockClient.post.mockResolvedValue({ status: 201, data: '' });
+
+      await JiraConnector.actions.linkIssues.handler(mockContext, {
+        inwardIssueKey: 'PROJ-10',
+        outwardIssueKey: 'PROJ-20',
+        linkType: 'blocks',
+        comment: 'Blocked by this issue',
+      });
+
+      const body = mockClient.post.mock.calls[0][1] as Record<string, unknown>;
+      expect(body.comment).toEqual({ body: toAdf('Blocked by this issue') });
+    });
+  });
+
+  describe('deleteIssue action', () => {
+    it('has isTool: false to prevent agent exposure', () => {
+      expect(JiraConnector.actions.deleteIssue.isTool).toBe(false);
+    });
+
+    it('deletes the issue and returns { deleted: true, issueId }', async () => {
+      mockClient.delete.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.deleteIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+      });
+
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42',
+        { params: {} }
+      );
+      expect(result).toEqual({ deleted: true, issueId: 'PROJ-42' });
+    });
+
+    it('passes deleteSubtasks as a query param when provided', async () => {
+      mockClient.delete.mockResolvedValue({ status: 204, data: '' });
+
+      await JiraConnector.actions.deleteIssue.handler(mockContext, {
+        issueId: 'PROJ-42',
+        deleteSubtasks: true,
+      });
+
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42',
+        { params: { deleteSubtasks: true } }
+      );
+    });
+  });
+
+  describe('addWatcher action', () => {
+    it('posts a bare JSON string (accountId) as the body', async () => {
+      mockClient.post.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.addWatcher.handler(mockContext, {
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/watchers',
+        '"5b10ac8d82e05b22cc7d4ef5"',
+        { headers: { 'Content-Type': 'application/json' } }
+      );
+      expect(result).toEqual({
+        watching: true,
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+    });
+  });
+
+  describe('removeWatcher action', () => {
+    it('deletes with accountId in query string and returns { unwatched: true }', async () => {
+      mockClient.delete.mockResolvedValue({ status: 204, data: '' });
+
+      const result = await JiraConnector.actions.removeWatcher.handler(mockContext, {
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/issue/PROJ-42/watchers',
+        { params: { accountId: '5b10ac8d82e05b22cc7d4ef5' } }
+      );
+      expect(result).toEqual({
+        unwatched: true,
+        issueId: 'PROJ-42',
+        accountId: '5b10ac8d82e05b22cc7d4ef5',
+      });
+    });
+  });
+
+  // ===========================================================================
+  // test handler
+  // ===========================================================================
+
+  describe('test handler', () => {
+    const testSpec = JiraConnector.test;
+
+    it('should call /rest/api/3/myself and return {}', async () => {
+      mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
+
+      const result = await testSpec.handler(mockContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://mycompany.atlassian.net/rest/api/3/myself'
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should use OAuth base URL when authType is oauth_authorization_code', async () => {
+      const oauthContext = {
+        ...mockContext,
+        config: { subdomain: 'mycompany', cloudId: '11223344-a1b2-3c33-d444-ef1234567890' },
+        secrets: { authType: 'oauth_authorization_code' },
+      } as unknown as ActionContext;
+      mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });
+
+      const result = await testSpec.handler(oauthContext);
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.atlassian.com/ex/jira/11223344-a1b2-3c33-d444-ef1234567890/rest/api/3/myself'
+      );
+      expect(result).toEqual({});
+    });
+
+    it('should throw when the API call fails', async () => {
+      mockClient.get.mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(testSpec.handler(mockContext)).rejects.toThrow('Unauthorized');
     });
   });
 });

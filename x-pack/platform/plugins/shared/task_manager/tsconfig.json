@@ -9,7 +9,7 @@
     "server/**/*.json",
     "common/**/*",
     "test/scout/**/*",
-    "test/scout_task_manager_uiam/**/*"
+    "test/scout_uiam_local/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -52,7 +52,10 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
     "@kbn/core-security-server",
+    "@kbn/core-security-common",
     "@kbn/scout",
+    "@kbn/std",
+    "@kbn/mock-idp-utils",
   ],
   "exclude": ["target/**/*"]
 }

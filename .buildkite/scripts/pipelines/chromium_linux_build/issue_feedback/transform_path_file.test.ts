@@ -12,11 +12,13 @@ import { readFileSync } from 'fs';
 // @ts-expect-error test utils is defined and exists, see https://github.com/facebook/jscodeshift#applytransform
 import { applyTransform } from 'jscodeshift/dist/testUtils';
 
+import { getKibanaDir } from '#pipeline-utils';
+
 import pathFileTransform from './transform_path_file';
 
 // read contents of the path file our transform is built to update
 const pathFileContents = readFileSync(
-  resolve(process.cwd(), 'src/platform/packages/private/kbn-screenshotting-server/src/paths.ts'),
+  resolve(getKibanaDir(), 'src/platform/packages/private/kbn-screenshotting-server/src/paths.ts'),
   'utf8'
 );
 

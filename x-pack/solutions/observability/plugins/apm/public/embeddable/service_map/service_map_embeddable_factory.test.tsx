@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import {
   ENVIRONMENT_ALL,
@@ -36,6 +36,11 @@ jest.mock('@kbn/presentation-publishing', () => ({
   timeRangeComparators: { time_range: 'deepEquality' },
   useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
   useFetchContext: (...args: unknown[]) => mockUseFetchContext(...args),
+  apiHasParentApi: (api: unknown) =>
+    Boolean((api as { parentApi?: unknown } | null)?.parentApi !== undefined),
+  apiCanExpandPanels: (api: unknown) =>
+    Boolean((api as { expandPanel?: unknown } | null)?.expandPanel !== undefined),
+  getViewModeSubject: (api: unknown) => (api as { viewMode$?: unknown } | null)?.viewMode$,
 }));
 
 jest.mock('../embeddable_context', () => ({
@@ -85,6 +90,8 @@ describe('getServiceMapEmbeddableFactory', () => {
         setKuery: jest.fn(),
         serviceName$: new BehaviorSubject(undefined),
         setServiceName: jest.fn(),
+        highlightedServiceNames$: new BehaviorSubject(undefined),
+        setHighlightedServiceNames: jest.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
         setServiceGroupId: jest.fn(),
       },
@@ -92,6 +99,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
+        highlighted_service_names: undefined,
         service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
@@ -100,6 +108,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockInitializeStateApi.mockImplementation(() => ({ stateApi: true }));
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -131,6 +140,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         onEdit: expect.any(Function),
         getTypeDisplayName: expect.any(Function),
         blockingError$: expect.any(Object),
+        rendered$: expect.any(Object),
       })
     );
     const stateApi = mockInitializeStateApi.mock.calls[0][0];
@@ -162,6 +172,77 @@ describe('getServiceMapEmbeddableFactory', () => {
     expect(embeddable.api.blockingError$.getValue()).toBeUndefined();
   });
 
+  it('exposes rendered$ initialized to false', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    expect(embeddable.api.rendered$).toBeDefined();
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+  });
+
+  it('updates rendered$ when the service map reports render completion', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    render(<embeddable.Component />);
+
+    const onRendered = mockServiceMapEmbeddable.mock.calls[0][0].onRendered as (
+      isRendered: boolean
+    ) => void;
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+
+    act(() => {
+      onRendered(true);
+    });
+    expect(embeddable.api.rendered$.getValue()).toBe(true);
+
+    act(() => {
+      onRendered(false);
+    });
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+  });
+
+  it('keeps rendered$ false while waiting for a time range', async () => {
+    mockUseFetchContext.mockReturnValue({ timeRange: undefined });
+
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: {} } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-waiting',
+      parentApi,
+      initializeDrilldownsManager: jest.fn(),
+    } as never);
+
+    render(<embeddable.Component />);
+
+    expect(mockServiceMapEmbeddable).not.toHaveBeenCalled();
+    expect(embeddable.api.rendered$.getValue()).toBe(false);
+  });
+
   it('exposes edit capabilities', async () => {
     const finalizeApi = jest.fn((api) => api);
     const parentApi = { query$: new BehaviorSubject({ query: '' }) };
@@ -177,7 +258,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     } as never);
 
     expect(embeddable.api.isEditingEnabled()).toBe(true);
-    expect(embeddable.api.getTypeDisplayName()).toBe('configuration');
+    expect(embeddable.api.getTypeDisplayName()).toBe('Service map');
     expect(typeof embeddable.api.onEdit).toBe('function');
   });
 
@@ -186,6 +267,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       'production',
       'service.name: api',
       'checkout',
+      undefined,
       'group-1',
     ]);
     mockUseFetchContext.mockReturnValue({ timeRange: { from: 'now-1h', to: 'now' } });
@@ -247,6 +329,8 @@ describe('getServiceMapEmbeddableFactory', () => {
         setKuery: jest.fn(),
         serviceName$: new BehaviorSubject(undefined),
         setServiceName: jest.fn(),
+        highlightedServiceNames$: new BehaviorSubject(undefined),
+        setHighlightedServiceNames: jest.fn(),
         serviceGroupId$: new BehaviorSubject(undefined),
         setServiceGroupId: jest.fn(),
       },
@@ -254,6 +338,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         environment: ENVIRONMENT_ALL.value,
         kuery: undefined,
         service_name: undefined,
+        highlighted_service_names: undefined,
         service_group_id: undefined,
       })),
       anyStateChange$: customStateAnyStateChange$,
@@ -262,6 +347,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
       '  host.name: app-1  ',
+      null,
       null,
       null,
     ]);
@@ -324,6 +410,7 @@ describe('getServiceMapEmbeddableFactory', () => {
   it('defaults to now-15m when initialState has undefined time range', async () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -401,6 +488,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     mockUseFetchContext.mockReturnValue({ timeRange: undefined });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       ENVIRONMENT_ALL.value,
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -517,6 +605,138 @@ describe('getServiceMapEmbeddableFactory', () => {
       const api = await buildEmbeddableWithApi({});
 
       expect(api.filters$.getValue()).toHaveLength(0);
+    });
+  });
+
+  describe('showEmbeddedControls', () => {
+    function buildWithExpandableParent(uuid: string, viewMode: 'view' | 'edit' = 'view') {
+      const expandedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
+      const viewMode$ = new BehaviorSubject<string>(viewMode);
+      const parentApi = {
+        query$: new BehaviorSubject({ query: '' }),
+        expandPanel: jest.fn(),
+        expandedPanelId$,
+        viewMode$,
+      };
+      const finalizeApi = jest.fn((apiRegistration: Record<string, unknown>) => ({
+        ...apiRegistration,
+        parentApi,
+      }));
+      const factory = getServiceMapEmbeddableFactory({
+        coreStart: {},
+      } as unknown as EmbeddableDeps);
+
+      return { expandedPanelId$, factory, finalizeApi, parentApi, uuid };
+    }
+
+    it('is false when the panel is not expanded', async () => {
+      const uuid = 'panel-not-expanded';
+      const {
+        expandedPanelId$: _,
+        factory,
+        finalizeApi,
+        parentApi,
+      } = buildWithExpandableParent(uuid);
+
+      const embeddable = await factory.buildEmbeddable({
+        initialState: {},
+        finalizeApi,
+        uuid,
+        parentApi,
+        initializeDrilldownsManager: jest.fn(),
+      } as never);
+
+      render(<embeddable.Component />);
+
+      expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
+        expect.objectContaining({ showEmbeddedControls: false })
+      );
+    });
+
+    it('becomes true when expandedPanelId$ emits this panel uuid in view mode', async () => {
+      const uuid = 'panel-maximize-view';
+      const { expandedPanelId$, factory, finalizeApi, parentApi } = buildWithExpandableParent(
+        uuid,
+        'view'
+      );
+
+      const embeddable = await factory.buildEmbeddable({
+        initialState: {},
+        finalizeApi,
+        uuid,
+        parentApi,
+        initializeDrilldownsManager: jest.fn(),
+      } as never);
+
+      render(<embeddable.Component />);
+
+      act(() => {
+        expandedPanelId$.next(uuid);
+      });
+
+      expect(mockServiceMapEmbeddable).toHaveBeenLastCalledWith(
+        expect.objectContaining({ showEmbeddedControls: true })
+      );
+    });
+
+    it('stays false when panel is expanded but dashboard is in edit mode', async () => {
+      const uuid = 'panel-maximize-edit';
+      const { expandedPanelId$, factory, finalizeApi, parentApi } = buildWithExpandableParent(
+        uuid,
+        'edit'
+      );
+
+      const embeddable = await factory.buildEmbeddable({
+        initialState: {},
+        finalizeApi,
+        uuid,
+        parentApi,
+        initializeDrilldownsManager: jest.fn(),
+      } as never);
+
+      render(<embeddable.Component />);
+
+      act(() => {
+        expandedPanelId$.next(uuid);
+      });
+
+      expect(mockServiceMapEmbeddable).toHaveBeenLastCalledWith(
+        expect.objectContaining({ showEmbeddedControls: false })
+      );
+    });
+
+    it('resets to false when panel collapses again', async () => {
+      const uuid = 'panel-collapse';
+      const { expandedPanelId$, factory, finalizeApi, parentApi } = buildWithExpandableParent(
+        uuid,
+        'view'
+      );
+
+      const embeddable = await factory.buildEmbeddable({
+        initialState: {},
+        finalizeApi,
+        uuid,
+        parentApi,
+        initializeDrilldownsManager: jest.fn(),
+      } as never);
+
+      render(<embeddable.Component />);
+
+      act(() => {
+        expandedPanelId$.next(uuid);
+      });
+
+      expect(mockServiceMapEmbeddable).toHaveBeenLastCalledWith(
+        expect.objectContaining({ showEmbeddedControls: true })
+      );
+
+      act(() => {
+        expandedPanelId$.next(undefined);
+      });
+
+      expect(mockServiceMapEmbeddable).toHaveBeenLastCalledWith(
+        expect.objectContaining({ showEmbeddedControls: false })
+      );
     });
   });
 

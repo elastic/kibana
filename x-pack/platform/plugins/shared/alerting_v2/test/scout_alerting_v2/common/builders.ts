@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CreateActionPolicyDataInput, CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateActionPolicyDataInput,
+  CreateRuleData,
+  RuleTemplateData,
+} from '@kbn/alerting-v2-schemas';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -57,6 +61,25 @@ export const buildCreateRuleData = (input: BuildCreateRuleDataInput = {}): Creat
   ...input,
 });
 
+export const buildRuleTemplateData = (rule: BuildCreateRuleDataInput = {}): RuleTemplateData => ({
+  engine: 'v2',
+  rule: buildCreateRuleData(rule),
+});
+
+export const buildV1RuleTemplateAttributes = ({
+  name = 'scout-v1-template',
+  tags = ['v1-only'],
+  engine,
+}: { name?: string; tags?: string[]; engine?: string } = {}) => ({
+  ...(engine ? { engine } : {}),
+  name,
+  tags,
+  description: 'Alerting v1 rule template',
+  ruleTypeId: '.index-threshold',
+  schedule: { interval: '1m' },
+  params: { threshold: [1000] },
+});
+
 export type BuildCreateActionPolicyDataInput = Partial<CreateActionPolicyDataInput>;
 
 export const buildCreateActionPolicyData = (
@@ -66,11 +89,38 @@ export const buildCreateActionPolicyData = (
   ...input,
 });
 
+/**
+ * Minimal valid workflow YAML. Action policy specs only need the workflow to
+ * exist and be searchable by name so it can be picked as a destination, so the
+ * body is deliberately a single no-op console step.
+ *
+ * `name` is emitted as a JSON string, which is also a valid YAML double-quoted
+ * scalar, so callers can pass names containing `:` or `#` without producing
+ * YAML that parses into something else.
+ */
+export const buildWorkflowYaml = (name: string): string => `name: ${JSON.stringify(name)}
+enabled: true
+description: Scout action policy destination
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "scout"
+`;
+
 export const buildActionPolicyDestinations = (count: number) =>
   Array.from({ length: count }, (_, i) => ({
     type: 'workflow' as const,
     id: `wf-${i}`,
   }));
+
+/**
+ * Returns an ISO timestamp `offsetMs` in the future (default: 24h).
+ */
+export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
+  new Date(Date.now() + offsetMs).toISOString();
 /**
  * Defaults used by `buildAlertEvent` so the integration specs only have to
  * spell out what makes each alert event unique.
@@ -91,4 +141,24 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     space_id: 'default',
     ...input,
   };
+};
+
+/**
+ * Builds an external alert event (no `rule` field) for tests that exercise
+ * the source-based episode path (e.g. PagerDuty, Opsgenie).
+ */
+export type BuildExternalAlertEventInput = Omit<Partial<AlertEvent>, 'rule'>;
+
+export const buildExternalAlertEvent = (input: BuildExternalAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    group_hash: 'external-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'pagerduty',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  } as AlertEvent;
 };

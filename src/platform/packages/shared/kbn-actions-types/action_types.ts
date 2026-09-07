@@ -36,6 +36,7 @@ export interface ActionType {
   allowMultipleSystemActions?: boolean;
   description?: string;
   isExperimental?: boolean;
+  isTestable?: boolean;
 }
 
 export type ConnectorUserAuthStatus = 'connected' | 'not_connected' | 'not_applicable';

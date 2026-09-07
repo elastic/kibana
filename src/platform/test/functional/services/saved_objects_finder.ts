@@ -35,10 +35,20 @@ export class SavedObjectsFinderService extends FtrService {
       const text = await listItem.getVisibleText();
       if (text === type) {
         await listItem.click();
-        await this.toggleFilterPopover();
         break;
       }
     }
+    // Type selection does not close the popover. Later title clicks hit the open
+    // list (e.g. "Map") if we continue before it unmounts.
+    await this.toggleFilterPopover();
+    await this.retry.try(async () => {
+      const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
+      const filtersButton = await filtersHolder.findByCssSelector('button');
+      const expanded = await filtersButton.getAttribute('aria-expanded');
+      if (expanded === 'true') {
+        throw new Error('Saved objects finder filter popover is still open');
+      }
+    });
   }
 
   public async waitForFilter(type: string, expectCondition: string) {

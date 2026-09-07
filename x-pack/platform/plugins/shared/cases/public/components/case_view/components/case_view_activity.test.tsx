@@ -48,6 +48,9 @@ import { isLegacyAttachmentRequest } from '../../../../common/utils/attachments'
 jest.mock('./template_fields', () => ({
   TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
 }));
+jest.mock('./global_case_fields', () => ({
+  GlobalCaseFields: () => null,
+}));
 
 jest.mock('../../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../../containers/use_find_case_user_actions');
@@ -72,7 +75,9 @@ jest.mock('../../../containers/user_profiles/use_get_current_user_profile');
 
 (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 (useGetCategories as jest.Mock).mockReturnValue({ data: ['foo', 'bar'], refetch: jest.fn() });
-(useGetCaseConfiguration as jest.Mock).mockReturnValue({ data: { observableTypes: [] } });
+(useGetCaseConfiguration as jest.Mock).mockReturnValue({
+  data: { customFields: [], observableTypes: [] },
+});
 (useGetCurrentUserProfile as jest.Mock).mockReturnValue({ data: {}, isFetching: false });
 
 const caseData: CaseUI = {
@@ -124,7 +129,6 @@ const useGetCasesFeaturesRes = {
   metricsFeatures: [CaseMetricsFeature.ALERTS_COUNT],
   pushToServiceAuthorized: true,
   caseAssignmentAuthorized: true,
-  isAlertsEnabled: true,
   isSyncAlertsEnabled: true,
 };
 

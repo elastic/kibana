@@ -95,7 +95,6 @@ dependsOn:
   - '@kbn/home-plugin'
   - '@kbn/data-view-field-editor-plugin'
   - '@kbn/license-management-plugin'
-  - '@kbn/presentation-util-plugin'
   - '@kbn/security-plugin'
   - '@kbn/serverless'
   - '@kbn/core-application-browser'
@@ -113,7 +112,11 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/alerting-types'
   - '@kbn/response-ops-alerts-table'
+  - '@kbn/response-ops-alerts-apis'
+  - '@kbn/response-ops-alert-snooze'
   - '@kbn/streams-plugin'
+  - '@kbn/significant-events-plugin'
+  - '@kbn/react-query'
   - '@kbn/response-ops-rule-form'
   - '@kbn/data-service'
   - '@kbn/ebt-tools'
@@ -143,7 +146,6 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/discover-utils'
   - '@kbn/deeplinks-management'
-  - '@kbn/react-query'
   - '@kbn/content-management-utils'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/agent-builder-browser'
@@ -151,6 +153,9 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/ai-assistant-common'
   - '@kbn/management-settings-ids'
+  - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-evals'
   - '@kbn/observability-agent-builder-plugin'
   - '@kbn/kql'
   - '@kbn/shared-ux-utility'
@@ -161,7 +166,11 @@ dependsOn:
   - '@kbn/expressions-plugin'
   - '@kbn/ingest-hub-plugin'
   - '@kbn/core-spaces-common'
-  - '@kbn/nightshift'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/global-search-plugin'
+  - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
@@ -174,7 +183,7 @@ fileGroups:
     - public/**/*
     - public/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout*/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

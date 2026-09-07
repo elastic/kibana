@@ -230,6 +230,7 @@ Fired at the end of each successful conversation round.
 | `conversation_id` | keyword | no | Conversation ID. |
 | `execution_id` | keyword | no | Agent execution ID. |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
+| `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
 | `message_length` | integer | yes | Character length of the user's input message. |
 | `model` | keyword | no | LLM model identifier. |

@@ -9,7 +9,7 @@ Not every FTR test should become a Scout UI test. Many should be downgraded to a
 
 The authoritative decision matrix lives in the Scout best practices doc — do not duplicate it here:
 
-[`docs/extend/scout/best-practices.md#pick-the-right-test-type`](../../../../docs/extend/scout/best-practices.md#pick-the-right-test-type)
+[`docs/extend/testing/scout-best-practices.md#pick-the-right-test-type`](../../../../docs/extend/testing/scout-best-practices.md#pick-the-right-test-type)
 
 That section covers when to choose a Scout UI test, Scout API test, Jest integration test, or Jest unit test, with concrete code examples for each.
 

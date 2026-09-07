@@ -30,7 +30,7 @@ export const ViewExecutionButton: React.FC<ViewExecutionButtonProps> = ({
   return (
     <>
       <EuiButton
-        iconType="popout"
+        iconType="external"
         size="s"
         color="text"
         onClick={() => setIsOpen(true)}
