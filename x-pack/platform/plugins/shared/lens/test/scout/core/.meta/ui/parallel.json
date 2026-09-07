@@ -1,5 +1,5 @@
 {
-  "sha1": "7e980ff78ae4ff28cda153d3f20ccd32223d09e0",
+  "sha1": "fbf2fe5e37fa456b5739b30cdc724f8540d6e866",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -811,27 +811,27 @@
     {
       "id": "19db52c9b83cb21-00047d302ca0c1c",
       "title": "Lens ES|QL filter data view selector dashboard add filter from ES|QL panel should not show duplicate data view names",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 46,
-        "column": 46
+        "line": 116,
+        "column": 9
       }
     },
     {
       "id": "19db52c9b83cb21-d35e8ca1522ac6f",
       "title": "Lens ES|QL filter data view selector filter fields should be available after changing ES|QL query source",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 113,
-        "column": 31
+        "line": 162,
+        "column": 11
       }
     },
     {
