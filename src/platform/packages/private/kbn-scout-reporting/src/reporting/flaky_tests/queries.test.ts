@@ -8,9 +8,11 @@
  */
 
 import {
+  buildBranchStatsQuery,
   buildFailingFilesQuery,
   buildTestMetadataQuery,
   buildTestStatsQuery,
+  fetchBranchStats,
   fetchFailingFiles,
   fetchLatestRuns,
   fetchSampleFailures,
@@ -97,6 +99,104 @@ describe('buildTestStatsQuery', () => {
       'EVAL failed = CASE(test.outcome IN ("unexpected", "flaky"), 1, 0), retry_flake = CASE(test.outcome == "flaky", 1, 0)'
     );
     expect(query).not.toContain('test-end');
+  });
+});
+
+describe('buildBranchStatsQuery', () => {
+  it('counts builds per test and branch for the given tests only', () => {
+    const query = buildBranchStatsQuery(scope, ['jest', 'ftr'], ['t1', 't2']);
+
+    expect(query).toContain(
+      'event.action == "test-end" AND reporter.type IN ("jest", "ftr") AND test.status IN ("passed", "failed", "timedOut")'
+    );
+    expect(query).toContain('test.id IN ("t1", "t2")');
+    expect(query).toContain('BY test.id, buildkite.branch');
+    expect(query).toContain('RENAME test.id AS test_id, buildkite.branch AS branch');
+  });
+});
+
+describe('fetchBranchStats', () => {
+  it('returns an empty map without a query when there are no tests', async () => {
+    const { client, esql } = mockEs([]);
+
+    expect(await fetchBranchStats(client, scope, [])).toEqual(new Map());
+    expect(esql).not.toHaveBeenCalled();
+  });
+
+  it('queries once per execution model and sorts branches by failed builds', async () => {
+    const { client, esql } = mockEs([]);
+    const attemptRows = [
+      {
+        test_id: 'j1',
+        branch: 'main',
+        builds: 40,
+        failed_builds: 2,
+        last_failed_at: '2026-09-05T00:00:00.000Z',
+      },
+      {
+        test_id: 'j1',
+        branch: '9.5',
+        builds: 8,
+        failed_builds: 3,
+        last_failed_at: '2026-09-06T00:00:00.000Z',
+      },
+      { test_id: 'j1', branch: '9.4', builds: 5, failed_builds: 0, last_failed_at: null },
+      { test_id: 'j1', branch: null, builds: 1, failed_builds: 1, last_failed_at: null },
+    ];
+    const outcomeRows = [
+      {
+        test_id: 'p1',
+        branch: 'main',
+        builds: 10,
+        failed_builds: 5,
+        last_failed_at: '2026-09-06T00:00:00.000Z',
+      },
+    ];
+    esql
+      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: attemptRows }) })
+      .mockReturnValueOnce({ toRecords: jest.fn().mockResolvedValue({ records: outcomeRows }) });
+
+    const stats = await fetchBranchStats(client, scope, [
+      { testId: 'j1', framework: 'jest' },
+      { testId: 'f1', framework: 'ftr' },
+      { testId: 'p1', framework: 'playwright' },
+    ]);
+
+    expect(esql).toHaveBeenCalledTimes(2);
+    const queries = esql.mock.calls.map(([{ query }]) => query as string);
+    expect(queries[0]).toContain('reporter.type IN ("jest", "ftr")');
+    expect(queries[0]).toContain('test.id IN ("j1", "f1")');
+    expect(queries[1]).toContain('reporter.type IN ("playwright")');
+    expect(queries[1]).toContain('test.id IN ("p1")');
+
+    // rows without a branch are dropped
+    expect(stats.get('j1')).toEqual([
+      {
+        branch: '9.5',
+        builds: 8,
+        failedBuilds: 3,
+        buildFailRate: 0.375,
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+      },
+      {
+        branch: 'main',
+        builds: 40,
+        failedBuilds: 2,
+        buildFailRate: 0.05,
+        lastFailedAt: new Date('2026-09-05T00:00:00.000Z'),
+      },
+      { branch: '9.4', builds: 5, failedBuilds: 0, buildFailRate: 0, lastFailedAt: undefined },
+    ]);
+    expect(stats.get('p1')).toEqual([
+      {
+        branch: 'main',
+        builds: 10,
+        failedBuilds: 5,
+        buildFailRate: 0.5,
+        lastFailedAt: new Date('2026-09-06T00:00:00.000Z'),
+      },
+    ]);
+    expect(stats.has('f1')).toBe(false);
   });
 });
 

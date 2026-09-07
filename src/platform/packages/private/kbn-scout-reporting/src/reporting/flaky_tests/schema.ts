@@ -39,6 +39,18 @@ export const FlakyTestLatestRunSchema = z.object({
 });
 export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 
+/** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
+export const FlakyTestBranchStatsSchema = z.object({
+  branch: z.string(),
+  builds: z.int(),
+  failedBuilds: z.int(),
+  /** `failedBuilds / builds` on this branch. */
+  buildFailRate: z.number(),
+  /** Absent when the test never failed on this branch. */
+  lastFailedAt: z.optional(z.coerce.date()),
+});
+export type FlakyTestBranchStats = z.infer<typeof FlakyTestBranchStatsSchema>;
+
 /**
  * One test aggregated over the report window. Counts are per execution (one per test run;
  * Playwright in-run retries collapse into a single execution) and per Buildkite build.
@@ -67,6 +79,8 @@ export const FlakyTestEntrySchema = z.object({
   buildFailRate: z.number(),
   /** Distinct branches with at least one failed execution. */
   failedBranches: z.int(),
+  /** Per-branch breakdown of `builds` / `failedBuilds`, most failed builds first. */
+  byBranch: z.array(FlakyTestBranchStatsSchema),
   firstFailedAt: z.coerce.date(),
   lastFailedAt: z.coerce.date(),
   /** Absent only if the test emitted no execution events in the window (should not happen). */

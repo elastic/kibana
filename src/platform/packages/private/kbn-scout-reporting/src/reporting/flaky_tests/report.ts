@@ -13,6 +13,7 @@ import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   ESQL_ROW_LIMIT,
+  fetchBranchStats,
   fetchFailingFiles,
   fetchLatestRuns,
   fetchSampleFailures,
@@ -26,6 +27,7 @@ import {
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
   TEST_FRAMEWORKS,
+  type FlakyTestBranchStats,
   type FlakyTestEntry,
   type FlakyTestLatestRun,
   type FlakyTestReport,
@@ -94,8 +96,8 @@ export const rankTests = <
       b.lastFailedAt.getTime() - a.lastFailedAt.getTime()
   );
 
-/** An entry before the per-test lookups (latest run, failure samples) are attached. */
-type AggregatedEntry = Omit<FlakyTestEntry, 'latestRun' | 'sampleFailures'>;
+/** An entry before the per-test lookups (latest run, branch stats, failure samples) are attached. */
+type AggregatedEntry = Omit<FlakyTestEntry, 'latestRun' | 'byBranch' | 'sampleFailures'>;
 
 const toEntry = (stats: TestStatsRow, metadata: TestMetadataRow | undefined): AggregatedEntry => ({
   testId: stats.testId,
@@ -239,16 +241,25 @@ const buildReport = async (
   }
 
   const admitted = [...rankedFlaky, ...rankedConsistentlyFailing];
+  let branchStats = new Map<string, FlakyTestBranchStats[]>();
   let samples = new Map<string, FlakyTestEntry['sampleFailures']>();
   if (admitted.length > 0) {
     startedAt = performance.now();
-    samples = await fetchSampleFailures(es, scope, testIds(admitted), options.samplesPerTest);
-    log.info(`Fetched failure samples for ${admitted.length} tests in ${elapsed(startedAt)}`);
+    [branchStats, samples] = await Promise.all([
+      fetchBranchStats(es, scope, admitted),
+      fetchSampleFailures(es, scope, testIds(admitted), options.samplesPerTest),
+    ]);
+    log.info(
+      `Fetched per-branch stats and failure samples for ${admitted.length} tests in ${elapsed(
+        startedAt
+      )}`
+    );
   }
 
   const decorate = (entry: AggregatedEntry): FlakyTestEntry => ({
     ...entry,
     latestRun: latestRuns.get(entry.testId),
+    byBranch: branchStats.get(entry.testId) ?? [],
     sampleFailures: samples.get(entry.testId) ?? [],
   });
 

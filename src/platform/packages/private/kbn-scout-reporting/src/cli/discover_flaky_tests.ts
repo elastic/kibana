@@ -108,6 +108,35 @@ const formatAge = (from: Date, to: Date): string => {
 const formatLatestRun = (entry: FlakyTestEntry, now: Date): string =>
   entry.latestRun ? `${entry.latestRun.status}\n${formatAge(entry.latestRun.timestamp, now)}` : '-';
 
+const BRANCH_LABEL_WIDTH = 6;
+const BUILDS_COL_WIDTH = BRANCH_LABEL_WIDTH + 8 + 2 + 6 + 2;
+/** PR pipelines have a branch per PR; keep the cell to the branches that matter. */
+const MAX_BRANCH_LINES = 5;
+
+const formatBuildsLine = (label: string, failedBuilds: number, builds: number): string => {
+  const rate = builds > 0 ? `${((failedBuilds / builds) * 100).toFixed(1)}%` : '-';
+  const counts = `${failedBuilds}/${builds}`.padStart(8);
+  return `${label.padEnd(BRANCH_LABEL_WIDTH)}${counts}  ${rate.padStart(6)}`;
+};
+
+/**
+ * `failed/total  rate` over all branches, followed by one aligned line per branch the test ran
+ * on. A test that only ran on one branch gets a single line labelled with that branch.
+ */
+const formatBuilds = (entry: FlakyTestEntry): string => {
+  const { byBranch, failedBuilds, builds } = entry;
+  if (byBranch.length === 1) {
+    return formatBuildsLine(byBranch[0].branch, failedBuilds, builds);
+  }
+  const shown = byBranch.slice(0, MAX_BRANCH_LINES);
+  const notShown = byBranch.length - shown.length;
+  return [
+    formatBuildsLine('all', failedBuilds, builds),
+    ...shown.map((stats) => formatBuildsLine(stats.branch, stats.failedBuilds, stats.builds)),
+    ...(notShown > 0 ? [`+${notShown} more branches`] : []),
+  ].join('\n');
+};
+
 const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
   const groups = new Map<string, FlakyTestEntry[]>();
   for (const entry of entries) {
@@ -127,8 +156,16 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Fail rate', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
-    colWidths: [null, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
+    head: ['#', 'Failed builds', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
+    colWidths: [
+      null,
+      BUILDS_COL_WIDTH,
+      null,
+      TITLE_COL_WIDTH,
+      FILE_COL_WIDTH,
+      null,
+      OWNERS_COL_WIDTH,
+    ],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -161,8 +198,7 @@ const buildTopFlakyTable = (
       rank += 1;
       table.push([
         rank,
-        `${entry.failedBuilds}/${entry.builds}`,
-        `${(entry.buildFailRate * 100).toFixed(1)}%`,
+        formatBuilds(entry),
         formatLatestRun(entry, now),
         entry.title,
         ...(index === 0 ? fileCells : []),

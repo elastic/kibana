@@ -9,7 +9,12 @@
 
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import { SCOUT_TEST_EVENTS_INDEX_PATTERN } from '@kbn/scout-info';
-import type { FlakyTestLatestRun, FlakyTestSampleFailure, TestFramework } from './schema';
+import type {
+  FlakyTestBranchStats,
+  FlakyTestLatestRun,
+  FlakyTestSampleFailure,
+  TestFramework,
+} from './schema';
 
 /**
  * Elasticsearch silently truncates ES|QL results at this row count; callers warn when a query
@@ -190,6 +195,34 @@ export const buildTestStatsQuery = (
 };
 
 /**
+ * Per-branch build counts for the given tests of one execution model. Only ever run for the
+ * tests admitted to the report, so the `test.id` filter keeps it small.
+ */
+export const buildBranchStatsQuery = (
+  scope: FlakyTestQueryScope,
+  frameworks: readonly TestFramework[],
+  testIds: readonly string[]
+): string => {
+  const [model] = buildExecutionModels(frameworks);
+
+  return [
+    `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
+    `WHERE ${[
+      ...scopeClauses(scope),
+      model.executionFilter,
+      `test.id IN (${inList(testIds)})`,
+    ].join(' AND ')}`,
+    `EVAL failed = ${model.failedExpression}`,
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' failed_builds = COUNT_DISTINCT(CASE(failed == 1, buildkite.build.id, NULL)),' +
+      ' last_failed_at = MAX(CASE(failed == 1, @timestamp, NULL))' +
+      ' BY test.id, buildkite.branch',
+    'RENAME test.id AS test_id, buildkite.branch AS branch',
+    `LIMIT ${ESQL_ROW_LIMIT}`,
+  ].join(' | ');
+};
+
+/**
  * Descriptive fields per failing test, read from failure documents only so the query stays
  * cheap regardless of how many passes there are.
  */
@@ -297,6 +330,55 @@ export const fetchTestMetadata = async (
       },
     ])
   );
+};
+
+/**
+ * Per-branch build counts for the given tests, most failed builds first. Tests are grouped by
+ * execution model so that each one is counted the way its framework requires.
+ */
+export const fetchBranchStats = async (
+  es: ESClient,
+  scope: FlakyTestQueryScope,
+  tests: ReadonlyArray<{ testId: string; framework: TestFramework }>
+): Promise<Map<string, FlakyTestBranchStats[]>> => {
+  const modelTests = buildExecutionModels([...new Set(tests.map((test) => test.framework))]).map(
+    (model) => ({
+      frameworks: model.frameworks,
+      testIds: tests
+        .filter((test) => model.frameworks.includes(test.framework))
+        .map((test) => test.testId),
+    })
+  );
+
+  const results = await Promise.all(
+    modelTests.map(({ frameworks, testIds }) =>
+      runEsql<{
+        test_id: string;
+        branch: string | null;
+        builds: number;
+        failed_builds: number;
+        last_failed_at: string | null;
+      }>(es, buildBranchStatsQuery(scope, frameworks, testIds))
+    )
+  );
+
+  const byTest = new Map<string, FlakyTestBranchStats[]>();
+  for (const record of results.flat()) {
+    if (record.branch === null) continue;
+    const stats = byTest.get(record.test_id) ?? [];
+    stats.push({
+      branch: record.branch,
+      builds: record.builds,
+      failedBuilds: record.failed_builds,
+      buildFailRate: record.builds > 0 ? record.failed_builds / record.builds : 0,
+      lastFailedAt: record.last_failed_at ? new Date(record.last_failed_at) : undefined,
+    });
+    byTest.set(record.test_id, stats);
+  }
+  for (const stats of byTest.values()) {
+    stats.sort((a, b) => b.failedBuilds - a.failedBuilds || b.builds - a.builds);
+  }
+  return byTest;
 };
 
 const scopeFilter = (scope: FlakyTestQueryScope): object[] => {
