@@ -795,7 +795,9 @@ export class WorkflowExecutionQueryService {
   /**
    * Returns the HITL wait step currently blocking the run, whether or not it
    * has already been claimed, so the atomic `markStepAsResponded` write stays
-   * the single first-writer-wins arbiter for concurrent resumes.
+   * the single first-writer-wins arbiter for concurrent resumes. Callers that
+   * already know the step id (inbox, Kibana UI, Scout) should pass it and skip
+   * this lookup.
    */
   async getWaitingStepExecutionId(executionId: string, spaceId: string): Promise<string | null> {
     try {
@@ -822,10 +824,7 @@ export class WorkflowExecutionQueryService {
       if (isIndexNotFoundError(error)) {
         return null;
       }
-      this.deps.logger.warn(
-        `Failed to resolve the waiting step execution for ${executionId}: ${error}`
-      );
-      return null;
+      throw error;
     }
   }
 
