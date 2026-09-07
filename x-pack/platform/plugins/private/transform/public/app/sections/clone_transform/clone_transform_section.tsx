@@ -7,13 +7,13 @@
 
 import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps } from 'react-router-dom';
+import { useHistory, type RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { TransformConfigUnion } from '../../../../common/types/transform';
@@ -40,6 +40,7 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     docTitleService.setTitle('createTransform');
   }, []);
 
+  const history = useHistory();
   const { esTransform } = useDocumentationLinks();
 
   const transformId = match.params.transformId;
@@ -99,20 +100,6 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
     }
   }, [error, errorMessage, transformConfigs]);
 
-  const docsLink = (
-    <EuiButtonEmpty
-      href={esTransform}
-      target="_blank"
-      iconType="question"
-      data-test-subj="documentationLink"
-    >
-      <FormattedMessage
-        id="xpack.transform.transformsWizard.transformDocsLinkText"
-        defaultMessage="Transform docs"
-      />
-    </EuiButtonEmpty>
-  );
-
   return (
     <CapabilitiesWrapper
       requiredCapabilities={[
@@ -122,16 +109,18 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
         'canStartStopTransform',
       ]}
     >
-      <EuiPageTemplate.Header
-        pageTitle={
-          <FormattedMessage
-            id="xpack.transform.transformsWizard.cloneTransformTitle"
-            defaultMessage="Clone transform"
-          />
-        }
-        rightSideItems={[docsLink]}
-        bottomBorder
-        paddingSize={'none'}
+      <AppHeader
+        title={i18n.translate('xpack.transform.transformsWizard.cloneTransformTitle', {
+          defaultMessage: 'Clone transform',
+        })}
+        back={{
+          href: history.createHref({ pathname: '/' }),
+          label: i18n.translate('xpack.transform.transformList.transformTitle', {
+            defaultMessage: 'Transforms',
+          }),
+        }}
+        docLink={esTransform}
+        spacing="bleed"
       />
 
       <EuiSpacer size="l" />
@@ -149,10 +138,10 @@ export const CloneTransformSection: FC<Props> = ({ match, location }) => {
             </KbnDangerCallout>
             <EuiSpacer size="l" />
           </>
-        ) : null}
-
-        {searchItems !== undefined && isInitialized === true && transformConfig !== undefined && (
+        ) : searchItems !== undefined && isInitialized === true && transformConfig !== undefined ? (
           <Wizard cloneConfig={transformConfig} searchItems={searchItems} />
+        ) : (
+          <EuiSkeletonText lines={6} data-test-subj="transformCloneLoading" />
         )}
       </EuiPageTemplate.Section>
     </CapabilitiesWrapper>

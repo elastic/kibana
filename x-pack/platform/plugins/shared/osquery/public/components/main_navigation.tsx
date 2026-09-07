@@ -6,22 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { matchPath, useHistory, useLocation } from 'react-router-dom';
 import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
-} from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import { matchPath, useLocation } from 'react-router-dom';
-import { navCss } from './layouts/default';
+  AppHeader,
+  AppHeaderLoading,
+  AppHeaderView,
+  type AppHeaderBack,
+  type AppHeaderTab,
+} from '@kbn/app-header';
 import { useRouterNavigate, useKibana } from '../common/lib/kibana';
-import { PAGE_ROUTING_PATHS } from '../common/page_paths';
-import { ManageIntegrationLink } from './manage_integration_link';
+import { PAGE_ROUTING_PATHS, pagePathGetters } from '../common/page_paths';
+import { useGoBack } from '../common/use_go_back';
+import { useOsqueryAppMenu } from './use_osquery_app_menu';
+import { useOsqueryPageHeaderTitle } from './osquery_page_header_context';
 import { getHistoryFilters } from '../actions/history_filter_storage';
 
 enum Section {
@@ -30,15 +28,29 @@ enum Section {
   SavedQueries = 'saved_queries',
 }
 
-const topBarCss = ({ euiTheme }: UseEuiTheme) => ({
-  background: euiTheme.colors.body,
-  borderBottom: euiTheme.border.thin,
-  padding: `${euiTheme.size.s} ${euiTheme.size.l}`,
+const OSQUERY_TITLE = i18n.translate('xpack.osquery.appNavigation.title', {
+  defaultMessage: 'Osquery',
+});
+const HISTORY_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.historyLinkText', {
+  defaultMessage: 'History',
+});
+const PACKS_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.packsLinkText', {
+  defaultMessage: 'Packs',
+});
+const QUERIES_BACK_LABEL = i18n.translate('xpack.osquery.appNavigation.queriesLinkText', {
+  defaultMessage: 'Queries',
 });
 
+const matchExact = <Params extends { [K in keyof Params]?: string }>(
+  pathname: string,
+  path: string
+) => matchPath<Params>(pathname, { path, exact: true });
+
 export const MainNavigation = () => {
+  const history = useHistory();
   const permissions = useKibana().services.application.capabilities.osquery;
   const location = useLocation();
+  const subpageTitle = useOsqueryPageHeaderTitle();
   const section = useMemo(() => {
     const firstSegment = location.pathname.split('/')[1] ?? 'overview';
 
@@ -48,15 +60,17 @@ export const MainNavigation = () => {
   const isListView = useMemo(
     () =>
       [PAGE_ROUTING_PATHS.history, PAGE_ROUTING_PATHS.packs, PAGE_ROUTING_PATHS.saved_queries].some(
-        (path) => matchPath(location.pathname, { path, exact: true })
+        (path) => matchExact(location.pathname, path)
       ),
     [location.pathname]
   );
+  const handleGoBackToHistory = useGoBack(pagePathGetters.history());
 
   const persistedHistoryQs = getHistoryFilters();
-  const historyNavProps = useRouterNavigate(
-    persistedHistoryQs ? `${Section.History}${persistedHistoryQs}` : Section.History
-  );
+  const historyPath = persistedHistoryQs
+    ? `${Section.History}${persistedHistoryQs}`
+    : Section.History;
+  const historyNavProps = useRouterNavigate(historyPath);
   const packsNavProps = useRouterNavigate(Section.Packs);
   const savedQueriesNavProps = useRouterNavigate(Section.SavedQueries);
   const newQueryNavProps = useRouterNavigate('/new');
@@ -65,66 +79,177 @@ export const MainNavigation = () => {
     permissions.writeLiveQueries ||
     (permissions.runSavedQueries && (permissions.readSavedQueries || permissions.readPacks));
 
-  const topBar = (
-    <div css={topBarCss}>
-      <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" direction="row" alignItems="center">
-            <ManageIntegrationLink />
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+  const listMenuExtras = useMemo(
+    () =>
+      isListView
+        ? {
+            primaryActionItem: {
+              id: 'runQuery',
+              iconType: 'play' as const,
+              label: i18n.translate('xpack.osquery.history.newLiveQueryButtonLabel', {
+                defaultMessage: 'Run query',
+              }),
+              href: newQueryNavProps.href,
+              testId: 'osqueryRunQueryButton',
+              disableButton: !canRunQuery,
+              run: () => {
+                history.push('/new');
+              },
+            },
+          }
+        : undefined,
+    [canRunQuery, history, isListView, newQueryNavProps.href]
+  );
+  const menu = useOsqueryAppMenu(listMenuExtras);
+  const loadingMenu = useMemo(() => ({ buttonCount: 1, hasPrimary: false }), []);
+
+  const tabs = useMemo<AppHeaderTab[]>(
+    () => [
+      {
+        id: Section.History,
+        label: HISTORY_BACK_LABEL,
+        isSelected: section === Section.History,
+        href: historyNavProps.href,
+        onClick: () => {
+          history.push(historyPath);
+        },
+      },
+      {
+        id: Section.Packs,
+        label: PACKS_BACK_LABEL,
+        isSelected: section === Section.Packs,
+        href: packsNavProps.href,
+        onClick: () => {
+          history.push(Section.Packs);
+        },
+      },
+      {
+        id: Section.SavedQueries,
+        label: QUERIES_BACK_LABEL,
+        isSelected: section === Section.SavedQueries,
+        href: savedQueriesNavProps.href,
+        onClick: () => {
+          history.push(Section.SavedQueries);
+        },
+      },
+    ],
+    [
+      history,
+      historyNavProps.href,
+      historyPath,
+      packsNavProps.href,
+      savedQueriesNavProps.href,
+      section,
+    ]
   );
 
+  const subpageHeader = useMemo(() => {
+    const { pathname } = location;
+    const historyBack: AppHeaderBack = {
+      href: historyNavProps.href,
+      label: HISTORY_BACK_LABEL,
+      onClick: handleGoBackToHistory,
+    };
+    const packsBack: AppHeaderBack = {
+      href: packsNavProps.href,
+      label: PACKS_BACK_LABEL,
+    };
+    const queriesBack: AppHeaderBack = {
+      href: savedQueriesNavProps.href,
+      label: QUERIES_BACK_LABEL,
+    };
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.new_query)) {
+      return {
+        title: i18n.translate('xpack.osquery.newLiveQuery.pageTitle', {
+          defaultMessage: 'Run query',
+        }),
+        back: historyBack,
+      };
+    }
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.saved_query_new)) {
+      return {
+        title: i18n.translate('xpack.osquery.addSavedQuery.pageTitle', {
+          defaultMessage: 'Add saved query',
+        }),
+        back: queriesBack,
+      };
+    }
+
+    const savedQueryEditMatch = matchExact<{ savedQueryId: string }>(
+      pathname,
+      PAGE_ROUTING_PATHS.saved_query_edit
+    );
+    if (savedQueryEditMatch) {
+      return {
+        title: subpageTitle,
+        back: queriesBack,
+      };
+    }
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.pack_add)) {
+      return {
+        title: i18n.translate('xpack.osquery.addPack.pageTitle', {
+          defaultMessage: 'Add pack',
+        }),
+        back: packsBack,
+      };
+    }
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.pack_edit)) {
+      return {
+        title: subpageTitle,
+        back: packsBack,
+      };
+    }
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.history_scheduled_details)) {
+      return {
+        title: i18n.translate('xpack.osquery.liveQueryActionResults.results', {
+          defaultMessage: 'Query results',
+        }),
+        back: historyBack,
+      };
+    }
+
+    if (matchExact(pathname, PAGE_ROUTING_PATHS.history_details)) {
+      return {
+        title: i18n.translate('xpack.osquery.liveQueryActionResults.results', {
+          defaultMessage: 'Query results',
+        }),
+        back: historyBack,
+      };
+    }
+
+    return null;
+  }, [
+    handleGoBackToHistory,
+    historyNavProps.href,
+    location,
+    packsNavProps.href,
+    savedQueriesNavProps.href,
+    subpageTitle,
+  ]);
+
+  if (!isListView && !subpageHeader) {
+    if (!menu.items?.length) {
+      return null;
+    }
+
+    return <AppHeaderView menu={menu} />;
+  }
+
+  if (subpageHeader && subpageHeader.title === undefined) {
+    return <AppHeaderLoading back={subpageHeader.back} menu={loadingMenu} />;
+  }
+
   return (
-    <>
-      {topBar}
-      {isListView && (
-        <div css={navCss}>
-          <EuiFlexGroup gutterSize="l" alignItems="center">
-            <EuiFlexItem>
-              <EuiText>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.osquery.appNavigation.title"
-                    defaultMessage="Osquery"
-                  />
-                </h1>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton fill {...newQueryNavProps} isDisabled={!canRunQuery}>
-                <FormattedMessage
-                  id="xpack.osquery.history.newLiveQueryButtonLabel"
-                  defaultMessage="Run query"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiTabs bottomBorder={false}>
-            <EuiTab isSelected={section === Section.History} {...historyNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.historyLinkText"
-                defaultMessage="History"
-              />
-            </EuiTab>
-            <EuiTab isSelected={section === Section.Packs} {...packsNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.packsLinkText"
-                defaultMessage="Packs"
-              />
-            </EuiTab>
-            <EuiTab isSelected={section === Section.SavedQueries} {...savedQueriesNavProps}>
-              <FormattedMessage
-                id="xpack.osquery.appNavigation.queriesLinkText"
-                defaultMessage="Queries"
-              />
-            </EuiTab>
-          </EuiTabs>
-        </div>
-      )}
-    </>
+    <AppHeader
+      title={subpageHeader?.title ?? OSQUERY_TITLE}
+      back={subpageHeader?.back}
+      tabs={subpageHeader ? undefined : tabs}
+      menu={menu}
+    />
   );
 };

@@ -20,7 +20,13 @@ import { validateYaraRule } from '../../../endpoint/lib/libyara';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 jest.mock('../../../endpoint/lib/libyara', () => ({
-  validateYaraRule: jest.fn(async () => ({ errors: [], warnings: [] })),
+  validateYaraRule: jest.fn(async () => ({
+    errors: [],
+    warnings: [],
+    errorCount: 0,
+    warningCount: 0,
+    rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+  })),
   getYaraEngineVersion: jest.fn(async () => 'MOCKED_VERSION'),
 }));
 
@@ -40,7 +46,13 @@ describe('YARA Signatures API validations', () => {
     );
     exceptionsGenerator = new ExceptionsListItemGenerator();
     mockValidateYaraRule.mockReset();
-    mockValidateYaraRule.mockResolvedValue({ errors: [], warnings: [] });
+    mockValidateYaraRule.mockResolvedValue({
+      errors: [],
+      warnings: [],
+      errorCount: 0,
+      warningCount: 0,
+      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+    });
   });
 
   it('should initialize', () => {
@@ -272,11 +284,16 @@ describe('YARA Signatures API validations', () => {
       mockValidateYaraRule.mockResolvedValue({
         errors: [{ severity: 'error', message: 'syntax error', line: 2 }],
         warnings: [],
+        errorCount: 1,
+        warningCount: 0,
+        rules: [],
       });
 
       await expect(
         customYaraSignaturesValidator.validatePreCreateItem(buildCreateItem())
-      ).rejects.toThrow(/Invalid YARA rule \(libyara MOCKED_VERSION\): line 2: syntax error/);
+      ).rejects.toThrow(
+        /Invalid YARA rules \(libyara MOCKED_VERSION\), 1 error found: \[line 2\] syntax error/
+      );
       expect(mockValidateYaraRule).toHaveBeenCalled();
     });
 
@@ -284,6 +301,9 @@ describe('YARA Signatures API validations', () => {
       mockValidateYaraRule.mockResolvedValue({
         errors: [],
         warnings: [{ severity: 'warning', message: 'may slow down scanning', line: 1 }],
+        errorCount: 0,
+        warningCount: 1,
+        rules: [{ identifier: 'T', meta: {}, duplicateMeta: [] }],
       });
 
       await expect(
