@@ -207,10 +207,10 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest(
-    'preserves metrics profile state through a GET and PUT round trip',
+    'preserves metrics tab state through a GET and PUT round trip',
     async ({ apiClient, kbnClient }) => {
-      const id = createId('metrics-profile-round-trip');
-      const storedProfileState: NonNullable<
+      const id = createId('metrics-tab-state-round-trip');
+      const storedTabTypeState: NonNullable<
         DiscoverSessionAttributes['tabs'][number]['attributes']['tabTypeState']
       > = {
         type: DiscoverTabType.Metrics,
@@ -222,7 +222,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       };
 
       const attributes: DiscoverSessionAttributes = {
-        title: 'Metrics profile round trip',
+        title: 'Metrics tab state round trip',
         description: '',
         tabs: [
           {
@@ -236,12 +236,12 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
               grid: {},
               kibanaSavedObjectMeta: {
                 searchSourceJSON: JSON.stringify({
-                  query: { esql: 'FROM metrics-* | LIMIT 10' },
+                  query: { esql: 'TS metrics-* | LIMIT 10' },
                   filter: [],
                 }),
               },
               isTextBasedQuery: true,
-              tabTypeState: storedProfileState,
+              tabTypeState: storedTabTypeState,
             },
           },
         ],
@@ -266,17 +266,15 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.data.tabs[0]).toMatchObject({
         id: 'metrics-tab',
-        profile: {
-          type: 'metrics',
-          dimensions: ['host.name', 'service.name'],
-          search_term: 'cpu',
-          counter_aggregation: 'max',
-          gauge_aggregation: 'min',
-          histogram_percentile: 'p99',
-        },
+        type: 'metrics',
+        dimensions: ['host.name', 'service.name'],
+        search_term: 'cpu',
+        counter_aggregation: 'max',
+        gauge_aggregation: 'min',
+        histogram_percentile: 'p99',
         data_source: {
           type: 'esql',
-          query: 'FROM metrics-* | LIMIT 10',
+          query: 'TS metrics-* | LIMIT 10',
         },
       });
       expect('tabTypeState' in getResponse.body.data.tabs[0]).toBe(false);
@@ -309,7 +307,7 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         id,
       });
       expect(storedSession.attributes.tabs[0].attributes.tabTypeState).toStrictEqual(
-        storedProfileState
+        storedTabTypeState
       );
     }
   );

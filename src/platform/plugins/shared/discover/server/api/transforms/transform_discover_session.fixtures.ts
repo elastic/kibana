@@ -270,7 +270,7 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
     {
       id: 'fe157f5f-1ad8-47c9-9cb0-f9fff059aa48',
       label: 'Classic',
-      profile: { type: DiscoverTabType.Default },
+      type: DiscoverTabType.Default,
       sort: [
         {
           name: 'transaction.id',
@@ -322,14 +322,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
     {
       id: 'de687fc2-0719-456e-b9c3-adccc8426746',
       label: 'ES|QL',
-      profile: {
-        type: DiscoverTabType.Metrics,
-        dimensions: ['host.name'],
-        search_term: 'cpu',
-        counter_aggregation: 'max',
-        gauge_aggregation: 'min',
-        histogram_percentile: 'p99',
-      },
+      type: DiscoverTabType.Metrics,
+      dimensions: ['host.name'],
+      search_term: 'cpu',
+      counter_aggregation: 'max',
+      gauge_aggregation: 'min',
+      histogram_percentile: 'p99',
       sort: [
         {
           name: 'transaction.id',

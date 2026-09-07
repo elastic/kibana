@@ -11,13 +11,14 @@ import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionTab } from '../../embeddable';
 import { isDiscoverSessionEsqlTab } from '../../../common/embeddable';
 import { fromStoredTab } from '../../../common/embeddable/transform_utils';
 import type { DiscoverSessionApiData, DiscoverSessionWarning } from '../schema';
 import { transformControlPanelsOut } from './transform_control_panels';
-import { transformProfileOut } from './transform_profile';
+import { transformTabTypeStateOut } from './transform_tab_type_state';
 import { transformVisContextOut } from './transform_vis_context';
 
 export const transformDiscoverSessionOut = (
@@ -44,11 +45,10 @@ export const transformDiscoverSessionOut = (
       );
       warnings.push(...controlPanelWarnings);
 
-      return {
+      const tabTypeState = transformTabTypeStateOut(tab.attributes.tabTypeState);
+      const presentation = {
         id: tab.id,
         label: tab.label,
-        profile: transformProfileOut(tab.attributes.tabTypeState),
-        ...apiTab,
         hide_chart: tab.attributes.hideChart ?? false,
         hide_table: tab.attributes.hideTable ?? false,
         ...(tab.attributes.hideAggregatedPreview !== undefined && {
@@ -75,6 +75,16 @@ export const transformDiscoverSessionOut = (
             esql_approximation: tab.attributes.esqlApproximation,
           }),
       };
+
+      if (tabTypeState.type === DiscoverTabType.Default) {
+        return { ...apiTab, ...presentation, ...tabTypeState };
+      }
+
+      if (!isDiscoverSessionEsqlTab(apiTab)) {
+        throw new Error(`Metrics tab "${tab.id}" requires an ES|QL data source.`);
+      }
+
+      return { ...apiTab, ...presentation, ...tabTypeState };
     }),
   };
 

@@ -168,17 +168,18 @@ const discoverSessionTabIdentitySchema = z
   })
   .strict();
 
-const discoverSessionDefaultProfileSchema = z
+const discoverSessionDefaultTabTypeStateSchema = z
   .object({
-    type: z.literal(DiscoverTabType.Default).meta({
-      description: 'Identifies a tab that uses the default Discover experience.',
-    }),
+    type: z
+      .literal(DiscoverTabType.Default)
+      .default(DiscoverTabType.Default)
+      .meta({
+        description:
+          'A tab with no type-specific saved state. ' +
+          'If `type` is omitted, it defaults to `default`. Responses always include `type`.',
+      }),
   })
-  .strict()
-  .meta({
-    title: 'Default profile',
-    description: 'The standard Discover tab profile, which has no profile-specific state.',
-  });
+  .strict();
 
 const simpleAggregationSchema = z.enum(METRICS_GRID_SIMPLE_AGGREGATIONS);
 
@@ -186,10 +187,12 @@ const histogramPercentileSchema = z.enum(METRICS_GRID_HISTOGRAM_PERCENTILES).met
   description: 'Percentile displayed for histogram metric fields.',
 });
 
-const discoverSessionMetricsProfileSchema = z
+const discoverSessionMetricsTabTypeStateSchema = z
   .object({
     type: z.literal(DiscoverTabType.Metrics).meta({
-      description: 'Identifies a tab that uses the Discover metrics experience.',
+      description:
+        'A tab with saved metrics grid settings. Requires an ES|QL data source. ' +
+        'These settings are used only when the query supports the metrics experience.',
     }),
     dimensions: z
       .array(z.string().max(MAX_METRICS_TAB_STATE_STRING_LENGTH))
@@ -208,37 +211,14 @@ const discoverSessionMetricsProfileSchema = z
     }),
     histogram_percentile: histogramPercentileSchema,
   })
-  .strict()
-  .meta({
-    title: 'Metrics profile',
-    description: 'The Discover metrics profile and its persisted grid configuration.',
-  });
-
-export const discoverSessionProfileSchema = z
-  .discriminatedUnion('type', [
-    discoverSessionDefaultProfileSchema,
-    discoverSessionMetricsProfileSchema,
-  ])
-  .meta({
-    id: 'kbn-discover-session-profile',
-    title: 'Discover session profile',
-    description:
-      'The profile used by the tab, including any profile-specific state. ' +
-      'When omitted from a Discover session tab request, it defaults to the `default` profile and is always included in responses.',
-  });
-
-// Existing requests can omit the profile.
-// When omitted, responses and transforms use the default profile.
-const discoverSessionProfileWithDefaultSchema = discoverSessionProfileSchema.default({
-  type: DiscoverTabType.Default,
-});
+  .strict();
 
 const discoverSessionClassicTabSchema = z
   .object({
     ...discoverSessionTabIdentitySchema.shape,
     ...classicTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
-    profile: discoverSessionProfileWithDefaultSchema,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
@@ -248,15 +228,28 @@ const discoverSessionEsqlTabSchema = z
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
     ...asCodeEsqlApproximationSchema.shape,
-    profile: discoverSessionProfileWithDefaultSchema,
+    ...discoverSessionDefaultTabTypeStateSchema.shape,
   })
   .strict();
 
+const discoverSessionMetricsTabSchema = discoverSessionEsqlTabSchema
+  .extend(discoverSessionMetricsTabTypeStateSchema.shape)
+  .meta({
+    title: 'Metrics tab',
+    description: 'An ES|QL tab with saved metrics grid settings.',
+  });
+
 const discoverSessionApiTabSchema = z
-  .union([discoverSessionClassicTabSchema, discoverSessionEsqlTabSchema])
+  .union([
+    discoverSessionClassicTabSchema,
+    discoverSessionEsqlTabSchema,
+    discoverSessionMetricsTabSchema,
+  ])
   .meta({
     description:
-      'A Discover tab definition. `data_source.type` selects the data source shape, while `profile.type` selects the Discover experience and its state.',
+      'A Discover tab definition. `data_source.type` identifies the data source; `type` identifies the tab type. ' +
+      'The tab type describes saved state and does not select the active Discover experience. ' +
+      'Default tabs support data views and ES|QL; metrics tabs support only ES|QL.',
   });
 
 export const discoverSessionApiDataSchema = z
@@ -397,9 +390,14 @@ export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSche
 export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
 export type DiscoverSessionApiClassicTab = z.output<typeof discoverSessionClassicTabSchema>;
-export type DiscoverSessionApiEsqlTab = z.output<typeof discoverSessionEsqlTabSchema>;
+export type DiscoverSessionApiMetricsTab = z.output<typeof discoverSessionMetricsTabSchema>;
+export type DiscoverSessionApiEsqlTab =
+  | z.output<typeof discoverSessionEsqlTabSchema>
+  | DiscoverSessionApiMetricsTab;
 export type DiscoverSessionApiTab = z.output<typeof discoverSessionApiTabSchema>;
-export type DiscoverSessionApiProfile = z.output<typeof discoverSessionProfileSchema>;
+export type DiscoverSessionApiTabTypeState =
+  | z.output<typeof discoverSessionDefaultTabTypeStateSchema>
+  | z.output<typeof discoverSessionMetricsTabTypeStateSchema>;
 export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
 
 // Input types (shape accepted by the API, before defaults applied)

@@ -55,7 +55,8 @@ const esqlTab = {
   hide_table: false,
 };
 
-const metricsProfile = {
+const metricsTab = {
+  ...esqlTab,
   type: DiscoverTabType.Metrics,
   dimensions: ['host.name'],
   search_term: 'cpu',
@@ -105,35 +106,48 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.sample_size).toBe(500);
   });
 
+  it.each(['TS metrics-* | LIMIT 10', 'FROM custom-* | LIMIT 10'])(
+    'preserves the metrics tab type regardless of the ES|QL query: %s',
+    (query) => {
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Metrics',
+        tabs: [{ ...metricsTab, data_source: { ...esqlTab.data_source, query } }],
+      });
+
+      expect(validated.tabs[0]).toMatchObject({
+        ...metricsTab,
+        data_source: { ...esqlTab.data_source, query },
+      });
+    }
+  );
+
   it.each([
     ['classic', classicTab],
     ['ES|QL', esqlTab],
-  ])('validates a metrics tab with a %s data source', (_, tabInput) => {
+    ['ES|QL TS', { ...esqlTab, data_source: { ...esqlTab.data_source, query: 'TS metrics-*' } }],
+  ])('uses the default tab type when omitted from a %s tab', (_, tabInput) => {
     const validated = discoverSessionApiDataSchema.parse({
-      title: 'Metrics',
-      tabs: [{ ...tabInput, profile: metricsProfile }],
-    });
-
-    expect(validated.tabs[0].profile).toMatchObject(metricsProfile);
-  });
-
-  it.each([
-    ['classic', classicTab],
-    ['ES|QL', esqlTab],
-  ])('uses the default profile when omitted from a %s tab', (_, tabInput) => {
-    const validated = discoverSessionApiDataSchema.parse({
-      title: 'Default profile',
+      title: 'Default tab type',
       tabs: [tabInput],
     });
 
-    expect(validated.tabs[0].profile).toEqual({ type: DiscoverTabType.Default });
+    expect(validated.tabs[0].type).toBe(DiscoverTabType.Default);
   });
 
-  it('rejects profile fields flattened onto the tab', () => {
+  it('rejects a metrics tab with a classic data source', () => {
     expect(() =>
       discoverSessionApiDataSchema.parse({
-        title: 'Invalid flat profile',
-        tabs: [{ ...classicTab, ...metricsProfile }],
+        title: 'Invalid metrics data source',
+        tabs: [{ ...metricsTab, data_source: classicTab.data_source }],
+      })
+    ).toThrow();
+  });
+
+  it('rejects unknown tab properties', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Unknown tab property',
+        tabs: [{ ...esqlTab, unknown_property: true }],
       })
     ).toThrow();
   });
@@ -173,55 +187,40 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.control_panels).toBeUndefined();
   });
 
-  it('rejects metrics profile state on a default tab', () => {
-    const { type: _metricsType, ...metricsState } = metricsProfile;
+  it.each([DiscoverTabType.Default, undefined])(
+    'rejects metrics state when the tab type is %s',
+    (type) => {
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Invalid default tab',
+          tabs: [{ ...metricsTab, type }],
+        })
+      ).toThrow();
+    }
+  );
 
-    expect(() =>
-      discoverSessionApiDataSchema.parse({
-        title: 'Invalid default tab',
-        tabs: [
-          {
-            ...classicTab,
-            profile: {
-              type: DiscoverTabType.Default,
-              ...metricsState,
-            },
-          },
-        ],
-      })
-    ).toThrow();
-  });
+  it.each([
+    'dimensions',
+    'search_term',
+    'counter_aggregation',
+    'gauge_aggregation',
+    'histogram_percentile',
+  ] as const)('rejects a metrics tab without %s', (field) => {
+    const { [field]: _value, ...incompleteTab } = metricsTab;
 
-  it('rejects an incomplete metrics profile state', () => {
     expect(() =>
       discoverSessionApiDataSchema.parse({
         title: 'Incomplete metrics tab',
-        tabs: [
-          {
-            ...classicTab,
-            profile: {
-              type: DiscoverTabType.Metrics,
-              dimensions: [],
-            },
-          },
-        ],
+        tabs: [incompleteTab],
       })
     ).toThrow();
   });
 
-  it('rejects an unknown profile type', () => {
+  it('rejects an unknown tab type', () => {
     expect(() =>
       discoverSessionApiDataSchema.parse({
-        title: 'Unknown profile',
-        tabs: [
-          {
-            ...classicTab,
-            profile: {
-              ...metricsProfile,
-              type: 'unknown',
-            },
-          },
-        ],
+        title: 'Unknown tab type',
+        tabs: [{ ...metricsTab, type: 'unknown' }],
       })
     ).toThrow();
   });
@@ -232,15 +231,7 @@ describe('discoverSessionApiDataSchema', () => {
       expect(() =>
         discoverSessionApiDataSchema.parse({
           title: 'Unsupported aggregation',
-          tabs: [
-            {
-              ...classicTab,
-              profile: {
-                ...metricsProfile,
-                [aggregation]: 'median',
-              },
-            },
-          ],
+          tabs: [{ ...metricsTab, [aggregation]: 'median' }],
         })
       ).toThrow();
     }
@@ -250,15 +241,7 @@ describe('discoverSessionApiDataSchema', () => {
     expect(() =>
       discoverSessionApiDataSchema.parse({
         title: 'Unsupported histogram percentile',
-        tabs: [
-          {
-            ...classicTab,
-            profile: {
-              ...metricsProfile,
-              histogram_percentile: 'p100',
-            },
-          },
-        ],
+        tabs: [{ ...metricsTab, histogram_percentile: 'p100' }],
       })
     ).toThrow();
   });
@@ -617,17 +600,14 @@ describe('discoverSessionApiDataSchema', () => {
       expect(validated.description).toHaveLength(MAX_SESSION_DESCRIPTION_LENGTH);
     });
 
-    it('rejects a metrics profile with too many dimensions', () => {
+    it('rejects a metrics tab with too many dimensions', () => {
       expect(() =>
         discoverSessionApiDataSchema.parse({
           title: 'Too many metrics dimensions',
           tabs: [
             {
-              ...classicTab,
-              profile: {
-                ...metricsProfile,
-                dimensions: new Array(MAX_METRICS_TAB_DIMENSIONS + 1).fill('host.name'),
-              },
+              ...metricsTab,
+              dimensions: new Array(MAX_METRICS_TAB_DIMENSIONS + 1).fill('host.name'),
             },
           ],
         })
@@ -640,11 +620,8 @@ describe('discoverSessionApiDataSchema', () => {
           title: 'Oversized metrics dimension',
           tabs: [
             {
-              ...classicTab,
-              profile: {
-                ...metricsProfile,
-                dimensions: [repeat('a', MAX_METRICS_TAB_STATE_STRING_LENGTH + 1)],
-              },
+              ...metricsTab,
+              dimensions: [repeat('a', MAX_METRICS_TAB_STATE_STRING_LENGTH + 1)],
             },
           ],
         })
@@ -657,11 +634,8 @@ describe('discoverSessionApiDataSchema', () => {
           title: 'Oversized metrics search term',
           tabs: [
             {
-              ...classicTab,
-              profile: {
-                ...metricsProfile,
-                search_term: repeat('a', MAX_METRICS_TAB_STATE_STRING_LENGTH + 1),
-              },
+              ...metricsTab,
+              search_term: repeat('a', MAX_METRICS_TAB_STATE_STRING_LENGTH + 1),
             },
           ],
         })

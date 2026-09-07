@@ -23,7 +23,7 @@ import type {
   DiscoverSessionApiTab,
 } from '../schema';
 import { transformControlPanelsIn } from './transform_control_panels';
-import { transformProfileIn } from './transform_profile';
+import { transformTabTypeStateIn } from './transform_tab_type_state';
 import { transformVisContextIn } from './transform_vis_context';
 
 const isEsqlTab = (tab: DiscoverSessionApiTab): tab is DiscoverSessionApiEsqlTab =>
@@ -111,7 +111,7 @@ export const transformDiscoverSessionIn = (
     const { state: tabAttributes, references: tabReferences } = toStoredTab(tab, {
       refNamePrefix: `tab_${tab.id}`,
     });
-    const tabTypeState = transformProfileIn(tab.profile);
+    const tabTypeState = transformTabTypeStateIn(tab);
 
     references.push(...tabReferences);
 
