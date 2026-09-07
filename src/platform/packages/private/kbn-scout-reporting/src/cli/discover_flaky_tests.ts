@@ -74,8 +74,8 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
   return frameworks.filter(isTestFramework);
 };
 
-// `#`, `Failed builds`, `Fail rate`, `Test`; widths include one column of padding on each side
-const TOP_TABLE_COL_WIDTHS = [6, 15, 11, 100];
+const FILE_COL_WIDTH = 60;
+const TITLE_COL_WIDTH = 64;
 
 // cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/`
 const wrapPath = (filePath: string, width: number): string => {
@@ -103,44 +103,43 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests grouped under their file, in order of first appearance, so
- * whole-suite failures (every test in a file failing in the same builds) stand out.
+ * Renders the top-ranked tests one per row, with the file cell spanning the rows of its tests
+ * (in order of first appearance) so whole-suite failures stand out.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
   all: readonly FlakyTestEntry[]
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Fail rate', 'Test'],
-    colWidths: TOP_TABLE_COL_WIDTHS,
+    head: ['#', 'Failed builds', 'Fail rate', 'File', 'Test'],
+    colWidths: [null, null, null, FILE_COL_WIDTH, TITLE_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
-  // a spanning cell covers every column and the borders between them; leave room for the
-  // cell padding and the trailing `/` of a broken path line
-  const pathWidth =
-    TOP_TABLE_COL_WIDTHS.reduce((sum, width) => sum + width, 0) +
-    (TOP_TABLE_COL_WIDTHS.length - 1) -
-    3;
 
-  let fileNumber = 0;
+  let rank = 0;
   for (const [filePath, entries] of groupByFile(top)) {
-    fileNumber += 1;
     const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const details = [
-      `[${framework}] ${owners.join(', ') || '-'}`,
-      notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-    ]
-      .filter(Boolean)
-      .join('  ');
+    const fileCell: CliTable3.Cell = {
+      rowSpan: entries.length,
+      content: [
+        // cell padding takes 2 columns and a broken line ends in `/`
+        wrapPath(filePath, FILE_COL_WIDTH - 3),
+        `[${framework}] ${owners.join(', ') || '-'}`,
+        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    };
 
-    table.push([{ colSpan: 4, content: `${wrapPath(filePath, pathWidth)}\n${details}` }]);
     entries.forEach((entry, index) => {
+      rank += 1;
       table.push([
-        `${fileNumber}.${index + 1}`,
+        rank,
         `${entry.failedBuilds}/${entry.builds}`,
         `${(entry.buildFailRate * 100).toFixed(1)}%`,
+        ...(index === 0 ? [fileCell] : []),
         entry.title,
       ]);
     });
@@ -188,7 +187,7 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
   if (flaky.length > 0) {
     const top = flaky.slice(0, limit);
     panel.push([
-      `Top ${top.length} flaky tests by failed builds, grouped by file\n${buildTopFlakyTable(
+      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
         top,
         flaky
       ).toString()}`,
