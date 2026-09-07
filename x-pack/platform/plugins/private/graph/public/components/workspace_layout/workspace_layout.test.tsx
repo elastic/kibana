@@ -11,7 +11,6 @@ import { WorkspaceLayoutComponent } from '.';
 import { coreMock } from '@kbn/core/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
@@ -44,9 +43,7 @@ describe('workspace_layout', () => {
     capabilities: {} as Capabilities,
     coreStart: coreMock.createStart(),
     graphSavePolicy: 'configAndDataWithConsent' as GraphSavePolicy,
-    navigation: {} as NavigationStart,
     canEditDrillDownUrls: true,
-    setHeaderActionMenu: jest.fn(),
     sharingSavedObjectProps: {
       outcome: 'exactMatch',
       aliasTargetId: '',

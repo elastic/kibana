@@ -296,12 +296,12 @@ for i in $(seq 1 25); do
   node scripts/jest <path-to-test-file> --json --outputFile=/tmp/gh-aw/agent/jest-run.json >/dev/null 2>&1 || fails=$((fails + 1))
   node -e 'const a = require("/tmp/gh-aw/agent/jest-run.json").testResults[0]?.assertionResults.find((t) => t.fullName.includes(process.argv[1])); console.log(a ? a.duration : 0)' '<distinctive substring of the test name>' >> /tmp/gh-aw/agent/jest-durations
 done
-echo "$fails/25 runs failed"
+echo "$((25 - fails))/25 passed ($fails failed)"
 awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", total / NR, max}' /tmp/gh-aw/agent/jest-durations
 ```
 
 - **Run it on the unpatched test first** (`git stash` the patch if you already wrote it). If it never fails there, the flake doesn't reproduce here and a clean post-fix loop proves nothing: say so under "Not verified locally".
-- **Report both loops** on the Jest line of "Verified locally", as `<failures>/<runs> before the fix (avg, max), then the same after`. Add under "Not verified locally" that neither loop ran under CI's parallel load.
+- **Report both loops** as pass counts, not failure counts: `<passes>/<runs>` before the fix (avg, max), then the same after — e.g. `21/25` then `25/25`, never `4/25 failed` / `0/25 failed`. Use that on the Jest line of "Verified locally" and in the runtime table. Add under "Not verified locally" that neither loop ran under CI's parallel load.
 - **Read the timings, not only the counts.** A patch meant to make the test cheaper — an async step removed, a smaller unit under test, heavy children mocked — must show a clearly lower average, not a few percent. An average that barely moves means the expensive work is still there and the patch only changed how the test waits; that is the shape of Jest fix that comes back. An average that jumps after the patch means it bought reliability by waiting longer, which the body has to justify. A max far above the average means something is still racing. A deliberate timeout bump is the exception: it is not meant to lower the average. Two traps in the durations file — a `0` line means the test name did not match, not a fast run, and a run that crashed adds no line at all, so check you have one line per run.
 - **25 runs is the floor**, 50 when a run takes only seconds. A loop this size catches a test that fails every few runs, not one that fails weekly.
 - **Any failure in the post-fix loop means the fix did not hold.** Revise the patch and run both loops again.
@@ -311,7 +311,7 @@ awk '{total += $1; if ($1 > max) max = $1} END {printf "avg %dms, max %dms\n", t
 Write the body so a developer can grasp the fix and its root cause at a glance, from the PR alone — without needing to open links or leave the page (links are still welcome for anyone who wants to dig deeper).
 
 - **Branch**: name the PR's source branch `fix/flaky-<issue-number>-<short-kebab-slug>` (e.g. `fix/flaky-275144-host-flow-ingestion-wait`) to keep fixer branches uniform.
-- **Title**: `[<Plugin name>] <concise summary of the fix>`. Derive the plugin name from the test file path (e.g. `x-pack/solutions/security/plugins/security_solution/...` → `Security Solution`).
+- **Title**: `[<Feature>] <concise summary of the fix>`. Prefix by the user-facing area or named project this serves (the `Feature:` / `Project:` a maintainer would triage it under), not the plugin/package folder you edited — e.g. `[Fleet]`, `[Alerting v2]`, `[Chrome Next]`.
 - **Body**:
   ```
   Fixes #<issue-number>
@@ -321,10 +321,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   <only when the test failed by running past its time budget, add this table right below the Summary, so the numbers are visible without opening Verification. Fill it from the two loops in "Verifying a Jest fix", and name the budget the test failed against (5s unless the file raises it with `jest.setTimeout`):
 
-  | Runtime vs. 5s budget | Failed | Avg | Max |
+  | Runtime vs. 5s budget | Passed | Avg | Max |
   | --- | --- | --- | --- |
-  | Before fix | 4/25 | 4.6s | 5.0s |
-  | After fix | 0/25 | 0.9s | 1.1s |
+  | Before fix | 21/25 | 4.6s | 5.0s |
+  | After fix | 25/25 | 0.9s | 1.1s |
 
   Omit the table for every other kind of flake.>
 
@@ -343,10 +343,10 @@ Write the body so a developer can grasp the fix and its root cause at a glance, 
 
   #### Verified locally
 
-  <one line per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
-  ✅ Passed: `node scripts/eslint <files>`
-  ✅ Passed: `node scripts/jest <test>`: 4/25 runs failed before the fix (avg 820ms, max 4.9s), 0/25 after (avg 890ms, max 1.0s)
-  ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
+  <one bullet per check you ran on this branch, each prefixed with its status — `✅ Passed:` when it succeeded, `⚠️` when it failed — followed by the exact command in backticks, with any note left outside them, e.g.
+  - ✅ Passed: `node scripts/eslint <files>`
+  - ✅ Passed: `node scripts/jest <test>`: 21/25 passed before the fix (avg 820ms, max 4.9s), 25/25 after (avg 890ms, max 1.0s)
+  - ⚠️ `node scripts/jest <test>`: 1 assertion still failing (<one-line reason>)>
 
   #### Not verified locally
 
@@ -372,7 +372,7 @@ Add the following at the very end of the PR description (and outside of the deta
 
 ## Release-note and backport labels
 
-Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a short PR comment; label guidance does not belong in the PR body.
+Do not research, choose, or apply release-note or backport labels for a PR opened by this workflow. The Flaky Fix Verifier handles both after verification, adds a user-focused `## Release note` section for `release_note:fix`, and leaves its label rationale in a collapsed PR comment section; label guidance does not belong in the PR body.
 
 The only exception is a failure that must be fixed directly on a version branch and therefore cannot produce a `main` PR for the verifier. In that no-PR hand-off, use `release_note:skip` for internal changes, documentation changes, fixes for unreleased features, or other non-user-facing changes; use `release_note:fix` for user-facing bug fixes to already released versions. For `release_note:fix`, include a `## Release note` section with one concise, user-focused description of what the change does for the user. Also include any confident version-branch labels described below.
 

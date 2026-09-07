@@ -10,8 +10,7 @@
 import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest } from '../fixtures';
-import { createHelpers } from './helpers';
+import { apiTest, createHelpers } from '../fixtures';
 
 const SPACE_A = 'nav-ro-space-a';
 const SPACE_B = 'nav-ro-space-b';
