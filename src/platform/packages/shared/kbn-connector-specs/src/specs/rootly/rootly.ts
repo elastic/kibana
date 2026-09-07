@@ -146,6 +146,7 @@ export const Rootly: ConnectorSpec = {
   actions: {
     createIncident: {
       isTool: true,
+      scope: 'write',
       description:
         "Declare a new Rootly incident, the core outbound action that mobilizes responders from a Kibana alert. Returns the new incident's ID. Use listSeverities and listServices to resolve real severity/service IDs first.",
       input: RootlyCreateIncidentInputSchema,
@@ -174,6 +175,7 @@ export const Rootly: ConnectorSpec = {
 
     getIncident: {
       isTool: true,
+      scope: 'read',
       description:
         'Get a single Rootly incident by ID, so a workflow can branch on its current state before it acts.',
       input: RootlyGetIncidentInputSchema,
@@ -192,6 +194,7 @@ export const Rootly: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly incidents filtered by status, severity, service, team, free-text search, or creation time window, so a workflow can dedupe and correlate before it acts.',
       input: RootlyListIncidentsInputSchema,
@@ -226,6 +229,7 @@ export const Rootly: ConnectorSpec = {
 
     updateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         "Patch a Rootly incident's title, summary, severity, services, teams, or labels in place, so a workflow can enrich or reclassify an incident as it learns more.",
       input: RootlyUpdateIncidentInputSchema,
@@ -253,6 +257,7 @@ export const Rootly: ConnectorSpec = {
 
     triageIncident: {
       isTool: true,
+      scope: 'destroy',
       description: 'Move a Rootly incident into triage while severity is still being assessed.',
       input: RootlyTriageIncidentInputSchema,
       handler: async (ctx, input: RootlyTriageIncidentInput) => {
@@ -271,6 +276,7 @@ export const Rootly: ConnectorSpec = {
 
     mitigateIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a Rootly incident to mitigated once impact is contained, the first lifecycle transition a response workflow drives to closure.',
       input: RootlyIncidentLifecycleInputSchema,
@@ -291,6 +297,7 @@ export const Rootly: ConnectorSpec = {
 
     resolveIncident: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Move a Rootly incident to resolved once remediation is verified, closing the incident lifecycle.',
       input: RootlyIncidentLifecycleInputSchema,
@@ -311,6 +318,7 @@ export const Rootly: ConnectorSpec = {
 
     cancelIncident: {
       isTool: true,
+      scope: 'destroy',
       description: 'Cancel a Rootly incident as a false positive so it does not skew metrics.',
       input: RootlyIncidentLifecycleInputSchema,
       handler: async (ctx, input: RootlyIncidentLifecycleInput) => {
@@ -330,6 +338,7 @@ export const Rootly: ConnectorSpec = {
 
     assignIncidentUser: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Assign a responder to a Rootly incident by user ID and incident role ID (e.g. Incident Commander), so automated mobilization routes the incident to a person, not just a queue.',
       input: RootlyAssignIncidentUserInputSchema,
@@ -354,6 +363,7 @@ export const Rootly: ConnectorSpec = {
 
     addIncidentSubscribers: {
       isTool: true,
+      scope: 'write',
       description:
         'Subscribe stakeholders to a Rootly incident so they receive updates, an automated notification fan-out from the workflow.',
       input: RootlyAddIncidentSubscribersInputSchema,
@@ -373,6 +383,7 @@ export const Rootly: ConnectorSpec = {
 
     createActionItem: {
       isTool: true,
+      scope: 'write',
       description:
         'File a follow-up task on a Rootly incident, so remediation work is tracked and reminders can be driven.',
       input: RootlyCreateActionItemInputSchema,
@@ -400,6 +411,7 @@ export const Rootly: ConnectorSpec = {
 
     listActionItems: {
       isTool: true,
+      scope: 'read',
       description:
         'List action items on a Rootly incident (or org-wide if incidentId is omitted), filtered by status or priority.',
       input: RootlyListActionItemsInputSchema,
@@ -426,6 +438,7 @@ export const Rootly: ConnectorSpec = {
 
     createTimelineEvent: {
       isTool: true,
+      scope: 'write',
       description:
         "Post a note or milestone to a Rootly incident's timeline, so automated actions are recorded where responders read the incident history.",
       input: RootlyCreateTimelineEventInputSchema,
@@ -448,6 +461,7 @@ export const Rootly: ConnectorSpec = {
 
     listSeverities: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly severity definitions and their resource IDs, so createIncident and updateIncident can set severity by a real ID instead of a guessed string.',
       input: RootlyListSeveritiesInputSchema,
@@ -468,6 +482,7 @@ export const Rootly: ConnectorSpec = {
 
     listServices: {
       isTool: true,
+      scope: 'read',
       description:
         'List the Rootly service catalog, so a workflow can attach the affected service by reference when it opens or updates an incident.',
       input: RootlyListServicesInputSchema,
@@ -491,6 +506,7 @@ export const Rootly: ConnectorSpec = {
 
     listTeams: {
       isTool: true,
+      scope: 'read',
       description: 'List Rootly teams, so a workflow can set incident ownership by reference.',
       input: RootlyListTeamsInputSchema,
       handler: async (ctx, input: RootlyListTeamsInput) => {
@@ -510,6 +526,7 @@ export const Rootly: ConnectorSpec = {
 
     listAlerts: {
       isTool: true,
+      scope: 'read',
       description:
         'List Rootly alerts filtered by status or source, feeding triage and correlation from the monitoring signal before an incident is declared.',
       input: RootlyListAlertsInputSchema,
@@ -534,6 +551,7 @@ export const Rootly: ConnectorSpec = {
 
     getAlert: {
       isTool: true,
+      scope: 'read',
       description: 'Get a single Rootly alert by ID.',
       input: RootlyGetAlertInputSchema,
       handler: async (ctx, input: RootlyGetAlertInput) => {
@@ -551,6 +569,7 @@ export const Rootly: ConnectorSpec = {
 
     acknowledgeAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge a Rootly alert so on-call sees it is being handled. The alert must be in "triggered" status.',
       input: RootlyAcknowledgeAlertInputSchema,
@@ -570,6 +589,7 @@ export const Rootly: ConnectorSpec = {
 
     resolveAlert: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve a Rootly alert when the condition clears, closing the alert loop from a workflow. Optionally cascades to resolve linked incidents.',
       input: RootlyResolveAlertInputSchema,

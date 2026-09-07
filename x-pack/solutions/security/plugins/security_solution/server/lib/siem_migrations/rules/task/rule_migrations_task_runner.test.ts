@@ -111,7 +111,7 @@ describe('RuleMigrationTaskRunner', () => {
         throw new Error(errorMessage);
       });
 
-      await expect(taskRunner.setup('test-connector-id')).rejects.toThrowError(errorMessage);
+      await expect(taskRunner.setup('test-connector-id')).rejects.toThrow(errorMessage);
     });
 
     it('uses the v1 agent when ruleMigrationGraphv2 is disabled', async () => {
