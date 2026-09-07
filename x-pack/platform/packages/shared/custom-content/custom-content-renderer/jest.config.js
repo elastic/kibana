@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const ADD_CUSTOM_CONTENT_ACTION_ID = 'ADD_CUSTOM_CONTENT_PANEL';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/custom-content/custom-content-renderer'],
+};
