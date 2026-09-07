@@ -14422,7 +14422,7 @@ axe-core@^4.2.0, axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
 
-axios@1.19.0, axios@^1.15.0, axios@^1.6.0, axios@^1.8.2:
+axios@1.19.0, axios@^1.16.0, axios@^1.6.0, axios@^1.8.2:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.19.0.tgz#ddf864d4c8233c0e6873746ab59361537d05ad39"
   integrity sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==
@@ -15517,13 +15517,13 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@148.0.1:
-  version "148.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.1.tgz#264bbc33c9dd16637e325ff6456cc72d035971eb"
-  integrity sha512-dlRbJqLAb7luLHNQ8pze7Qv9rVHHn+BwcOLbwa11PYfDgrISRZNtMTXm/kX0byZUsHF6mMQpAUPJ9T7oy87o9Q==
+chromedriver@148.0.2:
+  version "148.0.2"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-148.0.2.tgz#0d0236b96e32e58a276db4109449631d7d93a3b2"
+  integrity sha512-9N9J6XxkB7dub7dcYzJomNfTbaEQA5qILpdha5cxUxgDC2hwE3u8yV/7tkJacSSfPGCHKHp05NYmAitQ4Y7tSw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.15.0"
+    axios "^1.16.0"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
     proxy-agent "^8.0.1"
