@@ -200,6 +200,106 @@ export function updatePackagePolicyWithCloudConnectorSecrets(
 }
 
 /**
+ * Injects credential vars from an existing cloud connector into a package policy's stream vars.
+ * Used when reusing a connector: the policy arrives without credentials (the caller only provided
+ * cloud_connector_id), so we backfill them from the connector's stored vars so the agent can
+ * authenticate with the cloud provider.
+ *
+ * For AWS: injects role_arn (plain text) and external_id secret reference.
+ * For Azure: injects tenant_id and client_id secret references.
+ * For GCP: injects service_account, audience, and gcp_credentials_cloud_connector_id secret ref.
+ */
+export function injectConnectorVarsIntoPolicy(
+  packagePolicy: NewPackagePolicy,
+  connectorVars: CloudConnectorVars,
+  cloudProvider: CloudProvider,
+  packageInfo: PackageInfo
+): NewPackagePolicy {
+  const mode = getCredentialStorageScope(packageInfo);
+  const { target, vars: currentVars } = resolveVarTarget(packagePolicy, mode);
+
+  if (!currentVars) {
+    return packagePolicy;
+  }
+
+  const updatedVars = { ...currentVars };
+  const schema = getCredentialSchema(cloudProvider);
+
+  if (cloudProvider === 'aws') {
+    const awsVars = connectorVars as AwsCloudConnectorVars;
+    if (awsVars.role_arn?.value) {
+      const roleArnKeys = getAllVarKeys(schema.fields.roleArn);
+      for (const key of roleArnKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = awsVars.role_arn;
+          break;
+        }
+      }
+    }
+    if (awsVars.external_id) {
+      const externalIdKeys = getAllVarKeys(schema.fields.externalId);
+      for (const key of externalIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = awsVars.external_id;
+          break;
+        }
+      }
+    }
+  } else if (cloudProvider === 'azure') {
+    const azureVars = connectorVars as AzureCloudConnectorVars;
+    if (azureVars.tenant_id) {
+      const tenantIdKeys = getAllVarKeys(schema.fields.tenantId);
+      for (const key of tenantIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = azureVars.tenant_id;
+          break;
+        }
+      }
+    }
+    if (azureVars.client_id) {
+      const clientIdKeys = getAllVarKeys(schema.fields.clientId);
+      for (const key of clientIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = azureVars.client_id;
+          break;
+        }
+      }
+    }
+  } else if (cloudProvider === 'gcp') {
+    const gcpVars = connectorVars as GcpCloudConnectorVars;
+    if (gcpVars.service_account) {
+      const serviceAccountKeys = getAllVarKeys(schema.fields.serviceAccount);
+      for (const key of serviceAccountKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.service_account;
+          break;
+        }
+      }
+    }
+    if (gcpVars.audience) {
+      const audienceKeys = getAllVarKeys(schema.fields.audience);
+      for (const key of audienceKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.audience;
+          break;
+        }
+      }
+    }
+    if (gcpVars.gcp_credentials_cloud_connector_id) {
+      const connectorIdKeys = getAllVarKeys(schema.fields.gcp_credentials_cloud_connector_id);
+      for (const key of connectorIdKeys) {
+        if (key in updatedVars) {
+          updatedVars[key] = gcpVars.gcp_credentials_cloud_connector_id;
+          break;
+        }
+      }
+    }
+  }
+
+  return applyVarsAtTarget(packagePolicy, updatedVars, target);
+}
+
+/**
  * Extracts cloud connector name from package policy variables
  * Used to name cloud connectors based on user input or generate a default name
  *
