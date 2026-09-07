@@ -155,9 +155,9 @@ const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestE
 };
 
 /**
- * Renders the top-ranked tests one per row, grouped under a full-width header row per test file
- * (in order of first appearance) carrying the path, framework and owners, so whole-suite failures
- * stand out and the path is never repeated.
+ * Renders the top-ranked tests of one framework one per row, grouped under a full-width header
+ * row per test file (in order of first appearance) carrying the path and owners, so whole-suite
+ * failures stand out and the path is never repeated.
  */
 const buildTopFlakyTable = (
   top: readonly FlakyTestEntry[],
@@ -174,12 +174,12 @@ const buildTopFlakyTable = (
 
   let rank = 0;
   for (const [filePath, entries] of groupByFile(top)) {
-    const [{ framework, owners }] = entries;
+    const [{ owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
     const fileHeader = [
       chalk.yellow(wrapOn(filePath, '/', FILE_ROW_WIDTH)),
       notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      `${framework} · ${owners.join(', ') || 'no owners'}`,
+      owners.join(', ') || 'no owners',
     ]
       .filter(Boolean)
       .join('\n');
@@ -237,12 +237,18 @@ const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog)
     ]
   );
 
-  if (flaky.length > 0) {
-    const top = flaky.slice(0, limit);
+  // one table per framework in scope, in the canonical framework order
+  for (const framework of TEST_FRAMEWORKS.filter((fw) => scope.frameworks.includes(fw))) {
+    const frameworkFlaky = flaky.filter((entry) => entry.framework === framework);
+    if (frameworkFlaky.length === 0) {
+      panel.push([`No flaky ${framework} tests`]);
+      continue;
+    }
+    const top = frameworkFlaky.slice(0, limit);
     panel.push([
-      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
+      `Top ${top.length} flaky ${framework} tests by failed builds\n${buildTopFlakyTable(
         top,
-        flaky,
+        frameworkFlaky,
         report.thresholds.minBuilds,
         report.generatedAt
       ).toString()}`,
