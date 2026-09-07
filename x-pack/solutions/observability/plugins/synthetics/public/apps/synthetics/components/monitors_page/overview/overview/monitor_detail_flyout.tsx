@@ -32,7 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
@@ -415,8 +415,15 @@ export function MonitorDetailFlyout(props: Props) {
   const isCurrentMonitorFetchError =
     Boolean(error) && (errorMonitorId === undefined || errorMonitorId === configId);
 
+  // Both effects below depend on `fetchSavedObject`, whose identity changes
+  // whenever `space` (or `configId` / `crossSpaceId`) resolves — which makes
+  // them fire together in the same pass. This ref lets the retry effect know
+  // the fetch effect just dispatched, so it doesn't duplicate the request.
+  const justDispatchedRef = useRef(false);
+
   const fetchSavedObject = useCallback(() => {
     if (isReadOnly || !space) return;
+    justDispatchedRef.current = true;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
@@ -441,6 +448,10 @@ export function MonitorDetailFlyout(props: Props) {
   // flyout still has no matching saved object (`useSelectedMonitor` does the same).
   // Stop on any error for this configId so a 403/500 does not refetch forever.
   useEffect(() => {
+    if (justDispatchedRef.current) {
+      justDispatchedRef.current = false;
+      return;
+    }
     if (isLoading || currentMonitorObject || isCurrentMonitorFetchError) return;
     fetchSavedObject();
   }, [currentMonitorObject, fetchSavedObject, isCurrentMonitorFetchError, isLoading]);

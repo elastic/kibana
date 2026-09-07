@@ -264,6 +264,36 @@ describe('Monitor Detail Flyout', () => {
     }
   });
 
+  it('dispatches getMonitorAction.get exactly once on a plain mount', () => {
+    // The fetch effect and the retry effect both depend on the same
+    // `fetchSavedObject` callback, whose identity changes whenever `space`
+    // resolves. Without a guard, both effects fire in the same pass and
+    // double-dispatch the request.
+    const mockDispatch = jest.fn();
+    const dispatchSpy = jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(mockDispatch);
+
+    try {
+      render(
+        <MonitorDetailFlyout
+          configId="123456"
+          id="test-id"
+          location="US East"
+          locationId="us-east"
+          onClose={jest.fn()}
+          onEnabledChange={jest.fn()}
+          onLocationChange={jest.fn()}
+        />
+      );
+
+      const getMonitorCalls = mockDispatch.mock.calls.filter(
+        ([action]) => action?.type === getMonitorAction.get.type
+      );
+      expect(getMonitorCalls).toHaveLength(1);
+    } finally {
+      dispatchSpy.mockRestore();
+    }
+  });
+
   it('renders details for fetch success', () => {
     const detailLink = '/app/synthetics/monitor/test-id';
     jest.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(detailLink);
