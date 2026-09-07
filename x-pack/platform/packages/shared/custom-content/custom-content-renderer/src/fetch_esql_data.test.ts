@@ -23,7 +23,7 @@ jest.mock('@kbn/esql-utils', () => ({
   getESQLTimeField: jest.fn(),
 }));
 
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
