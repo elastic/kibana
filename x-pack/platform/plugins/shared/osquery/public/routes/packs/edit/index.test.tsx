@@ -208,12 +208,11 @@ describe('EditPackPage', () => {
     });
   });
 
-  describe('back navigation', () => {
-    it('renders a "View all packs" back link that targets the packs list', () => {
+  describe('page chrome', () => {
+    it('does not render an in-page back link; AppHeader owns back navigation', () => {
       renderPage();
 
-      const backLink = screen.getByText('View all packs').closest('a');
-      expect(backLink).toHaveAttribute('href', 'packs');
+      expect(screen.queryByText('View all packs')).not.toBeInTheDocument();
     });
   });
 
