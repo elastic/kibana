@@ -42,7 +42,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   });
 
   const viewDetailsLabel = i18n.translate('xpack.contextEngine.landing.managedRow.viewDetails', {
-    defaultMessage: 'View AI index details for {name}',
+    defaultMessage: 'View AI Index details for {name}',
     values: { name: aiIndex.id },
   });
 
