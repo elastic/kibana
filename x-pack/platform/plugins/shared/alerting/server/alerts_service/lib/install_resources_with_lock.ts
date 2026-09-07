@@ -128,6 +128,11 @@ export const installResourcesWithLock = async ({
         });
         return;
       } catch (err) {
+        // A shutdown mid-install isn't contention or a real failure; rethrow so
+        // `initializeCommon` logs it at debug rather than error.
+        if (err instanceof InstallShutdownError) {
+          throw err;
+        }
         if (!isLockAcquisitionError(err)) {
           // Install failure or lock-manager error — not "someone else holds it".
           logger.error(

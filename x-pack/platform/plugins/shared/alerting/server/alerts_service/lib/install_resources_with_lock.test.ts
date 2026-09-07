@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import { ReplaySubject } from 'rxjs';
+import { InstallShutdownError } from './install_with_timeout';
 import {
   getInstallLockRetryDelayMs,
   installResourcesWithLock,
@@ -98,6 +99,7 @@ describe('installResourcesWithLock', () => {
 
     await expect(installation).rejects.toThrow('Server is stopping');
     expect(installFn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('does not start installation when the plugin stops during acquisition', async () => {
@@ -119,6 +121,7 @@ describe('installResourcesWithLock', () => {
     ).rejects.toThrow('Server is stopping');
 
     expect(installFn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('logs and propagates install failures (non lock-acquisition errors) without retrying', async () => {
@@ -142,5 +145,23 @@ describe('installResourcesWithLock', () => {
     expect(logger.error).toHaveBeenCalledWith(
       'Error while installing resources under lock "lock-a" (Kibana node server-1): install failed'
     );
+  });
+
+  it('rethrows shutdown without logging an error', async () => {
+    const withLock = jest.fn(async (_lockId: string, cb: () => Promise<void>) => cb());
+    const installFn = jest.fn().mockRejectedValue(new InstallShutdownError());
+
+    await expect(
+      installResourcesWithLock({
+        lockManager: createLockManager(withLock),
+        lockId: 'lock-a',
+        logger,
+        installFn,
+        serverUuid: 'server-1',
+      })
+    ).rejects.toThrow(InstallShutdownError);
+
+    expect(withLock).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
   });
 });
