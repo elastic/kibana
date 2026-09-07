@@ -19,7 +19,7 @@ describe('CustomContentEmptyPrompt', () => {
   it('renders the body text when AI is not available', () => {
     render(<CustomContentEmptyPrompt isAiAvailable={false} />);
     expect(
-      screen.getByText('Use HTML, CSS, Liquid and ES|QL to create your custom panel')
+      screen.getByText('Use HTML, CSS, Liquid, and ES|QL to create your custom panel')
     ).toBeInTheDocument();
   });
 

@@ -23,6 +23,7 @@ import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pi
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { createMissingEntities as runCreateMissingEntities } from './create_missing_entities';
 
 const BASE_SCORING_REQUEST_TIMEOUT = '5m';
 
@@ -39,11 +40,14 @@ interface ScoreBaseEntitiesParams {
   watchlistConfigs: Map<string, WatchlistObject>;
   calculationRunId: string;
   abortSignal?: AbortSignal;
+  /** Explicit creation opt-in; also makes lookup failures fatal so they cannot be treated as misses. */
+  createMissingEntities: boolean;
 }
 
 interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
   writer: RiskEngineDataWriter;
   idBasedRiskScoringEnabled: boolean;
+  createMissingEntities: boolean;
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
   /** When true, populate `scores` in the summary. Omit for full-population runs. */
   collectScores?: boolean;
@@ -53,8 +57,17 @@ export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
   scoresWrittenRiskIndex: number;
   scoresCalculated: number;
+  /** Missing-at-lookup scores not recovered by creation; equals `scoresMissingFromStore` when disabled. */
   scoresDroppedNotInStore: number;
   scores: Record<string, number>;
+  /** Scores absent at lookup time, including entities later created or found through a create race. */
+  scoresMissingFromStore: number;
+  /** EUID-valid scores whose entity was created via the create-if-missing path. */
+  entitiesCreated: number;
+  /** Missing scores not written because no alert was found or policy rejected them. */
+  entityCreationsSkipped: number;
+  /** Missing scores rejected by EUID/field validation or bulk creation. */
+  entityCreationsFailed: number;
 }
 
 interface EuidPageBounds {
@@ -91,6 +104,7 @@ export const calculateBaseEntityScores = async function* ({
   watchlistConfigs,
   calculationRunId,
   abortSignal,
+  createMissingEntities,
 }: ScoreBaseEntitiesParams): AsyncGenerator<ScoredEntityPage> {
   let afterKey: Record<string, string> | undefined;
   let previousPageUpperBound: string | undefined;
@@ -132,6 +146,7 @@ export const calculateBaseEntityScores = async function* ({
         logger,
         errorContext:
           'Error fetching entities for base modifier application. Base scoring will proceed without modifiers',
+        strict: createMissingEntities,
       });
 
       yield applyBaseScoreModifiers({
@@ -149,6 +164,7 @@ export const calculateBaseEntityScores = async function* ({
 export const scoreBaseEntities = async ({
   writer,
   idBasedRiskScoringEnabled,
+  createMissingEntities: createMissingEntitiesEnabled,
   refresh,
   collectScores,
   ...params
@@ -158,33 +174,72 @@ export const scoreBaseEntities = async ({
   let scoresWrittenEntityStore = 0;
   let scoresCalculated = 0;
   let scoresDroppedNotInStore = 0;
+  let scoresMissingFromStore = 0;
   let scoresFailed = 0;
+  let entitiesCreated = 0;
+  let entityCreationsSkipped = 0;
+  let entityCreationsFailed = 0;
   const newScores: Record<string, number> = {};
 
-  for await (const page of calculateBaseEntityScores(params)) {
+  for await (const page of calculateBaseEntityScores({
+    ...params,
+    createMissingEntities: createMissingEntitiesEnabled,
+  })) {
     pagesProcessed += 1;
     scoresCalculated += page.scores.length;
-    // Drop scores for entities that aren't in the entity store. The composite
-    // aggregation discovers EUIDs from alerts, which can include identifiers
-    // with no canonical store entity (host.id variations, synthetic identifiers,
-    // alerts that name an entity the entity store has no record of). Writing
-    // those to the risk index produces phantom score documents that have no
-    // anchor on the entity, no place on the entity flyout, and bloat trend
-    // graphs. The V1 maintainer dropped them in `categorizePhase1Entities`;
-    // do the same here.
-
+    // Scores without a canonical entity would create orphaned risk documents. Create eligible
+    // entities from a representative alert when enabled; otherwise drop their scores.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
-    const droppedCount = page.scores.length - inStoreScores.length;
-    if (droppedCount > 0) {
-      scoresDroppedNotInStore += droppedCount;
-      params.logger.debug(
-        `dropped ${droppedCount} not_in_store scores from page (kept ${inStoreScores.length})`
-      );
+    const missingScores = page.scores.filter((score) => !page.entities.has(score.id_value));
+    scoresMissingFromStore += missingScores.length;
+
+    let riskIndexScores = inStoreScores;
+    let entityStoreScores = inStoreScores;
+
+    if (missingScores.length > 0) {
+      if (createMissingEntitiesEnabled) {
+        const createResult = await runCreateMissingEntities({
+          esClient: params.esClient,
+          crudClient: params.crudClient,
+          entityType: params.entityType,
+          alertsIndex: params.alertsIndex,
+          alertFilters: params.alertFilters,
+          logger: params.logger,
+          missingScores,
+          abortSignal: params.abortSignal,
+        });
+
+        entitiesCreated += createResult.created.length;
+        entityCreationsSkipped += createResult.skipped.length;
+        entityCreationsFailed += createResult.failed.length;
+
+        const createdSet = new Set(createResult.created);
+        const alreadyExistsSet = new Set(createResult.alreadyExists);
+        // Created docs already contain the score; raced docs still require an entity-store update.
+        const createdScores = missingScores.filter((score) => createdSet.has(score.id_value));
+        const racedScores = missingScores.filter((score) => alreadyExistsSet.has(score.id_value));
+
+        riskIndexScores = [...inStoreScores, ...createdScores, ...racedScores];
+        entityStoreScores = [...inStoreScores, ...racedScores];
+
+        params.logger.debug(
+          `create-if-missing: created=${createdScores.length} alreadyExists=${racedScores.length} ` +
+            `skipped=${createResult.skipped.length} failed=${createResult.failed.length} ` +
+            `(of ${missingScores.length} not_in_store scores)`
+        );
+      } else {
+        params.logger.debug(
+          `dropped ${missingScores.length} not_in_store scores from page (kept ${inStoreScores.length})`
+        );
+      }
     }
+
+    scoresDroppedNotInStore += page.scores.length - riskIndexScores.length;
+
     scoresWrittenRiskIndex += await persistScoresToRiskIndex({
       writer,
       entityType: params.entityType,
-      scores: inStoreScores,
+      scores: riskIndexScores,
       logger: params.logger,
       refresh,
     });
@@ -192,14 +247,14 @@ export const scoreBaseEntities = async ({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
-      scores: inStoreScores,
+      scores: entityStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
     if (collectScores) {
-      for (const score of inStoreScores) {
+      for (const score of riskIndexScores) {
         newScores[score.id_value] = score.calculated_score_norm;
       }
     }
@@ -211,8 +266,12 @@ export const scoreBaseEntities = async ({
     scoresWrittenEntityStore,
     scoresCalculated,
     scoresDroppedNotInStore,
+    scoresMissingFromStore,
     scoresFailed,
     scores: newScores,
+    entitiesCreated,
+    entityCreationsSkipped,
+    entityCreationsFailed,
   };
 };
 

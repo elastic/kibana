@@ -57,10 +57,58 @@ describe('applyHtmlTheme', () => {
       danger: '#b00',
       borderBasePlain: '#ccc',
     },
+    size: { xs: '4px', s: '8px', m: '12px', base: '16px', l: '24px' },
+    border: { radius: { medium: '6px', small: '4px' } },
+    font: {
+      family: 'Inter, sans-serif',
+    },
+    animation: {
+      fast: '150ms',
+      normal: '250ms',
+      slow: '350ms',
+      resistance: 'cubic-bezier(.32,.72,0,1)',
+    },
   } as unknown as EuiThemeComputed;
 
   // A meta CSP only governs resources fetched after it is parsed, so it must precede the
   // theme <style> tag — otherwise CSS injected ahead of it would be ungoverned.
+  // Without this a bare-markup template renders with browser defaults and reads as pasted in from
+  // another product — the reason the feature was hidden.
+  it('gives markup-only templates a themed baseline', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('font-family:var(--cc-font-family)');
+    expect(result).toContain('padding:var(--cc-space-l)');
+    expect(result).toContain('color:var(--cc-color-text)');
+  });
+
+  it('emits the baseline before the template so author CSS still wins', () => {
+    const authored = '<html><head><style>body{padding:0}</style></head><body></body></html>';
+
+    const result = applyHtmlTheme(authored, 'LIGHT', euiTheme);
+
+    expect(result.indexOf('--cc-space-l')).toBeLessThan(result.indexOf('body{padding:0}'));
+  });
+
+  // Everything else in the baseline is a floor the template can override. These two are not, so
+  // the count is pinned: a third `!important` should be a deliberate decision, not a drive-by.
+  it('locks the body background and the reduced-motion guard, and nothing else', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('body{background:var(--cc-color-background)!important}');
+    expect(result).toContain(
+      '@media screen and (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}'
+    );
+    expect(result.match(/!important/g)).toHaveLength(3);
+  });
+
+  it('exposes the motion tokens', () => {
+    const result = applyHtmlTheme('<p>hello</p>', 'LIGHT', euiTheme);
+
+    expect(result).toContain('--cc-motion-fast:150ms');
+    expect(result).toContain('--cc-ease:cubic-bezier(.32,.72,0,1)');
+  });
+
   it('places the CSP meta before the injected theme style tag', () => {
     const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
     expect(result.indexOf('Content-Security-Policy')).toBeLessThan(result.indexOf('<style>'));
@@ -76,6 +124,25 @@ describe('applyHtmlTheme', () => {
     const result = applyHtmlTheme('<html><head></head><body></body></html>', 'LIGHT', euiTheme);
     expect(result).toContain('--cc-color-text:#111');
     expect(result).toContain('--cc-color-border:#ccc');
+  });
+
+  // Pins the light/dark branch in `buildThemeCss`. Inverting it would paint a dark background in
+  // light mode, and no other test would catch it — every other case here runs in LIGHT.
+  it('resolves the background variable per theme', () => {
+    const markup = '<html><head></head><body></body></html>';
+
+    expect(applyHtmlTheme(markup, 'LIGHT', euiTheme)).toContain(
+      '--cc-color-background:transparent'
+    );
+
+    const dark = applyHtmlTheme(markup, 'DARK', euiTheme);
+    expect(dark).toContain('--cc-color-background:#fff');
+    expect(dark).not.toContain('--cc-color-background:transparent');
+  });
+
+  it('sets the color-scheme meta per theme', () => {
+    expect(applyHtmlTheme('<p>hi</p>', 'DARK', euiTheme)).toContain('content="dark"');
+    expect(applyHtmlTheme('<p>hi</p>', 'LIGHT', euiTheme)).toContain('content="light"');
   });
 });
 
