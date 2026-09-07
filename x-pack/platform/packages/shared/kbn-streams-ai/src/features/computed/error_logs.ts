@@ -17,7 +17,7 @@ const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'] as const;
 const ERROR_KEYWORDS = ['error', 'exception'] as const;
 
-const ERROR_LOG_KEEP_FIELDS = new Set<string>([
+const ERROR_LOG_KEEP_FIELDS_LIST = [
   '@timestamp',
   ...LOG_MESSAGE_FIELDS,
   'log.level',
@@ -29,7 +29,9 @@ const ERROR_LOG_KEEP_FIELDS = new Set<string>([
   'exception.message',
   'event.outcome',
   'service.name',
-]);
+] as const;
+
+const ERROR_LOG_KEEP_FIELDS = new Set<string>(ERROR_LOG_KEEP_FIELDS_LIST);
 
 const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
 
@@ -75,7 +77,10 @@ This is useful for understanding error patterns, identifying recurring issues, a
     return {
       samples: compact(
         hits.map((hit) => {
-          const fields = formatRawDocument({ hit })?.fields;
+          const fields = formatRawDocument({
+            hit,
+            priorityFields: ERROR_LOG_KEEP_FIELDS_LIST,
+          })?.fields;
           return fields ? pickErrorLogFields(fields) : undefined;
         })
       ),

@@ -66,24 +66,28 @@ components:
         - id
         - watchIds
         - lastRun
-        - enabled
       properties:
         id:
           type: string
           description: >-
             Copy key — the UI resolves name and description from this id. Unique among skills only.
+        name:
+          type: string
+          description: >-
+            Display name resolved from the Agent Builder registry at projection time.
         watchIds:
           type: array
           items:
             type: string
           description: Watches whose workers may call this skill
+        summary:
+          type: string
+          description: >-
+            Summary of the skill's purpose
         lastRun:
           type: string
           nullable: true
           description: ISO 8601 timestamp of last invocation, or null when never invoked
-        enabled:
-          type: boolean
-          description: Global flag. Effective enablement is this AND the per-watch attachment flag.
         lifecycle:
           $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
           description: Omitted for generally available skills; badge shown otherwise
@@ -229,8 +233,8 @@ components:
     WatchSettings:
       type: object
       description: >-
-        Per-watch settings. Optional sections are absent when a watch does not offer them, which is
-        what lets each watch legitimately render a different set of sections.
+        Legacy per-watch settings projection. Watches are grouping-only; durable settings live on
+        WorkerSettings. Kept so unused mock fixtures continue to parse.
       required:
         - watchId
         - autonomy
@@ -239,26 +243,63 @@ components:
           type: string
         autonomy:
           $ref: '#/components/schemas/WatchAutonomyLevel'
-          description: >-
-            The selected level. The scale itself is shared across every watch, so it is not repeated
-            per watch — see WATCH_AUTONOMY_LEVELS.
-        triggers:
-          $ref: '#/components/schemas/WatchTriggersSettings'
-        scopeRouting:
-          $ref: '#/components/schemas/WatchScopeRoutingSettings'
-        workers:
+
+    WorkerSettings:
+      type: object
+      description: Durable per-Worker settings stored as managed template values.
+      required:
+        - workerId
+        - autonomy
+      properties:
+        workerId:
+          type: string
+        autonomy:
+          $ref: '#/components/schemas/WatchAutonomyLevel'
+
+    Worker:
+      type: object
+      description: A live registered Worker with Watch membership and durable settings.
+      required:
+        - id
+        - name
+        - watchIds
+        - enabled
+        - lastRun
+        - state
+        - settings
+        - settingsRevision
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        watchIds:
           type: array
           items:
-            $ref: '#/components/schemas/WatchWorkerAttachment'
+            type: string
+          description: Catalog Watch ids this Worker belongs to, derived from YAML tags
+        enabled:
+          type: boolean
+        lastRun:
+          type: string
+          nullable: true
+        state:
+          $ref: '#/components/schemas/WorkerRunState'
+        stateReason:
+          type: string
+        lifecycle:
+          $ref: './watch.schema.yaml#/components/schemas/Lifecycle'
+        settings:
+          $ref: '#/components/schemas/WorkerSettings'
+        settingsRevision:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: >-
+            Logical workflow version for best-effort stale settings detection. Null when the
+            per-space managed Worker has not been installed yet.
         skills:
           type: array
           items:
-            $ref: '#/components/schemas/WatchSkillAttachment'
-        approvalGates:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchApprovalGate'
-        runsLedger:
-          type: array
-          items:
-            $ref: '#/components/schemas/WatchLedgerEntry'
+            $ref: './watch.schema.yaml#/components/schemas/WatchCallableRef'
