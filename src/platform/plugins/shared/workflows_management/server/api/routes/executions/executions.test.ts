@@ -21,6 +21,8 @@ import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
 import type { RouteDependencies } from '../types';
+import { MAX_WORKFLOW_ENTITY_ID_LENGTH } from '../utils/route_constants';
+import { executionIdParamSchema } from '../utils/schemas';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 describe('Execution Routes', () => {
@@ -871,6 +873,24 @@ describe('Execution Routes', () => {
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(mockApi.getWorkflowExecution).not.toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+  });
+
+  describe('executionIdParamSchema', () => {
+    it('accepts an execution id within the length bound', () => {
+      expect(executionIdParamSchema.validate({ executionId: 'ex-1' })).toEqual({
+        executionId: 'ex-1',
+      });
+    });
+
+    it('rejects an execution id longer than the length bound', () => {
+      expect(() =>
+        executionIdParamSchema.validate({
+          executionId: 'x'.repeat(MAX_WORKFLOW_ENTITY_ID_LENGTH + 1),
+        })
+      ).toThrow(
+        `[executionId]: value has length [${MAX_WORKFLOW_ENTITY_ID_LENGTH + 1}] but it must have a maximum length of [${MAX_WORKFLOW_ENTITY_ID_LENGTH}].`
+      );
     });
   });
 
