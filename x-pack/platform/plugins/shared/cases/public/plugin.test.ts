@@ -25,6 +25,9 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
   CASE_PAGE_VIEW_EVENT_TYPE,
+  CASES_TEMPLATE_APPLIED_EVENT_TYPE,
+  CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE,
+  CASES_TEMPLATE_CLEARED_EVENT_TYPE,
   CASE_VIEW_ATTACH_BUTTON_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACH_MENU_ITEM_CLICKED_EVENT_TYPE,
   CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE,
@@ -212,6 +215,39 @@ describe('Cases Ui Plugin', () => {
           schema: expect.objectContaining({
             owner: expect.objectContaining({ type: 'keyword' }),
             plugin_type: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+    });
+
+    it('registers the template apply event types', async () => {
+      plugin.setup(coreSetup, pluginsSetup);
+
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_APPLIED_ON_CREATE_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_APPLIED_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
+            apply_mode: expect.objectContaining({ type: 'keyword' }),
+          }),
+        })
+      );
+      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventType: CASES_TEMPLATE_CLEARED_EVENT_TYPE,
+          schema: expect.objectContaining({
+            owner: expect.objectContaining({ type: 'keyword' }),
+            entry_point: expect.objectContaining({ type: 'keyword' }),
           }),
         })
       );
