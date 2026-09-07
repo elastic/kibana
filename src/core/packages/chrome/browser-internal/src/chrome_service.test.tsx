@@ -722,6 +722,74 @@ describe('start', () => {
       });
     });
   });
+
+  describe('controls and help', () => {
+    it('aliases deprecated next members onto the canonical objects', async () => {
+      const { chrome, service } = await start();
+
+      expect(chrome.next.aiButton).toBe(chrome.controls.aiButton);
+      expect(chrome.next.globalSearch).toBe(chrome.controls.globalSearch);
+      expect(chrome.next.contextSwitcher).toBe(chrome.controls.contextSwitcher);
+      expect(chrome.next.projectPicker).toBe(chrome.controls.projectPicker);
+      expect(chrome.next.userMenu).toBe(chrome.controls.userMenu);
+      expect(chrome.next.registerFeedbackHandler).toBe(chrome.help.registerFeedbackHandler);
+      expect(chrome.next.getFeedbackHandler$).toBe(chrome.help.getFeedbackHandler$);
+      expect(chrome.next.registerNewsfeedHandler).toBe(chrome.help.registerNewsfeedHandler);
+      expect(chrome.next.getNewsfeedHandler$).toBe(chrome.help.getNewsfeedHandler$);
+
+      service.stop();
+    });
+
+    it('observes control registrations through either path', async () => {
+      const { chrome, service } = await start();
+      const search = { onClick: () => {} };
+
+      chrome.next.globalSearch.set(search);
+      expect(await firstValueFrom(chrome.controls.globalSearch.get$())).toBe(search);
+
+      chrome.controls.globalSearch.set(undefined);
+      expect(await firstValueFrom(chrome.next.globalSearch.get$())).toBeUndefined();
+
+      service.stop();
+    });
+
+    it('unregisters AI buttons from either path', async () => {
+      const { chrome, service } = await start();
+      const button = { content: <div /> };
+
+      const unregisterFromControls = chrome.controls.aiButton.register(button);
+      expect(await firstValueFrom(chrome.next.aiButton.get$())).toEqual([button]);
+
+      unregisterFromControls();
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([]);
+
+      const unregisterFromNext = chrome.next.aiButton.register(button);
+      expect(await firstValueFrom(chrome.controls.aiButton.get$())).toEqual([button]);
+
+      unregisterFromNext();
+      expect(await firstValueFrom(chrome.next.aiButton.get$())).toEqual([]);
+
+      service.stop();
+    });
+
+    it('unregisters help handlers from either path', async () => {
+      const { chrome, service } = await start();
+      const feedback = () => {};
+      const newsfeed = { open: () => {}, hasNew$: new Rx.BehaviorSubject(false) };
+
+      const unregisterFeedback = chrome.next.registerFeedbackHandler(feedback);
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBe(feedback);
+      unregisterFeedback();
+      expect(await firstValueFrom(chrome.help.getFeedbackHandler$())).toBeUndefined();
+
+      const unregisterNewsfeed = chrome.help.registerNewsfeedHandler(newsfeed);
+      expect(await firstValueFrom(chrome.next.getNewsfeedHandler$())).toBe(newsfeed);
+      unregisterNewsfeed();
+      expect(await firstValueFrom(chrome.next.getNewsfeedHandler$())).toBeUndefined();
+
+      service.stop();
+    });
+  });
 });
 
 describe('stop', () => {
