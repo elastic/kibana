@@ -348,10 +348,13 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(403);
+        // Register before asserting: if this ever regresses to a 200, the rule really was
+        // created and still needs cleaning up, but the failing assertion would skip the push.
         if (response.statusCode === 200 && response.body?.id) {
           createdRuleIds.push(response.body.id);
         }
+
+        expect(response).toHaveStatusCode(403);
       }
     );
 
@@ -374,10 +377,12 @@ apiTest.describe(
           responseType: 'json',
         });
 
-        expect(response).toHaveStatusCode(403);
+        // Register before asserting - see the note on the mismatched-query test above.
         if (response.statusCode === 200 && response.body?.id) {
           createdRuleIds.push(response.body.id);
         }
+
+        expect(response).toHaveStatusCode(403);
       }
     );
 

@@ -12,6 +12,7 @@ import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { packSavedObjectType } from '../../../common/types';
+import { PACK_NOT_FOUND } from '../../../common/translations/errors';
 
 jest.mock('./create_queries');
 jest.mock('../../lib/parse_agent_groups');
@@ -189,6 +190,34 @@ describe('createActionHandler', () => {
     expect(bulkCreate).not.toHaveBeenCalled();
     expect(bulk).not.toHaveBeenCalled();
     expect(reportEvent).not.toHaveBeenCalled();
+  });
+
+  it('records an error on the action instead of throwing when reportErrorsOnAction is set and the pack is gone', async () => {
+    mockedGetInternalSOClient.mockReturnValue({
+      get: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(packSavedObjectType, 'missing-pack')
+        ),
+    } as unknown as ReturnType<typeof mockedGetInternalSOClient>);
+    const { context, bulkCreate, bulk } = buildOsqueryContext();
+
+    const result = await createActionHandler(
+      context,
+      { pack_id: 'missing-pack', agent_ids: [TEST_AGENT] },
+      { space: { id: 'production' }, reportErrorsOnAction: true }
+    );
+
+    // The action document is still written so the failure is visible in the alert's
+    // Osquery Results tab, but nothing is dispatched to any agent.
+    expect(result.fleetActionsCount).toBe(0);
+    expect(bulkCreate).not.toHaveBeenCalled();
+    expect(bulk).toHaveBeenCalledTimes(1);
+    expect(result.response.queries).toEqual([
+      expect.objectContaining({ id: 'missing-pack', error: PACK_NOT_FOUND }),
+    ]);
+    // A missing pack must never fall through to caller-supplied SQL.
+    expect(mockedCreateDynamicQueries).not.toHaveBeenCalled();
   });
 
   it('forwards useStoredQuery and storedQuery to createDynamicQueries', async () => {
