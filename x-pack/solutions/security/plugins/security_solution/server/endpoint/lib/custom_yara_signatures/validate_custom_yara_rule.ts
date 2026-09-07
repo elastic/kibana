@@ -6,8 +6,9 @@
  */
 
 import type { OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
-import type { YaraCompiledRule, YaraMetaKeyOfInterest, YaraValidateResult } from '../libyara';
+import type { YaraCompiledRule, YaraValidateResult } from '../libyara';
 import { validateYaraRule } from '../libyara';
+import { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
 import { MAX_YARA_RULE_CONTENT_BYTE_LENGTH, MAXIMUM_RULE_IDENTIFIER_LENGTH } from './constants';
 
 const VALID_META_ARCH_VALUES = Object.freeze(['x86', 'arm64']);
@@ -147,7 +148,7 @@ const validateMetaArchField = (
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'arch',
+        YaraMetaKeyOfInterest.ARCH,
         lineNumberOfRule
       );
 
@@ -172,7 +173,7 @@ const validateMetaScanTypeField = (
     const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
     const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
       textLines,
-      'scan_type',
+      YaraMetaKeyOfInterest.SCAN_TYPE,
       lineNumberOfRule
     );
 
@@ -205,7 +206,7 @@ const validateMetaOsField = (
       const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
       const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
         textLines,
-        'os',
+        YaraMetaKeyOfInterest.OS,
         lineNumberOfRule
       );
 
@@ -229,7 +230,7 @@ const validateMetaOsField = (
         const lineNumberOfRule = getRuleIdentifierLineNumber(textLines, rule.identifier);
         const lineNumber = findFirstOccurrenceLineNumberAfterLineNumber(
           textLines,
-          'os',
+          YaraMetaKeyOfInterest.OS,
           lineNumberOfRule
         );
 
