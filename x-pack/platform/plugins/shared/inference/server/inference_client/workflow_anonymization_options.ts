@@ -12,4 +12,6 @@ export interface WorkflowAnonymizationOptions {
   readonly provider: WorkflowAnonymizationProvider;
   readonly failureMode: WorkflowAnonymizationFailureMode;
   readonly preLLMTimeoutMs: number;
+  /** HMAC server salt derived from xpack.inference.anonymization.encryptionKey. Undefined when the key is not configured; tokens are session-ID-derived only. */
+  readonly encryptionKey?: string;
 }
