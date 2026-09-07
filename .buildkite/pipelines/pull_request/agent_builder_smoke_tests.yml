@@ -27,6 +27,7 @@ steps:
           mkdir -p target
           buildkite-agent artifact download 'target/eis_models.json' . --step discover-eis-models || echo '{"models":[]}' > target/eis_models.json
           .buildkite/scripts/steps/test/scout/configs.sh
+          .buildkite/scripts/steps/test/annotate_llm_smoke_judgements.sh
         env:
           FTR_GEN_AI: '1'
           FTR_EIS_CCM: '1'
@@ -42,6 +43,8 @@ steps:
           machineType: n2-standard-4
           preemptible: true
           spotZones: us-central1-f,us-central1-c,us-central1-a
+        artifact_paths:
+          - 'target/llm_smoke_judgements.jsonl'
         retry:
           automatic:
             - exit_status: '-1'
