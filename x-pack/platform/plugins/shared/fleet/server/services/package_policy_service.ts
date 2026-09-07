@@ -350,6 +350,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;
+  /** When false, skip bumping agent policy revisions. Defaults to true. */
+  bumpRevision?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {
