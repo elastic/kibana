@@ -307,7 +307,7 @@ Hard bans (do not "helpfully" do these anyway):
 
 A doctor `delete` is an intentional removal (navigation/page-load, or coverage already at API/unit), not skipping a flake. It is the one exception to the imported "don't reduce coverage" guardrail.
 
-**Handoff** (no PR): use the "No PR opened" outcome comment. Say the doctor action is migrate / new Scout (or new API/unit) coverage, which this fixer does not implement. Point the requester at these skills — read the files; do not invoke them, and do not follow the doctor's "open CI in the browser" guidance:
+**Handoff** (no PR): use the "Migrate Cypress test to Scout" outcome comment. Point the requester at these skills — read the files; do not invoke them, and do not follow the doctor's "open CI in the browser" guidance:
 
 - `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`
 - `.agents/skills/scout-ui-testing/`
@@ -489,13 +489,14 @@ Follow this format:
 
   The failure is infrastructure-side (the CI agent lost its Elasticsearch connection mid-run), so there's nothing to patch in this repo. cc @<requester-github-handle-here-if-not-a-bot>
   ```
-  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified. For a Security Cypress migrate / new-Scout (or new API/unit) handoff, use a reason like:
-
+  Swap in the actual one-clause reason — e.g. the test already passes on `main`, the failure is infrastructure-side, or the root cause can't be confidently identified.
+- **Migrate Cypress test to Scout** (Security Cypress — doctor action is migrate, a new Scout spec, or a new API/unit test; no PR opened):
   ```markdown
-  ### ⏭️ No fix PR was opened
+  ### 🔄 Migrate Cypress test to Scout
 
   The doctor recommends migrating this Cypress coverage to Scout, which this fixer does not implement. Use `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/`, plus `scout-ui-testing` / `scout-api-testing` skills as needed. Do not patch the Cypress spec. cc @<requester-github-handle-here-if-not-a-bot>
   ```
+  For a new API/unit test rather than Scout, swap the heading to `### 🔄 Move Cypress coverage to API/unit` and name that destination in the sentence.
 - **Pre-fix CI lag** (the reported failure ran a Cloud image that predates the fix — confirm via the `flaky-test-investigator` skill's pipelines reference — so no PR was opened):
   ```markdown
   ### 🕒 Pre-fix CI lag, not a regression
