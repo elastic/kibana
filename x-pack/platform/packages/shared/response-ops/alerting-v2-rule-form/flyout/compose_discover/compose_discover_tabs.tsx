@@ -104,6 +104,15 @@ interface BlockEditorProps {
   /** Drop top padding so this editor sits flush against the locked base above. */
   flushTop?: boolean;
   dataTestSubj?: string;
+  /**
+   * Register the Prettify (Cmd/Ctrl+I) action. Only enable for complete queries
+   * (the base tab); alert/recovery blocks hold a partial fragment that can't be
+   * formatted on its own, so Prettify would be a dead no-op there.
+   *
+   * TODO: support prettifying alert/recovery fragments — e.g. format the composed
+   * `base + fragment`, then write back only the fragment portion.
+   */
+  enablePrettify?: boolean;
 }
 
 const BlockEditor: React.FC<BlockEditorProps> = ({
@@ -114,6 +123,7 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
   readOnly = false,
   flushTop = false,
   dataTestSubj,
+  enablePrettify = false,
 }) => {
   const options = useMemo(
     (): monaco.editor.IStandaloneEditorConstructionOptions => ({
@@ -130,12 +140,12 @@ const BlockEditor: React.FC<BlockEditorProps> = ({
 
   const handleEditorMount = useCallback(
     (editor: IStandaloneCodeEditor) => {
-      if (!readOnly) {
+      if (enablePrettify && !readOnly) {
         addPrettifyAction(editor);
       }
       onEditorMount?.(editor);
     },
-    [onEditorMount, readOnly]
+    [onEditorMount, readOnly, enablePrettify]
   );
 
   return (
@@ -310,6 +320,7 @@ export const ComposeDiscoverTabs: React.FC<ComposeDiscoverTabsProps> = ({
             lineNumberOffset={0}
             onEditorMount={onBaseEditorMount}
             readOnly={readOnly}
+            enablePrettify
             dataTestSubj="composeDiscoverBlockEditor-base"
           />
         );

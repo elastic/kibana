@@ -78,6 +78,16 @@ describe('addPrettifyAction', () => {
     expect(editor.executeEdits).not.toHaveBeenCalled();
   });
 
+  it('does not wipe a fragment when prettifyQuery returns an empty string', () => {
+    const editor = makeEditor('| WHERE delay > 15');
+    jest.mocked(prettifyQuery).mockReturnValue('');
+    addPrettifyAction(editor);
+
+    getRegisteredRun(editor)(editor);
+
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
   it('leaves the content untouched when prettifying throws (e.g. a fragment)', () => {
     const editor = makeEditor('| WHERE a > 1');
     jest.mocked(prettifyQuery).mockImplementation(() => {

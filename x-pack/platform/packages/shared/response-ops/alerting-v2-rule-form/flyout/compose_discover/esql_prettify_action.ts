@@ -52,11 +52,14 @@ export const addPrettifyAction = (
       try {
         pretty = prettifyQuery(query, lineWidthChars);
       } catch {
-        // Fragment / invalid query that can't be parsed on its own — leave it as is.
+        // Invalid query that can't be parsed — leave it as is.
         return;
       }
 
-      if (pretty !== query) {
+      // A partial/fragment query (e.g. `| WHERE ...` in a split alert/recovery block)
+      // can't be parsed on its own, and `prettifyQuery` returns an empty string for it.
+      // Guard against that so we never wipe the editor's content.
+      if (pretty.trim() && pretty !== query) {
         ed.executeEdits('alertingV2.esql.prettify', [
           { range: model.getFullModelRange(), text: pretty },
         ]);
