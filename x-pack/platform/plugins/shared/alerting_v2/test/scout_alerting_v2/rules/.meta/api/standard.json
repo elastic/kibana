@@ -1,5 +1,5 @@
 {
-  "sha1": "925fb4cba273c2049800335ea30a646e396ef634",
+  "sha1": "7ca4b6f6c397eac2819de0b43d0dc0b46ef8ed72",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3020,29 +3020,107 @@
       }
     },
     {
-      "id": "8a0f9c4b951e191-ea3ba7758654b28",
-      "title": "Rule artifacts API create: round-trips artifacts of registered types",
+      "id": "8a0f9c4b951e191-e45023c76c2fa3b",
+      "title": "Rule artifacts API create: round-trips artifacts and extracts a reference only for types that declare one",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 30,
+        "line": 48,
         "column": 86
       }
     },
     {
-      "id": "8a0f9c4b951e191-63886d3245a8e7a",
-      "title": "Rule artifacts API create: an unregistered artifact type is stored as-is",
+      "id": "8a0f9c4b951e191-3972357c72fb827",
+      "title": "Rule artifacts API get: resolves a dashboard id from references rather than stored artifact data",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 44,
-        "column": 78
+        "line": 64,
+        "column": 14
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-885de004e7b8875",
+      "title": "Rule artifacts API patch: an unrelated update preserves a remapped reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 92,
+        "column": 9
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-f9ab150a0bd4d66",
+      "title": "Rule artifacts API patch: replacing the artifacts array drops references for removed artifacts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 129,
+        "column": 5
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-3188477d9fc0d99",
+      "title": "Rule artifacts API create: an unregistered artifact type is stored as-is and produces no references",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 152,
+        "column": 23
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-81a838fef9224c5",
+      "title": "Rule artifacts API bulk disable: preserves artifacts and a remapped reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 172,
+        "column": 5
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-2e0d47c1dee56c0",
+      "title": "Rule artifacts API bulk enable: preserves artifacts and a remapped reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 206,
+        "column": 59
+      }
+    },
+    {
+      "id": "8a0f9c4b951e191-2a9b9dee29754e9",
+      "title": "Rule artifacts API bulk update api key: preserves artifacts and a remapped reference",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
+        "line": 247,
+        "column": 33
       }
     },
     {
@@ -3054,8 +3132,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 59,
-        "column": 81
+        "line": 285,
+        "column": 18
       }
     },
     {
@@ -3067,8 +3145,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 76,
-        "column": 14
+        "line": 299,
+        "column": 84
       }
     },
     {
@@ -3080,8 +3158,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 95,
-        "column": 10
+        "line": 320,
+        "column": 43
       }
     },
     {
@@ -3093,8 +3171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 109,
-        "column": 8
+        "line": 332,
+        "column": 16
       }
     },
     {
@@ -3106,8 +3184,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 126,
-        "column": 10
+        "line": 351,
+        "column": 9
       }
     },
     {
@@ -3119,8 +3197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 163,
-        "column": 27
+        "line": 356,
+        "column": 9
       }
     },
     {
@@ -3132,8 +3210,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/rule_artifacts.spec.ts",
-        "line": 160,
-        "column": 84
+        "line": 373,
+        "column": 27
       }
     },
     {

@@ -1,9 +1,74 @@
 {
-  "sha1": "efae7abcc293a84c18854170f529f5d8328ed839",
+  "sha1": "2c5d81e764f6678cb91cfd684144751db2bf7299",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "9d9e2576f83ca69-f39fa53ccc71915",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) recovery tab appears in the YAML-mode sandbox when YAML sets recovery_strategy: query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
+        "line": 111,
+        "column": 11
+      }
+    },
+    {
+      "id": "9d9e2576f83ca69-9ac60ad92d797f5",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) a YAML recovery edit reaches the form dropdown (#278327 regression test)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
+        "line": 151,
+        "column": 10
+      }
+    },
+    {
+      "id": "9d9e2576f83ca69-44bcce60c970fd9",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) removing recovery from YAML drops the recovery tab and falls back to the base tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
+        "line": 200,
+        "column": 22
+      }
+    },
+    {
+      "id": "9d9e2576f83ca69-025ed4020661b5c",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) selecting Custom recovery in the form and editing the query reaches the YAML",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
+        "line": 252,
+        "column": 15
+      }
+    },
+    {
+      "id": "9d9e2576f83ca69-e49d94bcf2f0e93",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) a YAML recovery edit persists on save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
+        "line": 283,
+        "column": 26
+      }
+    },
     {
       "id": "e8f722387a3dee5-9be44a4fb742275",
       "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
