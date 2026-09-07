@@ -1741,6 +1741,65 @@ describe('LogsExtractionClient mid-slice resume', () => {
     });
   });
 
+  it('pins the window start as the checkpoint on a first-ever cycle so the resume lower bound cannot drift', async () => {
+    setup({ docsLimit: 2 });
+    // Fresh engine: no checkpoint and no lastExecutionTimestamp, so the window start falls back
+    // to now - lookbackPeriod (09:00 at the frozen clock) - a value that moves between runs.
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user') as Awaited<
+        ReturnType<EngineDescriptorClient['findOrThrow']>
+      >
+    );
+    const lookbackStartAtRun1 = '2025-01-15T09:00:00.000Z';
+
+    // Run 1: probe pins the slice end, page 1 persists the cursor, the run dies on page 2.
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(sliceEndTimestamp))
+      .mockResolvedValueOnce({
+        columns: extractionColumns,
+        values: [
+          ['2025-01-15T09:01:00.000Z', 'hash1', 'entity1'],
+          ['2025-01-15T09:02:00.000Z', 'hash2', 'entity2'],
+        ],
+      })
+      .mockRejectedValueOnce(new Error('crash mid-slice on first-ever cycle'));
+
+    const run1 = await ctx.client.extractLogs('user');
+    expect(run1.success).toBe(false);
+
+    const persistedState = ctx.mockEngineDescriptorClient.update.mock.calls
+      .map(([, update]) => update.logExtractionState)
+      .filter((s) => s?.paginationId)
+      .at(-1)!;
+    // The slice start is pinned even though the engine state held no checkpoint.
+    expect(persistedState.checkpointTimestamp).toBe(lookbackStartAtRun1);
+
+    // Advance the clock: a re-derived now - lookbackPeriod would now be 09:02, not 09:00.
+    jest.setSystemTime(new Date('2025-01-15T12:02:00.000Z'));
+
+    // Run 2 resumes from the persisted state.
+    ctx.mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+      createMockEngineDescriptor('user', {
+        checkpointTimestamp: persistedState.checkpointTimestamp!,
+        paginationId: persistedState.paginationId!,
+        sliceEndTimestamp: persistedState.sliceEndTimestamp!,
+      }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
+    );
+    mockExecuteEsqlQuery
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] })
+      .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+      .mockResolvedValueOnce({ columns: extractionColumns, values: [] });
+
+    const run2 = await ctx.client.extractLogs('user');
+    expect(run2.success).toBe(true);
+
+    // The resumed slice re-runs with run 1's exact bounds: the pinned start, not the drifted one.
+    const run2FirstQuery = mockExecuteEsqlQuery.mock.calls.at(-3)![0].query;
+    expect(isExtractionQuery(run2FirstQuery)).toBe(true);
+    expect(run2FirstQuery).toContain(`@timestamp >= TO_DATETIME("${lookbackStartAtRun1}")`);
+    expect(run2FirstQuery).toContain(`@timestamp <= TO_DATETIME("${sliceEndTimestamp}")`);
+  });
+
   it.each(['user', 'host', 'service', 'generic'] as const)(
     'resume determinism for %s: no entity skipped or duplicated across an interrupted run and its resume',
     async (entityType) => {
@@ -1785,6 +1844,7 @@ describe('LogsExtractionClient mid-slice resume', () => {
         .filter((s) => s?.paginationId)
         .at(-1)!;
       expect(persistedState).toMatchObject({
+        checkpointTimestamp,
         paginationId: 'entity2',
         sliceEndTimestamp,
       });

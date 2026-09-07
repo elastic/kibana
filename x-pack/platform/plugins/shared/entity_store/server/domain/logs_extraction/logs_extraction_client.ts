@@ -834,11 +834,14 @@ export class LogsExtractionClient {
       });
 
       if (pagination) {
-        // checkpointTimestamp is intentionally untouched: it stays at the slice start so a
-        // resumed run re-enters this slice; the pinned end + id cursor make the resume
-        // deterministic regardless of what the sampled probe would return on a re-run.
+        // Pin both slice bounds alongside the entity cursor: the id cursor is only meaningful
+        // together with the exact bounds it was created under. The start is pinned explicitly
+        // because on the first slice of a first-ever cycle the persisted checkpoint is null and
+        // the fallback window start (now - lookbackPeriod) moves between runs; for later slices
+        // this equals the checkpoint already, so it is a no-op.
         state = {
           ...state,
+          checkpointTimestamp: logsPageCursorStart?.timestampCursor ?? fromDateISO,
           paginationId: pagination.idCursor,
           sliceEndTimestamp: logsPageCursorEnd.timestampCursor,
         };
