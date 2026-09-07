@@ -17,8 +17,6 @@ import {
   AGENT_BUILDER_INFERENCE_FEATURE_ID,
   AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID,
 } from '@kbn/agent-builder-common/constants';
-import { isAbValidated } from './ab_model_compatibility';
-
 const DEFAULT_POLLING_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const DEFAULT_ERROR_RETRY_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -94,8 +92,7 @@ const pickBestPerFamily = (
 /**
  * Derives recommended endpoint lists from raw EIS endpoint data.
  *
- * Returns null when EIS capability/family fields are not yet deployed (safe no-op),
- * or when the AB validation gate would produce an empty list.
+ * Returns null when EIS capability/family fields are not yet deployed (safe no-op).
  */
 export const deriveRecommendations = (
   endpoints: InferenceInferenceEndpointInfo[]
@@ -109,11 +106,8 @@ export const deriveRecommendations = (
     return null;
   }
 
-  // Apply AB validation gate before picking — ensures an unvalidated-but-newer model
-  // does not displace the newest already-validated model for the same family.
-  const validated = eligible.filter((ep) => isAbValidated(ep.inference_id));
-  const recommended = pickBestPerFamily(validated, MAIN_CAPABILITIES);
-  const fast = pickBestPerFamily(validated, FAST_CAPABILITIES);
+  const recommended = pickBestPerFamily(eligible, MAIN_CAPABILITIES);
+  const fast = pickBestPerFamily(eligible, FAST_CAPABILITIES);
 
   // Each list is applied independently: a partial EIS rollout (e.g. capable/balanced
   // models tagged before any efficient model is validated) still updates the lists
@@ -134,8 +128,6 @@ export const deriveRecommendations = (
  *
  * The poller is a safe no-op until EIS delivers the `capability` and `family`
  * fields (elastic/search-team#15790) — static constants remain active until then.
- * Models must also pass the AB compatibility gate ({@link isAbValidated}) before
- * being promoted to the recommended list.
  */
 export class RecommendedEndpointsPoller {
   private readonly logger: Logger;
