@@ -299,6 +299,42 @@ describe('createRuleRoute', () => {
     });
   });
 
+  it('maps the clone API key header to a rules client option, never rule data', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const encryptedSavedObjects = encryptedSavedObjectsMock.createSetup({ canEncrypt: true });
+
+    createRuleRoute({
+      router,
+      licenseState,
+      encryptedSavedObjects,
+      docLinks,
+      alertingConfig: alertingConfigMock,
+      core: {} as unknown as CoreSetup<AlertingPluginsStart, unknown>,
+    });
+
+    const [, handler] = router.post.mock.calls[0];
+
+    rulesClient.create.mockResolvedValueOnce(mockedAlert);
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        body: ruleToCreate,
+        headers: { 'x-kbn-alerting-clone-api-key': 'true' },
+      },
+      ['ok']
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.create).toHaveBeenCalledTimes(1);
+    const [createArgs] = rulesClient.create.mock.calls[0];
+    expect(createArgs.options).toEqual({ id: undefined, cloneApiKey: true });
+    expect(createArgs.data).not.toHaveProperty('clone_api_key');
+    expect(createArgs.data).not.toHaveProperty('cloneApiKey');
+  });
+
   it('allows providing a custom id when space is undefined', async () => {
     const expectedResult = {
       ...createResult,
