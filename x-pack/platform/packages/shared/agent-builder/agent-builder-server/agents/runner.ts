@@ -7,7 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import type { ChatAgentEvent, AgentExecutionMode } from '@kbn/agent-builder-common';
+import type {
+  ChatAgentEvent,
+  AgentExecutionMode,
+  InteractivityConfigInput,
+} from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -20,9 +24,17 @@ export interface RunAgentReturn {
  */
 export interface RunAgentParams {
   /**
-   * Execution mode for this run. When 'standalone', HITL is disabled.
+   * Execution mode for this run. When 'standalone', HITL is disabled by default.
    **/
   executionMode?: AgentExecutionMode;
+  /**
+   * Interactivity configuration for this run,
+   */
+  interactive?: InteractivityConfigInput;
+  /**
+   * The id of the parent execution that spawned this one, when applicable.
+   */
+  parentExecutionId?: string;
   /**
    * ID of the agent to call.
    */

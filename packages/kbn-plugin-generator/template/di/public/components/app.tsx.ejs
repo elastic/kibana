@@ -1,0 +1,74 @@
+import React, { useState } from 'react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import {
+  EuiButton,
+  EuiHorizontalRule,
+  EuiPageTemplate,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
+import { useService } from '@kbn/core-di-browser';
+import { PLUGIN_NAME } from '../../common';
+import { ExampleApiService } from '../service';
+
+export const App = () => {
+  const service = useService(ExampleApiService);
+  const [timestamp, setTimestamp] = useState<string | undefined>();
+
+  const onClickHandler = () => {
+    service.getExample().then((res) => {
+      setTimestamp(res.time);
+    });
+  };
+
+  return (
+    <I18nProvider>
+      <EuiPageTemplate restrictWidth="1000px">
+        <EuiPageTemplate.Header>
+          <EuiTitle size="l">
+            <h1>
+              <FormattedMessage
+                id="<%= camelCase(name) %>.helloWorldText"
+                defaultMessage="{name}"
+                values={{ name: PLUGIN_NAME }}
+              />
+            </h1>
+          </EuiTitle>
+        </EuiPageTemplate.Header>
+        <EuiPageTemplate.Section>
+          <EuiTitle>
+            <h2>
+              <FormattedMessage
+                id="<%= camelCase(name) %>.congratulationsTitle"
+                defaultMessage="Congratulations, you have successfully created a new Kibana Plugin!"
+              />
+            </h2>
+          </EuiTitle>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="<%= camelCase(name) %>.content"
+                defaultMessage="Look through the generated code and check out the plugin development documentation."
+              />
+            </p>
+            <EuiHorizontalRule />
+            <p>
+              <FormattedMessage
+                id="<%= camelCase(name) %>.timestampText"
+                defaultMessage="Last timestamp: {time}"
+                values={{ time: timestamp ? timestamp : 'Unknown' }}
+              />
+            </p>
+            <EuiButton size="s" onClick={onClickHandler}>
+              <FormattedMessage
+                id="<%= camelCase(name) %>.buttonText"
+                defaultMessage="<%= hasServer ? 'Get data' : 'Click me' %>"
+                ignoreTag
+              />
+            </EuiButton>
+          </EuiText>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </I18nProvider>
+  );
+};

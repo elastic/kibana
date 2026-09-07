@@ -6,6 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import { registerTemplateApplyEvents } from './templates/register_apply_events';
 import {
   CASE_ATTACH_EVENTS_EVENT_TYPE,
   CASE_MARKDOWN_EDITOR_PLUGIN_CLICKED_EVENT_TYPE,
@@ -18,12 +19,15 @@ import {
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
 } from '../../common/constants';
+import { registerTemplateAnalytics } from './templates';
 
 export const registerAnalytics = ({
   analyticsService,
 }: {
   analyticsService: AnalyticsServiceSetup;
 }) => {
+  registerTemplateApplyEvents({ analyticsService });
+
   analyticsService.registerEventType({
     eventType: CASE_PAGE_VIEW_EVENT_TYPE,
     schema: {
@@ -268,4 +272,6 @@ export const registerAnalytics = ({
       },
     },
   });
+
+  registerTemplateAnalytics({ analyticsService });
 };

@@ -23,5 +23,5 @@ export interface ContextEngineAgentBuilderSetupDependencies {
 
 export interface ContextEngineAgentBuilderStartDependencies {
   contextEngine: ContextEnginePluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
 }

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
@@ -29,8 +29,7 @@ export function isEmbeddableEditActionCompatible(
   attributes: TypedLensByValueInput['attributes']
 ) {
   // for ES|QL is compatible only when advanced setting is enabled
-  const query = attributes.state.query;
-  return isOfAggregateQueryType(query) ? core.uiSettings.get(ENABLE_ESQL) : true;
+  return isTextBasedAttributes(attributes) ? core.uiSettings.get(ENABLE_ESQL) : true;
 }
 
 export async function getEditEmbeddableFlyout({

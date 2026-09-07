@@ -23,6 +23,10 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   LazyAwsStaticKeysForm: jest.fn(),
 }));
 
+jest.mock('../../onboarding_flow_context', () => ({
+  useOnboardingFlow: jest.fn(),
+}));
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useGetPackageInfoByKeyQuery,
@@ -30,27 +34,40 @@ import {
   LazyAwsIdentityFederationSetup,
   LazyAwsStaticKeysForm,
 } from '@kbn/fleet-plugin/public';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as jest.Mock;
 const mockGetAnyCloudConnectorIacTemplateUrl = getAnyCloudConnectorIacTemplateUrl as jest.Mock;
 const MockIdentityFederation = LazyAwsIdentityFederationSetup as unknown as jest.Mock;
 const MockStaticKeys = LazyAwsStaticKeysForm as unknown as jest.Mock;
+const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 import { ManagedIntegrationsSection } from './managed_integrations_section';
 
-function setupMocks({ cloud = undefined }: { cloud?: object } = {}) {
+function setupMocks({
+  cloud = undefined,
+  setConnectorId = jest.fn(),
+}: { cloud?: object; setConnectorId?: jest.Mock } = {}) {
   mockUseKibana.mockReturnValue({ services: { cloud } });
   mockUseGetPackageInfoByKeyQuery.mockReturnValue({ data: undefined });
   mockGetAnyCloudConnectorIacTemplateUrl.mockReturnValue(undefined);
+  mockUseOnboardingFlow.mockReturnValue({ setConnectorId });
 
   MockIdentityFederation.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onConnectorIdChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onConnectorIdChange?: (id: string | undefined, name?: string) => void;
+    }) => (
       <div data-test-subj="identity-federation">
         <button onClick={() => onReadyChange?.(true)}>mark-ready</button>
         <button onClick={() => onReadyChange?.(false)}>mark-not-ready</button>
+        <button onClick={() => onConnectorIdChange?.('id-1', 'my-connector')}>mark-named</button>
       </div>
     )
   );
@@ -64,13 +81,26 @@ function setupMocks({ cloud = undefined }: { cloud?: object } = {}) {
   );
 }
 
-function renderSection(props: { serviceCount?: number; showIdentityFederation?: boolean } = {}) {
+function renderSection(
+  props: {
+    serviceCount?: number;
+    showIdentityFederation?: boolean;
+    onDeploy?: () => void;
+    isDeploying?: boolean;
+    isDone?: boolean;
+    hasFailed?: boolean;
+  } = {}
+) {
   return render(
     <I18nProvider>
       <React.Suspense fallback={<div>Loading...</div>}>
         <ManagedIntegrationsSection
           serviceCount={props.serviceCount ?? 3}
           showIdentityFederation={props.showIdentityFederation ?? true}
+          onDeploy={props.onDeploy ?? jest.fn()}
+          isDeploying={props.isDeploying ?? false}
+          isDone={props.isDone ?? false}
+          hasFailed={props.hasFailed ?? false}
         />
       </React.Suspense>
     </I18nProvider>
@@ -178,6 +208,118 @@ describe('ManagedIntegrationsSection', () => {
       // Switch to access keys — button must reset to disabled
       fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeDisabled();
+    });
+  });
+
+  describe('connector name propagation', () => {
+    it('calls setConnectorId with id and name when identity federation fires onConnectorIdChange', () => {
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId });
+      renderSection({ showIdentityFederation: true });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-named'));
+      });
+      expect(setConnectorId).toHaveBeenCalledWith('id-1', 'my-connector');
+    });
+
+    it('calls setConnectorId(undefined) when switching to access keys', () => {
+      const setConnectorId = jest.fn();
+      setupMocks({ setConnectorId });
+      renderSection({ showIdentityFederation: true });
+      fireEvent.click(screen.getByRole('radio', { name: /access keys/i }));
+      expect(setConnectorId).toHaveBeenCalledWith(undefined);
+    });
+  });
+
+  describe('deploy button interaction', () => {
+    it('calls onDeploy when clicked after credentials ready', () => {
+      const onDeploy = jest.fn();
+      renderSection({ onDeploy });
+      act(() => {
+        fireEvent.click(screen.getByText('mark-ready'));
+      });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-deployButton'));
+      expect(onDeploy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deploying state', () => {
+    it('shows loading button while isDeploying', () => {
+      renderSection({ isDeploying: true });
+      const btn = screen.getByTestId('managedIntegrationsSection-deployButton');
+      expect(btn).toBeDisabled();
+      expect(screen.getByText('Deploying integrations...')).toBeInTheDocument();
+    });
+  });
+
+  describe('failed state', () => {
+    it('shows error callout when hasFailed', () => {
+      renderSection({ hasFailed: true });
+      expect(screen.getByTestId('managedIntegrationsSection-errorCallout')).toBeInTheDocument();
+    });
+
+    it('hides deploy button when hasFailed', () => {
+      renderSection({ hasFailed: true });
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-deployButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('calls onDeploy when Retry clicked', () => {
+      const onDeploy = jest.fn();
+      renderSection({ hasFailed: true, onDeploy });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-retryButton'));
+      expect(onDeploy).toHaveBeenCalledTimes(1);
+    });
+
+    it('hides callout while isDeploying (retry in flight)', () => {
+      renderSection({ hasFailed: true, isDeploying: true });
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-errorCallout')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('done state', () => {
+    it('auto-collapses section when isDone', () => {
+      const { rerender } = renderSection({ isDone: false });
+      expect(screen.getByTestId('identity-federation')).toBeInTheDocument();
+      act(() => {
+        rerender(
+          <I18nProvider>
+            <React.Suspense fallback={<div>Loading...</div>}>
+              <ManagedIntegrationsSection
+                serviceCount={3}
+                showIdentityFederation={true}
+                onDeploy={jest.fn()}
+                isDeploying={false}
+                isDone={true}
+                hasFailed={false}
+              />
+            </React.Suspense>
+          </I18nProvider>
+        );
+      });
+      expect(screen.queryByTestId('identity-federation')).not.toBeInTheDocument();
+    });
+
+    it('shows Done badge in header when isDone', () => {
+      renderSection({ isDone: true });
+      expect(screen.getByText('Done')).toBeInTheDocument();
+    });
+
+    it('deploy button is absent when isDone', () => {
+      renderSection({ isDone: true });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(
+        screen.queryByTestId('managedIntegrationsSection-deployButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows success message when isDone and section is open', () => {
+      renderSection({ isDone: true });
+      fireEvent.click(screen.getByTestId('managedIntegrationsSection-headerButton'));
+      expect(screen.getByTestId('managedIntegrationsSection-successMessage')).toBeInTheDocument();
     });
   });
 
