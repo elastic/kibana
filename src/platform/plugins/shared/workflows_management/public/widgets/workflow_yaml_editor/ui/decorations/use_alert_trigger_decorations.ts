@@ -93,8 +93,8 @@ export const useAlertTriggerDecorations = ({
             model.getLineMaxColumn(typeRange!.startLineNumber)
           ),
           options: {
-            linesDecorationsClassName: 'alert-trigger-glyph',
-            hoverMessage: {
+            glyphMarginClassName: 'alert-trigger-glyph',
+            glyphMarginHoverMessage: {
               value: i18n.translate(
                 'workflows.workflowDetail.yamlEditor.alertTriggerGlyphTooltip',
                 {
