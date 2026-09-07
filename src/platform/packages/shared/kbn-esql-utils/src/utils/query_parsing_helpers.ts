@@ -333,11 +333,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string, prefix?: VariableNamePrefix): string[] => {
   const { root } = Parser.parse(esql);
   const params: Array<{ text: string; paramKind?: VariableNamePrefix }> = [];
-  const collect = (node: {
-    literalType: string;
-    text: string;
-    paramKind?: VariableNamePrefix;
-  }) => {
+  const collect = (node: { literalType: string; text: string; paramKind?: VariableNamePrefix }) => {
     if (node.literalType === 'param') params.push({ text: node.text, paramKind: node.paramKind });
   };
   // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
