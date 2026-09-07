@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+import { useActionPolicyAutoAttach } from '@kbn/alerting-v2-browser-shared/auto_attach/use_action_policy_auto_attach';
 import { ActionPolicyForm } from '../../components/action_policy/form/action_policy_form';
 import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
 import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
@@ -33,7 +34,6 @@ import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
 import { useFetchActionPolicy } from '../../hooks/use_fetch_action_policy';
 import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
-import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();

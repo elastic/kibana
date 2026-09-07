@@ -12,10 +12,10 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import type { RuleApiResponse } from '../services/rules_api';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { registerRuleAutoAttach } from './rule_auto_attach';
 
-const createRule = (overrides?: Partial<RuleApiResponse>): RuleApiResponse =>
+const createRule = (overrides?: Partial<RuleResponse>): RuleResponse =>
   ({
     id: 'rule-1',
     kind: 'signal',
@@ -29,12 +29,12 @@ const createRule = (overrides?: Partial<RuleApiResponse>): RuleApiResponse =>
     updated_by: 'alice',
     updated_at: '2026-01-01T00:00:00.000Z',
     ...overrides,
-  } as RuleApiResponse);
+  } as RuleResponse);
 
 describe('registerRuleAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
-  let focusedRule$: BehaviorSubject<RuleApiResponse | undefined>;
+  let focusedRule$: BehaviorSubject<RuleResponse | undefined>;
   let addAttachment: jest.Mock;
   let removeAttachment: jest.Mock;
   let cleanup: () => void;
@@ -44,7 +44,7 @@ describe('registerRuleAutoAttach', () => {
     jest.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
-    focusedRule$ = new BehaviorSubject<RuleApiResponse | undefined>(undefined);
+    focusedRule$ = new BehaviorSubject<RuleResponse | undefined>(undefined);
     addAttachment = jest.fn();
     removeAttachment = jest.fn();
     chatEventsByConversationId = new Map();

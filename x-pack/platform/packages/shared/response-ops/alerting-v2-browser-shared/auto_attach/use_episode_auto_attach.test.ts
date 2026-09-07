@@ -9,33 +9,39 @@ import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
-import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  EPISODE_ATTACHMENT_TYPE,
+  type AlertEpisode,
+} from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import type { RuleApiResponse } from '../services/rules_api';
-import { useRuleAutoAttach } from './use_rule_auto_attach';
+import { useEpisodeAutoAttach } from './use_episode_auto_attach';
 
 jest.mock('@kbn/core-di-browser');
+jest.mock('../common/episode_mappers', () => ({
+  alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
+    ...(episode as Record<string, unknown>),
+    __mapped: true,
+  }),
+}));
 
 const mockUseService = useService as jest.MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
-const rule = {
-  id: 'rule-1',
-  kind: 'signal',
-  enabled: true,
-  metadata: { name: 'Host CPU high', version: 1 },
-  time_field: '@timestamp',
-  schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
-  created_by: 'alice',
-  created_at: '2026-01-01T00:00:00.000Z',
-  updated_by: 'alice',
-  updated_at: '2026-01-01T00:00:00.000Z',
-} as RuleApiResponse;
+const episode: AlertEpisode = {
+  '@timestamp': '2026-01-01T00:00:00.000Z',
+  'episode.id': 'ep-1',
+  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  'rule.id': 'rule-1',
+  group_hash: 'gh-1',
+  first_timestamp: '2026-01-01T00:00:00.000Z',
+  last_timestamp: '2026-01-01T01:00:00.000Z',
+  duration: 3600000,
+};
 
-describe('useRuleAutoAttach', () => {
+describe('useEpisodeAutoAttach', () => {
   let addAttachment: jest.Mock;
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
@@ -84,15 +90,15 @@ describe('useRuleAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useEpisodeAutoAttach(episode, { ruleName: 'Rule A' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'rule:rule-1',
-        type: RULE_ATTACHMENT_TYPE,
-        origin: 'rule-1',
+        id: 'episode:ep-1',
+        type: EPISODE_ATTACHMENT_TYPE,
+        origin: 'ep-1',
       })
     );
   });
@@ -100,7 +106,7 @@ describe('useRuleAutoAttach', () => {
   it('does not stage on mount when sidebar is closed', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useEpisodeAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -109,7 +115,7 @@ describe('useRuleAutoAttach', () => {
   it('stages when sidebar opens after mount', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useEpisodeAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -120,38 +126,69 @@ describe('useRuleAutoAttach', () => {
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'rule-1' }));
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
   });
 
-  it('stages the new rule when it changes', () => {
+  it('does not double-stage the same episode', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    const rule2 = { ...rule, id: 'rule-2' };
 
-    const { rerender } = renderHook(({ item }) => useRuleAutoAttach(item), {
-      initialProps: { item: rule },
+    renderHook(() => useEpisodeAutoAttach(episode));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+  });
+
+  it('stages the new episode when it changes (same hook instance)', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
+
+    const { rerender } = renderHook(({ ep }) => useEpisodeAutoAttach(ep), {
+      initialProps: { ep: episode },
     });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'rule:rule-1', origin: 'rule-1' })
+      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
     );
 
-    rerender({ item: rule2 });
+    rerender({ ep: episode2 });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'rule:rule-2', origin: 'rule-2' })
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
     );
   });
 
-  it('does not stage when rule is undefined', () => {
+  it('stages the new episode when hook remounts with a different episode', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+    const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
+
+    const { unmount } = renderHook(() => useEpisodeAutoAttach(episode));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+
+    unmount();
+
+    renderHook(() => useEpisodeAutoAttach(episode2));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(2);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
+    );
+  });
+
+  it('does not stage when episode is undefined', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(undefined));
+    renderHook(() => useEpisodeAutoAttach(undefined));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -170,7 +207,7 @@ describe('useRuleAutoAttach', () => {
     });
 
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useEpisodeAutoAttach(episode));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -179,7 +216,7 @@ describe('useRuleAutoAttach', () => {
   it('cleans up subscriptions on unmount', () => {
     activeConversation$.next({ id: undefined });
 
-    const { unmount } = renderHook(() => useRuleAutoAttach(rule));
+    const { unmount } = renderHook(() => useEpisodeAutoAttach(episode));
     unmount();
 
     act(() => {

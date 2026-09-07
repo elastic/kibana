@@ -317,7 +317,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
         );
         import(
           /* webpackChunkName: "alerting_v2_episode_attachment" */
-          './agent_builder/attachments/episode_attachment_definition'
+          '@kbn/alerting-v2-browser-shared/attachments/episode_attachment_definition'
         ).then(
           ({
             createEpisodeAttachmentDefinition,

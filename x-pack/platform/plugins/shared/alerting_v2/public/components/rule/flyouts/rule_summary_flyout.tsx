@@ -24,6 +24,7 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared/auto_attach/use_rule_auto_attach';
 import { paths } from '../../../constants';
 import { RuleActionsMenu } from '../../../pages/rules_list_page/rule_actions_menu';
 import { TakeActionButton } from './take_action_button';
@@ -32,7 +33,6 @@ import { RuleHeaderDescription, RuleTitleWithBadges } from '../../rule_details/r
 import { RuleConditions } from '../../rule_details/sidebar/rule_conditions';
 import { RuleMetadata } from '../../rule_details/sidebar/rule_metadata';
 import type { RuleApiResponse } from '../../../services/rules_api';
-import { useRuleAutoAttach } from '../../../agent_builder/use_rule_auto_attach';
 
 const FLYOUT_TITLE_ID = 'ruleSummaryFlyoutTitle';
 
