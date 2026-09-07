@@ -26,6 +26,7 @@ Table of Contents
     - [Executor](#executor)
     - [Example](#example)
   - [RESTful API](#restful-api)
+  - [Inbound connector events (tech preview)](#inbound-connector-events-tech-preview)
   - [Firing actions](#firing-actions)
     - [Accessing a scoped ActionsClient](#accessing-a-scoped-actionsclient)
     - [actionsClient.enqueueExecution(options)](#actionsclientenqueueexecutionoptions)
@@ -201,6 +202,10 @@ The built-in email action type provides a good example of creating an action typ
 ## RESTful API
 
 Using an action type requires an action to be created that will contain and encrypt configuration for a given action type. See the [REST API Documentation](https://www.elastic.co/guide/en/kibana/master/actions-and-connectors-api.html) API for CRUD operations for Actions.
+
+## Inbound connector events (tech preview)
+
+Operator loop (flag, create, copy URL + token, `curl` POST, rotate): see [server/inbound/README.md](./server/inbound/README.md).
 
 ## Firing actions
 

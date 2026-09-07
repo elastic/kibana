@@ -12,7 +12,7 @@ import {
 } from '@kbn/fleet-plugin/server/errors';
 import { errors } from '@elastic/elasticsearch';
 import { EndpointError } from '../../../common/endpoint/errors';
-import { NotFoundError } from '../errors';
+import { EndpointAuthorizationError, NotFoundError } from '../errors';
 import { catchAndWrapError, wrapErrorIfNeeded } from './wrap_errors';
 
 describe('wrapErrorIfNeeded', () => {
@@ -135,6 +135,56 @@ describe('wrapErrorIfNeeded', () => {
         method: 'GET',
         path: '/_search',
       });
+    });
+
+    it('wraps a 403 security_exception in EndpointAuthorizationError', () => {
+      const esError = buildResponseError(
+        {
+          error: {
+            type: 'security_exception',
+            reason:
+              'action [indices:data/read/search] is unauthorized for user [1140609671] with effective roles [viewer] on indices [.metrics-endpoint.metadata_united_default], this action is granted by the index privileges [read,all]',
+          },
+          status: 403,
+        },
+        403
+      );
+      const result = wrapErrorIfNeeded(esError);
+
+      expect(result).toBeInstanceOf(EndpointAuthorizationError);
+      expect(result.meta).toBe(esError);
+    });
+
+    it('keeps Elasticsearch index names out of an authorization error message', () => {
+      const esError = buildResponseError(
+        {
+          error: {
+            type: 'security_exception',
+            reason:
+              'action [indices:data/read/search] is unauthorized for user [1140609671] on indices [.metrics-endpoint.metadata_united_default]',
+          },
+          status: 403,
+        },
+        403
+      );
+      const result = wrapErrorIfNeeded(esError);
+
+      expect(result.message).not.toContain('.metrics-endpoint.metadata_united_default');
+      expect(result.message).not.toContain('1140609671');
+    });
+
+    it('does not wrap a non-403 security_exception in EndpointAuthorizationError', () => {
+      const esError = buildResponseError(
+        {
+          error: { type: 'security_exception', reason: 'missing authentication credentials' },
+          status: 401,
+        },
+        401
+      );
+      const result = wrapErrorIfNeeded(esError);
+
+      expect(result).not.toBeInstanceOf(EndpointAuthorizationError);
+      expect(result).toBeInstanceOf(EndpointError);
     });
   });
 });
