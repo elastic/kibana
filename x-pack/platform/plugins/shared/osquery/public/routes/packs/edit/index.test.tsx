@@ -102,6 +102,7 @@ const mockPackData = {
 
 const PublishedTitle = () => {
   const title = useOsqueryPageHeaderTitle();
+
   return <span data-test-subj="published-osquery-title">{title ?? ''}</span>;
 };
 
