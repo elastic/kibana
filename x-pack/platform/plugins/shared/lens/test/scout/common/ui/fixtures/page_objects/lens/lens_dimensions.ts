@@ -59,7 +59,7 @@ export class LensDimensions {
     this.formatDecimalsInput = this.page.locator(
       'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
     );
-    this.dimensionColorPicker = this.page.getByTestId(/indexPattern-dimension-colorPicker/);
+    this.dimensionColorPicker = this.page.testSubj.locator('~indexPattern-dimension-colorPicker');
     this.dimensionNameInput = this.page.testSubj.locator('name-input');
     this.timeShift = this.page.testSubj.locator(TIME_SHIFT_TEST_SUBJ);
     this.timeShiftComboInput = this.timeShift.locator('[data-test-subj="comboBoxInput"]');
