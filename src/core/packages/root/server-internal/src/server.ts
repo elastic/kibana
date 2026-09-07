@@ -585,7 +585,8 @@ export class Server {
       }
     );
 
-    if (this.nodeRoles?.migrator === true) {
+    const isMigratorNode = this.nodeRoles?.migrator === true;
+    if (isMigratorNode) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
       throw new CriticalError(
         'Migrations completed, shutting down Kibana',
