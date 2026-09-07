@@ -845,9 +845,6 @@ node scripts/scout discover-flaky-tests
 
 # Include PR builds, widen the window, restrict to Jest and FTR
 node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
-
-# Leave out tests that have already been skipped
-node scripts/scout discover-flaky-tests --excludeSkipped
 ```
 
 The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.

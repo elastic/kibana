@@ -118,8 +118,6 @@ export const FlakyTestReportSchema = z.object({
     /** Empty means no branch filter. */
     branches: z.array(z.string()),
     frameworks: z.array(TestFrameworkSchema),
-    /** Whether tests whose latest run was skipped were dropped from the lists. */
-    excludeSkipped: z.boolean().default(false),
   }),
   thresholds: FlakyTestReportThresholdsSchema,
   summary: z.object({

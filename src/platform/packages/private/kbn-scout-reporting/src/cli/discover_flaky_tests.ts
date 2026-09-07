@@ -270,9 +270,6 @@ export const discoverFlakyTests: Command<void> = {
 
     # Only Jest and FTR, custom output path, summary suppressed
     node scripts/scout discover-flaky-tests --frameworks jest,ftr --outputPath target/flaky.json --quiet
-
-    # Leave out tests that have already been skipped
-    node scripts/scout discover-flaky-tests --excludeSkipped
   `,
   flags: {
     string: [
@@ -289,7 +286,7 @@ export const discoverFlakyTests: Command<void> = {
       'samplesPerTest',
       'outputPath',
     ],
-    boolean: ['verifyTLSCerts', 'excludeSkipped'],
+    boolean: ['verifyTLSCerts'],
     default: {
       esURL: SCOUT_REPORTER_ES_URL,
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
@@ -316,7 +313,6 @@ export const discoverFlakyTests: Command<void> = {
     --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEF_MIN_FAILED}]
     --maxTests         (optional)  Maximum tests per list in the report [default: ${DEF_MAX_TESTS}]
     --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEF_SAMPLES}]
-    --excludeSkipped   (optional)  Leave out tests whose latest run was skipped [default: false]
     --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     `,
   },
@@ -356,7 +352,6 @@ export const discoverFlakyTests: Command<void> = {
           maxTests: flagsReader.requiredNumber('maxTests'),
         },
         samplesPerTest: flagsReader.requiredNumber('samplesPerTest'),
-        excludeSkipped: flagsReader.boolean('excludeSkipped'),
       },
       log
     );
