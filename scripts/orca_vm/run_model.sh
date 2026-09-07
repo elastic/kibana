@@ -155,19 +155,36 @@ CCM_KEY=$(python3 -c "import json; d=json.load(open('/home/orcaeval/.elastic/eis
 export KIBANA_EIS_CCM_API_KEY=$CCM_KEY
 CONNS=$(python3 -c "import json,base64; c=json.load(open('/home/orcaeval/.elastic/eis-connectors-cache.json')); conns=c.get('connectors',c); print(base64.b64encode(json.dumps(conns).encode()).decode())")
 
-# ─── OpenRouter path (models named openrouter-*) ────────────────────────────
+# ─── OpenRouter / self-hosted path (openrouter-* or selfhost-*) ─────────────
 # The connector cache's providerConfig.url is must-point-at-proxy for
 # openrouter-* connectors: they need an ES inference endpoint pointing at
 # the on-VM SSE-normalizing proxy (localhost:8088), never openrouter.ai
 # directly — ES cannot parse OpenRouter's raw SSE (reasoning:null in finish
 # chunks → XContentParse exception → 500s). The proxy also injects max_tokens
-# and retries 503s.
+# and retries 503s. selfhost-* models reuse the same path with
+# PROXY_UPSTREAM set from /tmp/selfhost.env (url + api_key): same SSE
+# normalization need (SGLang emits reasoning_content deltas ES rejects).
 # Stale markers from a previous invocation would kill the endpoint watcher
 # loop below and confuse the sweep controller — clear BEFORE starting it.
 rm -f /tmp/unit.done /tmp/unit.rc
 OR_PROXY_PORT=8088
-if [ "${MODEL#openrouter-}" != "$MODEL" ]; then
-  echo "=== OpenRouter model detected: $MODEL ==="
+if [ "${MODEL#openrouter-}" != "$MODEL" ] || [ "${MODEL#selfhost-}" != "$MODEL" ]; then
+  IS_SELFHOST=0; [ "${MODEL#selfhost-}" != "$MODEL" ] && IS_SELFHOST=1
+  if [ "$IS_SELFHOST" = "1" ] && [ -f /tmp/selfhost.env ]; then
+    source /tmp/selfhost.env   # exports SELFHOST_UPSTREAM, SELFHOST_API_KEY
+    export PROXY_UPSTREAM="$SELFHOST_UPSTREAM"
+    # Dual-cell balancing: the A100 box serves two independent TP=1 cells (one
+    # per GPU). With a single upstream the whole sweep serialises on cell A
+    # (measured 2026-09-06: cell A 100% util / 44 queued while cell B idled at
+    # 0%). When a second cell is configured, hand both to the proxy so it can
+    # round-robin. Optional - absent SELFHOST_UPSTREAM_B keeps single-cell.
+    if [ -n "${SELFHOST_UPSTREAM_B:-}" ]; then
+      export PROXY_UPSTREAMS="$SELFHOST_UPSTREAM,$SELFHOST_UPSTREAM_B"
+      export PROXY_UPSTREAM_KEYS="$SELFHOST_API_KEY,${SELFHOST_API_KEY_B:-$SELFHOST_API_KEY}"
+      echo "=== dual-cell: balancing across 2 upstreams ==="
+    fi
+  fi
+  echo "=== OpenAI-compatible proxy model detected: $MODEL (upstream: ${PROXY_UPSTREAM:-openrouter.ai}) ==="
   # Proxy must be running BEFORE the endpoint references it and before any
   # converse call. Kill a stale process first: scp overwrites the file, but
   # the old process keeps serving OLD normalization rules (field-tested trap).
@@ -198,7 +215,28 @@ conns = json.loads(base64.b64decode(raw))
 model = os.environ['OPENROUTER_MODEL']
 c = conns.get(model)
 if c is None:
-    print(f'FATAL: connector {model} missing from cache', file=sys.stderr); sys.exit(3)
+    # selfhost-* connectors are NOT in the EIS cache — synthesize one on the
+    # fly from /tmp/selfhost.env values already exported by the caller.
+    sh_up = os.environ.get('SELFHOST_UPSTREAM', '')
+    sh_key = os.environ.get('SELFHOST_API_KEY', '')
+    if model.startswith('selfhost-') and sh_up and sh_key:
+        conns[model] = c = {
+            'name': model,
+            'actionTypeId': '.inference',
+            'config': {
+                'provider': 'openai',
+                'taskType': 'chat_completion',
+                'inferenceId': model + '-chat_completion',
+                'providerConfig': {
+                    'model_id': model.split('-', 1)[1],
+                    'url': f\"http://127.0.0.1:{os.environ['OR_PORT']}\",
+                    'api_key': sh_key,
+                },
+            },
+            'secrets': {},
+        }
+    else:
+        print(f'FATAL: connector {model} missing from cache', file=sys.stderr); sys.exit(3)
 pc = c.setdefault('config', {}).setdefault('providerConfig', {})
 pc['url'] = f\"http://127.0.0.1:{os.environ['OR_PORT']}\"
 # ES endpoint model_id = OpenRouter API name from the matrix config matchIds.
@@ -293,18 +331,126 @@ run_eval() {
 }
 
 EVAL_EXIT=1
+# RESUME (2026-09-06): a retry used to re-run all 21 examples, so one transient
+# failure near the end of a ~2h thinking-model pass discarded the whole pass
+# (runs 8/9 died exactly this way). Between attempts we ask the LOCAL scout ES
+# which example ids already produced a score and narrow the next attempt to the
+# survivors via PERSONA_MATRIX_EXAMPLE_IDS. If the probe cannot determine the
+# scored set we deliberately fall back to the full dataset — resuming on
+# incomplete information would silently under-run the matrix.
+scored_example_ids() {
+  # Query GOLDEN, not local ES. Score documents are written only when a
+  # Playwright run COMPLETES, and every retry wipes the local cluster, so the
+  # local index is empty at exactly the moment resume needs it (verified run 13
+  # s2of3: local total=0 while golden held 4088 docs / 7 examples for that same
+  # shard). Golden is the only store that survives the wipe.
+  #
+  # Match execution_id EXACTLY, on the BARE field. Verified against golden:
+  # term on metadata.execution_id -> 98 docs / 7 examples; the same term on
+  # metadata.execution_id.keyword -> 0 (field is already keyword-mapped, the
+  # .keyword suffix silently matches nothing).
+  # Prefix and match_phrase both return 0 docs on
+  # this field -- persona_matrix_sweep.py --self-test enforces that ban for the
+  # gate, and the same trap applies here: a partial match resumes nothing while
+  # looking healthy. execution_id is "<TEST_RUN_ID>::<suite>::<model>", and
+  # TEST_RUN_ID is already per-shard, so the shard scoping comes for free.
+  #
+  # Any failure yields "" = run everything. Re-running a scored example only
+  # wastes time; skipping an unscored one silently under-runs the matrix.
+  [ -n "${GOLDEN_ES_URL:-}" ] || { echo ""; return 0; }
+  # TEST_RUN_ID is exported by the launch wrapper into the EVAL subprocess, not
+  # into this script's shell (verified on the VM: absent from run_model.sh's
+  # /proc/<pid>/environ). Guarding on it made the probe return "" every time,
+  # so every retry silently re-ran all 21 examples. Derive the run id from the
+  # docs the run just wrote instead -- local ES is authoritative and always
+  # present at this point.
+  local RUN_ID="${TEST_RUN_ID:-}"
+  if [ -z "$RUN_ID" ]; then
+    RUN_ID=$(curl -s -m 20 "http://elastic:changeme@localhost:9220/.ds-.evaluation-scores*/_search" \
+      -H 'Content-Type: application/json' \
+      -d '{"size":1,"_source":["metadata.execution_id"],"sort":[{"@timestamp":{"order":"desc"}}]}' 2>/dev/null \
+      | python3 -c 'import json,sys
+try:
+    d=json.load(sys.stdin)
+    print(d["hits"]["hits"][0]["_source"]["metadata"]["execution_id"].split("::")[0])
+except Exception:
+    print("")' 2>/dev/null)
+  fi
+  [ -n "$RUN_ID" ] || { echo ""; return 0; }
+  curl -s -m 25 "${GOLDEN_ES_URL}/.ds-.evaluation-scores*/_search" \
+    -H "Authorization: ApiKey ${GOLDEN_ES_API_KEY}" \
+    -H 'Content-Type: application/json' \
+    -d '{"size":0,"query":{"term":{"metadata.execution_id":"'"${RUN_ID}::${EVAL_SUITE:-security-persona-matrix}::${MODEL}"'"}},
+         "aggs":{"ids":{"terms":{"field":"example.id","size":500}}}}' 2>/dev/null \
+    | python3 -c 'import json,sys
+try:
+    d=json.load(sys.stdin)
+    print(",".join(b["key"] for b in d["aggregations"]["ids"]["buckets"]))
+except Exception:
+    print("")' 2>/dev/null
+}
+
 for attempt in 1 2 3; do
   echo "--- eval attempt $attempt/3 ---"
+  if [ -n "${RESUME_IDS:-}" ]; then
+    export PERSONA_MATRIX_EXAMPLE_IDS="$RESUME_IDS"
+    echo "resume: running only $(echo "$RESUME_IDS" | tr ',' '\n' | grep -c .) remaining example(s)"
+  else
+    unset PERSONA_MATRIX_EXAMPLE_IDS
+  fi
   run_eval
   EVAL_EXIT=$?
   [ "$EVAL_EXIT" -eq 0 ] && break
   if [ "$attempt" -lt 3 ]; then
     echo "eval attempt $attempt failed (exit $EVAL_EXIT); stopping stack and retrying"
+    # ORDER MATTERS. Flush FIRST, then ask golden what scored.
+    #
+    # The executor records every completed measurement before it throws, but
+    # export_scores.py only runs at the END of this script -- so at this point
+    # the partial scores exist ONLY in the local scout ES that the wipe below is
+    # about to destroy. Querying golden before flushing therefore always returned
+    # "" (verified run 13 s2of3: 0 docs on golden while local held real results),
+    # which skipped the flush and re-ran all 21 examples every attempt.
+    echo "resume: flushing partial scores to golden before wipe"
+    source /tmp/golden-cluster-env.sh 2>/dev/null
+    EVAL_SUITE="${EVAL_SUITE:-security-persona-matrix}" \
+      python3 /tmp/export_scores.py "$MODEL" 2>&1 | tail -3
+    PARTIAL_EXPORT_RC=${PIPESTATUS[0]}
+    if [ "$PARTIAL_EXPORT_RC" -ne 0 ]; then
+      # Could not make the partial durable -> resuming would silently drop those
+      # examples from the matrix. Re-run the full dataset instead.
+      echo "resume: partial export rc=$PARTIAL_EXPORT_RC - falling back to FULL dataset"
+      DONE_IDS=""
+    else
+      DONE_IDS="$(scored_example_ids)"
+      echo "resume: golden confirms $(echo "$DONE_IDS" | tr ',' '\n' | grep -c .) scored example(s)"
+    fi
     node scripts/evals stop 2>/dev/null || true
     pkill -f "scout.js" 2>/dev/null || true
     pkill -f "org.elasticsearch.bootstrap.Elasticsearch" 2>/dev/null || true
     sleep $((attempt * 30))
     rm -rf ~/Projects/kibana/.es/cluster-scout/data 2>/dev/null
+    # Narrow the next attempt to examples that have NOT scored yet. The id list
+    # is read from the suite's own dataset module so it cannot drift from the
+    # examples actually registered.
+    RESUME_IDS=""
+    if [ -n "$DONE_IDS" ]; then
+      RESUME_IDS="$(DONE_IDS="$DONE_IDS" node -e '
+const path = "/home/orcaeval/Projects/kibana/x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix/src/datasets/persona_matrix_prompts.ts";
+const src = require("fs").readFileSync(path, "utf8");
+const all = [...src.matchAll(/^\s*id:\s*"([^"]+)"/gm)].map((m) => m[1]);
+const done = new Set((process.env.DONE_IDS || "").split(",").filter(Boolean));
+const rest = all.filter((id) => !done.has(id));
+// Only emit a filter when it is a strict, non-empty subset; anything else
+// (parse failure, nothing left, nothing done) means run the full dataset.
+process.stdout.write(rest.length && rest.length < all.length ? rest.join(",") : "");
+' 2>/dev/null)"
+      if [ -n "$RESUME_IDS" ]; then
+        echo "resume: $(echo "$DONE_IDS" | tr ',' '\n' | grep -c .) example(s) already scored and flushed to golden"
+      else
+        echo "resume: could not compute a valid remaining set - re-running FULL dataset"
+      fi
+    fi
   fi
 done
 echo "EVAL_EXIT=$EVAL_EXIT"

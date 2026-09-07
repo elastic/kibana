@@ -37,6 +37,36 @@ def es_local(path, body=None):
         return json.loads(r.read())
 
 
+def canonicalise(src: dict, model_id: str) -> dict:
+    """Rewrite the upstream model name to the sweep's model key.
+
+    A self-hosted cell is reached through the OpenAI-compatible proxy, so the
+    suite records whatever name the UPSTREAM reported (`qwen3.8-27b`,
+    `qwen/qwen3.8-27b`) -- never the sweep key `selfhost-qwen38`. Both the
+    golden completeness gate and the resume probe look the run up by the sweep
+    key, so unrewritten docs are invisible to them: run 12 wrote 266 real score
+    docs and still reported total failure.
+
+    execution_id embeds the same upstream name (`<run>::<suite>::qwen3.8-27b`)
+    and MUST be rewritten too. Normalising only task.model.id leaves the resume
+    probe querying an execution_id that does not exist, so every retry re-ran
+    the full dataset (run 14: 5 attempts, "golden confirms 0 scored examples"
+    while the export itself reported 14 docs written).
+    """
+    meta = src.get("metadata") or {}
+    exec_id = meta.get("execution_id")
+    if isinstance(exec_id, str) and "::" in exec_id:
+        run, _, rest = exec_id.partition("::")
+        suite = rest.rpartition("::")[0] or SUITE_ID
+        meta = {**meta, "execution_id": f"{run}::{suite}::{model_id}"}
+        src = {**src, "metadata": meta}
+    task = src.get("task") or {}
+    model = task.get("model") or {}
+    if model:
+        src = {**src, "task": {**task, "model": {**model, "id": model_id}}}
+    return src
+
+
 def export_model(model_id: str):
     # Every sweep VM starts from a clean ES data directory and runs exactly one
     # model. Export the complete suite instead of guessing the
@@ -79,7 +109,7 @@ def export_model(model_id: str):
         bulk_lines = []
         for h in batch:
             bulk_lines.append(json.dumps({"create": {"_index": INDEX, "_id": h["_id"]}}))
-            bulk_lines.append(json.dumps(h["_source"]))
+            bulk_lines.append(json.dumps(canonicalise(h["_source"], model_id)))
         bulk_body = "\n".join(bulk_lines) + "\n"
         req = urllib.request.Request(
             f"{GOLDEN_URL}/{INDEX}/_bulk",

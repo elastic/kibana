@@ -1119,8 +1119,13 @@ def self_test() -> int:
         # 1. Score docs live on GOLDEN. Local scout ES is wiped by the retry and
         #    is empty at exactly the moment resume reads it.
         _fn = _rm[_rm.index("scored_example_ids() {"):_rm.index("for attempt in 1 2 3; do")]
-        check("resume probe queries golden, not local scout ES",
-              "localhost:9220" not in _fn and "GOLDEN_ES_URL" in _fn, True)
+        # The SCORED-SET query must hit golden. A local-ES read is still
+        # legitimate for deriving the run id (TEST_RUN_ID is absent from this
+        # shell), so assert on the scoring query itself rather than banning
+        # every localhost:9220 mention.
+        _score_q = _fn.split("RUN_ID\" ] ||")[-1]
+        check("resume probe scores against golden, not local scout ES",
+              "localhost:9220" not in _score_q and "GOLDEN_ES_URL" in _score_q, True)
 
         # 2. metadata.execution_id is ALREADY keyword-mapped. Verified against
         #    golden: term on the bare field -> 98 docs; on .keyword -> 0.
