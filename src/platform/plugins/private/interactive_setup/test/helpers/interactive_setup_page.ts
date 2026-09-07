@@ -27,9 +27,9 @@ export class InteractiveSetupPage {
   private readonly configureManuallyButton: Locator;
   private readonly clusterAddressInput: Locator;
   private readonly checkAddressButton: Locator;
-  private readonly usernameInput: Locator;
+  readonly usernameInput: Locator;
   private readonly passwordInput: Locator;
-  private readonly trustCaCertCheckbox: Locator;
+  readonly trustCaCertCheckbox: Locator;
   private readonly submitConfigurationButton: Locator;
   private readonly progressIndicator: Locator;
 
@@ -112,13 +112,4 @@ export class InteractiveSetupPage {
     await this.progressIndicator.waitFor({ state: 'visible', timeout: timeoutMs });
   }
 
-  /** True when the configuration screen is asking for Elasticsearch credentials. */
-  async hasCredentialsFields(): Promise<boolean> {
-    return this.usernameInput.isVisible();
-  }
-
-  /** True when the configuration screen is offering the cluster's certificate authority to trust. */
-  async hasCaCertificateField(): Promise<boolean> {
-    return this.trustCaCertCheckbox.isVisible();
-  }
 }

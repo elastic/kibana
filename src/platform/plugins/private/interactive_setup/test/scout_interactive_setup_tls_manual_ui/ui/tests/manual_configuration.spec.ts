@@ -42,7 +42,7 @@ test.describe(
       });
 
       await test.step('a TLS-enabled cluster offers its certificate authority to trust', async () => {
-        expect(await interactiveSetup.hasCaCertificateField()).toBe(true);
+        await expect(interactiveSetup.trustCaCertCheckbox).toBeVisible();
       });
 
       await test.step('submitting credentials and trusting the CA completes setup', async () => {

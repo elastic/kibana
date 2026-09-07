@@ -42,7 +42,7 @@ test.describe(
       });
 
       await test.step('a cluster without TLS offers no certificate to trust', async () => {
-        expect(await interactiveSetup.hasCaCertificateField()).toBe(false);
+        await expect(interactiveSetup.trustCaCertCheckbox).toBeHidden();
       });
 
       await test.step('submitting credentials completes setup and leaves the wizard', async () => {

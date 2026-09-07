@@ -41,8 +41,8 @@ test.describe(
       });
 
       await test.step('an insecure cluster asks for neither credentials nor a certificate', async () => {
-        expect(await interactiveSetup.hasCredentialsFields()).toBe(false);
-        expect(await interactiveSetup.hasCaCertificateField()).toBe(false);
+        await expect(interactiveSetup.usernameInput).toBeHidden();
+        await expect(interactiveSetup.trustCaCertCheckbox).toBeHidden();
       });
 
       await test.step('submitting completes setup and leaves the wizard', async () => {
