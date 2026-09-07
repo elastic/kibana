@@ -97,7 +97,6 @@ const riskPanelFlexItemStyle = css`
   min-width: 460px;
 `;
 
-
 export const EntityAnalyticsHomePage = () => {
   const riskEngineReadPrivileges = useMissingRiskEnginePrivileges({ readonly: true });
   const entityEnginePrivilegesQuery = useEntityEnginePrivileges();
@@ -213,27 +212,42 @@ const EntityAnalyticsHomePageContent = () => {
     return params.get('watchlistId') || undefined;
   }, [search]);
 
-  const { count: alertsCount, entityIds: alertsEntityIds, isLoading: alertsLoading } =
-    useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
-  const { count: anomaliesCount, entityIds: anomaliesEntityIds, isLoading: anomaliesLoading } =
-    useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
-  const { count: watchlistedCount, entityIds: watchlistedEntityIds, isLoading: watchlistedLoading } =
-    useWatchlistedCount({ spaceId: resolvedSpaceId });
-  const { count: newEntityCount, entityIds: newEntityEntityIds, isLoading: newEntityLoading } =
-    useNewEntityCount({ spaceId: resolvedSpaceId });
-  const { count: riskMoversCount, entityIds: riskMoversEntityIds, isLoading: riskMoversLoading } =
-    useRiskMoversCount({ spaceId: resolvedSpaceId });
-  const { count: newlyHCCount, entityIds: newlyHCEntityIds, isLoading: newlyHCLoading } =
-    useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
+  const {
+    count: alertsCount,
+    entityIds: alertsEntityIds,
+    isLoading: alertsLoading,
+  } = useEntitiesWithAlertsCount({ spaceId: resolvedSpaceId });
+  const {
+    count: anomaliesCount,
+    entityIds: anomaliesEntityIds,
+    isLoading: anomaliesLoading,
+  } = useEntitiesWithAnomaliesCount({ spaceId: resolvedSpaceId });
+  const {
+    count: watchlistedCount,
+    entityIds: watchlistedEntityIds,
+    isLoading: watchlistedLoading,
+  } = useWatchlistedCount({ spaceId: resolvedSpaceId });
+  const {
+    count: newEntityCount,
+    entityIds: newEntityEntityIds,
+    isLoading: newEntityLoading,
+  } = useNewEntityCount({ spaceId: resolvedSpaceId });
+  const {
+    count: riskMoversCount,
+    entityIds: riskMoversEntityIds,
+    isLoading: riskMoversLoading,
+  } = useRiskMoversCount({ spaceId: resolvedSpaceId });
+  const {
+    count: newlyHCCount,
+    entityIds: newlyHCEntityIds,
+    isLoading: newlyHCLoading,
+  } = useNewlyHighCriticalCount({ spaceId: resolvedSpaceId });
 
-  const handleFilterForCard = useCallback(
-    (cardId: ActiveFilter['cardId']) => {
-      setActiveFilter((prev) =>
-        prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
-      );
-    },
-    []
-  );
+  const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
+    setActiveFilter((prev) =>
+      prev?.cardId === cardId ? null : { type: 'card', cardId, label: cardId }
+    );
+  }, []);
 
   const cardFilter = useMemo((): QueryDslQueryContainer | null => {
     if (!activeFilter || activeFilter.type !== 'card') return null;
@@ -241,71 +255,96 @@ const EntityAnalyticsHomePageContent = () => {
       case 'entitiesWithAlerts':
         return alertsEntityIds.length > 0 ? { terms: { 'entity.id': alertsEntityIds } } : null;
       case 'entitiesWithAnomalies':
-        return anomaliesEntityIds.length > 0 ? { terms: { 'entity.id': anomaliesEntityIds } } : null;
+        return anomaliesEntityIds.length > 0
+          ? { terms: { 'entity.id': anomaliesEntityIds } }
+          : null;
       case 'riskMovers':
-        return riskMoversEntityIds.length > 0 ? { terms: { 'entity.id': riskMoversEntityIds } } : null;
+        return riskMoversEntityIds.length > 0
+          ? { terms: { 'entity.id': riskMoversEntityIds } }
+          : null;
       case 'newlyHighCritical':
         return newlyHCEntityIds.length > 0 ? { terms: { 'entity.id': newlyHCEntityIds } } : null;
       case 'watchlisted':
-        return watchlistedEntityIds.length > 0 ? { terms: { 'entity.id': watchlistedEntityIds } } : null;
+        return watchlistedEntityIds.length > 0
+          ? { terms: { 'entity.id': watchlistedEntityIds } }
+          : null;
       case 'newEntity':
-        return newEntityEntityIds.length > 0 ? { terms: { 'entity.id': newEntityEntityIds } } : null;
+        return newEntityEntityIds.length > 0
+          ? { terms: { 'entity.id': newEntityEntityIds } }
+          : null;
       default:
         return getCardEntityFilter(activeFilter.cardId);
     }
-  }, [activeFilter, alertsEntityIds, anomaliesEntityIds, riskMoversEntityIds, newlyHCEntityIds, watchlistedEntityIds, newEntityEntityIds]);
-
-  const signalCards = useMemo((): SignalCardData[] => [
-    {
-      id: 'entitiesWithAlerts',
-      title: 'Entities with alerts',
-      value: alertsLoading ? 0 : alertsCount,
-      description: 'Entities with at least one alert in the last 24h',
-      filterLabel: 'Entities with alerts (24h)',
-    },
-    {
-      id: 'entitiesWithAnomalies',
-      title: 'Entities with anomalies',
-      value: anomaliesLoading ? 0 : anomaliesCount,
-      description: 'Entities with at least one ML anomaly in the last 24h',
-      filterLabel: 'Entities with anomalies (24h)',
-    },
-    {
-      id: 'riskMovers',
-      title: 'Risk movers',
-      value: riskMoversLoading ? 0 : riskMoversCount,
-      description: 'Entities whose risk score rose ≥10 points vs yesterday',
-      filterLabel: 'Risk movers',
-    },
-    {
-      id: 'newlyHighCritical',
-      title: 'Newly high/critical',
-      value: newlyHCLoading ? 0 : newlyHCCount,
-      description: 'Entities that crossed into High or Critical risk since yesterday',
-      filterLabel: 'Newly high/critical',
-    },
-    {
-      id: 'watchlisted',
-      title: 'Watchlisted',
-      value: watchlistedLoading ? 0 : watchlistedCount,
-      description: 'Entities on a watchlist with a risk score above zero',
-      filterLabel: 'Watchlisted',
-    },
-    {
-      id: 'newEntity',
-      title: 'New entity',
-      value: newEntityLoading ? 0 : newEntityCount,
-      description: 'Entities first seen in the last 7 days with a risk score above zero',
-      filterLabel: 'New entity (last 7 days)',
-    },
-  ], [
-    alertsCount, alertsLoading,
-    anomaliesCount, anomaliesLoading,
-    riskMoversCount, riskMoversLoading,
-    newlyHCCount, newlyHCLoading,
-    watchlistedCount, watchlistedLoading,
-    newEntityCount, newEntityLoading,
+  }, [
+    activeFilter,
+    alertsEntityIds,
+    anomaliesEntityIds,
+    riskMoversEntityIds,
+    newlyHCEntityIds,
+    watchlistedEntityIds,
+    newEntityEntityIds,
   ]);
+
+  const signalCards = useMemo(
+    (): SignalCardData[] => [
+      {
+        id: 'entitiesWithAlerts',
+        title: 'Entities with alerts',
+        value: alertsLoading ? 0 : alertsCount,
+        description: 'Entities with at least one alert in the last 24h',
+        filterLabel: 'Entities with alerts (24h)',
+      },
+      {
+        id: 'entitiesWithAnomalies',
+        title: 'Entities with anomalies',
+        value: anomaliesLoading ? 0 : anomaliesCount,
+        description: 'Entities with at least one ML anomaly in the last 24h',
+        filterLabel: 'Entities with anomalies (24h)',
+      },
+      {
+        id: 'riskMovers',
+        title: 'Risk movers',
+        value: riskMoversLoading ? 0 : riskMoversCount,
+        description: 'Entities whose risk score rose ≥10 points vs yesterday',
+        filterLabel: 'Risk movers',
+      },
+      {
+        id: 'newlyHighCritical',
+        title: 'Newly high/critical',
+        value: newlyHCLoading ? 0 : newlyHCCount,
+        description: 'Entities that crossed into High or Critical risk since yesterday',
+        filterLabel: 'Newly high/critical',
+      },
+      {
+        id: 'watchlisted',
+        title: 'Watchlisted',
+        value: watchlistedLoading ? 0 : watchlistedCount,
+        description: 'Entities on a watchlist with a risk score above zero',
+        filterLabel: 'Watchlisted',
+      },
+      {
+        id: 'newEntity',
+        title: 'New entity',
+        value: newEntityLoading ? 0 : newEntityCount,
+        description: 'Entities first seen in the last 7 days with a risk score above zero',
+        filterLabel: 'New entity (last 7 days)',
+      },
+    ],
+    [
+      alertsCount,
+      alertsLoading,
+      anomaliesCount,
+      anomaliesLoading,
+      riskMoversCount,
+      riskMoversLoading,
+      newlyHCCount,
+      newlyHCLoading,
+      watchlistedCount,
+      watchlistedLoading,
+      newEntityCount,
+      newEntityLoading,
+    ]
+  );
 
   const setSelectedWatchlist = useCallback(
     (id?: string, name?: string) => {
@@ -556,4 +595,3 @@ const EntityAnalyticsEntitiesTableContent = ({
 
   return <EntitiesTableSection state={state} config={DEFAULT_ENTITIES_TABLE_CONFIG} />;
 };
-

@@ -13,13 +13,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { getEntitiesAlias, ENTITY_LATEST } from '../constants';
 
-export const useWatchlistedCount = ({
-  spaceId,
-  skip,
-}: {
-  spaceId: string;
-  skip?: boolean;
-}) => {
+export const useWatchlistedCount = ({ spaceId, skip }: { spaceId: string; skip?: boolean }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
 
@@ -34,7 +28,12 @@ export const useWatchlistedCount = ({
 
   const queryKey = useMemo(() => ['watchlistedCount', query], [query]);
 
-  const { data: result, isLoading, isRefetching, error } = useQuery(
+  const {
+    data: result,
+    isLoading,
+    isRefetching,
+    error,
+  } = useQuery(
     queryKey,
     async ({ signal }) => {
       const searchResult = await lastValueFrom(

@@ -35,9 +35,7 @@ export const buildEntitiesWithAnomaliesCountQuery = (
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  parts.push(
-    `| EVAL entity.id = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
-  );
+  parts.push(`| EVAL entity.id = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`);
   parts.push(`| WHERE entity.id IS NOT NULL`);
 
   parts.push(`| RENAME @timestamp AS event_timestamp`);

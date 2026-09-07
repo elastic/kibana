@@ -34,10 +34,7 @@ interface NeedsAttentionTileProps {
   watchlistId?: string;
 }
 
-export const NeedsAttentionTile: React.FC<NeedsAttentionTileProps> = ({
-  spaceId,
-  watchlistId,
-}) => {
+export const NeedsAttentionTile: React.FC<NeedsAttentionTileProps> = ({ spaceId, watchlistId }) => {
   const { filterManager } = useKibana().services.data.query;
   const { count, isLoading } = useHighCriticalCount({ spaceId, watchlistId });
 
@@ -67,10 +64,9 @@ export const NeedsAttentionTile: React.FC<NeedsAttentionTileProps> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h3>
-              {i18n.translate(
-                'xpack.securitySolution.entityAnalytics.needsAttentionTile.title',
-                { defaultMessage: 'Needs attention' }
-              )}
+              {i18n.translate('xpack.securitySolution.entityAnalytics.needsAttentionTile.title', {
+                defaultMessage: 'Needs attention',
+              })}
             </h3>
           </EuiTitle>
         </EuiFlexItem>
@@ -94,10 +90,9 @@ export const NeedsAttentionTile: React.FC<NeedsAttentionTileProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            {i18n.translate(
-              'xpack.securitySolution.entityAnalytics.needsAttentionTile.subtitle',
-              { defaultMessage: 'High / Critical risk entities (score ≥ 70)' }
-            )}
+            {i18n.translate('xpack.securitySolution.entityAnalytics.needsAttentionTile.subtitle', {
+              defaultMessage: 'High / Critical risk entities (score ≥ 70)',
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

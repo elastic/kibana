@@ -52,10 +52,7 @@ export const useNewlyHighCriticalCount = ({
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const raw = await lastValueFrom(
-        data.search.search(
-          { params: { query } },
-          { abortSignal: signal, strategy: 'esql_async' }
-        )
+        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
       const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
@@ -77,10 +74,9 @@ export const useNewlyHighCriticalCount = ({
     }
   );
 
-  const filteredError =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-      ? undefined
-      : (error as SecurityAppError | undefined);
+  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
+    ? undefined
+    : (error as SecurityAppError | undefined);
 
   return {
     count: queryResult?.count ?? 0,

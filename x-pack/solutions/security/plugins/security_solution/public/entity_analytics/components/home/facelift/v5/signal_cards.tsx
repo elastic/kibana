@@ -6,13 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  AreaSeries,
-  Chart,
-  CurveType,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Chart, CurveType, ScaleType, Settings } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,8 +77,7 @@ const V5_CARD_DESCRIPTIONS: Partial<Record<SignalCardId, string>> = {
   newEntity: 'Entities first seen in the last 7 days with a risk score above zero',
 };
 
-const displayTitleFor = (card: SignalCardData): string =>
-  V3_CARD_TITLES[card.id] ?? card.title;
+const displayTitleFor = (card: SignalCardData): string => V3_CARD_TITLES[card.id] ?? card.title;
 
 const displayDescriptionFor = (card: SignalCardData): string =>
   V5_CARD_DESCRIPTIONS[card.id] ?? card.description;
@@ -228,10 +221,7 @@ const CornerControl: React.FC<{
 /** Decorative area sparkline behind the value — fill only, no stroke. */
 const Sparkline: React.FC<{ values: number[]; fill: string }> = ({ values, fill }) => {
   const chartBaseTheme = useElasticChartsTheme();
-  const data = useMemo(
-    () => values.map((y, x) => ({ x, y })),
-    [values]
-  );
+  const data = useMemo(() => values.map((y, x) => ({ x, y })), [values]);
 
   if (values.length < 2) {
     return null;
@@ -394,7 +384,12 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem grow={true} css={css`min-inline-size: 0;`}>
+          <EuiFlexItem
+            grow={true}
+            css={css`
+              min-inline-size: 0;
+            `}
+          >
             <EuiText
               css={css`
                 font-size: ${TITLE_FONT_SIZE}px;

@@ -31,9 +31,7 @@ export const buildAlertEuidPipeline = (euid: EntityStoreEuid): string[] => {
     parts.push(`| EVAL ${euid.esql.getEuidEvaluation(entityType, `${entityType}_euid`)}`);
   }
 
-  parts.push(
-    `| EVAL derived_euid = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`
-  );
+  parts.push(`| EVAL derived_euid = COALESCE(${ENTITY_TYPES.map((t) => `${t}_euid`).join(', ')})`);
   parts.push('| MV_EXPAND `kibana.alert.entity.id`');
   parts.push('| EVAL entity.id = COALESCE(`kibana.alert.entity.id`, derived_euid)');
   parts.push('| WHERE entity.id IS NOT NULL');

@@ -24,10 +24,7 @@ const esqlSearch = async (
   signal: AbortSignal
 ): Promise<ESQLSearchResponse> => {
   const result = await lastValueFrom(
-    searchService.search(
-      { params: { query } },
-      { abortSignal: signal, strategy: 'esql_async' }
-    )
+    searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
   );
   return result.rawResponse as unknown as ESQLSearchResponse;
 };
@@ -87,16 +84,14 @@ export const useEntitiesWithAlertsCount = ({
     }
   );
 
-  const filteredError =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-      ? undefined
-      : (error as SecurityAppError | undefined);
+  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
+    ? undefined
+    : (error as SecurityAppError | undefined);
 
   useErrorToast(
-    i18n.translate(
-      'xpack.securitySolution.entityAnalytics.home.entitiesWithAlerts.queryError',
-      { defaultMessage: 'There was an error loading entities with alerts count' }
-    ),
+    i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAlerts.queryError', {
+      defaultMessage: 'There was an error loading entities with alerts count',
+    }),
     filteredError
   );
 

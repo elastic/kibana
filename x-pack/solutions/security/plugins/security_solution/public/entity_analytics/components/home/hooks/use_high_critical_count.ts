@@ -35,12 +35,14 @@ export const useHighCriticalCount = ({
   const isEnabled =
     !skip && !isStatusLoading && riskEngineStatus?.risk_engine_status !== 'NOT_INSTALLED';
 
-  const queryKey = useMemo(
-    () => ['highCriticalCount', query, filterQuery],
-    [query, filterQuery]
-  );
+  const queryKey = useMemo(() => ['highCriticalCount', query, filterQuery], [query, filterQuery]);
 
-  const { data: result, isLoading, isRefetching, error } = useQuery(
+  const {
+    data: result,
+    isLoading,
+    isRefetching,
+    error,
+  } = useQuery(
     queryKey,
     async ({ signal }) => {
       const searchResult = await lastValueFrom(

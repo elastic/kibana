@@ -15,13 +15,7 @@ import { useRiskEngineStatus } from '../../../api/hooks/use_risk_engine_status';
 import { useResolvedLatestEntitiesIndexName } from '../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildRiskMoversCountQuery } from '../queries/tile_risk_movers_query';
 
-export const useRiskMoversCount = ({
-  spaceId,
-  skip,
-}: {
-  spaceId: string;
-  skip?: boolean;
-}) => {
+export const useRiskMoversCount = ({ spaceId, skip }: { spaceId: string; skip?: boolean }) => {
   const { data } = useKibana().services;
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const { data: resolvedIndex, isLoading: isIndexLoading } =
@@ -50,10 +44,7 @@ export const useRiskMoversCount = ({
     async ({ signal }) => {
       if (!query) return { count: 0, entityIds: [] };
       const raw = await lastValueFrom(
-        data.search.search(
-          { params: { query } },
-          { abortSignal: signal, strategy: 'esql_async' }
-        )
+        data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
       const response = raw.rawResponse as unknown as ESQLSearchResponse;
       const row = response.values?.[0];
@@ -75,10 +66,9 @@ export const useRiskMoversCount = ({
     }
   );
 
-  const filteredError =
-    (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
-      ? undefined
-      : (error as SecurityAppError | undefined);
+  const filteredError = (error as SecurityAppError | undefined)?.message?.includes('Unknown index')
+    ? undefined
+    : (error as SecurityAppError | undefined);
 
   return {
     count: queryResult?.count ?? 0,
