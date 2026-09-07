@@ -19,6 +19,7 @@ import {
 import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { ConditionEntryField } from '@kbn/securitysolution-utils';
+import { YaraMetaKeyOfInterest } from '../types';
 import { LIST_ITEM_ENTRY_OPERATOR_TYPES } from './common/artifact_list_item_entry_values';
 import { BaseDataGenerator } from './base_data_generator';
 import {
@@ -437,9 +438,9 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       rule Generated_Yara_Rule_${this.randomString(5)} {
         meta:
           description = "Generated test YARA rule"
-          ${this.randomBoolean() ? 'scan_type = "Memory"' : ''}
-          ${this.randomBoolean() ? `architecture = "${metaArch}"` : ''}
-          ${this.randomBoolean() ? `os = "${osMeta.join(', ')}"` : ''}
+          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.SCAN_TYPE} = "Memory"` : ''}
+          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.ARCH} = "${metaArch}"` : ''}
+          ${this.randomBoolean() ? `${YaraMetaKeyOfInterest.OS} = "${osMeta.join(', ')}"` : ''}
 
         ${condition}
       }`;
