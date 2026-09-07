@@ -15,6 +15,10 @@ export {
   isScoutTestPath,
   isScoutTestsOnlyDiff,
 } from './ci-stats/pick_test_group_run_order/selective_scout';
+export {
+  isJestTestPath,
+  isJestTestsOnlyDiff,
+} from './ci-stats/pick_test_group_run_order/selective_jest';
 export * from './github';
 export * as TestFailures from './test-failures';
 export * from './utils';

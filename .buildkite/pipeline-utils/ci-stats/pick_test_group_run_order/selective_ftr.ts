@@ -8,6 +8,7 @@
  */
 
 import { allChangedFilesInScope, touchedCriticalFiles } from '../../affected-packages';
+import { isJestTestsOnlyDiff } from './selective_jest';
 
 /**
  * Modules that cannot affect FTR. When a PR only touches these (and no critical
@@ -123,6 +124,11 @@ export function shouldSkipFtrTests(
 
   if (touchedCriticalFiles([...changedFiles], [...FTR_CRITICAL_PATHS])) {
     return false;
+  }
+
+  // Jest test files (and snapshots) only feed Jest; they can't affect FTR.
+  if (isJestTestsOnlyDiff(changedFiles)) {
+    return true;
   }
 
   if (allChangedFilesInScope(changedFiles, FTR_IRRELEVANT_PATHS)) {

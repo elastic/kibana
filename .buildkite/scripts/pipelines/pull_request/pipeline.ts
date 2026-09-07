@@ -26,6 +26,7 @@ import {
   emitPipeline,
   getPipeline,
   getPrChangesCached,
+  isJestTestPath,
   isScoutTestPath,
   isScoutTestsOnlyDiff,
   registerCancelKeys,
@@ -113,11 +114,15 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
       );
     }
 
-    // The suite matchers below use plugin prefixes, which also match that plugin's Scout tests.
-    // Drop those, so a Scout-only change can't trigger Cypress.
+    // The suite matchers below use plugin prefixes, which also match that plugin's Scout tests
+    // and Jest specs. Neither can regress Cypress/dedicated-Scout suites, so drop them here to
+    // keep a Scout- or Jest-test-only change from triggering those suites.
+    const isSuiteIrrelevantPath = (file: string): boolean =>
+      isScoutTestPath(file) || isJestTestPath(file);
+
     const isSuiteIrrelevantChange = (change: (typeof prChanges)[number]): boolean =>
-      isScoutTestPath(change.filename) &&
-      (!change.previous_filename || isScoutTestPath(change.previous_filename));
+      isSuiteIrrelevantPath(change.filename) &&
+      (!change.previous_filename || isSuiteIrrelevantPath(change.previous_filename));
 
     const suiteRelevantChanges = prChanges.filter((change) => !isSuiteIrrelevantChange(change));
 

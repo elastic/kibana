@@ -20,9 +20,11 @@ import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
 import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { ftrManifest } from './ftr_manifests';
+import type { FTRManifestEntry } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { shouldSkipFtrTests } from './selective_ftr';
+import { loadFtrConfigTestFilesIndex, narrowFtrConfigsToChangedSpecs } from './ftr_config_index';
 import { isScoutPathOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
@@ -118,6 +120,8 @@ export async function pickTestGroupRunOrder() {
       );
       ftrManifestEntriesByQueue.clear();
     }
+
+    narrowFtrToChangedSpecs(bk, ftrManifestEntriesByQueue, selectiveChangedFiles);
 
     const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
     if (selectiveCtx !== null) {
@@ -238,6 +242,51 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
+}
+
+/**
+ * Per-config FTR selection: when every changed file is a known FTR spec, narrow the
+ * scheduled configs to the ones that own those specs. Mutates the queue map in place
+ * and no-ops (runs the full set) whenever narrowing isn't provably safe.
+ */
+function narrowFtrToChangedSpecs(
+  bk: BuildkiteClient,
+  ftrManifestEntriesByQueue: Map<string, FTRManifestEntry[]>,
+  changedFiles: readonly string[] | undefined
+): void {
+  if (!ftrManifestEntriesByQueue.size || !changedFiles) {
+    return;
+  }
+
+  const allEntries = [...ftrManifestEntriesByQueue.values()].flat();
+  const narrowed = narrowFtrConfigsToChangedSpecs(
+    allEntries.map((entry) => entry.path),
+    changedFiles,
+    loadFtrConfigTestFilesIndex()
+  );
+
+  if (narrowed === null) {
+    return;
+  }
+
+  const keep = new Set(narrowed);
+  const kept = allEntries.filter((entry) => keep.has(entry.path));
+
+  ftrManifestEntriesByQueue.clear();
+  for (const entry of kept) {
+    const forQueue = ftrManifestEntriesByQueue.get(entry.queue);
+    if (forQueue) {
+      forQueue.push(entry);
+    } else {
+      ftrManifestEntriesByQueue.set(entry.queue, [entry]);
+    }
+  }
+
+  const message = `Selective testing: FTR narrowed to ${
+    kept.length
+  } config(s) owning the changed spec(s); dropped ${allEntries.length - kept.length}.`;
+  console.log(message);
+  bk.setAnnotation('selective-testing-ftr-narrowed', 'info', message);
 }
 
 /**

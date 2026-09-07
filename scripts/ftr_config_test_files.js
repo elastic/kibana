@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Config } from './config';
-export { readConfigFile } from './config_loading';
-export type { ConfigModule } from './config_loading';
-export { runCheckFtrConfigsCli } from './run_check_ftr_configs_cli';
-export { runFtrConfigTestFilesCli } from './run_ftr_config_test_files_cli';
-export type { FtrConfigTestFilesIndex } from './run_ftr_config_test_files_cli';
+require('@kbn/setup-node-env');
+require('@kbn/test').runFtrConfigTestFilesCli();
