@@ -185,6 +185,7 @@ export class LogsExtractionClient {
   private async getLogExtractionConfigAndState(type: EntityType): Promise<{
     config: MergedLogExtractionConfig;
     engineState: EngineLogExtractionState;
+    excludedUserNames: string[];
   }> {
     const engineDescriptor = await this.engineDescriptorClient.findOrThrow(type);
     const status = engineDescriptor[this.descriptorFields.status];
@@ -194,7 +195,10 @@ export class LogsExtractionClient {
       }
       throw new EntityStoreNotRunningError();
     }
-    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    const [globalOverrides, { excludedUserNames }] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.globalStateClient.findOrThrow(),
+    ]);
     const engineState =
       this.extractionMode === EXTRACTION_MODE.nonPriority
         ? engineDescriptor.nonPriorityLogExtractionState ?? FRESH_ENGINE_LOG_EXTRACTION_STATE
@@ -210,6 +214,7 @@ export class LogsExtractionClient {
           : undefined
       ),
       engineState,
+      excludedUserNames,
     };
   }
 
@@ -255,9 +260,13 @@ export class LogsExtractionClient {
     let lastPersistedCheckpointISO: string | undefined;
 
     try {
-      const { config, engineState } = await this.getLogExtractionConfigAndState(type);
+      const { config, engineState, excludedUserNames } = await this.getLogExtractionConfigAndState(
+        type
+      );
       ({ fromDateISO: resumePointISO } = resolveMainExtractionWindow({ config, engineState }));
-      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode);
+      const entityDefinition = getEntityDefinition(type, this.namespace, this.extractionMode, {
+        excludedUserNames,
+      });
       const {
         count,
         pages,
@@ -354,8 +363,14 @@ export class LogsExtractionClient {
     );
   }
 
-  public async updateConfig(params?: LogExtractionInstallParams): Promise<LogExtractionConfig> {
-    const state = await this.globalStateClient.update({ logsExtraction: params });
+  public async updateConfig(
+    params?: LogExtractionInstallParams,
+    excludedUserNames?: string[]
+  ): Promise<LogExtractionConfig> {
+    const state = await this.globalStateClient.update({
+      logsExtraction: params,
+      ...(excludedUserNames !== undefined ? { excludedUserNames } : {}),
+    });
     return state.logsExtraction;
   }
 
