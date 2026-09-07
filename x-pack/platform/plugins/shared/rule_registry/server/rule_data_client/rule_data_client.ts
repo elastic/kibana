@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
 import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import type { Either } from 'fp-ts/Either';
 import { isLeft } from 'fp-ts/Either';
@@ -25,6 +24,13 @@ import type { IResourceInstaller } from '../rule_data_plugin_service/resource_in
 import type { IRuleDataClient, IRuleDataReader, IRuleDataWriter } from './types';
 import type { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import type { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
+import { errorAggregator } from '../utils/utils';
+
+// Status codes that are treated as benign on the alerts-as-data write path and
+// should not be logged at ERROR. A 409 version_conflict_engine_exception is
+// expected when the same alert document (deterministic _id, op_type "create") is
+// written more than once, e.g. by concurrent or overlapping rule executions.
+const IGNORED_BULK_STATUS_CODES = [409];
 
 export interface RuleDataClientConstructorOptions {
   indexInfo: IndexInfo;
@@ -237,15 +243,32 @@ export class RuleDataClient implements IRuleDataClient {
               return response;
             }
 
-            // TODO: #160572 - add support for version conflict errors, in case alert was updated
-            // some other way between the time it was fetched and the time it was updated.
             // Redact part of reason message that echoes back value
             const sanitizedResponse = sanitizeBulkErrorResponse(response) as TransportResult<
               estypes.BulkResponse,
               unknown
             >;
-            const error = new errors.ResponseError(sanitizedResponse);
-            this.options.logger.error(error);
+
+            // Aggregate genuine failures, ignoring benign 409 version_conflict_engine_exception
+            // create-conflicts (#160572). These are expected when the same alert document is
+            // written more than once and should not be surfaced as an error.
+            const aggregatedErrors = errorAggregator(
+              sanitizedResponse.body,
+              IGNORED_BULK_STATUS_CODES
+            );
+
+            if (Object.keys(aggregatedErrors).length > 0) {
+              // Log a concise summary of the genuine failures instead of serializing the entire
+              // (potentially multi-kilobyte) bulk response body.
+              this.options.logger.error(
+                `Error writing to index: ${JSON.stringify(aggregatedErrors)}`
+              );
+            } else {
+              this.options.logger.debug(
+                `Bulk write to index completed with ignored version conflicts (409).`
+              );
+            }
+
             return sanitizedResponse;
           } else {
             this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
