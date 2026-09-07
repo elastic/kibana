@@ -8,7 +8,6 @@
  */
 
 import path from 'node:path';
-import chalk from 'chalk';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
@@ -164,8 +163,8 @@ const buildTopFlakyTable = (
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
-    head: ['#', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File', 'Framework', 'Owners'],
-    colWidths: [null, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH, null, OWNERS_COL_WIDTH],
+    head: ['#', 'Framework', 'Owners', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File'],
+    colWidths: [null, null, OWNERS_COL_WIDTH, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -175,16 +174,8 @@ const buildTopFlakyTable = (
     const [{ framework, owners }] = entries;
     const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
     const rowSpan = entries.length;
-    const fileCells: CliTable3.Cell[] = [
-      {
-        rowSpan,
-        content: [
-          chalk.cyan(wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH))),
-          notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-        ]
-          .filter(Boolean)
-          .join('\n'),
-      },
+    // cli-table3 lays later rows out around the spanning cells, so only the first row carries them
+    const frameworkAndOwnersCells: CliTable3.Cell[] = [
       { rowSpan, content: framework },
       {
         rowSpan,
@@ -193,17 +184,27 @@ const buildTopFlakyTable = (
           '-',
       },
     ];
+    const fileCell: CliTable3.Cell = {
+      rowSpan,
+      content: [
+        wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
+        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    };
 
     entries.forEach((entry, index) => {
       rank += 1;
       const flakiest = flakiestBranch(entry.byBranch, minBuilds);
       table.push([
         rank,
+        ...(index === 0 ? frameworkAndOwnersCells : []),
         `${entry.failedBuilds}/${entry.builds}`,
         formatFlakiestBranch(flakiest),
         formatLatestRun(entry, flakiest, now),
         entry.title,
-        ...(index === 0 ? fileCells : []),
+        ...(index === 0 ? [fileCell] : []),
       ]);
     });
   }
