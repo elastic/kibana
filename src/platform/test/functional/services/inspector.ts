@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
@@ -31,18 +32,20 @@ export class InspectorService extends FtrService {
     if (await this.testSubjects.exists('openInspectorButton', { timeout: 1000 })) {
       return false;
     }
-    if (!(await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 }))) {
+    if (
+      !(await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton, { timeout: 1000 }))
+    ) {
       return false;
     }
-    await this.testSubjects.click('app-menu-overflow-button');
+    await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
     await this.testSubjects.existOrFail('openInspectorButton', { timeout: 5000 });
     return true;
   }
 
   private async closeOverflowIfOpen(): Promise<void> {
-    if (await this.testSubjects.exists('app-menu-popover', { timeout: 250 })) {
-      await this.testSubjects.click('app-menu-overflow-button');
-      await this.testSubjects.missingOrFail('app-menu-popover', { timeout: 2000 });
+    if (await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.popover, { timeout: 250 })) {
+      await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
+      await this.testSubjects.missingOrFail(APP_MENU_TEST_SUBJECTS.popover, { timeout: 2000 });
     }
   }
 
@@ -87,8 +90,10 @@ export class InspectorService extends FtrService {
     if (!isOpen) {
       await this.retry.try(async () => {
         if (!(await this.testSubjects.exists(openButton, { timeout: 1000 }))) {
-          if (await this.testSubjects.exists('app-menu-overflow-button', { timeout: 1000 })) {
-            await this.testSubjects.click('app-menu-overflow-button');
+          if (
+            await this.testSubjects.exists(APP_MENU_TEST_SUBJECTS.overflowButton, { timeout: 1000 })
+          ) {
+            await this.testSubjects.click(APP_MENU_TEST_SUBJECTS.overflowButton);
           }
         }
         await this.testSubjects.click(openButton);

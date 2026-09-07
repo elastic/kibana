@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { VisualizeConstants } from '@kbn/visualizations-common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { FtrService } from '../ftr_provider_context';
@@ -72,7 +73,7 @@ export class VisualizePageObject extends FtrService {
   /**
    * Clicks the AppHeader back control when it points at the Visualize library.
    * AppHeader lives in the app, so flyouts with `belowHeader` overlays intercept
-   * `appHeaderBack`; the control is skipped when an overlay is open.
+   * the back control; it is skipped when an overlay is open.
    * Returns `'confirmed'` when an unsaved-changes modal had to be dismissed,
    * `'clicked'` when the control was clicked, and `false` when it was not used.
    */
@@ -80,15 +81,18 @@ export class VisualizePageObject extends FtrService {
     if (await this.find.existsByCssSelector('.euiOverlayMask', 250)) {
       return false;
     }
-    if (!(await this.testSubjects.exists('appHeaderBack', { timeout: 500 }))) {
+    if (!(await this.testSubjects.exists(APP_HEADER_TEST_SUBJECTS.back, { timeout: 500 }))) {
       return false;
     }
-    const ariaLabel = await this.testSubjects.getAttribute('appHeaderBack', 'aria-label');
+    const ariaLabel = await this.testSubjects.getAttribute(
+      APP_HEADER_TEST_SUBJECTS.back,
+      'aria-label'
+    );
     if (!ariaLabel?.includes('Visualize library')) {
       return false;
     }
     try {
-      await this.testSubjects.click('appHeaderBack');
+      await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
       if (await this.testSubjects.exists('confirmModalConfirmButton')) {
         await this.testSubjects.click('confirmModalConfirmButton');
         return 'confirmed';

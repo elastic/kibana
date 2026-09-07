@@ -48,12 +48,6 @@ export const getReadOnlyBadge = (): AppHeaderBadge => ({
   color: 'hollow',
 });
 
-export const getReadOnlyChromeBadge = () => ({
-  text: getReadOnlyBadgeText(),
-  tooltip: getReadOnlyBadgeTooltip(),
-  iconType: 'readOnly' as const,
-});
-
 export const getDefaultQuery = ({ data }: VisualizeServices) => {
   return data.query.queryString.getDefaultQuery();
 };

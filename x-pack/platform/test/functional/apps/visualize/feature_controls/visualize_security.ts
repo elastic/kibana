@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -22,7 +23,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
-  const globalNav = getService('globalNav');
   const queryBar = getService('queryBar');
   const savedQueryManagementComponent = getService('savedQueryManagementComponent');
 
@@ -98,7 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show read-only badge`, async () => {
-        await globalNav.badgeMissingOrFail();
+        await testSubjects.missingOrFail(APP_HEADER_TEST_SUBJECTS.badge);
       });
 
       it(`can view existing Visualization`, async () => {
@@ -221,7 +221,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.badge);
+        expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.badge)).to.be(
+          'Read only'
+        );
       });
 
       it(`can view existing Visualization`, async () => {
@@ -239,8 +242,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.moveMouseTo('appHeader');
-        await testSubjects.existOrFail('~shareTopNavButton');
+        await testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
+        await testSubjects.existOrFail(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
         await testSubjects.missingOrFail('visualizeSaveButton', {
           timeout: config.get('timeouts.waitFor'),
         });
@@ -322,7 +325,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`shows read-only badge`, async () => {
-        await globalNav.badgeExistsOrFail('Read only');
+        await testSubjects.existOrFail(APP_HEADER_TEST_SUBJECTS.badge);
+        expect(await testSubjects.getVisibleText(APP_HEADER_TEST_SUBJECTS.badge)).to.be(
+          'Read only'
+        );
       });
 
       it(`can view existing Visualization`, async () => {
@@ -338,8 +344,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await testSubjects.moveMouseTo('appHeader');
-        await testSubjects.existOrFail('~shareTopNavButton');
+        await testSubjects.moveMouseTo(APP_HEADER_TEST_SUBJECTS.root);
+        await testSubjects.existOrFail(`~${APP_HEADER_TEST_SUBJECTS.shareButton}`);
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
       });
 

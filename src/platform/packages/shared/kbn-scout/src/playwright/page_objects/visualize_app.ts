@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 import { SavedObjectSaveModal } from './saved_object_save_modal';
@@ -28,7 +29,7 @@ export class VisualizeApp {
   constructor(private readonly page: ScoutPage) {
     this.landingPage = this.page.testSubj.locator('visualizationLandingPage');
     this.newItemButton = this.page.locator(
-      '[data-test-subj="appHeader"] [data-test-subj="newItemButton"]'
+      `[data-test-subj="${APP_HEADER_TEST_SUBJECTS.root}"] [data-test-subj="newItemButton"]`
     );
     this.visNewDialogGroups = this.page.testSubj.locator('visNewDialogGroups');
     this.visNewDialogTypes = this.page.testSubj.locator('visNewDialogTypes');
@@ -51,8 +52,8 @@ export class VisualizeApp {
       return;
     }
 
-    const overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    const popover = this.page.testSubj.locator('app-menu-popover');
+    const overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
+    const popover = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.popover);
 
     // Poll separately: `.or().waitFor()` throws in strict mode when both
     // locators are visible, and `.first()` is banned.
