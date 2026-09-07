@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { toDescribedDefinition, toDescribedSchema } from '../describe_schema';
 import { getRegistries } from '../registry';
 import { getValidator } from '../validate_params';
-import type { ApiTarget } from '../types';
 
 // Ceiling for a described API schema, and for the expansion of any type it stubs.
 const MAX_DESCRIBED_CHARS = 40_000;
