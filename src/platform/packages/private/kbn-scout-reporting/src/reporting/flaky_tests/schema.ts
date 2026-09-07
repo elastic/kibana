@@ -15,12 +15,6 @@ import { z } from '@kbn/zod/v4';
  */
 export const FLAKY_TEST_REPORT_SCHEMA_VERSION = 1;
 
-/**
- * Test events older than this are moved to the frozen tier of the reporting cluster by ILM and
- * are too slow to aggregate over, so the report window is capped here.
- */
-export const FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS = 21;
-
 export const TEST_FRAMEWORKS = ['jest', 'ftr', 'cypress', 'playwright'] as const;
 export const TestFrameworkSchema = z.enum(TEST_FRAMEWORKS);
 export type TestFramework = z.infer<typeof TestFrameworkSchema>;
@@ -80,7 +74,7 @@ export const FlakyTestReportSchema = z.object({
   schemaVersion: z.literal(FLAKY_TEST_REPORT_SCHEMA_VERSION),
   generatedAt: z.coerce.date(),
   window: z.object({
-    lookbackDays: z.int().min(1).max(FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS),
+    lookbackDays: z.int().min(1),
     from: z.coerce.date(),
     to: z.coerce.date(),
   }),

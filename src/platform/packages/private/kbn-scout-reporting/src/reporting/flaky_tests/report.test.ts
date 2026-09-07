@@ -17,7 +17,7 @@ import {
   rankTests,
   ScoutFlakyTests,
 } from './report';
-import { FlakyTestReportSchema, FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS } from './schema';
+import { FlakyTestReportSchema } from './schema';
 import * as queries from './queries';
 
 const thresholds = { minBuilds: 10, minFailedBuilds: 2 };
@@ -101,14 +101,13 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
     jest.restoreAllMocks();
   });
 
-  it('rejects windows that reach into the frozen tier', async () => {
+  it('rejects a non-positive or fractional lookback', async () => {
     await expect(
-      ScoutFlakyTests.fromElasticsearch(
-        es,
-        { ...options, lookbackDays: FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS + 1 },
-        log
-      )
-    ).rejects.toThrow('lookbackDays must be an integer between 1 and 21');
+      ScoutFlakyTests.fromElasticsearch(es, { ...options, lookbackDays: 0 }, log)
+    ).rejects.toThrow('lookbackDays must be a positive integer, got 0');
+    await expect(
+      ScoutFlakyTests.fromElasticsearch(es, { ...options, lookbackDays: 1.5 }, log)
+    ).rejects.toThrow('lookbackDays must be a positive integer, got 1.5');
   });
 
   it('aggregates per framework, classifies, ranks, caps and decorates the result', async () => {

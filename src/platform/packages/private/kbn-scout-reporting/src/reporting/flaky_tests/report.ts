@@ -22,7 +22,6 @@ import {
   type TestStatsRow,
 } from './queries';
 import {
-  FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS,
   FLAKY_TEST_REPORT_SCHEMA_VERSION,
   FlakyTestReportSchema,
   TEST_FRAMEWORKS,
@@ -133,15 +132,8 @@ const buildReport = async (
   options: FlakyTestReportOptions,
   log: ToolingLog
 ): Promise<FlakyTestReport> => {
-  if (
-    !Number.isInteger(options.lookbackDays) ||
-    options.lookbackDays < 1 ||
-    options.lookbackDays > FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS
-  ) {
-    throw new Error(
-      `lookbackDays must be an integer between 1 and ${FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS}` +
-        ` (older events live on the frozen tier), got ${options.lookbackDays}`
-    );
+  if (!Number.isInteger(options.lookbackDays) || options.lookbackDays < 1) {
+    throw new Error(`lookbackDays must be a positive integer, got ${options.lookbackDays}`);
   }
 
   const { thresholds, frameworks } = options;

@@ -23,7 +23,6 @@ import {
 import { getValidatedESClient } from '../helpers/elasticsearch';
 import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
-  FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS,
   ScoutFlakyTests,
   TEST_FRAMEWORKS,
   type FlakyTestEntry,
@@ -39,7 +38,6 @@ const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
 // Short names for the help text so its lines stay readable
 const DEFAULT_OUTPUT_PATH = path.relative(REPO_ROOT, SCOUT_FLAKY_TESTS_PATH);
-const MAX_DAYS = FLAKY_TEST_REPORT_MAX_LOOKBACK_DAYS;
 const DEF_DAYS = defaults.lookbackDays;
 const DEF_PIPELINES = defaults.pipelines.join(',');
 const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
@@ -264,7 +262,7 @@ export const discoverFlakyTests: Command<void> = {
     --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried (default: 1)
     --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --lookbackDays     (optional)  Days to aggregate, at most ${MAX_DAYS} (default: ${DEF_DAYS})
+    --lookbackDays     (optional)  How many days to look back when aggregating (default: ${DEF_DAYS})
     --pipelines        (optional)  Comma-separated Buildkite pipeline slugs (default: ${DEF_PIPELINES})
     --branches         (optional)  Comma-separated branches; no filter when omitted
     --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} (default: all)
@@ -281,8 +279,8 @@ export const discoverFlakyTests: Command<void> = {
     const outputPath = path.resolve(REPO_ROOT, flagsReader.requiredString('output'));
     const frameworks = readFrameworks(flagsReader);
     const lookbackDays = flagsReader.requiredNumber('lookbackDays');
-    if (!Number.isInteger(lookbackDays) || lookbackDays < 1 || lookbackDays > MAX_DAYS) {
-      throw createFlagError(`--lookbackDays must be an integer between 1 and ${MAX_DAYS}`);
+    if (!Number.isInteger(lookbackDays) || lookbackDays < 1) {
+      throw createFlagError('--lookbackDays must be a positive integer');
     }
 
     log.info(`Connecting to Elasticsearch at ${esURL}`);
