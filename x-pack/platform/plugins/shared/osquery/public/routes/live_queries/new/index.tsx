@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
 import { isArray } from 'lodash';
-import { WithHeaderLayout } from '../../../components/layouts';
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { useGoBack } from '../../../common/use_go_back';
+import { fullWidthFormContentCss } from '../../../components/layouts';
 import { pagePathGetters } from '../../../common/page_paths';
 import type { LocationStateWithFromHistory } from '../../../common/use_go_back';
 import { LiveQuery } from '../../../live_queries';
@@ -28,8 +24,6 @@ const NewLiveQueryPageComponent = () => {
   useBreadcrumbs('new_query');
   const { replace, push } = useHistory();
   const location = useLocation<LocationState>();
-  const handleGoBack = useGoBack(pagePathGetters.history());
-  const backNavigationProps = useRouterNavigate(pagePathGetters.history(), handleGoBack);
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
   const agentPolicyIds = useMemo(() => {
@@ -56,46 +50,15 @@ const NewLiveQueryPageComponent = () => {
     [push]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiButtonEmpty
-            iconType="chevronSingleLeft"
-            {...backNavigationProps}
-            flush="left"
-            size="xs"
-          >
-            <FormattedMessage
-              id="xpack.osquery.newLiveQuery.viewHistoryTitle"
-              defaultMessage="View history"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage
-                id="xpack.osquery.newLiveQuery.pageTitle"
-                defaultMessage="Run query"
-              />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [backNavigationProps]
-  );
-
   return (
-    <WithHeaderLayout leftColumn={LeftColumn}>
+    <div css={fullWidthFormContentCss}>
       <LiveQuery
         {...initialFormData}
         agentPolicyIds={agentPolicyIds}
         onSuccess={handleSuccess}
         redirectsOnSuccess
       />
-    </WithHeaderLayout>
+    </div>
   );
 };
 
