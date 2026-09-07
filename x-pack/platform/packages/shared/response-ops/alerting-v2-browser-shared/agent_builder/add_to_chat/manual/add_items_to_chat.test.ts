@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import type { AttachmentConverter } from '../../types';
 import { addItemsToChat } from './add_items_to_chat';
 
 interface TestItem {

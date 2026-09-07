@@ -8,8 +8,8 @@
 import React from 'react';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
-import type { AttachmentConverter } from '../../types/attachment_converter';
-import { useManualAddToChat } from './use_manual_add_to_chat';
+import type { AttachmentConverter } from '../../types';
+import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
 
 const ADD_TO_CHAT_BUTTON_LABEL = i18n.translate(
   'xpack.alertingV2.agentBuilderUi.addToChatButtonLabel',
@@ -21,15 +21,17 @@ const ADD_TO_CHAT_BUTTON_LABEL = i18n.translate(
 export interface AddToChatButtonProps<FocusedItem> {
   item: FocusedItem | undefined;
   converter: AttachmentConverter<FocusedItem>;
+  services: ManualAddToChatServices;
   'data-test-subj'?: string;
 }
 
 export const AddToChatButton = <FocusedItem,>({
   item,
   converter,
+  services,
   'data-test-subj': dataTestSubj = 'alertingV2AddToChatButton',
 }: AddToChatButtonProps<FocusedItem>): React.ReactElement | null => {
-  const { addToChat, isAddToChatAvailable } = useManualAddToChat(item, converter);
+  const { addToChat, isAddToChatAvailable } = useManualAddToChat(item, converter, services);
 
   if (!isAddToChatAvailable) {
     return null;

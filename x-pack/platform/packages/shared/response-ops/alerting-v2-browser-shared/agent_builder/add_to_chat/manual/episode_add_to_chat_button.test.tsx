@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import type { AlertEpisode, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { EpisodeAddToChatButton } from './episode_add_to_chat_button';
 import { AddToChatButton } from './add_to_chat_button';
+import type { ManualAddToChatServices } from './use_manual_add_to_chat';
 
 jest.mock('./add_to_chat_button', () => ({
   AddToChatButton: jest.fn(() => <div data-test-subj="addToChatButtonStub" />),
@@ -29,13 +30,15 @@ const mockRule = {
   grouping: { fields: ['host.name'] },
 } as RuleResponse;
 
+const services: ManualAddToChatServices = { agentBuilder: undefined };
+
 describe('EpisodeAddToChatButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('packages the episode and rule for the generic add to chat button', () => {
-    render(<EpisodeAddToChatButton episode={mockEpisode} rule={mockRule} />);
+    render(<EpisodeAddToChatButton episode={mockEpisode} rule={mockRule} services={services} />);
 
     expect(mockAddToChatButton).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -52,7 +55,7 @@ describe('EpisodeAddToChatButton', () => {
   });
 
   it('falls back to episode_data.rule_name when the rule is missing', () => {
-    render(<EpisodeAddToChatButton episode={mockEpisode} />);
+    render(<EpisodeAddToChatButton episode={mockEpisode} services={services} />);
 
     expect(mockAddToChatButton).toHaveBeenCalledWith(
       expect.objectContaining({

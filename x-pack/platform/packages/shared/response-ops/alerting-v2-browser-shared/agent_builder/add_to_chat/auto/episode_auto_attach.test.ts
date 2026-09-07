@@ -17,7 +17,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { registerEpisodeAutoAttach } from './episode_auto_attach';
-import type { FocusedEpisode } from '../../types/focused_episode';
+import type { FocusedEpisode } from '../../types';
 
 const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',

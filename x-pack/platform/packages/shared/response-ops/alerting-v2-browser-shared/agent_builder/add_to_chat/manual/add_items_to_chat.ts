@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import type { AttachmentConverter } from '../../types';
 
 export interface AddItemsToChatOptions {
   addAttachment?: AgentBuilderPluginStart['addAttachment'];

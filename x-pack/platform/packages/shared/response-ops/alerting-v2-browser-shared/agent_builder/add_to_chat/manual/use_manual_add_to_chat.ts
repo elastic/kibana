@@ -6,17 +6,19 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { PluginStart } from '@kbn/core-di';
-import { useService } from '@kbn/core-di-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import type { AttachmentConverter } from '../../types';
 import { addItemsToChat } from './add_items_to_chat';
 import {
   shouldRestageOnConversationChange,
   toConversationBinding,
   type ConversationBinding,
 } from './conversation_binding';
+
+export interface ManualAddToChatServices {
+  agentBuilder?: AgentBuilderPluginStart;
+}
 
 export interface UseManualAddToChatResult {
   addToChat: () => void;
@@ -25,11 +27,10 @@ export interface UseManualAddToChatResult {
 
 export const useManualAddToChat = <FocusedItem>(
   item: FocusedItem | undefined,
-  converter: AttachmentConverter<FocusedItem>
+  converter: AttachmentConverter<FocusedItem>,
+  services: ManualAddToChatServices
 ): UseManualAddToChatResult => {
-  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
-    | AgentBuilderPluginStart
-    | undefined;
+  const { agentBuilder } = services;
 
   const converterRef = useRef(converter);
   converterRef.current = converter;

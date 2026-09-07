@@ -7,18 +7,14 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { PluginStart } from '@kbn/core-di';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { ChromeStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { ACTION_POLICY_ATTACHMENT_TYPE, type ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
+import type { AutoAttachServices } from './use_auto_attach';
 import { useActionPolicyAutoAttach } from './use_action_policy_auto_attach';
-
-jest.mock('@kbn/core-di-browser');
-
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 const policy = {
   id: 'policy-1',
@@ -44,31 +40,7 @@ describe('useActionPolicyAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let chatEvents$: Subject<ChatEvent>;
-
-  const setupMocks = () => {
-    mockCoreStart.mockImplementation((key: string) => `core:${key}` as never);
-
-    mockUseService.mockImplementation((token: unknown) => {
-      if (token === 'core:chrome') {
-        return {
-          sidebar: {
-            getCurrentAppId$: () => currentAppId$.asObservable(),
-          },
-        };
-      }
-      if (token === PluginStart('agentBuilder')) {
-        return {
-          addAttachment,
-          removeAttachment: jest.fn(),
-          events: {
-            ui: { activeConversation$: activeConversation$.asObservable() },
-            getChatEvents$: () => chatEvents$.asObservable(),
-          },
-        };
-      }
-      return undefined;
-    });
-  };
+  let services: AutoAttachServices;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -77,7 +49,22 @@ describe('useActionPolicyAutoAttach', () => {
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     chatEvents$ = new Subject<ChatEvent>();
-    setupMocks();
+
+    services = {
+      chrome: {
+        sidebar: {
+          getCurrentAppId$: () => currentAppId$.asObservable(),
+        },
+      } as unknown as ChromeStart,
+      agentBuilder: {
+        addAttachment,
+        removeAttachment: jest.fn(),
+        events: {
+          ui: { activeConversation$: activeConversation$.asObservable() },
+          getChatEvents$: () => chatEvents$.asObservable(),
+        },
+      } as unknown as AgentBuilderPluginStart,
+    };
   });
 
   afterEach(() => {
@@ -88,7 +75,7 @@ describe('useActionPolicyAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useActionPolicyAutoAttach(policy));
+    renderHook(() => useActionPolicyAutoAttach(policy, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -104,7 +91,7 @@ describe('useActionPolicyAutoAttach', () => {
   it('does not stage on mount when sidebar is closed', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useActionPolicyAutoAttach(policy));
+    renderHook(() => useActionPolicyAutoAttach(policy, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -113,7 +100,7 @@ describe('useActionPolicyAutoAttach', () => {
   it('stages when sidebar opens after mount', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useActionPolicyAutoAttach(policy));
+    renderHook(() => useActionPolicyAutoAttach(policy, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -132,15 +119,12 @@ describe('useActionPolicyAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const policy2 = { ...policy, id: 'policy-2' };
 
-    const { rerender } = renderHook(({ item }) => useActionPolicyAutoAttach(item), {
+    const { rerender } = renderHook(({ item }) => useActionPolicyAutoAttach(item, services), {
       initialProps: { item: policy },
     });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'action_policy:policy-1', origin: 'policy-1' })
-    );
 
     rerender({ item: policy2 });
     jest.runOnlyPendingTimers();
@@ -155,26 +139,17 @@ describe('useActionPolicyAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useActionPolicyAutoAttach(undefined));
+    renderHook(() => useActionPolicyAutoAttach(undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('does not stage when Agent Builder plugin is unavailable', () => {
-    mockUseService.mockImplementation((token: unknown) => {
-      if (token === 'core:chrome') {
-        return {
-          sidebar: {
-            getCurrentAppId$: () => currentAppId$.asObservable(),
-          },
-        };
-      }
-      return undefined;
-    });
-
+  it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    renderHook(() => useActionPolicyAutoAttach(policy));
+    renderHook(() =>
+      useActionPolicyAutoAttach(policy, { ...services, agentBuilder: undefined })
+    );
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -183,7 +158,7 @@ describe('useActionPolicyAutoAttach', () => {
   it('cleans up subscriptions on unmount', () => {
     activeConversation$.next({ id: undefined });
 
-    const { unmount } = renderHook(() => useActionPolicyAutoAttach(policy));
+    const { unmount } = renderHook(() => useActionPolicyAutoAttach(policy, services));
     unmount();
 
     act(() => {

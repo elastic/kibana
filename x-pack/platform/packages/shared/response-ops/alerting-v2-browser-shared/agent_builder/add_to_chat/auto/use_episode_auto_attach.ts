@@ -7,13 +7,14 @@
 
 import { useMemo } from 'react';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
-import { episodeAttachmentConverter } from '../../types/episode_attachment_converter';
-import type { FocusedEpisode } from '../../types/focused_episode';
-import { useAutoAttach } from './use_auto_attach';
+import { episodeAttachmentConverter } from '../../episode_attachment_converter';
+import type { FocusedEpisode } from '../../types';
+import { useAutoAttach, type AutoAttachServices } from './use_auto_attach';
 
 export const useEpisodeAutoAttach = (
   episode: AlertEpisode | undefined,
-  options?: { ruleName?: string; groupingFields?: readonly string[] }
+  options: { ruleName?: string; groupingFields?: readonly string[] } | undefined,
+  services: AutoAttachServices
 ): void => {
   const focused: FocusedEpisode | undefined = useMemo(
     () =>
@@ -23,5 +24,5 @@ export const useEpisodeAutoAttach = (
     [episode, options?.ruleName, options?.groupingFields]
   );
 
-  useAutoAttach(focused, episodeAttachmentConverter);
+  useAutoAttach(focused, episodeAttachmentConverter, services);
 };

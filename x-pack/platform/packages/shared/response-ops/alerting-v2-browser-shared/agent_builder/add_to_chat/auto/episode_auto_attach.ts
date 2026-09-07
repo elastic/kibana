@@ -9,8 +9,8 @@ import type { Observable } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { registerAutoAttach } from './auto_attach';
-import { episodeAttachmentConverter } from '../../types/episode_attachment_converter';
-import type { FocusedEpisode } from '../../types/focused_episode';
+import { episodeAttachmentConverter } from '../../episode_attachment_converter';
+import type { FocusedEpisode } from '../../types';
 
 export const registerEpisodeAutoAttach = ({
   agentBuilder,

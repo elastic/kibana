@@ -12,7 +12,7 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { registerAutoAttach } from './auto_attach';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import type { AttachmentConverter } from '../../types';
 
 interface TestItem {
   id: string;

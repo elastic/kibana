@@ -15,7 +15,7 @@ import {
   type ActionPolicyResponse,
 } from '@kbn/alerting-v2-schemas';
 import { registerAutoAttach } from './auto_attach';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import type { AttachmentConverter } from '../../types';
 
 type PendingActionPolicyAttachment = AttachmentInput<
   typeof ACTION_POLICY_ATTACHMENT_TYPE,

@@ -20,7 +20,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -70,7 +72,11 @@ export const RuleSummaryFlyout = ({
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
   const { basePath } = useService(CoreStart('http'));
-  useRuleAutoAttach(rule);
+  const chrome = useService(CoreStart('chrome'));
+  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
+    | AgentBuilderPluginStart
+    | undefined;
+  useRuleAutoAttach(rule, { chrome, agentBuilder });
   const detailsHref = basePath.prepend(paths.ruleDetails(rule.id));
 
   return (

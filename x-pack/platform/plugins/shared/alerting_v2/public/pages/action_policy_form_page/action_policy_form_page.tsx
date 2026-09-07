@@ -17,7 +17,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { ActionPolicyDestination, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState } from 'react';
@@ -146,7 +148,12 @@ const ActionPolicyFormPageContent = ({
   onCancel: () => void;
   onSuccess: () => void;
 }) => {
-  useActionPolicyAutoAttach(initialPolicy);
+  useActionPolicyAutoAttach(initialPolicy, {
+    chrome: useService(CoreStart('chrome')),
+    agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+      | AgentBuilderPluginStart
+      | undefined,
+  });
   const { toasts } = useService(CoreStart('notifications'));
   const { mutateAsync: createPolicy, isLoading: isCreating } = useCreateActionPolicy();
   const { mutateAsync: updatePolicy, isLoading: isUpdating } = useUpdateActionPolicy();

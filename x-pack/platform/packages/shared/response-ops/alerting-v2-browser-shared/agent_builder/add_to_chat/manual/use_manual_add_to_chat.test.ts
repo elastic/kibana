@@ -7,15 +7,10 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { PluginStart } from '@kbn/core-di';
-import { useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import type { AttachmentConverter } from '../../types/attachment_converter';
-import { useManualAddToChat } from './use_manual_add_to_chat';
-
-jest.mock('@kbn/core-di-browser');
-
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
+import type { AttachmentConverter } from '../../types';
+import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
 
 interface TestItem {
   id: string;
@@ -35,54 +30,47 @@ describe('useManualAddToChat', () => {
   let openChat: jest.Mock;
   let addAttachment: jest.Mock;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
-
-  const setupMocks = (overrides?: { agentBuilder?: unknown }) => {
-    mockUseService.mockImplementation((token: unknown) => {
-      if (token === PluginStart('agentBuilder')) {
-        return (
-          overrides?.agentBuilder ?? {
-            openChat,
-            addAttachment,
-            events: {
-              ui: { activeConversation$: activeConversation$.asObservable() },
-            },
-          }
-        );
-      }
-      return undefined;
-    });
-  };
+  let services: ManualAddToChatServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
     openChat = jest.fn();
     addAttachment = jest.fn();
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
-    setupMocks();
+
+    services = {
+      agentBuilder: {
+        openChat,
+        addAttachment,
+        events: {
+          ui: { activeConversation$: activeConversation$.asObservable() },
+        },
+      } as unknown as AgentBuilderPluginStart,
+    };
   });
 
   it('reports available when agentBuilder and item are present', () => {
-    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter));
+    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter, services));
 
     expect(result.current.isAddToChatAvailable).toBe(true);
   });
 
   it('reports unavailable when item is undefined', () => {
-    const { result } = renderHook(() => useManualAddToChat(undefined, converter));
+    const { result } = renderHook(() => useManualAddToChat(undefined, converter, services));
 
     expect(result.current.isAddToChatAvailable).toBe(false);
   });
 
   it('reports unavailable when agentBuilder is not available', () => {
-    mockUseService.mockReturnValue(undefined);
-
-    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter));
+    const { result } = renderHook(() =>
+      useManualAddToChat({ id: 'item-1' }, converter, { agentBuilder: undefined })
+    );
 
     expect(result.current.isAddToChatAvailable).toBe(false);
   });
 
   it('opens a new chat on addToChat when no conversation is bound', () => {
-    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter));
+    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter, services));
 
     act(() => {
       result.current.addToChat();
@@ -100,7 +88,7 @@ describe('useManualAddToChat', () => {
   it('adds attachment to existing conversation when chat is bound', () => {
     activeConversation$.next({ id: 'conv-1', conversation: undefined });
 
-    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter));
+    const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter, services));
 
     act(() => {
       result.current.addToChat();
@@ -111,7 +99,7 @@ describe('useManualAddToChat', () => {
   });
 
   it('does nothing when item is undefined and addToChat is called', () => {
-    const { result } = renderHook(() => useManualAddToChat(undefined, converter));
+    const { result } = renderHook(() => useManualAddToChat(undefined, converter, services));
 
     act(() => {
       result.current.addToChat();

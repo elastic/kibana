@@ -24,7 +24,9 @@ import {
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
-import { useService } from '@kbn/core-di-browser';
+import { PluginStart } from '@kbn/core-di';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -139,6 +141,11 @@ export function EpisodeDetailsPage() {
   useEpisodeAutoAttach(episode, {
     ruleName: episodeRuleName,
     groupingFields,
+  }, {
+    chrome: useService(CoreStart('chrome')),
+    agentBuilder: useService(PluginStart('agentBuilder'), { optional: true }) as
+      | AgentBuilderPluginStart
+      | undefined,
   });
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });

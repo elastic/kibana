@@ -10,8 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AddToChatButton } from './add_to_chat_button';
-import { useManualAddToChat } from './use_manual_add_to_chat';
-import type { AttachmentConverter } from '../../types/attachment_converter';
+import { useManualAddToChat, type ManualAddToChatServices } from './use_manual_add_to_chat';
+import type { AttachmentConverter } from '../../types';
 
 jest.mock('./use_manual_add_to_chat');
 
@@ -31,6 +31,8 @@ const converter: AttachmentConverter<TestItem> = {
   getOrigin: (item) => item.id,
 };
 
+const services: ManualAddToChatServices = { agentBuilder: undefined };
+
 describe('AddToChatButton', () => {
   const addToChat = jest.fn();
 
@@ -45,7 +47,7 @@ describe('AddToChatButton', () => {
   it('renders the add to chat button when available', () => {
     render(
       <I18nProvider>
-        <AddToChatButton item={{ id: 'item-1' }} converter={converter} />
+        <AddToChatButton item={{ id: 'item-1' }} converter={converter} services={services} />
       </I18nProvider>
     );
 
@@ -60,7 +62,7 @@ describe('AddToChatButton', () => {
 
     const { container } = render(
       <I18nProvider>
-        <AddToChatButton item={{ id: 'item-1' }} converter={converter} />
+        <AddToChatButton item={{ id: 'item-1' }} converter={converter} services={services} />
       </I18nProvider>
     );
 
@@ -71,7 +73,7 @@ describe('AddToChatButton', () => {
     const user = userEvent.setup();
     render(
       <I18nProvider>
-        <AddToChatButton item={{ id: 'item-1' }} converter={converter} />
+        <AddToChatButton item={{ id: 'item-1' }} converter={converter} services={services} />
       </I18nProvider>
     );
 

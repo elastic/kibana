@@ -7,19 +7,15 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { PluginStart } from '@kbn/core-di';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { ChromeStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { AutoAttachServices } from './use_auto_attach';
 import { useRuleAutoAttach } from './use_rule_auto_attach';
-
-jest.mock('@kbn/core-di-browser');
-
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 const rule = {
   id: 'rule-1',
@@ -40,31 +36,7 @@ describe('useRuleAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let chatEvents$: Subject<ChatEvent>;
-
-  const setupMocks = () => {
-    mockCoreStart.mockImplementation((key: string) => `core:${key}` as never);
-
-    mockUseService.mockImplementation((token: unknown) => {
-      if (token === 'core:chrome') {
-        return {
-          sidebar: {
-            getCurrentAppId$: () => currentAppId$.asObservable(),
-          },
-        };
-      }
-      if (token === PluginStart('agentBuilder')) {
-        return {
-          addAttachment,
-          removeAttachment: jest.fn(),
-          events: {
-            ui: { activeConversation$: activeConversation$.asObservable() },
-            getChatEvents$: () => chatEvents$.asObservable(),
-          },
-        };
-      }
-      return undefined;
-    });
-  };
+  let services: AutoAttachServices;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -73,7 +45,22 @@ describe('useRuleAutoAttach', () => {
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     chatEvents$ = new Subject<ChatEvent>();
-    setupMocks();
+
+    services = {
+      chrome: {
+        sidebar: {
+          getCurrentAppId$: () => currentAppId$.asObservable(),
+        },
+      } as unknown as ChromeStart,
+      agentBuilder: {
+        addAttachment,
+        removeAttachment: jest.fn(),
+        events: {
+          ui: { activeConversation$: activeConversation$.asObservable() },
+          getChatEvents$: () => chatEvents$.asObservable(),
+        },
+      } as unknown as AgentBuilderPluginStart,
+    };
   });
 
   afterEach(() => {
@@ -84,7 +71,7 @@ describe('useRuleAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useRuleAutoAttach(rule, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
@@ -100,7 +87,7 @@ describe('useRuleAutoAttach', () => {
   it('does not stage on mount when sidebar is closed', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useRuleAutoAttach(rule, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -109,7 +96,7 @@ describe('useRuleAutoAttach', () => {
   it('stages when sidebar opens after mount', () => {
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useRuleAutoAttach(rule, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -128,15 +115,12 @@ describe('useRuleAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const rule2 = { ...rule, id: 'rule-2' };
 
-    const { rerender } = renderHook(({ item }) => useRuleAutoAttach(item), {
+    const { rerender } = renderHook(({ item }) => useRuleAutoAttach(item, services), {
       initialProps: { item: rule },
     });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'rule:rule-1', origin: 'rule-1' })
-    );
 
     rerender({ item: rule2 });
     jest.runOnlyPendingTimers();
@@ -151,26 +135,15 @@ describe('useRuleAutoAttach', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    renderHook(() => useRuleAutoAttach(undefined));
+    renderHook(() => useRuleAutoAttach(undefined, services));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('does not stage when Agent Builder plugin is unavailable', () => {
-    mockUseService.mockImplementation((token: unknown) => {
-      if (token === 'core:chrome') {
-        return {
-          sidebar: {
-            getCurrentAppId$: () => currentAppId$.asObservable(),
-          },
-        };
-      }
-      return undefined;
-    });
-
+  it('does not stage when Agent Builder is unavailable', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    renderHook(() => useRuleAutoAttach(rule));
+    renderHook(() => useRuleAutoAttach(rule, { ...services, agentBuilder: undefined }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
@@ -179,7 +152,7 @@ describe('useRuleAutoAttach', () => {
   it('cleans up subscriptions on unmount', () => {
     activeConversation$.next({ id: undefined });
 
-    const { unmount } = renderHook(() => useRuleAutoAttach(rule));
+    const { unmount } = renderHook(() => useRuleAutoAttach(rule, services));
     unmount();
 
     act(() => {

@@ -6,6 +6,7 @@
  */
 
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 
 /*
  * Converts a focused item into an `AttachmentInput` ready for staging.
@@ -17,4 +18,10 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 export interface AttachmentConverter<FocusedItem> {
   toAttachment: (item: FocusedItem) => AttachmentInput;
   getOrigin: (item: FocusedItem) => string;
+}
+
+export interface FocusedEpisode {
+  episode: AlertEpisode;
+  ruleName?: string;
+  groupingFields?: readonly string[];
 }
