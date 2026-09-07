@@ -107,6 +107,7 @@ safe-outputs:
     allowed:
       # classification labels, max one per issue
       - failure:test-needs-update
+      - failure:test-needs-migration
       - failure:test-environment
       - failure:application
       - failure:ci-environment
@@ -191,7 +192,7 @@ Do **not** write `#### Root cause & evidence` or `#### Additional context` in th
 | `fix-app`, or `cypress-fix` on a `@serverlessQA` test | Smallest product or Cypress patch, existing Fix proposal / guardrails. | Unchanged (existing Automatic fix request). |
 | `none` (environment / no repo change) | No repo change. | Neither. |
 
-`test-needs-update` may still be the classification for a Cypress-layer flake. It does **not** mean "patch the `.cy.ts`."
+When the doctor action is `migrate` (or a new Scout spec), set `classification` to `test-needs-migration` and apply `failure:test-needs-migration`. Do **not** use `test-needs-update` / `failure:test-needs-update` for that. `test-needs-update` remains for Cypress-layer flakes that are not a migration (`delete`, `@serverlessQA` `cypress-fix`).
 
 Hard bans:
 
@@ -207,6 +208,7 @@ Hard bans:
 Set `classification` based on where the evidence points:
 
 - **`test-needs-update`**: issue lives in the test code (e.g., timing/waits, selectors, fixtures, helpers, setup/teardown, assertion shape).
+- **`test-needs-migration`**: Security Cypress doctor action is migrate (or a new Scout spec). Use this instead of `test-needs-update`.
 - **`test-environment`**: test code is fine, but its surroundings are problematic (e.g., leaked state from prior tests, flaky fixture init, missing `data-test-subj` the test relies on, parallel-slot interference). A stale/empty read after a write is *not* this: if a usable readiness signal exists and the test isn't waiting on it, that's `test-needs-update`; if none exists, or the product returns stale where it should be consistent, that's `application`.
 - **`application`**: real product bug exposed by the test (e.g., race, regression, broken contract, feature-flag bug, or a stale/empty read after a write that should be read-your-writes consistent — a cache not invalidated, a missing convergence signal the test would need, or a transient error such as "unknown index" surfaced to the user).
 - **`ci-environment`**: outside test + app — CI agent, downed dependency (e.g., ES failed to start), network, credentials, registry.
@@ -237,6 +239,7 @@ Every fix you propose is held to the same guardrails as the fixer and verifier w
 Add exactly one classification label to the issue that matches the chosen `classification`:
 
 - `failure:test-needs-update`: when `classification` is `test-needs-update`
+- `failure:test-needs-migration`: when `classification` is `test-needs-migration`
 - `failure:test-environment`: when `classification` is `test-environment`
 - `failure:application`: when `classification` is `application`
 - `failure:ci-environment`: when `classification` is `ci-environment`
@@ -353,17 +356,16 @@ A `###` heading followed by one summary sentence — nothing else, no standing m
 {One sentence pinpointing the exact failure point — the assertion, line, or error that fired.}
 ```
 
-**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason:
+**Heading** — a short natural-language phrase (~10 words max), not a full sentence. Start with the plain-English verdict for the classification, then an em dash, then a very short reason. Exception: for `test-needs-migration`, the heading is only `### Migrate to Scout` — no prefix, no em-dash reason. When the destination is a new API/unit test, the heading is only `### Move to API/unit`.
 
 | classification      | verdict phrase         |
 | ------------------- | ---------------------- |
-| `test-needs-update` | Test needs an update   |
-| `test-environment`  | Test environment issue |
+| `test-needs-update`     | Test needs an update   |
+| `test-needs-migration`  | Migrate to Scout       |
+| `test-environment`      | Test environment issue |
 | `application`       | Application bug        |
 | `ci-environment`    | CI environment issue   |
 | `inconclusive`      | Inconclusive           |
-
-For Security Cypress `migrate` (or a new Scout spec), use `### Test needs an update — migrate to Scout`. For a new API/unit destination, use `### Test needs an update — move to API/unit`.
 
 Example: `### Test needs an update — the case is too long for a 60s budget`. **Do not repeat the failing test's name** — the issue title already has it, so describe the _failure_, not the test.
 
