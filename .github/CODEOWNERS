@@ -1116,7 +1116,7 @@ x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-ui @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-ui @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status @elastic/response-ops
 x-pack/platform/packages/shared/llm-trace-waterfall @elastic/nightshift-context-and-research-team @elastic/workchat-eng
 x-pack/platform/packages/shared/logs-overview @elastic/obs-signals-logs-team
