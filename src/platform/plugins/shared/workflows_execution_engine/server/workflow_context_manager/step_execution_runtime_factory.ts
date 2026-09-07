@@ -148,13 +148,17 @@ export class StepExecutionRuntimeFactory {
     scope: ScopeData;
     stackFrames: StackFrame[];
   }): StepExecutionRuntime {
-    return this.createStepExecutionRuntimeForNode({
-      node: {
+    const node =
+      this.params.workflowExecutionGraph.getNode(scope.nodeId) ??
+      ({
         id: scope.nodeId,
         type: scope.nodeType,
         stepId: scope.stepId,
         stepType: scope.nodeType,
-      } as GraphNodeUnion,
+      } as GraphNodeUnion);
+
+    return this.createStepExecutionRuntimeForNode({
+      node,
       stackFrames,
     });
   }
