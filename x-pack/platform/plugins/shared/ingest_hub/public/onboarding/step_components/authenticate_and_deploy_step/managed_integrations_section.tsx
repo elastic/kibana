@@ -36,6 +36,7 @@ import {
   getAnyCloudConnectorIacTemplateUrl,
 } from '@kbn/fleet-plugin/public';
 import type { CloudSetupForCloudConnector } from '@kbn/fleet-plugin/public';
+import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 type PreferredMethod = 'identity_federation' | 'access_keys';
 
@@ -57,6 +58,7 @@ export function ManagedIntegrationsSection({
   hasFailed,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  const { setConnectorId } = useOnboardingFlow();
   const { euiTheme } = useEuiTheme();
   const contentId = useGeneratedHtmlId({ prefix: 'managedIntegrationsContent' });
   const [isOpen, setIsOpen] = useState(!isDone);
@@ -207,6 +209,9 @@ export function ManagedIntegrationsSection({
                     onChange={(id) => {
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
+                      if (id === 'access_keys') {
+                        setConnectorId(undefined);
+                      }
                     }}
                     data-test-subj="managedIntegrationsSection-preferredMethodRadio"
                   />
@@ -222,6 +227,7 @@ export function ManagedIntegrationsSection({
                   cloud={cloud}
                   iacTemplateUrl={iacTemplateUrl}
                   onReadyChange={setIsDeployReady}
+                  onConnectorIdChange={setConnectorId}
                 />
               ) : (
                 <LazyAwsStaticKeysForm onReadyChange={setIsDeployReady} />
