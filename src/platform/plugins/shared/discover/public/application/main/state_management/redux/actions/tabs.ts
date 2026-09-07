@@ -203,6 +203,17 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.globalState = cloneDeep(existingTabToDuplicateFrom.globalState);
         tab.profileState = cloneDeep(existingTabToDuplicateFrom.profileState);
         tab.uiState = cloneDeep(existingTabToDuplicateFrom.uiState);
+        // Carry over auto-refresh. Prefer the live timefilter when duplicating
+        // the current tab so an in-progress interval is not replaced by defaults.
+        const refreshInterval =
+          existingTabToDuplicateFrom.id === currentTab.id
+            ? services.timefilter.getRefreshInterval()
+            : existingTabToDuplicateFrom.globalState.refreshInterval ??
+              services.timefilter.getRefreshInterval();
+        tab.globalState = {
+          ...tab.globalState,
+          refreshInterval: cloneDeep(refreshInterval),
+        };
       } else if (item.restoredFromId) {
         // the new tab was created by restoring a recently closed tab
         const recentlyClosedTabToRestore = selectRecentlyClosedTabs(currentState).find(
