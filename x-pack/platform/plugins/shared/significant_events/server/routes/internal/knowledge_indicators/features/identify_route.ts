@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/streams-schema';
+import type { InferenceDocument } from '@kbn/streams-ai';
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
@@ -26,12 +27,41 @@ import {
   buildTelemetry,
   identifyInferredFeatures,
   identifyComputedFeatures,
+  MAX_INFERENCE_DOCUMENTS_BYTES,
+  MAX_INFERENCE_DOCUMENT_BYTES,
+  MAX_INFERENCE_DOCUMENT_FIELDS,
+  MAX_INFERENCE_FIELD_NAME_LENGTH,
+  prepareInferredSampling,
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
+
+const getSerializedByteLength = (value: unknown) =>
+  Buffer.byteLength(JSON.stringify(value), 'utf8');
+
+const inferenceDocumentSchema: z.ZodType<InferenceDocument> = z
+  .object({
+    _id: z.string().max(MAX_ID_LENGTH).optional(),
+    fields: z
+      .record(z.string().max(MAX_INFERENCE_FIELD_NAME_LENGTH), z.unknown())
+      .refine((fields) => Object.keys(fields).length <= MAX_INFERENCE_DOCUMENT_FIELDS, {
+        message: `Documents cannot contain more than ${MAX_INFERENCE_DOCUMENT_FIELDS} fields`,
+      }),
+  })
+  .refine((document) => getSerializedByteLength(document) <= MAX_INFERENCE_DOCUMENT_BYTES, {
+    message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENT_BYTES} serialized bytes`,
+  });
+
+const inferenceDocumentsSchema = z
+  .array(inferenceDocumentSchema)
+  .min(1)
+  .max(100)
+  .refine((documents) => getSerializedByteLength(documents) <= MAX_INFERENCE_DOCUMENTS_BYTES, {
+    message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
+  });
 
 // Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
 // which runs under a request whose API key can schedule the workflow trigger.
@@ -67,15 +97,11 @@ const bootstrapSyncWorkflow = async ({
   }
 };
 
-// ---------------------------------------------------------------------------
-// Route 1: Identify inferred features (one iteration: sample + infer + reconcile)
-// ---------------------------------------------------------------------------
-
-const identifyInferredFeaturesRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred',
+const prepareInferredSamplingRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred/prepare',
   options: {
     access: 'internal',
-    summary: 'Sample documents, run LLM inference, and reconcile KI features for one iteration',
+    summary: 'Sample documents for one inferred feature identification iteration',
     timeout: { idleSocket: 300_000 },
   },
   security: {
@@ -87,21 +113,92 @@ const identifyInferredFeaturesRoute = createServerRoute({
     path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
     body: z
       .object({
-        connectorId: z.string().max(MAX_ID_LENGTH).optional(),
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
-        iteration: z.number().optional(),
-        sampleSize: z.number().optional(),
+        iteration: z.number().int().min(1).optional(),
+        sampleSize: z.number().int().min(1).max(100).optional(),
         entityFilteredRatio: z.number().min(0).max(1).optional(),
         diverseRatio: z.number().min(0).max(1).optional(),
-        maxEntityFilters: z.number().optional(),
-        maxExcludedFeaturesInPrompt: z.number().optional(),
-        maxPreviouslyIdentifiedFeatures: z.number().optional(),
+        maxEntityFilters: z.number().int().min(1).max(50).optional(),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
       .optional(),
+  }),
+  handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { streamDataEsClient, streamsClient, tuningConfig, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
+
+    const { streamName } = params.path;
+    const routeLogger = logger.get('features_identification', 'prepare', streamName);
+    const now = Date.now();
+    const {
+      start = now - MS_PER_DAY,
+      end = now,
+      runId = uuidv4(),
+      iteration = 1,
+      sampleSize = tuningConfig.sample_size,
+      entityFilteredRatio = tuningConfig.entity_filtered_ratio,
+      diverseRatio = tuningConfig.diverse_ratio,
+      maxEntityFilters = tuningConfig.max_entity_filters,
+      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
+    } = params.body ?? {};
+
+    const [kiClient, stream] = await Promise.all([
+      scopedClients.getKnowledgeIndicatorClient(),
+      streamsClient.getStream(streamName),
+    ]);
+
+    return prepareInferredSampling({
+      esClient: streamDataEsClient,
+      kiClient,
+      streamName,
+      samplingSource: getStreamSamplingSource(stream),
+      start,
+      end,
+      runId,
+      logger: routeLogger,
+      sampleSize,
+      entityFilteredRatio,
+      diverseRatio,
+      maxEntityFilters,
+      iteration,
+      samplingTimeoutMs,
+    });
+  },
+});
+
+const identifyInferredFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{streamName}/features/_identify/inferred',
+  options: {
+    access: 'internal',
+    summary: 'Run LLM inference and reconcile KI features for one iteration',
+    timeout: { idleSocket: 300_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ streamName: z.string().max(MAX_ID_LENGTH) }),
+    body: z.object({
+      connectorId: z.string().max(MAX_ID_LENGTH).optional(),
+      runId: z.string().max(MAX_ID_LENGTH).optional(),
+      iteration: z.number().optional(),
+      documents: inferenceDocumentsSchema,
+      samplingTelemetry: z.object({
+        totalFilters: z.number().int().min(0),
+        filtersCapped: z.boolean(),
+        hasFilteredDocuments: z.boolean(),
+      }),
+      maxExcludedFeaturesInPrompt: z.number().optional(),
+      maxPreviouslyIdentifiedFeatures: z.number().optional(),
+    }),
   }),
   handler: async ({
     params,
@@ -116,7 +213,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
-      streamDataEsClient,
       streamsClient,
       inferenceClient,
       soClient,
@@ -131,19 +227,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const routeLogger = logger.get('features_identification', 'inferred', streamName);
     const now = Date.now();
     const {
-      start = now - MS_PER_DAY,
-      end = now,
       connectorId: connectorIdOverride,
       runId = uuidv4(),
       iteration,
-      sampleSize = tuningConfig.sample_size,
-      entityFilteredRatio = tuningConfig.entity_filtered_ratio,
-      diverseRatio = tuningConfig.diverse_ratio,
-      maxEntityFilters = tuningConfig.max_entity_filters,
+      documents,
+      samplingTelemetry,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
-      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
-    } = params.body ?? {};
+    } = params.body;
+    const { totalFilters, filtersCapped, hasFilteredDocuments } = samplingTelemetry;
 
     const [connectorId, stream, kiClient] = await Promise.all([
       connectorIdOverride
@@ -163,7 +255,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     try {
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
-        samplingEsClient: streamDataEsClient,
         kiClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({
@@ -179,20 +270,16 @@ const identifyInferredFeaturesRoute = createServerRoute({
         logger: routeLogger,
         signal: getRequestAbortSignal(request),
         streamName,
-        samplingSource: getStreamSamplingSource(stream),
         streamType,
-        start,
-        end,
         runId,
+        documents,
+        totalFilters,
+        filtersCapped,
+        hasFilteredDocuments,
         iteration,
         tuning: {
-          sample_size: sampleSize,
-          entity_filtered_ratio: entityFilteredRatio,
-          diverse_ratio: diverseRatio,
-          max_entity_filters: maxEntityFilters,
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
-          sampling_timeout_ms: samplingTimeoutMs,
         },
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
         // Expose prior Significant Events (read-only search) to feature
@@ -225,11 +312,11 @@ const identifyInferredFeaturesRoute = createServerRoute({
             iteration: iteration ?? 1,
             stream_name: streamName,
             stream_type: streamType,
-            docs_count: 0,
+            docs_count: documents.length,
             excluded_features_count: 0,
-            total_filters: 0,
-            filters_capped: false,
-            has_filtered_documents: false,
+            total_filters: totalFilters,
+            filters_capped: filtersCapped,
+            has_filtered_documents: hasFilteredDocuments,
           },
           Date.now() - now,
           { state: 'failure' }
@@ -249,10 +336,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
     }
   },
 });
-
-// ---------------------------------------------------------------------------
-// Route 2: Identify computed features (generate and persist computed KI features)
-// ---------------------------------------------------------------------------
 
 const identifyComputedFeaturesRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/features/_identify/computed',
@@ -348,10 +431,6 @@ const identifyComputedFeaturesRoute = createServerRoute({
   },
 });
 
-// ---------------------------------------------------------------------------
-// Route 3: Check whether features identification should run
-// ---------------------------------------------------------------------------
-
 const shouldIdentifyRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{streamName}/features/_should_identify',
   options: {
@@ -392,6 +471,7 @@ const shouldIdentifyRoute = createServerRoute({
 // ---------------------------------------------------------------------------
 
 export const internalIdentifyKIFeaturesRoutes = {
+  ...prepareInferredSamplingRoute,
   ...identifyInferredFeaturesRoute,
   ...identifyComputedFeaturesRoute,
   ...shouldIdentifyRoute,

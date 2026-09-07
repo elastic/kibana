@@ -20,6 +20,15 @@ if [[ -f pnpm-lock.yaml ]]; then
   USE_PNPM=true
 fi
 
+# Let's remove the irrelevant cache for the variant:
+if [[ "$USE_PNPM" == true ]]; then
+  echo "--- Removing irrelevant yarn cache"
+  rm -rf "${HOME}/.cache/yarn"
+else
+  echo "--- Removing irrelevant pnpm cache"
+  rm -rf "${PNPM_IMAGE_CACHE}"
+fi
+
 if [[ "$USE_PNPM" == true ]]; then
   echo "--- pnpm install and bootstrap"
   BOOTSTRAP_CMD=(pnpm kbn bootstrap)
@@ -88,10 +97,9 @@ fi
 # Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
 # Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
 if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
-  echo "--- Clearing yarn cache"
-  echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
-  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
-  echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
-  echo "Available disk space after clearing yarn cache:"
+  if [[ "$USE_PNPM" != true ]]; then
+    echo "--- Removing yarn cache"
+    rm -rf "${HOME}/.cache/yarn"
+  fi
   df -h . || echo "Failed to get disk space"
 fi
