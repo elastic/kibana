@@ -8,6 +8,7 @@
  */
 
 import React, { type ComponentProps } from 'react';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -213,6 +214,44 @@ describe('LinkContent', () => {
     // should only invoke once no matter how many times the button is clicked
     expect(createFromLongUrlSpy).toHaveBeenCalledTimes(1);
     expect(copyButton.getAttribute('data-share-url')).toBe(shortURL);
+  });
+
+  it('shows an error and allows retrying when creating a short URL fails', async () => {
+    const user = userEvent.setup();
+    const error = new Error('Short URL request failed');
+    const createFromLongUrlSpy = jest
+      .spyOn(BrowserShortUrlClient.prototype, 'createFromLongUrl')
+      .mockRejectedValue(error);
+    createFromLongUrlSpy.mockClear();
+    const { toasts } = notificationServiceMock.createStartContract();
+
+    renderComponent(
+      {
+        objectType: 'dashboard',
+        objectId: '123',
+        objectConfig: {},
+        isDirty: false,
+        shareableUrl,
+        shortUrlService,
+        allowShortUrl: true,
+      },
+      { ...mockShareContext, toastNotifications: toasts }
+    );
+
+    const copyButton = screen.getByTestId('copyShareUrlButton');
+
+    await user.click(copyButton);
+
+    await waitFor(() => {
+      expect(toasts.addError).toHaveBeenCalledWith(error, {
+        title: 'Unable to create share link',
+      });
+    });
+    expect(copyButton).toBeEnabled();
+
+    await user.click(copyButton);
+
+    await waitFor(() => expect(createFromLongUrlSpy).toHaveBeenCalledTimes(2));
   });
 
   it('renders a draft mode callout when dirty and triggers its save button', async () => {

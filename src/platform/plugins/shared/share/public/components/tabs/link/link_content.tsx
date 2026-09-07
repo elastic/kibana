@@ -53,7 +53,7 @@ export const LinkContent = ({
   shareableUrlLocatorParams,
   allowShortUrl,
 }: LinkProps) => {
-  const { onSave, isSaving } = useShareContext();
+  const { onSave, isSaving, toastNotifications } = useShareContext();
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -108,28 +108,37 @@ export const LinkContent = ({
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);
 
-    if (!urlToCopy.current) {
-      urlToCopy.current = delegatedShareUrlHandler
-        ? await delegatedShareUrlHandler()
-        : allowShortUrl
-        ? await createShortUrl()
-        : snapshotUrl;
-    }
-
-    copyToClipboard(urlToCopy.current);
-    setTextCopied(() => {
-      if (copiedTextToolTipCleanupIdRef.current) {
-        clearTimeout(copiedTextToolTipCleanupIdRef.current);
+    try {
+      if (!urlToCopy.current) {
+        urlToCopy.current = delegatedShareUrlHandler
+          ? await delegatedShareUrlHandler()
+          : allowShortUrl
+          ? await createShortUrl()
+          : snapshotUrl;
       }
 
-      // set up timer to revert copied state to false after specified duration
-      copiedTextToolTipCleanupIdRef.current = setTimeout(() => setTextCopied(false), 1000);
+      copyToClipboard(urlToCopy.current);
+      setTextCopied(() => {
+        if (copiedTextToolTipCleanupIdRef.current) {
+          clearTimeout(copiedTextToolTipCleanupIdRef.current);
+        }
 
-      // set copied state to true for now
-      return true;
-    });
-    setIsLoading(false);
-  }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl]);
+        // set up timer to revert copied state to false after specified duration
+        copiedTextToolTipCleanupIdRef.current = setTimeout(() => setTextCopied(false), 1000);
+
+        // set copied state to true for now
+        return true;
+      });
+    } catch (error) {
+      toastNotifications?.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: i18n.translate('share.link.unableCreateShareUrlErrorTitle', {
+          defaultMessage: 'Unable to create share link',
+        }),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [snapshotUrl, delegatedShareUrlHandler, allowShortUrl, createShortUrl, toastNotifications]);
 
   const handleTimeTypeChange = useCallback(
     (isAbsolute: boolean) => {
