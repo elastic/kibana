@@ -62,6 +62,12 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         breakdownField: 'transaction.id',
         chartInterval: 'h',
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: {
+          hideNulls: true,
+          wrapLines: false,
+          defaultRenderedNodes: 10,
+        },
         controlGroupJson: '{}',
       },
     },
@@ -98,6 +104,12 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         breakdownField: 'transaction.id',
         chartInterval: 'h',
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: {
+          hideNulls: true,
+          wrapLines: false,
+          defaultRenderedNodes: 10,
+        },
         visContext: {
           suggestionType: 'histogramForESQL',
           requestData: {
@@ -292,6 +304,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
+      documents_display_mode: 'json',
+      json_mode_settings: {
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 10,
+      },
       query: {
         expression: '',
         language: 'kql',
@@ -340,6 +358,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
+      documents_display_mode: 'json',
+      json_mode_settings: {
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 10,
+      },
       data_source: {
         type: 'esql',
         query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',
