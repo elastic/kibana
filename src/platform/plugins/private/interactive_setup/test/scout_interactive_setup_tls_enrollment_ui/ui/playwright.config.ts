@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defineConfig } from '@playwright/test';
-
-import { createPlaywrightConfig } from '@kbn/scout';
+import { createPlaywrightConfig, defineConfig } from '@kbn/scout';
 
 /**
  * Interactive setup consumes a one-shot server state: the "happy path" spec configures Kibana,
