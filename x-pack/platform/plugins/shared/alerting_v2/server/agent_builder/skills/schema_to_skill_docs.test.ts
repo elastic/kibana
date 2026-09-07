@@ -6,12 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { groupingModeSchema, MATCHER_CONTEXT_FIELDS } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
+  generateOperationsUsageList,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
+  generateRuleOperationsUsageList,
   generateRuleKindDoc,
   generateEpisodeLifecycleDoc,
   generateStateTransitionDoc,
@@ -22,11 +25,16 @@ import {
   generateGroupingModesDoc,
   generateThrottleStrategiesDoc,
   generateThrottleGroupingCompatibilityDoc,
+  generateMatcherContextDoc,
   getSeverityValues,
   getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
   generateNotificationsOverviewDoc,
+  generateWorkflowDestinationsDoc,
+  generateDispatchFlowDoc,
+  generateSingleRuleActionPolicyDoc,
+  generateMultiRuleActionPolicyDoc,
 } from './schema_to_skill_docs';
 
 /**
@@ -184,6 +192,52 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  describe('generateOperationsUsageList', () => {
+    const exampleOperationSchema = z.discriminatedUnion('operation', [
+      z
+        .object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        })
+        .describe('Use `set_name` to name the resource.'),
+      z
+        .object({
+          operation: z.literal('validate'),
+        })
+        .describe('Use `validate` as the last operation to confirm the resource is ready to save.'),
+    ]);
+
+    it('renders each operation .describe() as a bullet', () => {
+      const doc = generateOperationsUsageList({
+        title: 'Example Operations',
+        schema: exampleOperationSchema,
+      });
+
+      expect(doc).toBe(
+        [
+          '- Use `set_name` to name the resource.',
+          '- Use `validate` as the last operation to confirm the resource is ready to save.',
+        ].join('\n')
+      );
+    });
+
+    it('throws when an operation variant is missing a top-level describe', () => {
+      const schema = z.discriminatedUnion('operation', [
+        z.object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        }),
+      ]);
+
+      expect(() =>
+        generateOperationsUsageList({
+          title: 'Missing Describe',
+          schema,
+        })
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
   describe('getDescribedEnumValues', () => {
     it('returns each literal value with its .describe() copy', () => {
       const schema = z.union([
@@ -234,6 +288,8 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('set_query');
       expect(doc).toContain('set_grouping');
       expect(doc).toContain('set_state_transition');
+      expect(doc).toContain('set_dashboards');
+      expect(doc).toContain('set_runbook');
       expect(doc).toContain('validate');
     });
 
@@ -249,6 +305,21 @@ describe('schema_to_skill_docs', () => {
         'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
       );
       expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
+    });
+  });
+
+  describe('generateRuleOperationsUsageList', () => {
+    it('includes every manage_rule operation describe', () => {
+      const doc = generateRuleOperationsUsageList();
+      expect(doc).toContain('Use `set_metadata`');
+      expect(doc).toContain('Use `set_kind`');
+      expect(doc).toContain('Use `set_schedule`');
+      expect(doc).toContain('Use `set_query`');
+      expect(doc).toContain('Use `set_grouping`');
+      expect(doc).toContain('Use `set_state_transition`');
+      expect(doc).toContain('Use `set_dashboards`');
+      expect(doc).toContain('Use `set_runbook`');
+      expect(doc).toContain('Use `validate`');
     });
   });
 
@@ -337,7 +408,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only. (max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -471,17 +542,121 @@ describe('schema_to_skill_docs', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateGroupingModesDoc()).toMatchSnapshot();
     });
+
+    it('is a standalone reference that links to throttle compatibility', () => {
+      const doc = generateGroupingModesDoc();
+      expect(doc).toContain('# Grouping Modes');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
   });
 
   describe('generateThrottleStrategiesDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
     });
+
+    it('links to the dedicated compatibility reference', () => {
+      const doc = generateThrottleStrategiesDoc();
+      expect(doc).toContain('# Throttle Strategies');
+      expect(doc).toContain('action-policy-throttle-grouping-compatibility.md');
+    });
+  });
+
+  describe('generateMatcherContextDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMatcherContextDoc()).toMatchSnapshot();
+    });
+
+    it('documents every MATCHER_CONTEXT_FIELDS path', () => {
+      const doc = generateMatcherContextDoc();
+      for (const field of MATCHER_CONTEXT_FIELDS) {
+        expect(doc).toContain(`\`${field.path}\``);
+      }
+    });
+
+    it('enriches episode_status and severity with schema enum values', () => {
+      const doc = generateMatcherContextDoc();
+      expect(doc).toContain('`active`');
+      expect(doc).toContain('`critical`');
+    });
   });
 
   describe('generateThrottleGroupingCompatibilityDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
       expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
+    });
+
+    it('documents every grouping mode from the schema, then lists caveats', () => {
+      const doc = generateThrottleGroupingCompatibilityDoc();
+      expect(doc).toContain('# Throttle / Grouping Compatibility');
+      expect(doc).toContain('Caveats:');
+      expect(doc).toContain('set_grouping');
+      expect(doc).toContain('set_throttle');
+
+      for (const { value } of getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema')) {
+        expect(doc).toContain(`- \`${value}\`:`);
+      }
+    });
+  });
+
+  describe('generateWorkflowDestinationsDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateWorkflowDestinationsDoc()).toMatchSnapshot();
+    });
+
+    it('requires manual triggers and workflow IDs rather than connector IDs', () => {
+      const doc = generateWorkflowDestinationsDoc();
+      expect(doc).toContain('# Workflows');
+      expect(doc).toContain('workflow IDs');
+      expect(doc).toContain('triggers: - type: manual');
+      expect(doc).toContain('workflow-authoring');
+    });
+  });
+
+  describe('generateDispatchFlowDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateDispatchFlowDoc()).toMatchSnapshot();
+    });
+
+    it('covers matcher, grouping, throttle, and workflow dispatch', () => {
+      const doc = generateDispatchFlowDoc();
+      expect(doc).toContain('# Dispatch Flow');
+      expect(doc).toContain('Matcher evaluation');
+      expect(doc).toContain('scheduleWorkflow');
+      expect(doc).toContain("type == 'alert'");
+    });
+  });
+
+  describe('generateSingleRuleActionPolicyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateSingleRuleActionPolicyDoc()).toMatchSnapshot();
+    });
+
+    it('scopes with rule.id and defers shared policies to the multi-rule reference', () => {
+      const doc = generateSingleRuleActionPolicyDoc();
+      expect(doc).toContain('# Single-rule Action Policies');
+      expect(doc).toContain('set_metadata');
+      expect(doc).toContain('set_destinations');
+      expect(doc).toContain('rule.id:');
+      expect(doc).toContain('kind: signal');
+      expect(doc).toContain('(./action-policy-multi-rule.md)');
+      expect(doc).not.toContain('./references/');
+    });
+  });
+
+  describe('generateMultiRuleActionPolicyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateMultiRuleActionPolicyDoc()).toMatchSnapshot();
+    });
+
+    it('covers catch-all, tag, and severity matchers and links siblings without a ./references/ prefix', () => {
+      const doc = generateMultiRuleActionPolicyDoc();
+      expect(doc).toContain('# Multi-rule Action Policies');
+      expect(doc).toContain('Catch-all');
+      expect(doc).toContain('rule.tags');
+      expect(doc).toContain('(./action-policy-matchers.md)');
+      expect(doc).toContain('(./action-policy-single-rule.md)');
+      expect(doc).not.toContain('./references/');
     });
   });
 
@@ -523,6 +698,18 @@ describe('schema_to_skill_docs', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
     });
+
+    it('adds data-field notes and an example without a separate Liquid cookbook', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('### `data`');
+      expect(doc).toContain('ep.data.host.name');
+      expect(doc).toContain('| LIMIT 0');
+      expect(doc).toContain('## Example');
+      expect(doc).toContain('```yaml');
+      expect(doc).toContain('inputs.payload.rules[ep.rule_id].name');
+      expect(doc).not.toContain('## Liquid Templates');
+      expect(doc).not.toContain('./references/');
+    });
   });
 
   describe('Alerting v2 agent builder start contract', () => {
@@ -530,12 +717,17 @@ describe('schema_to_skill_docs', () => {
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_rule operation usage list', generateRuleOperationsUsageList],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
       ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
       ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
       ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
+      ['generateWorkflowDestinationsDoc', generateWorkflowDestinationsDoc],
+      ['generateDispatchFlowDoc', generateDispatchFlowDoc],
+      ['generateSingleRuleActionPolicyDoc', generateSingleRuleActionPolicyDoc],
+      ['generateMultiRuleActionPolicyDoc', generateMultiRuleActionPolicyDoc],
       ['generateRuleKindDoc from spec', generateRuleKindDoc],
       ['generateNotificationsOverviewDoc from spec', generateNotificationsOverviewDoc],
       ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],

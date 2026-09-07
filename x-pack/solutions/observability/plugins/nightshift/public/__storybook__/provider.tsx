@@ -121,7 +121,9 @@ const createServices = ({
   const significantEventsRepositoryClient = {
     fetch: async (
       route: string,
-      options?: { params?: { path?: { id?: string; name?: string } } }
+      options?: {
+        params?: { path?: { id?: string; name?: string }; query?: { event_id?: string } };
+      }
     ) => {
       if (route === 'GET /internal/significant_events/events') {
         if (scenario === 'loading') {
@@ -134,12 +136,13 @@ const createServices = ({
           throw new Error('The significant events request failed');
         }
         const response = getEventsResponse(scenario);
-        return {
-          ...response,
-          hits: response.hits.map((event) =>
+        const requestedEventId = options?.params?.query?.event_id;
+        const hits = response.hits
+          .filter((event) => !requestedEventId || event.event_id === requestedEventId)
+          .map((event) =>
             closedEventUuids.has(event.event_uuid) ? { ...event, status: 'closed' as const } : event
-          ),
-        };
+          );
+        return { ...response, hits, total: hits.length };
       }
 
       if (route === 'GET /internal/significant_events/events/{id}/lifecycle') {

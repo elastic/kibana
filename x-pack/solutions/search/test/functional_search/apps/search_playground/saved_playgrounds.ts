@@ -160,10 +160,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToExist();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectSavedPlaygroundButtonToBeDisabled();
         await pageObjects.searchPlayground.SavedPlaygroundPage.clickEditPlaygroundNameButton();
-        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditModal(
+        await pageObjects.searchPlayground.SavedPlaygroundPage.setPlaygroundNameInEditInput(
           updatedPlaygroundName
         );
-        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundNameInModal();
+        await pageObjects.searchPlayground.SavedPlaygroundPage.savePlaygroundName();
         await pageObjects.searchPlayground.SavedPlaygroundPage.expectPlaygroundNameHeader(
           updatedPlaygroundName
         );

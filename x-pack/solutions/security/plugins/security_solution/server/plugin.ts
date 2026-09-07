@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   ElasticsearchClient,
+  KibanaRequest,
   Logger,
   LogMeta,
   RequestHandlerContext,
@@ -108,6 +109,7 @@ import {
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
 import type { CreateSecurityRuleTypeWrapperProps } from './lib/detection_engine/rule_types/types';
+import { calculateRulesAuthz } from './lib/detection_engine/rule_management/authz';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -157,6 +159,10 @@ import { SIEM_MIGRATION_INFERENCE_FEATURE_ID } from '../common/siem_migrations/c
 import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
 import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 import { threatIntelligenceSearchStrategyProvider } from './threat_intelligence/search_strategy';
+import { registerRoutes as registerThreatIntelRoutes } from './threat_intel/routes';
+import { registerThreatIntelInferenceFeatures } from './threat_intel/inference_features';
+import { ensureThreatIntelBootstrap } from './threat_intel/setup/bootstrap_threat_intel';
+import { createDeferred } from './threat_intel/lib/deferred';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/threat_intelligence/constants';
 import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_diagnostic_service';
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
@@ -174,6 +180,10 @@ import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
 import { installSecurityAlertAnalysisWorkflowAndMarkReady } from './workflows/alert_analysis_workflow/install';
+import { SecuritySolutionEventBus } from './events/event_bus';
+import { registerSecurityWorkflowTriggers } from './workflows/triggers';
+import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { forwardCasesAlertStatusToSecuritySolution } from './workflows/triggers/cases_alert_status_bridge';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
@@ -213,9 +223,25 @@ export class Plugin implements ISecuritySolutionPlugin {
   private usageCollection?: UsageCollectionSetup;
 
   private isServerless: boolean;
+  private securityEventBus?: SecuritySolutionEventBus;
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
-  private defendCpsEnabled = false;
+  private platformCpsEnabled = false;
+  /** The `defendCrossProjectSearch` experimental flag; AND-ed with `cps.isCpsActive` per request */
+  private defendCpsFeatureFlagEnabled = false;
+
+  /**
+   * Threat intel routes are registered in `setup()` but depend on start-time
+   * services and a one-time bootstrap. We capture only the start plugins the
+   * route getters actually read and expose them via lazy getters so a request
+   * cannot resolve them before `start()` runs. Narrowed to those four so the
+   * full 20+ plugin start bundle is not held alive for the plugin's lifetime.
+   */
+  private threatIntelStartPlugins?: Pick<
+    SecuritySolutionPluginStartDependencies,
+    'spaces' | 'inference' | 'searchInferenceEndpoints' | 'taskManager'
+  >;
+  private readonly threatIntelBootstrapReady = createDeferred();
 
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
@@ -331,8 +357,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
 
-    this.defendCpsEnabled =
-      (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.defendCrossProjectSearch;
+    this.platformCpsEnabled = plugins.cps?.getCpsEnabled() ?? false;
+    this.defendCpsFeatureFlagEnabled = experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -361,6 +387,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         auditLogger: plugins.security?.audit.withoutRequest,
         productFeaturesService,
         entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
         telemetry: core.analytics,
       });
       if (experimentalFeatures.entityAnalyticsWatchlistEnabled) {
@@ -506,6 +533,24 @@ export class Plugin implements ISecuritySolutionPlugin {
       (context, request) => requestContextFactory.create(context, request)
     );
 
+    if (experimentalFeatures.threatIntelSupplyEnabled) {
+      // Inference features let operators pick a model per enrichment stage in
+      // Stack Management; no-op when `searchInferenceEndpoints` is unavailable.
+      registerThreatIntelInferenceFeatures(plugins.searchInferenceEndpoints, logger);
+
+      // Routes are registered now, but their start-time services and the
+      // one-time bootstrap are resolved lazily in `start()`.
+      registerThreatIntelRoutes({
+        router,
+        logger,
+        getSpacesService: () => this.threatIntelStartPlugins?.spaces?.spacesService,
+        getInference: () => this.threatIntelStartPlugins?.inference,
+        getSearchInferenceEndpoints: () => this.threatIntelStartPlugins?.searchInferenceEndpoints,
+        getTaskManager: () => this.threatIntelStartPlugins?.taskManager,
+        getBootstrapReady: () => this.threatIntelBootstrapReady.promise,
+      });
+    }
+
     this.endpointAppContextService.setup({
       securitySolutionRequestContextFactory: requestContextFactory,
       cloud: plugins.cloud,
@@ -536,7 +581,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
     registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
-    plugins.cases.attachmentFramework.registerUnified(securityAlertAttachmentType);
+    plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -583,6 +628,12 @@ export class Plugin implements ISecuritySolutionPlugin {
             osquery?.checkResponseActionAuthz(request, actionParams) ?? Promise.resolve()
         : undefined;
 
+    // Resolves the acting user's detection-rules authorization for a request.
+    const getRulesAuthz: CreateSecurityRuleTypeWrapperProps['getRulesAuthz'] = async (request) => {
+      const [coreStart] = await core.getStartServices();
+      return calculateRulesAuthz({ coreStart, request });
+    };
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       docLinks: core.docLinks,
@@ -609,6 +660,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.entityStore;
       },
+      getRulesAuthz,
       getOsqueryResponseActionsAuthzChecker,
     };
 
@@ -645,6 +697,10 @@ export class Plugin implements ISecuritySolutionPlugin {
       enabled: config.experimentalFeatures.trialCompanionEnabled && plugins.cloud?.isInTrial(),
     };
 
+    this.securityEventBus = plugins.workflowsExtensions
+      ? new SecuritySolutionEventBus()
+      : undefined;
+
     // TODO We need to get the endpoint routes inside of initRoutes
     const enableDataGeneratorRoutes =
       pluginContext.env.mode.dev || plugins.cloud.isElasticStaffOwned === true;
@@ -666,7 +722,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       core.docLinks,
       this.endpointContext,
       trialCompanionDeps,
-      enableDataGeneratorRoutes
+      enableDataGeneratorRoutes,
+      this.platformCpsEnabled,
+      this.securityEventBus
     );
 
     registerEndpointRoutes(router, this.endpointContext);
@@ -832,6 +890,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
 
@@ -865,12 +924,55 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.start(core, plugins);
 
+    if (config.experimentalFeatures.threatIntelSupplyEnabled) {
+      // Publish start services to the route getters registered in `setup()`.
+      this.threatIntelStartPlugins = plugins;
+
+      // A bootstrap failure must not crash Kibana. Routes that touch plugin-owned
+      // indices observe the rejection via `getBootstrapReady()` and return 503;
+      // the LLM enrichment routes do not gate on it at all. This no-op handler
+      // marks the shared promise handled so a failure does not surface as an
+      // unhandled rejection at startup (before any request has awaited it).
+      this.threatIntelBootstrapReady.promise.catch(() => {});
+
+      // Fire-and-forget: startup must not block on the bootstrap. Route handlers
+      // await `getBootstrapReady()` so requests cannot touch plugin-owned indices
+      // before their templates apply.
+      ensureThreatIntelBootstrap({
+        esClient: core.elasticsearch.client.asInternalUser,
+        logger,
+      }).then(
+        () => this.threatIntelBootstrapReady.resolve(),
+        (err) => {
+          logger.error(
+            `Threat intelligence bootstrap failed: ${err instanceof Error ? err.message : err}`
+          );
+          this.threatIntelBootstrapReady.reject(err);
+        }
+      );
+    }
+
     if (plugins.workflowsExtensions) {
       // Install once in the global space, then mark ready (install is awaited before ready inside
       // the helper). Fire-and-forget: startup must not block on it.
       void installSecurityAlertAnalysisWorkflowAndMarkReady({
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
+      });
+    }
+
+    if (this.securityEventBus && plugins.workflowsExtensions) {
+      registerSecurityWorkflowEventBridge(
+        this.securityEventBus,
+        plugins.workflowsExtensions,
+        logger
+      );
+    }
+
+    if (this.securityEventBus && plugins.cases) {
+      const securityEventBus = this.securityEventBus;
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
+        forwardCasesAlertStatusToSecuritySolution(securityEventBus, logger, request, payload);
       });
     }
 
@@ -948,7 +1050,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       esClient: core.elasticsearch.client.asInternalUser,
       clusterClient: core.elasticsearch.client,
       dataStart: plugins.data,
-      cpsEnabled: this.defendCpsEnabled,
+      // `cps.isCpsActive` is tri-state: `undefined` means the linked projects could not be
+      // resolved, which is not the same as there being none. Defend collapses that to "do not fan
+      // out" deliberately. An unresolved scope is one whose index grants we cannot inspect --
+      // almost always a custom role missing `read_project_routing` -- and fanning those out would
+      // put exactly the principals we know least about on `asCurrentUser`. The cost is that such a
+      // role reads origin-only until the predefined roles carry the privilege.
+      isCpsActive: async (request: KibanaRequest): Promise<boolean> =>
+        this.defendCpsFeatureFlagEnabled && (await plugins.cps?.isCpsActive(request)) === true,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,
@@ -1187,5 +1296,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();
     licenseService.stop();
+    this.securityEventBus?.removeAllListeners();
   }
 }

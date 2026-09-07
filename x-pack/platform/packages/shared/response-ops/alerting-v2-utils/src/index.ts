@@ -11,5 +11,6 @@ export {
   shouldShowAlertingV2CreateRuleFlyout,
 } from './is_alerting_v2_enabled';
 export { normalizeTags } from './normalize_tags';
+export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';
 export { parseEpisodeDataJson, getValueByFieldPath } from './episode_data';

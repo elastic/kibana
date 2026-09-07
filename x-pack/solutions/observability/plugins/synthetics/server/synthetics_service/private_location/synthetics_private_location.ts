@@ -13,6 +13,7 @@ import { escapeQuotes } from '@kbn/es-query';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import { getRebalancePrivateLocationShardsEnabled } from '../../tasks/rebalance_shards_enabled';
 import {
   syntheticsMonitorSOTypes,
   syntheticsMonitorSavedObjectType,
@@ -38,12 +39,18 @@ import {
 import { stringifyString } from '../formatters/private_formatters/formatting_utils';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import { PackagePolicyService } from './package_policy_service';
+import { rebalanceByCost } from './assign_shards';
+import {
+  toConditionUpdates,
+  toClearedConditionUpdates,
+  toMonitorPlacements,
+} from './rebalance_writes';
+import { getPrivateLocations } from '../get_private_locations';
 import {
   agentIdFromCondition,
   assignAgentById,
   isConditionShardedLocation,
   isEqlSafeLiteral,
-  UNASSIGNED_CONDITION,
 } from './assign_by_condition';
 
 export interface PrivateConfig {
@@ -210,7 +217,8 @@ export class SyntheticsPrivateLocation {
     testRunId?: string,
     runOnce?: boolean,
     conditionHosts?: EnrolledAgents,
-    existingCondition?: string | null
+    existingCondition?: string | null,
+    assignAgentConditions: boolean = true
   ): Promise<NewPackagePolicy | null> {
     const { label: locName } = privateLocation;
 
@@ -220,7 +228,7 @@ export class SyntheticsPrivateLocation {
       newPolicy.is_managed = true;
       newPolicy.policy_id = privateLocation.agentPolicyId;
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
-      if (isConditionShardedLocation(privateLocation)) {
+      if (isConditionShardedLocation(privateLocation) && assignAgentConditions) {
         const agentIds = conditionHosts?.agentIds ?? [];
         const existingAgentId = agentIdFromCondition(existingCondition);
 
@@ -229,21 +237,15 @@ export class SyntheticsPrivateLocation {
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
         } else if (agentIds.length > 0) {
-          newPolicy.condition =
-            assignAgentById(config.id, agentIds)?.condition ?? UNASSIGNED_CONDITION;
-        } else {
-          // An absent condition runs on every agent. Explicitly disable the
-          // monitor until an enrolled agent is available to own it.
-          newPolicy.condition = UNASSIGNED_CONDITION;
+          const assigned = assignAgentById(config.id, agentIds);
+          if (assigned) {
+            newPolicy.condition = assigned.condition;
+          }
         }
-      } else {
-        // Preserve the classic payload exactly as it was unless this edit is
-        // explicitly turning off a previously stamped scalable-location pin.
-        // In particular, package-policy creation must omit `condition`; an
-        // explicit `null` changes the Fleet policy and breaks classic callers.
-        if (existingCondition !== undefined) {
-          newPolicy.condition = null;
-        }
+        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+      } else if (existingCondition) {
+        // Classic location, or shard rebalancing paused: drop any leftover pin.
+        newPolicy.condition = null;
       }
       if (testRunId) {
         newPolicy.name =
@@ -324,6 +326,19 @@ export class SyntheticsPrivateLocation {
     return { agentIds: [...agentIds] };
   }
 
+  /**
+   * Cluster-wide kill-switch stored on the rebalance Task Manager task.
+   * Defaults to on so a task-read failure does not change CRUD behavior.
+   */
+  private async isShardRebalanceEnabled(): Promise<boolean> {
+    try {
+      return await getRebalancePrivateLocationShardsEnabled(this.server.pluginsStart.taskManager);
+    } catch (e) {
+      this.server.logger.error(e);
+      return true;
+    }
+  }
+
   /** Resolves each touched scalable location at most once per monitor batch. */
   private async getScalableAgentsByLocation(
     locations: Array<{ id: string; agentPolicyId: string; isAgentSharding?: boolean }>
@@ -375,9 +390,10 @@ export class SyntheticsPrivateLocation {
       configs,
       privateLocations
     );
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
-      referencedPrivateLocations
-    );
+    const assignAgentConditions = await this.isShardRebalanceEnabled();
+    const scalableAgentsByLocation = assignAgentConditions
+      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -401,7 +417,9 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            scalableAgentsByLocation.get(location.id)
+            scalableAgentsByLocation.get(location.id),
+            undefined,
+            assignAgentConditions
           );
 
           if (!newPolicy) {
@@ -471,9 +489,11 @@ export class SyntheticsPrivateLocation {
       const privateLocation = locations.find((loc) => !loc.isServiceManaged);
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
-      const conditionHosts = isConditionShardedLocation(location)
-        ? await this.getEnrolledAgents(location.agentPolicyId)
-        : undefined;
+      const assignAgentConditions = await this.isShardRebalanceEnabled();
+      const conditionHosts =
+        assignAgentConditions && isConditionShardedLocation(location)
+          ? await this.getEnrolledAgents(location.agentPolicyId)
+          : undefined;
 
       const newPolicy = await this.generateNewPolicy(
         config,
@@ -484,7 +504,9 @@ export class SyntheticsPrivateLocation {
         maintenanceWindows,
         undefined,
         undefined,
-        conditionHosts
+        conditionHosts,
+        undefined,
+        assignAgentConditions
       );
 
       const pkgPolicy = {
@@ -530,9 +552,10 @@ export class SyntheticsPrivateLocation {
       configs,
       allPrivateLocations
     );
-    const scalableAgentsByLocation = await this.getScalableAgentsByLocation(
-      referencedPrivateLocations
-    );
+    const assignAgentConditions = await this.isShardRebalanceEnabled();
+    const scalableAgentsByLocation = assignAgentConditions
+      ? await this.getScalableAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
     const existingPolicyById = new Map(existingPolicies.map((policy) => [policy.id, policy]));
 
     for (const { config, globalParams } of configs) {
@@ -571,7 +594,8 @@ export class SyntheticsPrivateLocation {
               undefined,
               undefined,
               scalableAgentsByLocation.get(privateLocation.id),
-              existingCondition
+              existingCondition,
+              assignAgentConditions
             );
 
             if (!newPolicy) {
@@ -688,6 +712,7 @@ export class SyntheticsPrivateLocation {
     const policies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name', 'condition'],
     });
 
     return { policies, allSpaces };
@@ -711,6 +736,7 @@ export class SyntheticsPrivateLocation {
     const existingPolicies = await this.packagePolicyService.getByIds({
       spaceId,
       packagePolicyIds: Array.from(policyIdsToFetch),
+      fields: ['name'],
     });
 
     const policyIdsToDelete = new Set<string>();
@@ -747,6 +773,120 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPolicies() {
     return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  }
+
+  /**
+   * Idempotent, minimal-churn rebalance for a scalable (condition-sharded)
+   * private location. Every monitor is pinned to the location's single agent
+   * policy; distribution is expressed as a per-monitor `${agent.id}` condition.
+   * This reads each monitor's current pin, runs the {@link rebalanceByCost}
+   * placement pass (failover of stale monitors + cost load-balancing onto
+   * stability-gated recovery agents, moving nothing else), and rewrites only the
+   * conditions of monitors whose agent actually changed — reusing the existing
+   * package-policy content and flipping only `condition`, never decrypting or
+   * regenerating monitor configs like {@link editMonitors}. Steady state
+   * performs zero writes.
+   *
+   * The two agent sets serve opposite goals. `recoveryAgentIds` (a
+   * stability-gated subset of `healthyAgentIds`) are the only agents eligible to
+   * *receive* load-balancing moves, so a freshly-recovered ("flapping") agent
+   * can't pull healthy monitors onto itself only to shed them on its next
+   * bounce. Failover is independent of that gate: a dead agent's monitors are
+   * placed on any of the full `healthyAgentIds`, so they evacuate immediately
+   * even when the only currently-live agents aren't stable yet.
+   */
+  async rebalanceShards({
+    location,
+    healthyAgentIds,
+    recoveryAgentIds,
+    capacities,
+    signal,
+  }: {
+    location: { id: string; label?: string; agentPolicyId: string };
+    healthyAgentIds: string[];
+    recoveryAgentIds?: string[];
+    capacities?: ReadonlyMap<string, number>;
+    signal: AbortSignal;
+  }): Promise<{ total: number; moved: number }> {
+    if (healthyAgentIds.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+    signal.throwIfAborted();
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+      signal,
+    });
+    if (pkgPolicies.length === 0) {
+      return { total: 0, moved: 0 };
+    }
+
+    const monitors = toMonitorPlacements(pkgPolicies, location.id);
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
+    const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
+
+    let moved = 0;
+    for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      signal.throwIfAborted();
+      // Update in the policy's own recorded space (grouped in toConditionUpdates),
+      // not via the agent-policy-derived routing — see bulkUpdateInSpace.
+      const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        policiesToUpdate,
+        spaceId,
+      });
+      // Count only successful moves (a failed bulkUpdate leaves the old pin).
+      moved += policiesToUpdate.length - failed.length;
+      if (failed.length > 0) {
+        // Not terminal: the rebalance is idempotent and retried every cycle, so
+        // the next run re-attempts these same moves. warn (not error) — no
+        // operator action is needed unless it persists across cycles.
+        this.server.logger.warn(
+          `[rebalanceShards] Failed to move ${failed.length} monitors for location ${
+            location.label ?? location.id
+          }`
+        );
+      }
+    }
+
+    return { total: pkgPolicies.length, moved };
+  }
+
+  /**
+   * Drops every `${agent.id}` pin on *scalable* private-location package
+   * policies so monitors run unfiltered (classic). Used when shard
+   * rebalancing is turned off. Classic locations never stamp pins, and
+   * disable-sharding already rewrites them before the SO flips, so listing
+   * those agent policies would only add Fleet load. Dedupes by agent policy
+   * so a shared policy is listed once.
+   */
+  async clearShardConditions(): Promise<{ cleared: number; failed: number }> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const locations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
+      isConditionShardedLocation
+    );
+    const agentPolicyIds = [...new Set(locations.map((location) => location.agentPolicyId))];
+
+    let cleared = 0;
+    let failed = 0;
+    for (const agentPolicyId of agentPolicyIds) {
+      const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({ agentPolicyId });
+      const updatesBySpace = toClearedConditionUpdates(pkgPolicies);
+
+      for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+        const failedBatch = await this.packagePolicyService.bulkUpdateInSpace({
+          policiesToUpdate,
+          spaceId,
+        });
+        cleared += policiesToUpdate.length - failedBatch.length;
+        failed += failedBatch.length;
+        if (failedBatch.length > 0) {
+          this.server.logger.warn(
+            `[clearShardConditions] Failed to clear ${failedBatch.length} monitor pin(s) on agent policy ${agentPolicyId}`
+          );
+        }
+      }
+    }
+
+    return { cleared, failed };
   }
 }
 

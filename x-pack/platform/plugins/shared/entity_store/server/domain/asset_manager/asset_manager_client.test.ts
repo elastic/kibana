@@ -10,6 +10,7 @@ import type {
   KibanaRequest,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -157,9 +158,6 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn().mockResolvedValue(undefined),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -167,7 +165,9 @@ describe('AssetManagerClient', () => {
       analytics: {
         reportEvent: jest.fn(),
       } as unknown as import('../../telemetry/events').TelemetryReporter,
-      savedObjectsClient: {} as SavedObjectsClientContract,
+      savedObjectsClient: {
+        delete: jest.fn().mockResolvedValue({}),
+      } as unknown as SavedObjectsClientContract,
     });
   });
 
@@ -255,9 +255,6 @@ describe('AssetManagerClient', () => {
           mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
         globalStateClient:
           mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-        remoteLogExtractionStateClient: {
-          delete: jest.fn().mockResolvedValue(undefined),
-        } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
         namespace,
         isServerless: false,
         logsExtractionClient: {
@@ -557,21 +554,16 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   const buildClient = (
     overrides: Partial<{
       latestExists: boolean;
-      updatesExists: boolean;
       metadataExists: boolean;
     }> = {}
   ) => {
-    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+    const { latestExists = true, metadataExists = true } = overrides;
 
     mockUserEsClient = {
       indices: {
         exists: jest.fn().mockResolvedValue(latestExists),
         getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
-          if (name.includes('updates')) {
-            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          } else {
-            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
-          }
+          return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
         }),
       },
     } as unknown as jest.Mocked<ElasticsearchClient>;
@@ -595,9 +587,6 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         find: jest.fn(),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
-      remoteLogExtractionStateClient: {
-        delete: jest.fn(),
-      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -615,7 +604,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns false and does not reinstall when all assets are present', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: true, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -624,7 +613,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
   });
 
   it('returns true and reinstalls when the latest index is missing', async () => {
-    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+    buildClient({ latestExists: false, metadataExists: true });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -640,20 +629,8 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     );
   });
 
-  it('returns true and reinstalls when the updates data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
-
-    const result = await client.reinstallSharedAssetsIfMissing();
-
-    expect(result).toBe(true);
-    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('.entities.v2.updates.default')
-    );
-  });
-
   it('returns true and reinstalls when the metadata data stream is missing', async () => {
-    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+    buildClient({ latestExists: true, metadataExists: false });
 
     const result = await client.reinstallSharedAssetsIfMissing();
 
@@ -676,5 +653,230 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
     });
     expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
     expect(mockLogger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('AssetManagerClient.getStatus component name resolution', () => {
+  /**
+   * Tests for the legacy-aware template and component-template collectors introduced to fix
+   * https://github.com/elastic/kibana/issues/286283 — status page reports neutral names as
+   * missing after an FF-off upgrade that leaves legacy Security-scoped assets in place.
+   *
+   * getIndexComponents is already legacy-aware; this suite covers getIndexTemplateComponents
+   * and getComponentTemplateComponents which were not.
+   */
+
+  const namespace = 'default';
+
+  const buildClient = ({
+    latestTemplateExists,
+    legacyLatestTemplateExists,
+    updatesTemplateExists,
+    legacyUpdatesTemplateExists,
+    latestComponentTemplateExists,
+    legacyLatestComponentTemplateExists,
+    updatesComponentTemplateExists,
+    legacyUpdatesComponentTemplateExists,
+  }: {
+    latestTemplateExists: boolean;
+    legacyLatestTemplateExists: boolean;
+    updatesTemplateExists: boolean;
+    legacyUpdatesTemplateExists: boolean;
+    latestComponentTemplateExists: boolean;
+    legacyLatestComponentTemplateExists: boolean;
+    updatesComponentTemplateExists: boolean;
+    legacyUpdatesComponentTemplateExists: boolean;
+  }) => {
+    const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+      const exists =
+        (name.includes('security_') && name.includes('latest') && legacyLatestTemplateExists) ||
+        (!name.includes('security_') && name.includes('latest') && latestTemplateExists) ||
+        (name.includes('security_') && name.includes('updates') && legacyUpdatesTemplateExists) ||
+        (!name.includes('security_') && name.includes('updates') && updatesTemplateExists);
+      if (!exists) throw new Error('index_template not found [404]');
+      return {};
+    });
+
+    const getComponentTemplate = jest
+      .fn()
+      .mockImplementation(async ({ name }: { name: string }) => {
+        const exists =
+          (name.includes('security_') &&
+            name.includes('latest') &&
+            legacyLatestComponentTemplateExists) ||
+          (!name.includes('security_') &&
+            name.includes('latest') &&
+            latestComponentTemplateExists) ||
+          (name.includes('security_') &&
+            name.includes('updates') &&
+            legacyUpdatesComponentTemplateExists) ||
+          (!name.includes('security_') &&
+            name.includes('updates') &&
+            updatesComponentTemplateExists);
+        if (!exists) throw new Error('component_template not found [404]');
+        return {};
+      });
+
+    // Stub the minimum ES surface getStatus/getComponentsForEngine needs.
+    // index and dataStream probes are not under test here — return "found" for all of them
+    // so the index rows don't interfere with the assertions.
+    const esClient = {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        getIndexTemplate,
+        getDataStream: jest.fn().mockResolvedValue({ data_streams: [{}] }),
+      },
+      cluster: { getComponentTemplate },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+
+    const taskManager = {
+      get: jest
+        .fn()
+        .mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'entity_store')
+        ),
+    } as unknown as jest.Mocked<TaskManagerStartContract>;
+
+    const engineDescriptorClient = {
+      getAll: jest.fn().mockResolvedValue([{ type: 'user', status: 'started' }]),
+      init: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    const globalStateClient = {
+      findOrThrow: jest.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
+      init: jest.fn(),
+      find: jest.fn(),
+      delete: jest.fn(),
+    };
+
+    return new AssetManagerClient({
+      logger: loggerMock.create(),
+      esClient,
+      internalEsClient: esClient,
+      taskManager,
+      engineDescriptorClient:
+        engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
+      globalStateClient:
+        globalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      namespace,
+      isServerless: true,
+      logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+      security: {} as import('@kbn/security-plugin/server').SecurityPluginStart,
+      analytics: {
+        reportEvent: jest.fn(),
+      } as unknown as import('../../telemetry/events').TelemetryReporter,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+    });
+  };
+
+  const getComponentsByResource = async (client: AssetManagerClient, resource: string) => {
+    const { engines } = await client.getStatus(true);
+    const components =
+      (engines[0] as { components?: Array<{ resource: string; id: string; installed: boolean }> })
+        .components ?? [];
+    return components.filter((c) => c.resource === resource);
+  };
+
+  describe('legacy-only assets (FF-off post-upgrade scenario)', () => {
+    it('reports neutral index template name as not installed when only legacy exists', async () => {
+      const client = buildClient({
+        latestTemplateExists: false,
+        legacyLatestTemplateExists: true,
+        updatesTemplateExists: false,
+        legacyUpdatesTemplateExists: true,
+        latestComponentTemplateExists: false,
+        legacyLatestComponentTemplateExists: true,
+        updatesComponentTemplateExists: false,
+        legacyUpdatesComponentTemplateExists: true,
+      });
+
+      const templates = await getComponentsByResource(client, 'index_template');
+
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(false);
+    });
+
+    it('reports neutral component template name as not installed when only legacy exists', async () => {
+      const client = buildClient({
+        latestTemplateExists: false,
+        legacyLatestTemplateExists: true,
+        updatesTemplateExists: false,
+        legacyUpdatesTemplateExists: true,
+        latestComponentTemplateExists: false,
+        legacyLatestComponentTemplateExists: true,
+        updatesComponentTemplateExists: false,
+        legacyUpdatesComponentTemplateExists: true,
+      });
+
+      const componentTemplates = await getComponentsByResource(client, 'component_template');
+
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(false);
+    });
+  });
+
+  describe('neutral-only assets (greenfield install)', () => {
+    it('reports neutral index template names as installed', async () => {
+      const client = buildClient({
+        latestTemplateExists: true,
+        legacyLatestTemplateExists: false,
+        updatesTemplateExists: true,
+        legacyUpdatesTemplateExists: false,
+        latestComponentTemplateExists: true,
+        legacyLatestComponentTemplateExists: false,
+        updatesComponentTemplateExists: true,
+        legacyUpdatesComponentTemplateExists: false,
+      });
+
+      const templates = await getComponentsByResource(client, 'index_template');
+
+      expect(templates).toHaveLength(1);
+      expect(templates[0].id).not.toContain('security_');
+      expect(templates[0].installed).toBe(true);
+    });
+
+    it('reports neutral component template names as installed', async () => {
+      const client = buildClient({
+        latestTemplateExists: true,
+        legacyLatestTemplateExists: false,
+        updatesTemplateExists: true,
+        legacyUpdatesTemplateExists: false,
+        latestComponentTemplateExists: true,
+        legacyLatestComponentTemplateExists: false,
+        updatesComponentTemplateExists: true,
+        legacyUpdatesComponentTemplateExists: false,
+      });
+
+      const componentTemplates = await getComponentsByResource(client, 'component_template');
+
+      expect(componentTemplates).toHaveLength(1);
+      expect(componentTemplates[0].id).not.toContain('security_');
+      expect(componentTemplates[0].installed).toBe(true);
+    });
+  });
+
+  describe('no assets present (not installed)', () => {
+    it('reports legacy names with installed: false when neither naming scheme exists', async () => {
+      const client = buildClient({
+        latestTemplateExists: false,
+        legacyLatestTemplateExists: false,
+        updatesTemplateExists: false,
+        legacyUpdatesTemplateExists: false,
+        latestComponentTemplateExists: false,
+        legacyLatestComponentTemplateExists: false,
+        updatesComponentTemplateExists: false,
+        legacyUpdatesComponentTemplateExists: false,
+      });
+
+      const templates = await getComponentsByResource(client, 'index_template');
+      const componentTemplates = await getComponentsByResource(client, 'component_template');
+
+      expect(templates.every((t) => !t.installed)).toBe(true);
+      expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+    });
   });
 });

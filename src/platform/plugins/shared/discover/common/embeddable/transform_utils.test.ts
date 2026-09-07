@@ -351,6 +351,8 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { hideNulls: true, wrapLines: false },
         grid: {
           columns: {
             message: { width: 100 },
@@ -376,11 +378,15 @@ describe('search embeddable transform utils', () => {
           rows_per_page: 100,
           header_row_height: 3,
           density: DataGridDensity.COMPACT,
+          documents_display_mode: 'json',
+          json_mode_settings: { hide_nulls: true, wrap_lines: false },
         },
       });
       expect(result).not.toHaveProperty('sort');
       expect(result).not.toHaveProperty('columns');
       expect(result).not.toHaveProperty('selectedTabId');
+      expect(result).not.toHaveProperty('documentsDisplayMode');
+      expect(result).not.toHaveProperty('jsonModeSettings');
     });
 
     it('throws when no saved search reference matches type and name', () => {
@@ -735,6 +741,8 @@ describe('search embeddable transform utils', () => {
         rowsPerPage: 100,
         headerRowHeight: 3,
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: { hideNulls: true, wrapLines: false },
         grid: {
           columns: {
             message: { width: 100 },
@@ -755,6 +763,8 @@ describe('search embeddable transform utils', () => {
         rows_per_page: 100,
         header_row_height: 3,
         density: DataGridDensity.COMPACT,
+        documents_display_mode: 'json',
+        json_mode_settings: { hide_nulls: true, wrap_lines: false },
       });
     });
 
@@ -774,6 +784,8 @@ describe('search embeddable transform utils', () => {
       expect(result.rows_per_page).toBeUndefined();
       expect(result.header_row_height).toBeUndefined();
       expect(result.density).toBeUndefined();
+      expect(result.documents_display_mode).toBeUndefined();
+      expect(result.json_mode_settings).toBeUndefined();
     });
 
     it('converts numeric row heights to API form', () => {

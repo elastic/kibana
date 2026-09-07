@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ContentList, ContentListFooter, ContentListToolbar } from '@kbn/content-list';
 import { ContentListClientProvider, createFilterControl } from '@kbn/content-list-provider-client';
@@ -17,6 +17,10 @@ import { AiIndexCardGrid, AiIndexListEmpty, AiIndexListError } from './component
 import { CreateAiIndexButton } from './components/create_ai_index_button';
 import { useAiIndexFindItems } from './hooks/use_list_ai_indices';
 import { useKibana } from './hooks/use_kibana';
+import {
+  ContextEnginePageSection,
+  ContextEnginePageTemplate,
+} from './layout/context_engine_page_template';
 import {
   AI_INDICES_PER_PAGE,
   AI_INDEX_LIST_LABELS,
@@ -38,7 +42,7 @@ const ContextLandingPageContent = () => {
   const showHeaderCreateButton = !hasNoItems;
 
   return (
-    <KibanaPageTemplate data-test-subj="contextLandingPage">
+    <ContextEnginePageTemplate data-test-subj="contextLandingPage">
       <KibanaPageTemplate.Header
         pageTitle={i18n.translate('xpack.contextEngine.landing.title', {
           defaultMessage: 'Context',
@@ -47,15 +51,17 @@ const ContextLandingPageContent = () => {
           defaultMessage:
             'Manage AI Indexes to organize and retrieve contextual knowledge for your agents.',
         })}
+        restrictWidth
+        bottomBorder={false}
         css={css`
           background-color: ${euiTheme.colors.backgroundBasePlain};
-          border-block-end: none;
         `}
         rightSideItems={
           showHeaderCreateButton ? [<CreateAiIndexButton key="create-ai-index-button" />] : []
         }
       />
-      <KibanaPageTemplate.Section>
+      <EuiHorizontalRule margin="none" data-test-subj="contextLandingPageHeaderDivider" />
+      <ContextEnginePageSection>
         {error ? (
           <AiIndexListError error={error} />
         ) : (
@@ -70,8 +76,8 @@ const ContextLandingPageContent = () => {
             <ContentListFooter data-test-subj="contextAiIndexListFooter" />
           </ContentList>
         )}
-      </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+      </ContextEnginePageSection>
+    </ContextEnginePageTemplate>
   );
 };
 

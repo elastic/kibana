@@ -55,6 +55,8 @@ export {
   AGENT_POLICY_API_ROUTES,
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
+  DATA_STREAM_API_ROUTES,
+  DATA_STREAM_INDEX_PATTERN_REGEX,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -74,6 +76,7 @@ export {
   AZURE_ACCOUNT_TYPE_VAR_NAME,
   GCP_ACCOUNT_TYPE_VAR_NAME,
   FLEET_LOG_INDICES,
+  OBLT_DEFAULT_CATEGORIES,
 } from './constants';
 export {
   // Route services
@@ -295,3 +298,4 @@ export {
   AZURE_LAUNCH_CLOUD_CONNECTOR_ARM_TEMPLATE_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
 } from './services/cloud_connectors/test_subjects';
+export { DATA_STREAM_DATASET_VAR, DATA_STREAM_TYPE_VAR } from './services/policy_template';

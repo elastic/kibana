@@ -7,30 +7,25 @@
 
 import { z } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { i18n } from '@kbn/i18n';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   PND_WORKER_URL_TEMPLATE,
-  type WatchWorker,
+  UpdateWorkerRequestBody,
 } from '@kbn/pnd-common';
-import { getWatchWriteRoutePrivileges } from '../watches/watch_route_security';
+import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
-import { storeUnavailableResponse } from '../store_route_guard';
 
 const UpdateWorkerRequestParams = z.object({
   workerId: z.string().min(1).max(128),
 });
 
-/** Toggles the worker's global flag. Per-watch attachments are patched via PATCH /watches/{id}. */
-const UpdateWorkerRequestBody = z.object({
-  enabled: z.boolean(),
-});
-
 export const registerUpdateWorkerRoute = ({
   router,
   logger,
-  config,
-  getWatchesService,
+  getSpaceId,
+  getWorkersService,
 }: RouteDependencies) => {
   router.versioned
     .patch({
@@ -38,10 +33,10 @@ export const registerUpdateWorkerRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
-          requiredPrivileges: getWatchWriteRoutePrivileges(),
+          requiredPrivileges: [PND_API_PRIVILEGE_WRITE],
         },
       },
-      summary: 'Update a PND worker',
+      summary: 'Update a PND worker and its settings',
     })
     .addVersion(
       {
@@ -55,25 +50,72 @@ export const registerUpdateWorkerRoute = ({
       },
       async (_context, request, response) => {
         try {
-          if (!config.ui.useMockData) {
-            return storeUnavailableResponse(response);
-          }
-
           const { workerId } = request.params;
-          const worker = getWatchesService().setWorkerEnabled(workerId, request.body.enabled);
-          if (!worker) {
-            return response.notFound({
-              body: { message: `Worker "${workerId}" not found` },
-            });
-          }
+          const result = await getWorkersService().update(
+            workerId,
+            request.body,
+            getSpaceId(request),
+            request
+          );
 
-          const body: { worker: WatchWorker } = { worker };
-          return response.ok({ body });
+          switch (result.outcome) {
+            case 'updated':
+              return response.ok({ body: result.response });
+            case 'not-found':
+              return response.notFound({
+                body: {
+                  message: i18n.translate('xpack.pnd.workerNotFoundErrorMessage', {
+                    defaultMessage: 'Worker "{workerId}" not found',
+                    values: { workerId },
+                  }),
+                },
+              });
+            case 'rejected':
+              return response.badRequest({
+                body: {
+                  message: i18n.translate('xpack.pnd.workerSettingsRejectedErrorMessage', {
+                    defaultMessage: 'Cannot apply {setting} to worker "{workerId}"',
+                    values: { setting: result.what, workerId },
+                  }),
+                },
+              });
+            case 'conflict':
+              return response.conflict({
+                body: {
+                  message: i18n.translate('xpack.pnd.workerSettingsConflictResponseErrorMessage', {
+                    defaultMessage: 'Worker "{workerId}" settings changed; reload and retry',
+                    values: { workerId },
+                  }),
+                },
+              });
+            case 'unavailable':
+              return response.customError({
+                statusCode: 503,
+                body: {
+                  message: i18n.translate('xpack.pnd.workerSettingsUnavailableErrorMessage', {
+                    defaultMessage: 'Worker settings are temporarily unavailable; try again',
+                  }),
+                },
+              });
+            case 'failed':
+              return response.customError({
+                statusCode: 500,
+                body: {
+                  message: i18n.translate('xpack.pnd.workerSettingsUnconfirmedErrorMessage', {
+                    defaultMessage: 'Worker settings could not be confirmed after save',
+                  }),
+                },
+              });
+          }
         } catch (error) {
           logger.error(`Failed to update worker: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to update worker' },
+            body: {
+              message: i18n.translate('xpack.pnd.workerUpdateResponseErrorMessage', {
+                defaultMessage: 'Failed to update worker',
+              }),
+            },
           });
         }
       }

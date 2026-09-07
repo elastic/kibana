@@ -6,6 +6,9 @@
  */
 
 import type { SignificantEvent, Detection, SignalEntry } from '@kbn/significant-events-schema';
+import type { ConverseStep } from '@kbn/evals';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { memoryToolIds } from '../../utils/tool_usage';
 import { evidenceCollectionEvaluator } from './evidence_collection';
 
 const detection = (ruleUuid: string): Omit<Detection, 'processed'> => ({
@@ -44,14 +47,18 @@ const detectionSignal = (
   },
 });
 
-const evaluate = (events: Partial<SignificantEvent>[], ruleUuids: string[]) =>
+const evaluate = (
+  events: Partial<SignificantEvent>[],
+  ruleUuids: string[],
+  steps: ConverseStep[] = []
+) =>
   evidenceCollectionEvaluator.evaluate({
     input: {
       detections: ruleUuids.map(detection),
     },
     output: {
       significantEvents: events as SignificantEvent[],
-      steps: [],
+      steps,
     },
     expected: {} as never,
     metadata: null,
@@ -118,5 +125,66 @@ describe('evidenceCollectionEvaluator', () => {
 
     expect(result).toMatchObject({ score: 0, label: 'unexpected-rule-uuid' });
     expect(result.explanation).toContain('"unexpected"');
+  });
+
+  it('covers already-recorded-noise without an events_write signal when the confirmation query ran', async () => {
+    const ruleUuid = 'f0886d68-d5d6-5941-ba01-449666ea5960';
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: memoryToolIds.memoryRead,
+        tool_call_id: 'read',
+        params: { id: 'page-1' },
+        results: [
+          {
+            data: {
+              content: `- 2026-08-19: rule_uuid ${ruleUuid} → status dismissed (false-positive)`,
+            },
+          },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: platformCoreTools.executeEsql,
+        tool_call_id: 'esql',
+        params: { query: 'FROM logs | LIMIT 1' },
+        results: [{ data: { columns: ['message'], values: [['expected noise']] } }],
+      },
+    ];
+
+    const result = await evaluate([], [ruleUuid], steps);
+
+    expect(result.score).toBe(1);
+  });
+
+  it('does not treat an unreadable memory page as already-recorded-noise', async () => {
+    const ruleUuid = 'f0886d68-d5d6-5941-ba01-449666ea5960';
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: memoryToolIds.memoryRead,
+        tool_call_id: 'read',
+        params: { id: 'stale-page-id', name: 'known-noise' },
+        results: [
+          {
+            data: {
+              error: "Memory read failed: Memory entry with id 'stale-page-id' not found",
+            },
+          },
+        ],
+      },
+      {
+        type: 'tool_call',
+        tool_id: platformCoreTools.executeEsql,
+        tool_call_id: 'esql',
+        params: { query: 'FROM logs | LIMIT 1' },
+        results: [],
+      },
+    ];
+
+    const result = await evaluate([], [ruleUuid], steps);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain(`missing signal for input rule "${ruleUuid}"`);
   });
 });
