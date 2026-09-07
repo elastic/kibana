@@ -11,6 +11,10 @@ import type { Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 
+import {
+  MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+  MISSING_EXECUTION_IDENTITY_MESSAGE,
+} from './execution_identity';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
@@ -20,6 +24,10 @@ export const TASK_RECOVERY_ERROR_TYPE = 'TaskRecoveryError' as const;
 export const taskRecoveryMessages = {
   scheduledStale:
     'Execution abandoned due to recovery mechanism. The scheduled task was interrupted before completion.',
+  scheduledAbandonedPending:
+    'Execution abandoned due to recovery mechanism. The scheduled run never started and a later schedule tick superseded it.',
+  scheduledRunFailedAfterCreate:
+    'Execution abandoned due to recovery mechanism. The scheduled task failed after creating the execution.',
   workflowRunInterrupted:
     'Execution abandoned due to recovery mechanism. The workflow run task was interrupted before completion.',
   workflowResumeInterrupted:
@@ -30,7 +38,20 @@ export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
   return `Task Manager exhausted all attempts for this workflow execution task. Last error: ${lastError}`;
 }
 
-export type InterruptedWorkflowRunTaskOutcome = 'run_workflow' | 'task_complete';
+/**
+ * Discriminated result for `workflow:run` interrupt recovery.
+ * - `run_workflow`: continue into `runWorkflow`
+ * - `task_complete` + `interrupted`: prior claim abandoned; execution marked FAILED
+ * - `task_complete` + `noop`: already terminal / waiting_for_input / queued — do not re-run;
+ *   stamp from execution status when terminal, otherwise omit semantic stamp
+ */
+export type InterruptedWorkflowRunTaskResult =
+  | { action: 'run_workflow' }
+  | {
+      action: 'task_complete';
+      reason: 'interrupted' | 'noop';
+      execution: EsWorkflowExecution;
+    };
 
 /**
  * When Task Manager retries `workflow:run` (`attempts > 1`), the prior claim did not finish successfully.
@@ -52,9 +73,9 @@ export async function resolveInterruptedWorkflowRunTask({
   spaceId: string;
   taskAttempts: number;
   logger: Logger;
-}): Promise<InterruptedWorkflowRunTaskOutcome> {
+}): Promise<InterruptedWorkflowRunTaskResult> {
   if (taskAttempts <= 1) {
-    return 'run_workflow';
+    return { action: 'run_workflow' };
   }
 
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -66,7 +87,7 @@ export async function resolveInterruptedWorkflowRunTask({
     logger.warn(
       `workflow:run retry (attempts=${taskAttempts}) but no execution document for ${workflowRunId}; continuing run`
     );
-    return 'run_workflow';
+    return { action: 'run_workflow' };
   }
 
   if (!shouldFailOnWorkflowRunRetry(execution)) {
@@ -75,7 +96,7 @@ export async function resolveInterruptedWorkflowRunTask({
         `workflow:run retry for execution ${workflowRunId} while status is waiting_for_input; leaving execution unchanged (human resume only)`
       );
     }
-    return 'task_complete';
+    return { action: 'task_complete', reason: 'noop', execution };
   }
 
   await markExecutionFailedTaskRecovery(
@@ -91,10 +112,33 @@ export async function resolveInterruptedWorkflowRunTask({
     `Marked workflow execution ${workflowRunId} FAILED after workflow:run retry (attempts=${taskAttempts}) - prior run was interrupted`
   );
 
-  return 'task_complete';
+  return {
+    action: 'task_complete',
+    reason: 'interrupted',
+    execution: {
+      ...execution,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: TASK_RECOVERY_ERROR_TYPE,
+        message: taskRecoveryMessages.workflowRunInterrupted,
+      },
+    },
+  };
 }
 
-export type InterruptedWorkflowResumeTaskOutcome = 'resume_workflow' | 'task_complete';
+/**
+ * Discriminated result for `workflow:resume` interrupt recovery.
+ * - `resume_workflow`: continue into `resumeWorkflow`
+ * - `task_complete` + `interrupted`: prior claim abandoned; execution marked FAILED
+ * - `task_complete` + `noop`: already terminal — stamp from status
+ */
+export type InterruptedWorkflowResumeTaskResult =
+  | { action: 'resume_workflow' }
+  | {
+      action: 'task_complete';
+      reason: 'interrupted' | 'noop';
+      execution: EsWorkflowExecution;
+    };
 
 /**
  * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
@@ -115,9 +159,9 @@ export async function resolveInterruptedWorkflowResumeTask({
   spaceId: string;
   taskAttempts: number;
   logger: Logger;
-}): Promise<InterruptedWorkflowResumeTaskOutcome> {
+}): Promise<InterruptedWorkflowResumeTaskResult> {
   if (taskAttempts <= 1) {
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -129,18 +173,18 @@ export async function resolveInterruptedWorkflowResumeTask({
     logger.warn(
       `workflow:resume retry (attempts=${taskAttempts}) but no execution document for ${workflowRunId}; continuing resume`
     );
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   if (isTerminalStatus(execution.status)) {
-    return 'task_complete';
+    return { action: 'task_complete', reason: 'noop', execution };
   }
 
   if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
     logger.warn(
       `workflow:resume retry for execution ${workflowRunId} still waiting_for_input - invoking resume handler again`
     );
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   await markExecutionFailedTaskRecovery(
@@ -156,7 +200,18 @@ export async function resolveInterruptedWorkflowResumeTask({
     `Marked workflow execution ${workflowRunId} FAILED after workflow:resume retry (attempts=${taskAttempts}) - prior resume task was interrupted`
   );
 
-  return 'task_complete';
+  return {
+    action: 'task_complete',
+    reason: 'interrupted',
+    execution: {
+      ...execution,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: TASK_RECOVERY_ERROR_TYPE,
+        message: taskRecoveryMessages.workflowResumeInterrupted,
+      },
+    },
+  };
 }
 
 export async function markExecutionFailedTaskRecovery(
@@ -168,18 +223,25 @@ export async function markExecutionFailedTaskRecovery(
     type = TASK_RECOVERY_ERROR_TYPE,
   }: {
     message: string;
-    type?: typeof TASK_RECOVERY_ERROR_TYPE | 'TaskAttemptsExhaustedError';
-  }
+    type?:
+      | typeof TASK_RECOVERY_ERROR_TYPE
+      | 'TaskAttemptsExhaustedError'
+      | typeof MISSING_EXECUTION_IDENTITY_ERROR_TYPE;
+  },
+  options: { refresh?: boolean | 'wait_for' } = {}
 ): Promise<void> {
   const error = { type, message };
   const finishedAt = new Date().toISOString();
 
-  await workflowExecutionRepository.updateWorkflowExecution({
-    id: executionId,
-    status: ExecutionStatus.FAILED,
-    error,
-    finishedAt,
-  });
+  await workflowExecutionRepository.updateWorkflowExecution(
+    {
+      id: executionId,
+      status: ExecutionStatus.FAILED,
+      error,
+      finishedAt,
+    },
+    { refresh: options.refresh ?? false }
+  );
 
   await stepExecutionRepository.markNonTerminalStepsFailed(executionId, error);
 }
@@ -256,4 +318,98 @@ export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): bo
     return false;
   }
   return true;
+}
+
+/**
+ * After `workflow:scheduled` creates an execution and inline `runWorkflow` throws, best-effort
+ * mark that execution FAILED if it still occupies a non-terminal slot (skips terminal /
+ * waiting_for_input). Complements past-tick abandoned-pending reap for the same-claim case.
+ */
+export async function markScheduledExecutionFailedAfterTaskError(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const { workflowExecutionRepository, stepExecutionRepository, workflowRunId, spaceId, logger } =
+    params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (
+      !execution ||
+      isTerminalStatus(execution.status) ||
+      execution.status === ExecutionStatus.WAITING_FOR_INPUT
+    ) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        message: taskRecoveryMessages.scheduledRunFailedAfterCreate,
+      },
+      { refresh: 'wait_for' }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED after scheduled task error (status was ${execution.status})`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark scheduled workflow execution ${workflowRunId} as FAILED after task error: ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
+}
+
+/**
+ * Persist a terminal FAILED state when a workflow task is claimed without a
+ * Task Manager identity (`fakeRequest` / API key). Completing the task after
+ * this write avoids leaving the execution pending forever.
+ */
+export async function failExecutionMissingIdentity(params: {
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+  workflowRunId: string;
+  spaceId: string;
+  logger: Logger;
+}): Promise<void> {
+  const { workflowExecutionRepository, stepExecutionRepository, workflowRunId, spaceId, logger } =
+    params;
+
+  try {
+    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
+      workflowRunId,
+      spaceId
+    );
+    if (!execution || isTerminalStatus(execution.status)) {
+      return;
+    }
+
+    await markExecutionFailedTaskRecovery(
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      workflowRunId,
+      {
+        type: MISSING_EXECUTION_IDENTITY_ERROR_TYPE,
+        message: MISSING_EXECUTION_IDENTITY_MESSAGE,
+      }
+    );
+    logger.warn(
+      `Marked workflow execution ${workflowRunId} FAILED: ${MISSING_EXECUTION_IDENTITY_MESSAGE}`
+    );
+  } catch (markFailedErr) {
+    logger.error(
+      `Failed to mark workflow execution ${workflowRunId} as FAILED (missing identity): ${
+        markFailedErr instanceof Error ? markFailedErr.message : String(markFailedErr)
+      }`
+    );
+  }
 }

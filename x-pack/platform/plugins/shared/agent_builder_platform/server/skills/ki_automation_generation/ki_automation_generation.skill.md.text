@@ -8,8 +8,10 @@ You produce Kibana Workflows that build KIs; you do not answer the underlying da
 
 ## What a KI is
 
-A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream.
-Use `.ai-index-ds-*` for timeseries KIs, `.ai-index-idx-*` otherwise.
+A **Knowledge Indicator (KI)** is a structured fact stored in a searchable AI Index index or datastream
+(backing stores match `ai-index-ds-*` for timeseries KIs, `ai-index-idx-*` otherwise).
+Workflows write KIs through the `context-engine` steps using the AI index id — never by indexing
+into the backing store directly (see "Writing and verifying KIs").
 See the index templates for those prefixes for field details.
 
 AI agents retrieve KIs at query time instead of scanning raw data — reducing token cost and
@@ -34,10 +36,18 @@ Apply these when deciding what KIs to generate and what each one should contain.
    and query templates. The agent traverses at ask-time for fresh values. Materialize a literal
    answer inside a KI **only for immutable facts** (e.g. a resolved case's root cause). Never
    materialize volatile facts (status, priority, counts, dates) — they rot and produce confidently
-   wrong answers. For those, provide an access pattern that reads live data.
+   wrong answers. For those, provide an access pattern that reads live data. Immutability implies a
+   **durability tier**: immutable-fact KIs are durable (omit `attributes.expires_at` so they never age out);
+   anything you cache that *can* drift gets a short TTL and is refreshed on re-run.
 
 3. **Access patterns must be grounded and validated.** Build every query from the index's real
-   mapping and sample documents — never invented field names. 
+   mapping and sample documents — never invented field names. Two query forms are both legitimate:
+   **parameterized templates** for "fill-in-the-blank" question-classes (the agent supplies the
+   value at ask-time), and **complete, runnable queries** for named detection conditions. Detection
+   KIs invert the usual "precompute the path, not the value" rule — they materialize the whole query
+   because the *condition* (not a volatile value) is the stable thing. Whichever form you use, ground
+   every threshold and field name in the observed data distributions (see `stats_distribution`
+   grounding step) before writing the query.
 
 4. **The Context Engine is more like a cache than a database.** Avoid generating KIs for the entire corpus
    eagerly. Prefer data views. Best practice is to apply a filter before starting: a time window (e.g. last 90 days), a status
@@ -47,6 +57,12 @@ Apply these when deciding what KIs to generate and what each one should contain.
 5. **Keep a fallback.** A finite set of KIs cannot anticipate every question. If no KI fits,
    the agent falls back and queries raw data directly. KIs accelerate retrieval; they do not
    replace it.
+
+6. **Derive, don't ask.** Anything you can compute deterministically from the data or the query
+   text, compute it — don't ask the LLM to produce it. E.g. derive a detection's `query_type`
+   (`match` vs `stats`) by parsing the ES|QL, not by asking the model. The LLM's job is judgement
+   (what matters, why), not mechanical classification it will occasionally get wrong. Same instinct
+   applies to dedup and validation: enforce them in the workflow, not solely in the prompt.
 
 ## Access patterns
 
@@ -63,6 +79,9 @@ Access patterns:
 
 Keep example queries cheap: end with a small `| LIMIT n`.
 
+**ES|QL rules:** For detection KIs the full query is materialized, not parameterised, and is written to `attributes.esql` (see "KI document shape") in addition to `content`, so these forms are allowed and expected:
+- `FROM <index> METADATA _id, _source` — carry document identity/source through the pipeline so detections can point back to the originating docs.
+- The full-text `field : "value"` (`: match`) operator — e.g. `WHERE message : "connection refused"` — for text-matching detection conditions in addition to `==`/`STATS`.
 **Connector sources — execute_connector_sub_action call:**
 ```
 Access patterns:
@@ -85,27 +104,54 @@ Choose the strategy (or combination) that fits the data source and question type
 | **Selective / Outlier** | One KI per significant document | Log streams, event feeds where most records are noise but outliers matter. |
 | **Atomic Facts** | Many KIs per document | Very information-dense documents (contracts, research papers) where one KI per document loses precision. |
 | **Cumulative / Wiki-style** | One KI per entity, updated over time | Entities recurring across many documents (customers, products, hosts). |
+| **Detection / Feature ** | One detection KI per named condition; one feature KI per entity/dependency | Observability indices (logs, APM, metrics) where you need named, runnable detection conditions and structured feature extractions rather than per-document KIs. |
 
-Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
+Quick guide: logs/events/metrics → Index Metadata + Selective/Outlier + Detection/Feature; knowledge base / article corpus → Bottom-Up; dense docs → Atomic Facts; recurring entities → Cumulative/Wiki-style; multiple indices/tables → Metadata for all, then add a deeper strategy for the most important one; unsure → Index/Table Metadata.
 
 ## Available tools
 
 Do **not** hand-write or persist workflow YAML yourself. Use these tools:
 
 - **platform.core.generate_workflow** — create or edit a workflow from a natural-language description.
-  Pass this skill's workflow shape descriptions as the spec (include target index, source indices,
-  the `ai.prompt` profile + access pattern requirements, the validation step, and the KI doc shape).
+  Pass this skill's workflow shape descriptions as the spec (include the target AI index id, source
+  indices, the `ai.prompt` profile + access pattern requirements, the verified KI sink
+  (`verifyKi` gate → `createKi`), and the KI doc shape).
   It emits a diff card and workflow attachment; it does NOT save the workflow.
 - **platform.core.execute_workflow** — run a workflow after the user has saved it.
 - **platform.core.execute_esql** — run an ES|QL query. Use it to validate that "example queries" are functional and correct.
 - **platform.core.generate_esql** — author or repair a single ES|QL query. Use it to hand-craft
   a tricky access pattern template, or re-write queries that failed to execute.
 - **platform.workflows.validate_workflow** — validate a complete YAML string before presenting it.
+- **platform.workflows.get_workflow** — read a saved workflow's metadata (name, description) or,
+  when needed, its full YAML (`includeYaml: true`, tool result only). Pass `attach: true` to load
+  a saved workflow into a `workflow.yaml` conversation attachment before editing with
+  `generate_workflow`. Defaults to metadata only.
 - **platform.workflows.get_step_definitions** / **platform.workflows.get_examples** — confirm
   a step's `with` params or find a pattern.
 - **platform.workflows.get_connectors** — list configured connectors and their types.
+- **platform.context_engine.save_automation** — save a generated workflow and attach it to the AI
+  index. Only available when an `ai_index` attachment is present. After every successful
+  `generate_workflow`, show the diff first, then call this in the **same assistant turn**. See
+  **Turn discipline** in Phase 4.
 
 For deep workflow YAML syntax, Liquid templating, and debugging, defer to the `workflow-authoring` skill.
+
+### User interaction (HITL)
+
+When the user must choose among a **fixed set of options** (edit vs create, confirm a strategy,
+what to change in an existing workflow, etc.), call `ask_user_question` — never paraphrase those
+choices as chat text. **Saving workflows** is different: after `generate_workflow`, show the diff
+in chat first, then **always call** `platform.context_engine.save_automation` in the same turn
+(platform confirmation replaces `ask_user_question` for save). Format each `ask_user_question` call like this:
+
+**Question:** "<short question>"
+
+**Options:**
+- `<label>` — optional description of what happens if picked
+- `<label>`
+
+Use free text in chat only for **open-ended** questions (e.g. Phase 1 use-case discovery) where
+there is no predefined option list.
 
 A reference workflow YAML for the Index Metadata strategy is available in the
 `index-selection-reference-workflow` resource file attached to this skill.
@@ -113,6 +159,65 @@ A reference workflow YAML for the Index Metadata strategy is available in the
 ## Phased workflow
 
 Follow these phases in order. Do not skip ahead.
+
+### When an `ai_index` attachment is present
+
+If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phase 1
+only** — the attachment is the source of truth for destination, sources, and existing
+automations. Do not call `platform.core.list_indices`, run open-ended discovery, or re-ask the
+user to pick sources/destination unless the attachment is clearly incomplete.
+
+**Still run Phases 2 and 3** when they add value:
+
+- **Phase 2 (strategy):** After sampling sources, pick a KI strategy per configured source from
+  the strategy catalog. If the attachment description and source types already make the strategy
+  obvious, state your recommendation briefly and proceed. If multiple strategies fit, or the
+  description is thin, call `ask_user_question` with one option per plausible strategy before
+  drafting.
+- **Phase 3 (corpus filter):** Before calling `generate_workflow`, agree on a corpus filter
+  (time window, status/condition, or numeric cap) per **Phase 3** below. Do not skip this just
+  because the attachment lists sources — encourage a filter even when the user might accept
+  "no filter" after you note the cost/bloat risk.
+
+Then continue to Phase 4.
+
+**Sample sources** (referenced below): ES|QL sources via `platform.core.execute_esql` against the
+configured query; connector sources via `platform.workflows.get_connectors` for the listed
+connector ids only.
+
+#### Existing automations on the AI index
+
+When `Existing automations` in the attachment is non-empty, resolve this **before** sampling
+sources or calling `generate_workflow`:
+
+1. Call `platform.workflows.get_workflow` per listed id, metadata only (`includeYaml` omitted),
+   to get name/description for the user-facing list — don't load YAML up front.
+2. Call `ask_user_question`: "This AI index already has workflow automations. What would you like
+   to do?" — one option per workflow (`Edit: {name}` / `{id}`) plus `Create a new automation`. Do
+   not call `generate_workflow` until the user picks.
+3. **Edit:**
+   a. Call `platform.workflows.get_workflow(id, attach: true)` to load it as a `workflow.yaml`
+      attachment (workflow ids are **not** attachment ids until attached this way).
+   b. Call `ask_user_question`: "What should change in this workflow?" — e.g. adjust KI
+      prompt/granularity, change source query or filter, update access patterns, or other (describe
+      in chat). Do **not** call `generate_workflow` until the user answers.
+   c. Re-sample sources with `platform.core.execute_esql` only if the edit needs fresh data.
+   d. Call `platform.core.generate_workflow` with the workflow `attachmentId` and the user's edit
+      intent. Continue to Phase 4, updating the existing workflow rather than creating a duplicate.
+4. **Create new:** sample sources, run **Phase 2** (strategy per source — confirm via
+   `ask_user_question` when unclear), then **Phase 3** (corpus filter), then propose something
+   materially different from the existing automations (different strategy/source/granularity)
+   based on their name + description — only load an existing workflow's YAML (`includeYaml: true`,
+   no `attach`) if the user asks to compare. If your pilot still overlaps, confirm with the user
+   before calling `generate_workflow`. Continue to Phase 4.
+
+#### No existing automations on the AI index
+
+1. Sample sources.
+2. **Phase 2:** Propose a KI strategy per source from the strategy catalog; call
+   `ask_user_question` when the attachment description does not make the choice obvious.
+3. **Phase 3:** Agree on a corpus filter before drafting (see Phase 3 below).
+4. Continue to Phase 4.
 
 ### Phase 1 — Discover
 
@@ -159,8 +264,28 @@ to draft a pilot workflow. Important constraints:
 - Use `ai.prompt` instead of `ai.agent` wherever possible.
 - Set `triggers: [{type: manual}]`.
 
-Present the generated diff card and summarize what the workflow does in 2–3 sentences. Tell the
-user to review and Save from the card — saving is a UI action you cannot perform.
+**Turn discipline (critical):** After `generate_workflow` returns, the user must **see the diff
+before** the platform save confirmation. Do not call `save_automation` in the same model message as
+`generate_workflow` — that shows save before the diff. Required order in one assistant turn:
+
+1. `platform.core.generate_workflow` — call this alone; do not batch other tools in the same message.
+2. Write a short summary and render the diff: `<render_attachment id="{diff_attachment_id}" />`
+   (use `diff_attachment_id` from step 1, not `attachment_id`). End this message with text only — no
+   tool calls.
+3. `platform.context_engine.save_automation` with `workflowAttachmentId` set to `attachment_id` from
+   step 1 (platform shows save confirmation — not `ask_user_question`).
+
+If you already posted a diff in a prior turn without calling save, re-render
+`<render_attachment id="{diff_attachment_id}" />` in chat before calling `save_automation` — never
+call save alone in a new turn without showing the diff again.
+
+If the user cancels the save confirmation dialog, stop and do not call `execute_workflow` until they
+save. The save tool is only available when a `platform.context_engine.ai_index` attachment is
+present. Do not call `execute_workflow` until the workflow is saved.
+
+If the user saved manually from the diff card instead of confirming the platform save dialog, call
+`platform.context_engine.save_automation` with `workflowId` set to the saved workflow id (from the
+attachment `origin` or `workflowId`) before continuing.
 
 **Approval gate:** Only call `platform.core.execute_workflow` when the user gives an unambiguous
 affirmative ("yes", "looks good", "run it") with no change requests. Handle edits first by
@@ -170,12 +295,15 @@ calling `generate_workflow` with the existing `attachmentId`, then return to thi
 
 After the user saves and approves, call `platform.core.execute_workflow(attachmentId)`.
 
-Retrieve the 1–3 generated KIs by running `FROM <target_index> | LIMIT 3` with `platform.core.execute_esql`
+Retrieve the 1–3 generated KIs by running `FROM <backing index of the AI index, e.g. ai-index-idx-<ai_index_id>> | WHERE @timestamp >= "<execution.started_at>" | SORT @timestamp DESC | LIMIT 3` with `platform.core.execute_esql`, taking `execution.started_at` from the `execute_workflow` response. The filter isolates this run's KIs — a bare sort would pad the rows with earlier runs' KIs when the pilot writes fewer than 3. (It assumes the workflow writes via `createKi`, which refreshes `@timestamp`; `updateKi` keeps the stored one, so merge flows need a different check.)
 
 Ask yourself:
 - Is the output the expected structure?
-- are the access patterns correct?
-- would I, as an Agent, find this context useful?
+- Are the access patterns correct? Run every query in `attributes.esql` (an index profile's `esql_example` queries, a detection's materialized query) with `platform.core.execute_esql` —
+  the ES|QL verifier only parses, so a query can pass verification yet fail on unknown fields
+  at execution time.
+- Would I, as an Agent, find this context useful?
+- If any two KIs have similar titles, query for one of them specifically and confirm it out-ranks its near-duplicate siblings. If it doesn't, the `description` is not carrying enough differentiating signal — fix that before expanding. Only do this query > improve description test once, and move on after.
 
 If not, repeat this step, adjusting the pilot workflow accordingly.
 Use `generate_workflow` with the existing `attachmentId` to edit.
@@ -208,7 +336,7 @@ same sequential workflow.
 **For larger scale**: switch to a **parent/child fan-out pair** using `workflow.executeAsync`.
 
 - **Child workflow** (`<strategy>_process_item`): processes one item's identifier, does the
-  per-item work (fetch → `ai.prompt` → `elasticsearch.index`), and finishes.
+  per-item work (fetch → `ai.prompt` → verified KI sink), and finishes.
 - **Parent workflow** (`<strategy>_dispatch`): queries the full corpus (with any agreed filter,
   pagination, etc), loops with a `foreach` whose body calls `workflow.executeAsync` with
   the child's workflow ID and the item as input — without waiting. After dispatching, polls for
@@ -227,12 +355,28 @@ The AI Index schema has these base fields (all required unless noted):
 
 | Field | Type | Purpose |
 |---|---|---|
-| `type` | keyword | Useful for categorization and grouping |
+| `type` | keyword | The **KI kind** — the top-level discriminator agents and queries filter on. Set it to the kind of KI this doc represents, e.g. `index_metadata`, `document`, `event`, `fact`, `entity`, `detection`, `feature`. Each strategy uses a stable value (see the per-strategy mapping under "Workflow shapes for each strategy"). **Not** the same as `query_type` (`match`/`stats`, a detection attribute) or `subtype` (a feature's `entity`/`dependency`/… class). |
 | `title` | text + semantic | Short display name; primary semantic surface |
-| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins |
+| `description` | text + semantic | Routing heuristic — what the index/source does NOT contain, key fields, joins. When sibling KIs share a similar `title` (e.g. support tickets all categorized as "Billing inquiry"), the description **must** carry the differentiating signal: the sub-category, product name, or time window. `title` alone will not separate near-duplicates for the retriever. |
 | `content` | text + semantic | Free-text for semantic retrieval: purpose, questions answered, access patterns |
 | `tags` | keyword[] | Filter facets |
-| `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on |
+| `attributes` | flattened | **Structured, keyword-queryable metadata** — use for any field that agents or users will filter/aggregate on. Also holds every quality, grounding, and lifecycle field (`confidence`, `coverage`, `evidence`, `expires_at`, `excluded`, …) — see below. |
+| `@timestamp` | date | When this KI was last profiled; enables recency guards on scheduled runs. Exists on the **stored document** only — `context-engine.createKi` sets it at write time, so leave it out of the `ki` step input (a supplied value would override the step's). |
+
+**Everything else lives inside `attributes`.** Rather than declaring bespoke mappings for quality/lifecycle fields — which would risk mapping conflicts on long-lived indices — put them all inside `attributes`. Because `attributes` is `flattened`, arbitrary nested keys are accepted without explicit mappings and can never conflict, while staying keyword-queryable. This applies to both the quality/grounding fields and the lifecycle fields:
+
+| Field (under `attributes`) | Type | Purpose |
+|---|---|---|
+| `attributes.confidence` | number 0–1 (keyword under `flattened`) | **Correctness** — how sure we are the KI's facts are right, calibrated to evidence strength (see the calibration bands under "Quality & grounding contract"). Distinct from `coverage`. |
+| `attributes.coverage` | number 0–1 (keyword under `flattened`) | **Completeness** — how fully the KI's access patterns cover the source's question-classes, emitted by the profiling step. Lets agents prefer better-covered KIs when routing. Optional; most meaningful for Index Metadata KIs. Because `flattened` indexes values as keywords, cast with `TO_DOUBLE(FIELD_EXTRACT(attributes, "coverage"))` before any numeric sort/range in ES\|QL. |
+| `attributes.evidence` | string[] | Observed values that justify a materialized detection/fact; each string quotes a real distribution (e.g. `"~20% of spans are errors (1,204 / 6,033)"`) |
+| `attributes.expires_at` | string (ISO date) | Expiry date (~30 days); used by the expiry-based freshness guard. **Omit entirely for durable (immutable-fact) KIs** — a KI with no `expires_at` never ages out (principle #2). Stored as an ISO-8601 string; compare with `TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at"))` in ES\|QL. |
+| `attributes.excluded` | boolean | Soft-exclude: KI exists but is skipped by agents |
+| `attributes.esql` | string or string[] | **The canonical location for the KI's ES\|QL** — the field the ES\|QL verifiers read (see "Writing and verifying KIs"). Populate it wherever the KI carries any ES\|QL: a detection's materialized query, an index profile's runnable `esql_example` queries. Keep the prose access-pattern presentation (templates + params + returns) in `content` for the agent to read; only KI kinds with no ES\|QL at all omit `attributes.esql`. |
+
+Strategy-specific structured output (e.g. a detection's materialized query and `query_type`/`severity_score`, a feature's `subtype`/`slug`) also goes in `content` + `attributes` — never in bespoke declared mappings.
+
+**Required fields note**: `@timestamp` is set by `context-engine.createKi` and the document id comes from `ki_id`, so there is no top-level field to hand-write. Everything else — `confidence`, `coverage` (if you emit it), and the lifecycle fields — is written *inside* `attributes` and needs no mapping declaration, since `attributes` is `flattened`.
 
 **Rule**: structured facts belong in both `content` and `attributes`, to facilitate exact-match and filter queries, as well as semantic searches.
 
@@ -242,12 +386,22 @@ The AI Index schema has these base fields (all required unless noted):
 `attributes` is a `flattened` mapping — any string, number, or boolean nested inside it becomes keyword-queryable without explicit mappings.
 Use it for strategy-specific structured output: status, severity, themes, product mentions, version strings, entity names, etc.
 
+The `ki` object passed to `context-engine.createKi` (the step sets `@timestamp` itself; the
+document id comes from `ki_id`):
+
 ```yaml
-id:          <index name or connector_id>
-type:        <type>
+type:        <KI kind, e.g. "index_metadata" | "document" | "detection" | "feature">
 title:       <display_name>
 tags:        [...]
 attributes:
+  # Quality & lifecycle metadata (all under attributes — no declared mappings needed):
+  confidence:      <0.0–1.0 calibrated correctness score (see grounding contract)>
+  coverage:        <0.0–1.0 completeness score from profile_index (optional)>
+  expires_at:      "2025-08-20T10:00:00Z"   # omit for durable (immutable-fact) KIs
+  evidence:        ["~20% of spans are errors (1,204 / 6,033)"]
+  # Every ES|QL query the KI carries, in the field verifiers read (a detection's
+  # materialized query, an index profile's runnable esql_example queries):
+  esql:            'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
   # Repeat structured values here for exact-match / filter queries.
   # Index Metadata example:
   key_fields:      [case_number, status, priority]
@@ -278,6 +432,125 @@ description: |
   <Shorter description/summary of the KI>
 ```
 
+## Writing and verifying KIs — the `context-engine` steps
+
+Sink KIs with the dedicated `context-engine` workflow steps — never with raw
+`elasticsearch.index`. The dedicated steps enforce the Context Engine write privilege,
+resolve the AI index to its backing store, and are the write path the verification gate
+below protects. They do **not** validate the `ki` object's shape at runtime — a `ki` built
+with `data.set` is indexed as-is — so the workflow must produce the "KI document shape"
+above itself: `type` and `title` present, no top-level `@timestamp` (a caller-supplied
+`@timestamp` is not stripped). All `context-engine` steps require the Context Engine advanced
+setting (`contextEngine:enabled`); confirm availability and exact params with
+`platform.workflows.get_step_definitions`.
+
+| Step | Input | Output |
+|---|---|---|
+| `context-engine.createKi` | `ai_index_id`, `ki_id` (optional), `ki` | `id` of the created KI |
+| `context-engine.updateKi` | `ai_index_id`, `ki_id`, `ki` (partial — only the provided fields change) | `id`, `result` (`updated` or `noop`) |
+| `context-engine.deleteKi` | `ai_index_id`, `ki_id` | `id` of the deleted KI |
+| `context-engine.verifyKi` | `ki` (a partial KI is accepted) | `passed`, `results[]` — one `{ verifier, passed, reason }` per applicable verifier (`reason` is present on failures) |
+
+- `ai_index_id` is the **AI index id**, not an Elasticsearch index name. It must match
+  `^[a-z0-9][a-z0-9_-]*$` (lowercase letters and digits, plus `_`/`-`) — other ids fail
+  auto-creation. `createKi` auto-creates the AI index when it does not exist yet, always
+  backed by a regular index (`ai-index-idx-<id>`); an AI index backed by a datastream
+  (`ai-index-ds-*`, for timeseries KIs) must be created in the Context Engine beforehand.
+  If a backing index named `ai-index-idx-<id>` already exists but was created outside the
+  Context Engine (e.g. directly by an older workflow, with incompatible mappings), writes
+  can fail — pick a new id or remove the stale index first.
+- `createKi` sets `@timestamp` itself. Pass `ki_id` for a stable, caller-chosen document id —
+  re-runs with the same `ki_id` replace the KI, making writes idempotent (see the KI upsert
+  below). Index-backed AI indices accept `ki_id`; data-stream-backed AI indices generate the
+  id and **reject** a supplied `ki_id` (the write fails).
+- The `ki` object is the "KI document shape" above minus `@timestamp` (the step writes
+  that): `type` and `title` required; `description`, `content`, `tags`, `attributes` optional.
+
+### Verification gate — required on every write
+
+`context-engine.verifyKi` runs every applicable registered Context Engine verifier against
+the KI and returns a per-verifier summary; each failure names the `verifier` and carries a
+`reason`. Verifiers select themselves from the KI's fields — e.g. the ES|QL syntax verifier
+applies only when the KI carries `attributes.esql`. When no verifier applies, the step
+passes with empty `results`. Do not hardcode a verifier list; newly registered verifiers
+apply automatically.
+
+The ES|QL verifier is a **static parse** — it checks syntax only and never runs the query,
+so a query referencing a nonexistent field or index still passes. Execute every query in
+`attributes.esql` live with `platform.core.execute_esql` (Phase 5) to catch those.
+
+Verification is not built into the write steps, so an ungated workflow will silently
+persist a KI whose ES|QL does not even parse. Every generated workflow must gate its
+writes:
+
+1. `build_ki` — a `data.set` step assembling the `ki` object once, so the verify and write
+   steps reference the same document (`${{ variables.ki }}`).
+2. `verify_ki` — `context-engine.verifyKi` with that `ki`.
+3. An `if` step on `condition: "${{ steps.verify_ki.output.passed }}"` — write only when it
+   passes. In the `else` branch, surface `steps.verify_ki.output.results` (verifier +
+   reason) with a `console` step so failures are visible, never silently dropped.
+4. The write — `context-engine.createKi`, or `context-engine.updateKi` on a collision.
+
+The gate is identical for index-backed and data-stream-backed AI indices; only the `ki_id`
+rules above differ. Data streams generate the document id, so their writes are always
+`createKi` without `ki_id` — each run appends a new entry (the timeseries model) — and the
+upsert pattern below applies only to index-backed AI indices.
+
+### KI upsert (dedup across runs)
+
+Set `ki_id` on `context-engine.createKi` to a stable value built from the KI's own data, so
+the same subject always produces the same id (e.g. `<index>/<doc_id>`, an entity id, or the
+source index name). Re-runs with the same `ki_id` replace the KI in place instead of
+appending a duplicate — this is the default for every re-runnable workflow.
+
+When a re-run must **merge** with the stored KI instead of replacing it (union
+`evidence`/`tags`, average `confidence` — see the dedup rules in the grounding contract):
+read the stored KI first with an `elasticsearch.search` step using an `ids` query
+(`ids: { values: ["<ki_id>"] }`) and `ignore_unavailable: true` — it returns empty hits,
+instead of erroring, before the backing index exists on the very first run. Compute the
+merged fields in the workflow and write them with `context-engine.updateKi`.
+
+Note: `createKi` refreshes `@timestamp` on each replace; `updateKi` keeps the stored one. A
+merge flow that needs a reliable last-profiled date should write it into `attributes` (e.g.
+`attributes.last_profiled_at`) and compare that instead.
+
+The verify → gate → `createKi`-with-`ki_id` pattern is shown in the
+`index-selection-reference-workflow` resource.
+
+## Quality & grounding contract
+
+These apply to **every** strategy — they are properties of a good KI, not of one recipe. Bake them
+into the `ai.prompt` instructions and the sink steps.
+
+**Non-empty grounding gate.** Do not emit a KI you cannot back with at least one stable identifying
+property *and* concrete evidence from the sampled data. A KI with no grounding is a hallucination
+with a confidence score — drop it rather than ship it.
+
+**Calibrated confidence.** Set `confidence` (0–1) on a shared scale, tied to evidence strength rather than an ad-hoc estimate:
+
+| Band | Meaning |
+|---|---|
+| 0.9–1.0 | Explicit, unambiguous evidence |
+| 0.7–0.89 | Strong pattern, multiple corroborating signals |
+| 0.5–0.69 | Clear indicators, some ambiguity |
+| 0.3–0.49 | Weak inference — must be tagged `inferred` in `tags` |
+| < 0.3 | Do not emit |
+
+**Evidence discipline.** Provide 2–5 short, specific `evidence[]` strings that quote real observed
+values in `field.path=value` notation (e.g. `service.name=checkout`, `error.type=timeout (312/1,204)`).
+When a KI is derived from specific documents, record the **minimal covering set** of source `_id`s
+(one per distinct source doc, not one per evidence string) — enough to trace every claim, no more.
+
+**Dedup & merge (not blind overwrite).** A stable `ki_id` catches only *exact* id collisions.
+Also treat two KIs as duplicates when they share a **fingerprint** — same `type` + `subtype` +
+same structured `attributes` — even if titles or ids differ slightly. Derive the `ki_id` from
+the KI's identifying data, normalized (trim + lowercase), so cosmetic variation collapses to
+one id. When a run must enrich rather than replace, **merge**: read the stored KI, compute the
+merged fields in the workflow (union `evidence`/`tags`, average `confidence`, keep the richer
+`description`), then write them with `context-engine.updateKi`. This matters most for
+Cumulative / Wiki-style KIs (which enrich the same entity across runs) and for any scheduled
+re-run.
+
 ## Workflow quality checklist
 
 Before presenting any workflow to the user:
@@ -286,21 +559,37 @@ Before presenting any workflow to the user:
 - [ ] Steps ordered logically within foreach: reads before AI step
 - [ ] Pilot LIMIT is set to 1–3 outputs
 - [ ] Structured, filterable fields (status, severity, themes, entity names, etc.) appear in both `attributes` (for exact/filter queries) and as prose in `content` (for semantic retrieval)
-- [ ] `id` on `elasticsearch.index` is set to a stable unique value for idempotent upserts
+- [ ] Grounding contract honored: non-empty grounding gate, calibrated `confidence` bands, 2–5 `field=value` evidence strings (see "Quality & grounding contract")
+- [ ] KIs are written via the `context-engine` steps (`createKi` / `updateKi`) — never raw `elasticsearch.index`
+- [ ] Every write is gated on `context-engine.verifyKi`: the workflow writes only when `passed` is true and surfaces the failing `results` (verifier + reason) otherwise
+- [ ] Every ES|QL query the KI carries lives in `attributes.esql` (string or array of strings) so verifiers check it; only KI kinds with no ES|QL at all omit it
+- [ ] `ki_id` on `context-engine.createKi` is a stable, normalized value built from the KI's own data, so re-runs replace instead of duplicate; enrichment flows **merge** (merged values computed in the workflow, written via `updateKi`) rather than blind-overwrite
 - [ ] `triggers: [{type: manual}]`
 - [ ] Corpus filter (Phase 3) is applied
+- [ ] `@timestamp` is left to `context-engine.createKi` and the document id to `ki_id`; `confidence`, `coverage` (if emitted), `evidence`, and `expires_at` are written *inside* `attributes` — never as top-level fields
+- [ ] Detection KIs carry the complete runnable query (not a template) in `attributes.esql` and repeated in `content`; `query_type` is derived from the ES|QL, not LLM-supplied; every threshold + `evidence[]` string quotes an observed distribution; sample-floor + precision-first guardrails applied
+- [ ] `attributes.expires_at` (~30 days) is written to expiring KIs and **omitted** for durable (immutable-fact) KIs
+- [ ] Expiry-based freshness guard is implemented when the workflow runs on a schedule
+- [ ] When titles are near-duplicates across the corpus, each `description` carries a differentiating discriminator (identifier, package, category)
 
 ## Workflow shapes for each strategy
 
 Use these descriptions as input to `platform.core.generate_workflow`. Do not submit YAML directly
 to the tool — describe the workflow in natural language using these shapes as the spec.
 
+Set the KI `type` field to the stable value for the strategy: Index Metadata → `index_metadata`; Bottom-Up → `document`; Selective / Outlier → `event`; Atomic Facts → `fact`; Cumulative / Wiki-style → `entity`; Detection / Feature → `detection` and `feature` respectively.
+
+In every shape, mirror the ES|QL the KI carries into `attributes.esql` wherever possible — a detection's materialized query, and the runnable `esql_example` of each access pattern the `ai.prompt` emits — so verification covers every query the KI ships.
+
 **Index Metadata:**
 A `foreach` loop over a hardcoded list of index names. Per iteration: `GET /<index>/_mapping`,
-`elasticsearch.search` size 20 for sample docs, `ai.prompt` producing display_name, purpose,
+`elasticsearch.search` size 20 for sample docs using `function_score` with `random_score` (so
+each run samples different records rather than always returning the first-ingested documents), `ai.prompt` producing display_name, purpose,
 answers_questions, does_not_contain, key_fields, joins, when_to_use, and access_patterns (each
-with question_type, esql_template, esql_example, params, returns). Then `elasticsearch.index`
-writing the KI document.
+with question_type, esql_template, esql_example, params, returns). Then the verified KI sink
+(`verifyKi` gate → `context-engine.createKi`) with `ki_id` set to the index name and
+`attributes.esql` set to the runnable `esql_example` queries (array of strings) so the ES|QL
+verifiers check them.
 Put key_fields, when_to_use, and joins into `attributes`; put purpose, answers_questions, and
 access patterns into `content`. A complete reference YAML is in the `index-selection-reference-workflow` resource.
 
@@ -308,23 +597,25 @@ access patterns into `content`. A complete reference YAML is in the `index-selec
 An `elasticsearch.esql.query` pulling docs with id, title, and body fields;
 truncate body to 12,000 chars with `EVAL body = SUBSTRING(body_field, 1, 12000)`. A `foreach`
 over the results. Per iteration: `ai.prompt` producing title, summary, answers_questions,
-key_entities, topics, and access_patterns. Then `elasticsearch.index` with `id` set to
-`<index>/<doc_id>` (stable, for idempotent upserts).
+key_entities, topics, and access_patterns. Then the verified KI sink with
+`ki_id` set to `<index>/<doc_id>` (stable, so re-runs replace instead of duplicating).
 Put structured fields (key_entities, topics, any domain-specific categorical
 values like status, severity, product_mentions) into `attributes`; put summary, answers_questions,
 and access_patterns into `content`.
+
+**Signal to roll up:** if a Bottom-Up pass yields many near-identically-titled entries — e.g. support tickets all titled "Billing inquiry — subscription", "Billing inquiry — refund", "Billing inquiry — upgrade" — emit one KI per logical cluster (category, product area, or status class) and enumerate the individual entries inside that KI's `content`, rather than one KI per record. This is a variant of Bottom-Up at a coarser granularity — treat the category or cluster as the document unit rather than the individual record.
 
 **Selective / Outlier:**
 An `elasticsearch.esql.query` pulling candidate docs filtered to notable records
 (e.g. `WHERE status == "ERROR" OR severity >= 7`). A `foreach` over the results. Per iteration:
 `ai.prompt` with a significance-check prompt returning `{ is_significant: bool, reason: string,
-ki: {...} }`. An `if` step that only calls `elasticsearch.index` when `is_significant == true`.
+ki: {...} }`. An `if` step that only runs the verified KI sink when `is_significant == true`.
 Put filterable fields (severity, error_type, affected_component) into `attributes`.
 
 **Atomic Facts:**
 An `elasticsearch.esql.query` pulling docs, full text truncated to 24,000 chars. An
 `ai.prompt` extracting a list of discrete atomic claims: `{ facts: [{ claim, entities, topics }] }`.
-A `foreach` over the facts. Per iteration: `elasticsearch.index` with `id` set to
+A `foreach` over the facts. Per iteration: the verified KI sink with `ki_id` set to
 `<index>/<doc_id>-fact-<n>`.
 Put entities and topics into `attributes` on each fact KI.
 
@@ -332,17 +623,56 @@ Put entities and topics into `attributes` on each fact KI.
 A top-level `foreach` over a hardcoded list of 1–2 entity IDs (pilot). Per entity: an
 `elasticsearch.esql.query` finding all documents referencing that entity (`LIMIT 10` for pilot).
 An `ai.prompt` synthesizing them into an entity profile: entity_name, summary, key_facts,
-open_questions, related_indices, and access_patterns. `elasticsearch.index` with `id` set to
-the entity ID — re-runs upsert to enrich the same KI over time. Put entity_name, entity_type, and related_indices into `attributes`.
+open_questions, related_indices, and access_patterns. The KI upsert with
+`ki_id` set to the entity ID — re-runs read the stored KI and merge via
+`context-engine.updateKi`, enriching it over time. Put entity_name, entity_type, and related_indices into `attributes`.
 
 **Connector:**
 Call `platform.workflows.get_step_definitions` with the connector type to get correct step params.
 A connector step to list/query documents. A `foreach` over the results. Per
 iteration: a second connector step to fetch the full document body. An `ai.prompt` extracting a
-KI including access_patterns using `execute_connector_sub_action` syntax. `elasticsearch.index`
-to upsert. Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
+KI including access_patterns using `execute_connector_sub_action` syntax. Then the verified KI
+sink with a stable `ki_id` from the source record id.
+Put domain-specific categorical fields (status, record_type, owner, tags from the source system)
 into `attributes` so they remain filterable after ingestion. Note that any of the above strategies
 can be used with connectors.
+
+**Detection / Feature:**
+Targets Observability indices (logs, APM, metrics). It runs **two complementary profiling passes** in a single workflow — one for detection (query) KIs, one for feature (knowledge) KIs — so the two concerns stay independent and either can be tuned without disturbing the other.
+
+*Pre-analysis grounding (before either `ai.prompt`):* These feed the profiler real distributions so it sets **data-driven thresholds instead of guessing**.
+1. `sample_error_logs` — `elasticsearch.search` with `function_score` + `random_score`, filtered to error records (e.g. `attributes.processor.event == "error"`, or `log.level == "error"` for log streams), size 20. Use `FROM <index> METADATA _id, _source` so the sample carries doc identity.
+2. `log_patterns` — an `elasticsearch.esql.query` using `CATEGORIZE` to cluster messages into templates (e.g. `FROM <index> | STATS count = COUNT() BY pattern = CATEGORIZE(message) | SORT count DESC | LIMIT 25`), so the profiler sees the recurring message shapes rather than raw lines.
+3. `stats_distribution` — an `elasticsearch.esql.query` aggregating field-level distributions and totals: error types, log levels, host/service counts, error-vs-total ratios (e.g. `FROM <index> | STATS count = COUNT() BY error.type, log.level | SORT count DESC | LIMIT 50`). These observed counts are what every threshold and every `evidence[]` string must quote.
+
+*Pass 2a — detection (query) profiling:* An `ai.prompt` fed all three grounding results, emitting `detections[]`. Fan out one KI per detection through the verified sink. Each entry: `{ title, description, esql (complete runnable ES|QL — NOT a template), severity_score (0–1) }`. Write the complete `esql` to `attributes.esql` — the canonical field the ES|QL verifiers read — and repeat it in `content` as a materialized access pattern; **derive `query_type` (`match`/`stats`) from the ES|QL itself** (principle #6 — parse for a `STATS` command) rather than asking the model, and mirror `query_type` + `severity_score` into `attributes`. The `description` **must state the threshold and its baseline rationale** (e.g. "fires when error rate exceeds 20%, ~2× the observed baseline of ~10%"). Every threshold and every `evidence[]` string must be directly justified by a value from `stats_distribution` / `log_patterns` — no invented numbers.
+
+Detection guardrails (bake into the prompt):
+- **Sample floor.** A ratio-based detection must guard its denominator — e.g. `WHERE total > 20` (or `attempts >= 50`) — so it can't fire on a handful of documents. Tiny-denominator "spikes" are the dominant false-positive source.
+- **Precision over recall.** Prefer zero firings to false positives: set thresholds above the observed baseline with margin, not at it.
+- **Caps.** At most one `STATS` detection per distinct failure dimension, and a small cap (≈3) on detections per signal — resist emitting near-duplicate conditions.
+
+*Pass 2b — feature (knowledge) profiling:* A **separate** `ai.prompt` pass over the same grounding, emitting `features[]`. Fan out one KI per feature through the verified sink. Each entry: `{ title, description, subtype, slug (stable id), confidence (0–1), evidence_doc_ids[] (source `_id`s from the sample) }`. Put `subtype`, `slug`, `evidence_doc_ids`, and `confidence` into `attributes`. Choose whatever `subtype` values fit the data (for Observability, e.g. `entity`/`dependency`/`technology`/`schema`) — this is free-form strategy output, not a fixed schema.
+
+> **`feature` vs. `entity` (Cumulative / Wiki-style):** these are deliberately different granularities and can coexist. A `feature` KI is a lightweight **inventory / orientation** signal from a single profiling pass — "this index *contains* a service called `checkout`", "it *depends on* Postgres" — answering "what exists in this data?". A Cumulative `entity` KI is a deep **per-instance dossier** enriched over many runs — everything known about one specific entity — answering "tell me everything about X". Reach for `feature` to map the shape of an index; reach for Cumulative when an entity deserves its own evolving profile. If a `feature/entity` grows into a full dossier, promote it to a Cumulative `entity` KI.
+
+*Sinking:*
+- `sink_detection_ki` — the verified KI sink with `ki_id = <index>/<slug-of-title>`, `type = "detection"`, `content` (with the materialized query repeated as prose), and `attributes` (esql, query_type, severity_score, confidence, evidence, expires_at).
+- `sink_feature_ki` — the verified KI sink with `ki_id = <index>/<slug>`, `type = "feature"`, `content`, and `attributes` (subtype, slug, evidence_doc_ids, confidence, evidence, expires_at).
+- Detections carry `attributes.esql`, so the ES|QL verifiers actually run on `verifyKi` here: a detection whose query fails verification is reported (verifier + reason) and not written.
+
+*Lifecycle and dedup:*
+- Set `attributes.expires_at` ~30 days from now; agents and the freshness guard treat an expired KI as stale, so a detection whose condition no longer appears in the data simply ages out.
+- **Expiry-based freshness guard** (not the simple `@timestamp` recency check Strategy 1 uses): before the grounding steps, query the target for the newest non-expired KI for this source index — `attributes.expires_at` is a `flattened` (keyword) string, so compare it as `WHERE TO_DATETIME(FIELD_EXTRACT(attributes, "expires_at")) > NOW()`; if one exists, skip the profiling run entirely.
+- Cross-run dedup: set `ki_id = <index>/<normalized-slug>` so a re-run replaces the same KI, and apply the fingerprint + merge rules from the grounding contract so near-duplicate detections/features (same condition, slightly different title) collapse into one rather than accumulating.
+
+## Adapting the recipe
+
+- **Scheduling:** When the workflow runs on a schedule, read the KI's last-profiled date with an `elasticsearch.search` step using an `ids` query on `<ki_id>` and `ignore_unavailable: true` — empty hits (not an error) means never profiled, including before the backing index exists on the first run. `createKi` refreshes `@timestamp` on each replace; merge flows using `updateKi` should compare `attributes.last_profiled_at` instead — see the KI upsert note. Skip re-profiling if the source index has not been updated since that timestamp (e.g. check with `elasticsearch.search` using a `range` query on the source index's `@timestamp`). This avoids burning LLM tokens on unchanged data.
+
+- **Large or noisy indices (multi-iteration with exclusion):** For indices whose content cannot be captured in a single 20-document random sample, use a while-loop convergence pattern: `sample_docs` → `profile_index` → merge into the accumulated result → repeat. Crucially, **exclude what you've already covered on each re-sample** rather than re-rolling blindly: add a `must_not` filter for the entities/patterns already profiled (e.g. `must_not` on known `service.name` values) so each pass sees *new* data instead of re-profiling the same dominant records. Combine with `random_score` for variety within the not-yet-covered slice. Stop when a pass surfaces nothing new, `coverage` meets threshold, or max iterations is reached — whichever comes first. Merge per the dedup rules in the grounding contract.
+
+- **Validate-and-repair broken `esql_example`:** `verify_ki` fails the whole KI when any query in `attributes.esql` fails to parse, and the gate then skips the write — one broken example holds back the full profile, by design. The failing query and reason appear in `steps.verify_ki.output.results`. Repair at authoring time: use `platform.core.generate_esql` — pass the failing query, the reason, and the index mapping as context — then tighten the `ai.prompt` ES|QL rules or fix the query source, and re-run.
 
 ## Handling edge cases
 
@@ -357,7 +687,7 @@ user understands their data better.
 **Very large corpus (> 10,000 documents):**
 The ES|QL cap is 10,000 rows per query. Use `platform.workflows.get_examples` to find the
 `esql_to_index` pagination pattern (offset-based batching). Adapt it by replacing the index
-step with `ai.prompt` + `elasticsearch.index`.
+step with `ai.prompt` + the verified KI sink.
 
 **Poor pilot results (generic, inaccurate, or empty KIs):**
 Ask: "The KIs look [generic / inaccurate / sparse]. Does the source data actually contain the

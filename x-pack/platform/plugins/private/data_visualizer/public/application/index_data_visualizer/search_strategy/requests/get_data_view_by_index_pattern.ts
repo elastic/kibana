@@ -10,7 +10,7 @@ import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public'
 import {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
-  getTimeFieldFromESQLQuery,
+  parseTimeFieldFromESQLQuery,
 } from '@kbn/esql-utils';
 
 /**
@@ -28,7 +28,7 @@ export async function getOrCreateDataViewByIndexPattern(
   http: HttpStart
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query);
-  const newTimeField = getTimeFieldFromESQLQuery(query);
+  const newTimeField = parseTimeFieldFromESQLQuery(query);
 
   if (
     currentDataView?.isPersisted() ||

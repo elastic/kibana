@@ -7,7 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 import {} from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -18,6 +18,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CasePlugin } from './plugin';
 import type { ConfigType } from './config';
 import { ALLOWED_MIME_TYPES } from '../common/constants/mime_types';
@@ -25,12 +26,24 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
+  INTERNAL_CASE_WORKFLOW_RUN_URL,
 } from '../common/constants';
 import type { CasesServerSetupDependencies, CasesServerStartDependencies } from './types';
+import { CasesClientFactory } from './client/factory';
+import { createCasesClientMock } from './client/mocks';
+
+jest.mock('./connectors', () => ({ registerConnectorTypes: jest.fn() }));
+jest.mock('./workflows', () => ({ registerCaseWorkflowSteps: jest.fn() }));
+jest.mock('./agent_builder', () => ({ registerCasesAgentBuilderTools: jest.fn() }));
+
+const { registerConnectorTypes } = jest.requireMock('./connectors');
+const { registerCaseWorkflowSteps } = jest.requireMock('./workflows');
+const { registerCasesAgentBuilderTools } = jest.requireMock('./agent_builder');
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {
     enabled: true,
+    assigneeIdentity: { enabled: true },
     markdownPlugins: { lens: true },
     files: { maxSize: 1, allowedMimeTypes: ALLOWED_MIME_TYPES },
     stack: { enabled: true },
@@ -44,6 +57,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
       resetPageDelayMs: 0,
     },
     templates: { enabled: true },
+    runWorkflows: { enabled: true },
     casesRedesign: { list: false, details: false, settings: false },
     attachments: { enabled: true },
     chat: { enabled: true },
@@ -132,6 +146,38 @@ describe('Cases Plugin', () => {
       expect(pluginsSetup.features.registerKibanaFeature).not.toHaveBeenCalled();
     });
 
+    it('registers the workflow execution route when run workflows is enabled', () => {
+      pluginsSetup.workflowsManagement = {
+        management: {},
+      } as unknown as WorkflowsServerPluginSetup;
+
+      plugin.setup(coreSetup, pluginsSetup);
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const registeredPostPaths = (router.post.mock.calls as Array<[{ path: string }]>).map(
+        ([options]) => options.path
+      );
+      expect(registeredPostPaths).toContain(INTERNAL_CASE_WORKFLOW_RUN_URL);
+    });
+
+    it('does not register the workflow execution route when run workflows is disabled', () => {
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({ runWorkflows: { enabled: false } })
+      );
+      const pluginWithRunWorkflowsDisabled = new CasePlugin(context);
+      pluginsSetup.workflowsManagement = {
+        management: {},
+      } as unknown as WorkflowsServerPluginSetup;
+
+      pluginWithRunWorkflowsDisabled.setup(coreSetup, pluginsSetup);
+
+      const router = coreSetup.http.createRouter.mock.results[0].value;
+      const registeredPostPaths = (router.post.mock.calls as Array<[{ path: string }]>).map(
+        ([options]) => options.path
+      );
+      expect(registeredPostPaths).not.toContain(INTERNAL_CASE_WORKFLOW_RUN_URL);
+    });
+
     it('should always register cases-attachments SO', async () => {
       plugin.setup(coreSetup, pluginsSetup);
 
@@ -182,6 +228,9 @@ describe('Cases Plugin', () => {
               "reconciliationIntervalMinutes": 30,
               "resetPageDelayMs": 0,
               "resetTaskTimeoutMinutes": 60,
+            },
+            "assigneeIdentity": Object {
+              "enabled": true,
             },
             "attachments": Object {
               "enabled": true,
@@ -296,6 +345,9 @@ describe('Cases Plugin', () => {
             "markdownPlugins": Object {
               "lens": true,
             },
+            "runWorkflows": Object {
+              "enabled": true,
+            },
             "stack": Object {
               "enabled": true,
             },
@@ -304,11 +356,61 @@ describe('Cases Plugin', () => {
             },
           },
           "getCasesClientWithRequest": [Function],
-          "getExternalReferenceAttachmentTypeRegistry": [Function],
-          "getPersistableStateAttachmentTypeRegistry": [Function],
+          "getCasesEventBus": [Function],
           "getUnifiedAttachmentTypeRegistry": [Function],
         }
       `);
+    });
+  });
+
+  describe('client source propagation', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const request = httpServerMock.createKibanaRequest();
+
+    it('passes the correct source for each client path', async () => {
+      const createClient = jest
+        .spyOn(CasesClientFactory.prototype, 'create')
+        .mockResolvedValue(createCasesClientMock());
+
+      context = coreMock.createPluginInitializerContext<ConfigType>(
+        getConfig({
+          incrementalId: {
+            enabled: false,
+            taskIntervalMinutes: 10,
+            taskStartDelayMinutes: 10,
+          },
+        })
+      );
+      plugin = new CasePlugin(context);
+      pluginsSetup.agentBuilder = {} as NonNullable<CasesServerSetupDependencies['agentBuilder']>;
+
+      coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+
+      plugin.setup(coreSetup, pluginsSetup);
+      const startContract = plugin.start(coreStart, pluginsStart);
+
+      const clients = [
+        ['connector', registerConnectorTypes.mock.calls[0][0].getCasesClient],
+        ['workflow', registerCaseWorkflowSteps.mock.calls[0][1]],
+        ['agent_builder', registerCasesAgentBuilderTools.mock.calls[0][1]],
+        ['plugin_contract', startContract.getCasesClientWithRequest],
+      ] as const;
+
+      for (const [expectedSource, getCasesClient] of clients) {
+        createClient.mockClear();
+
+        await getCasesClient(request);
+
+        expect(createClient).toHaveBeenCalledWith(
+          expect.objectContaining({
+            request,
+            clientSource: expectedSource,
+          })
+        );
+      }
     });
   });
 });

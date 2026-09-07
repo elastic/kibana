@@ -97,7 +97,7 @@ export const Zoom: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -125,6 +125,7 @@ export const Zoom: ConnectorSpec = {
   actions: {
     whoAmI: {
       isTool: true,
+      scope: 'read',
       description:
         'Get the profile of the currently authenticated Zoom user, including name, email, role, timezone, and personal meeting URL. Use this first to confirm which account is connected and to obtain the userId for other actions.',
       input: ZoomWhoAmIInputSchema,
@@ -138,6 +139,7 @@ export const Zoom: ConnectorSpec = {
 
     listMeetings: {
       isTool: true,
+      scope: 'read',
       description:
         'List meetings for a user. Use type=upcoming (default) for future meetings, type=live for in-progress meetings, type=scheduled for all scheduled meetings, or type=previous_meetings for past meetings. Returns meeting topics, start times, durations, and join URLs.',
       input: ZoomListMeetingsInputSchema,
@@ -174,6 +176,7 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingDetails: {
       isTool: true,
+      scope: 'read',
       description:
         'Get details of a scheduled or recurring meeting, including topic, agenda, start time, duration, timezone, host info, join URL, and settings. Use this for upcoming/recurring meetings to understand what a meeting is about before looking at recordings or participants.',
       input: ZoomGetMeetingDetailsInputSchema,
@@ -224,6 +227,7 @@ export const Zoom: ConnectorSpec = {
 
     getPastMeetingDetails: {
       isTool: true,
+      scope: 'read',
       description:
         'Get summary information for a meeting that has already ended. Returns total minutes, participant count, start/end times. Only works for past meetings — use getMeetingDetails for upcoming/scheduled meetings.',
       input: ZoomGetPastMeetingDetailsInputSchema,
@@ -261,6 +265,7 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingRecordings: {
       isTool: true,
+      scope: 'read',
       description:
         'Get cloud recording files for a specific meeting. Returns recording_files entries with recording_type (e.g. audio_transcript for VTT transcripts, chat_file for TXT chat logs, shared_screen_with_speaker_view for MP4 video), file_type, file_size, download_url, and status. Use the download_url values with downloadRecordingFile to fetch the actual content.',
       input: ZoomGetMeetingRecordingsInputSchema,
@@ -294,6 +299,7 @@ export const Zoom: ConnectorSpec = {
 
     listUserRecordings: {
       isTool: true,
+      scope: 'read',
       description:
         'List cloud recordings for a user within a date range (max 1 month). Returns meetings with their recording_files entries (including audio_transcript for VTT transcripts and chat_file for TXT chat logs). Use the download_url values from recording_files with downloadRecordingFile to fetch the actual content. Use this when you need recordings across multiple meetings; use getMeetingRecordings when you already know the specific meeting ID.',
       input: ZoomListUserRecordingsInputSchema,
@@ -342,6 +348,7 @@ export const Zoom: ConnectorSpec = {
 
     downloadRecordingFile: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a Zoom recording file by its download_url. Works for transcripts (recording_type=audio_transcript, VTT format), chat logs (recording_type=chat_file, TXT format), and other recording file types. Obtain the download_url from getMeetingRecordings or listUserRecordings — look for recording_files entries with the desired recording_type. Returns the file content as UTF-8 text, truncated to maxChars if needed. Check the truncated flag in the response.',
       input: ZoomDownloadRecordingFileInputSchema,
@@ -374,6 +381,7 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingParticipants: {
       isTool: true,
+      scope: 'read',
       description:
         'List participants of a past meeting. Returns participant name, email, join/leave times, and duration. Only works for meetings that have ended.',
       input: ZoomGetMeetingParticipantsInputSchema,
@@ -408,6 +416,7 @@ export const Zoom: ConnectorSpec = {
 
     getMeetingRegistrants: {
       isTool: true,
+      scope: 'read',
       description:
         'List registrants of a meeting. Works for future and past meetings that have registration enabled. Returns registrant name, email, and registration status.',
       input: ZoomGetMeetingRegistrantsInputSchema,
@@ -457,21 +466,9 @@ export const Zoom: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Zoom test handler — checking /users/me');
-
-      try {
-        const response = await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
-        const displayName =
-          `${response.data.first_name ?? ''} ${response.data.last_name ?? ''}`.trim() ||
-          response.data.email ||
-          'Unknown';
-        return {
-          ok: true,
-          message: `Successfully connected to Zoom as: ${displayName}`,
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      await ctx.client.get(`${ZOOM_API_BASE}/users/me`);
+      return {};
     },
+    enabled: true,
   },
 };

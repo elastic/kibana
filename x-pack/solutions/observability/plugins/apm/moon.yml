@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/fleet-plugin'
   - '@kbn/i18n'
   - '@kbn/es-query'
+  - '@kbn/ui-callout'
   - '@kbn/ui-theme'
   - '@kbn/synthtrace-client'
   - '@kbn/lens-plugin'
@@ -72,7 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-saved-objects-api-server-mocks'
   - '@kbn/field-types'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/safer-lodash-set'
   - '@kbn/shared-ux-router'
@@ -142,6 +143,7 @@ dependsOn:
   - '@kbn/cases-plugin'
   - '@kbn/apm-ui-shared'
   - '@kbn/shared-ux-error-boundary'
+  - '@kbn/react-hooks'
   - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
   - '@kbn/discover-shared-plugin'
@@ -174,6 +176,10 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/apm-shared'
+  - '@kbn/app-header'
+  - '@kbn/core-chrome-app-menu-components'
+  - '@kbn/core-chrome-browser-hooks'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod

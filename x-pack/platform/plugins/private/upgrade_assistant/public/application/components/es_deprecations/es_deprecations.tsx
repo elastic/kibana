@@ -9,7 +9,8 @@ import React, { useEffect, useMemo } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 
-import { EuiPageHeader, EuiSpacer, EuiLink, EuiCallOut } from '@elastic/eui';
+import { EuiPageHeader, EuiSpacer, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -175,18 +176,17 @@ export const EsDeprecations = withRouter(({ history }: RouteComponentProps) => {
         <>
           {remoteClusters && remoteClusters.length > 0 && (
             <>
-              <EuiCallOut
+              <KbnWarningCallout
                 announceOnMount={false}
                 title={i18nTexts.remoteClustersDetectedTitle}
-                color="warning"
-                iconType="question"
                 data-test-subj="remoteClustersWarningCallout"
-              >
-                <p>
-                  {i18nTexts.getRemoteClustersDetectedDescription(remoteClusters.length)}{' '}
-                  <RemoteClustersAppLink />
-                </p>
-              </EuiCallOut>
+                text={
+                  <p>
+                    {i18nTexts.getRemoteClustersDetectedDescription(remoteClusters.length)}{' '}
+                    <RemoteClustersAppLink />
+                  </p>
+                }
+              />
               <EuiSpacer />
             </>
           )}

@@ -25,7 +25,7 @@ const baseRuleResponse: RuleResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', owner: 'test-owner', tags: ['tag1'] },
+  metadata: { name: 'Test Rule', version: 1, owner: 'test-owner', tags: ['tag1'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '2m' },
   query: {
@@ -33,10 +33,10 @@ const baseRuleResponse: RuleResponse = {
     base: BASE,
     breach: { segment: ALERT_SEGMENT },
   },
-  createdBy: 'test',
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedBy: 'test',
-  updatedAt: '2026-01-01T00:00:00Z',
+  created_by: 'test',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_by: 'test',
+  updated_at: '2026-01-01T00:00:00Z',
 };
 
 const baseFormValues: FormValues = {
@@ -149,16 +149,6 @@ describe('composeFormToCreateRequest', () => {
     expect(result.no_data_strategy).toBe('recover');
   });
 
-  it('omits no_data_strategy for signal rules even when set', () => {
-    const values: FormValues = {
-      ...baseFormValues,
-      kind: 'signal',
-      noDataStrategy: 'recover',
-    };
-    const result = composeFormToCreateRequest(values);
-    expect(result.no_data_strategy).toBeUndefined();
-  });
-
   it('omits no_data_strategy when undefined', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.no_data_strategy).toBeUndefined();
@@ -207,58 +197,78 @@ describe('composeFormToCreateRequest', () => {
     );
   });
 
-  it('trims runbook and dashboard artifacts', () => {
+  it('passes runbook and dashboard artifacts through with data unchanged', () => {
     const values: FormValues = {
       ...baseFormValues,
       runbookArtifacts: [
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+        {
+          id: 'runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: '  Runbook steps  ' },
+        },
       ],
       dashboardArtifacts: [
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: '  dashboard-123  ' },
+        },
       ],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
-      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      {
+        id: 'runbook-id',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: '  Runbook steps  ' },
+      },
+      {
+        id: 'dashboard-id',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        data: { dashboardId: '  dashboard-123  ' },
+      },
     ]);
   });
 
-  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+  it('passes empty-looking runbook and dashboard artifacts through without filtering', () => {
     const values: FormValues = {
       ...baseFormValues,
-      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
-      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
-      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
-    };
-
-    const result = composeFormToCreateRequest(values);
-
-    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
-  });
-
-  it('generates missing IDs for runbook and dashboard artifacts', () => {
-    const values: FormValues = {
-      ...baseFormValues,
-      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
-      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+      runbookArtifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      ],
+      dashboardArtifacts: [
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+      ],
+      artifacts: [{ id: 'other-id', type: 'other', data: { value: 'kept' } }],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      expect.objectContaining({
-        id: expect.stringMatching(/^runbook-/),
-        type: RUNBOOK_ARTIFACT_TYPE,
-        value: 'Runbook steps',
-      }),
-      expect.objectContaining({
-        id: expect.stringMatching(/^dashboard-/),
-        type: DASHBOARD_ARTIFACT_TYPE,
-        value: 'dashboard-123',
-      }),
+      { id: 'other-id', type: 'other', data: { value: 'kept' } },
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+    ]);
+  });
+
+  it('passes empty artifact ids through without generating replacements', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [
+        { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      ],
+      dashboardArtifacts: [
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
     ]);
   });
 });
@@ -277,6 +287,24 @@ describe('composeFormToUpdateRequest', () => {
     expect(result.artifacts).toBeNull();
     expect(result.recovery_strategy).toBeNull();
     expect(result.no_data_strategy).toBeNull();
+  });
+
+  it('nullifies tags when empty (clear all tags on a partial update)', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: [] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('preserves tags when present', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, tags: ['prod', 'infra'] },
+    };
+    const result = composeFormToUpdateRequest(values);
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
   });
 
   it('preserves grouping when present', () => {
@@ -376,6 +404,25 @@ describe('mapRuleToComposeFormValues', () => {
       expect(result.query.base).toBe(BASE);
       expect(result.query.breach.segment).toBe(ALERT_SEGMENT);
     }
+  });
+
+  it('round-trips an omitted composed breach through the form as an empty segment', () => {
+    const rule: RuleResponse = {
+      ...baseRuleResponse,
+      query: { format: 'composed', base: BASE },
+    };
+
+    const formValues = mapRuleToComposeFormValues(rule);
+
+    expect(formValues.query).toEqual({
+      format: 'composed',
+      base: BASE,
+      breach: { segment: '' },
+    });
+    expect(composeFormToCreateRequest(formValues).query).toEqual({
+      format: 'composed',
+      base: BASE,
+    });
   });
 
   it('maps recovery segment from composed query when recovery_strategy: query', () => {
@@ -487,18 +534,18 @@ describe('mapRuleToComposeFormValues', () => {
     const rule = {
       ...baseRuleResponse,
       artifacts: [
-        { id: 'host-id', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
-        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+        { id: 'host-id', type: 'host', data: { value: 'host-a' } },
+        { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
       ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', data: { value: 'host-a' } }]);
     expect(result.runbookArtifacts).toEqual([
-      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+      { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
     ]);
     expect(result.dashboardArtifacts).toEqual([
-      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
     ]);
   });
 

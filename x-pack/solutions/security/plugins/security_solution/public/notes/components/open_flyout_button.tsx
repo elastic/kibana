@@ -17,8 +17,9 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { DocumentEventTypes } from '../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
   'xpack.securitySolution.notes.openFlyoutButtonLabel',
@@ -48,7 +49,8 @@ export interface OpenFlyoutButtonIconProps {
  */
 export const OpenFlyoutButtonIcon = memo(
   ({ eventId, timelineId, iconType }: OpenFlyoutButtonIconProps) => {
-    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+    const { dataView } = useDataView(PageScope.timeline);
+    const selectedPatterns = useSelectedPatterns(dataView);
 
     const { telemetry } = useKibana().services;
     const { openFlyout } = useExpandableFlyoutApi();
@@ -58,7 +60,11 @@ export const OpenFlyoutButtonIcon = memo(
     const handleClick = useCallback(() => {
       const indexName = selectedPatterns.join(',');
       if (enableNewFlyout) {
-        openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+        openDocumentFlyoutFromPattern({
+          documentId: eventId,
+          indexName,
+          origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+        });
       } else {
         openFlyout({
           right: {

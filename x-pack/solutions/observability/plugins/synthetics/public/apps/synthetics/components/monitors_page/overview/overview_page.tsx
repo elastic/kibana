@@ -8,14 +8,21 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { selectOverviewView, selectServiceLocationsState } from '../../../state';
+import {
+  selectOverviewPageState,
+  selectOverviewView,
+  selectServiceLocationsState,
+} from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
+import { isExternalOverviewMonitor } from '../../../state/overview_status';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
+import { useCpsLinkedProjects } from '../../../hooks/use_cps_linked_projects';
+import { shouldRedirectToGettingStarted } from '../hooks/should_redirect_to_getting_started';
 
 import { useMonitorList } from '../hooks/use_monitor_list';
 import { useOverviewStatus } from '../hooks/use_overview_status';
@@ -44,8 +51,6 @@ export const OverviewPage: React.FC = () => {
 
   const dispatch = useDispatch();
 
-  const { search } = useLocation();
-
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
   useSyntheticsPageReady({
@@ -60,9 +65,17 @@ export const OverviewPage: React.FC = () => {
 
   const { isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+  const {
+    allConfigs,
+    loaded: overviewLoaded,
+    settled: overviewSettled,
+    error: overviewError,
+  } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
+  const { cpsReady, hasLinkedProjects } = useCpsLinkedProjects();
+
+  const pageState = useSelector(selectOverviewPageState);
 
   const {
     loading: monitorsLoading,
@@ -71,7 +84,49 @@ export const OverviewPage: React.FC = () => {
     absoluteTotal,
   } = useMonitorList();
 
-  const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
+  // An overview monitor filter is active. Unlike `absoluteTotal` (which the server
+  // counts filter-independently), the overview-status `allConfigs` IS filtered — the
+  // active filters are forwarded to the request (see `toStatusOverviewQueryArgs`), so a
+  // filter that excludes every monitor makes `allConfigs` empty even when monitors exist.
+  // The date range is intentionally excluded: it scopes each monitor's status, not which
+  // monitors exist, so it must not suppress the Getting Started redirect.
+  const hasActiveOverviewFilter = Boolean(
+    pageState.query ||
+      pageState.tags?.length ||
+      pageState.locations?.length ||
+      pageState.monitorTypes?.length ||
+      pageState.projects?.length ||
+      pageState.schedules?.length
+  );
+
+  // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
+  // so they are absent from `absoluteTotal` but present in the overview status
+  // `allConfigs`. Wait for the overview status to settle and keep the page mounted when it
+  // holds such monitors, so we don't redirect to Getting Started (and flash the grid)
+  // when the only monitors are ping-driven.
+  //
+  // A failed status fetch must not look like an empty install — that onboarded
+  // users away from CPS linked-project remotes when the first request was origin-only.
+  //
+  // We suppress the redirect while a monitor filter is active: because `allConfigs` is
+  // filtered, an empty result there doesn't prove the deployment has no monitors — a
+  // filter could simply be excluding the ping-only ones. Onboarding away from a filtered
+  // view of a ping-only deployment would be wrong, so we keep the user on the overview
+  // (showing `NoMonitorsFound`) instead. This gate is scoped to real monitor filters, not
+  // the raw URL query string, so unrelated params (the date range) still allow the
+  // redirect on a genuinely empty deployment.
+  const hasNoMonitors =
+    !enablementLoading &&
+    monitorsLoaded &&
+    shouldRedirectToGettingStarted({
+      absoluteTotal,
+      overviewSettled,
+      overviewError: Boolean(overviewError),
+      hasActiveFilter: hasActiveOverviewFilter,
+      hasExternalMonitors: allConfigs.some(isExternalOverviewMonitor),
+      cpsReady,
+      hasLinkedProjects,
+    });
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;

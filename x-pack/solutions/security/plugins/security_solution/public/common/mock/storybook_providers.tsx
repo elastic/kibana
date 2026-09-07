@@ -78,7 +78,7 @@ const mockGraphResponse = {
       label: '/bin/bash',
       color: 'warning',
       shape: 'rectangle',
-      icon: 'console',
+      icon: 'commandLine',
     },
   ],
   edges: [

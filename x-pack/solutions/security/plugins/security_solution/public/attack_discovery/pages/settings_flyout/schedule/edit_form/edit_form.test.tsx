@@ -77,6 +77,26 @@ jest.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_con
     />
   ),
 }));
+// Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
+// alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
+// stub keeps the `alertSelection` marker and an `alertsRange` control wired to
+// `onSettingsChanged` so the settings-change assertion still exercises it.
+jest.mock('../../alert_selection', () => ({
+  AlertSelection: ({
+    settings,
+    onSettingsChanged,
+  }: {
+    settings: Record<string, unknown>;
+    onSettingsChanged?: (settings: Record<string, unknown>) => void;
+  }) => (
+    <div data-test-subj="alertSelection">
+      <input
+        data-test-subj="alertsRange"
+        onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+      />
+    </div>
+  ),
+}));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const onChangeMock = jest.fn();
@@ -107,12 +127,24 @@ const renderComponent = async () => {
   });
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/255131
-describe.skip('EditForm', () => {
+describe('EditForm', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Stub the heavy `triggers_actions_ui` ActionForm that `RuleActionsField`
+    // mounts via `getActionForm` -> `getActionFormLazy` (a `React.lazy`/`Suspense`
+    // subtree). Its first render pays a large one-time lazy-import cost and its
+    // connector/action-type loads never settle under jsdom, which was the
+    // dominant remaining cost that tripped Jest's 5s per-test timeout in CI (see
+    // https://github.com/elastic/kibana/issues/255131). Unlike the sibling
+    // `create_flyout` suite, we cannot blanket-stub `RuleActionsField` here
+    // because tests below assert that `getActionForm` is invoked with specific
+    // props, so we keep `RuleActionsField` live and stub `getActionForm` itself.
+    mockTriggersActionsUi.getActionForm = jest
+      .fn()
+      .mockReturnValue(<div data-test-subj="mockActionForm" />);
 
     mockUseKibana.mockReturnValue({
       services: {
@@ -206,7 +238,7 @@ describe.skip('EditForm', () => {
     await renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Select a connector type')).toBeInTheDocument();
+      expect(screen.getByTestId('mockActionForm')).toBeInTheDocument();
     });
   });
 
@@ -524,6 +556,42 @@ describe.skip('EditForm', () => {
       await waitFor(() => {
         expect(screen.getByTestId('alertRetrievalStep')).toBeInTheDocument();
       });
+    });
+
+    it('includes DEFAULT_WORKFLOW_CONFIGURATION in submit data when initialValue has no workflowConfig (C3: legacy schedule migration)', async () => {
+      // Simulate a legacy schedule (created with FF-off, no workflowConfig)
+      // opened for editing under FF-on. The form must submit DEFAULT_WORKFLOW_CONFIGURATION
+      // so that the server persists workflowConfig and the schedule migrates.
+      const onChange = jest.fn();
+
+      await act(() => {
+        render(
+          <TestProviders>
+            <EditForm
+              initialValue={{
+                ...defaultProps.initialValue,
+                connectorId: 'test-id',
+                name: 'Legacy Schedule',
+                // NOTE: no workflowConfig — this is the legacy case
+              }}
+              isWorkflowsEnabled={true}
+              onChange={onChange}
+            />
+          </TestProviders>
+        );
+      });
+
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalled();
+      });
+
+      let result: { isValid: boolean; data: Record<string, unknown> } | undefined;
+      await act(async () => {
+        const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+        result = await lastCall.submit();
+      });
+
+      expect(result!.data.workflowConfig).toEqual(DEFAULT_WORKFLOW_CONFIGURATION);
     });
 
     it('invokes onChange when rendered with workflow config', async () => {

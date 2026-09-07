@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type {
   SavedObject,
+  SavedObjectErrorResult,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -15,10 +16,11 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
+import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
 import {
   UNIFIED_ALERT_TYPES_ARRAY,
@@ -47,7 +49,7 @@ import {
   resolveAttachmentSavedObjectTypes,
 } from '../../common/attachments';
 import { buildFilter, combineFilters } from '../../client/utils';
-import { defaultSortField } from '../../common/utils';
+import { defaultSortField, getIDsAndIndicesAsArrays } from '../../common/utils';
 import type { AggregationResponse } from '../../client/metrics/types';
 import {
   extractAttachmentSORefsFromAttributes,
@@ -168,17 +170,35 @@ export class AttachmentService {
    *
    * Used by the case metrics handler to display the alert count to the user.
    */
-  public async countAlertsAttachedToCase(
-    params: AlertsAttachedToCaseArgs
-  ): Promise<number | undefined> {
-    const { caseId, filter: authorizationFilter } = params;
+  public async countAlertsAttachedToCase({
+    caseId,
+    filter: authorizationFilter,
+    owner,
+    originOnly = true,
+  }: AlertsAttachedToCaseArgs): Promise<number | undefined> {
     try {
       this.context.log.debug(`Attempting to count alerts for case id ${caseId}`);
-      return this.aggregateAlertsForCase({
+
+      const documents = await this.getter.getAllDocumentsAttachedToCase({
         caseId,
-        aggType: 'cardinality',
-        extraFilter: authorizationFilter,
+        filter: authorizationFilter,
+        attachmentTypes: [AttachmentType.alert],
+        owner,
       });
+
+      const alertIds = new Set<string>();
+      for (const document of documents) {
+        const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
+
+        ids.forEach((id, index) => {
+          const alertIndex = indices[index];
+          if (!originOnly || alertIndex == null || !isNonLocalIndexName(alertIndex)) {
+            alertIds.add(id);
+          }
+        });
+      }
+
+      return alertIds.size;
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
       throw error;
@@ -196,7 +216,7 @@ export class AttachmentService {
       this.context.log.debug(
         `Attempting to count all alerts (legacy + unified) for case ${caseId}`
       );
-      return this.aggregateAlertsForCase({ caseId, aggType: 'value_count' });
+      return this.aggregateAlertsForCase(caseId);
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case ${caseId}: ${error}`);
       throw error;
@@ -204,21 +224,10 @@ export class AttachmentService {
   }
 
   /**
-   * Shared aggregation across legacy (`cases-comments.attributes.alertId`) and
-   * unified (`cases-attachments.attributes.attachmentId`) alert storage.
-   *
-   * @param aggType `'cardinality'` for unique alert ids, `'value_count'` for occurrences.
-   * @param extraFilter additional KueryNode (e.g. authorization) AND-combined onto the type filter.
+   * Aggregates alert occurrence counts across legacy (`cases-comments.attributes.alertId`)
+   * and unified (`cases-attachments.attributes.attachmentId`) alert storage.
    */
-  private async aggregateAlertsForCase({
-    caseId,
-    aggType,
-    extraFilter,
-  }: {
-    caseId: string;
-    aggType: 'cardinality' | 'value_count';
-    extraFilter?: KueryNode;
-  }): Promise<number> {
+  private async aggregateAlertsForCase(caseId: string): Promise<number> {
     const typeFilters: Array<KueryNode | undefined> = [
       buildFilter({
         filters: [AttachmentType.alert],
@@ -236,15 +245,14 @@ export class AttachmentService {
 
     const aggregations: Record<string, estypes.AggregationsAggregationContainer> = {
       legacyAlerts: {
-        [aggType]: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
+        value_count: { field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId` },
       },
       unifiedAlerts: {
-        [aggType]: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
+        value_count: { field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId` },
       },
     };
 
-    const combinedTypeFilter = combineFilters(typeFilters, 'or');
-    const combinedFilter = combineFilters([combinedTypeFilter, extraFilter]);
+    const combinedFilter = combineFilters(typeFilters, 'or');
 
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
@@ -622,8 +630,8 @@ export class AttachmentService {
     > = [];
 
     for (const so of res.saved_objects) {
-      if (isSOError(so)) {
-        validatedAttachments.push(so as AttachmentSavedObjectTransformed);
+      if (isSavedObjectErrorResult(so)) {
+        validatedAttachments.push(so as unknown as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         successesToMirror.push(so);
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
@@ -854,9 +862,10 @@ export class AttachmentService {
       }
 
       const mergedSavedObjects: Array<
-        SavedObjectsUpdateResponse<
-          AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
-        >
+        | SavedObjectsUpdateResponse<
+            AttachmentPersistedAttributes | UnifiedAttachmentPersistedAttributes
+          >
+        | SavedObjectErrorResult
       > = new Array(comments.length);
 
       // Issue the two bulkUpdate calls in parallel for the mixed-bucket path.
@@ -949,11 +958,13 @@ export class AttachmentService {
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
 
-      if (isSOError(attachment)) {
+      if (isSavedObjectErrorResult(attachment)) {
         // Forcing the type here even though it is an error. The client is responsible for
         // determining what to do with the errors
         // TODO: we should fix the return type of this function so that it can return errors
-        validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
+        validatedAttachments.push(
+          attachment as unknown as SavedObjectsUpdateResponse<AttachmentAttributesV2>
+        );
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
         // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
         // the full merged document. Match single update(): return the validated patch from the request.

@@ -987,7 +987,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'error on some-id http event: maxContentLength size of 1000000 exceeded'
     );
   });
@@ -1595,6 +1595,105 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toContain('https://abc.def/api/v1/endpoint?');
     expect(requestMock.mock.calls[0][0].url).toContain('key1=value1');
     expect(requestMock.mock.calls[0][0].url).toContain('key2=value2');
+  });
+
+  test('execute preserves a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe('https://abc.def/api/users.info?user=U123');
+  });
+
+  test('execute preserves query strings in both the base URL and path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def?tenant=1',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/users.info?user=U123',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/users.info?tenant=1&user=U123'
+    );
+  });
+
+  test('execute preserves the raw encoding of a query string embedded in path', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~'
+    );
+  });
+
+  test('execute combines inline, explicit, and secret query parameters', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+      hasAuth: false,
+    };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: {
+        ...emptySecrets,
+        secretQueryParams: { apiKey: 'secret-api-key' },
+      },
+      params: {
+        method: 'GET',
+        path: '/api/search?q=a%20b&flag&symbol=~',
+        query: { page: '1' },
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].url).toBe(
+      'https://abc.def/api/search?q=a%20b&flag&symbol=~&apiKey=secret-api-key&page=1'
+    );
   });
 
   test('execute injects secretQueryParams from connector secrets into URL', async () => {

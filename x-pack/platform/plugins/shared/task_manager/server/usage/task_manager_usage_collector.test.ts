@@ -49,7 +49,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.task_type_exclusion).toEqual(['actions:*']);
   });
@@ -79,7 +79,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.recurring_tasks).toEqual({
       actual_service_time: mockUtilizationStats?.value.recurring.ran.service_time.actual,
@@ -114,7 +114,7 @@ describe('registerTaskManagerUsageCollector', () => {
     monitoringUtilization$.next(mockUtilization);
     await sleep(1001);
 
-    expect(usageCollectionMock.makeUsageCollector).toBeCalled();
+    expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
     const telemetry: TaskManagerUsage = (await collector.fetch(fetchContext)) as TaskManagerUsage;
     expect(telemetry.capacity).toEqual(10);
   });
@@ -132,7 +132,7 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
         status: HealthStatus.OK,
         value: {
           capacity: { config: 10, as_cost: 20, as_workers: 10 },
-          claim_strategy: 'update_by_query',
+          claim_strategy: 'mget',
           poll_interval: 3000,
           request_capacity: 1000,
           monitored_aggregated_stats_refresh_rate: 5000,
@@ -143,6 +143,10 @@ function getMockMonitoredHealth(overrides = {}): MonitoredHealth {
               warn_threshold: 80,
             },
             custom: {},
+          },
+          execution_control: {
+            paused: false,
+            paused_task_types: [],
           },
         },
       },

@@ -1608,7 +1608,7 @@ Object {
     "anomalyDetectorTypes": Object {
       "flags": Object {
         "default": [Function],
-        "description": "The types of anomalies that are detected. For example, detect abnormal latency, throughput, or failed transaction rates.",
+        "description": "The types of anomalies that are detected. For example, detect abnormal latency, throughput, failed transaction rates, or low transaction count.",
         "error": [Function],
         "presence": "optional",
       },
@@ -1647,6 +1647,18 @@ Object {
               "schema": Object {
                 "allow": Array [
                   "txFailureRate",
+                ],
+                "flags": Object {
+                  "error": [Function],
+                  "only": true,
+                },
+                "type": "any",
+              },
+            },
+            Object {
+              "schema": Object {
+                "allow": Array [
+                  "txLowCount",
                 ],
                 "flags": Object {
                   "error": [Function],
@@ -6044,6 +6056,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -6262,38 +6275,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -6820,6 +6870,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -7038,38 +7089,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -7581,6 +7669,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -7799,38 +7888,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -8297,6 +8423,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -8515,38 +8642,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -9136,6 +9300,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -9354,38 +9519,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -9924,6 +10126,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -10142,38 +10345,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -10638,6 +10878,7 @@ Object {
                   "endpoint_events",
                   "endpoint_host_isolation_exceptions",
                   "endpoint_blocklists",
+                  "endpoint_custom_yara_signatures",
                 ],
                 "type": "string",
               },
@@ -10856,38 +11097,75 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "properties": Object {
-                          "command": Object {
-                            "enum": Array [
-                              "kill-process",
-                              "suspend-process",
-                            ],
-                            "type": "string",
-                          },
-                          "comment": Object {
-                            "type": "string",
-                          },
-                          "config": Object {
+                        "oneOf": Array [
+                          Object {
                             "properties": Object {
-                              "field": Object {
+                              "command": Object {
+                                "const": "kill-process",
                                 "type": "string",
                               },
-                              "overwrite": Object {
-                                "default": true,
-                                "type": "boolean",
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "kill_descendants": Object {
+                                    "type": "boolean",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
                               },
                             },
                             "required": Array [
-                              "field",
+                              "command",
+                              "config",
                             ],
                             "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
-                          "config",
+                          Object {
+                            "properties": Object {
+                              "command": Object {
+                                "const": "suspend-process",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "properties": Object {
+                                  "field": Object {
+                                    "maxLength": 2000,
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
+                          },
                         ],
-                        "type": "object",
                       },
                       Object {
                         "properties": Object {
@@ -12448,6 +12726,50 @@ Object {
                           ],
                           "type": "alternatives",
                         },
+                        "docsCountPercentage": Object {
+                          "flags": Object {
+                            "default": null,
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "matches": Array [
+                            Object {
+                              "schema": Object {
+                                "flags": Object {
+                                  "error": [Function],
+                                },
+                                "rules": Array [
+                                  Object {
+                                    "args": Object {
+                                      "limit": 0,
+                                    },
+                                    "name": "min",
+                                  },
+                                  Object {
+                                    "args": Object {
+                                      "limit": 100,
+                                    },
+                                    "name": "max",
+                                  },
+                                ],
+                                "type": "number",
+                              },
+                            },
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  null,
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                          ],
+                          "type": "alternatives",
+                        },
                         "enabled": Object {
                           "flags": Object {
                             "default": true,
@@ -12455,6 +12777,45 @@ Object {
                             "presence": "optional",
                           },
                           "type": "boolean",
+                        },
+                        "thresholdType": Object {
+                          "flags": Object {
+                            "default": [Function],
+                            "error": [Function],
+                            "presence": "optional",
+                          },
+                          "matches": Array [
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  "count",
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                            Object {
+                              "schema": Object {
+                                "allow": Array [
+                                  "percentage",
+                                ],
+                                "flags": Object {
+                                  "error": [Function],
+                                  "only": true,
+                                },
+                                "type": "any",
+                              },
+                            },
+                          ],
+                          "metas": Array [
+                            Object {
+                              "x-oas-optional": true,
+                            },
+                          ],
+                          "type": "alternatives",
                         },
                         "timeInterval": Object {
                           "flags": Object {

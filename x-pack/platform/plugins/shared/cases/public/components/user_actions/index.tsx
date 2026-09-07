@@ -17,7 +17,7 @@ import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
-import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
+import { CaseUserAvatar } from '../user_profiles/user_avatar';
 import { UserActionsList } from './user_actions_list';
 import { useUserActionsPagination } from './use_user_actions_pagination';
 import { useLastPageUserActions } from './use_user_actions_last_page';
@@ -147,7 +147,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
             </UserToolTip>
           ),
           'data-test-subj': 'add-comment',
-          timelineAvatar: <HoverableAvatar userInfo={currentUserProfile} />,
+          timelineAvatar: <CaseUserAvatar size="m" userInfo={currentUserProfile} />,
           className: 'isEdit',
           children: MarkdownNewComment,
         },

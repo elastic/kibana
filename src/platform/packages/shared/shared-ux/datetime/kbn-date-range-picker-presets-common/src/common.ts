@@ -16,26 +16,31 @@ export interface PresetItem {
   start: string;
   end: string;
   label?: string;
+  /** Presets from `timepicker:quickRanges` set this to `false`. */
+  isEditable?: boolean;
 }
 
+/**
+ * Legacy shape, where the stored list was the *whole* displayed list: on first
+ * save the quick ranges from UI settings were copied into storage alongside
+ * the user's own presets, which made them deletable. `null` meant "not yet seeded".
+ */
 export interface StoredPresetsV1 {
   version: 1;
   presets: PresetItem[] | null;
 }
 
-export type StoredPresets = StoredPresetsV1;
+/** Holds the user's own presets only; the quick ranges are merged in at read time. */
+export interface StoredPresetsV2 {
+  version: 2;
+  presets: PresetItem[];
+}
 
-export const DEFAULT_STORED_PRESETS: StoredPresets = {
-  version: 1,
-  presets: null,
-};
+export type StoredPresets = StoredPresetsV1 | StoredPresetsV2;
 
-export const normalize = (storedPresets?: StoredPresets): StoredPresets => {
-  if (storedPresets?.version === 1) {
-    return storedPresets;
-  }
-
-  return DEFAULT_STORED_PRESETS;
+export const DEFAULT_STORED_PRESETS: StoredPresetsV2 = {
+  version: 2,
+  presets: [],
 };
 
 /**
@@ -46,11 +51,57 @@ export const normalize = (storedPresets?: StoredPresets): StoredPresets => {
 export const getPresetKey = ({ start, end }: Pick<PresetItem, 'start' | 'end'>): string =>
   `${start}|${end}`;
 
+/**
+ * Reads any stored shape as the v2 user-owned list.
+ *
+ * v1 documents contain a copy of the quick ranges made when the list was
+ * seeded, so those are subtracted to recover the user's own additions. A range
+ * the admin has since removed from `timepicker:quickRanges` survives as a user
+ * preset — the user keeps it and can now delete it.
+ */
+export const migrateStoredPresets = (
+  storedPresets: StoredPresets | undefined,
+  uiSettingsPresets: readonly PresetItem[]
+): StoredPresetsV2 => {
+  if (storedPresets?.version === 2) {
+    return storedPresets;
+  }
+
+  if (storedPresets?.version === 1 && storedPresets.presets) {
+    const uiSettingsKeys = new Set(uiSettingsPresets.map(getPresetKey));
+
+    return {
+      version: 2,
+      presets: storedPresets.presets.filter((preset) => !uiSettingsKeys.has(getPresetKey(preset))),
+    };
+  }
+
+  return DEFAULT_STORED_PRESETS;
+};
+
+/**
+ * Composes the displayed list: the user's own editable presets, then
+ * the default quick ranges that get `isEditable=false`.
+ */
+export const mergePresets = (
+  userPresets: readonly PresetItem[],
+  defaultPresets: readonly PresetItem[]
+): PresetItem[] => {
+  const userKeys = new Set(userPresets.map(getPresetKey));
+
+  return [
+    ...userPresets,
+    ...defaultPresets
+      .filter((preset) => !userKeys.has(getPresetKey(preset)))
+      .map((preset) => ({ ...preset, isEditable: false })),
+  ];
+};
+
 /** Outcome of a {@link DateRangePickerPresetsService.savePreset} call. */
 export type SavePresetOutcome =
   | 'saved' // persisted a new preset
   | 'duplicate' // an equal preset (by `start`/`end`) already exists — no-op
-  | 'limit-reached'; // MAX_PRESETS already stored — no-op
+  | 'limit-reached'; // MAX_PRESETS user presets already stored — no-op
 
 /**
  * Storage-agnostic contract for reading and persisting date range presets.
@@ -62,16 +113,14 @@ export type SavePresetOutcome =
  */
 export interface DateRangePickerPresetsService {
   /**
-   * Synchronous default presets derived from the configured quick ranges,
-   * with no stored data. Shown when persistence is disabled or nothing is
-   * stored yet.
+   * Synchronous presets derived from the configured quick ranges. Shown
+   * on their own when persistence is disabled.
    */
   getDefaultPresets(): PresetItem[];
 
   /**
-   * Resolved presets to display: the user's stored presets when present,
-   * otherwise {@link getDefaultPresets}. Emits again whenever the stored value
-   * changes.
+   * Presets to display: the user's own editable presets followed by the default
+   * {@link getDefaultPresets}. Emits again whenever the stored value changes.
    */
   getPresets$(): Observable<PresetItem[]>;
 
@@ -79,18 +128,20 @@ export interface DateRangePickerPresetsService {
    * Whether the current user can persist presets. `false` (for example, for a
    * user without a profile) means save/delete must be disabled.
    */
-  getCanWrite$(): Observable<boolean>;
+  canPersist(): boolean;
 
   /**
-   * Persists `preset`, enforcing dedupe (by `start`/`end`) and the
+   * Persists `preset` as a user preset, deduping (by `start`/`end`) against both
+   * the stored user presets and the quick ranges, and enforcing the
    * {@link MAX_PRESETS} cap. Resolves with the {@link SavePresetOutcome};
    * rejects if the underlying write fails.
    */
   savePreset(preset: PresetItem): Promise<SavePresetOutcome>;
 
   /**
-   * Removes the stored preset matching `preset` (by `start`/`end`). Rejects if
-   * the underlying write fails.
+   * Removes the stored user preset matching `preset` (by `start`/`end`). Presets
+   * coming from the quick ranges are not stored, so they cannot be removed.
+   * Rejects if the underlying write fails.
    */
   deletePreset(preset: PresetItem): Promise<void>;
 }

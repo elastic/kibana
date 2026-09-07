@@ -109,7 +109,18 @@ export async function validateSimulation(
   definition: Streams.ClassicStream.Definition | Streams.WiredStream.Definition,
   esClient: ElasticsearchClient
 ) {
-  if (definition.ingest.processing.steps.length === 0) {
+  const processors =
+    'processors' in definition.ingest.processing
+      ? definition.ingest.processing.processors
+      : (
+          await transpileIngestPipeline(
+            definition.ingest.processing,
+            undefined,
+            createStreamlangResolverOptions(esClient)
+          )
+        ).processors;
+
+  if (processors.length === 0) {
     return;
   }
 
@@ -120,13 +131,7 @@ export async function validateSimulation(
       },
     ],
     pipeline: {
-      processors: (
-        await transpileIngestPipeline(
-          definition.ingest.processing,
-          undefined,
-          createStreamlangResolverOptions(esClient)
-        )
-      ).processors,
+      processors,
     },
   };
   const simulationResult = await executePipelineSimulation(esClient, simulationBody);

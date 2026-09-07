@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsService } from '../../server/crypto';
 import * as EncryptedSavedObjectsModule from '../../server/saved_objects';
 
 // This will only change if new ESOs are introduced. This number should never get smaller.
-export const ESO_TYPES_COUNT = 25 as const;
+export const ESO_TYPES_COUNT = 24 as const;
 
 describe('checking changes on all registered encrypted SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -68,13 +68,12 @@ describe('checking changes on all registered encrypted SO types', () => {
         "action_task_params": "06aa563283bdcd5c07ec433a7d0b8425019ad11d75595ee1431691667ecd2cec",
         "ad_hoc_run_params": "492d390fb70fba457acb3b33ce76d4ea027625b3a7d7e9dd76c5c3255655c544",
         "alert": "878a3b83179bbf2ad9d3862fcba539b7066429869b14c120a1dc7a8d39f4a7fa",
-        "alerting_action_policy": "539c465f3bf4d062e394acbbb9184f995f48127f701e40ba6f601dc5a20300fd",
+        "alerting_action_policy": "de4278b8fbb8dc1a77e57ead6c88570c3bffb7d4ba590ddf1c0f84e96b1c405f",
         "anonymization-salt": "1e5ff6ba241b27bbfc6901898b0ece9327ba63fdaea1f2f6cba6344d4a425b43",
         "api_key_pending_invalidation": "4dafadadaaca2f2f3f6038ee8363b71b2d101371ca98c34d2b6aa2a96f7e71c5",
         "api_key_to_invalidate": "d7a3423a74032bb5ecce9a0975e8ea1d5d5171348f99173df54b2fa0dfd3de43",
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
         "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
-        "entity-discovery-api-key": "cd3b5230a513d2d3503583223e48362fbbbc7812aa4710579a62acfa5bbc30e6",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
@@ -117,8 +116,10 @@ describe('checking changes on all registered encrypted SO types', () => {
       Array [
         "action|2",
         "action|1",
+        "action_task_params|3",
         "action_task_params|2",
         "action_task_params|1",
+        "ad_hoc_run_params|5",
         "ad_hoc_run_params|4",
         "ad_hoc_run_params|3",
         "ad_hoc_run_params|2",
@@ -131,12 +132,14 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|15",
         "alert|14",
         "alert|13",
         "alert|12",
         "alert|11",
         "alert|10",
         "alert|1",
+        "alerting_action_policy|2",
         "alerting_action_policy|1",
         "anonymization-salt|1",
         "api_key_pending_invalidation|2",
@@ -149,6 +152,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",
+        "ingest-download-sources|2",
         "ingest-download-sources|1",
         "ingest-outputs|9",
         "ingest-outputs|8",
@@ -158,6 +162,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "ingest-outputs|4",
         "ingest-outputs|3",
         "ingest-outputs|2",
+        "ingest-outputs|11",
         "ingest-outputs|10",
         "ingest-outputs|1",
         "oauth_state|1",
@@ -171,6 +176,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|13",
         "task|12",
         "task|11",
         "task|10",

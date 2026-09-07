@@ -11,7 +11,11 @@ import type { SavedObject } from '@kbn/core/server';
 import type { RuleChangeTracking } from '@kbn/alerting-types';
 import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { SanitizedRule, RawRule } from '../../../../types';
-import { validateRuleTypeParams, getRuleNotifyWhenType } from '../../../../lib';
+import {
+  validateRuleTypeParams,
+  authorizeRuleTypeParams,
+  getRuleNotifyWhenType,
+} from '../../../../lib';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -188,6 +192,10 @@ async function updateWithOCC<Params extends RuleParams = never>(
   const actionsClient = await context.getActionsClient();
 
   const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
+  await authorizeRuleTypeParams(validatedRuleTypeParams, ruleType.authorize?.params, {
+    request: context.request,
+    previousParams: originalRuleSavedObject.attributes.params,
+  });
   await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
   await validateAndAuthorizeSystemActions({
     actionsClient,

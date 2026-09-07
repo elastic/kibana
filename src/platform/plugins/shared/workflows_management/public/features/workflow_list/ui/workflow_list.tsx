@@ -344,7 +344,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
                 defaultMessage: 'Event-driven triggers are disabled',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="workflows-event-driven-disabled-banner"
             >
               <p>

@@ -30,7 +30,6 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -107,7 +106,6 @@ export interface MapsPluginStartDependencies {
   share: SharePluginStart;
   visualizations: VisualizationsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesPluginStart;
   mapsEms: MapsEmsPluginPublicStart;
   contentManagement: ContentManagementPublicStart;

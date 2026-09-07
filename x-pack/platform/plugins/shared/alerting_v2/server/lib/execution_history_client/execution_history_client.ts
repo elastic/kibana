@@ -6,11 +6,14 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { GetRuleExecutionsQuery, GetRuleExecutionsResponse } from '@kbn/alerting-v2-schemas';
 import { EventLogServiceToken } from '../services/event_log_service/tokens';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
-import type { ExecutionHistoryClientContract } from './types';
+import type {
+  ExecutionHistoryClientContract,
+  ListRuleExecutionsArgs,
+  ListRuleExecutionsResult,
+} from './types';
 
 @injectable()
 export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
@@ -19,21 +22,7 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
     @inject(RequestSpaceIdToken) private readonly spaceId: string
   ) {}
 
-  public async getRuleExecutions(
-    query: GetRuleExecutionsQuery
-  ): Promise<GetRuleExecutionsResponse> {
-    const { ruleId: ruleIds, outcome: outcomes, from, to, sort, sortOrder, page, perPage } = query;
-
-    return this.eventLog.findRuleExecutions({
-      spaceId: this.spaceId,
-      ruleIds,
-      outcomes,
-      from,
-      to,
-      sort,
-      sortOrder,
-      page,
-      perPage,
-    });
+  public async listRuleExecutions(args: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResult> {
+    return this.eventLog.findRuleExecutions({ spaceId: this.spaceId, ...args });
   }
 }

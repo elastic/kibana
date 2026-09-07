@@ -26,6 +26,7 @@ import {
   createMockConnectorType,
   createMockConnectorFindResult,
 } from '@kbn/actions-plugin/server/application/connector/mocks';
+import { ConfigSchema } from '../../config';
 
 describe('client', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -1211,6 +1212,245 @@ describe('client', () => {
           );
         });
       });
+
+      describe('global field definitions', () => {
+        beforeEach(() => {
+          // Reset config so mutations in one test don't leak into the next.
+          clientArgs.config = ConfigSchema.validate({});
+          // clearAllMocks does not drop implementations — reset the ones this
+          // block overrides so mockResolvedValue calls don't leak across tests.
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+            .mockReset()
+            .mockResolvedValue([]);
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockReset();
+        });
+
+        const baseGetResult = {
+          // @ts-ignore: these are all the attributes needed for the test
+          attributes: {
+            customFields: [],
+            connector: {
+              id: 'none',
+              name: 'none',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+            closure_type: 'close-by-user',
+            owner: 'securitySolutionFixture',
+            templates: [],
+          },
+          version: 'test-version',
+        };
+
+        const basePatchResult = {
+          id: 'test-id',
+          type: 'cases-configure',
+          version: 'test-version',
+          namespaces: ['default'],
+          references: [],
+          attributes: {
+            customFields: [
+              {
+                key: 'my_text',
+                label: 'My Text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+            templates: [],
+            created_at: '2019-11-25T21:54:48.952Z',
+            created_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            updated_at: '2019-11-25T21:54:48.952Z',
+            updated_by: {
+              full_name: 'elastic',
+              email: 'testemail@elastic.co',
+              username: 'elastic',
+            },
+            observableTypes: [],
+          },
+        };
+
+        it('ensures linked definitions even when the templates flag is disabled (live sync decoupled)', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          ).toHaveBeenCalledWith('securitySolutionFixture');
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).toHaveBeenCalled();
+        });
+
+        it('creates a linked global field definition (friendly name, deterministic id, legacyKey) before persisting', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).toHaveBeenCalledWith(
+            expect.objectContaining({
+              name: 'my_text',
+              owner: 'securitySolutionFixture',
+              isGlobal: true,
+            }),
+            expect.objectContaining({
+              id: expect.any(String),
+              legacyKey: 'my_text',
+            })
+          );
+        });
+
+        it('does not create a field definition when a def with the same name already exists', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(
+            [
+              {
+                id: 'fd-1',
+                type: 'cases-field-definition',
+                references: [],
+                attributes: {
+                  fieldDefinitionId: 'fd-1',
+                  name: 'my_text',
+                  owner: 'securitySolutionFixture',
+                  definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+                  isGlobal: true,
+                  legacyKey: 'my_text',
+                },
+              },
+            ] as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+        });
+
+        it('skips linkage validation entirely when the patch omits customFields (e.g. a connector-only edit)', async () => {
+          // A patch that never touches customFields must not re-validate the pre-existing set —
+          // otherwise an unrelated edit (connector-only here) would fail if an existing v1 field's
+          // linkage had since gone stale, blocking the operator's most natural repair path.
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            ...baseGetResult,
+            attributes: {
+              ...baseGetResult.attributes,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+          } as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(
+            clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          ).not.toHaveBeenCalled();
+          expect(
+            clientArgs.services.fieldDefinitionsService.createFieldDefinition
+          ).not.toHaveBeenCalled();
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalled();
+        });
+
+        it('fails the configuration update when createFieldDefinition fails (definition-before-config)', async () => {
+          clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+          clientArgs.services.caseConfigureService.get.mockResolvedValue(baseGetResult as never);
+          clientArgs.services.caseConfigureService.patch.mockResolvedValue(
+            basePatchResult as never
+          );
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+            new Error('SO write error')
+          );
+
+          await expect(
+            update(
+              'test-id',
+              {
+                version: 'test-version',
+                customFields: [
+                  {
+                    key: 'my_text',
+                    label: 'My Text',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
+              },
+              clientArgs,
+              casesClientInternal
+            )
+          ).rejects.toThrow('SO write error');
+
+          // The configuration must never be persisted without its linked definitions.
+          expect(clientArgs.services.caseConfigureService.patch).not.toHaveBeenCalled();
+        });
+      });
     });
   });
 
@@ -1615,6 +1855,223 @@ describe('client', () => {
             'Failed to create case configuration: Error: Invalid duplicated observable types in request: ipv4'
           );
         });
+      });
+    });
+
+    describe('global field definitions', () => {
+      beforeEach(() => {
+        // Reset config so mutations in one test don't leak into the next.
+        clientArgs.config = ConfigSchema.validate({});
+        // clearAllMocks does not drop implementations — reset the ones this
+        // block overrides so mockResolvedValue calls don't leak across tests.
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+          .mockReset()
+          .mockResolvedValue([]);
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockReset();
+      });
+
+      const validPostResult = {
+        id: 'test-id',
+        type: 'cases-configure',
+        version: 'test-version',
+        attributes: {
+          connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
+          closure_type: 'close-by-user',
+          owner: 'securitySolutionFixture',
+          customFields: [
+            { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+          ],
+          templates: [],
+          observableTypes: [],
+          created_at: '2019-11-25T21:54:48.952Z',
+          created_by: { full_name: 'elastic', email: 'test@test.com', username: 'elastic' },
+          updated_at: null,
+          updated_by: null,
+        },
+      };
+
+      beforeEach(() => {
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [],
+        } as never);
+        // @ts-ignore: partial SO shape is sufficient for the test
+        clientArgs.services.caseConfigureService.post.mockResolvedValue(validPostResult as never);
+      });
+
+      it('ensures linked definitions even when the templates flag is disabled (live sync decoupled)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: false } };
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects
+        ).toHaveBeenCalledWith('securitySolutionFixture');
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).toHaveBeenCalled();
+      });
+
+      it('creates a linked global field definition (friendly name, deterministic id, legacyKey) before persisting', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'my_text',
+            owner: 'securitySolutionFixture',
+            isGlobal: true,
+          }),
+          expect.objectContaining({
+            id: expect.any(String),
+            legacyKey: 'my_text',
+          })
+        );
+      });
+
+      it('does not create a field definition when one with the same name already exists', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(
+          [
+            {
+              id: 'fd-1',
+              type: 'cases-field-definition',
+              references: [],
+              attributes: {
+                fieldDefinitionId: 'fd-1',
+                name: 'my_text',
+                owner: 'securitySolutionFixture',
+                definition: 'name: my_text\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+                isGlobal: true,
+                legacyKey: 'my_text',
+              },
+            },
+          ] as never
+        );
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it('fails the configuration create when createFieldDefinition fails (definition-before-config)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+          new Error('SO write error')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('SO write error');
+
+        // The configuration must never be persisted without its linked definitions.
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      it('leaves an existing configuration untouched when the linked-definition ensure fails (no delete-before-validate)', async () => {
+        // REGRESSION (the bug this guards): create used to delete the existing configuration
+        // BEFORE running the fatal ensureGlobalFieldDefinitions check. A definition-cap,
+        // malformed-link, or definition-write failure then left the caller with no
+        // configuration at all.
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+          new Error('definition limit reached')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('definition limit reached');
+
+        // The pre-existing configuration must survive the failed replacement.
+        expect(clientArgs.services.caseConfigureService.delete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      it('replaces an existing configuration only after the linked-definition ensure succeeds (ensure → delete → post)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        // Successful replacement still deletes the old configuration and posts the new one…
+        expect(clientArgs.services.caseConfigureService.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ configurationId: 'existing-config-id' })
+        );
+        expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalled();
+
+        // …and the ensure ran strictly before the destructive delete.
+        const ensureOrder =
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mock
+            .invocationCallOrder[0];
+        const deleteOrder =
+          clientArgs.services.caseConfigureService.delete.mock.invocationCallOrder[0];
+        expect(ensureOrder).toBeLessThan(deleteOrder);
       });
     });
   });

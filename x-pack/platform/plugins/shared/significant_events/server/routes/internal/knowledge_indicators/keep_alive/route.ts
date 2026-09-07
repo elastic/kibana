@@ -11,7 +11,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 
-export const keepAlivePersistentIndicatorsRoute = createServerRoute({
+const keepAlivePersistentIndicatorsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',

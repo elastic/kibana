@@ -7,10 +7,6 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import {
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
-} from '@kbn/as-code-shared-schemas';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
@@ -20,8 +16,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import { findInvalidDurationFormat } from '../../../../common/transforms/ga_schema_validator';
-import type { LensCreateIn, LensSavedObject } from '../../../content_management';
+import type { LensCreateIn, LensSavedObject } from '../../../content_management/zod';
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensCreateResponseBody } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
@@ -43,8 +38,8 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -87,19 +82,7 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
-        const { core } = await ctx.resolve(['core']);
-        const useGASchemas = await core.featureFlags.getBooleanValue(
-          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
-          AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
-        );
-
-        // Enforce the active duration unit names for the current flag state (GA or legacy).
-        const durationError = findInvalidDurationFormat(req.body, useGASchemas);
-        if (durationError) {
-          return res.badRequest({ body: { message: durationError } });
-        }
-
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const client = contentManagement.contentClient
           .getForRequest({ request: req, requestHandlerContext: ctx })
           .for<LensSavedObject>(LENS_CONTENT_TYPE);
@@ -108,10 +91,10 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
           const { references, ...data } = getLensRequestConfig(builder, req.body);
           const options: LensCreateIn['options'] = { references };
           const { result } = await client.create(data, options);
-          const responseItem = getLensResponseItem(builder, result.item, useGASchemas);
+          const responseItem = getLensResponseItem(builder, result.item);
 
           return res.created<LensCreateResponseBody>({
-            body: responseItem,
+            body: lensCreateResponseBodySchema.parse(responseItem),
           });
         } catch (error) {
           if (isBoom(error) && error.output.statusCode === 403) {

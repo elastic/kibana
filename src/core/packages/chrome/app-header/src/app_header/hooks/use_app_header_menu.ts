@@ -8,14 +8,13 @@
  */
 
 import { useMemo } from 'react';
-import type { AppMenuConfig, AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
-import { APP_MENU_SHARE_ID, getTooltip, isDisabled } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuStaticItem } from '@kbn/app-menu';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
 
-import { useBasePath } from './chrome';
-import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/ui-app-header';
+import { useBasePath, useCanAccessIntegrations } from './chrome';
 
 const createIntegrationsMenuItem = (href: string): AppMenuStaticItem => ({
   label: i18n.translate('core.chrome.appHeader.addIntegrationsMenuItemLabel', {
@@ -61,6 +60,7 @@ export const useAppHeaderStaticItems = ({
 }): AppMenuStaticItem[] => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const canAccessIntegrations = useCanAccessIntegrations();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
   const helpExtension = useObservable(chrome.getHelpExtension$(), undefined);
 
@@ -82,48 +82,17 @@ export const useAppHeaderStaticItems = ({
       staticItems.push(createDocumentationMenuItem(docLink));
     }
 
-    if (showAddIntegrations) {
-      // FIXME: https://github.com/elastic/kibana/issues/271295 - handle edge case where fleet is not enabled or user doesn't have permissions to view it
+    if (showAddIntegrations && canAccessIntegrations) {
       staticItems.push(createIntegrationsMenuItem(basePath.prepend('/app/integrations/browse')));
     }
 
     return staticItems;
-  }, [basePath, explicitDocLink, helpExtension, showAddIntegrations, feedbackHandler]);
+  }, [
+    basePath,
+    canAccessIntegrations,
+    explicitDocLink,
+    helpExtension,
+    showAddIntegrations,
+    feedbackHandler,
+  ]);
 };
-
-export interface ShareAction {
-  onClick: (triggerElement: HTMLElement) => void;
-  tooltipContent?: string;
-  tooltipTitle?: string;
-  testId?: string;
-  isDisabled?: boolean;
-}
-
-export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
-  // Temporary bridge: share is still modeled as a legacy app-menu item. The item stays in the
-  // menu (owned by the app); here we only read it to render the title-row share button.
-  // Replace this with a typed app-header action once share requirements are clear.
-  // https://github.com/elastic/kibana/issues/271401
-  const shareItem = pageAppMenu?.items?.find((item) => item.id === APP_MENU_SHARE_ID);
-
-  return useMemo(() => {
-    if (!shareItem) return undefined;
-    const { run, tooltipContent, tooltipTitle, testId, disableButton } = shareItem;
-    if (!run) return undefined;
-
-    const { content, title } = getTooltip({
-      tooltipContent,
-      tooltipTitle,
-    });
-
-    return {
-      onClick: (triggerElement: HTMLElement) => {
-        run({ triggerElement, returnFocus: () => triggerElement.focus() });
-      },
-      tooltipContent: content,
-      tooltipTitle: title,
-      testId,
-      isDisabled: isDisabled(disableButton),
-    };
-  }, [shareItem]);
-}

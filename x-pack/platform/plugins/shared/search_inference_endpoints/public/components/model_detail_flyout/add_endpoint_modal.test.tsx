@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import type { TaskTypeOption } from './add_endpoint_modal';
 import { AddEndpointModal } from './add_endpoint_modal';
@@ -167,6 +168,189 @@ describe('AddEndpointModal', () => {
       renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'completion' });
       fireEvent.click(screen.getByText('Close'));
       expect(onCancel).toHaveBeenCalled();
+    });
+  });
+
+  describe('Reasoning section', () => {
+    it('shows the reasoning toggle when chat_completion is selected', async () => {
+      renderModal();
+      expect(screen.getByTestId('addEndpointReasoningToggle')).toBeInTheDocument();
+    });
+
+    it('does not show the reasoning toggle when a non-chat_completion task type is selected', async () => {
+      renderModal({
+        taskTypes: [{ value: 'completion', label: 'Completion', description: 'Text completion.' }],
+      });
+      expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
+    });
+
+    it('hides the effort level button group when auto mode is on (default)', async () => {
+      renderModal();
+      expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
+    });
+
+    it('shows the effort level button group and token usage note when auto mode is turned off', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      expect(screen.getByTestId('addEndpointReasoningButtonGroup')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningTokenUsageNote')).toBeInTheDocument();
+    });
+
+    it('shows all six effort levels: none, min, low, med, high, extra-high', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      expect(screen.getByTestId('addEndpointReasoningEffort-none')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningEffort-minimal')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningEffort-low')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningEffort-medium')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningEffort-high')).toBeInTheDocument();
+      expect(screen.getByTestId('addEndpointReasoningEffort-xhigh')).toBeInTheDocument();
+    });
+
+    it('defaults to med effort when auto mode is first turned off', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const medButton = screen.getByTestId('addEndpointReasoningEffort-medium');
+      expect(medButton).toBeInTheDocument();
+      expect(medButton.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('changes effort level when a different option is clicked', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      const highButton = screen.getByTestId('addEndpointReasoningEffort-high');
+      await userEvent.click(highButton);
+      expect(highButton.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('hides reasoning section when task type is switched away from chat_completion', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      expect(screen.getByTestId('addEndpointReasoningButtonGroup')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByLabelText('Completion'));
+      expect(screen.queryByTestId('addEndpointReasoningToggle')).not.toBeInTheDocument();
+    });
+
+    it('resets to auto mode when switching back to chat_completion', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      await userEvent.click(screen.getByLabelText('Completion'));
+      await userEvent.click(screen.getByLabelText(/Chat completion/i));
+
+      expect(screen.getByTestId('addEndpointReasoningToggle')).toBeInTheDocument();
+      expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
+    });
+
+    it('resets effort level to med when switching away from chat_completion and back', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      await userEvent.click(screen.getByTestId('addEndpointReasoningEffort-high'));
+      expect(
+        screen.getByTestId('addEndpointReasoningEffort-high').getAttribute('aria-pressed')
+      ).toBe('true');
+
+      await userEvent.click(screen.getByLabelText('Completion'));
+      await userEvent.click(screen.getByLabelText(/Chat completion/i));
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+
+      expect(
+        screen.getByTestId('addEndpointReasoningEffort-medium').getAttribute('aria-pressed')
+      ).toBe('true');
+    });
+
+    it('disables the reasoning toggle in view mode', async () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'chat_completion' });
+      const toggle = screen.getByTestId('addEndpointReasoningToggle');
+      expect(toggle).toBeDisabled();
+    });
+
+    it('preselects the stored reasoning effort in view mode', async () => {
+      renderModal({
+        mode: 'view',
+        initialEndpointId: 'my-ep',
+        initialTaskType: 'chat_completion',
+        initialReasoningEffort: 'high',
+      });
+
+      const toggle = screen.getByTestId('addEndpointReasoningToggle');
+      expect(toggle).toBeChecked();
+
+      const highButton = screen.getByTestId('addEndpointReasoningEffort-high');
+      expect(highButton.getAttribute('aria-pressed')).toBe('true');
+    });
+
+    it('shows auto mode in view mode when no reasoning effort was stored', async () => {
+      renderModal({ mode: 'view', initialEndpointId: 'my-ep', initialTaskType: 'chat_completion' });
+
+      const toggle = screen.getByTestId('addEndpointReasoningToggle');
+      expect(toggle).not.toBeChecked();
+      expect(screen.queryByTestId('addEndpointReasoningButtonGroup')).not.toBeInTheDocument();
+    });
+
+    it('does not include taskTypeConfig in the save payload when auto mode is on', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
+      expect(mockMutate).toHaveBeenCalledWith(
+        {
+          config: {
+            inferenceId: expect.stringMatching(/^anthropic-claude-4_6-opus-chat_completion-/),
+            taskType: 'chat_completion',
+            provider: 'elastic',
+            providerConfig: { model_id: 'anthropic-claude-4.6-opus' },
+          },
+          secrets: { providerSecrets: {} },
+        },
+        false
+      );
+      expect(mockMutate).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: expect.objectContaining({ taskTypeConfig: expect.anything() }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('includes taskTypeConfig with the selected reasoning effort in the save payload', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      await userEvent.click(screen.getByTestId('addEndpointReasoningEffort-high'));
+
+      await userEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
+      expect(mockMutate).toHaveBeenCalledWith(
+        {
+          config: {
+            inferenceId: expect.stringMatching(/^anthropic-claude-4_6-opus-chat_completion-/),
+            taskType: 'chat_completion',
+            provider: 'elastic',
+            providerConfig: { model_id: 'anthropic-claude-4.6-opus' },
+            taskTypeConfig: { reasoning: { effort: 'high' } },
+          },
+          secrets: { providerSecrets: {} },
+        },
+        false
+      );
+    });
+
+    it('sends the Elasticsearch-recognized "xhigh" value when extra-high is selected', async () => {
+      renderModal();
+      await userEvent.click(screen.getByTestId('addEndpointReasoningToggle'));
+      await userEvent.click(screen.getByTestId('addEndpointReasoningEffort-xhigh'));
+
+      await userEvent.click(screen.getByTestId('addEndpointModalSaveButton'));
+      expect(mockMutate).toHaveBeenCalledWith(
+        {
+          config: {
+            inferenceId: expect.stringMatching(/^anthropic-claude-4_6-opus-chat_completion-/),
+            taskType: 'chat_completion',
+            provider: 'elastic',
+            providerConfig: { model_id: 'anthropic-claude-4.6-opus' },
+            taskTypeConfig: { reasoning: { effort: 'xhigh' } },
+          },
+          secrets: { providerSecrets: {} },
+        },
+        false
+      );
     });
   });
 });

@@ -22,6 +22,7 @@ import {
   EuiSelectable,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -609,7 +610,7 @@ export function ActionsMenu({
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="arrowRight" size="s" color="primary" aria-hidden={true} />
+              <EuiIcon type="chevronSingleRight" size="s" color="primary" aria-hidden={true} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
@@ -622,6 +623,12 @@ export function ActionsMenu({
     const glyphColor =
       getIconGlyphColor(action.iconVariant, euiTheme) ??
       ('iconColor' in action ? action.iconColor : undefined);
+    const viewDetailsLabel = i18n.translate('workflows.actionsMenu.viewDetails', {
+      defaultMessage: 'View details',
+    });
+    const addStepLabel = i18n.translate('workflows.actionsMenu.addStep', {
+      defaultMessage: 'Add step',
+    });
 
     return (
       <div
@@ -704,40 +711,40 @@ export function ActionsMenu({
             </EuiFlexItem>
           ) : (
             <span className="rowActions" css={styles.rowActions}>
-              <EuiButtonIcon
-                iconType="info"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="empty"
-                css={styles.rowActionButton}
-                aria-label={i18n.translate('workflows.actionsMenu.viewDetails', {
-                  defaultMessage: 'View details',
-                })}
-                data-test-subj="actionsMenuItemInfo"
-                onClick={(e: React.MouseEvent) => handlePinPreview(action, e)}
-                onMouseDown={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-              <EuiButtonIcon
-                iconType="plusInCircle"
-                size="m"
-                iconSize="m"
-                color="text"
-                display="base"
-                css={styles.rowActionButton}
-                aria-label={i18n.translate('workflows.actionsMenu.addStep', {
-                  defaultMessage: 'Add step',
-                })}
-                data-test-subj="actionsMenuItemAdd"
-                onClick={(e: React.MouseEvent) => handleAddFromRow(action, e)}
-                onMouseDown={(e: React.MouseEvent) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
+              <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="info"
+                  size="m"
+                  iconSize="m"
+                  color="text"
+                  display="empty"
+                  css={styles.rowActionButton}
+                  aria-label={viewDetailsLabel}
+                  data-test-subj="actionsMenuItemInfo"
+                  onClick={(e: React.MouseEvent) => handlePinPreview(action, e)}
+                  onMouseDown={(e: React.MouseEvent) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={addStepLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="plusInCircle"
+                  size="m"
+                  iconSize="m"
+                  color="text"
+                  display="base"
+                  css={styles.rowActionButton}
+                  aria-label={addStepLabel}
+                  data-test-subj="actionsMenuItemAdd"
+                  onClick={(e: React.MouseEvent) => handleAddFromRow(action, e)}
+                  onMouseDown={(e: React.MouseEvent) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                />
+              </EuiToolTip>
             </span>
           )}
         </EuiFlexGroup>

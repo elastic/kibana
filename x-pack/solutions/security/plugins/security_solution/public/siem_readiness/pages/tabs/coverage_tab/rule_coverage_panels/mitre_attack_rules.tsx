@@ -285,6 +285,12 @@ export const MitreAttackRuleCoveragePanel: React.FC = () => {
           {tacticCoverageMap.map((tactic) => (
             <EuiPopover
               key={tactic.tacticId}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.mitreAttack.missingIntegrationsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Missing or disabled integrations for this tactic',
+                }
+              )}
               isOpen={activeTacticPopover === tactic.tacticId}
               closePopover={() => setActiveTacticPopover(null)}
               button={

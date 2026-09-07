@@ -18,7 +18,7 @@ export const createSearchPanelAction = {
   id: ADD_SEARCH_ACTION_ID,
   grouping: [embeddableExamplesGrouping],
   getDisplayName: () => 'Search example',
-  getIconType: () => 'search',
+  getIconType: () => 'magnify',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
     return apiCanAddNewPanel(embeddable);
   },

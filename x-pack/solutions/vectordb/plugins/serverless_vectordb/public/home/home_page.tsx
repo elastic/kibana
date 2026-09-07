@@ -6,132 +6,74 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
+  EuiHorizontalRule,
+  EuiLink,
   EuiPageTemplate,
-  EuiPanel,
-  EuiShowFor,
   EuiSpacer,
-  EuiStat,
-  EuiText,
-  EuiTextColor,
   EuiTitle,
-  type UseEuiTheme,
 } from '@elastic/eui';
-import { TrialUsageBadge, CloudLinks } from '@kbn/shared-components';
+import { TrialUsageBadge } from '@kbn/shared-components';
 import { ConnectToProject, useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { i18n } from '@kbn/i18n';
-import { formatBytes, formatNumber, useDeploymentStats } from '../hooks/use_deployment_stats';
-import { useAgentsCount } from '../hooks/use_agents_count';
+import { useDeploymentStats } from '../hooks/use_deployment_stats';
 import { HomePageBanner } from './home_page_banner';
-import { DocumentationQuickLinks } from './documentation_quick_links';
+import { HomePageStatPanel } from './home_page_stat_panel';
+import { getDataCard, getSecondaryCards } from './home_page_stat_cards';
+import { AddDataSection } from './add_data_section';
+import { ChatWithYourDataSection } from './chat_with_data_section';
 import { useKibana } from '../hooks/use_kibana';
-import { STAT_TILE_LABELS } from '../constants';
-
-interface StatTileProps {
-  label: string;
-  value: string;
-  isLoading: boolean;
-}
-
-const VerticalSeparatorStyle = ({ euiTheme }: UseEuiTheme) => css`
-  border-left: ${euiTheme.border.thin};
-  height: ${euiTheme.size.l};
-`;
-
-const StatTile = ({ label, value, isLoading }: StatTileProps) => (
-  <EuiPanel hasBorder paddingSize="m">
-    <EuiStat
-      title={isLoading ? <EuiLoadingSpinner size="m" /> : value}
-      description={
-        <>
-          <EuiText size="xs" color="subdued">
-            <strong>{label}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
-      }
-      descriptionElement="div"
-      titleSize="m"
-    />
-  </EuiPanel>
-);
+import { useAuthenticatedUser } from '../hooks/use_authenticated_user';
 
 export const HomePage = () => {
   const {
-    services: { cloud },
+    services: { cloud, application, docLinks },
   } = useKibana();
+  const { user } = useAuthenticatedUser();
   const { stats, isLoading } = useDeploymentStats();
-  const { agentsCount, isLoading: isAgentsCountLoading } = useAgentsCount();
   const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
-  const hasData = (stats.vectorDocsCount ?? 0) > 0 || (stats.indicesCount ?? 0) > 0;
+  const hasData = stats.indicesCount !== 0 || (stats.vectorCount ?? 0) > 0;
 
-  const statTiles = [
-    {
-      key: 'indices',
-      label: STAT_TILE_LABELS.indices,
-      value: formatNumber(stats.indicesCount),
-      isLoading,
-    },
-    {
-      key: 'vectors',
-      label: STAT_TILE_LABELS.vectors,
-      value: formatNumber(stats.vectorDocsCount),
-      isLoading,
-    },
-    {
-      key: 'storage',
-      label: STAT_TILE_LABELS.storage,
-      value: formatBytes(stats.storeSizeBytes),
-      isLoading,
-    },
-    {
-      key: 'dashboards',
-      label: STAT_TILE_LABELS.dashboards,
-      value: formatNumber(stats.dashboardsCount),
-      isLoading,
-    },
-    {
-      key: 'agents',
-      label: STAT_TILE_LABELS.agents,
-      value: formatNumber(agentsCount),
-      isLoading: isAgentsCountLoading,
-    },
-    {
-      key: 'workflows',
-      label: STAT_TILE_LABELS.workflows,
-      value: formatNumber(stats.workflowsCount),
-      isLoading,
-    },
-  ];
+  const username = user?.full_name || user?.email;
+  const vectorDatabaseDocsUrl = docLinks.links.enterpriseSearch.vectorDatabaseFullTextSearch;
+
+  const statCardDeps = { application, stats, isLoading };
+  const dataCard = getDataCard(statCardDeps);
+  const secondaryCards = getSecondaryCards(statCardDeps);
 
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" wrap>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup
+              responsive={false}
+              wrap
+              alignItems="center"
+              gutterSize="s"
+              data-test-subj="vectordbHomepageHeaderLeftsideGroup"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h1>
+                    {username
+                      ? i18n.translate('xpack.serverlessVectordb.home.welcome.title', {
+                          defaultMessage: 'Welcome, {username}',
+                          values: { username },
+                        })
+                      : i18n.translate('xpack.serverlessVectordb.home.welcome.defaultTitle', {
+                          defaultMessage: 'Welcome',
+                        })}
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
               {cloud?.isInTrial() && (
-                <>
-                  <EuiFlexItem grow={false}>
-                    <TrialUsageBadge cloud={cloud} />
-                  </EuiFlexItem>
-                  <EuiShowFor sizes={['m', 'l', 'xl']}>
-                    <EuiFlexItem grow={false}>
-                      <span css={VerticalSeparatorStyle} />
-                    </EuiFlexItem>
-                  </EuiShowFor>
-                </>
-              )}
-              <EuiShowFor sizes={['m', 'l', 'xl']}>
                 <EuiFlexItem grow={false}>
-                  <CloudLinks cloud={cloud} CloudBaseOnly />
+                  <TrialUsageBadge cloud={cloud} />
                 </EuiFlexItem>
-              </EuiShowFor>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -145,33 +87,55 @@ export const HomePage = () => {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="none" />
+
         <EuiFlexGroup gutterSize="l" direction="column">
           <EuiFlexItem>
             <HomePageBanner hasData={hasData} isLoading={isLoading} />
           </EuiFlexItem>
-          <EuiSpacer size="s" />
+
           <EuiFlexItem>
-            <EuiTitle size="xxxs">
-              <h2>
-                <EuiTextColor color="subdued">
-                  {i18n.translate('xpack.serverlessVectordb.home.stats.heading', {
-                    defaultMessage: 'Your vector database overview',
-                  })}
-                </EuiTextColor>
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiFlexGrid columns={3} gutterSize="m">
-              {statTiles.map(({ key, label, value, isLoading: tileIsLoading }) => (
-                <StatTile key={key} label={label} value={value} isLoading={tileIsLoading} />
-              ))}
-            </EuiFlexGrid>
+            <HomePageStatPanel {...dataCard} newIndex={stats.newIndex} />
           </EuiFlexItem>
-          <EuiSpacer size="s" />
+
           <EuiFlexItem>
-            <DocumentationQuickLinks />
+            <EuiFlexGroup gutterSize="l">
+              {secondaryCards.map((card) => (
+                <EuiFlexItem key={card.testSubj}>
+                  <HomePageStatPanel {...card} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+
+          <EuiSpacer size="s" />
+
+          {/* Add data / Chat with your data */}
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="xl">
+              <EuiFlexItem>
+                <AddDataSection />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ChatWithYourDataSection />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiHorizontalRule margin="l" />
+        <EuiLink
+          href={vectorDatabaseDocsUrl}
+          target="_blank"
+          external
+          data-test-subj="vectordbHomepageDocumentationLink"
+          data-telemetry-id="serverlessVectordb-home-documentationLink"
+        >
+          {i18n.translate('xpack.serverlessVectordb.home.learnMoreLink', {
+            defaultMessage: 'Learn more about Elasticsearch Vector Database',
+          })}
+        </EuiLink>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

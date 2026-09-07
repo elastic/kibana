@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiIcon } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
+import type { CaseSeverity } from '../../../../../../../common/types/domain';
 import { CaseStatuses } from '../../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../../common';
 import { statuses } from '../../../../../status/config';
@@ -16,22 +17,35 @@ import { severities } from '../../../../../severity/config';
 interface GetBadgesArgs {
   caseData: CaseUI;
   isStatusMenuDisabled: boolean;
+  isSeverityMenuDisabled: boolean;
   onStatusChanged: (status: CaseStatuses) => void;
+  onSeverityChanged: (severity: CaseSeverity) => void;
 }
 
 export const getBadges = ({
   caseData,
   isStatusMenuDisabled,
+  isSeverityMenuDisabled,
   onStatusChanged,
+  onSeverityChanged,
 }: GetBadgesArgs): AppHeaderBadge[] => {
   const result: AppHeaderBadge[] = [];
 
   const severityConfig = severities[caseData.severity];
-  result.push({
+  const severityBadge: AppHeaderBadge = {
     label: severityConfig?.label ?? caseData.severity,
     color: severityConfig?.badgeColor ?? 'default',
     'data-test-subj': 'case-view-severity-badge',
-  });
+  };
+
+  if (!isSeverityMenuDisabled) {
+    severityBadge.items = (Object.keys(severities) as CaseSeverity[]).map((severity) => ({
+      name: severities[severity].label,
+      onClick: () => onSeverityChanged(severity),
+      'data-test-subj': `case-view-severity-dropdown-${severity}`,
+    }));
+  }
+  result.push(severityBadge);
 
   const statusConfig = statuses[caseData.status];
   const statusBadge: AppHeaderBadge = {

@@ -6,7 +6,10 @@
  */
 
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  type ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common';
 import type {
   PromptManager,
   ToolPromptManager,
@@ -30,7 +33,6 @@ import {
   isConfirmationPromptResponse,
 } from '@kbn/agent-builder-common/agents/prompts';
 import type { InternalToolDefinition } from '@kbn/agent-builder-server';
-import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-server/tools';
 import type { ToolPolicyConfirmationDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { i18nBundles } from '../i18n';
 

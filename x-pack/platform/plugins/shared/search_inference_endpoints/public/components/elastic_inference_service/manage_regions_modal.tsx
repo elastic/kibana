@@ -10,23 +10,26 @@ import { css } from '@emotion/react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
+  EuiSwitch,
   EuiTabbedContent,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { regionKey, isPolicyMode } from '../../utils/eis_utils';
 import { useManageRegionsState } from './use_manage_regions_state';
 import { ConfirmRegionChangeModal } from './confirm_region_change_modal';
+import { ConfirmRegionSelectionModal } from './confirm_region_selection_modal';
+import { ConfirmDeleteRegionPolicyModal } from './confirm_delete_region_policy_modal';
 import { GeoTabContent } from './geo_tab_content';
 import { RegionsTabContent } from './regions_tab_content';
 
@@ -35,25 +38,34 @@ interface ManageRegionsModalProps {
 }
 
 const modalStyles = ({ euiTheme }: UseEuiTheme) => css`
-  min-width: ${euiTheme.base * 35}px;
+  min-width: ${euiTheme.base * 45}px;
 `;
 
 export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose }) => {
   const modalTitleId = useGeneratedHtmlId();
+  const customPolicyToggleId = useGeneratedHtmlId({ prefix: 'manageRegionsCustomPolicyToggle' });
   const { common, regionTab, geoTab } = useManageRegionsState(onClose);
   const {
     activeTab,
     isLoading,
     isError,
     isSaving,
+    isDeleting,
     isSaveDisabled,
     isCallOutDismissed,
     showConfirmation,
+    showDeleteConfirmation,
+    conflictArtifacts,
+    isRedesignEnabled,
+    useCustomPolicy,
     setActiveTab,
+    setUseCustomPolicy,
     handleDismissCallOut,
     handleRequestSave,
     handleConfirmSave,
     handleCancelConfirmation,
+    handleConfirmDelete,
+    handleCancelDeleteConfirmation,
   } = common;
 
   const filteredRegions = useMemo(
@@ -93,41 +105,48 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
     [tabs, activeTab]
   );
 
+  const isAnyConfirmationOpen = showConfirmation || showDeleteConfirmation;
+  const handleAnyCancelConfirmation = showDeleteConfirmation
+    ? handleCancelDeleteConfirmation
+    : handleCancelConfirmation;
+  const showTabContent = useCustomPolicy || isLoading;
+  const showCallOut = useCustomPolicy && !isCallOutDismissed;
+  const showRedesignConfirmation = showConfirmation && isRedesignEnabled;
+  const showLegacyConfirmation = showConfirmation && !isRedesignEnabled;
+
   return (
     <>
       <EuiModal
         css={modalStyles}
-        onClose={showConfirmation ? handleCancelConfirmation : onClose}
+        onClose={isAnyConfirmationOpen ? handleAnyCancelConfirmation : onClose}
         aria-labelledby={modalTitleId}
         data-test-subj="manageRegionsModal"
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle id={modalTitleId}>
             {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.title', {
-              defaultMessage: 'Manage region preferences',
+              defaultMessage: 'Region preferences',
             })}
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
           {isError && (
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount={false}
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.manageRegions.errorCallout.title',
                 { defaultMessage: 'Failed to load region data' }
               )}
-              color="danger"
-              iconType="error"
               data-test-subj="manageRegionsErrorCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.errorCallout.body', {
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.manageRegions.errorCallout.body',
+                {
                   defaultMessage:
                     'An error occurred while fetching region or policy data. To try again, close and reopen this panel.',
-                })}
-              </p>
-            </EuiCallOut>
+                }
+              )}
+            />
           )}
           {isError && <EuiSpacer size="m" />}
 
@@ -135,45 +154,56 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             <p>
               <FormattedMessage
                 id="xpack.searchInferenceEndpoints.manageRegions.description"
-                defaultMessage="You can restrict inference calls to specific regions."
+                defaultMessage="Choose which locations can receive inference traffic: by geography or by region."
               />
             </p>
           </EuiText>
 
           <EuiSpacer size="m" />
 
-          {!isCallOutDismissed && (
-            <EuiCallOut
+          <EuiSwitch
+            id={customPolicyToggleId}
+            checked={useCustomPolicy}
+            onChange={(e) => setUseCustomPolicy(e.target.checked)}
+            disabled={isLoading || isSaving || isDeleting}
+            label={i18n.translate(
+              'xpack.searchInferenceEndpoints.manageRegions.customPolicyToggleLabel',
+              { defaultMessage: 'Restrict inference to specific locations' }
+            )}
+            data-test-subj="manageRegionsCustomPolicyToggle"
+          />
+
+          {showCallOut && <EuiSpacer size="m" />}
+          {showCallOut && (
+            <KbnWarningCallout
               title={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.title', {
                 defaultMessage: "Some models aren't available in every region.",
               })}
-              color="primary"
-              iconType="info"
               announceOnMount={false}
               onDismiss={handleDismissCallOut}
+              dismissButtonProps={{ 'data-test-subj': 'manageRegionsCalloutDismiss' }}
               data-test-subj="manageRegionsCallout"
-            >
-              <p>
-                {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
-                  defaultMessage:
-                    "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
-                })}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate('xpack.searchInferenceEndpoints.manageRegions.callout.body', {
+                defaultMessage:
+                  "Some models are only available in specific regions. Restricting regions might make those models unavailable. Check each model's details to verify its supported regions.",
+              })}
+            />
           )}
-          {!isCallOutDismissed && <EuiSpacer size="m" />}
 
-          <EuiTabbedContent
-            tabs={tabs}
-            selectedTab={selectedTab}
-            onTabClick={(tab) => isPolicyMode(tab.id) && setActiveTab(tab.id)}
-          />
+          {showTabContent && <EuiSpacer size="m" />}
+          {showTabContent && (
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={selectedTab}
+              onTabClick={(tab) => isPolicyMode(tab.id) && setActiveTab(tab.id)}
+            />
+          )}
         </EuiModalBody>
 
         <EuiModalFooter>
           <EuiButtonEmpty
-            onClick={showConfirmation ? handleCancelConfirmation : onClose}
-            isDisabled={isSaving}
+            onClick={isAnyConfirmationOpen ? handleAnyCancelConfirmation : onClose}
+            isDisabled={isSaving || isDeleting}
             data-test-subj="manageRegionsCancelButton"
           >
             {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.cancelButtonLabel', {
@@ -185,7 +215,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             fill
             onClick={handleRequestSave}
             isDisabled={isSaveDisabled}
-            isLoading={isSaving}
+            isLoading={isSaving || isDeleting}
             data-test-subj="manageRegionsSaveButton"
           >
             {i18n.translate('xpack.searchInferenceEndpoints.manageRegions.saveButtonLabel', {
@@ -195,7 +225,18 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
         </EuiModalFooter>
       </EuiModal>
 
-      {showConfirmation && (
+      {showRedesignConfirmation && (
+        <ConfirmRegionSelectionModal
+          mode={activeTab}
+          selectedRegions={filteredRegions}
+          selectedGeos={[...geoTab.checkedGeos]}
+          conflictArtifacts={conflictArtifacts}
+          onConfirm={handleConfirmSave}
+          onCancel={handleCancelConfirmation}
+          isSaving={isSaving}
+        />
+      )}
+      {showLegacyConfirmation && (
         <ConfirmRegionChangeModal
           mode={activeTab}
           selectedRegions={filteredRegions}
@@ -203,6 +244,14 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
           onConfirm={handleConfirmSave}
           onCancel={handleCancelConfirmation}
           isSaving={isSaving}
+        />
+      )}
+
+      {showDeleteConfirmation && (
+        <ConfirmDeleteRegionPolicyModal
+          onConfirm={handleConfirmDelete}
+          onCancel={handleCancelDeleteConfirmation}
+          isDeleting={isDeleting}
         />
       )}
     </>

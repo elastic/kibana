@@ -1,23 +1,16 @@
 {
-  "sha1": "ce4548a1b17799aaf7de57f1e7cd8e26080395ae",
+  "sha1": "a42468277a5de37c1818a7176190f3ad851bccaa",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
       "id": "451ff2b9982142c-9a17f71a4f5ef91",
       "title": "Discover App - Performance Metrics & Bundle Analysis collects and validates JS Bundles loaded on page",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -28,23 +21,17 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 131,
-        "column": 9
+        "line": 104,
+        "column": 7
       }
     },
     {
       "id": "451ff2b9982142c-0744d4070723e77",
       "title": "Discover App - Performance Metrics & Bundle Analysis measures Performance Metrics before and after Discover load",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -55,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts",
-        "line": 177,
-        "column": 9
+        "line": 139,
+        "column": 7
       }
     },
     {
@@ -66,12 +53,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -82,8 +63,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_lighthouse.spec.ts",
-        "line": 29,
-        "column": 19
+        "line": 24,
+        "column": 20
       }
     },
     {
@@ -93,12 +74,6 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
         "@local-serverless-search",
         "@cloud-serverless-search",
         "@local-serverless-observability_complete",
@@ -108,8 +83,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/saved_search_embeddable.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 60,
+        "column": 21
       }
     }
   ]

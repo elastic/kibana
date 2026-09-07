@@ -6,73 +6,31 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import {
-  InputTextFieldSchema,
-  InputNumberFieldSchema,
-  SelectBasicFieldSchema,
-  TextareaFieldSchema,
-  DatePickerFieldSchema,
-  ToggleFieldSchema,
-  UserPickerFieldSchema,
-  CheckboxGroupFieldSchema,
-  RadioGroupFieldSchema,
-} from '../../../../common/types/domain/template/fields';
+import { InlineFieldSchema } from '../../../../common/types/domain/template/fields';
+import { applyFieldSchemaOverrides } from '../../templates_v2/utils/template_json_schema';
+import { INLINE_FIELD_DEFAULT_SNIPPETS } from '../../templates_v2/utils/template_field_snippets';
 
 export const FIELD_DEFINITION_SCHEMA_URI = 'file:///cases-field-definition-schema.json';
 
 /**
- * Schema for a single inline field definition entry (ref fields excluded —
- * the library stores concrete field definitions, not references to other fields).
+ * Generates the Monaco editor JSON Schema for a standalone field-library definition. The document
+ * root is a single inline field — the same shapes a template's `fields` entries accept, minus
+ * `$ref` (the library stores concrete field definitions, not references to other fields), which
+ * `InlineFieldSchema` already excludes. The override pipeline and scaffold snippets are shared
+ * with the template editor so both editors autocomplete and validate identically.
  */
-const InlineFieldSchema = z.union([
-  InputTextFieldSchema,
-  InputNumberFieldSchema,
-  SelectBasicFieldSchema,
-  TextareaFieldSchema,
-  DatePickerFieldSchema,
-  ToggleFieldSchema,
-  UserPickerFieldSchema,
-  CheckboxGroupFieldSchema,
-  RadioGroupFieldSchema,
-]);
-
 export const getFieldDefinitionJsonSchema = (): z.core.JSONSchema.JSONSchema | null => {
   try {
-    return z.toJSONSchema(InlineFieldSchema, {
+    const schema = z.toJSONSchema(InlineFieldSchema, {
       target: 'draft-7',
       unrepresentable: 'any',
       reused: 'inline',
-      override: ({ jsonSchema, path }) => {
-        // Remove additionalProperties from allOf items — same fix as the template schema
-        const last = path[path.length - 1];
-        const secondLast = path[path.length - 2];
-        if (typeof last === 'number' && secondLast === 'allOf') {
-          jsonSchema.additionalProperties = undefined;
-        }
-        // Add enum hints on discriminator property for Monaco autocomplete
-        const { oneOf } = jsonSchema;
-        if (oneOf && Array.isArray(oneOf) && oneOf.length > 0) {
-          const branches = oneOf as Array<Record<string, unknown>>;
-          const discriminatorValues: Record<string, string[]> = {};
-          for (const branch of branches) {
-            const props = (branch.properties ?? {}) as Record<string, { const?: string }>;
-            for (const [k, v] of Object.entries(props)) {
-              if (v?.const !== undefined) {
-                discriminatorValues[k] = [...(discriminatorValues[k] ?? []), v.const];
-              }
-            }
-          }
-          for (const [k, vals] of Object.entries(discriminatorValues)) {
-            if (vals.length === branches.length) {
-              jsonSchema.properties = {
-                ...(jsonSchema.properties as object),
-                [k]: { type: 'string', enum: vals },
-              };
-            }
-          }
-        }
-      },
+      override: applyFieldSchemaOverrides,
     });
+    // Root-level defaultSnippets give the same "pick a field type" scaffold menu as the template
+    // editor's `fields` entries, just at the document root.
+    (schema as Record<string, unknown>).defaultSnippets = INLINE_FIELD_DEFAULT_SNIPPETS;
+    return schema;
   } catch {
     return null;
   }

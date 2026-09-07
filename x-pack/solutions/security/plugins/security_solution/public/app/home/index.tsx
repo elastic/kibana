@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { SecuritySolutionAppWrapper } from '../../common/components/page';
 import { HelpMenu } from '../../common/components/help_menu';
-import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath } from '../../data_view_manager/utils/paths';
 import { GlobalHeader } from './global_header';
 import { ConsoleManager } from '../../management/components/console/components/console_manager';
 import { useUrlState } from '../../common/hooks/use_url_state';
@@ -27,6 +27,14 @@ import { TopValuesPopover } from '../components/top_values_popover/top_values_po
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useFlyoutV2RestoreFromUrl } from '../../flyout_v2/shared/url_state/use_flyout_v2_restore';
+import {
+  FLYOUT_V2_URL_PARAM,
+  FLYOUT_V2_TIMELINE_URL_PARAM,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
+import { useLegacyFlyoutUrlInterop } from '../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop';
+import { URL_PARAM_KEY } from '../../common/hooks/constants';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -34,11 +42,17 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  const browserFields = useBrowserFields(getScopeFromPath(pathname));
+  const { dataView } = useDataView(getScopeFromPath(pathname));
+  const browserFields = useBrowserFields(dataView);
 
   useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), getScopeFromPath(pathname));
 
   useUrlState();
+  // Interop must run before the restore hook so the legacy param is consumed first.
+  useLegacyFlyoutUrlInterop(URL_PARAM_KEY.flyout, FLYOUT_V2_URL_PARAM);
+  useLegacyFlyoutUrlInterop(URL_PARAM_KEY.timelineFlyout, FLYOUT_V2_TIMELINE_URL_PARAM);
+  useFlyoutV2RestoreFromUrl(FLYOUT_V2_URL_PARAM);
+  useFlyoutV2RestoreFromUrl(FLYOUT_V2_TIMELINE_URL_PARAM);
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
 

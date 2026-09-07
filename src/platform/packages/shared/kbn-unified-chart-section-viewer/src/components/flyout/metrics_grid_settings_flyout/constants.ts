@@ -8,13 +8,18 @@
  */
 
 import { FunctionNames } from '@kbn/esql-language';
-import type { HistogramPercentile, MetricsGridSettings, SimpleAggregation } from '../../../types';
+import type {
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
 
-export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
-  counterAggregation: FunctionNames.SUM,
-  gaugeAggregation: FunctionNames.AVG,
-  histogramPercentile: 'p95',
-};
+/** Settings owned by this flyout. */
+export const FLYOUT_SETTING_KEYS = [
+  'counterAggregation',
+  'gaugeAggregation',
+  'histogramPercentile',
+] as const satisfies ReadonlyArray<keyof MetricsGridSettings>;
 
 export const SIMPLE_AGGREGATION_OPTIONS: SimpleAggregation[] = [
   FunctionNames.AVG,

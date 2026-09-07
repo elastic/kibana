@@ -218,6 +218,268 @@ describe('RetentionSelector', () => {
     expect(screen.queryByTestId('retentionSelectorSearchInput')).not.toBeInTheDocument();
   });
 
+  describe('managed policies', () => {
+    const managedOption: RetentionOption = {
+      name: 'Managed Policy',
+      descriptionParts: ['hot', '30d'],
+      isManaged: true,
+    };
+    const unmanagedOption: RetentionOption = {
+      name: 'Regular Policy',
+      descriptionParts: ['warm', '60d'],
+      isManaged: false,
+    };
+    const mixedOptions = [managedOption, unmanagedOption];
+
+    it('hides managed policies by default when managed options are present', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.queryByTestId(rowTestSubj('Managed Policy'))).not.toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Regular Policy'))).toBeInTheDocument();
+    });
+
+    it('keeps a managed policy visible while it is the selected option', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          selectedOptionName="Managed Policy"
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      // The managed policy is selected, so it stays visible (with its badge) even though the
+      // managed filter is off by default.
+      expect(screen.getByTestId(rowTestSubj('Managed Policy'))).toBeInTheDocument();
+      expect(screen.getByTestId('retentionSelectorManagedBadge')).toBeInTheDocument();
+    });
+
+    it('shows a selected managed policy in read-only inherited mode (no search, single option)', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={[managedOption]}
+          selectedOptionName="Managed Policy"
+          onSelectOption={() => {}}
+          isDisabled
+          showSearch={false}
+          listStyle="panel"
+          showRowActions={false}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.getByTestId(rowTestSubj('Managed Policy'))).toBeInTheDocument();
+      const badge = screen.getByTestId('retentionSelectorManagedBadge');
+      expect(badge).toBeInTheDocument();
+      // In the read-only inherited view the whole selector is disabled, so the badge should
+      // render in its disabled state too.
+      expect(badge.className).toContain('euiBadge-disabled');
+    });
+
+    it('shows the "Managed" filter toggle when managed options exist', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.getByTestId('retentionSelectorIncludeManagedFilter')).toBeInTheDocument();
+    });
+
+    it('does not show the managed filter toggle when no managed options exist', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={options}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.queryByTestId('retentionSelectorIncludeManagedFilter')).not.toBeInTheDocument();
+    });
+
+    it('labels the managed filter toggle "Managed"', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.getByTestId('retentionSelectorIncludeManagedFilter')).toHaveTextContent(
+        'Managed'
+      );
+    });
+
+    it('hides the managed filter and shows managed policies when showManagedFilter is false', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          showManagedFilter={false}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      // No toggle, and managed policies are not filtered out.
+      expect(screen.queryByTestId('retentionSelectorIncludeManagedFilter')).not.toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Managed Policy'))).toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Regular Policy'))).toBeInTheDocument();
+    });
+
+    it('forces the managed filter to show when showManagedFilter is true even without managed options', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={options}
+          showManagedFilter={true}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.getByTestId('retentionSelectorIncludeManagedFilter')).toBeInTheDocument();
+    });
+
+    it('reflects the toggle state via aria-pressed (unchecked by default, checked once activated)', async () => {
+      const user = userEvent.setup();
+
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      const toggle = screen.getByTestId('retentionSelectorIncludeManagedFilter');
+      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+
+      await user.click(toggle);
+      expect(toggle).toHaveAttribute('aria-pressed', 'true');
+
+      await user.click(toggle);
+      expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('shows managed policies when the filter toggle is activated', async () => {
+      const user = userEvent.setup();
+
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.queryByTestId(rowTestSubj('Managed Policy'))).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId('retentionSelectorIncludeManagedFilter'));
+
+      expect(screen.getByTestId(rowTestSubj('Managed Policy'))).toBeInTheDocument();
+      expect(screen.getByTestId(rowTestSubj('Regular Policy'))).toBeInTheDocument();
+    });
+
+    it('re-hides managed policies when the filter toggle is deactivated', async () => {
+      const user = userEvent.setup();
+
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      await user.click(screen.getByTestId('retentionSelectorIncludeManagedFilter'));
+      expect(screen.getByTestId(rowTestSubj('Managed Policy'))).toBeInTheDocument();
+
+      await user.click(screen.getByTestId('retentionSelectorIncludeManagedFilter'));
+      expect(screen.queryByTestId(rowTestSubj('Managed Policy'))).not.toBeInTheDocument();
+    });
+
+    it('renders a "Managed" badge on managed policy rows', async () => {
+      const user = userEvent.setup();
+
+      renderWithTheme(
+        <RetentionSelector
+          options={mixedOptions}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      await user.click(screen.getByTestId('retentionSelectorIncludeManagedFilter'));
+
+      const badge = screen.getByTestId('retentionSelectorManagedBadge');
+      expect(badge).toBeInTheDocument();
+      // When the selector is interactive the badge should not be in its disabled state.
+      expect(badge.className).not.toContain('euiBadge-disabled');
+    });
+
+    it('renders both the "Managed" badge and the inspect button on a managed, inspectable row', async () => {
+      const user = userEvent.setup();
+      const onInspect = jest.fn();
+      const managedInspectableOption: RetentionOption = {
+        name: 'Managed Inspectable',
+        descriptionParts: ['hot', '30d'],
+        isManaged: true,
+        inspectable: true,
+      };
+
+      renderWithTheme(
+        <RetentionSelector
+          options={[managedInspectableOption]}
+          showManagedFilter={false}
+          onSelectOption={() => {}}
+          onInspect={onInspect}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.getByTestId('retentionSelectorManagedBadge')).toBeInTheDocument();
+      expect(screen.getByTestId(inspectTestSubj('Managed Inspectable'))).toBeInTheDocument();
+
+      await user.click(screen.getByTestId(inspectTestSubj('Managed Inspectable')));
+      expect(onInspect).toHaveBeenCalledWith('Managed Inspectable');
+    });
+
+    it('does not render a "Managed" badge on unmanaged policy rows', () => {
+      renderWithTheme(
+        <RetentionSelector
+          options={[unmanagedOption]}
+          onSelectOption={() => {}}
+          searchPlaceholder="Search policies"
+          inspectButtonLabel={(name) => `Inspect ${name}`}
+        />
+      );
+
+      expect(screen.queryByTestId('retentionSelectorManagedBadge')).not.toBeInTheDocument();
+    });
+  });
+
   describe('split search (RetentionSelectorSearch + showSearch={false})', () => {
     const SplitExample = () => {
       const [searchValue, setSearchValue] = useState('');

@@ -77,6 +77,243 @@ describe('RelayClient', () => {
     });
   });
 
+  it('maps a complete claim with an absent tenant_key to undefined', async () => {
+    requestMock.mockResolvedValueOnce({ status: 200, data: {} } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: undefined,
+    });
+  });
+
+  it('unbind posts the tenant key to the uninstall endpoint', async () => {
+    requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+
+    await createClient().unbind('tenant-1');
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://relay.test/v1/slack/uninstall',
+        method: 'post',
+        data: { tenant_key: 'tenant-1' },
+      })
+    );
+  });
+
+  describe('listBindings', () => {
+    it('GETs a single page and maps SUB entries with their display snapshot, exposing next_cursor', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: {
+          bindings: [
+            {
+              scope_type: 'SUB',
+              scope_id: 'C123',
+              display_name: 'general',
+              visibility: 'public',
+            },
+            { scope_type: 'SUB', scope_id: 'C456' },
+          ],
+          next_cursor: 'cursor-2',
+        },
+      } as never);
+
+      await expect(createClient().listBindings('team-A')).resolves.toEqual({
+        bindings: [
+          {
+            scope_type: 'SUB',
+            scope_id: 'C123',
+            display_name: 'general',
+            visibility: 'public',
+          },
+          {
+            scope_type: 'SUB',
+            scope_id: 'C456',
+            display_name: undefined,
+            visibility: undefined,
+          },
+        ],
+        nextCursor: 'cursor-2',
+      });
+
+      expect(requestMock).toHaveBeenCalledTimes(1);
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=200',
+          method: 'get',
+        })
+      );
+    });
+
+    it('passes the caller-supplied cursor and limit through to the Relay', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { bindings: [] } } as never);
+
+      await createClient().listBindings('team-A', { cursor: 'cursor-1', limit: 10 });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings?limit=10&cursor=cursor-1',
+        })
+      );
+    });
+
+    it('encodes special characters in the tenantKey path segment', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { bindings: [] } } as never);
+
+      await createClient().listBindings('team/with spaces');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2Fwith%20spaces/bindings?limit=200',
+        })
+      );
+    });
+
+    it('returns an empty page with no cursor when the response bindings field is missing', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: {} } as never);
+      await expect(createClient().listBindings('team-A')).resolves.toEqual({
+        bindings: [],
+        nextCursor: undefined,
+      });
+    });
+  });
+
+  describe('bind', () => {
+    it('PUTs to the per-channel bind endpoint', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { status: 'bound' } } as never);
+
+      await createClient().bind('team-A', 'C123');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings/C123/bind',
+          method: 'put',
+        })
+      );
+    });
+
+    it('encodes special characters in tenantKey and channelId', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { status: 'bound' } } as never);
+
+      await createClient().bind('team/A', 'C 1');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team%2FA/bindings/C%201/bind',
+        })
+      );
+    });
+  });
+
+  describe('unbindChannel', () => {
+    it('DELETEs the per-channel unbind endpoint', async () => {
+      requestMock.mockResolvedValue({ status: 200, data: { status: 'unbound' } } as never);
+
+      await createClient().unbindChannel('team-A', 'C123');
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/tenants/team-A/bindings/C123/unbind',
+          method: 'delete',
+        })
+      );
+    });
+  });
+
+  describe('trigger', () => {
+    it('posts the snake_case outbound body with the Relay SSL overrides', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ok: true, surface: 'slack', tenant_key: 'team-A', ref: '1700000000.000100' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
+      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A' });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: 'https://relay.test/v1/slack/trigger',
+          method: 'post',
+          data: { tenant_key: 'team-A', channel: 'C123', message: 'hello' },
+          sslOverrides: relaySSLSettings,
+        })
+      );
+    });
+
+    it('includes thread_ts only when replying in a thread', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'in thread',
+        threadTs: '1700000000.000100',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ thread_ts: '1700000000.000100' }),
+        })
+      );
+    });
+
+    it.each([403, 409, 502])(
+      'turns a %s into a RelayRequestError carrying the status',
+      async (status) => {
+        requestMock.mockResolvedValue({ status, data: { message: 'nope' } } as never);
+
+        const error = await createClient()
+          .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+          .then(() => undefined)
+          .catch((cause) => cause);
+
+        expect(error).toBeInstanceOf(RelayRequestError);
+        expect(error).toMatchObject({ statusCode: status, relayMessage: 'nope' });
+      }
+    );
+
+    it.each([
+      { label: 'empty body', data: undefined },
+      { label: 'empty object', data: {} },
+      { label: 'empty ref', data: { ref: '', tenant_key: 'team-A' } },
+      { label: 'missing ref', data: { tenant_key: 'team-A' } },
+    ])('throws RelayRequestError when response body has $label', async ({ data }) => {
+      requestMock.mockResolvedValue({ status: 202, data } as never);
+
+      const error = await createClient()
+        .trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hello' })
+        .then(() => undefined)
+        .catch((cause) => cause);
+
+      expect(error).toBeInstanceOf(RelayRequestError);
+      expect(error).toMatchObject({
+        relayMessage: 'Relay invalid response format missing expected `ref`',
+      });
+    });
+
+    it('falls back to the caller tenantKey when tenant_key is absent from the response', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000400' },
+      } as never);
+
+      await expect(
+        createClient().trigger({
+          tenantKey: 'team-A',
+          channel: 'C123',
+          message: 'hello',
+        })
+      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A' });
+    });
+  });
+
   it('preserves Relay errors', async () => {
     requestMock.mockResolvedValue({
       status: 400,

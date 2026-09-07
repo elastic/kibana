@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_search_sessions/**/*"
   ],
   "kbn_references": [
     "@kbn/spaces-plugin",
@@ -103,7 +104,6 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/esql-utils",
-    "@kbn/managed-content-badge",
     "@kbn/sort-predicates",
     "@kbn/presentation-publishing",
     "@kbn/saved-objects-finder-plugin",
@@ -131,6 +131,7 @@
     "@kbn/css-utils",
     "@kbn/lens-common",
     "@kbn/lens-common-2",
+    "@kbn/lens-test-helpers",
     "@kbn/react-kibana-context-common",
     "@kbn/control-group-renderer",
     "@kbn/unified-tabs",
@@ -143,12 +144,14 @@
     "@kbn/controls-constants",
     "@kbn/presentation-publishing-schemas",
     "@kbn/field-formats-common",
-    "@kbn/calculate-auto",
-    "@kbn/esql-language",
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-telemetry",
     "@kbn/core-http-browser",
     "@kbn/use-observable",
+    "@kbn/zod",
+    "@kbn/app-header",
+    "@kbn/managed-content-badge",
+    "@kbn/core-http-common"
   ],
   "exclude": ["target/**/*"]
 }

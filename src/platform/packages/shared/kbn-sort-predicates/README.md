@@ -52,7 +52,7 @@ const schemaDetectors = dataGridColumns.map((column) => {
     return {
         sortTextAsc: 'asc'
         sortTextDesc: 'desc',
-        icon: 'starFilled',
+        icon: 'starFill',
         type: sortingHint || '',
         detector: () => 1,
         // This is the actual logic that is used to sort the table

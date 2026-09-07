@@ -16,7 +16,6 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { PresentationUtilPluginSetup } from '@kbn/presentation-util-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { UiActionsPublicSetup } from '@kbn/ui-actions-plugin/public/plugin';
@@ -33,7 +32,6 @@ export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
-  presentationUtil: PresentationUtilPluginSetup;
   uiActions: UiActionsPublicSetup;
 }
 

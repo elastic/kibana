@@ -18,12 +18,16 @@ import type { QueryTab } from './types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 let mockFieldMap: DataViewFieldMap = {};
 jest.mock('../../form/hooks/use_data_fields', () => ({
   useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
+}));
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
 }));
 
 jest.mock('../../form/contexts/rule_form_context', () => ({
@@ -32,6 +36,7 @@ jest.mock('../../form/contexts/rule_form_context', () => ({
     data: { search: { search: jest.fn() } },
     dataViews: {},
     application: {},
+    notifications: { toasts: { addDanger: jest.fn(), addWarning: jest.fn() } },
   }),
 }));
 

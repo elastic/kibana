@@ -332,7 +332,7 @@ const getTelemetryUsageHandler: FleetRequestHandler = async (context, request, r
   if (!fetchUsage) {
     throw new Error('Fetch usage is not initialized.');
   }
-  const usage = await fetchUsage(new AbortController());
+  const usage = await fetchUsage(new AbortController().signal);
 
   return response.ok({
     body: {

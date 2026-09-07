@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useRef, useEffect } from 'react';
-import { useLocation, useHistory } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux-v7';
 import { parameterName } from '../store/parameter_name';
 /**
@@ -14,14 +14,6 @@ import { parameterName } from '../store/parameter_name';
  * This works by having a React effect that just has behavior in the 'cleanup' function.
  */
 export function useResolverQueryParamCleaner(id: string) {
-  /**
-   * Keep a reference to the current search value. This is used in the cleanup function.
-   * This value of useLocation().search isn't used directly since that would change and
-   * we only want the cleanup to run on unmount or when the resolverComponentInstanceID
-   * changes.
-   */
-  const searchRef = useRef<string>();
-  searchRef.current = useLocation().search;
   const dispatch = useDispatch();
 
   const history = useHistory();
@@ -38,9 +30,13 @@ export function useResolverQueryParamCleaner(id: string) {
      */
     return () => {
       /**
-       * This effect must not be invalidated when `search` changes.
+       * Read the CURRENT url search at cleanup time — NOT a value snapshotted during render.
+       * Other code (e.g. the flyout_v2 URL sync clearing its own param when the flyout closes)
+       * may have changed the query string after this component's last render; replaying a stale
+       * snapshot here would resurrect those params. We only want to remove our own resolver key
+       * and preserve everything else that is currently in the url.
        */
-      const urlSearchParams = new URLSearchParams(searchRef.current);
+      const urlSearchParams = new URLSearchParams(history.location.search);
 
       /**
        * Remove old keys from the url

@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/serverless-search-settings",
   "owner": [
-    "@elastic/search-kibana",
+    "@elastic/search-ml-ux",
     "@elastic/kibana-management"
   ],
   "group": "platform",

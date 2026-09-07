@@ -218,6 +218,7 @@ export interface FunctionFilterPredicates {
 export enum PromQLFunctionDefinitionTypes {
   WITHIN_SERIES = 'within_series',
   ACROSS_SERIES = 'across_series',
+  ACROSS_SERIES_REDUCTION = 'across_series_reduction',
   VALUE_TRANSFORMATION = 'value_transformation',
   VECTOR_CONVERSION = 'vector_conversion',
   SCALAR = 'scalar',
@@ -384,6 +385,14 @@ export interface ValidationErrors {
     message: string;
     type: { columnName: string; types?: string };
   };
+  inSubqueryTypeMismatch: {
+    message: string;
+    type: { leftField: string; leftType: string; rightField: string; rightType: string };
+  };
+  inSubqueryColumnCountMismatch: {
+    message: string;
+    type: { expected: number; actual: number };
+  };
   unsupportedMode: {
     message: string;
     type: { command: string; value: string; expected: string };
@@ -503,6 +512,22 @@ export interface ValidationErrors {
   mmrOnFieldWrongType: {
     message: string;
     type: { type: string };
+  };
+  invalidMapParameterValue: {
+    message: string;
+    type: { paramName: string; value: string; allowedValues: string };
+  };
+  highlightMissingOnClause: {
+    message: string;
+    type: {};
+  };
+  highlightInvalidPrefixModifier: {
+    message: string;
+    type: { keyword: string };
+  };
+  highlightInvalidQueryExpression: {
+    message: string;
+    type: { expression: string };
   };
   tsdbIncompatibleFunction: {
     message: string;

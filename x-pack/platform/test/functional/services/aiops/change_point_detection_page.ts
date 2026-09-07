@@ -125,6 +125,12 @@ export function ChangePointDetectionPageProvider(
       await testSubjects.missingOrFail('aiopsChangePointDetectionSelectedCharts');
     },
 
+    async ensureFlyoutClosed() {
+      if (await testSubjects.exists('aiopsChangePointDetectionSelectedCharts')) {
+        await this.closeFlyout();
+      }
+    },
+
     async addChangePointConfig() {
       await testSubjects.click('aiopsChangePointAddConfig');
     },

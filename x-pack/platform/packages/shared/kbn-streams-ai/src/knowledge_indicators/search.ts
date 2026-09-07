@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, intersection, uniq } from 'lodash';
+import { compact, intersection, isString, uniq } from 'lodash';
 import type { Feature, QueryLink } from '@kbn/significant-events-schema';
 import type {
   KnowledgeIndicator,
@@ -16,11 +16,12 @@ import type {
 } from './types';
 import { featureToKnowledgeIndicatorFeature, queryLinkToKnowledgeIndicatorQuery } from './mappers';
 
-export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT = 20;
+export const DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE = 50;
 
 interface NormalizedParams {
   searchText: string | undefined;
-  limit: number;
+  page: number;
+  perPage: number;
   includeFeatures: boolean;
   includeQueries: boolean;
 }
@@ -31,12 +32,66 @@ const isFeatureIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorFea
 const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery =>
   ki.kind === 'query';
 
+// Collects all source/target endpoints of dependency features that reference any of the seed IDs.
+// Called once per filter pass so entity expansion doesn't re-scan the indicator list per indicator.
+function buildConnectedEndpoints(
+  indicators: KnowledgeIndicator[],
+  featureIds: Set<string>
+): Set<string> {
+  const endpoints = new Set<string>();
+  for (const ki of indicators) {
+    if (!isFeatureIndicator(ki) || ki.feature.type !== 'dependency') continue;
+    const { source, target } = ki.feature.properties;
+    if (
+      (isString(source) && featureIds.has(source)) ||
+      (isString(target) && featureIds.has(target)) ||
+      featureIds.has(ki.feature.id)
+    ) {
+      if (isString(source)) endpoints.add(source);
+      if (isString(target)) endpoints.add(target);
+    }
+  }
+  return endpoints;
+}
+
+function featureMatchesTopology(
+  { feature }: KnowledgeIndicatorFeature,
+  featureIds: Set<string>,
+  connectedEndpoints: Set<string>
+): boolean {
+  if (featureIds.has(feature.id)) return true;
+  const { type, properties } = feature;
+  if (type === 'dependency') {
+    const { source, target } = properties;
+    return (
+      (isString(source) && featureIds.has(source)) || (isString(target) && featureIds.has(target))
+    );
+  }
+  if (type === 'entity') {
+    const { name, technology } = properties;
+    return (
+      (isString(name) && connectedEndpoints.has(name)) ||
+      (isString(technology) && connectedEndpoints.has(technology))
+    );
+  }
+  return false;
+}
+
 const compareFeatures = (
   current: KnowledgeIndicatorFeature,
   next: KnowledgeIndicatorFeature
 ): number => {
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
-  return byConfidence !== 0 ? byConfidence : current.feature.id.localeCompare(next.feature.id);
+  if (byConfidence !== 0) {
+    return byConfidence;
+  }
+  const byStream = current.feature.stream_name.localeCompare(next.feature.stream_name);
+  if (byStream !== 0) {
+    return byStream;
+  }
+
+  const byId = current.feature.id.localeCompare(next.feature.id);
+  return byId !== 0 ? byId : current.feature.uuid.localeCompare(next.feature.uuid);
 };
 
 const compareQueries = (
@@ -44,20 +99,32 @@ const compareQueries = (
   next: KnowledgeIndicatorQuery
 ): number => {
   const byScore = (next.query.severity_score ?? -1) - (current.query.severity_score ?? -1);
-  return byScore !== 0 ? byScore : current.query.id.localeCompare(next.query.id);
+  if (byScore !== 0) {
+    return byScore;
+  }
+  const byStream = current.stream_name.localeCompare(next.stream_name);
+  if (byStream !== 0) {
+    return byStream;
+  }
+
+  const byId = current.query.id.localeCompare(next.query.id);
+  return byId !== 0 ? byId : current.rule.id.localeCompare(next.rule.id);
 };
 
 function normalizeParams(params: SearchKnowledgeIndicatorsInput): NormalizedParams {
   const searchText = params.search_text ? params.search_text.trim() : undefined;
-  const limit =
-    typeof params.limit === 'number' && params.limit > 0
-      ? Math.floor(params.limit)
-      : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT;
+  const page = typeof params.page === 'number' && params.page > 0 ? Math.floor(params.page) : 1;
+  const requestedPageSize = params.per_page;
+  const perPage =
+    typeof requestedPageSize === 'number' && requestedPageSize > 0
+      ? Math.floor(requestedPageSize)
+      : DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
   const kinds = params.kind?.length ? params.kind : undefined;
 
   return {
     searchText,
-    limit,
+    page,
+    perPage,
     includeFeatures: !kinds || kinds.includes('feature'),
     includeQueries: !kinds || kinds.includes('query'),
   };
@@ -76,22 +143,28 @@ async function resolveStreamNames(
 
 async function fetchFeatureIndicators({
   streamNames,
-  limit,
   searchText,
+  featureTypes,
+  featureIds,
   getFeatures,
   onFeatureFetchError,
 }: {
   streamNames: string[];
-  limit: number;
   searchText: string | undefined;
+  featureTypes: SearchKnowledgeIndicatorsInput['feature_types'];
+  featureIds: string[] | undefined;
   getFeatures: (
     streamName: string,
-    options: { searchText?: string; limit?: number }
+    options: {
+      searchText?: string;
+      featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
+      featureIds?: string[];
+    }
   ) => Promise<Feature[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
 }): Promise<KnowledgeIndicatorFeature[]> {
   const results = await Promise.allSettled(
-    streamNames.map((name) => getFeatures(name, { searchText, limit }))
+    streamNames.map((name) => getFeatures(name, { searchText, featureTypes, featureIds }))
   );
 
   const indicators: KnowledgeIndicatorFeature[] = [];
@@ -108,11 +181,52 @@ async function fetchFeatureIndicators({
 
 async function fetchQueryIndicators(
   streamNames: string[],
-  searchText: string | undefined,
-  getQueries: (streamNames: string[], search_text?: string) => Promise<QueryLink[]>
+  options: {
+    searchText: string | undefined;
+    queryTypes: SearchKnowledgeIndicatorsInput['query_types'];
+    queryIds: string[] | undefined;
+    ruleIds: string[] | undefined;
+    ruleBacked: boolean | undefined;
+  },
+  getQueries: (
+    streamNames: string[],
+    options: {
+      searchText?: string;
+      queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
+      queryIds?: string[];
+      ruleIds?: string[];
+      ruleBacked?: boolean;
+    }
+  ) => Promise<QueryLink[]>
 ): Promise<KnowledgeIndicatorQuery[]> {
-  const links = await getQueries(streamNames, searchText);
+  const links = await getQueries(streamNames, options);
   return links.map(queryLinkToKnowledgeIndicatorQuery);
+}
+
+function filterIndicators(
+  indicators: KnowledgeIndicator[],
+  params: SearchKnowledgeIndicatorsInput
+): KnowledgeIndicator[] {
+  const featureIdSet = params.feature_ids?.length ? new Set(params.feature_ids) : undefined;
+  const connectedEndpoints = featureIdSet
+    ? buildConnectedEndpoints(indicators, featureIdSet)
+    : new Set<string>();
+
+  return indicators.filter((indicator) => {
+    if (isFeatureIndicator(indicator)) {
+      return (
+        (!params.feature_types?.length || params.feature_types.includes(indicator.feature.type)) &&
+        (!featureIdSet || featureMatchesTopology(indicator, featureIdSet, connectedEndpoints))
+      );
+    }
+
+    return (
+      (!params.query_types?.length || params.query_types.includes(indicator.query.type)) &&
+      (!params.query_ids?.length || params.query_ids.includes(indicator.query.id)) &&
+      (!params.rule_ids?.length || params.rule_ids.includes(indicator.rule.id)) &&
+      (params.rule_backed === undefined || params.rule_backed === indicator.rule.backed)
+    );
+  });
 }
 
 function sortIndicators(indicators: KnowledgeIndicator[]): KnowledgeIndicator[] {
@@ -134,9 +248,22 @@ export async function searchKnowledgeIndicators({
   getStreamNames(): Promise<string[]>;
   getFeatures(
     streamName: string,
-    options: { searchText?: string; limit?: number }
+    options: {
+      searchText?: string;
+      featureTypes?: SearchKnowledgeIndicatorsInput['feature_types'];
+      featureIds?: string[];
+    }
   ): Promise<Feature[]>;
-  getQueries(streamNames: string[], search_text?: string): Promise<QueryLink[]>;
+  getQueries(
+    streamNames: string[],
+    options: {
+      searchText?: string;
+      queryTypes?: SearchKnowledgeIndicatorsInput['query_types'];
+      queryIds?: string[];
+      ruleIds?: string[];
+      ruleBacked?: boolean;
+    }
+  ): Promise<QueryLink[]>;
   onFeatureFetchError?: (streamName: string, error: unknown) => void;
   params: SearchKnowledgeIndicatorsInput;
 }): Promise<SearchKnowledgeIndicatorsOutput> {
@@ -148,15 +275,24 @@ export async function searchKnowledgeIndicators({
   const hasRequestedStreams = Array.isArray(params.stream_names) && params.stream_names.length > 0;
   // Handle the case where no streams are accessible and streams were requested.
   if (hasRequestedStreams && streamNames.length === 0) {
-    return { knowledge_indicators: [] };
+    return {
+      knowledge_indicators: [],
+      page: normalized.page,
+      per_page: normalized.perPage,
+      returned: 0,
+      total: 0,
+      has_more: false,
+      next_page: null,
+    };
   }
 
   // Step 3: Fetch features.
   const features = normalized.includeFeatures
     ? await fetchFeatureIndicators({
         streamNames,
-        limit: normalized.limit,
         searchText: normalized.searchText,
+        featureTypes: params.feature_types,
+        featureIds: params.feature_ids,
         getFeatures,
         onFeatureFetchError,
       })
@@ -164,10 +300,31 @@ export async function searchKnowledgeIndicators({
 
   // Step 4: Fetch queries.
   const queries = normalized.includeQueries
-    ? await fetchQueryIndicators(streamNames, normalized.searchText, getQueries)
+    ? await fetchQueryIndicators(
+        streamNames,
+        {
+          searchText: normalized.searchText,
+          queryTypes: params.query_types,
+          queryIds: params.query_ids,
+          ruleIds: params.rule_ids,
+          ruleBacked: params.rule_backed,
+        },
+        getQueries
+      )
     : [];
 
-  // Step 5: Merge, sort, and limit.
-  const sorted = sortIndicators([...features, ...queries]);
-  return { knowledge_indicators: sorted.slice(0, normalized.limit) };
+  // Step 5: Filter defensively, sort deterministically, and paginate.
+  const sorted = sortIndicators(filterIndicators([...features, ...queries], params));
+  const offset = (normalized.page - 1) * normalized.perPage;
+  const knowledgeIndicators = sorted.slice(offset, offset + normalized.perPage);
+  const hasMore = normalized.page * normalized.perPage < sorted.length;
+  return {
+    knowledge_indicators: knowledgeIndicators,
+    page: normalized.page,
+    per_page: normalized.perPage,
+    returned: knowledgeIndicators.length,
+    total: sorted.length,
+    has_more: hasMore,
+    next_page: hasMore ? normalized.page + 1 : null,
+  };
 }

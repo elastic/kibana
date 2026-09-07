@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   elasticsearchServiceMock,
   httpServerMock,
+  httpServiceMock,
   savedObjectsServiceMock,
   securityServiceMock,
   uiSettingsServiceMock,
@@ -39,8 +40,9 @@ import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, type ConversationTemplate } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStart } from '../services/attachments';
+import type { ConversationTemplatesServiceStart } from '../services/conversation/templates';
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
 import type { ModelProviderFactoryMock, ModelProviderMock } from './model_provider';
 import { createModelProviderFactoryMock, createModelProviderMock } from './model_provider';
@@ -48,6 +50,7 @@ import type { ToolsServiceStartMock } from './tools';
 import { createToolsServiceStartMock } from './tools';
 import type { AgentsServiceStartMock } from './agents';
 import { createAgentsServiceStartMock } from './agents';
+import { createConversationServiceMock } from './conversations';
 import type { SkillRegistry, SkillServiceStart } from '../services/skills';
 import type { PluginsServiceStart } from '../services/plugins/plugin_service';
 
@@ -74,6 +77,24 @@ export const createToolProviderMock = (): ToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+  };
+};
+
+export const createInMemoryConversationTemplates = (
+  templates: ConversationTemplate[] = []
+): ConversationTemplatesServiceStart => {
+  const byId = new Map(templates.map((t) => [t.id, t]));
+  return {
+    get: async (id) => byId.get(id),
+    getMany: async (ids) => {
+      const result = new Map<string, ConversationTemplate>();
+      for (const id of ids) {
+        const t = byId.get(id);
+        if (t) result.set(id, t);
+      }
+      return result;
+    },
+    list: async () => [...byId.values()],
   };
 };
 
@@ -299,6 +320,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),
+    selfClient: httpServiceMock.createStartContract().selfClient,
     savedObjectsClient: savedObjectsServiceMock.createStartContract().getScopedClient({} as any),
     modelProvider: createModelProviderMock(),
     toolProvider: createToolProviderMock(),
@@ -324,20 +346,32 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     bashService: undefined,
     skills: createSkillsServiceMock(),
     plugins: createPluginsServiceMock(),
+    conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    conversationClient: {
+      exists: jest.fn().mockResolvedValue(false),
+      patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }),
+    },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -384,12 +418,18 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
     runContext: { runId: 'mock-run-id', stack: [] },
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
+    executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
@@ -410,6 +450,7 @@ export const createHooksServiceStartMock = (): jest.Mocked<HooksServiceStart> =>
 export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -418,6 +459,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     modelProvider: createModelProviderMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     request: httpServerMock.createKibanaRequest(),
     resultStore: createToolResultStoreMock(),
@@ -426,6 +468,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationTemplates: createInMemoryConversationTemplates(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     hooks: createHooksServiceStartMock(),
@@ -434,23 +477,31 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
+      aiIndices: false,
+      relevantSkills: false,
       subagents: false,
       todos: false,
       datasets: false,
       askUserQuestion: false,
       bash: false,
+      apiTools: false,
     },
     subAgentExecutor: {
       executeSubAgent: jest.fn(),
+      createSubAgent: jest.fn(),
+      sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
     executionMode: AgentExecutionMode.conversation,
+    interactivity: { enabled: true },
+    parentExecutionId: undefined,
   };
 };
 
 export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
   return {
     elasticsearch: elasticsearchServiceMock.createStart(),
+    http: httpServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -459,9 +510,11 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     modelProviderFactory: createModelProviderFactoryMock(),
     toolsService: createToolsServiceStartMock(),
     agentsService: createAgentsServiceStartMock(),
+    conversationService: createConversationServiceMock(),
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationTemplates: createInMemoryConversationTemplates(),
     hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),

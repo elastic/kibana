@@ -40,7 +40,6 @@ import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
-import { getAgentsByKuery } from './agents';
 import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { outputService } from './output';
@@ -54,6 +53,7 @@ import { isSpaceAwarenessEnabled } from './spaces/helpers';
 import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_policies_task';
 import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
+import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { getPackageInfo } from './epm/packages';
 import { ensureInstalledPackage } from './epm/packages/install';
@@ -142,6 +142,13 @@ jest.mock('./agent_policies/bump_agent_policies_by_id_task');
 jest.mock('./agent_policy_create');
 jest.mock('./epm/packages/install');
 jest.mock('./epm/packages');
+jest.mock('./utils/version_specific_policies', () => {
+  const actual = jest.requireActual('./utils/version_specific_policies');
+  return {
+    ...actual,
+    reassignAgentsFromVersionSpecificPolicies: jest.fn(),
+  };
+});
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
@@ -315,7 +322,7 @@ describe('Agent policy', () => {
         },
         { id: 'test-agent-policy' }
       );
-      expect(soClient.create).toBeCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         AGENT_POLICY_SAVED_OBJECT_TYPE,
         expect.anything(),
         expect.anything()
@@ -340,9 +347,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -356,7 +361,7 @@ describe('Agent policy', () => {
           name: 'test',
           namespace: 'default',
         })
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
     });
@@ -375,7 +380,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -396,7 +401,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -542,7 +547,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -581,7 +586,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           supports_agentless: true,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentPolicyInvalidError(
           'supports_agentless is only allowed in serverless and cloud environments that support the agentless feature'
         )
@@ -783,7 +788,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.get(soClient, 'test-agent-policy', false);
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-agent-policy',
         name: 'Test',
@@ -899,13 +904,7 @@ describe('Agent policy', () => {
         },
       ] as any);
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 0,
-        page: 1,
-        perPage: 10,
-      });
+      esClient.count.mockResolvedValue({ count: 0 } as any);
       mockedPackagePolicyService.create.mockReset();
     });
 
@@ -952,13 +951,8 @@ describe('Agent policy', () => {
     });
 
     it('should throw error if active agents are assigned to the policy', async () => {
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 2,
-        page: 1,
-        perPage: 10,
-      });
-      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+      esClient.count.mockResolvedValueOnce({ count: 2 } as any);
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );
     });
@@ -983,6 +977,64 @@ describe('Agent policy', () => {
       );
     });
 
+    it('should delete .fleet-policies entries BEFORE deleting the saved object', async () => {
+      // Arrange: track call order
+      const callOrder: string[] = [];
+
+      esClient.deleteByQuery.mockImplementationOnce(async () => {
+        callOrder.push('deleteByQuery');
+        return { deleted: 2 };
+      });
+
+      soClient.delete.mockImplementationOnce(async () => {
+        callOrder.push('soDelete');
+        return {};
+      });
+
+      await agentPolicyService.delete(soClient, esClient, 'mocked');
+
+      const deleteByQueryIdx = callOrder.indexOf('deleteByQuery');
+      const soDeleteIdx = callOrder.indexOf('soDelete');
+
+      expect(deleteByQueryIdx).toBeGreaterThanOrEqual(0);
+      expect(soDeleteIdx).toBeGreaterThanOrEqual(0);
+      expect(deleteByQueryIdx).toBeLessThan(soDeleteIdx);
+    });
+
+    it('should not delete the saved object when the .fleet-policies deleteByQuery fails', async () => {
+      // Fix 1: if ES is unavailable when we try to delete .fleet-policies docs, the SO must be
+      // preserved so the caller can retry the full delete later.
+      esClient.deleteByQuery.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+        'ES unavailable'
+      );
+
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('should attempt to redeploy .fleet-policies documents when saved object delete fails', async () => {
+      // Fix 6: if the SO delete fails after .fleet-policies docs were already removed, we must
+      // try to redeploy them so fleet-server can continue delivering the policy.
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 2 });
+      soClient.delete.mockRejectedValueOnce(new Error('SO delete failed'));
+      const deploySpy = jest
+        .spyOn(agentPolicyService, 'deployPolicy')
+        .mockResolvedValue(undefined as any);
+
+      try {
+        await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrow(
+          'SO delete failed'
+        );
+        expect(deploySpy).toHaveBeenCalledWith(soClient, 'mocked');
+      } finally {
+        // Restore the original so subsequent deployPolicy tests are not affected.
+        // jest.resetAllMocks() (used in beforeEach) clears implementations but does not
+        // restore spies, so without this the deployPolicy describe block would call a no-op.
+        deploySpy.mockRestore();
+      }
+    });
+
     it('should only delete package polices that are not shared with other agent policies', async () => {
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
@@ -1000,13 +1052,13 @@ describe('Agent policy', () => {
         },
       ] as any);
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
-      expect(mockedPackagePolicyService.delete).toBeCalledWith(
+      expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         ['package-2', 'package-3'],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -1094,6 +1146,21 @@ describe('Agent policy', () => {
           package_agent_version_conditions: null,
         })
       );
+    });
+
+    it('should not fetch full package policies when deploying asynchronously', async () => {
+      const soClient = getSavedObjectMock({ revision: 1, monitoring_enabled: [] });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        asyncDeploy: true,
+      });
+
+      // computeMinAgentVersionData always fetches package policies once, but `_update`'s eager
+      // full fetch (for the deploy event it never triggers on this branch) should now be skipped,
+      // so the total should stay at 1 instead of the 2 it would be if `_update` also fetched.
+      expect(mockedPackagePolicyService.findAllForAgentPolicy).toHaveBeenCalledTimes(1);
+      expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1757,9 +1824,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected'));
     });
 
     it('should throw a HostedAgentPolicyRestrictionRelatedError if user tries to update namespace for a managed policy', async () => {
@@ -1781,9 +1846,7 @@ describe('Agent policy', () => {
         agentPolicyService.update(soClient, esClient, 'test-id', {
           namespace: 'test-namespace',
         })
-      ).rejects.toThrowError(
-        new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
-      );
+      ).rejects.toThrow(new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace'));
     });
     it('should not throw if user tries to update namespace for a managed policy with option force', async () => {
       const soClient = createSavedObjectClientMock();
@@ -1810,7 +1873,7 @@ describe('Agent policy', () => {
           },
           { force: true }
         )
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new HostedAgentPolicyRestrictionRelatedError('Cannot update namespace')
       );
     });
@@ -1869,9 +1932,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(
-        new FleetUnauthorizedError('Tamper protection requires Platinum license')
-      );
+      ).rejects.toThrow(new FleetUnauthorizedError('Tamper protection requires Platinum license'));
     });
 
     it('should not throw FleetUnauthorizedError if is_protected=false with insufficient license', async () => {
@@ -1896,7 +1957,7 @@ describe('Agent policy', () => {
           name: 'test',
           namespace: 'default',
         })
-      ).resolves.not.toThrowError(
+      ).resolves.not.toThrow(
         new FleetUnauthorizedError('Tamper protection requires Platinum license')
       );
     });
@@ -1930,7 +1991,7 @@ describe('Agent policy', () => {
           namespace: 'default',
           is_protected: true,
         })
-      ).rejects.toThrowError(new Error('Cannot enable Agent Tamper Protection: reason'));
+      ).rejects.toThrow(new Error('Cannot enable Agent Tamper Protection: reason'));
     });
 
     it('should not throw AgentPolicyInvalidError if support_agentless is defined in stateful', async () => {
@@ -2110,6 +2171,124 @@ describe('Agent policy', () => {
         expect.objectContaining({ has_agent_version_conditions: false })
       );
     });
+
+    it('reassigns agents back to the base policy when version conditions are removed', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      // Existing policy still had version conditions...
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { has_agent_version_conditions: true },
+            id: 'agent-policy',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+      // ...but no package policy requires them anymore (global beforeEach returns []).
+      await agentPolicyService.update(soClient, esClient, 'agent-policy', {
+        name: 'updated',
+        namespace: 'default',
+      });
+
+      expect(reassignAgentsFromVersionSpecificPolicies).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'agent-policy'
+      );
+    });
+
+    it('does not fail the update when reassigning agents from version-specific policies throws', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      (reassignAgentsFromVersionSpecificPolicies as jest.Mock).mockRejectedValueOnce(
+        new Error('transient ES failure')
+      );
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { has_agent_version_conditions: true },
+            id: 'agent-policy',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'agent-policy', {
+          name: 'updated',
+          namespace: 'default',
+        })
+      ).resolves.not.toThrow();
+
+      expect(reassignAgentsFromVersionSpecificPolicies).toHaveBeenCalled();
+    });
+
+    it('does not reassign agents when version conditions were never present', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { has_agent_version_conditions: false },
+            id: 'agent-policy',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await agentPolicyService.update(soClient, esClient, 'agent-policy', {
+        name: 'updated',
+        namespace: 'default',
+      });
+
+      expect(reassignAgentsFromVersionSpecificPolicies).not.toHaveBeenCalled();
+    });
+
+    it('does not reassign agents when the feature is disabled', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: false,
+      } as any);
+      const soClient = getAgentPolicyCreateMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: { has_agent_version_conditions: true },
+            id: 'agent-policy',
+            type: 'mocked',
+            references: [],
+          },
+        ],
+      });
+
+      await agentPolicyService.update(soClient, esClient, 'agent-policy', {
+        name: 'updated',
+        namespace: 'default',
+      });
+
+      expect(reassignAgentsFromVersionSpecificPolicies).not.toHaveBeenCalled();
+    });
   });
 
   describe('copy', () => {
@@ -2211,7 +2390,7 @@ describe('Agent policy', () => {
       await agentPolicyService.copy(soClient, esClient, 'mocked', {
         name: 'copy mocked',
       });
-      expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -2223,7 +2402,7 @@ describe('Agent policy', () => {
         ],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -2365,7 +2544,7 @@ describe('Agent policy', () => {
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.create).not.toBeCalled();
+      expect(esClient.create).not.toHaveBeenCalled();
     });
 
     it('should create a .fleet-policy document if we can get the full policy', async () => {
@@ -2423,7 +2602,7 @@ describe('Agent policy', () => {
       } as any);
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.bulk).toBeCalledWith(
+      expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           operations: [
@@ -2544,8 +2723,8 @@ describe('Agent policy', () => {
       jest.spyOn(agentlessAgentService, 'createAgentlessAgent');
 
       await agentPolicyService.deployPolicy(soClient, 'test-agentless-policy');
-      expect(esClient.bulk).toBeCalled();
-      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).toBeCalledWith(
+      expect(esClient.bulk).toHaveBeenCalled();
+      expect(jest.mocked(agentlessAgentService.createAgentlessAgent)).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -3123,7 +3302,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
 
-      expect(esClient.deleteByQuery).toBeCalledTimes(2);
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -3499,6 +3678,34 @@ describe('Agent policy', () => {
       });
     });
 
+    it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
+      const connectorWithoutExternalId = {
+        ...baseConnector,
+        attributes: {
+          ...baseConnector.attributes,
+          vars: {
+            role_arn: { type: 'text' as const, value: 'arn:aws:iam::123456:role/test' },
+          },
+        },
+      };
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        connectorWithoutExternalId as any,
+        baseVerificationInfo
+      );
+
+      const { streams: awsStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = awsStreams[0].vars!;
+
+      expect(vars.credentials_role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123456:role/test',
+      });
+      expect(vars.credentials_external_id).toBeUndefined();
+    });
+
     it('should include Azure credential vars for azure provider', async () => {
       const azureConnector = {
         ...baseConnector,
@@ -3803,6 +4010,87 @@ describe('Agent policy', () => {
           query: { terms: { policy_id: ['policy1', 'policy2', 'policy3'] } },
         })
       );
+    });
+  });
+
+  describe('getFleetServerPolicy', () => {
+    const makeEsHit = (policyId: string, revision: number = 5) => ({
+      _source: { policy_id: policyId, revision_idx: revision },
+    });
+
+    const makeSearchResponse = (hits: Array<{ _source: object }>, total: number = hits.length) => ({
+      hits: { total, hits },
+    });
+
+    it('returns the exact match when policy_id exists', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([makeEsHit('base-policy')]) as any)
+        .mockResolvedValueOnce(makeSearchResponse([]) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect(result).toEqual({ policy_id: 'base-policy', revision_idx: 5 });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns the exact variant when a suffixed id matches', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(
+        makeSearchResponse([makeEsHit('base-policy#9.2')]) as any
+      );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy#9.2', 5);
+      expect(result).toEqual({ policy_id: 'base-policy#9.2', revision_idx: 5 });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns null for a specific variant id that does not exist (no fallback)', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(makeSearchResponse([]) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy#9.2', 5);
+      expect(result).toBeNull();
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('falls back to highest-semver variant when base id has no base doc at the revision', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any)
+        .mockResolvedValueOnce(
+          makeSearchResponse(
+            [makeEsHit('base-policy#9.2'), makeEsHit('base-policy#9.10')],
+            2
+          ) as any
+        );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      // 9.10 > 9.2 in semver — must not use lexicographic ordering
+      expect(result).toEqual({ policy_id: 'base-policy#9.10', revision_idx: 5 });
+    });
+
+    it('correctly orders #9.10 before #9.2 (semver, not lexicographic)', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search.mockResolvedValueOnce(makeSearchResponse([], 0) as any).mockResolvedValueOnce(
+        makeSearchResponse(
+          // Deliberately supply 9.10 last to confirm sort is not insertion-order
+          [makeEsHit('base-policy#9.2'), makeEsHit('base-policy#9.10')],
+          2
+        ) as any
+      );
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect((result as any)?.policy_id).toBe('base-policy#9.10');
+    });
+
+    it('returns null when base id has no docs at all at the revision', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      esClient.search
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any)
+        .mockResolvedValueOnce(makeSearchResponse([], 0) as any);
+
+      const result = await agentPolicyService.getFleetServerPolicy(esClient, 'base-policy', 5);
+      expect(result).toBeNull();
     });
   });
 });

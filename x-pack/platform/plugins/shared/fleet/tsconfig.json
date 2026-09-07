@@ -16,7 +16,9 @@
     "package.json",
     "../../../../../typings/**/*",
     "test/scout/**/*",
-    "test/scout_automatic_import/**/*"
+    "test/scout_automatic_import/**/*",
+    "test/scout_fi_agentless/**/*",
+    "test/scout_iac_provisioner/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -48,6 +50,7 @@
     "@kbn/custom-integrations-plugin",
 
     // packages
+    "@kbn/ui-callout",
     "@kbn/deeplinks-management",
     "@kbn/core-application-common",
     "@kbn/core-capabilities-common",
@@ -77,6 +80,7 @@
     "@kbn/test",
     "@kbn/stdio-dev-helpers",
     "@kbn/tooling-log",
+    "@kbn/apm-types",
     "@kbn/apm-utils",
     "@kbn/core-saved-objects-common",
     "@kbn/core-http-server",
@@ -123,6 +127,8 @@
     "@kbn/core-di",
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
+    "@kbn/alerting-v2-utils",
+    "@kbn/alerting-v2-constants",
     "@kbn/core-spaces-common",
     "@kbn/setup-node-env",
     "@kbn/react-query",

@@ -11,7 +11,6 @@ export class FeatureSettingsPage {
   // Header
   readonly pageHeader: Locator;
   readonly saveButton: Locator;
-  readonly apiDocumentationLink: Locator;
 
   // Content
   readonly content: Locator;
@@ -56,9 +55,8 @@ export class FeatureSettingsPage {
 
   constructor(private readonly page: ScoutPage) {
     // Header
-    this.pageHeader = this.page.testSubj.locator('modelSettingsPageHeader');
+    this.pageHeader = this.page.testSubj.locator('appHeaderTitle');
     this.saveButton = this.page.testSubj.locator('save-settings-button');
-    this.apiDocumentationLink = this.page.testSubj.locator('settings-api-documentation');
 
     // Content
     this.content = this.page.testSubj.locator('modelSettingsContent');
@@ -81,7 +79,7 @@ export class FeatureSettingsPage {
 
     // Add Model Popover
     this.addModelSearch = this.page.testSubj.locator('add-model-search');
-    this.addModelOptions = this.page.testSubj.locator('add-model-selectable').getByRole('option');
+    this.addModelOptions = this.page.components.selectable('add-model-selectable').options;
 
     // Copy To Modal
     this.copyToModalApply = this.page.testSubj.locator('copy-to-modal-apply');
@@ -112,7 +110,7 @@ export class FeatureSettingsPage {
 
   public async goto() {
     await this.page.gotoApp('management/modelManagement/model_settings');
-    await this.page.testSubj.waitForSelector('modelSettingsPageHeader', { state: 'visible' });
+    await this.page.testSubj.waitForSelector('appHeaderTitle', { state: 'visible' });
   }
 
   public async gotoEmptyState() {
@@ -147,7 +145,9 @@ export class FeatureSettingsPage {
   }
 
   public addModelOption(name: string): Locator {
-    return this.page.testSubj.locator('add-model-selectable').getByRole('option', { name });
+    return this.page.components
+      .selectable('add-model-selectable')
+      .options.filter({ hasText: name });
   }
 
   public copyToModalCheckbox(featureId: string): Locator {
@@ -190,5 +190,22 @@ export class FeatureSettingsPage {
   /** Picks a connector by visible name in the Global model combobox. */
   public async selectGlobalModel(name: string): Promise<void> {
     await this.page.components.comboBox('globalModelComboBox').setSelectedOptions([name]);
+  }
+
+  /**
+   * Picks a model in the Global model combobox without asserting it becomes the
+   * confirmed selection. Selecting an End-of-Life model intentionally flags the
+   * combobox invalid (which drives the EOL danger callout), and an invalid
+   * combobox reports no confirmed selection — so {@link selectGlobalModel},
+   * which verifies the value reads back as selected, can't be used here.
+   */
+  public async selectGlobalModelExpectingInvalid(name: string): Promise<void> {
+    await this.globalModelComboBox.locator('[data-test-subj="comboBoxInput"]').click();
+    // EUI stamps the options list with `${testSubj}-optionsList` as one of several
+    // space-separated test-subj tokens, so match it with `~=` (token match).
+    await this.page
+      .locator('[data-test-subj~="globalModelComboBox-optionsList"]')
+      .getByRole('option', { name })
+      .click();
   }
 }

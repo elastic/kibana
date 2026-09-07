@@ -10,6 +10,9 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
+import { capitalize } from 'lodash';
+import type { ApiTarget } from '@kbn/agent-builder-common';
+import { apiSelectorsByTarget } from '@kbn/agent-builder-common/apis/known_apis';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -21,6 +24,26 @@ import { normalizeOptionalStringParam } from '../normalize_optional_string_param
  * Step type ID for the agentBuilder run agent step.
  */
 export const RunAgentStepTypeId = 'ai.agent';
+
+// Enumerating every selector (rather than validating a pattern) is what lets monaco-yaml drive
+// both completion and diagnostics for this field off the generated JSON Schema.
+const apiSelectorArraySchema = (target: ApiTarget, exampleApi: string) => {
+  const targetLabel = capitalize(target);
+  const exampleNamespace = exampleApi.split('.')[0];
+  return z
+    .array(
+      z.enum(apiSelectorsByTarget[target], {
+        error: (issue) => `Unknown ${targetLabel} API identifier "${issue.input}".`,
+      })
+    )
+    .max(100)
+    .optional()
+    .describe(
+      `${targetLabel} APIs pre-approved for this step. Each entry is an exact identifier formed from ` +
+        `the namespace and name (e.g. "${exampleApi}"), a namespace wildcard (e.g. ` +
+        `"${exampleNamespace}.*"), or "*" for every ${targetLabel} API.`
+    );
+};
 
 /**
  * Input schema for the run agent step.
@@ -88,6 +111,63 @@ export const InputSchema = z.object({
     .optional()
     .describe(
       'Optional key-value tags stored with the underlying agent execution and searchable via findExecutions. Callers that need to discover the execution id before this step completes (e.g. to follow it live) can tag it with a value they already know and look it up by that tag.'
+    ),
+  /**
+   * Optional pre-approvals for actions the agent would otherwise refuse for want of a live user
+   * to confirm them. A workflow has no live user, so anything requiring confirmation is refused
+   * unless it is granted here.
+   */
+  approvals: z
+    .object({
+      auto_approved_apis: z
+        .strictObject({
+          elasticsearch: apiSelectorArraySchema('elasticsearch', 'indices.create'),
+          kibana: apiSelectorArraySchema('kibana', 'alerting.delete-alerting-rule-id'),
+        })
+        .optional()
+        .describe(
+          'Destructive APIs pre-approved for this step, keyed by backend, which the agent may then call without a user confirmation.'
+        ),
+    })
+    .optional()
+    .describe(
+      'Actions pre-approved for this step, which the agent may then take without a user confirmation. The grant covers this step execution and the sub-agents it spawns.'
+    ),
+  /**
+   * Optional runtime overrides for the agent configuration. These replace the corresponding
+   * fields in the stored agent configuration for this step execution only.
+   */
+  configuration_overrides: z
+    .object({
+      instructions: z
+        .string()
+        .max(2048)
+        .optional()
+        .describe('Custom instructions for the agent, replacing the stored instructions.'),
+      tools: z
+        .array(
+          z.object({
+            tool_ids: z.array(z.string().max(100)).describe('Tool IDs to enable.'),
+          })
+        )
+        .max(50)
+        .optional()
+        .describe('Tool selection to enable for this execution, replacing the stored tool list.'),
+      skill_ids: z
+        .array(z.string().max(100))
+        .max(50)
+        .optional()
+        .describe(
+          'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+        ),
+      enable_elastic_capabilities: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable built-in Elastic skills for this execution.'),
+    })
+    .optional()
+    .describe(
+      'Runtime configuration overrides applied to this step execution only. Each provided field replaces the corresponding field in the stored agent configuration.'
     ),
 });
 
@@ -186,6 +266,17 @@ export const ConfigSchema = z
       .boolean()
       .optional()
       .describe('When true, creates a conversation for the step.'),
+    /**
+     * When true, newly created conversations are public so other users who can use the
+     * underlying agent can list, view, and continue them. Ignored when continuing an
+     * existing conversation. Defaults to private.
+     */
+    'public-conversation': z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, newly created conversations are public to users who can use the agent. Defaults to private. Ignored when continuing an existing conversation.'
+      ),
     /**
      * Connector telemetry feature id used to attribute this step's LLM calls for billing
      * (sets `metadata.connectorTelemetry.pluginId`). When omitted, the default Agent Builder
@@ -306,7 +397,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "platform.sig_events.investigation"
+  agent-id: "significant-events.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
@@ -328,6 +419,20 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
     conversation_id: "{{ steps.initial_analysis.output.conversation_id }}"
     message: "Continue from the previous analysis and complete any missing steps."
 \`\`\``,
+
+      `## Create a public conversation
+\`\`\`yaml
+- name: shared_analysis
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  create-conversation: true
+  public-conversation: true
+  with:
+    message: "Analyze the event and share findings with the team. {{ event | json }}"
+\`\`\`
+
+Public conversations are visible to other users who can use the underlying agent.
+This setting only applies when the step creates a new conversation.`,
 
       `## Get structured output using a JSON schema
 \`\`\`yaml
@@ -383,6 +488,58 @@ When a schema is provided, the agent's response will be available in \`output.st
         - sentiment
         - confidence
 \`\`\``,
+
+      `## Override agent configuration for this step
+\`\`\`yaml
+- name: investigate
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    message: "Investigate the root cause of the issue."
+    configuration_overrides:
+      instructions: "Focus only on the security implications."
+      enable_elastic_capabilities: false
+      skill_ids:
+        - "security-analysis-skill"
+      tools:
+        - tool_ids:
+            - "get_logs"
+            - "search_alerts"
+\`\`\``,
+
+      `## Let the agent call destructive APIs
+\`\`\`yaml
+- name: rotate_index
+  type: ${RunAgentStepTypeId}
+  agent-id: "my-custom-agent"
+  with:
+    message: "Create the new index and point the alias at it."
+    approvals:
+      auto_approved_apis:
+        elasticsearch:
+          - indices.create
+          - indices.update_aliases
+\`\`\`
+
+A destructive API normally requires the user to confirm the call, which a workflow cannot do.
+Listing an API here pre-approves it for this step and for any sub-agents it spawns. Every other
+destructive API is still refused, and omitting the field keeps that stricter behavior for all of them.
+
+An entry can also be a namespace wildcard, or \`*\` for every API on that backend. Prefer the
+narrowest grant that works: \`indices.*\` includes \`indices.delete\`, and \`*\` lets the agent
+perform any destructive operation the workflow's credentials allow, unattended.
+
+\`\`\`yaml
+    approvals:
+      auto_approved_apis:
+        elasticsearch:
+          - indices.*
+        kibana:
+          - alerting.delete-alerting-rule-id
+\`\`\`
+
+Note that some Elasticsearch APIs have no namespace at all (\`bulk\`, \`delete_by_query\`), so no
+namespace wildcard reaches them. Grant those by their exact identifier, or with \`*\`.`,
 
       `## Follow the agent execution live while the step is still running
 \`\`\`yaml

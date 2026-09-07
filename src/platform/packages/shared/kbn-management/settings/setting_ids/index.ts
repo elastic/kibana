@@ -51,12 +51,6 @@ export const TIMEPICKER_QUICK_RANGES_ID = 'timepicker:quickRanges';
 export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID = 'timepicker:refreshIntervalDefaults';
 export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
 
-// Presentation labs settings
-export const LABS_CANVAS_BY_VALUE_EMBEDDABLE_ID = 'labs:canvas:byValueEmbeddable';
-export const LABS_CANVAS_ENABLE_UI_ID = 'labs:canvas:enable_ui';
-export const LABS_DASHBOARD_DEFER_BELOW_FOLD_ID = 'labs:dashboard:deferBelowFold';
-export const LABS_DASHBOARDS_ENABLE_UI_ID = 'labs:dashboard:enable_ui';
-
 // Accessibility settings
 export const ACCESSIBILITY_DISABLE_ANIMATIONS_ID = 'accessibility:disableAnimations';
 
@@ -65,8 +59,6 @@ export const AGENT_BUILDER_NAV_ENABLED_SETTING_ID = 'agentBuilder:navEnabled';
 export const AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID = 'agentBuilder:experimentalFeatures';
 export const AGENT_BUILDER_BASH_SUPPORT_SETTING_ID = 'agentBuilder:bashSupport';
 export const AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS = 'agentBuilder:prePromptWorkflowIds';
-export const AGENT_BUILDER_UIAM_OAUTH_CLIENT_MANAGEMENT_SETTING_ID =
-  'agentBuilder:uiamOAuthClientManagement';
 export const AGENT_BUILDER_TRACING_ENABLED_SETTING_ID = 'agentBuilder:tracing:enabled';
 export const AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID =
   'agentBuilder:tracing:includeUserPrompts';
@@ -78,6 +70,10 @@ export const AGENT_BUILDER_TRACING_SYSTEM_PROMPT_SETTING_ID =
   'agentBuilder:tracing:includeSystemPrompt';
 export const AGENT_BUILDER_TRACING_REAL_NAMES_SETTING_ID = 'agentBuilder:tracing:includeRealNames';
 export const AGENT_BUILDER_TRACING_REAL_IDS_SETTING_ID = 'agentBuilder:tracing:includeRealIds';
+export const AGENT_BUILDER_TRACING_USER_DATA_SETTING_ID = 'agentBuilder:tracing:includeUserData';
+
+// Alerting settings
+export const ALERTING_V2_ENABLED_SETTING_ID = 'alerting:v2:enabled';
 
 // Context engine settings
 export const CONTEXT_ENGINE_ENABLED_SETTING_ID = 'contextEngine:enabled';
@@ -93,12 +89,19 @@ export const BANNERS_TEXT_COLOR_ID = 'banners:textColor';
 export const BANNERS_LINK_COLOR_ID = 'banners:linkColor';
 export const BANNERS_BACKGROUND_COLOR_ID = 'banners:backgroundColor';
 
+// Custom branding settings
+export const XPACK_CUSTOM_BRANDING_LOGO_ID = 'xpackCustomBranding:logo';
+export const XPACK_CUSTOM_BRANDING_CUSTOMIZED_LOGO_ID = 'xpackCustomBranding:customizedLogo';
+export const XPACK_CUSTOM_BRANDING_FAVICON_PNG_ID = 'xpackCustomBranding:faviconPNG';
+export const XPACK_CUSTOM_BRANDING_FAVICON_SVG_ID = 'xpackCustomBranding:faviconSVG';
+
 // Discover settings
 export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_ID = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_ID = 'defaultColumns';
 export const ENABLE_ESQL_ID = 'enableESQL';
+export const DISCOVER_DEFAULT_ESQL_QUERY_ID = 'discover:defaultEsqlQuery';
 export const DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID = 'discover:maxDocFieldsDisplayed';
 export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwitch';
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
@@ -169,8 +172,6 @@ export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED =
   'observability:streamsContinuousKiExtractionEnabled';
 export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS =
   'observability:streamsContinuousKiExtractionIntervalHours';
-export const OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS =
-  'observability:streamsContinuousKiExtractionExcludedStreamPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS =
   'observability:streamsSigEventsIndexPatterns';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG =
@@ -189,10 +190,14 @@ export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_REVIEW
   'observability:streamsSigEventsScheduledDiscoveryReviewIntervalMinutes';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DISCOVERY_BATCH_SIZE =
   'observability:streamsSigEventsScheduledDiscoveryDiscoveryBatchSize';
-export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_TRIAGE_BATCH_SIZE =
-  'observability:streamsSigEventsScheduledDiscoveryTriageBatchSize';
 export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_MAX_REVIEW_PASSES =
   'observability:streamsSigEventsScheduledDiscoveryMaxReviewPasses';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_DETECTION_THRESHOLD =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleDetectionThreshold';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_PROBE_AFTER_MINUTES =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleProbeAfterMinutes';
+export const OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_FLAKY_RULE_EXEMPT_SEVERITY_SCORE =
+  'observability:streamsSigEventsScheduledDiscoveryFlakyRuleExemptSeverityScore';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

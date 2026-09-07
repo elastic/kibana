@@ -191,7 +191,7 @@ const RulesPage = () => {
   useEffect(() => {
     if (setBreadcrumbs) {
       if (currentSection === 'logs') {
-        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);

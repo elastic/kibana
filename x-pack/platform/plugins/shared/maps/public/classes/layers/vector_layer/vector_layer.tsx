@@ -324,7 +324,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getLayerTypeIconName() {
-    return 'vector';
+    return 'vectorSquare';
   }
 
   async hasLegendDetails() {

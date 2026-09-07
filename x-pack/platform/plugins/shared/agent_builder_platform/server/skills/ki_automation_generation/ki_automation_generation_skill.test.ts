@@ -50,11 +50,48 @@ describe('kiAutomationGenerationSkill', () => {
       platformCoreTools.getIndexMapping,
       platformCoreTools.getWorkflowExecutionStatus,
       `${internalNamespaces.workflows}.validate_workflow`,
+      `${internalNamespaces.workflows}.get_workflow`,
       `${internalNamespaces.workflows}.get_step_definitions`,
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
     ];
 
     expect(toolIds).toEqual(expectedTools);
+  });
+
+  it('only instructs the agent to call tools that are actually bound', async () => {
+    const boundTools = (await kiAutomationGenerationSkill.getRegistryTools?.()) ?? [];
+
+    // Every `platform.core.*` / `platform.workflows.*` tool id the content tells the
+    // agent to call must be bound — guards against prose drifting from the bindings.
+    const referencedToolIds = [
+      ...new Set(
+        [
+          ...kiAutomationGenerationSkill.content.matchAll(
+            /platform\.(?:core|workflows|context_engine)\.[a-z_]+/g
+          ),
+        ].map((match) => match[0])
+      ),
+    ];
+
+    expect(referencedToolIds.length).toBeGreaterThan(0);
+
+    const attachmentTypeIds = new Set([`${internalNamespaces.platformContextEngine}.ai_index`]);
+    const attachmentScopedToolIds = new Set([
+      `${internalNamespaces.platformContextEngine}.save_automation`,
+    ]);
+    const unboundReferences = referencedToolIds.filter(
+      (toolId) =>
+        !attachmentTypeIds.has(toolId) &&
+        !attachmentScopedToolIds.has(toolId) &&
+        !boundTools.includes(toolId)
+    );
+    expect(unboundReferences).toEqual([]);
+  });
+
+  it('mentions every referencedContent entry by name in the skill content', () => {
+    for (const ref of kiAutomationGenerationSkill.referencedContent ?? []) {
+      expect(kiAutomationGenerationSkill.content).toContain(ref.name);
+    }
   });
 });

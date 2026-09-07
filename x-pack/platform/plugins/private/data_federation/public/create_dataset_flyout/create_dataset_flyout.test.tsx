@@ -9,9 +9,27 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render } from '@testing-library/react';
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataSetWithName } from '../../common';
 import type { DataSource } from '../../common';
 import { CreateDatasetFlyout } from './create_dataset_flyout';
+
+const docLinksMock = {
+  links: {
+    dataFederation: {
+      overview: '',
+      quickstart: '',
+      dataSources: '',
+      datasets: '',
+      datasetSettings: '',
+      authentication: '',
+      staticCredentials: '',
+      federatedIdentity: '',
+      querying: '',
+      security: '',
+    },
+  },
+};
 
 const renderFlyout = ({
   initialDataSet,
@@ -26,13 +44,15 @@ const renderFlyout = ({
 }) =>
   render(
     <EuiProvider>
-      <CreateDatasetFlyout
-        initialDataSet={initialDataSet}
-        existingDataSetNames={existingDataSetNames}
-        dataSources={dataSources}
-        onClose={jest.fn()}
-        onSave={onSave}
-      />
+      <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+        <CreateDatasetFlyout
+          initialDataSet={initialDataSet}
+          existingDataSetNames={existingDataSetNames}
+          dataSources={dataSources}
+          onClose={jest.fn()}
+          onSave={onSave}
+        />
+      </KibanaContextProvider>
     </EuiProvider>
   );
 
