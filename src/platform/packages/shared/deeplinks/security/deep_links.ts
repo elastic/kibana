@@ -104,6 +104,7 @@ export enum SecurityPageName {
   entityAnalyticsPrivilegedUserMonitoring = 'entity_analytics-privileged_user_monitoring',
   entityAnalyticsOverview = 'entity_analytics-overview',
   entityAnalyticsHomePage = 'entity_analytics-home_page',
+  entityAnalyticsNewHomePage = 'entity_analytics-new_home_page',
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
