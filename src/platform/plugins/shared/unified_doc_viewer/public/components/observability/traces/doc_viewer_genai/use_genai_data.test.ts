@@ -335,6 +335,64 @@ describe('useGenAiData', () => {
     expect(result.current.genAi?.inputMessages[0].content).toHaveLength(2000);
   });
 
+  it('recovers a partial array in ES|QL mode when _ignored was not requested', async () => {
+    // A present-but-partial array cannot be assumed complete without
+    // `_ignored`, so it must still be refetched and replaced wholesale.
+    const shortMessage = '{"role":"system","content":"be brief"}';
+    const longMessage = '{"role":"user","content":"' + 'q'.repeat(2000) + '"}';
+    mockSearch.mockReturnValue(
+      of({
+        rawResponse: {
+          hits: {
+            hits: [
+              { _source: { attributes: { 'gen_ai.input.messages': [shortMessage, longMessage] } } },
+            ],
+          },
+        },
+      })
+    );
+
+    const { result } = renderHook(() =>
+      useGenAiData({
+        hit: buildHit({
+          flattened: {
+            'attributes.gen_ai.request.model': ['gpt-4o'],
+            [INPUT_MESSAGES_FIELD]: [shortMessage],
+          },
+        }),
+        isEsqlMode: true,
+      })
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    expect(mockSearch).toHaveBeenCalledTimes(1);
+    expect(result.current.genAi?.inputMessages).toHaveLength(2);
+    expect(result.current.genAi?.inputMessages[1].content).toHaveLength(2000);
+  });
+
+  it('flags a partial array as unrecoverable when the row has no _id/_index', () => {
+    // Reproduces `FROM traces-* | WHERE ... | SORT ...` with no METADATA: the
+    // short message renders, the long one is gone, and nothing can be fetched.
+    const { result } = renderHook(() =>
+      useGenAiData({
+        hit: buildHit({
+          flattened: {
+            'attributes.gen_ai.request.model': ['gpt-4o'],
+            [INPUT_MESSAGES_FIELD]: ['{"role":"system","content":"be brief"}'],
+          },
+          _id: null,
+          _index: null,
+        }),
+        isEsqlMode: true,
+      })
+    );
+
+    expect(result.current.genAi?.inputMessages).toHaveLength(1);
+    expect(result.current.unrecoverableLongFields).toBe(true);
+    expect(mockSearch).not.toHaveBeenCalled();
+  });
+
   it('does not fetch in ES|QL mode when _ignored was requested and is empty', () => {
     // `METADATA _ignored` present with no entries proves nothing was dropped,
     // so an absent message field is genuinely absent.

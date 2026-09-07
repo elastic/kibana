@@ -69,7 +69,10 @@ export function useGenAiData({
     const ignoredUnknown = isEsqlMode && !('_ignored' in hit.raw);
 
     for (const fieldName of GEN_AI_LONG_MESSAGE_FIELDS) {
-      if (merged[fieldName] == null || isIgnored(fieldName)) {
+      // `ignoredUnknown` also enters here for a present value: these fields are
+      // multi-valued and `ignore_above` drops only the over-long elements, so
+      // without `_ignored` a non-null array cannot be assumed complete.
+      if (merged[fieldName] == null || isIgnored(fieldName) || ignoredUnknown) {
         const sourceValue = getFieldFromSource(hit.raw._source, fieldName);
         if (sourceValue != null) {
           merged[fieldName] = castArray(sourceValue);

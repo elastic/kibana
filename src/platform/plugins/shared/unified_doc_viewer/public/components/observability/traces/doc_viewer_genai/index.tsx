@@ -54,17 +54,11 @@ export function DocViewerObsTracesGenAi({
     return null;
   }
 
-  // Whether values were dropped is unknowable without `_ignored`, so this is
-  // phrased as a possibility. Suppressed once any long-field content renders,
-  // so a span missing only e.g. `system_instructions` stays quiet.
-  const nothingRendered =
-    genAi.inputMessages.length === 0 &&
-    genAi.outputMessages.length === 0 &&
-    !genAi.systemInstructions &&
-    genAi.toolDefinitions == null &&
-    genAi.toolCallArguments == null &&
-    genAi.toolCallResult == null;
-  const showMetadataHint = unrecoverableLongFields && nothingRendered;
+  // Only true when the query requested no metadata at all, so nothing can be
+  // verified or refetched. Deliberately not gated on whether content rendered:
+  // `ignore_above` drops individual elements, so a conversation can render and
+  // still be truncated — that silent case is the one users most need flagged.
+  const showMetadataHint = unrecoverableLongFields;
 
   return (
     <div
