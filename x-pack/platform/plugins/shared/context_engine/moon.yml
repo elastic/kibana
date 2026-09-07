@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/features-plugin'
   - '@kbn/storage-adapter'
   - '@kbn/es-errors'
+  - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/management-settings-ids'
   - '@kbn/shared-ux-router'
   - '@kbn/shared-ux-page-kibana-template'
@@ -77,6 +78,7 @@ dependsOn:
   - '@kbn/alerts-ui-shared'
   - '@kbn/react-hooks'
   - '@kbn/datemath'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod

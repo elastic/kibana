@@ -39,5 +39,12 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-export type { YaraDiagnostic, YaraDiagnosticSeverity, YaraValidateResult } from './types';
+export type {
+  YaraCompiledRule,
+  YaraCompiledRuleMeta,
+  YaraDiagnostic,
+  YaraDiagnosticSeverity,
+  YaraMetaKeyOfInterest,
+  YaraValidateResult,
+} from './types';
 export { getYaraEngineVersion, setYaraLogger, validateYaraRule } from './validate_yara_rule';

@@ -125,6 +125,12 @@ export type CancelAllActiveWorkflowExecutions = (params: {
   spaceId: string;
   workflowId: string;
   schedulingRequest: KibanaRequest;
+  /**
+   * Invoked for each successfully cancelled execution as paging proceeds.
+   * Prefer this over accumulating ids so callers (e.g. per-execution audit)
+   * never retain an unbounded list in memory.
+   */
+  onCancelled?: (executionId: string) => void;
 }) => Promise<void>;
 
 export type ResumeWorkflowExecution = (
