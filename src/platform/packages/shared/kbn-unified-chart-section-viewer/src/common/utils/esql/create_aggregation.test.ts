@@ -8,6 +8,7 @@
  */
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { SimpleAggregation } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
 
 describe('createMetricAggregation', () => {
@@ -166,6 +167,20 @@ describe('createMetricAggregation with gridSettings override', () => {
       expect(result).toBe(expected);
     }
   );
+
+  it('falls back to the default gauge aggregation when the setting is not a known aggregation', () => {
+    const result = createMetricAggregation({
+      types: [ES_FIELD_TYPES.DOUBLE],
+      instrument: 'gauge',
+      metricName: 'cpu.usage',
+      gridSettings: {
+        ...gridSettings,
+        // URL profile state is not validated, so an unknown value can reach this code.
+        gaugeAggregation: 'gauge-aggregation-that-does-not-exist' as SimpleAggregation,
+      },
+    });
+    expect(result).toBe('AVG(AVG_OVER_TIME(cpu.usage))');
+  });
 
   it('applies the histogram percentile setting for legacy histograms', () => {
     const result = createMetricAggregation({

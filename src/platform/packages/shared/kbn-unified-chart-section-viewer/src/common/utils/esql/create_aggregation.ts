@@ -106,9 +106,13 @@ function buildAggregationNode(
     return synth.exp`${synth.kwd(fn)}(RATE(${resolvedField}))`;
   }
 
-  const fn = settings.gaugeAggregation.toUpperCase();
+  const gaugeAggregation =
+    settings.gaugeAggregation in GAUGE_OVER_TIME_FN
+      ? settings.gaugeAggregation
+      : METRICS_GRID_SETTINGS_DEFAULTS.gaugeAggregation;
+  const fn = gaugeAggregation.toUpperCase();
   if (instrument === 'gauge') {
-    const overTimeFn = GAUGE_OVER_TIME_FN[settings.gaugeAggregation].toUpperCase();
+    const overTimeFn = GAUGE_OVER_TIME_FN[gaugeAggregation].toUpperCase();
     return synth.exp`${synth.kwd(fn)}(${synth.kwd(overTimeFn)}(${resolvedField}))`;
   }
 
