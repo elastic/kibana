@@ -14,7 +14,7 @@ import {
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
-  ENTITY_ANALYTICS_NEW_HOME_PAGE_PATH,
+  ENTITY_ANALYTICS_HOME_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
@@ -210,7 +210,7 @@ const EntityAnalyticsNewHomePageContainer: React.FC = React.memo(() => {
   return (
     <Routes>
       <Route
-        path={ENTITY_ANALYTICS_NEW_HOME_PAGE_PATH}
+        path={ENTITY_ANALYTICS_HOME_PATH}
         exact
         render={({ location }) =>
           isEnabled ? (
@@ -279,10 +279,10 @@ export const routes = [
     ),
   },
   {
-    path: ENTITY_ANALYTICS_NEW_HOME_PAGE_PATH,
+    path: ENTITY_ANALYTICS_HOME_PATH,
     component: withSecurityRoutePageWrapper(
       EntityAnalyticsNewHomePageContainer,
-      SecurityPageName.entityAnalyticsNewHomePage
+      SecurityPageName.entityAnalyticsHome
     ),
   },
 ];

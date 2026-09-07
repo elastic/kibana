@@ -35,7 +35,7 @@ import { dashboardsLinks } from '../../dashboards/links';
 import {
   entityAnalyticsLinks,
   entityAnalyticsV2Links,
-  entityAnalyticsNewHomePageLink,
+  entityAnalyticsHomeLink,
 } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
@@ -99,7 +99,7 @@ export const getFilteredLinks = async (
       ? entityAnalyticsV2Links
       : entityAnalyticsLinks,
     ...(core.featureFlags.getBooleanValue(USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG, false)
-      ? [entityAnalyticsNewHomePageLink]
+      ? [entityAnalyticsHomeLink]
       : []),
     assetInventoryLinks,
     rulesLinks,
