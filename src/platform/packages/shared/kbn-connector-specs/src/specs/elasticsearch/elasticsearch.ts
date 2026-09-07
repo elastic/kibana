@@ -111,6 +111,7 @@ export const Elasticsearch: ConnectorSpec = {
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description:
         'Search documents in one or more Elasticsearch indices using the Query DSL. Returns matching hits with source, score, and metadata. Supports aggregations, sorting, field filtering, and pagination. Use listIndices first if you do not know the index name, and getMapping to understand available fields.',
       input: SearchInputSchema,
@@ -132,6 +133,7 @@ export const Elasticsearch: ConnectorSpec = {
 
     esql: {
       isTool: true,
+      scope: 'read',
       description:
         'Run an ES|QL query against Elasticsearch. ES|QL is a pipe-based query language optimized for analytics, aggregations, and time-series exploration (requires Elasticsearch 8.11+). Returns a columnar result set with column names and row values. Use this for analytics; use search for full-text search or Query DSL.',
       input: EsqlInputSchema,
@@ -147,6 +149,7 @@ export const Elasticsearch: ConnectorSpec = {
 
     listIndices: {
       isTool: true,
+      scope: 'read',
       description:
         'List indices and data streams with their health, status, document count, and storage size. Optionally filter by name pattern. Use this to discover available indices before calling search, getMapping, or esql.',
       input: ListIndicesInputSchema,
@@ -166,6 +169,7 @@ export const Elasticsearch: ConnectorSpec = {
 
     getMapping: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve the field mapping for an index using the _field_caps API. Returns field names, types, and whether each field is searchable and aggregatable. Use this to understand available fields before constructing a search query or ES|QL query against an unfamiliar index.',
       input: GetMappingInputSchema,
@@ -179,6 +183,7 @@ export const Elasticsearch: ConnectorSpec = {
 
     request: {
       isTool: true,
+      scope: 'read',
       description:
         'Make an arbitrary GET request to the Elasticsearch REST API. Use this as an escape hatch when no typed action covers the endpoint you need (e.g. GET /_cluster/settings, GET /_aliases, GET /_nodes). The base cluster URL is prepended automatically — only provide the path.',
       input: RequestInputSchema,
@@ -191,6 +196,7 @@ export const Elasticsearch: ConnectorSpec = {
 
     getClusterInfo: {
       isTool: true,
+      scope: 'read',
       description:
         'Get basic information about the Elasticsearch cluster: name, version, and build information. Use getClusterHealth (via the request action: GET /_cluster/health) to check shard/node counts and cluster status.',
       input: GetClusterInfoInputSchema,
