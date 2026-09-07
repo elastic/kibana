@@ -8,13 +8,13 @@
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { WrappedHelper } from '../../../utils/testing';
 import { setOverviewPageStateAction } from '../../../state';
 import { useSyncOverviewDateRange } from './use_sync_overview_date_range';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: jest.fn(),
 }));
 

@@ -71,12 +71,27 @@ export interface SuspendProcessActionOutputContent {
   entity_id?: string;
 }
 
+/** A single killed process descendant. Only for Endpoint starting with v9.6 */
+export interface KilledProcessDescendant {
+  pid?: number;
+  parent_pid?: number;
+  entity_id?: string;
+  parent_entity_id?: string;
+  process_name?: string;
+  command?: string;
+  was_killed?: boolean;
+  error?: string;
+}
+
 export interface KillProcessActionOutputContent {
   code: string;
   command?: string;
   pid?: number;
   entity_id?: string;
+  /** Process Name is currently a SentinelOne only property */
   process_name?: string;
+  /** Killed process descendants. Only for Endpoint starting with v9.6 */
+  descendants?: KilledProcessDescendant[];
 }
 
 export interface ResponseActionGetFileOutputContent {
@@ -259,12 +274,16 @@ export interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
   process_name?: never;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithEntityId {
   pid?: never;
   process_name?: never;
   entity_id: string;
+  /** Also terminate the descendent (child) processes. Valid for `endpoint` agent type only. */
+  kill_descendants?: boolean;
 }
 
 export interface ResponseActionParametersWithProcessName {
@@ -307,6 +326,27 @@ export interface ResponseActionMemoryDumpOutputContent {
   path: string;
   /** The remaining free disk space in bytes (after creating memory dump) */
   disk_free_space: number;
+  /** Returned for `raw` memory dump. The size of the dump's memory */
+  total_memory_size?: number;
+  /** Returned for `raw` memory dump. The amount of bytes captured by the dump */
+  total_bytes_captured?: number;
+  /**
+   * Returned for `raw` memory dump.
+   * Calculated as `total_bytes_captured `/ (double) `total_memory_size` - tells the percentage
+   * of RAM successfully captured into a dump
+   */
+  success_ratio?: number;
+  /**
+   * Returned for `kernel` memory dump.
+   * If true, the dump was executed from the driver, which means it doesn't have the same restrictions
+   * as a dump executed from user mode (e.g. it will work on older systems and will contain user mode memory)
+   */
+  dump_executed_from_driver?: boolean;
+  /**
+   * Returned for `kernel` memory dump.
+   * Indicates if the user space memory was included in the dump
+   */
+  user_space_included?: boolean;
 }
 
 export type EndpointActionDataParameterTypes =

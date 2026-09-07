@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 
 import type { Logger } from '@kbn/logging';
 
 import type { FleetProxy, Output, TemplateAgentPolicyInput } from '../../types';
+import type { BeatsOutput } from '../../../common/types';
 import type {
   FullAgentPolicyInput,
   FullAgentPolicyInputStream,
@@ -614,7 +615,7 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
 }
 
 function buildBeatsauthConfig(
-  output: Output,
+  output: BeatsOutput,
   proxy?: FleetProxy,
   logger?: Logger
 ): Record<string, unknown> {
@@ -671,7 +672,7 @@ function buildBeatsauthConfig(
 function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }
@@ -745,7 +746,7 @@ function parseOtelExporterConfigYaml(
 ): Record<string, unknown> {
   if (!yaml) return {};
   try {
-    const parsed = load(yaml);
+    const parsed = parse(yaml);
     if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
       return parsed as Record<string, unknown>;
     }

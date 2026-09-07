@@ -9,7 +9,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import React, { type PropsWithChildren } from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 import { MemoryRouter } from 'react-router-dom';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
@@ -47,7 +47,7 @@ export const TestProvider: React.FC<PropsWithChildren<TestProviderProps>> = ({
             <WorkflowsUiServicesProvider services={mockServices}>
               <MemoryRouter initialEntries={initialEntries}>
                 <I18nProviderMock>
-                  <MockAppHeaderProvider>
+                  <MockAppHeaderProvider chrome={mockServices.chrome}>
                     <Provider store={testStore}>{children}</Provider>
                   </MockAppHeaderProvider>
                 </I18nProviderMock>

@@ -5,12 +5,27 @@
  * 2.0.
  */
 
+jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
+  esManifest: [
+    { id: 'indices.create' },
+    { id: 'indices.delete' },
+    { id: 'indices.update_aliases' },
+    { id: 'bulk' },
+  ],
+}));
+
+jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
+  kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
+}));
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
+import { z } from '@kbn/zod/v4';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
+  InputSchema,
 } from '../../common/step_types/run_agent_step';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
@@ -117,8 +132,57 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     const res = await step.handler(context);
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent.mock.calls[0][0].params.accessControl).toBeUndefined();
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
+  });
+
+  it('passes public access control when public-conversation is true', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-public', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+        },
+        config: {
+          'create-conversation': true,
+          'public-conversation': true,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          accessControl: { access_mode: 'public' },
+          storeConversation: true,
+          autoCreateConversationWithId: true,
+        }),
+      })
+    );
+    expect(res.output?.conversation_id).toBe('c-public');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {
@@ -356,6 +420,211 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
     expect(res.output?.message).toBe('ok');
+  });
+
+  describe('approvals', () => {
+    const runStep = async (input: Record<string, unknown>) => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(createContext({ input }));
+
+      return execution;
+    };
+
+    it('flattens the per-target map without ever enabling interactivity', async () => {
+      const execution = await runStep({
+        message: 'hello',
+        approvals: {
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.update_aliases'],
+            kibana: ['alerting.delete-alerting-rule-id'],
+          },
+        },
+      });
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          interactive: {
+            enabled: false,
+            auto_approved_apis: [
+              { target: 'elasticsearch', api: 'indices.create' },
+              { target: 'elasticsearch', api: 'indices.update_aliases' },
+              { target: 'kibana', api: 'alerting.delete-alerting-rule-id' },
+            ],
+          },
+        })
+      );
+    });
+
+    it.each<{ description: string; input: Record<string, unknown> }>([
+      { description: 'omitted', input: { message: 'hello' } },
+      { description: 'an empty object', input: { message: 'hello', approvals: {} } },
+      {
+        description: 'an empty map',
+        input: { message: 'hello', approvals: { auto_approved_apis: {} } },
+      },
+      {
+        description: 'an empty list for a target',
+        input: { message: 'hello', approvals: { auto_approved_apis: { elasticsearch: [] } } },
+      },
+    ])(
+      'runs non-interactively with no grants when the field is $description',
+      async ({ input }) => {
+        const execution = await runStep(input);
+
+        expect(execution.executeAgent.mock.calls[0][0].interactive).toEqual({ enabled: false });
+      }
+    );
+
+    it('emits a per-target selector enum, which is what drives editor autocomplete', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
+
+      expect(byTarget.elasticsearch.items.enum).toContain('indices.create');
+      expect(byTarget.elasticsearch.items.enum).not.toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).toContain('alerting.delete-alerting-rule-id');
+      expect(byTarget.kibana.items.enum).not.toContain('indices.create');
+    });
+
+    it('offers the wildcards through that same enum', () => {
+      const jsonSchema = z.toJSONSchema(InputSchema, {
+        unrepresentable: 'any',
+        io: 'input',
+      }) as Record<string, any>;
+
+      const byTarget = jsonSchema.properties.approvals.properties.auto_approved_apis.properties;
+
+      expect(byTarget.elasticsearch.items.enum).toEqual(expect.arrayContaining(['*', 'indices.*']));
+      expect(byTarget.kibana.items.enum).toEqual(expect.arrayContaining(['*', 'alerting.*']));
+      expect(byTarget.kibana.items.enum).not.toContain('indices.*');
+    });
+
+    it('accepts a well-formed map, including wildcards', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: {
+          auto_approved_apis: {
+            elasticsearch: ['indices.create', 'indices.*', 'bulk', '*'],
+            kibana: ['alerting.delete-alerting-rule-id', 'alerting.*'],
+          },
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it.each<{ description: string; autoApprovedApis: unknown }>([
+      {
+        description: 'an identifier that names no real API',
+        autoApprovedApis: { elasticsearch: ['indices.crate'] },
+      },
+      {
+        description: 'an identifier that only exists on the other target',
+        autoApprovedApis: { kibana: ['indices.create'] },
+      },
+      {
+        description: 'a namespace wildcard that only exists on the other target',
+        autoApprovedApis: { kibana: ['indices.*'] },
+      },
+      {
+        description: 'a bare namespace instead of a full identifier or wildcard',
+        autoApprovedApis: { elasticsearch: ['indices'] },
+      },
+      {
+        description: 'a wildcard on an identifier that has no namespace',
+        autoApprovedApis: { elasticsearch: ['bulk.*'] },
+      },
+      {
+        description: 'an unknown target',
+        autoApprovedApis: { postgres: ['indices.create'] },
+      },
+      {
+        description: 'a flat list, which was the previous shape',
+        autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }],
+      },
+      {
+        description: 'a list exceeding 100 entries for one target',
+        autoApprovedApis: {
+          elasticsearch: Array.from({ length: 101 }, () => 'indices.create'),
+        },
+      },
+    ])('rejects $description', ({ autoApprovedApis }) => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        approvals: { auto_approved_apis: autoApprovedApis },
+      });
+      expect(parsed.success).toBe(false);
+    });
+  });
+
+  describe('configuration_overrides (InputSchema)', () => {
+    it('accepts configuration_overrides with all optional fields', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          instructions: 'Custom instructions.',
+          tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
+          skill_ids: ['skill-a'],
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts configuration_overrides with a subset of fields', () => {
+      expect(
+        InputSchema.safeParse({ message: 'hi', configuration_overrides: { skill_ids: ['s1'] } })
+          .success
+      ).toBe(true);
+      expect(
+        InputSchema.safeParse({
+          message: 'hi',
+          configuration_overrides: { instructions: 'override' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an omitted configuration_overrides field', () => {
+      const parsed = InputSchema.safeParse({ message: 'hello' });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.configuration_overrides).toBeUndefined();
+      }
+    });
+
+    it('rejects instructions exceeding 2048 characters', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { instructions: 'a'.repeat(2049) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects skill_ids list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { skill_ids: Array.from({ length: 51 }, (_, i) => `s-${i}`) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects tools list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          tools: Array.from({ length: 51 }, (_, i) => ({ tool_ids: [`t-${i}`] })),
+        },
+      });
+      expect(parsed.success).toBe(false);
+    });
   });
 
   describe('connector-id / inference-id', () => {

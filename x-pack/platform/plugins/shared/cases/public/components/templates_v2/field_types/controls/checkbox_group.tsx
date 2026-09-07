@@ -17,9 +17,12 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
-import { OptionalFieldLabel } from '../../../optional_field_label';
+import { getFieldRequirementLabel } from '../../../optional_field_label';
 
-type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
+type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> &
+  ConditionRenderProps & {
+    onEditCancel?: () => void;
+  };
 
 const toStringArray = (value: unknown): string[] =>
   Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
@@ -43,9 +46,11 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
   onConfirm,
   isSaving,
   isSaveDisabled,
+  onEditCancel,
 }) => {
   const { control, resetField } = useFormContext();
   const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
@@ -68,7 +73,8 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
 
   const handleCancel = useCallback(() => {
     resetField(path);
-  }, [path, resetField]);
+    onEditCancel?.();
+  }, [onEditCancel, path, resetField]);
 
   return (
     <Controller
@@ -91,7 +97,7 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
           <>
             <EuiFormRow
               label={label}
-              labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+              labelAppend={getFieldRequirementLabel(isRequired, isRequiredOnClose)}
               error={fieldState.error?.message}
               isInvalid={Boolean(fieldState.error)}
               fullWidth

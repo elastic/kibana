@@ -28,7 +28,7 @@ const ChangeHistoryRowActions = ({
         ? [
             {
               name: i18n.ROW_ACTIONS_COMPARE_TO_THIS_VERSION,
-              icon: 'diff' as const,
+              icon: 'compare' as const,
               onClick: () => {
                 setIsOpen(false);
                 onCompareToVersion();

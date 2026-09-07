@@ -55,14 +55,14 @@ export class DeleteUnenrolledAgentsTask {
         timeout: TIMEOUT,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask({ taskInstance, core, abortController });
+              return this.runTask({ taskInstance, core, signal });
             },
             cancel: async () => {},
           };
@@ -106,10 +106,10 @@ export class DeleteUnenrolledAgentsTask {
 
   public async deleteUnenrolledAgents({
     esClient,
-    abortController,
+    signal,
   }: {
     esClient: ElasticsearchClient;
-    abortController: AbortController;
+    signal: AbortSignal;
   }) {
     this.logger.debug(`[DeleteUnenrolledAgentsTask] Fetching unenrolled agents`);
 
@@ -128,7 +128,7 @@ export class DeleteUnenrolledAgentsTask {
           },
         },
       },
-      { signal: abortController.signal }
+      { signal }
     );
 
     this.logger.debug(
@@ -146,11 +146,11 @@ export class DeleteUnenrolledAgentsTask {
   public runTask = async ({
     taskInstance,
     core,
-    abortController,
+    signal,
   }: {
     taskInstance: ConcreteTaskInstance;
     core: CoreSetup;
-    abortController: AbortController;
+    signal: AbortSignal;
   }) => {
     if (!this.wasStarted) {
       this.logger.debug('[DeleteUnenrolledAgentsTask] runTask Aborted. Task not started yet');
@@ -178,7 +178,7 @@ export class DeleteUnenrolledAgentsTask {
         this.endRun('Delete unenrolled agents is disabled');
         return;
       }
-      await this.deleteUnenrolledAgents({ esClient, abortController });
+      await this.deleteUnenrolledAgents({ esClient, signal });
 
       this.endRun('success');
     } catch (err) {

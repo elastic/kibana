@@ -6,7 +6,7 @@
  */
 
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { normalizeEsqlSafe } from '@kbn/streams-schema';
+import { getSourcesForStream, normalizeEsqlSafe, replaceFromSources } from '@kbn/streams-schema';
 import { HIGH_SEVERITY_THRESHOLD } from '@kbn/significant-events-schema';
 import { v4 } from 'uuid';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
@@ -22,7 +22,10 @@ export interface PersistQueriesResult {
 }
 
 function isRuleEligible(query: GeneratedSignificantEventQuery): boolean {
-  return canQueryBeRuleBacked(query.type) && query.severity_score >= HIGH_SEVERITY_THRESHOLD;
+  return (
+    canQueryBeRuleBacked({ type: query.type, esql: query.esql }) &&
+    query.severity_score >= HIGH_SEVERITY_THRESHOLD
+  );
 }
 
 export async function persistQueries(
@@ -41,11 +44,15 @@ export async function persistQueries(
 
   const definition = await streamsClient.getStream(streamName);
 
+  // A stored and an incoming query can be identical apart from their FROM (a classic stream
+  // accepts both `FROM name` and `FROM name, name.*`), so canonicalize the sources on both sides
+  // or the duplicate slips through. No-op when the FROM already matches, or when there is none.
+  const targetSources = getSourcesForStream(definition);
+  const dedupKey = (esql: string) => normalizeEsqlSafe(replaceFromSources(esql, targetSources));
+
   const { [streamName]: existingLinks } = await kiClient.getStreamToQueryLinksMap([streamName]);
   const existingById = new Map(existingLinks.map((link) => [link.query.id, link]));
-  const existingEsqls = new Set(
-    existingLinks.map((link) => normalizeEsqlSafe(link.query.esql.query))
-  );
+  const existingEsqls = new Set(existingLinks.map((link) => dedupKey(link.query.esql.query)));
   const ruleBackedIds = new Set(
     existingLinks.filter((link) => link.rule_backed).map((link) => link.query.id)
   );
@@ -68,7 +75,7 @@ export async function persistQueries(
   for (const query of queries) {
     const { replaces, ...indexFields } = query;
 
-    const normalizedEsql = normalizeEsqlSafe(query.esql.query);
+    const normalizedEsql = dedupKey(query.esql.query);
 
     if (existingEsqls.has(normalizedEsql)) {
       skippedQueries.push(query);

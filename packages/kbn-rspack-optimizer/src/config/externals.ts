@@ -10,6 +10,23 @@
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
 /**
+ * Returns true when the import is `react-redux` originating from a kea
+ * node_modules context.  kea depends on an older react-redux (v7) and
+ * must be redirected to `react-redux-v7` so it shares the same React
+ * context as the `<Provider>` used by consumers like enterprise_search.
+ *
+ * Use this in:
+ * - externals callbacks: skip externalizing so the NormalModuleReplacementPlugin fires
+ * - NormalModuleReplacementPlugin: redirect `react-redux` → `react-redux-v7`
+ */
+export function isKeaReactReduxImport(
+  context: string | undefined,
+  request: string | undefined
+): boolean {
+  return !!context && request === 'react-redux' && /node_modules[\\/]kea/.test(context);
+}
+
+/**
  * Get externals mapping for shared dependencies.
  *
  * Spreads the canonical externals from @kbn/ui-shared-deps-src (the single

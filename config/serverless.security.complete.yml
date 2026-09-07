@@ -14,6 +14,10 @@ xpack.features.overrides:
   agentBuilderSml:
     category: "security"
     order: 1102
+  ### Context Engine should match Agent Builder for role management.
+  contextEngine:
+    category: "security"
+    order: 1103
 
 # Elastic Managed LLMs
 xpack.actions.preconfigured:

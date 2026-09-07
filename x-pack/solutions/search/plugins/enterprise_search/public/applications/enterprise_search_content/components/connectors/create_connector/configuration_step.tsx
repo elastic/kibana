@@ -18,14 +18,13 @@ import {
   EuiText,
   EuiButton,
   EuiProgress,
-  EuiCallOut,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { Status } from '../../../../../../common/types/api';
 
@@ -69,9 +68,8 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
     <>
       <EuiFlexGroup gutterSize="m" direction="column">
         {isWaitingOnAgentlessDeployment && (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
             title={
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
@@ -87,18 +85,14 @@ export const ConfigurationStep: React.FC<ConfigurationStepProps> = ({ title, set
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-          >
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
-                {
-                  defaultMessage:
-                    'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
-                }
-              )}
-            </EuiText>
-          </EuiCallOut>
+            text={i18n.translate(
+              'xpack.enterpriseSearch.createConnector.configurationStep.agentlessDeploymentNotReadyCallOut.description',
+              {
+                defaultMessage:
+                  'Setting up the agentless infrastructure to run the connector. This process may take up to one minute.',
+              }
+            )}
+          />
         )}
         <EuiFlexItem>
           <EuiPanel hasShadow={false} hasBorder paddingSize="l" style={{ position: 'relative' }}>

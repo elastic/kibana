@@ -18,7 +18,19 @@ A concise, non-technical map of the Discover Profile extension points (what they
 
 **Use when:** Preconfigure defaults per team/use case.
 
-**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart?, hideTable? }`
+**Returns:** `{ columns?, rowHeight?, breakdownField?, hideChart?, hideTable?, hideSidebar? }`
+
+To show the Summary column alongside selected fields by default, include `{ name: '_source' }` in `columns` (omit `width` for auto-width), typically last:
+
+```ts
+columns: [
+  { name: dataView.timeFieldName, width: 212 },
+  { name: 'log.level', width: 150 },
+  { name: '_source' }, // Summary
+],
+```
+
+`_source` is always treated as a valid profile column. Users can still pin Summary from the Columns popover.
 
 **Screenshot:**
 ![Default app state example](./docs/extension_points/get_default_app_state.png)

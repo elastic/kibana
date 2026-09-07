@@ -17,19 +17,11 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
-
-const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
-  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
-    default: m.AgentBuilderAnnouncementChromeInner,
-  }))
-);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -37,6 +29,7 @@ import {
   RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -45,9 +38,12 @@ import {
   OAuthClientsService,
   PluginsService,
   EventsService,
+  SpaceSettingsService,
   type AgentBuilderInternalService,
 } from './services';
+import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
@@ -60,6 +56,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
+  OpenConversationDetailsOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -97,11 +94,13 @@ export class AgentBuilderPlugin
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private isEarsEnabled = false;
   private isEarsExperimentalEnabled = false;
   private experimentalDeepLinksSubscription?: Subscription;
+  private sidebarOpenSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -156,7 +155,7 @@ export class AgentBuilderPlugin
 
     startDependencies.cps?.cpsManager?.registerAppAccess(
       AGENTBUILDER_APP_ID,
-      () => ProjectRoutingAccess.READONLY
+      () => ProjectRoutingAccess.EDITABLE
     );
 
     const agentService = new AgentService({ http });
@@ -166,12 +165,14 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const oauthClientsService = new OAuthClientsService({ http });
+    const spaceSettingsService = new SpaceSettingsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -181,7 +182,14 @@ export class AgentBuilderPlugin
     const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
-    const sidebar = core.chrome.sidebar.getApp('agentBuilder');
+    const agentBuilderSidebar = core.chrome.sidebar.getApp('agentBuilder');
+    this.sidebarOpenSubscription = agentBuilderSidebar.isOpen$().subscribe((isOpen) => {
+      if (!isOpen) {
+        this.activeSidebarRef = null;
+        this.sidebarCallbacks = null;
+        clearSidebarRuntimeContext();
+      }
+    });
 
     const openSidebarInternal = (options?: OpenSidebarInternalOptions) => {
       const { conversationId, ...openOptions } = options ?? {};
@@ -194,7 +202,7 @@ export class AgentBuilderPlugin
       }
 
       // If already open, update props instead of creating new
-      if (this.activeSidebarRef && this.sidebarCallbacks) {
+      if (agentBuilderSidebar.isOpen() && this.activeSidebarRef && this.sidebarCallbacks) {
         this.sidebarCallbacks.updateProps(config);
         return { chatRef: this.activeSidebarRef };
       }
@@ -205,26 +213,32 @@ export class AgentBuilderPlugin
         onRegisterCallbacks: (callbacks) => {
           this.sidebarCallbacks = callbacks;
         },
-        onClose: () => {
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
       });
 
-      sidebar.open();
+      agentBuilderSidebar.open();
 
       const sidebarRef: ConversationSidebarRef = {
-        close: () => {
-          sidebar.close();
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          clearSidebarRuntimeContext();
-        },
+        close: agentBuilderSidebar.close,
       };
 
       this.activeSidebarRef = sidebarRef;
       return { chatRef: sidebarRef };
+    };
+
+    const openConversationDetails = async ({
+      conversationId,
+      onClose,
+    }: OpenConversationDetailsOptions): Promise<() => void> => {
+      const { openConversationDetailsFlyout } = await import(
+        './flyout/open_conversation_details_flyout'
+      );
+      return openConversationDetailsFlyout({
+        core,
+        conversationsService,
+        conversationTemplatesService,
+        conversationId,
+        onClose,
+      });
     };
 
     const internalServices: AgentBuilderInternalService = {
@@ -233,6 +247,7 @@ export class AgentBuilderPlugin
       renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
@@ -240,6 +255,7 @@ export class AgentBuilderPlugin
       smlService,
       pluginsService,
       oauthClientsService,
+      spaceSettingsService,
       startDependencies,
       usageCollection,
       accessChecker,
@@ -316,12 +332,24 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),
+      getAgentBuilderAccess: createPublicEmbeddableChatAccess({
+        accessChecker,
+        application: core.application,
+      }),
       addAttachment: (attachment: AttachmentInput) => {
         if (this.sidebarCallbacks) {
           this.sidebarCallbacks.addAttachment(attachment);
+        }
+      },
+      removeAttachment: (attachmentId: string) => {
+        if (this.sidebarCallbacks) {
+          this.sidebarCallbacks.removeAttachmentById(attachmentId);
         }
       },
       setChatConfig: (config: EmbeddableConversationProps) => {
@@ -344,13 +372,8 @@ export class AgentBuilderPlugin
         return openSidebarInternal(options);
       },
       toggleChat: (options?: OpenConversationSidebarOptions) => {
-        if (this.activeSidebarRef) {
-          const sidebarRef = this.activeSidebarRef;
-          // Be defensive: clear local references immediately in case the sidebar doesn't
-          // synchronously invoke our onClose callback.
-          this.activeSidebarRef = null;
-          this.sidebarCallbacks = null;
-          sidebarRef.close();
+        if (agentBuilderSidebar.isOpen()) {
+          agentBuilderSidebar.close();
           return;
         }
 
@@ -361,52 +384,10 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      openConversationDetails,
     };
 
     if (hasAgentBuilder) {
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <LazyAgentBuilderAnnouncementChromeInner
-              coreStart={core}
-              pluginsStart={startDependencies}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        order: 1000,
-      });
-
-      core.chrome.navControls.registerRight({
-        mount: (element) => {
-          ReactDOM.render(
-            <AgentBuilderNavControlInitiator
-              coreStart={core}
-              pluginsStart={startDependencies}
-              agentBuilderService={agentBuilderService}
-            />,
-            element,
-            () => {}
-          );
-
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-        // right before the user profile
-        order: 1001,
-      });
-
-      // Chrome Next transition: also expose this control as an AI button so it renders in the
-      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
-      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
-      // Remove the `registerRight` registration once Chrome Next is the only chrome.
-      // See https://github.com/elastic/kibana/issues/260010
       core.chrome.next.aiButton.register({
         content: (
           <AgentBuilderNavControlInitiator
@@ -423,5 +404,6 @@ export class AgentBuilderPlugin
 
   stop() {
     this.experimentalDeepLinksSubscription?.unsubscribe();
+    this.sidebarOpenSubscription?.unsubscribe();
   }
 }

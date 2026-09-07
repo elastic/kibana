@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
-import type { ConnectedProps } from 'react-redux';
+import { connect } from 'react-redux-v7';
+import type { ConnectedProps } from 'react-redux-v7';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { IndexActionsContextMenu as PresentationComponent } from './index_actions_context_menu';
 import type { IndexActionsContextMenuProps as PresentationComponentProps } from './index_actions_context_menu';

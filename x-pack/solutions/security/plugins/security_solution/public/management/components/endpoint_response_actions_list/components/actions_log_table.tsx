@@ -361,7 +361,7 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
 
                       let tooltipText: React.ReactNode = UX_MESSAGES.cancelAction;
                       const buttonProps: React.ComponentProps<typeof EuiButtonIcon> = {
-                        iconType: 'minusInCircle',
+                        iconType: 'minusCircle',
                         'data-test-subj': 'responseActionRowActions',
                         'aria-label': UX_MESSAGES.cancelAction,
                         isDisabled: !!actionToCancel,

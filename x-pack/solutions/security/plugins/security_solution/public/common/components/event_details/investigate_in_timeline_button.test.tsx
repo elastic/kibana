@@ -56,5 +56,35 @@ describe('InvestigateInTimelineButton', () => {
         container.querySelector(`[aria-label="${ACTION_INVESTIGATE_IN_TIMELINE}"]`)
       ).toBeDisabled();
     });
+
+    it('should apply the size prop to the empty button', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: true },
+      });
+      const dataProviders = [getDataProvider('host.ip', '', '127.0.0.1')];
+      const { getByLabelText, rerender } = render(
+        <TestProviders>
+          <InvestigateInTimelineButton
+            asEmptyButton={true}
+            dataProviders={dataProviders}
+            size="xs"
+          />
+        </TestProviders>
+      );
+      const xsClassName = getByLabelText(ACTION_INVESTIGATE_IN_TIMELINE).className;
+
+      rerender(
+        <TestProviders>
+          <InvestigateInTimelineButton
+            asEmptyButton={true}
+            dataProviders={dataProviders}
+            size="m"
+          />
+        </TestProviders>
+      );
+      const mClassName = getByLabelText(ACTION_INVESTIGATE_IN_TIMELINE).className;
+
+      expect(mClassName).not.toEqual(xsClassName);
+    });
   });
 });

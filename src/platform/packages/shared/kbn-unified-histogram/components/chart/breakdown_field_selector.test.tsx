@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, act, screen, waitFor, fireEvent } from '@testing-library/react';
+import { act, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { DataViewField } from '@kbn/data-views-plugin/common';
@@ -38,7 +39,7 @@ describe('BreakdownFieldSelector', () => {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
@@ -84,7 +85,7 @@ describe('BreakdownFieldSelector', () => {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
@@ -141,7 +142,7 @@ describe('BreakdownFieldSelector', () => {
     const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
     const breakdown: UnifiedHistogramBreakdownContext = { field };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
@@ -181,13 +182,54 @@ describe('BreakdownFieldSelector', () => {
     `);
   });
 
+  it('renders the button label with the field name slotted into the message and passed to EuiTextTruncate', () => {
+    const onBreakdownFieldChange = jest.fn();
+    const field = dataViewWithTimefieldMock.fields.find((f) => f.name === 'extension')!;
+    const breakdown: UnifiedHistogramBreakdownContext = { field };
+
+    renderWithI18n(
+      <BreakdownFieldSelector
+        dataView={dataViewWithTimefieldMock}
+        breakdown={breakdown}
+        onBreakdownFieldChange={onBreakdownFieldChange}
+      />
+    );
+
+    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
+
+    // "Breakdown by" is part of the same translatable message as the field
+    // name (not a separately positioned element), so translators can reorder
+    // it per locale
+    expect(button).toHaveTextContent('Breakdown by');
+
+    // the field name is passed through to EuiTextTruncate rather than being
+    // rendered as plain, unconstrained text — its full, untruncated value is
+    // always present in the DOM (for accessibility/selection), regardless of
+    // whatever pixel-based truncation math EUI applies to the visible copy
+    expect(within(button).getByTestId('fullText')).toHaveTextContent(field.displayName);
+  });
+
+  it('should render "No breakdown" as plain text when no field is selected', () => {
+    renderWithI18n(
+      <BreakdownFieldSelector
+        dataView={dataViewWithTimefieldMock}
+        breakdown={{ field: undefined }}
+        onBreakdownFieldChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('unifiedHistogramBreakdownSelectorButton')).toHaveTextContent(
+      'No breakdown'
+    );
+  });
+
   it('should filter options based on the search input', async () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
 
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
@@ -254,7 +296,7 @@ describe('BreakdownFieldSelector', () => {
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}
@@ -274,7 +316,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('renders recommended group in hardcoded order and all-fields group for the rest', () => {
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={{ field: undefined }}
@@ -297,7 +339,7 @@ describe('BreakdownFieldSelector', () => {
   });
 
   it('falls back to flat list when no recommendedFields match available fields', () => {
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={{ field: undefined }}
@@ -335,7 +377,7 @@ describe('BreakdownFieldSelector', () => {
     const breakdown: UnifiedHistogramBreakdownContext = {
       field: undefined,
     };
-    render(
+    renderWithI18n(
       <BreakdownFieldSelector
         dataView={dataViewWithTimefieldMock}
         breakdown={breakdown}

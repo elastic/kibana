@@ -10,8 +10,7 @@ import { z } from '@kbn/zod';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { IKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
 import { isPlainObject } from 'lodash';
-import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '../../../constants';
-
+import { ALERTING_V2_EPISODES_APP_ID, ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 /** Namespace for episodes table config inside the `_a` app-state blob */
 export const EPISODES_TABLE_APP_STATE_KEY = 'episodesTable' as const;
 
@@ -53,6 +52,7 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'rule.id',
   'duration',
   'tags',
+  'rule_tags',
   'assignees',
 ];
 

@@ -601,7 +601,6 @@ export const otelDemoDataset: DatasetConfig = {
     },
   ],
   discovery: [],
-  discoveryJudge: [],
   kiQueryGeneration: [
     {
       input: {
@@ -639,14 +638,23 @@ export const otelDemoDataset: DatasetConfig = {
           },
           {
             id: 'stats-aggregate-monitoring',
-            text: 'Should generate at least one STATS query for aggregate monitoring (e.g., error rate, traffic volume) when dataset_analysis reveals fields suitable for aggregation. STATS queries should have calibrated thresholds documented in descriptions.',
+            text: 'Should generate at least one STATS metric-series query (bucket + metric_value, no post-STATS threshold WHERE) for aggregate monitoring (e.g., error rate, traffic volume) when dataset_analysis reveals fields suitable for aggregation. Descriptions should document dataset_analysis baselines, not breach thresholds.',
             score: 1,
+          },
+          {
+            id: 'avoid-routine-success-alerts',
+            text: 'Must not generate MATCH queries that alert solely because a verified routine successful operation occurred in this healthy snapshot (verified examples: "order confirmation email sent to ..." from checkout, 73 docs; "GetCartAsync called with userId=..." from cart, 404 docs). These are success events, not alert conditions. Useful aggregates over successful operations remain allowed (throughput, success rate, absence of activity), and a success event used as evidence inside a broader failure condition rather than as the alert condition itself remains allowed. A direct alert on any of these routine-success messages fails this criterion.',
+            score: 1,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'order confirmation email sent to' } },
+              { match_phrase: { 'body.text': 'GetCartAsync called' } },
+            ],
           },
         ],
         expected_categories: ['operational', 'error'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[operational monitoring and proactive error detection across OTel Demo microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey); operational queries for service health and request patterns; error queries for exception/failure detection grounded in entity and dependency features; STATS queries for aggregate monitoring (error rate, traffic volume) with calibrated thresholds]',
+          'queries=[operational monitoring and proactive error detection across OTel Demo microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey); operational queries for service health and request patterns; error queries for exception/failure detection grounded in entity and dependency features; STATS metric-series queries for aggregate monitoring (error rate, traffic volume) with baselines from dataset_analysis]',
       },
       metadata: {
         difficulty: 'easy',
@@ -728,14 +736,14 @@ export const otelDemoDataset: DatasetConfig = {
           },
           {
             id: 'stats-error-rate-detection',
-            text: 'Should generate a STATS query detecting elevated error rates or degraded cart operation success rates during the Redis cutoff. The threshold should reflect the severity of the cache failure.',
+            text: 'Should generate a STATS metric-series query (bucket + metric_value) for error rate or cart operation success rate during the Redis cutoff so change-point detection can surface the cache failure. Do not require a post-STATS breach threshold.',
             score: 2,
           },
         ],
         expected_categories: ['error', 'operational'],
         expect_stats: true,
         expected_ground_truth:
-          'queries=[error detection for Valkey/Redis connection failures in cart logs (connect to redis errors), cart service crash/shutdown detection (Application is shutting down), impact detection in frontend from cart unavailability (gRPC UNAVAILABLE ECONNREFUSED, failed to get user cart during checkout), operational monitoring across OTel Demo microservices; STATS queries for aggregate error rate detection during cart cache failure]',
+          'queries=[error detection for Valkey/Redis connection failures in cart logs (connect to redis errors), cart service crash/shutdown detection (Application is shutting down), impact detection in frontend from cart unavailability (gRPC UNAVAILABLE ECONNREFUSED, failed to get user cart during checkout), operational monitoring across OTel Demo microservices; STATS metric-series queries for aggregate error rate during cart cache failure]',
       },
       metadata: {
         difficulty: 'medium',

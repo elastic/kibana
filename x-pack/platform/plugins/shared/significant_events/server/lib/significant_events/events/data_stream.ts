@@ -18,7 +18,6 @@ export const eventsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     event_uuid: mappings.keyword(),
-    discovery_id: mappings.keyword(),
     event_id: mappings.keyword(),
     previous_event_uuid: mappings.keyword(),
     stream_names: mappings.keyword(),
@@ -26,6 +25,36 @@ export const eventsMappings = {
     severity: mappings.keyword(),
     title: mappings.text(),
     summary: mappings.text(),
+    symptom_hypothesis: mappings.text(),
+    causal_features: mappings.object({
+      properties: {
+        feature_id: mappings.keyword(),
+      },
+    }),
+    blast_radius: mappings.object({
+      properties: {
+        feature_id: mappings.keyword(),
+      },
+    }),
+    signals: mappings.object({
+      properties: {
+        metadata: mappings.object({
+          properties: {
+            rule_uuid: mappings.keyword(),
+          },
+        }),
+      },
+    }),
+    // Mapped so discovery can gate re-investigation with a server-side `exists` filter.
+    // `exists` on this object matches only when at least one sub-field has a value, so an
+    // empty investigations array does not count as "investigated".
+    investigations: mappings.object({
+      properties: {
+        workflow_execution_id: { type: 'keyword' as const },
+        started_at: { type: 'date' as const },
+        completed_at: { type: 'date' as const },
+      },
+    }),
   },
 } satisfies MappingsDefinition;
 export type StoredEvent = GetFieldsOf<typeof eventsMappings>;
@@ -45,7 +74,7 @@ export const storedEventSchema = significantEventSchema.transform((doc) => ({
 
 export const eventsDataStream: DataStreamDefinition<typeof eventsMappings, StoredEvent> = {
   name: EVENTS_DATA_STREAM,
-  version: 7,
+  version: 12,
   hidden: true,
   template: {
     priority: 500,

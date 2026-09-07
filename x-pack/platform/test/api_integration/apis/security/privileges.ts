@@ -99,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         'manage_skills',
       ],
       agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
+      contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
       automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],

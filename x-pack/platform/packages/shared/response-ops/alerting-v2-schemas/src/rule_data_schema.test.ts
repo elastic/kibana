@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ARTIFACT_VALUE_LIMITS,
-  RUNBOOK_ARTIFACT_TYPE,
-} from '@kbn/alerting-v2-constants';
+import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
@@ -22,8 +18,15 @@ import {
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
   updateRuleBodySchema,
+  ruleTagsParamsSchema,
 } from './rule_data_schema';
-import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
+import { tagsResponseSchema } from './common';
+import {
+  ID_MAX_LENGTH,
+  MAX_ARTIFACT_DATA_FIELDS,
+  MAX_BULK_ITEMS,
+  MAX_FIELD_NAME_LENGTH,
+} from './constants';
 
 const validCreateData = {
   kind: 'alert',
@@ -61,7 +64,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
 
       expect(result).toEqual(
@@ -78,7 +81,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
-          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+          artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         })
       );
     });
@@ -375,6 +378,29 @@ describe('createRuleDataSchema', () => {
       expect(result.success).toBe(true);
     });
 
+    it('accepts a composed query without a breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with an empty breach segment', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          breach: { segment: '' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
     it('rejects a composed query with a whitespace-only breach segment', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
@@ -385,6 +411,19 @@ describe('createRuleDataSchema', () => {
         },
       });
       expect(result.success).toBe(false);
+    });
+
+    it('accepts recovery_strategy "query" without a composed breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          recovery: { segment: 'WHERE cpu < 0.5' },
+        },
+      });
+      expect(result.success).toBe(true);
     });
 
     it('rejects a composed query with an invalid breach segment (compose fails ES|QL validation)', () => {
@@ -824,77 +863,122 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+  describe('artifacts envelope', () => {
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
+
+    // How large a value may be depends on the artifact type, so it is bounded
+    // server-side where the artifact-type registry is available: by the type's
+    // own `dataSchema`, or by a generic per-field ceiling for unregistered types.
+    it('does not bound the size of a data value', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(100_000) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
+    it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT) },
       });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('does not enforce per-type required fields at the envelope layer', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: {},
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('accepts structured values of any shape', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { count: 12, enabled: true, nested: { a: 'b' }, list: [1, 2, 3] },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it(`accepts an artifact carrying ${MAX_ARTIFACT_DATA_FIELDS} fields`, () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS }, (_, index) => [`field-${index}`, 'a'])
+        ),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an artifact carrying more fields than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: Object.fromEntries(
+          Array.from({ length: MAX_ARTIFACT_DATA_FIELDS + 1 }, (_, index) => [
+            `field-${index}`,
+            'a',
+          ])
+        ),
+      });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+              path: ['artifacts', 0, 'data'],
+              message: `Artifact data must have at most ${MAX_ARTIFACT_DATA_FIELDS} fields.`,
             }),
           ])
         );
       }
     });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
+    it('rejects a field name longer than the limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { ['a'.repeat(MAX_FIELD_NAME_LENGTH + 1)]: 'value' },
       });
-      expect(result.success).toBe(true);
+
+      expect(result.success).toBe(false);
     });
 
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
+    it('rejects an empty field name', () => {
+      const result = parseWithArtifact({ id: 'artifact-1', type: 'host', data: { '': 'value' } });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects duplicate artifact ids within the array', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
+          { id: 'same', type: 'host', data: { value: 'a' } },
+          { id: 'same', type: 'runbook', data: { content: 'b' } },
         ],
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
+              path: ['artifacts', 1, 'id'],
+              message: 'Artifact id "same" must be unique within the rule.',
             }),
           ])
         );
@@ -932,31 +1016,41 @@ describe('updateRuleDataSchema', () => {
     expect(result.metadata?.description).toBe('updated description');
   });
 
+  it('accepts a non-empty tags update', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: ['prod', 'infra'] } });
+    expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('accepts metadata.tags set to null (clear all tags)', () => {
+    const result = updateRuleDataSchema.parse({ metadata: { tags: null } });
+    expect(result.metadata?.tags).toBeNull();
+  });
+
+  it('rejects metadata.tags as an empty array (use null to clear)', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
     expect(withArtifacts).toMatchObject({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
 
     const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
     expect(nullArtifacts).toMatchObject({ artifacts: null });
   });
 
-  it('accepts an enabled field set to true', () => {
-    const result = updateRuleDataSchema.parse({ enabled: true });
-    expect(result).toEqual({ enabled: true });
+  it('rejects enabled: true (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: true });
+    expect(result.success).toBe(false);
   });
 
-  it('accepts an enabled field set to false', () => {
-    const result = updateRuleDataSchema.parse({ enabled: false });
-    expect(result).toEqual({ enabled: false });
-  });
-
-  it('omits enabled when not provided', () => {
-    const result = updateRuleDataSchema.parse({});
-    expect(result).not.toHaveProperty('enabled');
+  it('rejects enabled: false (enabled is not writable via update)', () => {
+    const result = updateRuleDataSchema.safeParse({ enabled: false });
+    expect(result.success).toBe(false);
   });
 
   it('accepts a state_transition object', () => {
@@ -1074,77 +1168,36 @@ describe('updateRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+  describe('artifacts envelope', () => {
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      updateRuleDataSchema.safeParse({ artifacts: [artifact] });
+
+    it('does not bound the size of a data value', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(100_000) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
+    it('accepts runbook-sized content, since per-type limits are registry-enforced', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(RUNBOOK_CONTENT_LIMIT) },
       });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
-            }),
-          ])
-        );
-      }
-    });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
-      });
       expect(result.success).toBe(true);
     });
+  });
 
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
-        ],
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
-            }),
-          ])
-        );
-      }
+  describe('artifacts null clearing', () => {
+    it('clears artifacts with an explicit null rather than an emptied artifact', () => {
+      const result = updateRuleDataSchema.safeParse({ artifacts: null });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -1231,6 +1284,28 @@ describe('getBreachEsqlQuery', () => {
       breach: { segment: 'WHERE cpu > 0.9' },
     };
     expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('returns base verbatim when the breach block is omitted', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
+  // Storage persists a conditionless composed rule as an empty segment, so
+  // both shapes reach this helper and must not append a trailing pipe.
+  it.each([
+    ['empty', ''],
+    ['whitespace-only', '   '],
+  ])('returns base verbatim for a %s stored breach segment', (_label, segment) => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      breach: { segment },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-*');
   });
 
   it('handles a trailing comment in base without corrupting the composed query', () => {
@@ -1529,15 +1604,15 @@ describe('bulkGetRulesResponseSchema', () => {
   const sampleRule = {
     id: 'rule-1',
     kind: 'alert' as const,
-    metadata: { name: 'r' },
+    metadata: { name: 'r', version: 1 },
     time_field: '@timestamp',
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
     enabled: true,
-    createdBy: 'user-a',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    updatedBy: 'user-a',
-    updatedAt: '2026-01-01T00:00:00.000Z',
+    created_by: 'user-a',
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_by: 'user-a',
+    updated_at: '2026-01-01T00:00:00.000Z',
   };
 
   it('accepts an empty rules array', () => {
@@ -1553,5 +1628,52 @@ describe('bulkGetRulesResponseSchema', () => {
 
   it('rejects a missing rules field', () => {
     expect(() => bulkGetRulesResponseSchema.parse({})).toThrow();
+  });
+});
+
+describe('ruleTagsParamsSchema', () => {
+  it('accepts an empty object', () => {
+    expect(ruleTagsParamsSchema.parse({})).toEqual({});
+  });
+
+  it('accepts valid search and kind', () => {
+    expect(ruleTagsParamsSchema.parse({ search: 'cpu', kind: 'alert' })).toEqual({
+      search: 'cpu',
+      kind: 'alert',
+    });
+  });
+
+  it('accepts kind: signal', () => {
+    expect(ruleTagsParamsSchema.parse({ kind: 'signal' })).toEqual({ kind: 'signal' });
+  });
+
+  it('rejects search longer than 256 characters', () => {
+    expect(() => ruleTagsParamsSchema.parse({ search: 'a'.repeat(257) })).toThrow();
+  });
+
+  it('rejects invalid kind', () => {
+    expect(() => ruleTagsParamsSchema.parse({ kind: 'unknown' })).toThrow();
+  });
+
+  it('rejects the removed filter key', () => {
+    expect(() => ruleTagsParamsSchema.parse({ filter: 'kind:alert' })).toThrow();
+  });
+
+  it('rejects unknown keys', () => {
+    expect(() => ruleTagsParamsSchema.parse({ foo: 'bar' })).toThrow();
+  });
+});
+
+describe('tagsResponseSchema', () => {
+  it('accepts a tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: ['a', 'b'] })).toEqual({ tags: ['a', 'b'] });
+  });
+
+  it('accepts an empty tags array', () => {
+    expect(tagsResponseSchema.parse({ tags: [] })).toEqual({ tags: [] });
+  });
+
+  it('rejects a missing tags field', () => {
+    expect(() => tagsResponseSchema.parse({})).toThrow();
   });
 });

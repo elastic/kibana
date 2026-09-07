@@ -124,84 +124,66 @@ evaluate.describe(
   'Alert-triggered workflow creation',
   { tag: tags.serverless.observability.complete },
   () => {
-    evaluate(
-      'creates an alert workflow with severity-based conditional routing',
-      async ({ evaluateAlertCreateDataset }) => {
-        await evaluateAlertCreateDataset({
-          dataset: {
-            name: 'workflow-creation-alert: severity-routing',
-            description:
-              'Evaluate creation of an alert workflow that routes to different actions based on severity',
-            examples: [
-              {
-                input: {
-                  instruction:
-                    'Create a "Severity Router" workflow that triggers on security alerts. For critical or high severity alerts, page the on-call team via PagerDuty. For medium alerts, just send a Slack message. Low severity alerts should be ignored. Use the alert severity from the trigger data.',
-                },
-                output: {
-                  criteria: [
-                    'The workflow is named "Severity Router".',
-                    'The trigger type is "alert".',
-                    'There are exactly two mutually exclusive branches: one for critical+high, one for medium.',
-                    'Low severity does NOT fall through to either branch — no PagerDuty, no Slack, and no console/log step fires for low.',
-                    'The PagerDuty step is only reachable when severity is exactly "critical" or "high" (the check explicitly enumerates these values, not a >=high comparison that could include medium).',
-                    'The Slack step is only reachable when severity is "medium" — not when it is high or critical.',
-                    'The severity condition references a Liquid expression from the event data (e.g. event.alerts[0].kibana.alert.severity).',
-                    'Connector steps include a connector-id field.',
-                    'No nested if-inside-if duplicates the severity check — the branches are siblings, not nested.',
-                  ],
-                  expectedStepCount: { min: 3, max: 5 },
-                  expectedStepTypes: ['if', 'pagerduty', 'slack2.sendMessage'],
-                  expectedMaxToolCalls: 4,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                  expectedLiquidChains: [{ ref: 'event.alerts', resolvesTo: 'event-field' }],
-                },
-                metadata: { category: 'alert-trigger-creation' },
+    evaluate('alert-triggered creation cases', async ({ evaluateAlertCreateDataset }) => {
+      await evaluateAlertCreateDataset({
+        dataset: {
+          name: 'workflow-creation-alert: core',
+          description:
+            'Alert-triggered creation: severity-based conditional routing and per-alert ES enrichment.',
+          examples: [
+            {
+              input: {
+                instruction:
+                  'Create a "Severity Router" workflow that triggers on security alerts. For critical or high severity alerts, page the on-call team via PagerDuty. For medium alerts, just send a Slack message. Low severity alerts should be ignored. Use the alert severity from the trigger data.',
               },
-            ],
-          },
-        });
-      }
-    );
-
-    evaluate(
-      'creates an alert workflow with per-alert ES enrichment',
-      async ({ evaluateAlertCreateDataset }) => {
-        await evaluateAlertCreateDataset({
-          dataset: {
-            name: 'workflow-creation-alert: per-alert-enrichment',
-            description:
-              'Evaluate creation of an alert workflow that enriches each alert with an Elasticsearch lookup',
-            examples: [
-              {
-                input: {
-                  instruction:
-                    'Build an "Alert Enricher" workflow triggered by alerts. For each alert that comes in, look up the full alert document from the .alerts-security.alerts-default index using the alert ID, then log the rule name and the matched host name from the enrichment result.',
-                },
-                output: {
-                  criteria: [
-                    'The workflow is named "Alert Enricher".',
-                    'The trigger type is "alert".',
-                    'There is a foreach step iterating over the alert batch.',
-                    'Inside the foreach, an Elasticsearch search step queries .alerts-security.alerts-default using the alert ID from foreach.item.',
-                    'A console step logs the rule name and host name, referencing the Elasticsearch search output via Liquid.',
-                  ],
-                  expectedStepCount: { min: 3, max: 6 },
-                  expectedStepTypes: ['foreach', 'elasticsearch.search', 'console'],
-                  expectedMaxToolCalls: 8,
-                  expectedToolSequence: ['platform.core.generate_workflow'],
-                  expectedLiquidChains: [
-                    { ref: 'event.alerts', resolvesTo: 'event-field' },
-                    { ref: 'foreach.item', resolvesTo: 'foreach-item' },
-                  ],
-                },
-                metadata: { category: 'alert-trigger-creation' },
+              output: {
+                criteria: [
+                  'The workflow is named "Severity Router".',
+                  'The trigger type is "alert".',
+                  'There are exactly two mutually exclusive branches: one for critical+high, one for medium.',
+                  'Low severity does NOT fall through to either branch — no PagerDuty, no Slack, and no console/log step fires for low.',
+                  'The PagerDuty step is only reachable when severity is exactly "critical" or "high" (the check explicitly enumerates these values, not a >=high comparison that could include medium).',
+                  'The Slack step is only reachable when severity is "medium" — not when it is high or critical.',
+                  'The severity condition references a Liquid expression from the event data (e.g. event.alerts[0].kibana.alert.severity).',
+                  'Connector steps include a connector-id field.',
+                  'No nested if-inside-if duplicates the severity check — the branches are siblings, not nested.',
+                ],
+                expectedStepCount: { min: 3, max: 5 },
+                expectedStepTypes: ['if', 'pagerduty', 'slack2.sendMessage'],
+                expectedMaxToolCalls: 4,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+                expectedLiquidChains: [{ ref: 'event.alerts', resolvesTo: 'event-field' }],
               },
-            ],
-          },
-        });
-      }
-    );
+              metadata: { category: 'alert-severity-routing' },
+            },
+            {
+              input: {
+                instruction:
+                  'Build an "Alert Enricher" workflow triggered by alerts. For each alert that comes in, look up the full alert document from the .alerts-security.alerts-default index using the alert ID, then log the rule name and the matched host name from the enrichment result.',
+              },
+              output: {
+                criteria: [
+                  'The workflow is named "Alert Enricher".',
+                  'The trigger type is "alert".',
+                  'There is a foreach step iterating over the alert batch.',
+                  'Inside the foreach, an Elasticsearch search step queries .alerts-security.alerts-default using the alert ID from foreach.item.',
+                  'A console step logs the rule name and host name, referencing the Elasticsearch search output via Liquid.',
+                ],
+                expectedStepCount: { min: 3, max: 6 },
+                expectedStepTypes: ['foreach', 'elasticsearch.search', 'console'],
+                expectedMaxToolCalls: 8,
+                expectedToolSequence: ['platform.core.generate_workflow'],
+                expectedLiquidChains: [
+                  { ref: 'event.alerts', resolvesTo: 'event-field' },
+                  { ref: 'foreach.item', resolvesTo: 'foreach-item' },
+                ],
+              },
+              metadata: { category: 'alert-per-alert-enrichment' },
+            },
+          ],
+        },
+      });
+    });
   }
 );
 

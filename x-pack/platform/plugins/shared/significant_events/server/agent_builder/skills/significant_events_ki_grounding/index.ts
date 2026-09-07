@@ -16,6 +16,9 @@ export const significantEventsKIGroundingSkill = defineSkillType({
   id: SIGNIFICANT_EVENTS_KI_GROUNDING_SKILL_ID,
   name: 'significant-events-ki-grounding',
   basePath: 'skills/platform/streams',
+  // Discovery-only: pinned via discovery agent skill_ids. Keep out of elastic capabilities so
+  // investigation (enable_elastic_capabilities: true) does not auto-load this skill.
+  excludeFromElasticCapabilities: true,
   description,
   content,
   getRegistryTools: () => [

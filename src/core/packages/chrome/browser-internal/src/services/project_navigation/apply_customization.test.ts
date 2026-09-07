@@ -28,7 +28,7 @@ const buildDef = (ids: string[]) => ({
   body: ids.map((id) => ({ id, title: id.toUpperCase(), href: `https://localhost/app/${id}` })),
 });
 
-/** Extract the render-ready IDs (home, definition-hidden, and no-leaf nodes pruned). */
+/** Extract the render-ready IDs after hidden and no-leaf nodes are pruned. */
 const renderableIds = (result: ParsedNavigation): string[] =>
   result.renderableNodes.map((n) => n.id);
 
@@ -82,27 +82,6 @@ describe('applyCustomization', () => {
   });
 
   describe('defaultItemIds', () => {
-    it('excludes items with renderAs === "home"', () => {
-      const def = {
-        id: SOLUTION_ID,
-        body: [
-          { id: 'home_node', title: 'HOME', renderAs: 'home' as const },
-          { id: 'a', title: 'A' },
-          { id: 'b', title: 'B' },
-        ],
-      };
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        def,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        undefined
-      );
-
-      expect(result.defaultItemIds).toEqual(['a', 'b']);
-    });
-
     it('captures ids from items that use the `link` field instead of `id`', () => {
       const def = {
         id: SOLUTION_ID,
@@ -225,27 +204,6 @@ describe('applyCustomization', () => {
   });
 
   describe('renderableNodes (pruning rules)', () => {
-    it('excludes the home node from renderableNodes', () => {
-      const def = {
-        id: SOLUTION_ID,
-        body: [
-          { id: 'home_node', title: 'HOME', renderAs: 'home' as const },
-          { id: 'a', title: 'A', href: 'https://localhost/app/a' },
-          { id: 'b', title: 'B', href: 'https://localhost/app/b' },
-        ],
-      };
-
-      const result = applyCustomization(
-        SOLUTION_ID,
-        def,
-        EMPTY_DEEP_LINKS,
-        EMPTY_CLOUD_LINKS,
-        undefined
-      );
-
-      expect(renderableIds(result)).toEqual(['a', 'b']);
-    });
-
     it('excludes nodes flagged with sideNavStatus "hidden" in the definition', () => {
       const def = {
         id: SOLUTION_ID,
@@ -330,7 +288,7 @@ describe('applyCustomization', () => {
     });
   });
 
-  describe('isHomeCustomizable=true', () => {
+  describe('home node', () => {
     const homeDef = {
       id: SOLUTION_ID,
       body: [
@@ -338,7 +296,6 @@ describe('applyCustomization', () => {
           id: 'home_node',
           title: 'My solution',
           icon: 'logoElastic',
-          renderAs: 'home' as const,
           href: 'https://localhost/app/home',
         },
         { id: 'a', title: 'A', href: 'https://localhost/app/a' },
@@ -352,8 +309,7 @@ describe('applyCustomization', () => {
         homeDef,
         EMPTY_DEEP_LINKS,
         EMPTY_CLOUD_LINKS,
-        customizationArg,
-        true
+        customizationArg
       );
 
     it('includes the home node in defaultItemIds', () => {
@@ -364,16 +320,16 @@ describe('applyCustomization', () => {
       expect(renderableIds(applyHome())).toEqual(['home_node', 'a', 'b']);
     });
 
-    it('normalizes the home node title and icon to "Home"/"home" in both treeUI and renderableNodes', () => {
+    it('preserves the authored title and icon', () => {
       const result = applyHome();
 
       const homeRenderable = result.renderableNodes.find((n) => n.id === 'home_node');
-      expect(homeRenderable?.title).toBe('Home');
-      expect(homeRenderable?.icon).toBe('home');
+      expect(homeRenderable?.title).toBe('My solution');
+      expect(homeRenderable?.icon).toBe('logoElastic');
 
       const homeInTree = result.treeUI.body.find((n) => n.id === 'home_node');
-      expect(homeInTree?.title).toBe('Home');
-      expect(homeInTree?.icon).toBe('home');
+      expect(homeInTree?.title).toBe('My solution');
+      expect(homeInTree?.icon).toBe('logoElastic');
     });
 
     it('allows hiding the home node (signalled via overflowItemIds, still present in renderableNodes)', () => {

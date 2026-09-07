@@ -34,6 +34,7 @@ export interface RouteHandlerScopedClients {
   soClient: SavedObjectsClientContract;
   internalSoClient: SavedObjectsClientContract;
   spaceId: string;
+  isCpsAvailable: boolean;
   dataViewsService: DataViewsService;
   rulesClient: RulesClientApi;
   racClient: AlertsClient;
@@ -59,6 +60,7 @@ export interface SLORoutesDependencies {
   getScopedClients: GetScopedClients;
   config: {
     isServerless: boolean;
+    isCpsEnabled: boolean;
     compositeSloSummaryTaskEnabled: boolean;
   };
 }

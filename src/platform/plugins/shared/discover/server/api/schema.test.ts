@@ -16,14 +16,27 @@ import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import {
   discoverSessionApiResponseSchema,
   discoverSessionApiDataSchema,
-  MAX_BREAKDOWN_FIELD_LENGTH,
-  MAX_SESSION_DESCRIPTION_LENGTH,
-  MAX_SESSION_TITLE_LENGTH,
-  MAX_TAB_LABEL_LENGTH,
-  MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH,
   type DiscoverSessionApiClassicTab,
   type DiscoverSessionApiEsqlTab,
 } from './schema';
+
+// Keep these values independent from the schema constants so contract changes require an explicit
+// test update.
+const CURRENT_API_LIMITS = {
+  titleLength: 256,
+  descriptionLength: 1000,
+  tabLabelLength: 120,
+  tabs: 25,
+  breakdownFieldLength: 1000,
+  visContextAttributeKeyLength: 256,
+  columnOrder: 100,
+  sort: 100,
+  filters: 100,
+  rowsPerPage: { min: 1, max: 10_000 },
+  sampleSize: { min: 10, max: 10_000 },
+  headerRowHeight: { min: 1, max: 5 },
+  rowHeight: { min: 1, max: 20 },
+} as const;
 
 const classicTab = {
   id: 'tab-classic',
@@ -37,7 +50,6 @@ const classicTab = {
   view_mode: 'documents',
   hide_chart: false,
   hide_table: false,
-  time_restore: false,
 };
 
 const esqlTab = {
@@ -50,7 +62,6 @@ const esqlTab = {
   sort: [],
   hide_chart: false,
   hide_table: false,
-  time_restore: false,
 };
 
 const multiTabSessionData = {
@@ -61,7 +72,7 @@ const multiTabSessionData = {
 
 describe('discoverSessionApiDataSchema', () => {
   it('validates a classic data view tab', () => {
-    const validated = discoverSessionApiDataSchema.validate({
+    const validated = discoverSessionApiDataSchema.parse({
       title: 'Classic only',
       tabs: [classicTab],
     });
@@ -75,7 +86,7 @@ describe('discoverSessionApiDataSchema', () => {
   });
 
   it('validates an ES|QL tab', () => {
-    const validated = discoverSessionApiDataSchema.validate({
+    const validated = discoverSessionApiDataSchema.parse({
       title: 'ES|QL only',
       tabs: [
         {
@@ -95,30 +106,52 @@ describe('discoverSessionApiDataSchema', () => {
   });
 
   it('validates a multi-tab session', () => {
-    const validated = discoverSessionApiDataSchema.validate(multiTabSessionData);
+    const validated = discoverSessionApiDataSchema.parse(multiTabSessionData);
 
     expect(validated.tabs).toHaveLength(2);
     expect(validated.description).toBe('');
   });
 
+  it('validates tag IDs', () => {
+    const validated = discoverSessionApiDataSchema.parse({
+      ...multiTabSessionData,
+      tags: ['tag-1', 'tag-2'],
+    });
+
+    expect(validated.tags).toEqual(['tag-1', 'tag-2']);
+  });
+
   it('applies schema defaults for a fully qualified representation', () => {
-    const validated = discoverSessionApiDataSchema.validate({
+    const validated = discoverSessionApiDataSchema.parse({
       title: 'Defaults',
       tabs: [classicTab],
     });
 
     const tab = validated.tabs[0] as DiscoverSessionApiClassicTab;
 
+    expect(validated.description).toBe('');
     expect(tab.hide_chart).toBe(false);
     expect(tab.hide_table).toBe(false);
-    expect(tab.time_restore).toBe(false);
     expect(tab.sort).toEqual([]);
     expect(tab.filters).toEqual([]);
     expect(tab.view_mode).toBe('documents');
+    expect(validated.tags).toEqual([]);
+    expect(tab.density).toBeUndefined();
+    expect(tab.header_row_height).toBeUndefined();
+    expect(tab.control_panels).toBeUndefined();
+  });
+
+  it('rejects the removed time_restore API field', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Legacy time restore',
+        tabs: [{ ...classicTab, time_restore: false }],
+      })
+    ).toThrow();
   });
 
   it('validates vis_context with opaque Lens attributes', () => {
-    const validated = discoverSessionApiDataSchema.validate({
+    const validated = discoverSessionApiDataSchema.parse({
       title: 'With chart',
       tabs: [
         {
@@ -145,7 +178,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects an invalid vis_context suggestion_type', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Invalid suggestion type',
         tabs: [
           {
@@ -165,7 +198,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects an empty vis_context object (use omission to indicate a cleared chart)', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Empty vis context',
         tabs: [
           {
@@ -179,7 +212,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects vis_context request_data (inferred from tab fields at runtime)', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'With request_data',
         tabs: [
           {
@@ -207,7 +240,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects legacy stringified control group JSON', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Invalid controls',
         tabs: [
           {
@@ -221,7 +254,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects legacy flattened control panels map shape', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Invalid controls map',
         tabs: [
           {
@@ -242,7 +275,7 @@ describe('discoverSessionApiDataSchema', () => {
   });
 
   it('validates ES|QL control_panels', () => {
-    const validated = discoverSessionApiDataSchema.validate({
+    const validated = discoverSessionApiDataSchema.parse({
       title: 'With controls',
       tabs: [
         {
@@ -285,7 +318,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects non-ES|QL control_panels', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'With non-ESQL controls',
         tabs: [
           {
@@ -312,7 +345,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects an invalid data source type', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Bad data source',
         tabs: [
           {
@@ -329,7 +362,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects an unsupported nested data_source shape', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Nested data source',
         tabs: [
           {
@@ -347,7 +380,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects duplicate tab ids', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Duplicate tabs',
         tabs: [
           classicTab,
@@ -362,7 +395,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects duplicate control_panels ids', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Duplicate controls',
         tabs: [
           {
@@ -405,7 +438,7 @@ describe('discoverSessionApiDataSchema', () => {
 
   it('rejects sessions with no tabs', () => {
     expect(() =>
-      discoverSessionApiDataSchema.validate({
+      discoverSessionApiDataSchema.parse({
         title: 'Empty',
         tabs: [],
       })
@@ -417,7 +450,7 @@ describe('discoverSessionApiDataSchema', () => {
 
     it('rejects an empty title', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: '',
           tabs: [classicTab],
         })
@@ -426,59 +459,163 @@ describe('discoverSessionApiDataSchema', () => {
 
     it('rejects a title that exceeds the max length', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
-          title: repeat('a', MAX_SESSION_TITLE_LENGTH + 1),
+        discoverSessionApiDataSchema.parse({
+          title: repeat('a', CURRENT_API_LIMITS.titleLength + 1),
           tabs: [classicTab],
         })
       ).toThrow();
     });
 
     it('accepts a title at the max length', () => {
-      const validated = discoverSessionApiDataSchema.validate({
-        title: repeat('a', MAX_SESSION_TITLE_LENGTH),
+      const validated = discoverSessionApiDataSchema.parse({
+        title: repeat('a', CURRENT_API_LIMITS.titleLength),
         tabs: [classicTab],
       });
 
-      expect(validated.title).toHaveLength(MAX_SESSION_TITLE_LENGTH);
+      expect(validated.title).toHaveLength(CURRENT_API_LIMITS.titleLength);
     });
 
     it('rejects a description that exceeds the max length', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: 'Valid title',
-          description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH + 1),
+          description: repeat('a', CURRENT_API_LIMITS.descriptionLength + 1),
           tabs: [classicTab],
         })
       ).toThrow();
     });
 
     it('accepts a description at the max length', () => {
-      const validated = discoverSessionApiDataSchema.validate({
+      const validated = discoverSessionApiDataSchema.parse({
         title: 'Valid title',
-        description: repeat('a', MAX_SESSION_DESCRIPTION_LENGTH),
+        description: repeat('a', CURRENT_API_LIMITS.descriptionLength),
         tabs: [classicTab],
       });
 
-      expect(validated.description).toHaveLength(MAX_SESSION_DESCRIPTION_LENGTH);
+      expect(validated.description).toHaveLength(CURRENT_API_LIMITS.descriptionLength);
     });
 
     it('rejects a tab label that exceeds the max length', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [
             {
               ...classicTab,
-              label: repeat('a', MAX_TAB_LABEL_LENGTH + 1),
+              label: repeat('a', CURRENT_API_LIMITS.tabLabelLength + 1),
             },
           ],
         })
       ).toThrow();
     });
 
+    it('accepts a tab label at the max length', () => {
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            label: repeat('a', CURRENT_API_LIMITS.tabLabelLength),
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].label).toHaveLength(CURRENT_API_LIMITS.tabLabelLength);
+    });
+
+    it.each([
+      ['rows_per_page', CURRENT_API_LIMITS.rowsPerPage],
+      ['sample_size', CURRENT_API_LIMITS.sampleSize],
+      ['header_row_height', CURRENT_API_LIMITS.headerRowHeight],
+      ['row_height', CURRENT_API_LIMITS.rowHeight],
+    ] as const)('pins the current %s range', (field, { min, max }) => {
+      for (const value of [min, max]) {
+        expect(() =>
+          discoverSessionApiDataSchema.parse({
+            title: 'Valid title',
+            tabs: [{ ...classicTab, [field]: value }],
+          })
+        ).not.toThrow();
+      }
+
+      for (const value of [min - 1, max + 1]) {
+        expect(() =>
+          discoverSessionApiDataSchema.parse({
+            title: 'Valid title',
+            tabs: [{ ...classicTab, [field]: value }],
+          })
+        ).toThrow();
+      }
+    });
+
+    it.each([
+      {
+        field: 'column_order',
+        max: CURRENT_API_LIMITS.columnOrder,
+        buildValue: (size: number) => Array.from({ length: size }, (_, index) => `field-${index}`),
+      },
+      {
+        field: 'sort',
+        max: CURRENT_API_LIMITS.sort,
+        buildValue: (size: number) =>
+          Array.from({ length: size }, (_, index) => ({
+            name: `field-${index}`,
+            direction: 'asc',
+          })),
+      },
+      {
+        field: 'filters',
+        max: CURRENT_API_LIMITS.filters,
+        buildValue: (size: number) =>
+          Array.from({ length: size }, (_, index) => ({
+            type: 'condition',
+            condition: {
+              field: `field-${index}`,
+              operator: 'exists',
+            },
+          })),
+      },
+    ])('pins the current $field size limit', ({ field, max, buildValue }) => {
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: [{ ...classicTab, [field]: buildValue(max) }],
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: [{ ...classicTab, [field]: buildValue(max + 1) }],
+        })
+      ).toThrow();
+    });
+
+    it('pins the current session tab limit', () => {
+      const buildTabs = (size: number) =>
+        Array.from({ length: size }, (_, index) => ({
+          ...classicTab,
+          id: `tab-${index}`,
+        }));
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: buildTabs(CURRENT_API_LIMITS.tabs),
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Valid title',
+          tabs: buildTabs(CURRENT_API_LIMITS.tabs + 1),
+        })
+      ).toThrow();
+    });
+
     it('rejects an unsupported chart_interval option', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [
             {
@@ -492,7 +629,7 @@ describe('discoverSessionApiDataSchema', () => {
 
     it('accepts supported chart_interval options', () => {
       for (const chartInterval of ['auto', 'ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']) {
-        const validated = discoverSessionApiDataSchema.validate({
+        const validated = discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [
             {
@@ -508,21 +645,37 @@ describe('discoverSessionApiDataSchema', () => {
 
     it('rejects a breakdown_field that exceeds the max length', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [
             {
               ...classicTab,
-              breakdown_field: repeat('a', MAX_BREAKDOWN_FIELD_LENGTH + 1),
+              breakdown_field: repeat('a', CURRENT_API_LIMITS.breakdownFieldLength + 1),
             },
           ],
         })
       ).toThrow();
     });
 
+    it('accepts a breakdown_field at the max length', () => {
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            breakdown_field: repeat('a', CURRENT_API_LIMITS.breakdownFieldLength),
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].breakdown_field).toHaveLength(
+        CURRENT_API_LIMITS.breakdownFieldLength
+      );
+    });
+
     it('rejects a vis_context attribute key that exceeds the max length', () => {
       expect(() =>
-        discoverSessionApiDataSchema.validate({
+        discoverSessionApiDataSchema.parse({
           title: 'Valid title',
           tabs: [
             {
@@ -530,7 +683,7 @@ describe('discoverSessionApiDataSchema', () => {
               vis_context: {
                 suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
                 attributes: {
-                  [repeat('a', MAX_VIS_CONTEXT_ATTRIBUTE_KEY_LENGTH + 1)]: {
+                  [repeat('a', CURRENT_API_LIMITS.visContextAttributeKeyLength + 1)]: {
                     foo: 'bar',
                   },
                 },
@@ -540,12 +693,30 @@ describe('discoverSessionApiDataSchema', () => {
         })
       ).toThrow();
     });
+
+    it('accepts a vis_context attribute key at the max length', () => {
+      const key = repeat('a', CURRENT_API_LIMITS.visContextAttributeKeyLength);
+      const validated = discoverSessionApiDataSchema.parse({
+        title: 'Valid title',
+        tabs: [
+          {
+            ...classicTab,
+            vis_context: {
+              suggestion_type: UnifiedHistogramSuggestionType.histogramForDataView,
+              attributes: { [key]: { foo: 'bar' } },
+            },
+          },
+        ],
+      });
+
+      expect(validated.tabs[0].vis_context?.attributes).toHaveProperty(key);
+    });
   });
 });
 
 describe('discoverSessionApiResponseSchema', () => {
   it('validates the standard as-code API envelope', () => {
-    const validated = discoverSessionApiResponseSchema.validate({
+    const validated = discoverSessionApiResponseSchema.parse({
       id: 'session-id',
       data: multiTabSessionData,
       meta: {

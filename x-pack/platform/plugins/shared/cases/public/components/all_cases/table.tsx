@@ -91,6 +91,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   ) : (
     <>
       <EuiBasicTable
+        tableCaption={i18n.TABLE_CAPTION}
         className={classnames({ isSelectorView })}
         columns={columns}
         rowHeader={rowHeader}

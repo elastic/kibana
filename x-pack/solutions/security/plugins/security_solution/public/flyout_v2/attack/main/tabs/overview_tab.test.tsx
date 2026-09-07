@@ -75,6 +75,7 @@ const renderTab = (
   }: { openSystemFlyout?: jest.Mock; renderCellActions?: jest.Mock } = {}
 ) => {
   const startServices = createStartServicesMock();
+  openSystemFlyout.mockReturnValue({ onClose: Promise.resolve(), close: jest.fn() });
   startServices.overlays = { ...startServices.overlays, openSystemFlyout };
   return render(
     <TestProviders startServices={startServices}>

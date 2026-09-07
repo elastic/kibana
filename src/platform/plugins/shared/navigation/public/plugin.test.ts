@@ -146,6 +146,89 @@ describe('Navigation Plugin', () => {
     });
   });
 
+  describe('initNavigation()', () => {
+    it('forwards to chrome.project.initNavigation', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+        username: 'test-user',
+      });
+
+      const navigationTree$ = of({ body: [] });
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+
+      initNavigation('es', navigationTree$);
+
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', navigationTree$);
+    });
+
+    it('calls enableUi with the solution id when authenticated', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockResolvedValue({
+        username: 'test-user',
+      });
+
+      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      // start() itself may call enableUi synchronously (e.g. registering the
+      // chrome handler); clear those calls so the assertion below is scoped
+      // to the one triggered by initNavigation().
+      enableUiSpy.mockClear();
+
+      initNavigation('security', of({ body: [] }));
+
+      expect(enableUiSpy).toHaveBeenCalledWith(expect.objectContaining({ solution: 'security' }));
+    });
+
+    it('skips enableUi when unauthenticated', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
+
+      const enableUiSpy = jest.spyOn((plugin as any).customizationService, 'enableUi');
+      const { initNavigation } = plugin.start(coreStart, { unifiedSearch, cloud, spaces });
+      enableUiSpy.mockClear();
+
+      initNavigation('security', of({ body: [] }));
+
+      expect(enableUiSpy).not.toHaveBeenCalled();
+    });
+
+    it('ignores a different solution id after the active solution is claimed', async () => {
+      const { plugin, coreStart, unifiedSearch, cloud, spaces } = setup();
+
+      spaces.getActiveSpace$ = jest
+        .fn()
+        .mockReturnValue(of({ solution: 'es' } as Pick<Space, 'solution'>));
+      spaces.isSolutionViewEnabled = true;
+
+      const esTree$ = of({ body: [] });
+      const { addSolutionNavigation, initNavigation } = plugin.start(coreStart, {
+        unifiedSearch,
+        cloud,
+        spaces,
+      });
+      await new Promise((resolve) => setTimeout(resolve));
+
+      addSolutionNavigation({
+        id: 'es' as const,
+        title: 'Elasticsearch',
+        navigationTree$: esTree$,
+      });
+      expect(coreStart.chrome.project.initNavigation).toHaveBeenCalledWith('es', esTree$);
+      (coreStart.chrome.project.initNavigation as jest.Mock).mockClear();
+
+      const loggerError = jest.spyOn((plugin as any).initializerContext.logger.get(), 'error');
+      initNavigation('security', of({ body: [] }));
+
+      expect(coreStart.chrome.project.initNavigation).not.toHaveBeenCalled();
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.stringContaining('already initialized with solution "es"')
+      );
+    });
+  });
+
   describe('set Chrome style', () => {
     it('should set the Chrome style to "classic" when spaces plugin is not available', async () => {
       const { plugin, coreStart, unifiedSearch, cloud } = setup();

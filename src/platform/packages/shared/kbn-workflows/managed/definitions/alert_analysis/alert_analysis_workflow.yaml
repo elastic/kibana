@@ -244,7 +244,7 @@ steps:
                 delay: 5s
             with:
               method: PATCH
-              path: /api/note
+              path: "/s/{{ workflow.spaceId }}/api/note"
               body:
                 note:
                   eventId: '{{ foreach.item._id }}'
@@ -407,7 +407,7 @@ steps:
                         "@timestamp":
                           gte: '{{foreach.item["@timestamp"]}}||-24h'
                           lte: '{{foreach.item["@timestamp"]}}||+24h'
-              aggs:
+              aggregations:
                 unique_sources:
                   cardinality:
                     field: effective_source
@@ -487,7 +487,7 @@ steps:
                         "@timestamp":
                           gte: '{{foreach.item["@timestamp"]}}||-7d'
                           lte: '{{foreach.item["@timestamp"]}}||+7d'
-              aggs:
+              aggregations:
                 unique_sources:
                   cardinality:
                     field: effective_source
@@ -568,7 +568,7 @@ steps:
 
           - name: build_threat_technique_lines
             type: foreach
-            foreach: '{{ steps.get_rule_metadata.output.metadata.threats | json }}'
+            foreach: '{{ steps.get_rule_metadata.output.metadata.threats | default: "[]" | json_parse }}'
             steps:
               - name: set_current_threat_tactic
                 type: data.set
@@ -578,7 +578,7 @@ steps:
 
               - name: build_techniques_for_tactic
                 type: foreach
-                foreach: '{{ foreach.item.technique | json }}'
+                foreach: '{{ foreach.item.technique | default: "[]" | json_parse }}'
                 steps:
                   - name: set_threat_technique_line
                     type: data.set
@@ -1079,7 +1079,7 @@ steps:
                     delay: 5s
                 with:
                   method: PATCH
-                  path: /api/note
+                  path: "/s/{{ workflow.spaceId }}/api/note"
                   body:
                     noteId: "{{variables.note_id}}"
                     note:
@@ -1103,7 +1103,7 @@ steps:
                     delay: 5s
                 with:
                   method: PATCH
-                  path: /api/note
+                  path: "/s/{{ workflow.spaceId }}/api/note"
                   body:
                     noteId: "{{variables.note_id}}"
                     note:

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -17,6 +17,25 @@ import { TestChromeProviders } from '../../test_helpers';
 import { ChromeNextGlobalHeader } from './global_header';
 
 describe('ChromeNextGlobalHeader', () => {
+  it('renders the project picker beside the context switcher', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.next.contextSwitcher.set(<span>Context switcher</span>);
+    chrome.next.projectPicker.set(<span>Project picker</span>);
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('chromeNextGlobalHeaderSwitcher')).toHaveTextContent(
+      'Context switcher'
+    );
+    expect(screen.getByTestId('chromeNextGlobalHeaderProjectPicker')).toHaveTextContent(
+      'Project picker'
+    );
+  });
+
   it('renders the help menu button', async () => {
     renderWithI18n(
       <TestChromeProviders>
@@ -34,7 +53,6 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
@@ -57,7 +75,6 @@ describe('ChromeNextGlobalHeader', () => {
     const chrome = chromeServiceMock.createStartContract();
     chrome.getChromeStyle.mockReturnValue('project');
     chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
-    Object.defineProperty(chrome.next, 'isEnabled', { configurable: true, get: () => true });
     chrome.next.getNewsfeedHandler$.mockReturnValue(
       new BehaviorSubject({
         open: jest.fn(),
@@ -73,6 +90,39 @@ describe('ChromeNextGlobalHeader', () => {
 
     await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
 
+    expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
+  });
+
+  it('shows unread indicators when the newsfeed has new items', async () => {
+    const chrome = chromeServiceMock.createStartContract();
+    const hasNew$ = new BehaviorSubject(true);
+    chrome.getChromeStyle.mockReturnValue('project');
+    chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+    chrome.next.getNewsfeedHandler$.mockReturnValue(
+      new BehaviorSubject({
+        open: jest.fn(),
+        hasNew$,
+      })
+    );
+
+    renderWithI18n(
+      <TestChromeProviders chrome={chrome}>
+        <ChromeNextGlobalHeader />
+      </TestChromeProviders>
+    );
+
+    expect(screen.getByTestId('headerActionButtonNotification')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('chromeNextGlobalHeaderHelpButton'));
+
+    expect(screen.getByTestId('helpMenuWhatsNewUnreadIndicator')).toBeInTheDocument();
+
+    act(() => {
+      hasNew$.next(false);
+    });
+
+    expect(screen.queryByTestId('headerActionButtonNotification')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('helpMenuWhatsNewUnreadIndicator')).not.toBeInTheDocument();
     expect(screen.getByTestId('helpMenuWhatsNewButton')).toBeInTheDocument();
   });
 });

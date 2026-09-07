@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ServiceAnomalyTimeseries } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
@@ -16,8 +16,10 @@ export interface ServiceAnomalyChartsResponse {
 
 export const serviceAnomalyChartsRoute = defineRoute<ServiceAnomalyChartsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
-  params: z.object({
-    path: z.object({ serviceName: z.string() }),
-    query: rangeSchema.merge(environmentSchema).merge(z.object({ transactionType: z.string() })),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ serviceName: z.string() }),
+      query: rangeSchema.merge(environmentSchema).merge(z.object({ transactionType: z.string() })),
+    })
+  ),
 });

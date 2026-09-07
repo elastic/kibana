@@ -56,6 +56,11 @@ jest.mock('../templates_v2/pages/edit_template/page', () => ({
   default: () => <div>{'Edit template'}</div>,
 }));
 
+jest.mock('../cases_redesign/configure_cases/configure_cases', () => ({
+  __esModule: true,
+  default: () => <div>{'Settings redesign'}</div>,
+}));
+
 const useGetCaseMock = useGetCase as jest.Mock;
 
 const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
@@ -133,6 +138,53 @@ describe('Cases routes', () => {
     it('shows the no privileges page if the user does not have settings privileges', async () => {
       renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
       expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+    });
+
+    describe('with casesRedesign.settings enabled', () => {
+      let getConfigSpy: jest.SpyInstance;
+
+      const mockConfig = (templatesEnabled: boolean) => {
+        getConfigSpy = jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+          templates: { enabled: templatesEnabled },
+          casesRedesign: { list: false, details: false, settings: true },
+        } as ReturnType<typeof KibanaServices.getConfig>);
+      };
+
+      afterEach(() => {
+        getConfigSpy.mockRestore();
+      });
+
+      it('renders the redesigned settings page', async () => {
+        mockConfig(true);
+        renderWithRouter(['/cases/configure']);
+        expect(await screen.findByText('Settings redesign')).toBeInTheDocument();
+        expect(screen.queryByText('Settings')).not.toBeInTheDocument();
+      });
+
+      // Regression coverage for the redesign-ON / templates-OFF flag combination:
+      // the v2 templates and field-library routes must be unregistered (falling
+      // through to the settings route, where custom fields and templates are
+      // managed inline) rather than dead-ending the user.
+      describe('and templates disabled', () => {
+        it('renders the redesigned settings page on /configure', async () => {
+          mockConfig(false);
+          renderWithRouter(['/cases/configure']);
+          expect(await screen.findByText('Settings redesign')).toBeInTheDocument();
+        });
+
+        it('does not register the v2 templates route', async () => {
+          mockConfig(false);
+          renderWithRouter(['/cases/configure/templates']);
+          expect(await screen.findByText('Settings redesign')).toBeInTheDocument();
+          expect(screen.queryByText('All templates')).not.toBeInTheDocument();
+        });
+
+        it('does not register the v2 field library route', async () => {
+          mockConfig(false);
+          renderWithRouter(['/cases/configure/field_library']);
+          expect(await screen.findByText('Settings redesign')).toBeInTheDocument();
+        });
+      });
     });
   });
 

@@ -20,7 +20,7 @@ import type { Installation } from '../../types';
 import { reinstallPackageForInstallation } from '../../services/epm/packages';
 
 interface RunUpgradePackageInstallVersionParams {
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
 }
 
@@ -28,7 +28,7 @@ interface RunUpgradePackageInstallVersionParams {
  * Deferred task to upgrade package install versions for packages installed with an older version of Kibana.
  */
 export async function runUpgradePackageInstallVersion({
-  abortController,
+  signal,
   logger,
 }: RunUpgradePackageInstallVersionParams): Promise<void> {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
@@ -58,7 +58,7 @@ export async function runUpgradePackageInstallVersion({
 
   const savedObjects = res.saved_objects;
   for (let i = 0; i < savedObjects.length; i += batchSize) {
-    if (abortController.signal.aborted) {
+    if (signal.aborted) {
       logger.warn('Package install version upgrade was aborted');
       return;
     }
@@ -73,7 +73,7 @@ export async function runUpgradePackageInstallVersion({
     await pMap(
       batch,
       async ({ attributes: installation }) => {
-        if (abortController.signal.aborted) {
+        if (signal.aborted) {
           return;
         }
 

@@ -12,6 +12,10 @@ Keep page objects focused on **UI interactions**. Don’t hide API setup/teardow
 
 For practical tips, see the page object guidelines in [UI test best practices](./ui-best-practices.md#use-existing-page-objects-to-interact-with-the-kibana-ui).
 
+::::::{tip}
+For interacting with individual EUI components (combo boxes, data grids, and so on), use the [EUI test helpers](./eui-test-helpers.md) exposed through `page.components` rather than hand-rolling selectors in a page object.
+::::::
+
 ## Usage [scout-page-objects-usage]
 
 Page objects are exposed through the `pageObjects` fixture and are lazy-initialized:

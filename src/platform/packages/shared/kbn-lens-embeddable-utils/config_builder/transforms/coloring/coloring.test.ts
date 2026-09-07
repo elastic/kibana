@@ -182,7 +182,7 @@ describe('Color util transforms', () => {
             progression: 'fixed',
             reverse: false,
             rangeType: 'percent',
-            continuity: 'none',
+            continuity: 'all',
             steps: DEFAULT_COLOR_STEPS,
             maxSteps: DEFAULT_COLOR_STEPS,
           },
@@ -240,7 +240,7 @@ describe('Color util transforms', () => {
             // default range type for distributed palettes
             rangeType: 'percent',
             // default continuity for distributed palettes
-            continuity: 'none',
+            continuity: 'all',
             steps: 3,
             maxSteps: DEFAULT_COLOR_STEPS,
           },
@@ -293,7 +293,7 @@ describe('Color util transforms', () => {
             progression: 'fixed',
             reverse: false,
             rangeType: 'percent', // default range type for distributed palettes
-            continuity: 'none', // default continuity for distributed palettes
+            continuity: 'all', // default continuity for distributed palettes
             steps: 4, // the number of bands defined as argument
             maxSteps: DEFAULT_COLOR_STEPS,
           },

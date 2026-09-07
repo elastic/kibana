@@ -111,6 +111,18 @@ describe('GET /internal/entity_details/ai_summary - entityDetailsGetAiSummaryRou
     });
   });
 
+  it('includes author_profile_uid when present on the metadata doc', async () => {
+    const uid = 'u_alice';
+    mockGetLatestByEntityId.mockResolvedValue({
+      ...STORED_DOC,
+      'Ai_summary.author_profile_uid': uid,
+    });
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body.summary.author_profile_uid).toBe(uid);
+  });
+
   it('returns { summary: null, canRead: true } when no summary exists', async () => {
     mockGetLatestByEntityId.mockResolvedValue(null);
     const response = await server.inject(buildRequest(), context);

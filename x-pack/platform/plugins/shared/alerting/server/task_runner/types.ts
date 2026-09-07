@@ -14,6 +14,7 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
+import type { ConvertUiamAPIKeysResponse } from '@kbn/core-security-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
@@ -110,8 +111,23 @@ export interface RunRuleParams<Params extends RuleTypeParams> {
   version: string | undefined;
 }
 
+/**
+ * Rule task params after deserialization, with `spaceId` branded as {@link SpaceId}.
+ * The brand is applied once, at the trusted task-instance boundary, so it flows to
+ * the task runner, action schedulers and downstream consumers without per-call casts.
+ *
+ * Persisted task params are a loose bag (`consumer`, `adHocRunParamsId`, etc. are
+ * read ad hoc across the regular and ad-hoc runners), so the index signature is
+ * preserved; `alertId` and the branded `spaceId` are guaranteed.
+ */
+export type RuleTaskInstanceParams = ConcreteTaskInstance['params'] & {
+  alertId: string;
+  spaceId: SpaceId;
+};
+
 export interface RuleTaskInstance extends ConcreteTaskInstance {
   state: RuleTaskState;
+  params: RuleTaskInstanceParams;
 }
 
 // ActionScheduler
@@ -223,6 +239,11 @@ export interface TaskRunnerContext {
   getEventLogClient: (request: KibanaRequest) => IEventLogClient;
   isServerless: boolean;
   shouldGrantUiam?: boolean;
+  /**
+   * Converts Elasticsearch API keys into UIAM ones. Used to re-grant a rule's UIAM API key when a
+   * run fails because UIAM no longer knows the stored key. Absent when UIAM is not configured.
+   */
+  uiamConvert?: (keys: string[]) => Promise<ConvertUiamAPIKeysResponse | null>;
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

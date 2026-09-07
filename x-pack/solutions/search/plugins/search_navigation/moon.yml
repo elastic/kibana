@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-navigation'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-navigation'
   description: Moon project for @kbn/search-navigation
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/search_navigation
 dependsOn:
   - '@kbn/core'
@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/spaces-plugin'
   - '@kbn/share-plugin'
   - '@kbn/index-management-shared-types'
+  - '@kbn/context-engine-plugin'
 tags:
   - plugin
   - prod

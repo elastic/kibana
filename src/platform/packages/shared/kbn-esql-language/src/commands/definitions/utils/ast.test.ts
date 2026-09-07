@@ -90,6 +90,12 @@ describe('correctQuerySyntax', () => {
     const result = correctQuerySyntax(query);
     expect(result.endsWith(`${EDITOR_MARKER})`)).toBe(true);
   });
+
+  it('uses a literal marker for an incomplete match expression', () => {
+    const query = 'FROM index | EVAL SCORE(ABS(bytes) : ';
+
+    expect(correctQuerySyntax(query)).toBe(`${query}"${EDITOR_MARKER}")`);
+  });
 });
 
 describe('correctPromqlQuerySyntax', () => {
@@ -156,6 +162,36 @@ describe('removeAutocompleteMarkers', () => {
 
     expect(countMarkers(root)).toBeGreaterThan(0);
     expect(countMarkers(removeAutocompleteMarkers(root))).toBe(0);
+  });
+
+  it('preserves a nested match expression after removing its literal marker', () => {
+    const root = parseAutocomplete('FROM index | EVAL SCORE(ABS(bytes) : ');
+    const normalizedRoot = removeAutocompleteMarkers(root);
+
+    expect(countMarkers(root)).toBe(1);
+    expect(normalizedRoot.commands[1]).toMatchObject({
+      type: 'command',
+      name: 'eval',
+      args: [
+        {
+          type: 'function',
+          name: 'score',
+          args: [
+            {
+              type: 'function',
+              subtype: 'binary-expression',
+              name: ':',
+              args: [
+                {
+                  type: 'function',
+                  name: 'abs',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
   });
 
   it('strips the marker from the inline cast type, not only from text', () => {

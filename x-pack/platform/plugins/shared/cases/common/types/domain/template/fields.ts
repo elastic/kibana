@@ -69,6 +69,8 @@ export type Validation = z.infer<typeof ValidationSchema>;
  */
 export interface ConditionRenderProps {
   isRequired?: boolean;
+  /** Field must be filled before the case can be closed (not required now). Drives the field label. */
+  isRequiredOnClose?: boolean;
   patternValidation?: { regex: string; message?: string };
   min?: number;
   max?: number;
@@ -124,6 +126,7 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
   metadata: z
     .object({
       options: z.array(z.string()),
+      default: z.string().optional(),
     })
     .catchall(z.unknown()),
 });
@@ -144,6 +147,10 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
   type: z.literal('date'),
   metadata: z
     .object({
+      // A default is honored at runtime for a date picker (a UTC-ISO string flows through
+      // getYamlDefaultAsString and the renderer reads it), so it must be a declared property —
+      // otherwise the editor's strict metadata schema would false-flag a `default` that works.
+      default: z.string().optional(),
       show_time: z.boolean().optional(),
       timezone: z.enum(['utc', 'local']).optional(),
     })
@@ -153,6 +160,11 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
 
 export const ToggleFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TOGGLE),
+  // A toggle stores a boolean value, so its extended-field storage key is `<name>_as_boolean` and
+  // it publishes as a native `boolean` runtime field (see cases_analytics_v2 runtime_fields.ts).
+  // Overriding BaseFieldSchema's `keyword` here is what makes the analytics layer's boolean branch
+  // reachable — without it a toggle would surface as a keyword string ('true'/'false') in Lens/Discover.
+  type: z.literal('boolean'),
   metadata: z
     .object({
       default: z.boolean().optional(),
@@ -244,6 +256,17 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * field" (do not inherit the library default; the field stays empty), whereas an absent
  * `metadata.default` inherits the library field's default. This is what the v1→v2 template
  * migration emits for a legacy template custom field whose value was explicitly cleared.
+ *
+ * `display` and `validation` are optional per-template overrides (e.g. `show_when`,
+ * `required_when`). `display` fully replaces the library field's own `display` when present
+ * (its only key is `show_when`). `validation` is instead merged onto the library field's own
+ * `validation` — a template that only wants to change requiredness keeps the library's format
+ * constraints (`pattern`/`min`/`max`/etc.), though the `required`/`required_when`/
+ * `required_on_close` family is swapped as a unit rather than merged key-by-key (see
+ * `mergeValidationOverride`). Without declaring `display`/`validation` here at all, they would be
+ * silently stripped by Zod when a `$ref` entry authored a local `display`/`validation` block,
+ * which is what made conditional visibility appear to be broken for `$ref` fields (see
+ * `applyRefFieldOverride`).
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -262,6 +285,8 @@ export const RefFieldSchema = z.object({
         .optional(),
     })
     .optional(),
+  display: DisplaySchema.optional(),
+  validation: ValidationSchema.optional(),
 });
 
 export type RefField = z.infer<typeof RefFieldSchema>;
@@ -285,10 +310,11 @@ export const MarkdownFieldSchema = BaseFieldSchema.extend({
 });
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
- * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ * Union of all inline (control-based) field definitions — every concrete field shape that can be
+ * authored directly, excluding library references (`$ref`). This is the schema for a standalone
+ * field-library definition, which stores concrete fields, never references to other fields.
  */
-export const FieldSchema = z.union([
+export const InlineFieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
@@ -299,8 +325,13 @@ export const FieldSchema = z.union([
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
   MarkdownFieldSchema,
-  RefFieldSchema,
 ]);
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
+export const FieldSchema = z.union([...InlineFieldSchema.options, RefFieldSchema]);
 
 export type Field = z.infer<typeof FieldSchema>;
 

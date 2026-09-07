@@ -10,7 +10,7 @@ import ReactRouterDom from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { fireEvent, screen, renderHook, act as hooksAct } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { getExpandedStepCallback, useExpandedRow } from './use_expanded_row';
 import { render } from '../../../lib/helper/rtl_helpers';
 import type { JourneyStep } from '../../../../../common/runtime_types';
@@ -98,15 +98,19 @@ describe('useExpandedROw', () => {
     return (
       <Route path={SYNTHETIC_CHECK_STEPS_ROUTE}>
         Step list
-        {defaultSteps.map((journeyStep, index) => (
-          <EuiButtonIcon
-            key={index}
-            data-test-subj={TEST_ID + index}
-            onClick={() => toggleExpand({ journeyStep })}
-            aria-label={expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL}
-            iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
-          />
-        ))}
+        {defaultSteps.map((journeyStep, index) => {
+          const buttonLabel = expandedRows[journeyStep._id] ? COLLAPSE_LABEL : EXPAND_LABEL;
+          return (
+            <EuiToolTip key={index} content={buttonLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj={TEST_ID + index}
+                onClick={() => toggleExpand({ journeyStep })}
+                aria-label={buttonLabel}
+                iconType={expandedRows[journeyStep._id] ? 'chevronSingleUp' : 'chevronSingleDown'}
+              />
+            </EuiToolTip>
+          );
+        })}
       </Route>
     );
   };

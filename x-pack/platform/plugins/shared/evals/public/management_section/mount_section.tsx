@@ -44,28 +44,19 @@ export const mountManagementSection = async ({
   const breadcrumbPrefix = [{ text: aiBreadcrumbLabel }, { text: PLUGIN_NAME }];
   const getHref = (path: string) => path;
 
-  const rootStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    flex: 1,
-    minHeight: 0,
-  } as React.CSSProperties;
-
   const App = () => (
-    <div style={rootStyle}>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>
-          <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
-            <EvalsApp
-              history={history}
-              setBreadcrumbs={setBreadcrumbs}
-              getHref={getHref}
-              breadcrumbPrefix={breadcrumbPrefix}
-            />
-          </KibanaContextProvider>
-        </I18nProvider>
-      </QueryClientProvider>
-    </div>
+    <QueryClientProvider client={queryClient}>
+      <I18nProvider>
+        <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+          <EvalsApp
+            history={history}
+            setBreadcrumbs={setBreadcrumbs}
+            getHref={getHref}
+            breadcrumbPrefix={breadcrumbPrefix}
+          />
+        </KibanaContextProvider>
+      </I18nProvider>
+    </QueryClientProvider>
   );
 
   ReactDOM.render(wrapWithTheme(<App />, core.theme), element);

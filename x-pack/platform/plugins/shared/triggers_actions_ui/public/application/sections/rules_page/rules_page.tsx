@@ -191,7 +191,7 @@ const RulesPage = () => {
   useEffect(() => {
     if (setBreadcrumbs) {
       if (currentSection === 'logs') {
-        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref(getUrlForApp);
+        const rulesBreadcrumbWithAppPath = getRulesBreadcrumbWithHref();
         setBreadcrumbs([rulesBreadcrumbWithAppPath, getAlertingSectionBreadcrumb('logs')]);
       } else {
         setBreadcrumbs([getAlertingSectionBreadcrumb('rules')]);
@@ -209,7 +209,7 @@ const RulesPage = () => {
         tabs={tabs}
         menu={appMenu}
         docLink={docLinks.links.alerting.guide}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
         back={{
           href: backButtonHref,
           label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {

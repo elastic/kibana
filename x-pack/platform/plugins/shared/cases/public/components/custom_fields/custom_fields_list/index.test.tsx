@@ -95,10 +95,15 @@ describe('CustomFieldsList', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not show any panel when custom fields', () => {
-    renderWithTestingProviders(<CustomFieldsList {...{ ...props, customFields: [] }} />);
+  it('renders as line-separated rows when useLineSeparators is true', () => {
+    renderWithTestingProviders(<CustomFieldsList {...props} useLineSeparators />);
 
-    expect(screen.queryAllByTestId(`custom-field-`, { exact: false })).toHaveLength(0);
+    const row = screen.getByTestId(
+      `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
+    );
+
+    expect(row.className).not.toContain('euiPanel');
+    expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
   });
 
   describe('Delete', () => {

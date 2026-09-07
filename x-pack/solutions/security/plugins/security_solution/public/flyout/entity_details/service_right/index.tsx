@@ -225,6 +225,7 @@ export const ServicePanel = memo(function ServicePanel({
             openDetailsPanel={openDetailsPanel}
             isPreviewMode={isPreviewMode}
             entityStoreEntityId={entityStoreEntityId}
+            riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>

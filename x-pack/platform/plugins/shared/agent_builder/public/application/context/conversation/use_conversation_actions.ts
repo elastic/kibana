@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { QueryClient } from '@kbn/react-query';
-import produce, { type Draft } from 'immer';
+import produce, { type Draft } from 'immer-v9';
 import type {
   ConversationRound,
   ReasoningStep,
