@@ -15,14 +15,14 @@ interface ConversationRenderModeContextValue {
 }
 
 const ConversationRenderModeContext = createContext<ConversationRenderModeContextValue>({
-  renderMode: 'rounds',
+  renderMode: 'events',
   setRenderMode: () => {},
 });
 
 export const ConversationRenderModeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [renderMode, setRenderMode] = useState<ConversationRenderMode>('rounds');
+  const [renderMode, setRenderMode] = useState<ConversationRenderMode>('events');
 
   return (
     <ConversationRenderModeContext.Provider value={{ renderMode, setRenderMode }}>
