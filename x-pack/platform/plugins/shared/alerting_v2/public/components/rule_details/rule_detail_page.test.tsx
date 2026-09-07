@@ -27,7 +27,8 @@ jest.mock('react-router-dom', () => ({
 
 let mockCanWriteRules = true;
 
-jest.mock('../../agent_builder/use_rule_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useRuleAutoAttach: jest.fn(),
 }));
 
@@ -435,7 +436,7 @@ describe('RuleDetailPage', () => {
     it('passes the loaded rule to useRuleAutoAttach', () => {
       renderPage(baseRule);
 
-      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
     });
 
     it('passes the new rule to useRuleAutoAttach when the rule id changes', () => {
@@ -469,7 +470,7 @@ describe('RuleDetailPage', () => {
         </MemoryRouter>
       );
 
-      expect(mockUseRuleAutoAttach).toHaveBeenLastCalledWith(nextRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenLastCalledWith(nextRule, expect.any(Object));
     });
   });
 });

@@ -31,7 +31,8 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } 
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
 
-jest.mock('../../agent_builder/use_episode_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useEpisodeAutoAttach: jest.fn(),
 }));
 
@@ -486,7 +487,7 @@ describe('EpisodeDetailsPage', () => {
       expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
         ruleName: 'Rule A',
         groupingFields: ['host.name'],
-      });
+      }, expect.any(Object));
     });
 
     it('omits grouping fields when the rule is not loaded', () => {
@@ -504,7 +505,7 @@ describe('EpisodeDetailsPage', () => {
       expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
         ruleName: undefined,
         groupingFields: undefined,
-      });
+      }, expect.any(Object));
     });
 
     it('passes the next episode when the episode id changes', () => {
@@ -538,7 +539,7 @@ describe('EpisodeDetailsPage', () => {
       expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(nextEpisode, {
         ruleName: 'Rule A',
         groupingFields: ['host.name'],
-      });
+      }, expect.any(Object));
     });
   });
 });

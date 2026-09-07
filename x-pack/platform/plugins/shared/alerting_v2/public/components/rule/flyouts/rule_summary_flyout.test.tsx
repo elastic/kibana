@@ -12,7 +12,8 @@ import { RuleSummaryFlyout } from './rule_summary_flyout';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 
-jest.mock('../../../agent_builder/use_rule_auto_attach', () => ({
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
   useRuleAutoAttach: jest.fn(),
 }));
 
@@ -253,7 +254,7 @@ describe('RuleSummaryFlyout', () => {
     it('passes the loaded rule to useRuleAutoAttach', () => {
       renderFlyout();
 
-      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule, expect.any(Object));
     });
   });
 });
