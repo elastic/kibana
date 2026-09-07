@@ -1489,7 +1489,14 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
     # matches, so build it rather than filtering the "latest" lookup.
     if shard:
         _run_id = shard_run_id(os.environ.get("TEST_RUN_ID", ""), shard)
-        exec_id = f"{_run_id}::{suite_profile()['gate_suite_id']}::{stored_id}"
+        # Build the id from the connector id the caller passed (`model`), NOT
+        # `stored_id`. The VM's local index holds the model's display name in
+        # `task.model.id` ("anthropic-claude-4.5-haiku") while golden writes
+        # docs under the connector id ("eis-anthropic-claude-4-5-haiku").
+        # Gating on the display name returned 0/98 for 12/12 wave-2 batch B
+        # units that had in fact written 98 docs each (verified: eis- form 98,
+        # dotted form 0).
+        exec_id = f"{_run_id}::{suite_profile()['gate_suite_id']}::{model}"
     else:
         exec_id = None
     _latest_must = [
