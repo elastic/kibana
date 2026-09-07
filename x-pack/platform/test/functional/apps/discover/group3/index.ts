@@ -19,7 +19,7 @@
  * - value_suggestions_non_timebased: DELETED (fully ported to Scout)
  * - saved_search_embeddable: MIXED (1 delete, 1 cover with unit test, 3 migrate)
  * - esql_starred: migrated to Scout and component tests
- * - rule_creation: cover with a unit test, then DELETE
+ * - rule_creation: migrated to rule form component tests
  */
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -29,6 +29,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./visualize_field'));
     loadTestFile(require.resolve('./saved_search_embeddable'));
-    loadTestFile(require.resolve('./rule_creation'));
   });
 }
