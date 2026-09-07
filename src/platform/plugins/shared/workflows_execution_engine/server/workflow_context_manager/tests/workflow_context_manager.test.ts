@@ -1580,6 +1580,7 @@ describe('WorkflowContextManager', () => {
               url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
               executedBy: 'unknown',
               triggeredBy: undefined,
+              usage: undefined,
             },
             workflow: {
               id: 'workflow-456',
@@ -1592,7 +1593,13 @@ describe('WorkflowContextManager', () => {
               API_URL: 'https://api.example.com',
               TIMEOUT: 5000,
             },
-            event: undefined,
+            event: {
+              spaceId: 'space-789',
+              inputs: {
+                userId: 'user-123',
+                count: 10,
+              },
+            },
             inputs: {
               userId: 'user-123',
               count: 10,
