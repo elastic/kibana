@@ -10,7 +10,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/code-editor';
 import type { ESQLColumn } from '@elastic/esql/types';
 import { Parser, walk } from '@elastic/esql';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, VariableNamePrefix, type ESQLControlVariable } from '@kbn/esql-types';
 import {
   getRemoteClustersFromESQLQuery,
   getLimitFromESQLQuery,
@@ -20,6 +20,7 @@ import {
   prettifyQuery,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  getESQLQueryVariables,
   mapVariableToColumn,
   getValuesFromQueryField,
   fixESQLQueryWithVariables,
@@ -1314,6 +1315,56 @@ describe('esql query helpers', () => {
 
     it('should return false when query does not contain METRICS_INFO or TS_INFO', () => {
       expect(hasTimeseriesInfoCommand('FROM index | STATS count()')).toBe(false);
+    });
+  });
+
+  describe('getESQLQueryVariables', () => {
+    it('returns all variable names without the prefix when no prefix is given', () => {
+      expect(getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os')).toEqual(
+        ['field', 'os']
+      );
+    });
+
+    it('returns Identifier (??) variable names without the prefix', () => {
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field', VariableNamePrefix.IDENTIFIER)
+      ).toEqual(['field']);
+      expect(
+        getESQLQueryVariables('FROM a | KEEP ??field, ??field2', VariableNamePrefix.IDENTIFIER)
+      ).toEqual(['field', 'field2']);
+    });
+
+    it('excludes Value (?) variables when filtering by IDENTIFIER prefix', () => {
+      expect(
+        getESQLQueryVariables('FROM a | WHERE os == ?os', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables(
+          'FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os',
+          VariableNamePrefix.IDENTIFIER
+        )
+      ).toEqual(['field']);
+    });
+
+    it('does not treat a backtick-quoted column named `??x` as a variable', () => {
+      expect(
+        getESQLQueryVariables('FROM a | EVAL `??x` = 1', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(`??x`)', VariableNamePrefix.IDENTIFIER)
+      ).toEqual([]);
+    });
+
+    it('with VALUE prefix excludes Identifier (??) variables', () => {
+      expect(
+        getESQLQueryVariables('FROM a | STATS COUNT(*) BY ??field', VariableNamePrefix.VALUE)
+      ).toEqual([]);
+      expect(
+        getESQLQueryVariables(
+          'FROM a | STATS COUNT(*) BY ??field | WHERE os == ?os',
+          VariableNamePrefix.VALUE
+        )
+      ).toEqual(['os']);
     });
   });
 });
