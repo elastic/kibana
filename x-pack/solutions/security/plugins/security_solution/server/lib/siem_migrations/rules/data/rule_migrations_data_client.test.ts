@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { RuleMigrationsDataClient } from './rule_migrations_data_client';
 import { RuleMigrationsDataRulesClient } from './rule_migrations_data_rules_client';
@@ -78,7 +79,8 @@ describe('RuleMigrationsDataClient', () => {
         mockEsClient,
         mockLogger,
         mockSpaceId,
-        mockDependencies
+        mockDependencies,
+        { kibanaVersion: '9.6.0', pluginStop$: new Subject<void>() }
       );
 
       const migrationId = 'testId';

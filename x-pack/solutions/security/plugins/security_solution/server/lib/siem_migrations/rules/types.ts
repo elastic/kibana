@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
+import type { IndexPatternAdapter } from '@kbn/index-adapter';
+import type { IndexOptions } from './data/utils/ensure_index';
 import type {
   MigrationTranslationResult,
   SiemMigrationResource,
@@ -67,14 +68,16 @@ export type MicrosoftSentinelSeverity = 'high' | 'medium' | 'low' | 'information
 export interface RuleMigrationAdapters {
   rules: IndexPatternAdapter;
   resources: IndexPatternAdapter;
-  integrations: IndexAdapter;
-  prebuiltrules: IndexAdapter;
   migrations: IndexPatternAdapter;
 }
 
 export type RuleMigrationAdapterId = keyof RuleMigrationAdapters;
 
 export type RuleMigrationIndexNameProviders = Record<
-  RuleMigrationAdapterId,
+  RuleMigrationAdapterId | 'integrations' | 'prebuiltrules',
   SiemMigrationsIndexNameProvider
 >;
+
+export interface RuleMigrationsSemanticIndexOptions extends IndexOptions {
+  elserInferenceId?: string;
+}

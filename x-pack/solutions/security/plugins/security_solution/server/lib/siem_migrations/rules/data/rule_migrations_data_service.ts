@@ -17,11 +17,10 @@ import type {
   RuleMigrationAdapterId,
   RuleMigrationAdapters,
   RuleMigrationIndexNameProviders,
+  RuleMigrationsSemanticIndexOptions,
 } from '../types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import {
-  getIntegrationsFieldMap,
-  getPrebuiltRulesFieldMap,
   migrationsFieldMaps,
   ruleMigrationResourcesFieldMap,
   ruleMigrationsFieldMap,
@@ -34,6 +33,7 @@ interface CreateClientParams {
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
   dependencies: SiemMigrationsClientDependencies;
+  indexInstallOptions: Pick<RuleMigrationsSemanticIndexOptions, 'pluginStop$' | 'tasksTimeoutMs'>;
 }
 interface CreateRuleAdapterParams {
   adapterId: RuleMigrationAdapterId;
@@ -49,7 +49,11 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
 
   private readonly adapters: RuleMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string, elserInferenceId?: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string,
+    private readonly elserInferenceId?: string
+  ) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createRuleIndexPatternAdapter({
@@ -64,25 +68,12 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
         adapterId: 'resources',
         fieldMap: ruleMigrationResourcesFieldMap,
       }),
-      integrations: this.createRuleIndexAdapter({
-        adapterId: 'integrations',
-        fieldMap: getIntegrationsFieldMap({ elserInferenceId }),
-      }),
-      prebuiltrules: this.createRuleIndexAdapter({
-        adapterId: 'prebuiltrules',
-        fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
-      }),
     };
   }
 
   private createRuleIndexPatternAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
     return this.createIndexPatternAdapter({ name, fieldMap });
-  }
-
-  private createRuleIndexAdapter({ adapterId, fieldMap }: CreateRuleAdapterParams) {
-    const name = this.getAdapterIndexName(adapterId);
-    return this.createIndexAdapter({ name, fieldMap });
   }
 
   private async runIndexMigrations(esClient: SetupParams['esClient']) {
@@ -94,8 +85,6 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
     await Promise.all([
       this.adapters.rules.install({ ...params, logger: this.logger }),
       this.adapters.resources.install({ ...params, logger: this.logger }),
-      this.adapters.integrations.install({ ...params, logger: this.logger }),
-      this.adapters.prebuiltrules.install({ ...params, logger: this.logger }),
       this.adapters.migrations.install({ ...params, logger: this.logger }),
     ]);
   }
@@ -105,7 +94,13 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
     await this.runIndexMigrations(params.esClient);
   }
 
-  public createClient({ spaceId, currentUser, esScopedClient, dependencies }: CreateClientParams) {
+  public createClient({
+    spaceId,
+    currentUser,
+    esScopedClient,
+    dependencies,
+    indexInstallOptions,
+  }: CreateClientParams) {
     const indexNameProviders: RuleMigrationIndexNameProviders = {
       rules: this.createIndexNameProvider(this.adapters.rules, spaceId),
       resources: this.createIndexNameProvider(this.adapters.resources, spaceId),
@@ -120,7 +115,12 @@ export class RuleMigrationsDataService extends SiemMigrationsBaseDataService {
       esScopedClient,
       this.logger,
       spaceId,
-      dependencies
+      dependencies,
+      {
+        ...indexInstallOptions,
+        kibanaVersion: this.kibanaVersion,
+        elserInferenceId: this.elserInferenceId,
+      }
     );
   }
 }

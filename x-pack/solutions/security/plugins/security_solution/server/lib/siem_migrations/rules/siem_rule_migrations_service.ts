@@ -27,7 +27,7 @@ export interface SiemRuleMigrationsClient {
 
 export class SiemRuleMigrationsService {
   private dataService: RuleMigrationsDataService;
-  private esClusterClient?: IClusterClient;
+  private setupParams?: SiemRulesMigrationsSetupParams;
   private taskService: RuleMigrationsTaskService;
   private logger: Logger;
 
@@ -37,8 +37,9 @@ export class SiemRuleMigrationsService {
     this.taskService = new RuleMigrationsTaskService(this.logger);
   }
 
-  setup({ esClusterClient, ...params }: SiemRulesMigrationsSetupParams) {
-    this.esClusterClient = esClusterClient;
+  setup(setupParams: SiemRulesMigrationsSetupParams) {
+    this.setupParams = setupParams;
+    const { esClusterClient, ...params } = setupParams;
     const esClient = esClusterClient.asInternalUser;
 
     this.dataService.setup({ ...params, esClient }).catch((err) => {
@@ -53,14 +54,16 @@ export class SiemRuleMigrationsService {
     dependencies,
   }: SiemMigrationsCreateClientParams): SiemRuleMigrationsClient {
     assert(currentUser, 'Current user must be authenticated');
-    assert(this.esClusterClient, 'ES client not available, please call setup first');
+    assert(this.setupParams, 'ES client not available, please call setup first');
 
-    const esScopedClient = this.esClusterClient.asScoped(request);
+    const { esClusterClient, pluginStop$, tasksTimeoutMs } = this.setupParams;
+    const esScopedClient = esClusterClient.asScoped(request);
     const dataClient = this.dataService.createClient({
       spaceId,
       currentUser,
       esScopedClient,
       dependencies,
+      indexInstallOptions: { pluginStop$, tasksTimeoutMs },
     });
 
     const taskClient = this.taskService.createClient({

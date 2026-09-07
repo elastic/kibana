@@ -7,15 +7,12 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
-import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigration,
   RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
-
-const DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID = defaultInferenceEndpoints.ELSER;
 
 export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
@@ -101,7 +98,7 @@ export const ruleMigrationResourcesFieldMap: FieldMap<
 export const getIntegrationsFieldMap: ({
   elserInferenceId,
 }: {
-  elserInferenceId?: string;
+  elserInferenceId: string;
 }) => FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationIntegration, 'knowledge_base'>>> = ({
   elserInferenceId,
 }) => ({
@@ -115,7 +112,7 @@ export const getIntegrationsFieldMap: ({
   elser_embedding: {
     type: 'semantic_text',
     required: true,
-    inference_id: elserInferenceId ?? DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID,
+    inference_id: elserInferenceId,
   },
   fields_metadata: { type: 'object', required: false },
 });
@@ -123,14 +120,14 @@ export const getIntegrationsFieldMap: ({
 export const getPrebuiltRulesFieldMap: ({
   elserInferenceId,
 }: {
-  elserInferenceId?: string;
+  elserInferenceId: string;
 }) => FieldMap<SchemaFieldMapKeys<RuleMigrationPrebuiltRule>> = ({ elserInferenceId }) => ({
   name: { type: 'text', required: true },
   description: { type: 'text', required: true },
   elser_embedding: {
     type: 'semantic_text',
     required: true,
-    inference_id: elserInferenceId ?? DEFAULT_SIEM_RULE_MIGRATIONS_ELSER_INFERENCE_ID,
+    inference_id: elserInferenceId,
   },
   rule_id: { type: 'keyword', required: true },
   mitre_attack_ids: { type: 'keyword', array: true, required: false },

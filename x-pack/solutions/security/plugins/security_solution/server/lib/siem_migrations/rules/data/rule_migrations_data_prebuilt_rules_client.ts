@@ -5,13 +5,22 @@
  * 2.0.
  */
 
+import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { RuleVersions } from '../../../detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff';
 import { createPrebuiltRuleAssetsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleObjectsClient } from '../../../detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client';
 import { fetchRuleVersionsTriad } from '../../../detection_engine/prebuilt_rules/logic/rule_versions/fetch_rule_versions_triad';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { ElserPopulateError } from '../../common/data/elser_populate_error';
-import type { RuleMigrationPrebuiltRule } from '../types';
+import type { RuleMigrationPrebuiltRule, RuleMigrationsSemanticIndexOptions } from '../types';
+import type {
+  SiemMigrationsClientDependencies,
+  SiemMigrationsIndexNameProvider,
+} from '../../common/types';
+import { getPrebuiltRulesFieldMap } from './field_maps';
+import { ensureIndex } from './utils/ensure_index';
+import { resolveElserInferenceId } from './utils/resolve_elser_inference_id';
+import { isMissingIndexError } from './utils/is_missing_index_error';
 
 export type { RuleVersions };
 export type PrebuildRuleVersionsMap = Map<string, RuleVersions>;
@@ -26,6 +35,17 @@ const RETURNED_RULES = 5 as const;
 const BULK_MAX_SIZE = 500 as const;
 
 export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBaseClient {
+  constructor(
+    getIndexName: SiemMigrationsIndexNameProvider,
+    currentUser: AuthenticatedUser,
+    esScopedClient: IScopedClusterClient,
+    logger: Logger,
+    dependencies: SiemMigrationsClientDependencies,
+    private readonly semanticIndexOptions: RuleMigrationsSemanticIndexOptions
+  ) {
+    super(getIndexName, currentUser, esScopedClient, logger, dependencies);
+  }
+
   async getRuleVersionsMap(): Promise<PrebuildRuleVersionsMap> {
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(this.dependencies.savedObjectsClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(this.dependencies.rulesClient);
@@ -53,7 +73,22 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
       }
     });
 
+    if (filteredRules.length === 0) {
+      return;
+    }
+
     const index = await this.getIndexName();
+    const elserInferenceId = await resolveElserInferenceId(
+      this.esClient,
+      this.semanticIndexOptions.elserInferenceId
+    );
+    await ensureIndex({
+      ...this.semanticIndexOptions,
+      esClient: this.esClient,
+      logger: this.logger,
+      index,
+      fieldMap: getPrebuiltRulesFieldMap({ elserInferenceId }),
+    });
     const createdAt = new Date().toISOString();
     let prebuiltRuleSlice: RuleMigrationPrebuiltRule[];
     while ((prebuiltRuleSlice = filteredRules.splice(0, BULK_MAX_SIZE)).length) {
@@ -62,13 +97,10 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
           {
             refresh: 'wait_for',
             operations: prebuiltRuleSlice.flatMap((prebuiltRule) => [
-              { update: { _index: index, _id: prebuiltRule.rule_id } },
+              { index: { _index: index, _id: prebuiltRule.rule_id } },
               {
-                doc: {
-                  ...prebuiltRule,
-                  '@timestamp': createdAt,
-                },
-                doc_as_upsert: true,
+                ...prebuiltRule,
+                '@timestamp': createdAt,
               },
             ]),
           },
@@ -79,7 +111,7 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
             // use the first error to throw, preserving the ES error type for classification.
             // Bulk item errors carry `type` + `reason` but no HTTP status; classification
             // keys on the stable `type`.
-            const itemError = response.items.find((item) => item.update?.error)?.update?.error;
+            const itemError = response.items.find((item) => item.index?.error)?.index?.error;
             throw new ElserPopulateError(itemError?.reason ?? 'Unknown error', itemError?.type);
           }
         })
@@ -129,6 +161,9 @@ export class RuleMigrationsDataPrebuiltRulesClient extends SiemMigrationsDataBas
       })
       .then((response) => this.processResponseHits(response))
       .catch((error) => {
+        if (isMissingIndexError(error, index)) {
+          return [];
+        }
         this.logger.error(`Error querying prebuilt rule details for ELSER: ${error.message}`);
         throw error;
       });

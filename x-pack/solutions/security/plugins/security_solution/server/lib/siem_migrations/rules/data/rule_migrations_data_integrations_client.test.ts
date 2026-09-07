@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Subject } from 'rxjs';
+import { errors } from '@elastic/elasticsearch';
+import { getIntegrationsFieldMap } from './field_maps';
+import * as indexUtils from './utils/ensure_index';
+import * as inferenceUtils from './utils/resolve_elser_inference_id';
 import { RuleMigrationsDataIntegrationsClient } from './rule_migrations_data_integrations_client';
 import type {
   ElasticsearchClient,
@@ -38,6 +43,8 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   const getIndexName = jest.fn().mockResolvedValue('mock-index');
   const currentUser = { username: 'elastic' } as AuthenticatedUser;
   const logger = loggerMock.create();
+  const semanticIndexOptions = { kibanaVersion: '9.6.0', pluginStop$: new Subject<void>() };
+  const ensureIndex = jest.spyOn(indexUtils, 'ensureIndex');
 
   const esClientMock = {
     bulk: jest.fn(),
@@ -59,12 +66,15 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    ensureIndex.mockReset().mockResolvedValue(undefined);
+    jest.spyOn(inferenceUtils, 'resolveElserInferenceId').mockResolvedValue('resolved-elser');
     client = new RuleMigrationsDataIntegrationsClient(
       getIndexName,
       currentUser,
       esScopedClientMock,
       logger,
-      dependencies
+      dependencies,
+      semanticIndexOptions
     );
   });
 
@@ -93,7 +103,8 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies,
+        semanticIndexOptions
       );
 
       const result = await brokenClient.getSecurityLogsPackages();
@@ -102,6 +113,27 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
   });
 
   describe('populate', () => {
+    it('prepares the index before population and retries a failed preparation', async () => {
+      mockGetPackages.mockResolvedValue([createMockPackage()]);
+      esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      ensureIndex.mockRejectedValueOnce(new Error('Preparation failed'));
+      await expect(client.populate()).rejects.toThrow('Preparation failed');
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+      ensureIndex.mockImplementationOnce(async () => {
+        expect(esClientMock.bulk).not.toHaveBeenCalled();
+      });
+      await client.populate();
+      expect(ensureIndex).toHaveBeenCalledTimes(2);
+      expect(inferenceUtils.resolveElserInferenceId).toHaveBeenCalledWith(esClientMock, undefined);
+      expect(ensureIndex).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          esClient: esClientMock,
+          fieldMap: getIntegrationsFieldMap({ elserInferenceId: 'resolved-elser' }),
+        })
+      );
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+    });
+
     it('should index integrations with at least on logs data stream', async () => {
       mockGetPackages.mockResolvedValue([
         createMockPackage({
@@ -115,6 +147,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       await client.populate();
 
       expect(esClientMock.bulk).not.toHaveBeenCalled();
+      expect(ensureIndex).not.toHaveBeenCalled();
     });
 
     it('should only index logs data streams', async () => {
@@ -135,14 +168,11 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           refresh: 'wait_for',
           operations: [
             // only the logs data stream operation should be included
-            expect.objectContaining({ update: expect.any(Object) }),
+            expect.objectContaining({ index: { _index: 'mock-index', _id: 'mock-package' } }),
             expect.objectContaining({
-              doc: expect.objectContaining({
-                data_streams: [
-                  { dataset: 'logs.dataset', index_pattern: 'logs-logs.dataset-*', title: 'Logs' },
-                ],
-              }),
-              doc_as_upsert: true,
+              data_streams: [
+                { dataset: 'logs.dataset', index_pattern: 'logs-logs.dataset-*', title: 'Logs' },
+              ],
             }),
           ],
         },
@@ -172,10 +202,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
           refresh: 'wait_for',
           operations: expect.arrayContaining([
             expect.objectContaining({
-              doc: expect.objectContaining({
-                fields_metadata: fieldsMetadata,
-              }),
-              doc_as_upsert: true,
+              fields_metadata: fieldsMetadata,
             }),
           ]),
         },
@@ -193,8 +220,8 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         {
           refresh: 'wait_for',
           operations: expect.arrayContaining([
-            expect.objectContaining({ update: expect.any(Object) }),
-            expect.objectContaining({ doc: expect.any(Object), doc_as_upsert: true }),
+            expect.objectContaining({ index: { _index: 'mock-index', _id: 'mock-package' } }),
+            expect.objectContaining({ title: 'Mock Package', elser_embedding: expect.any(String) }),
           ]),
         },
         { requestTimeout: 600000 }
@@ -207,11 +234,13 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
         currentUser,
         esScopedClientMock,
         logger,
-        { packageService: undefined } as unknown as SiemMigrationsClientDependencies
+        { packageService: undefined } as unknown as SiemMigrationsClientDependencies,
+        semanticIndexOptions
       );
 
       await noPackageClient.populate();
 
+      expect(ensureIndex).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         'Package service not available, not able not populate integrations index'
       );
@@ -221,7 +250,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       mockGetPackages.mockResolvedValue([createMockPackage()]);
       esClientMock.bulk = jest.fn().mockResolvedValue({
         errors: true,
-        items: [{ update: { error: { reason: 'test error' } } }],
+        items: [{ index: { error: { reason: 'test error' } } }],
       });
 
       await expect(client.populate()).rejects.toThrow('test error');
@@ -257,7 +286,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
     const getKnowledgeBaseFromMockEsCall = (): string => {
       const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
       const docOp = bulkCall[0].operations[1];
-      return docOp.doc.knowledge_base;
+      return docOp.knowledge_base;
     };
 
     it('should include content from sample_event files', async () => {
@@ -376,18 +405,44 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
               getPackage: jest.fn().mockResolvedValue(undefined),
             },
           },
-        } as unknown as SiemMigrationsClientDependencies
+        } as unknown as SiemMigrationsClientDependencies,
+        semanticIndexOptions
       );
 
       await clientWithPartialSvc.populate();
 
       const bulkCall = (esClientMock.bulk as jest.Mock).mock.calls[0];
       const docOp = bulkCall[0].operations[1];
-      expect(docOp.doc.knowledge_base).toBe('');
+      expect(docOp.knowledge_base).toBe('');
     });
   });
 
   describe('semanticSearch', () => {
+    it('returns empty results when the lookup index does not exist', async () => {
+      esClientMock.search = jest.fn().mockRejectedValue(
+        new errors.ResponseError({
+          body: { error: { type: 'index_not_found_exception', index: 'mock-index' } },
+          statusCode: 404,
+          warnings: [],
+          meta: {
+            context: null,
+            name: 'test',
+            request: {
+              id: 1,
+              params: { method: 'GET', path: '/', headers: {}, querystring: '' },
+              options: {},
+            },
+            connection: null,
+            attempts: 0,
+            aborted: false,
+          },
+        })
+      );
+      await expect(client.semanticSearch('query')).resolves.toEqual([]);
+      expect(ensureIndex).not.toHaveBeenCalled();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
     it('should return filtered integration results from search', async () => {
       const mockHits = [
         {
