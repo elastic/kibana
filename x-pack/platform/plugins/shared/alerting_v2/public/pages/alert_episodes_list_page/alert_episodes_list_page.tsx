@@ -15,6 +15,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   logicalCSS,
   useEuiTheme,
 } from '@elastic/eui';
@@ -45,7 +46,6 @@ import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_al
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
 import {
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -233,9 +233,8 @@ export const AlertEpisodesListPage = () => {
     timeRange,
   });
 
-  const { data: kpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
-
-  const alertEpisodesCount = kpis?.alertsCount ?? 0;
+  const loadedEpisodesCount = episodesData?.length ?? 0;
+  const isEpisodeListCapped = loadedEpisodesCount >= ALERT_EPISODES_LIST_PAGE_SIZE;
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -304,9 +303,21 @@ export const AlertEpisodesListPage = () => {
             `}
           >
             <EuiFlexItem grow={false}>
-              <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
-                {i18n.EPISODES_LIST_ITEM_COUNT(alertEpisodesCount)}
-              </EuiText>
+              {isEpisodeListCapped ? (
+                <EuiToolTip
+                  content={i18n.EPISODES_LIST_ITEM_COUNT_CAPPED_TOOLTIP(
+                    ALERT_EPISODES_LIST_PAGE_SIZE
+                  )}
+                >
+                  <EuiText size="xs" data-test-subj="alertEpisodesItemCount" tabIndex={0}>
+                    {i18n.EPISODES_LIST_ITEM_COUNT_CAPPED(ALERT_EPISODES_LIST_PAGE_SIZE)}
+                  </EuiText>
+                </EuiToolTip>
+              ) : (
+                <EuiText size="xs" data-test-subj="alertEpisodesItemCount">
+                  {i18n.EPISODES_LIST_ITEM_COUNT(loadedEpisodesCount)}
+                </EuiText>
+              )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
@@ -328,7 +339,13 @@ export const AlertEpisodesListPage = () => {
           </EuiFlexGroup>
         ),
       }),
-    [euiTheme.size.s, alertEpisodesCount, handleClearFilters, hasActiveFilters]
+    [
+      euiTheme.size.s,
+      handleClearFilters,
+      hasActiveFilters,
+      isEpisodeListCapped,
+      loadedEpisodesCount,
+    ]
   );
 
   const episodeActions: EpisodeAction[] = useMemo(
