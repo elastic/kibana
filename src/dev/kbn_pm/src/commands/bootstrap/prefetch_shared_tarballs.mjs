@@ -28,7 +28,7 @@ const MIRROR_DIR = Path.resolve(REPO_ROOT, '.yarn-local-mirror');
  * @param {string} url
  * @returns {{ name: string, version: string } | undefined}
  */
-function parseRegistryUrl(url) {
+export function parseRegistryUrl(url) {
   const match = new URL(url).pathname.match(
     /^\/((?:@[^/]+\/)?[^/]+)\/-\/[^/]+-(\d+\.\d+\.\d+(?:-[^/]+)?)\.tgz$/
   );
@@ -39,10 +39,11 @@ function parseRegistryUrl(url) {
 /**
  * Parse yarn.lock (dependency-free) and return tarball URLs which are
  * referenced by more than one lockfile entry.
+ * @param {string} [lock] yarn.lock contents (defaults to reading the repo lockfile)
  * @returns {Promise<SharedTarball[]>}
  */
-export async function findSharedTarballs() {
-  const lock = await Fsp.readFile(Path.resolve(REPO_ROOT, 'yarn.lock'), 'utf8');
+export async function findSharedTarballs(lock) {
+  lock = lock ?? (await Fsp.readFile(Path.resolve(REPO_ROOT, 'yarn.lock'), 'utf8'));
 
   /** @type {Map<string, { integrity: string, count: number }>} */
   const byUrl = new Map();
@@ -73,7 +74,7 @@ export async function findSharedTarballs() {
  * replace is sufficient.
  * @param {SharedTarball} tarball
  */
-function mirrorFilename({ name, version }) {
+export function mirrorFilename({ name, version }) {
   return `${name.replace('/', '-')}-${version}.tgz`;
 }
 
@@ -85,7 +86,7 @@ function mirrorFilename({ name, version }) {
  * @param {Buffer} buffer
  * @param {string} integrity
  */
-function isValid(buffer, integrity) {
+export function isValid(buffer, integrity) {
   for (const entry of integrity.split(/\s+/)) {
     const dash = entry.indexOf('-');
     if (dash === -1) continue;
