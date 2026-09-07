@@ -37,7 +37,7 @@ import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { WorkspaceManager } from './tools/sandbox_bash/workspace_manager';
-import { getConversationId } from './tools/sandbox_bash/tool_utils';
+import { preconfiguredConnectorSource } from './tools/sandbox_bash/connector_sources';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -65,6 +65,7 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private actionsStart?: NightshiftInvestigationsStartDeps['actions'];
   private savedObjects?: CoreStart['savedObjects'];
   private sandboxConnectionManager?: SandboxConnectionManager;
 
@@ -106,6 +107,13 @@ export class NightshiftInvestigationsPlugin
         const connectionManager = new SandboxConnectionManager({
           config: config.sandbox,
           logger: this.logger.get('sandbox_bash_tool'),
+          // this.actionsStart is set in start(); the source is invoked at seed time, so the
+          // reference is populated before any tool handler fires.
+          // Returns [] when the actions plugin is absent — seedSandbox no-ops on an empty list.
+          getConnectors: preconfiguredConnectorSource(
+            () => this.actionsStart,
+            (req) => this.actionsStart!.getActionsClientWithRequest(req)
+          ),
         });
         this.sandboxConnectionManager = connectionManager;
         const sandboxLogger = this.logger.get('sandbox_bash_tool');
@@ -133,20 +141,13 @@ export class NightshiftInvestigationsPlugin
           createSandboxWriteFileTool({ connectionManager, logger: sandboxLogger })
         );
 
-        const writeToolIds = new Set([
-          'nightshift_sandbox_bash',
-          'nightshift_sandbox_str_replace',
-          'nightshift_sandbox_write_file',
-        ]);
-
         plugins.agentBuilder.hooks.register({
           id: 'nightshift-sandbox-workspace-backup',
           hooks: {
-            [HookLifecycle.afterToolCall]: {
+            [HookLifecycle.afterAgent]: {
               mode: HookExecutionMode.nonBlocking,
               handler: (context) => {
-                if (!writeToolIds.has(context.toolId)) return;
-                const conversationId = getConversationId(context.toolHandlerContext);
+                const conversationId = context.conversationId;
                 if (!conversationId) return;
                 workspaceManager.backupWorkspace(conversationId).catch((err) => {
                   sandboxLogger
@@ -196,6 +197,7 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.actionsStart = plugins.actions;
     this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
