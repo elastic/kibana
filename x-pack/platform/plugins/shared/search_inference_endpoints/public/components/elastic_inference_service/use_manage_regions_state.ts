@@ -22,8 +22,6 @@ import { computeSeedState } from '../../utils/compute_seed_state';
 import { useSetSelection } from '../../hooks/use_set_selection';
 import { useRegionTabState } from './use_region_tab_state';
 
-export type ManageRegionsState = ReturnType<typeof useManageRegionsState>;
-
 export const useManageRegionsState = (onClose: () => void) => {
   const { data: policy, isLoading: isPolicyLoading, isError: isPolicyError } = useRegionPolicy();
   const {

@@ -139,7 +139,7 @@ describe('LocationSelectionList', () => {
     );
 
     expect(screen.getByTestId('manageRegionsNoGeos')).toBeInTheDocument();
-    expect(screen.getByText('No geographies available')).toBeInTheDocument();
+    expect(screen.getByTestId('manageRegionsNoGeos')).toHaveTextContent('No geographies available');
     expect(screen.queryByTestId('manageRegionsSelectAllButton')).not.toBeInTheDocument();
   });
 

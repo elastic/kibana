@@ -152,7 +152,7 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
             <p>
               <FormattedMessage
                 id="xpack.searchInferenceEndpoints.manageRegions.descriptionOff"
-                defaultMessage="Restrict inference traffic to the only the geographies or regions you choose. It's recommended to review model availability as not all models are available in all locations."
+                defaultMessage="Restrict inference traffic to only the geographies or regions you choose. It's recommended to review model availability as not all models are available in all locations."
               />
             </p>
           </EuiText>
@@ -207,8 +207,10 @@ export const ManageRegionsModal: React.FC<ManageRegionsModalProps> = ({ onClose 
               ) : (
                 <EuiText size="s">
                   <p>
-                    Elastic Inference default policy routes traffic through any available location
-                    for best performance.
+                    <FormattedMessage
+                      id="xpack.searchInferenceEndpoints.manageRegions.restrictTrafficHelpOff"
+                      defaultMessage="Elastic Inference default policy routes traffic through any available location for best performance."
+                    />
                   </p>
                 </EuiText>
               )}
