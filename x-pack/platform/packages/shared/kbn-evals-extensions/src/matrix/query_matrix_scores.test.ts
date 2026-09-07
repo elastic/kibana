@@ -81,6 +81,32 @@ describe('pickLatestExperimentPerModel', () => {
     expect(selected.get('m2')?.experiment_id).toBe('clean2');
   });
 
+  it('reports the judge that graded the surviving run', () => {
+    // Rejecting a self-judged run falls back to an older run -- which may have
+    // been graded by a different judge. Sonnet 4.6 published a fleet-leading
+    // 7.12 that way: its sonnet-judged runs were correctly rejected, and the
+    // haiku-judged survivor scored it ~1 point higher than the judge every
+    // other row was measured with. The swap has to be visible.
+    const experiments = [
+      {
+        experiment_id: 'self-judged-newer',
+        task_model: { id: 'm1' },
+        evaluator_model: { id: 'm1' },
+        timestamp: '2026-08-29T00:00:00.000Z',
+      },
+      {
+        experiment_id: 'other-judge-older',
+        task_model: { id: 'm1' },
+        evaluator_model: { id: 'judge-b' },
+        timestamp: '2026-08-22T00:00:00.000Z',
+      },
+    ] as unknown as Parameters<typeof pickLatestExperimentPerModel>[0];
+
+    const selected = pickLatestExperimentPerModel(experiments);
+    expect(selected.get('m1')?.experiment_id).toBe('other-judge-older');
+    expect(selected.get('m1')?.evaluator_model?.id).toBe('judge-b');
+  });
+
   it('keeps the most recent experiment per model', () => {
     const result = pickLatestExperimentPerModel([
       experiment({ experiment_id: 'old', modelId: 'm1', timestamp: '2026-06-01T00:00:00.000Z' }),

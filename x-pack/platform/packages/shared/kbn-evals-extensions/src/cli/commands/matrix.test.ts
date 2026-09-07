@@ -22,7 +22,7 @@ describe('matrixScoreQuery', () => {
         models: [{ id: 'model-a', label: 'Model A' }],
         ...overrides,
       }),
-      { suiteIds: ['suite-a'], modelIds: ['model-a'] }
+      { suiteIds: ['suite-a'], modelIds: ['model-a'], asOf: undefined }
     );
 
   it('forwards asOf to the score query', () => {

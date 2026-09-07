@@ -135,6 +135,8 @@ export interface AggregatedSuiteScores {
    * self-judged score can be disclosed per row rather than per column.
    */
   selfJudged?: boolean;
+  /** Judge that graded this suite's run, for cross-row comparability checks. */
+  judgeModelId?: string;
   /**
    * Number of experiments withheld because the grader was the graded model.
    * Set only when the withholding emptied the suite, so a cell can say
@@ -741,6 +743,11 @@ export const queryMatrixScores = async (
           latest.evaluator_model?.id && latest.task_model?.id
             ? describeJudge(latest.evaluator_model.id, latest.task_model.id).selfJudged
             : undefined,
+        // Which judge graded this row. Rejecting a self-judged run silently
+        // falls back to an older run graded by someone else, so a model can
+        // end up measured with a different instrument than the rows it is
+        // ranked against. Carry the id so that is visible instead of implied.
+        judgeModelId: latest.evaluator_model?.id ?? undefined,
         // A suite whose scores were ALL rejected for self-judging is not the
         // same as a suite that never ran: the run exists and its size is
         // known. Carry the count so the cell can say which it is.
