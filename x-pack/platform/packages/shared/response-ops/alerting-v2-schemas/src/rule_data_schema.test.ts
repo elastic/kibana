@@ -17,7 +17,7 @@ import {
   getRootEsqlQuery,
   bulkGetRulesResponseSchema,
   bulkGetRulesParamsSchema,
-  bulkCreateRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   updateRuleBodySchema,
   ruleTagsParamsSchema,
@@ -1633,7 +1633,7 @@ describe('bulkGetRulesResponseSchema', () => {
   });
 });
 
-describe('bulkCreateRulesParamsSchema', () => {
+describe('bulkCreateRulesRequestSchema', () => {
   const validItem = {
     kind: 'alert',
     metadata: { name: 'test rule' },
@@ -1642,14 +1642,14 @@ describe('bulkCreateRulesParamsSchema', () => {
   };
 
   it('accepts a single item and defaults enabled to true', () => {
-    const result = bulkCreateRulesParamsSchema.parse({ rules: [validItem] });
+    const result = bulkCreateRulesRequestSchema.parse({ rules: [validItem] });
     expect(result.rules).toHaveLength(1);
     expect(result.rules[0].enabled).toBe(true);
     expect(result.rules[0].id).toBeUndefined();
   });
 
   it('accepts client-supplied id and enabled: false', () => {
-    const result = bulkCreateRulesParamsSchema.parse({
+    const result = bulkCreateRulesRequestSchema.parse({
       rules: [{ ...validItem, id: 'rule-1', enabled: false }],
     });
     expect(result.rules[0].id).toBe('rule-1');
@@ -1661,11 +1661,11 @@ describe('bulkCreateRulesParamsSchema', () => {
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesParamsSchema.parse({ rules })).not.toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).not.toThrow();
   });
 
   it('rejects an empty rules array', () => {
-    expect(() => bulkCreateRulesParamsSchema.parse({ rules: [] })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [] })).toThrow();
   });
 
   it('rejects more than MAX_BULK_ITEMS items', () => {
@@ -1673,12 +1673,12 @@ describe('bulkCreateRulesParamsSchema', () => {
       ...validItem,
       metadata: { name: `rule-${i}` },
     }));
-    expect(() => bulkCreateRulesParamsSchema.parse({ rules })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules })).toThrow();
   });
 
   it('rejects duplicate client-supplied ids', () => {
     expect(() =>
-      bulkCreateRulesParamsSchema.parse({
+      bulkCreateRulesRequestSchema.parse({
         rules: [
           { ...validItem, id: 'same-id' },
           { ...validItem, metadata: { name: 'other' }, id: 'same-id' },
@@ -1688,16 +1688,16 @@ describe('bulkCreateRulesParamsSchema', () => {
   });
 
   it('rejects a missing rules field', () => {
-    expect(() => bulkCreateRulesParamsSchema.parse({})).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({})).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
-    expect(() => bulkCreateRulesParamsSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
+    expect(() => bulkCreateRulesRequestSchema.parse({ rules: [validItem], foo: 'bar' })).toThrow();
   });
 
   it('rejects an item that fails create-rule refinements', () => {
     expect(() =>
-      bulkCreateRulesParamsSchema.parse({
+      bulkCreateRulesRequestSchema.parse({
         rules: [{ ...validItem, kind: 'signal', recovery_strategy: 'no_breach' }],
       })
     ).toThrow();

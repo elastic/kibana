@@ -101,26 +101,48 @@ describe('RulesSavedObjectService', () => {
         ],
         { overwrite: false }
       );
-      expect(result).toEqual([{ id: 'rule-1', success: true, version: 'WzEsMV0=' }]);
+      expect(result).toEqual([
+        {
+          id: 'rule-1',
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+      ]);
     });
 
-    it('maps per-item saved object errors', async () => {
+    it('maps mixed success and per-item saved object errors', async () => {
       mockSavedObjectsClient.bulkCreate.mockResolvedValueOnce({
         saved_objects: [
           {
             id: 'rule-1',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: attrs,
+            references: [],
+            version: 'WzEsMV0=',
+          },
+          {
+            id: 'rule-2',
             type: RULE_SAVED_OBJECT_TYPE,
             error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
           },
         ],
       } as never);
 
-      const result = await rulesSavedObjectService.bulkCreate([{ id: 'rule-1', attrs }]);
+      const result = await rulesSavedObjectService.bulkCreate([
+        { id: 'rule-1', attrs },
+        { id: 'rule-2', attrs },
+      ]);
 
       expect(result).toEqual([
         {
           id: 'rule-1',
-          success: false,
+          attributes: attrs,
+          version: 'WzEsMV0=',
+          references: [],
+        },
+        {
+          id: 'rule-2',
           error: { statusCode: 409, error: 'Conflict', message: 'version conflict' },
         },
       ]);

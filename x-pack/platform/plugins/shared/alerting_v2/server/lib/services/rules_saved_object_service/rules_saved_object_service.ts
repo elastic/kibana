@@ -80,8 +80,11 @@ export type BulkUpdateResultItem =
   | { id: string; success: false; error: SavedObjectError };
 
 export type BulkCreateResultItem =
-  | { id: string; success: true; version?: string }
-  | { id: string; success: false; error: SavedObjectError };
+  | RuleSavedObjectDoc
+  | {
+      id: string;
+      error: SavedObjectError;
+    };
 
 export interface RulesFindAllResultItem {
   id: string;
@@ -216,9 +219,14 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
 
     return result.saved_objects.map((doc) => {
       if (isSavedObjectErrorResult(doc)) {
-        return { id: doc.id, success: false as const, error: doc.error };
+        return { id: doc.id, error: doc.error };
       }
-      return { id: doc.id, success: true as const, version: doc.version };
+      return {
+        id: doc.id,
+        attributes: doc.attributes,
+        version: doc.version,
+        references: doc.references ?? [],
+      };
     });
   }
 

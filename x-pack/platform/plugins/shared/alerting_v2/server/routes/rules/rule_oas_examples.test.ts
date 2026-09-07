@@ -8,7 +8,7 @@
 import {
   bulkByIdsSchema,
   bulkByQuerySchema,
-  bulkCreateRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   bulkGetRulesParamsSchema,
   bulkGetRulesResponseSchema,
@@ -72,8 +72,8 @@ describe('rule OAS example payloads', () => {
     expect(bulkResponseSchema.safeParse(BULK_OPERATION_RESPONSE).success).toBe(true);
   });
 
-  it('keeps bulk-create request example valid against bulkCreateRulesParamsSchema', () => {
-    expect(bulkCreateRulesParamsSchema.safeParse(BULK_CREATE_RULES_REQUEST).success).toBe(true);
+  it('keeps bulk-create request example valid against bulkCreateRulesRequestSchema', () => {
+    expect(bulkCreateRulesRequestSchema.safeParse(BULK_CREATE_RULES_REQUEST).success).toBe(true);
   });
 
   it('keeps bulk-create response example valid against bulkCreateRulesResponseSchema', () => {

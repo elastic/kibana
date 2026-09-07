@@ -9,7 +9,7 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import {
-  bulkCreateRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
@@ -38,7 +38,7 @@ export class BulkCreateRulesRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      body: bulkCreateRulesParamsSchema,
+      body: bulkCreateRulesRequestSchema,
     },
     response: {
       200: {

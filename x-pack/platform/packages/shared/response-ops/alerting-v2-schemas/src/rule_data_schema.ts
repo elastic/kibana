@@ -813,12 +813,11 @@ export const bulkCreateRuleItemSchema = applyCreateRuleRefinements(
 ).meta({ id: 'alerting_bulk_create_rule_item' });
 
 export type BulkCreateRuleItem = z.infer<typeof bulkCreateRuleItemSchema>;
-export type BulkCreateRuleItemInput = z.input<typeof bulkCreateRuleItemSchema>;
 
 /**
  * Request body schema for `POST /api/alerting/v2/rules/_bulk_create`.
  */
-export const bulkCreateRulesParamsSchema = z
+export const bulkCreateRulesRequestSchema = z
   .object({
     rules: z
       .array(bulkCreateRuleItemSchema)
@@ -838,7 +837,7 @@ export const bulkCreateRulesParamsSchema = z
   )
   .meta({ id: 'alerting_bulk_create_rules_request' });
 
-export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesParamsSchema>;
+export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>;
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.

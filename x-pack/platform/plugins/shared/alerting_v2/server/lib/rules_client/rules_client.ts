@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
-  bulkCreateRulesParamsSchema,
+  bulkCreateRulesRequestSchema,
   createRuleDataSchema,
   isStateTransitionAllowed,
   updateRuleDataSchema,
@@ -57,7 +57,10 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../services/logger_service/logger_service';
-import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
+import type {
+  RuleSavedObjectDoc,
+  RulesSavedObjectServiceContract,
+} from '../services/rules_saved_object_service/rules_saved_object_service';
 import {
   RulesSavedObjectServiceInternalToken,
   RulesSavedObjectServiceScopedToken,
@@ -153,6 +156,29 @@ const toPerItemBoomError = (id: string, err: Boom.Boom): BulkOperationError => {
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
+interface PreparedRule {
+  id: string;
+  enabled: boolean;
+  attrs: RuleSavedObjectAttributes;
+  references: SavedObjectReference[];
+}
+
+interface PersistPreparedRulesResult {
+  created: Array<{ prepared: PreparedRule; doc: RuleSavedObjectDoc }>;
+  errors: BulkOperationError[];
+}
+
+const throwOnCreateError = (error: BulkOperationError): never => {
+  const { code, message, details } = error.error;
+  if (code === ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS) {
+    throw Boom.conflict(message, { code, details: { rule_id: error.id } });
+  }
+  throw new Boom.Boom(message, {
+    statusCode: 500,
+    data: { code, ...(details ? { details } : {}) },
+  });
+};
+
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
     return undefined;
@@ -207,24 +233,68 @@ export class RulesClient {
   }
 
   /**
-   * Validates a rule's schedule against the configured guardrails: the interval
-   * may not be shorter than `minimumScheduleInterval`, and (when `checkLimit`)
-   * scheduling it may not push the cluster past `maxScheduledPerMinute`. The
-   * limit is only relevant when the rule contributes to the scheduled load
-   * (i.e. it is, or is becoming, enabled).
+   * Validates rule schedules against the configured guardrails: no interval may
+   * be shorter than `minimumScheduleInterval`, and the net added load of items
+   * with `checkLimit` may not push the cluster past `maxScheduledPerMinute`.
+   * Callers pass one item for single-rule writes and the enabled subset for
+   * bulk create so later items cannot overshoot a budget that earlier items
+   * already consumed.
    */
-  private async validateSchedule({
-    updatedEvery,
-    prevEvery,
-    checkLimit,
-  }: {
-    updatedEvery: string;
-    prevEvery?: string;
-    checkLimit: boolean;
-  }): Promise<void> {
-    this.assertScheduleIntervalAllowed(updatedEvery);
-    if (checkLimit) {
-      await this.assertScheduleLimitNotExceeded({ updatedEvery, prevEvery });
+  private async validateSchedule(
+    rules: Array<{
+      updatedEvery: string;
+      prevEvery?: string;
+      checkLimit: boolean;
+    }>
+  ): Promise<void> {
+    if (rules.length === 0) {
+      return;
+    }
+
+    for (const rule of rules) {
+      this.assertScheduleIntervalAllowed(rule.updatedEvery);
+    }
+
+    const limitItems = rules.filter((rule) => rule.checkLimit);
+    if (limitItems.length === 0) {
+      return;
+    }
+
+    const { maxScheduledPerMinute } = this.config.rules;
+    const addedSchedulesPerMinute = limitItems.reduce(
+      (sum, rule) => sum + convertEveryToSchedulesPerMinute(rule.updatedEvery),
+      0
+    );
+    const prevSchedulesPerMinute = limitItems.reduce(
+      (sum, rule) => sum + (rule.prevEvery ? convertEveryToSchedulesPerMinute(rule.prevEvery) : 0),
+      0
+    );
+
+    // An unchanged or less-frequent schedule adds no scheduled load, so it can
+    // never breach the limit. Skip the cluster-wide scan in that case (the
+    // previous schedule is already counted in the total).
+    if (addedSchedulesPerMinute <= prevSchedulesPerMinute) {
+      return;
+    }
+
+    const totalScheduledPerMinute =
+      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
+    const remainingSchedulesPerMinute =
+      Math.max(maxScheduledPerMinute - totalScheduledPerMinute, 0) + prevSchedulesPerMinute;
+
+    if (addedSchedulesPerMinute > remainingSchedulesPerMinute) {
+      const isSingle = limitItems.length === 1;
+      throw Boom.badRequest(
+        isSingle
+          ? `Rule schedule of "${limitItems[0].updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`
+          : `Rule schedules would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
+        {
+          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
+          details: isSingle
+            ? { interval: limitItems[0].updatedEvery, maxScheduledPerMinute }
+            : { maxScheduledPerMinute },
+        }
+      );
     }
   }
 
@@ -243,89 +313,6 @@ export class RulesClient {
         {
           code: ALERTING_ERROR_CODES.SCHEDULE_INTERVAL_TOO_SHORT,
           details: { interval: every, minimumScheduleInterval },
-        }
-      );
-    }
-  }
-
-  /**
-   * Rejects a rule whose schedule would push the total number of rule runs per
-   * minute across all spaces past the configured
-   * `xpack.alerting_v2.rules.maxScheduledPerMinute`. When editing an
-   * already-scheduled rule, its previous schedule is added back before
-   * comparing so an unchanged or relaxed schedule is never rejected.
-   */
-  private async assertScheduleLimitNotExceeded({
-    updatedEvery,
-    prevEvery,
-  }: {
-    updatedEvery: string;
-    prevEvery?: string;
-  }): Promise<void> {
-    const { maxScheduledPerMinute } = this.config.rules;
-
-    const updatedSchedulesPerMinute = convertEveryToSchedulesPerMinute(updatedEvery);
-    const prevSchedulesPerMinute = prevEvery ? convertEveryToSchedulesPerMinute(prevEvery) : 0;
-
-    // An unchanged or less-frequent schedule adds no scheduled load, so it can
-    // never breach the limit. Skip the cluster-wide scan in that case (the
-    // previous schedule is already counted in the total).
-    if (updatedSchedulesPerMinute <= prevSchedulesPerMinute) {
-      return;
-    }
-
-    const totalScheduledPerMinute =
-      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
-
-    const remainingSchedulesPerMinute =
-      Math.max(maxScheduledPerMinute - totalScheduledPerMinute, 0) + prevSchedulesPerMinute;
-
-    if (updatedSchedulesPerMinute > remainingSchedulesPerMinute) {
-      throw Boom.badRequest(
-        `Rule schedule of "${updatedEvery}" would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
-        {
-          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
-          details: { interval: updatedEvery, maxScheduledPerMinute },
-        }
-      );
-    }
-  }
-
-  /**
-   * Rejects a bulk create whose enabled rules would push the total number of
-   * rule runs per minute across all spaces past the configured
-   * `xpack.alerting_v2.rules.maxScheduledPerMinute`. Disabled rules are not
-   * counted. Checked once for the whole batch so later items cannot overshoot
-   * after earlier ones were accepted against the same remaining budget.
-   */
-  private async assertBulkScheduleLimitNotExceeded(intervals: string[]): Promise<void> {
-    if (intervals.length === 0) {
-      return;
-    }
-
-    const { maxScheduledPerMinute } = this.config.rules;
-    const addedSchedulesPerMinute = intervals.reduce(
-      (sum, every) => sum + convertEveryToSchedulesPerMinute(every),
-      0
-    );
-
-    if (addedSchedulesPerMinute <= 0) {
-      return;
-    }
-
-    const totalScheduledPerMinute =
-      await this.rulesSavedObjectServiceInternal.getTotalScheduledPerMinute();
-    const remainingSchedulesPerMinute = Math.max(
-      maxScheduledPerMinute - totalScheduledPerMinute,
-      0
-    );
-
-    if (addedSchedulesPerMinute > remainingSchedulesPerMinute) {
-      throw Boom.badRequest(
-        `Rule schedules would exceed the limit of ${maxScheduledPerMinute} rule runs per minute`,
-        {
-          code: ALERTING_ERROR_CODES.MAX_SCHEDULES_PER_MINUTE_EXCEEDED,
-          details: { maxScheduledPerMinute },
         }
       );
     }
@@ -388,6 +375,188 @@ export class RulesClient {
         request: this.request as unknown as CoreKibanaRequest,
       },
     });
+  }
+
+  /**
+   * Builds saved-object attributes and references for one create. Throws on
+   * artifact or minimum-interval validation; callers decide whether to surface
+   * that as a request failure or a per-item bulk error.
+   */
+  private prepareRuleForCreate({
+    data,
+    id,
+    enabled,
+    userProfileUid,
+    nowIso,
+    version,
+  }: {
+    data: CreateRuleData;
+    id?: string;
+    enabled: boolean;
+    userProfileUid: string | null;
+    nowIso: string;
+    version: number;
+  }): PreparedRule {
+    this.artifactTypeRegistry.validate(data.artifacts);
+    this.assertScheduleIntervalAllowed(data.schedule.every);
+
+    const attrs = transformCreateRuleBodyToRuleSoAttributes(data, {
+      enabled,
+      createdBy: userProfileUid,
+      createdAt: nowIso,
+      updatedBy: userProfileUid,
+      updatedAt: nowIso,
+      version,
+    });
+
+    return {
+      id: id ?? SavedObjectsUtils.generateId(),
+      enabled,
+      attrs,
+      references: extractArtifactReferences(attrs.artifacts, this.artifactTypeRegistry),
+    };
+  }
+
+  /**
+   * Persists prepared rules, then schedules executor tasks for the enabled
+   * subset. Saved objects are written first; rules whose task did not schedule
+   * are deleted so create and bulk create share the same ordering and rollback.
+   */
+  private async persistPreparedRules(
+    prepared: PreparedRule[]
+  ): Promise<PersistPreparedRulesResult> {
+    if (prepared.length === 0) {
+      return { created: [], errors: [] };
+    }
+
+    const errors: BulkOperationError[] = [];
+    let createResults: Awaited<ReturnType<RulesSavedObjectServiceContract['bulkCreate']>>;
+    try {
+      createResults = await this.rulesSavedObjectService.bulkCreate(
+        prepared.map((item) => ({
+          id: item.id,
+          attrs: item.attrs,
+          references: item.references,
+        }))
+      );
+    } catch (e) {
+      for (const item of prepared) {
+        errors.push({
+          id: item.id,
+          error: {
+            code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+            message: errorMessage(e),
+          },
+        });
+      }
+      return { created: [], errors };
+    }
+
+    const persisted: PersistPreparedRulesResult['created'] = [];
+    for (let i = 0; i < createResults.length; i++) {
+      const createResult = createResults[i];
+      const item = prepared[i];
+      if ('error' in createResult) {
+        errors.push(toBulkCreateError(createResult.id, createResult.error));
+        continue;
+      }
+      persisted.push({ prepared: item, doc: createResult });
+    }
+
+    const enabledPersisted = persisted.filter((entry) => entry.prepared.enabled);
+    if (enabledPersisted.length === 0) {
+      return { created: persisted, errors };
+    }
+
+    const { spaceId } = this.getSpaceContext();
+    const scheduledRuleIds = new Set<string>();
+    try {
+      const scheduledTasks = await bulkScheduleRuleExecutorTasks({
+        services: { taskManager: this.taskManager },
+        input: {
+          items: enabledPersisted.map((entry) => ({
+            ruleId: entry.prepared.id,
+            spaceId,
+            schedule: { interval: entry.prepared.attrs.schedule.every },
+          })),
+          request: this.request,
+        },
+      });
+      for (const task of scheduledTasks) {
+        const ruleId = task.params.ruleId;
+        if (typeof ruleId === 'string') {
+          scheduledRuleIds.add(ruleId);
+        }
+      }
+    } catch (e) {
+      const driftedRuleIds = enabledPersisted.map((entry) => entry.prepared.id);
+      const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
+        ', '
+      )}]; they were not created: ${errorMessage(e)}`;
+
+      this.logger.error({
+        error: new Error(message),
+        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+      });
+
+      for (const id of driftedRuleIds) {
+        errors.push(toTaskManagerDriftError(id, message));
+      }
+
+      await this.rollbackCreatedRules(driftedRuleIds, spaceId);
+      return {
+        created: persisted.filter((entry) => !entry.prepared.enabled),
+        errors,
+      };
+    }
+
+    const failedScheduleIds = enabledPersisted
+      .filter((entry) => !scheduledRuleIds.has(entry.prepared.id))
+      .map((entry) => entry.prepared.id);
+
+    for (const id of failedScheduleIds) {
+      errors.push(
+        toTaskManagerDriftError(
+          id,
+          `Failed to schedule executor task for rule "${id}"; it was not created`
+        )
+      );
+    }
+    await this.rollbackCreatedRules(failedScheduleIds, spaceId);
+
+    return {
+      created: persisted.filter(
+        (entry) => !entry.prepared.enabled || scheduledRuleIds.has(entry.prepared.id)
+      ),
+      errors,
+    };
+  }
+
+  private async rollbackCreatedRules(ruleIds: string[], spaceId: string): Promise<void> {
+    if (ruleIds.length === 0) {
+      return;
+    }
+
+    try {
+      const results = await this.rulesSavedObjectService.bulkDelete(ruleIds);
+      const failedIds = results.filter((result) => !result.success).map((result) => result.id);
+      if (failedIds.length === 0) {
+        return;
+      }
+      this.logger.error({
+        message: 'Failed to roll back rule creation after task scheduling failed',
+        error: new Error(`Failed to delete rule(s) [${failedIds.join(', ')}]`),
+        code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+        labels: { rule_id: failedIds.join(','), space_id: spaceId },
+      });
+    } catch (rollbackError) {
+      this.logger.error({
+        message: 'Failed to roll back rule creation after task scheduling failed',
+        error: rollbackError,
+        code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
+        labels: { rule_id: ruleIds.join(','), space_id: spaceId },
+      });
+    }
   }
 
   /**
@@ -456,73 +625,37 @@ export class RulesClient {
 
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
-    this.artifactTypeRegistry.validate(parsed.artifacts);
-
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
-
     const nowIso = new Date().toISOString();
-    const ruleVersion = this.getNextVersion();
 
-    const ruleAttributes = transformCreateRuleBodyToRuleSoAttributes(parsed, {
+    const prepared = this.prepareRuleForCreate({
+      data: parsed,
+      id: params.options?.id,
       enabled: true,
-      createdBy: userProfileUid,
-      createdAt: nowIso,
-      updatedBy: userProfileUid,
-      updatedAt: nowIso,
-      version: ruleVersion,
+      userProfileUid,
+      nowIso,
+      version: this.getNextVersion(),
     });
 
-    // A freshly created rule is always enabled, so it always counts towards the limit.
-    await this.validateSchedule({ updatedEvery: ruleAttributes.schedule.every, checkLimit: true });
+    await this.validateSchedule([
+      { updatedEvery: prepared.attrs.schedule.every, checkLimit: true },
+    ]);
 
-    const references = extractArtifactReferences(
-      ruleAttributes.artifacts,
-      this.artifactTypeRegistry
-    );
-
-    let created: { id: string; version?: string };
-    try {
-      created = await this.rulesSavedObjectService.create({
-        attrs: ruleAttributes,
-        id: params.options?.id,
-        references,
-      });
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(getRuleAlreadyExistsMessage(conflictId), {
-          code: ALERTING_ERROR_CODES.RULE_ALREADY_EXISTS,
-          details: { rule_id: conflictId },
-        });
-      }
-      throw e;
+    const { created, errors } = await this.persistPreparedRules([prepared]);
+    if (errors.length > 0) {
+      throwOnCreateError(errors[0]);
     }
-
-    const { id, version } = created;
-
-    try {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: ruleAttributes.schedule.every,
-      });
-    } catch (e) {
-      try {
-        await this.rulesSavedObjectService.delete({ id });
-      } catch (rollbackError) {
-        this.logger.error({
-          message: 'Failed to roll back rule creation after task scheduling failed',
-          error: rollbackError,
-          code: ALERTING_LOG_CODES.RULE_CREATE_ROLLBACK_FAILED,
-          labels: { rule_id: id, space_id: spaceId },
-        });
-      }
-      throw e;
+    const persisted = created[0];
+    if (!persisted) {
+      throw Boom.badImplementation('Rule was not created');
     }
-
-    const rule = this.toRuleApiResponse({ id, attrs: ruleAttributes, version, references });
+    const rule = this.toRuleApiResponse({
+      id: persisted.doc.id,
+      attrs: persisted.doc.attributes,
+      version: persisted.doc.version,
+      references: persisted.doc.references,
+    });
     this.ruleEventPublisher.emitRuleCreated(this.request, [
       { ruleId: rule.id, spaceId: this.spaceId, rule },
     ]);
@@ -531,169 +664,61 @@ export class RulesClient {
 
   @withApm
   public async bulkCreateRules(params: BulkCreateRulesParams): Promise<BulkCreateRulesResponse> {
-    const parsed = this.parseRuleData(bulkCreateRulesParamsSchema, params, 'create');
+    const parsed = this.parseRuleData(bulkCreateRulesRequestSchema, params, 'create');
     const { spaceId } = this.getSpaceContext();
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
     const errors: BulkOperationError[] = [];
-    const prepared: Array<{
-      id: string;
-      enabled: boolean;
-      attrs: RuleSavedObjectAttributes;
-      references: SavedObjectReference[];
-    }> = [];
+    const prepared: PreparedRule[] = [];
 
     for (const item of parsed.rules) {
-      const id = item.id ?? SavedObjectsUtils.generateId();
+      const { id, enabled, ...data } = item;
       try {
-        this.artifactTypeRegistry.validate(item.artifacts);
-        this.assertScheduleIntervalAllowed(item.schedule.every);
+        prepared.push(
+          this.prepareRuleForCreate({
+            data,
+            id,
+            enabled,
+            userProfileUid,
+            nowIso,
+            version: ruleVersion,
+          })
+        );
       } catch (e) {
         if (Boom.isBoom(e)) {
-          errors.push(toPerItemBoomError(id, e));
+          errors.push(toPerItemBoomError(id ?? SavedObjectsUtils.generateId(), e));
           continue;
         }
         throw e;
       }
-
-      const { enabled } = item;
-      const attrs = transformCreateRuleBodyToRuleSoAttributes(item, {
-        enabled,
-        createdBy: userProfileUid,
-        createdAt: nowIso,
-        updatedBy: userProfileUid,
-        updatedAt: nowIso,
-        version: ruleVersion,
-      });
-      prepared.push({
-        id,
-        enabled,
-        attrs,
-        references: extractArtifactReferences(attrs.artifacts, this.artifactTypeRegistry),
-      });
     }
 
-    const enabledPrepared = prepared.filter((item) => item.enabled);
-    await this.assertBulkScheduleLimitNotExceeded(
-      enabledPrepared.map((item) => item.attrs.schedule.every)
+    await this.validateSchedule(
+      prepared
+        .filter((item) => item.enabled)
+        .map((item) => ({
+          updatedEvery: item.attrs.schedule.every,
+          checkLimit: true,
+        }))
     );
 
-    const scheduledRuleIds = new Set<string>();
-    if (enabledPrepared.length > 0) {
-      try {
-        const scheduledTasks = await bulkScheduleRuleExecutorTasks({
-          services: { taskManager: this.taskManager },
-          input: {
-            items: enabledPrepared.map((item) => ({
-              ruleId: item.id,
-              spaceId,
-              schedule: { interval: item.attrs.schedule.every },
-            })),
-            request: this.request as unknown as CoreKibanaRequest,
-          },
-        });
-        for (const task of scheduledTasks) {
-          const ruleId = task.params.ruleId;
-          if (typeof ruleId === 'string') {
-            scheduledRuleIds.add(ruleId);
-          }
-        }
-        for (const item of enabledPrepared) {
-          if (!scheduledRuleIds.has(item.id)) {
-            errors.push(
-              toTaskManagerDriftError(
-                item.id,
-                `Failed to schedule executor task for rule "${item.id}"; it was not created`
-              )
-            );
-          }
-        }
-      } catch (e) {
-        const driftedRuleIds = enabledPrepared.map((item) => item.id);
-        const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
-          ', '
-        )}]; they were not created: ${errorMessage(e)}`;
-
-        this.logger.error({
-          error: new Error(message),
-          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
-        });
-
-        for (const id of driftedRuleIds) {
-          errors.push(toTaskManagerDriftError(id, message));
-        }
-
-        await this.removeExecutorTasks({
-          ruleIds: driftedRuleIds,
-          spaceId,
-        });
-      }
-    }
-
-    const toPersist = prepared.filter((item) => !item.enabled || scheduledRuleIds.has(item.id));
-
-    if (toPersist.length === 0) {
-      return { rules: [], errors };
-    }
-
-    let createResults: Awaited<ReturnType<RulesSavedObjectServiceContract['bulkCreate']>>;
-    try {
-      createResults = await this.rulesSavedObjectService.bulkCreate(
-        toPersist.map((item) => ({
-          id: item.id,
-          attrs: item.attrs,
-          references: item.references,
-        }))
-      );
-    } catch (e) {
-      await this.removeExecutorTasks({
-        ruleIds: toPersist.filter((item) => scheduledRuleIds.has(item.id)).map((item) => item.id),
-        spaceId,
-      });
-      for (const item of toPersist) {
-        errors.push({
-          id: item.id,
-          error: {
-            code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
-            message: errorMessage(e),
-          },
-        });
-      }
-      return { rules: [], errors };
-    }
+    const persisted = await this.persistPreparedRules(prepared);
+    errors.push(...persisted.errors);
 
     const rules: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
-    const failedScheduledIds: string[] = [];
-
-    for (let i = 0; i < createResults.length; i++) {
-      const createResult = createResults[i];
-      const item = toPersist[i];
-
-      if (!createResult.success) {
-        errors.push(toBulkCreateError(createResult.id, createResult.error));
-        if (scheduledRuleIds.has(item.id)) {
-          failedScheduledIds.push(item.id);
-        }
-        continue;
-      }
-
+    for (const entry of persisted.created) {
       const rule = this.toRuleApiResponse({
-        id: item.id,
-        attrs: item.attrs,
-        version: createResult.version,
-        references: item.references,
+        id: entry.doc.id,
+        attrs: entry.doc.attributes,
+        version: entry.doc.version,
+        references: entry.doc.references,
       });
       rules.push(rule);
       createdRules.push({ ruleId: rule.id, spaceId, rule });
     }
-
-    await this.removeExecutorTasks({
-      ruleIds: failedScheduledIds,
-      spaceId,
-    });
 
     this.ruleEventPublisher.emitRuleCreated(this.request, createdRules);
 
@@ -738,11 +763,13 @@ export class RulesClient {
 
     validateMergedRuleAttributes(id, nextAttrs);
 
-    await this.validateSchedule({
-      updatedEvery: nextAttrs.schedule.every,
-      prevEvery: existingAttrs.schedule.every,
-      checkLimit: existingAttrs.enabled,
-    });
+    await this.validateSchedule([
+      {
+        updatedEvery: nextAttrs.schedule.every,
+        prevEvery: existingAttrs.schedule.every,
+        checkLimit: existingAttrs.enabled,
+      },
+    ]);
 
     // updateRule NEVER changes whether a rule runs — it only re-syncs the
     // schedule interval of an already-enabled rule (Task Manager's
@@ -935,7 +962,7 @@ export class RulesClient {
     // it re-writes the SO and re-ensures the executor task (self-heal), and still
     // emits `ruleEnabled`.
     if (!existingAttrs.enabled) {
-      await this.validateSchedule({ updatedEvery: nextAttrs.schedule.every, checkLimit: true });
+      await this.validateSchedule([{ updatedEvery: nextAttrs.schedule.every, checkLimit: true }]);
     }
 
     await this.scheduleRuleExecutorTask({
@@ -1800,11 +1827,13 @@ export class RulesClient {
       version: ruleVersion,
     });
 
-    await this.validateSchedule({
-      updatedEvery: nextAttrs.schedule.every,
-      prevEvery: existingAttrs.schedule.every,
-      checkLimit: existingAttrs.enabled,
-    });
+    await this.validateSchedule([
+      {
+        updatedEvery: nextAttrs.schedule.every,
+        prevEvery: existingAttrs.schedule.every,
+        checkLimit: existingAttrs.enabled,
+      },
+    ]);
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,

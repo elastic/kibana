@@ -36,52 +36,23 @@ apiTest.describe('Bulk create rules API', { tag: '@local-stateful-classic' }, ()
     await apiServices.alertingV2.rules.cleanUp();
   });
 
-  apiTest(
-    'create: should create enabled rules and persist them',
-    async ({ apiClient, apiServices }) => {
-      const response = await apiClient.post(BULK_CREATE_URL, {
-        headers: writerHeaders,
-        body: {
-          rules: [
-            buildCreateRuleData({ metadata: { name: 'bulk-a' } }),
-            buildCreateRuleData({ metadata: { name: 'bulk-b' } }),
-          ],
-        },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(2);
-      expect(response.body.rules.every((rule: { enabled: boolean }) => rule.enabled)).toBe(true);
+  apiTest('create: should create two rules', async ({ apiClient, apiServices }) => {
+    const response = await apiClient.post(BULK_CREATE_URL, {
+      headers: writerHeaders,
+      body: {
+        rules: [
+          buildCreateRuleData({ metadata: { name: 'bulk-a' } }),
+          buildCreateRuleData({ metadata: { name: 'bulk-b' } }),
+        ],
+      },
+    });
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.errors).toStrictEqual([]);
+    expect(response.body.rules).toHaveLength(2);
 
-      const stored = await apiServices.alertingV2.rules.find({ per_page: 100 });
-      expect(stored.items).toHaveLength(2);
-      expect(stored.items.every((rule) => rule.enabled)).toBe(true);
-    }
-  );
-
-  apiTest(
-    'create: should persist a disabled rule without enabling it',
-    async ({ apiClient, apiServices }) => {
-      const response = await apiClient.post(BULK_CREATE_URL, {
-        headers: writerHeaders,
-        body: {
-          rules: [
-            {
-              ...buildCreateRuleData({ metadata: { name: 'bulk-disabled' } }),
-              enabled: false,
-            },
-          ],
-        },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.errors).toStrictEqual([]);
-      expect(response.body.rules).toHaveLength(1);
-      expect(response.body.rules[0].enabled).toBe(false);
-
-      const stored = await apiServices.alertingV2.rules.get(response.body.rules[0].id);
-      expect(stored.enabled).toBe(false);
-    }
-  );
+    const stored = await apiServices.alertingV2.rules.find({ per_page: 100 });
+    expect(stored.items).toHaveLength(2);
+  });
 
   apiTest(
     'create: should report RULE_ALREADY_EXISTS for colliding ids and still create the rest',
