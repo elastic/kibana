@@ -82,11 +82,9 @@ class ConversationClientImpl implements ConversationClient {
       _source: ['agent_id', 'user_id', 'user_name', 'title', 'created_at', 'updated_at'],
       query: {
         bool: {
-          filter: [createSpaceDslFilter(this.space)],
-          must: [
-            {
-              term: { user_name: this.user.username },
-            },
+          filter: [
+            createSpaceDslFilter(this.space),
+            buildOwnedConversationFilter({ user: this.user }),
             ...(agentId ? [{ term: { agent_id: agentId } }] : []),
           ],
         },
@@ -111,10 +109,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async exists(conversationId: string): Promise<boolean> {
     const document = await this._get(conversationId);
-    if (!document) {
-      return false;
-    }
-    return hasAccess({ conversation: document, user: this.user });
+    return document !== undefined;
   }
 
   async create(conversation: ConversationCreateRequest): Promise<Conversation> {
@@ -128,10 +123,19 @@ class ConversationClientImpl implements ConversationClient {
       space: this.space,
     });
 
-    await this.storage.getClient().index({
-      id,
-      document: attributes,
-    });
+    try {
+      await this.storage.getClient().index({
+        id,
+        document: attributes,
+        op_type: 'create',
+      });
+    } catch (error) {
+      if (error?.statusCode === 409) {
+        throw createConversationNotFoundError({ conversationId: id });
+      }
+
+      throw error;
+    }
 
     return this.get(id);
   }
@@ -201,6 +205,38 @@ class ConversationClientImpl implements ConversationClient {
   }
 }
 
+/**
+ * Matches conversations owned by the current user, on `user_id` when the document stored one and on
+ * username only when it did not. Mirrors `hasAccess`.
+ */
+const buildOwnedConversationFilter = ({ user }: { user: UserIdAndName }) => {
+  const shouldClauses: Array<Record<string, unknown>> = [];
+
+  if (user.id !== undefined) {
+    shouldClauses.push({ term: { user_id: user.id } });
+  }
+
+  shouldClauses.push({
+    bool: {
+      must_not: { exists: { field: 'user_id' } },
+      filter: { term: { user_name: user.username } },
+    },
+  });
+
+  return {
+    bool: {
+      should: shouldClauses,
+      minimum_should_match: 1,
+    },
+  };
+};
+
+/**
+ * Checks whether the current user owns the conversation.
+ *
+ * Username matching is limited to documents that never stored a `user_id`, so those owners are not
+ * orphaned. It cannot distinguish same-username principals across authentication realms.
+ */
 const hasAccess = ({
   conversation,
   user,
@@ -208,8 +244,15 @@ const hasAccess = ({
   conversation: Pick<Document, '_source'>;
   user: UserIdAndName;
 }) => {
-  if (user.id && conversation._source!.user_id === user.id) {
-    return true;
+  const { user_id: userId, user_name: userName } = conversation._source!;
+
+  if (userId !== undefined && user.id !== undefined) {
+    return userId === user.id;
   }
-  return conversation._source!.user_name === user.username;
+
+  if (userId === undefined && user.username !== undefined) {
+    return userName === user.username;
+  }
+
+  return false;
 };

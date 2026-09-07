@@ -54,13 +54,9 @@ jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
   applyInputDefaults: jest.fn(() => ({})),
 }));
 
-// Mock generateSampleFromJsonSchema
-jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
+// Mock generateSampleFromJsonSchema and theme constant sourced from @kbn/workflows-ui
+jest.mock('@kbn/workflows-ui', () => ({
   generateSampleFromJsonSchema: jest.fn(() => 'sample-value'),
-}));
-
-// Mock theme constant
-jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme', () => ({
   WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
 }));
 

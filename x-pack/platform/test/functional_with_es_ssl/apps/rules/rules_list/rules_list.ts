@@ -72,6 +72,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     afterEach(async () => {
+      await toasts.dismissAll();
       await objectRemover.removeAll();
     });
 
@@ -245,7 +246,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
+
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 

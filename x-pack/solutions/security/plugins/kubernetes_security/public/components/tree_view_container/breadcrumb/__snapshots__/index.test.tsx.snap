@@ -30,6 +30,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -52,6 +53,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -74,6 +76,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted renders Bread
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -150,6 +153,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -172,6 +176,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -194,6 +199,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should displa
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -270,6 +276,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -292,6 +299,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -314,6 +322,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -336,6 +345,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -412,6 +422,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />
@@ -434,6 +445,7 @@ exports[`Tree view Breadcrumb component When Breadcrumb is mounted should render
           </button>
         </span>
         <span
+          aria-hidden="true"
           class="css-15ro776"
           data-euiicon-type="arrowRight"
         />

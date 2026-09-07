@@ -174,14 +174,15 @@ export class DashboardPlugin
     }
 
     // Do not call getDashboardStateSchema when registering plugin.
-    // Plugin is registered during setup and before all plugins have reigistered embeddable schemas.
+    // Plugin is registered during setup and before all plugins have registered embeddable schemas.
     // Instead, use once to only call getDashboardStateSchema the first time client is executed.
     const getCachedDashboardStateSchema = once(() => {
       return getDashboardStateSchema(false);
     });
 
     return {
-      scanDashboards,
+      scanDashboards: (ctx: RequestHandlerContext, page: number, perPage: number) =>
+        scanDashboards(ctx, page, perPage, getCachedDashboardStateSchema()),
       client: {
         read: async (requestCtx: RequestHandlerContext, id: string) =>
           (await read(requestCtx, getCachedDashboardStateSchema(), id)).body,

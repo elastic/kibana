@@ -132,14 +132,16 @@ const ActionColumnComponent: React.FC<ActionColumnProps> = ({
       id={`template-action-popover-${template.templateId}`}
       aria-label={i18n.ACTIONS}
       button={
-        <EuiButtonIcon
-          onClick={togglePopover}
-          iconType="boxesVertical"
-          aria-label={i18n.ACTIONS}
-          color="text"
-          data-test-subj={`template-action-popover-button-${template.templateId}`}
-          disabled={disableActions}
-        />
+        <EuiToolTip content={i18n.ACTIONS} disableScreenReaderOutput>
+          <EuiButtonIcon
+            onClick={togglePopover}
+            iconType="boxesVertical"
+            aria-label={i18n.ACTIONS}
+            color="text"
+            data-test-subj={`template-action-popover-button-${template.templateId}`}
+            disabled={disableActions}
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}

@@ -284,15 +284,19 @@ describe('Outputs preconfiguration', () => {
 
   describe('create', () => {
     it('should generate a preconfigured output if elasticsearch.hosts is set in the config', async () => {
-      expect(
-        getPreconfiguredOutputFromConfig({
-          agents: {
-            elasticsearch: { hosts: ['http://elasticsearc:9201'] },
-          },
-        })
-      ).toMatchInlineSnapshot(`
+      const result = getPreconfiguredOutputFromConfig({
+        agents: {
+          elasticsearch: { hosts: ['http://elasticsearc:9201'] },
+        },
+      });
+      expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
+          "allow_edit": Array [
+            "hosts",
+            "ca_sha256",
+            "ca_trusted_fingerprint",
+          ],
           "ca_sha256": undefined,
           "ca_trusted_fingerprint": undefined,
           "hosts": Array [
@@ -307,6 +311,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]
     `);
+      expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
     it('should include ECH agentless output when agentless is enabled in cloud environment', async () => {
@@ -359,6 +364,7 @@ describe('Outputs preconfiguration', () => {
         is_default_monitoring: false,
         is_preconfigured: true,
       });
+      expect(result[1].allow_edit).toEqual(['hosts', 'ca_sha256']);
 
       // Restore original mocks
       jest.mocked(appContextService.getCloud).mockImplementation(originalGetCloud);
@@ -1283,7 +1289,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1317,7 +1323,7 @@ describe('Outputs preconfiguration', () => {
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1345,7 +1351,7 @@ describe('Outputs preconfiguration', () => {
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,
             { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,

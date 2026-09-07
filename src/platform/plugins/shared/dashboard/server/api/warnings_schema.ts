@@ -43,10 +43,38 @@ const droppedPanelWarningSchema = schema.object(
   }
 );
 
-export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema, {
-  maxSize: 100,
-  meta: {
-    description:
-      'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
+const droppedDashboardProperty = schema.object(
+  {
+    type: schema.literal('dropped_property'),
+    message: schema.string({
+      meta: { description: 'Human-readable explanation of why the property was dropped.' },
+    }),
+    key: schema.string({
+      meta: { description: 'The name of the property that was dropped.' },
+    }),
+    value: schema.maybe(
+      schema.any({
+        meta: { description: 'The original value of the property that was dropped.' },
+      })
+    ),
   },
-});
+  {
+    meta: {
+      id: 'kbn-dashboard-dropped-property-warning',
+      title: 'Dropped panel',
+      description:
+        'A panel that was excluded from the response because its type is not supported by the API.',
+    },
+  }
+);
+
+export const warningsSchema = schema.arrayOf(
+  schema.oneOf([droppedPanelWarningSchema, droppedDashboardProperty]),
+  {
+    maxSize: 100,
+    meta: {
+      description:
+        'A list of warnings returned by the Dashboards API. Present only when one or more dashboard properties failed validation.',
+    },
+  }
+);

@@ -12,6 +12,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSuperSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { kebabCase } from 'lodash/fp';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -192,13 +193,15 @@ export const MitreAttackTechniqueFields: React.FC<AddTechniqueProps> = ({
                 {getSelectTechnique(values[threatIndex].tactic.name, index, isDisabled, technique)}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="danger"
-                  iconType="trash"
-                  isDisabled={isDisabled}
-                  onClick={() => removeTechnique(index)}
-                  aria-label={Rulei18n.DELETE}
-                />
+                <EuiToolTip content={Rulei18n.DELETE} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    color="danger"
+                    iconType="trash"
+                    isDisabled={isDisabled}
+                    onClick={() => removeTechnique(index)}
+                    aria-label={Rulei18n.DELETE}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

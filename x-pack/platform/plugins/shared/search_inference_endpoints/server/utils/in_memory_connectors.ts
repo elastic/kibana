@@ -15,11 +15,19 @@ import {
 const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 const KIBANA_CONNECTOR_PROPERTY = 'kibana-connector';
 
+// Inference ID prefixes for internal Elastic endpoints kept for backwards
+// compatibility that must not be surfaced in the UI.
+const HIDDEN_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
+
+const isHiddenInferenceEndpoint = (inferenceId: string): boolean =>
+  HIDDEN_INFERENCE_ID_PREFIXES.some((prefix) => inferenceId.startsWith(prefix));
+
 export function filterPreconfiguredEndpoints(
   endpoints: InferenceInferenceEndpointInfo[]
 ): InferenceInferenceEndpointInfo[] {
   return endpoints.filter(
     (endpoint) =>
+      !isHiddenInferenceEndpoint(endpoint.inference_id) &&
       isInferenceEndpointWithMetadata(endpoint) &&
       endpoint.metadata?.heuristics?.properties?.includes(KIBANA_CONNECTOR_PROPERTY) &&
       endpoint.task_type === CHAT_COMPLETION_TASK_TYPE

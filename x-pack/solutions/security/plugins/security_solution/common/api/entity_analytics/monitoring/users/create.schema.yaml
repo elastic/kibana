@@ -9,7 +9,10 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: CreatePrivMonUser
+      deprecated: true
       summary: Create a new monitored user
+      description: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
       requestBody:
         required: true
         content:

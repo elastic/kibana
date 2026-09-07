@@ -18,7 +18,6 @@ export async function sanitize(
   dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
-
   /**
    * Temporary escape hatch for lens as code
    * TODO remove transforms when lens as code transforms are ready for production
@@ -28,12 +27,18 @@ export async function sanitize(
    */
   const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
   const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-    transformDashboardOut(storedDashboardState ?? {}, references ?? []);
+    transformDashboardOut(
+      storedDashboardState ?? {},
+      references ?? [],
+      undefined,
+      dashboardStateSchema
+    );
 
   const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
     transformedApiDashboardState as Partial<DashboardState>
   );
   warnings.push(...dashboardStateWarnings, ...scopeWarnings);
+  // TODO: As part of sanitization, we should drop panels, filters, etc. that exceed their max array sizes
   const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
   return {
     data: sanitizedDashboardState,

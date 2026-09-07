@@ -29,9 +29,13 @@ type PartialHitPair = [
   fieldName: string | null
 ];
 
+interface FormatHitReactOptions {
+  skipNullishValues?: boolean;
+}
+
 const formattedHitCache = new WeakMap<
   EsHitRecord,
-  { formattedHit: FormattedHit; maxEntries: number }
+  { formattedHit: FormattedHit; maxEntries: number; skipNullishValues: boolean }
 >();
 
 /**
@@ -44,6 +48,7 @@ const formattedHitCache = new WeakMap<
  * @param maxEntries
  * @param fieldFormats
  * @param columnsMeta
+ * @param options
  */
 export function formatHit(
   hit: DataTableRecord,
@@ -51,11 +56,17 @@ export function formatHit(
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  columnsMeta: DataTableColumnsMeta | undefined,
+  options?: FormatHitReactOptions
 ): FormattedHit {
+  const skipNullishValues = Boolean(options?.skipNullishValues);
   const cached = formattedHitCache.get(hit.raw);
 
-  if (cached && cached.maxEntries === maxEntries) {
+  if (
+    cached &&
+    cached.maxEntries === maxEntries &&
+    cached.skipNullishValues === skipNullishValues
+  ) {
     return cached.formattedHit;
   }
 
@@ -68,6 +79,10 @@ export function formatHit(
   // depending on whether the original hit had a highlight for it. That way we can ensure
   // highlighted fields are shown first in the document summary.
   for (const key of Object.keys(flattened)) {
+    if (skipNullishValues && (flattened[key] ?? null) === null) {
+      continue;
+    }
+
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
@@ -133,7 +148,7 @@ export function formatHit(
 
   const formattedHit = renderedPairs as FormattedHit;
 
-  formattedHitCache.set(hit.raw, { formattedHit, maxEntries });
+  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues });
 
   return formattedHit;
 }

@@ -65,6 +65,8 @@ export const AgentPolicySummaryLine = memo<{
     const showIncompatibilityBadge =
       incompatibleIntegrations.length > 0 && Boolean(policy.min_agent_version);
 
+    const showVersionSpecificTooltip = isVersionSpecific && incompatibleIntegrations.length > 0;
+
     if (agent?.type === 'OPAMP') {
       return <EuiText>-</EuiText>;
     }
@@ -118,11 +120,11 @@ export const AgentPolicySummaryLine = memo<{
             justifyContent="flexStart"
             wrap={false}
           >
-            {(isVersionSpecific || isManaged) && (
+            {(showVersionSpecificTooltip || isManaged) && (
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                  {isVersionSpecific && (
-                    <EuiFlexItem grow={false}>
+                  {showVersionSpecificTooltip && (
+                    <EuiFlexItem grow={false} data-test-subj="agentPolicyVersionSpecificTooltip">
                       <EuiIconTip
                         type="info"
                         size="m"
@@ -171,7 +173,6 @@ export const AgentPolicySummaryLine = memo<{
                 <EuiLink
                   className="eui-textBreakWord"
                   href={getHref('policy_details', { policyId: id })}
-                  title={policyDisplayName}
                   data-test-subj="agentPolicyNameLink"
                 >
                   {policyDisplayName}
@@ -240,9 +241,11 @@ export const AgentPolicySummaryLine = memo<{
 
         {withDescription && description && (
           <EuiFlexItem>
-            <EuiText color="subdued" title={description} size="xs">
-              {description}
-            </EuiText>
+            <EuiToolTip content={description}>
+              <EuiText color="subdued" size="xs">
+                {description}
+              </EuiText>
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

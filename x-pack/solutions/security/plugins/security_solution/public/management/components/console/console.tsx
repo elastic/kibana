@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
@@ -186,6 +187,12 @@ export const Console = memo<ConsoleProps>(
                           <div
                             className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
                             ref={scrollingViewport}
+                            tabIndex={0}
+                            role="region"
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.console.historyViewport.ariaLabel',
+                              { defaultMessage: 'Command output history' }
+                            )}
                           >
                             <HistoryOutput />
                           </div>

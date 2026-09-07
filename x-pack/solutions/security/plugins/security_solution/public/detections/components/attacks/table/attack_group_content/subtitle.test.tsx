@@ -26,8 +26,10 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown }) => (
-      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
     )),
   })
 );
@@ -69,5 +71,20 @@ describe('Subtitle', () => {
     );
     expect(getByTestId('mock-markdown-formatter')).not.toHaveTextContent('Detected on');
     expect(getByTestId('mock-markdown-formatter')).not.toHaveTextContent('•');
+  });
+
+  it('should pass originalAlertIds to AttackDiscoveryMarkdownFormatter', () => {
+    const scheduledAttack = {
+      ...mockAttack,
+      alertRuleUuid: 'some_other_rule_id',
+      alertIds: ['alert-1', 'alert-2'],
+      replacements: { 'alert-1': 'original-1' },
+    };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
+
+    expect(getByTestId('mock-markdown-formatter')).toHaveAttribute(
+      'data-alert-ids',
+      JSON.stringify(['original-1', 'alert-2'])
+    );
   });
 });

@@ -94,6 +94,9 @@ export const AgentPolicyOutputsSummary: React.FC<{
             +{data?.integrations.length}
           </EuiBadge>
           <EuiPopover
+            aria-label={i18n.translate('xpack.fleet.agentPolicyOutputsSummary.popoverAriaLabel', {
+              defaultMessage: 'Output integrations',
+            })}
             data-test-subj="outputPopover"
             isOpen={isPopoverOpen}
             closePopover={closePopover}

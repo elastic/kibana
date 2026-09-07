@@ -113,7 +113,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               <EuiFlexItem>
                 {startedAt ? (
                   <EuiToolTip position="left" content={formattedDate}>
-                    <EuiText size="xs" tabIndex={0} color="subdued">
+                    <EuiText size="xs" tabIndex={0} color="subdued" css={{ whiteSpace: 'nowrap' }}>
                       <FormattedRelativeEnhanced value={startedAt} />
                     </EuiText>
                   </EuiToolTip>

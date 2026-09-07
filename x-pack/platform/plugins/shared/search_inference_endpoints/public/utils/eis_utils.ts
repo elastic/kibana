@@ -23,6 +23,13 @@ export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
 export const isEisEndpoint = (ep: InferenceAPIConfigResponse): ep is EisInferenceEndpoint =>
   ep.service === 'elastic';
 
+// Inference ID prefixes for internal Elastic endpoints kept for backwards
+// compatibility that must not be surfaced in the UI.
+const HIDDEN_EIS_INFERENCE_ID_PREFIXES = ['.gp-llm-v2', '.rainbow-sprinkles'];
+
+export const isHiddenEisEndpoint = (ep: InferenceAPIConfigResponse): boolean =>
+  HIDDEN_EIS_INFERENCE_ID_PREFIXES.some((prefix) => ep.inference_id.startsWith(prefix));
+
 export type TaskTypeCategory = 'LLM' | 'Embedding' | 'Rerank';
 
 export const TASK_TYPE_CATEGORY: Partial<Record<InferenceTaskType, TaskTypeCategory>> = {

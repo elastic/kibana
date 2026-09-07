@@ -32,7 +32,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   const openFirstRule = async (ruleName: string) => {
     await svlTriggersActionsUI.searchRules(ruleName);
-    await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${ruleName}"]`);
+    await find.clickDisplayedByCssSelector(
+      `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${ruleName}"]`
+    );
   };
 
   const openRulesSection = async () => {
@@ -74,8 +76,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/256840
-    describe.skip('Header', () => {
+    describe('Header', () => {
       const testRunUuid = uuidv4();
       const ruleName = `test-rule-${testRunUuid}`;
       const RULE_TYPE_ID = '.es-query';
@@ -104,6 +105,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await openRulesSection();
         await testSubjects.existOrFail('rulesList');
         await openFirstRule(rule.name);
+        // Wait for the rule details panel to finish loading: the rule type value
+        // replaces its loading spinner once `useGetRuleTypesPermissions` resolves.
+        await testSubjects.existOrFail('ruleSummaryRuleType');
       });
 
       after(async () => {
@@ -120,13 +124,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders the rule details', async () => {
         const headingText = await testSubjects.getVisibleText('ruleDetailsTitle');
         expect(headingText.includes(`test-rule-${testRunUuid}`)).toBe(true);
-        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
-        expect(ruleType).toEqual('Elasticsearch query');
+        // The rule type value resolves asynchronously (`useGetRuleTypesPermissions`
+        // plus the rule-type index) and renders through empty frames before it
+        // settles. Read and assert within the same retry attempt so a re-render
+        // cannot blank the value between the read and the assertion.
+        await retry.tryForTime(120 * 1000, async () => {
+          const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
+          expect(ruleType).toEqual('Elasticsearch query');
+        });
         const { username } = await svlUserManager.getUserData(ADMIN_ROLE);
 
         await retry.tryForTime(15 * 1000, async () => {
           const owner = await testSubjects.getVisibleText('apiKeyOwnerLabel');
-          expect(owner.trim()).toEqual(username);
+          expect(owner.trim()).toEqual(`API key owner ${username}`);
         });
       });
 

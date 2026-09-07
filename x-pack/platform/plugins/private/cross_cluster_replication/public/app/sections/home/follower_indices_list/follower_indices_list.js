@@ -46,6 +46,15 @@ export class FollowerIndicesList extends PureComponent {
   state = {
     lastFollowerIndexId: null,
     isDetailPanelOpen: false,
+    selectedItems: [],
+  };
+
+  onSelectionChange = (selectedItems) => {
+    this.setState({ selectedItems });
+  };
+
+  resetSelection = () => {
+    this.setState({ selectedItems: [] });
   };
 
   componentDidMount() {
@@ -141,7 +150,7 @@ export class FollowerIndicesList extends PureComponent {
   renderList() {
     const { selectFollowerIndex, followerIndices } = this.props;
 
-    const { isDetailPanelOpen } = this.state;
+    const { isDetailPanelOpen, selectedItems } = this.state;
 
     return (
       <>
@@ -156,9 +165,19 @@ export class FollowerIndicesList extends PureComponent {
 
         <EuiSpacer size="l" />
 
-        <FollowerIndicesTable followerIndices={followerIndices} />
+        <FollowerIndicesTable
+          followerIndices={followerIndices}
+          selectedItems={selectedItems}
+          onSelectionChange={this.onSelectionChange}
+          resetSelection={this.resetSelection}
+        />
 
-        {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectFollowerIndex(null)} />}
+        {isDetailPanelOpen && (
+          <DetailPanel
+            closeDetailPanel={() => selectFollowerIndex(null)}
+            onActionComplete={this.resetSelection}
+          />
+        )}
       </>
     );
   }

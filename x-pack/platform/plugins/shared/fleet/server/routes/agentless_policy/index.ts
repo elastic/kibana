@@ -18,7 +18,7 @@ import { AGENTLESS_POLICIES_ROUTES, API_VERSIONS } from '../../../common/constan
 import type { FleetAuthzRouter } from '../../services/security';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
-import { genericErrorResponse } from '../schema/errors';
+import { genericErrorResponse, notFoundResponse } from '../schema/errors';
 
 import {
   createAgentlessPolicyHandler,
@@ -156,6 +156,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
             400: {
               description: 'A bad request.',
               body: genericErrorResponse,
+            },
+            404: {
+              description: 'Not found.',
+              body: notFoundResponse,
             },
             409: {
               description: 'A conflict occurred.',

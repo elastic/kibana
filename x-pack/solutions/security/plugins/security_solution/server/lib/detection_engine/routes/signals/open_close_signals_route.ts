@@ -8,6 +8,7 @@
 import { get } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import {
   ALERTS_API_ALL,
@@ -34,6 +35,10 @@ import {
   getUpdateSignalStatusScript,
   setWorkflowStatusHandler,
 } from '../common/set_workflow_status_handler';
+import {
+  buildRuntimeMappingsFromFieldTypes,
+  MAX_RUNTIME_FIELDS_PER_REQUEST,
+} from './bulk_close_runtime_mappings';
 
 export const setSignalsStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -128,7 +133,17 @@ export const setSignalsStatusRoute = (
               getIndexPattern,
             });
           } else {
-            const { conflicts, query } = request.body;
+            const { conflicts, query, runtime_fields: runtimeFields } = request.body;
+
+            const runtimeFieldCount = runtimeFields ? Object.keys(runtimeFields).length : 0;
+            if (runtimeFieldCount > MAX_RUNTIME_FIELDS_PER_REQUEST) {
+              return siemResponse.error({
+                statusCode: 400,
+                body: `runtime_fields is limited to ${MAX_RUNTIME_FIELDS_PER_REQUEST} entries per request, received ${runtimeFieldCount}`,
+              });
+            }
+
+            const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
             const body = await updateSignalsStatusByQuery(
               status,
@@ -137,7 +152,8 @@ export const setSignalsStatusRoute = (
               spaceId,
               esClient,
               user,
-              reason
+              reason,
+              runtimeMappings
             );
 
             return response.ok({ body });
@@ -158,6 +174,10 @@ export const setSignalsStatusRoute = (
  * Please avoid using `updateSignalsStatusByQuery` when possible, use the common handler with "by IDs" instead.
  *
  * This method calls `updateByQuery` with `refresh: true` which is expensive on serverless.
+ *
+ * When `runtimeMappings` are provided, they are attached to the `_update_by_query`
+ * request alongside the filter so the query can reference fields not natively mapped
+ * on the alerts index.
  */
 const updateSignalsStatusByQuery = async (
   status: SetAlertsStatusRequestBody['status'],
@@ -166,9 +186,14 @@ const updateSignalsStatusByQuery = async (
   spaceId: string,
   esClient: ElasticsearchClient,
   user: AuthenticatedUser | null,
-  reason?: string
-) =>
-  esClient.updateByQuery({
+  reason?: string,
+  runtimeMappings?: estypes.MappingRuntimeFields
+) => {
+  const hasRuntimeMappings = runtimeMappings != null && Object.keys(runtimeMappings).length > 0;
+
+  const esRequest: estypes.UpdateByQueryRequest & {
+    runtime_mappings?: estypes.MappingRuntimeFields;
+  } = {
     index: `${DEFAULT_ALERTS_INDEX}-${spaceId}`,
     conflicts: options.conflicts,
     refresh: true,
@@ -179,4 +204,8 @@ const updateSignalsStatusByQuery = async (
       },
     },
     ignore_unavailable: true,
-  });
+    ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+  };
+
+  return esClient.updateByQuery(esRequest);
+};

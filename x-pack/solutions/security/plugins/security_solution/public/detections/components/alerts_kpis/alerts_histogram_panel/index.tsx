@@ -38,7 +38,7 @@ import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { GROUP_BY_TOP_LABEL } from '../common/translations';
+import { ALERT_DETAILS_TOGGLE_ARIA_LABEL, GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
@@ -237,6 +237,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           titleSize={titleSize}
           toggleStatus={showHistogram}
           toggleQuery={hideQueryToggle ? undefined : toggleQuery}
+          toggleAriaLabel={ALERT_DETAILS_TOGGLE_ARIA_LABEL}
           showInspectButton={false}
           subtitle={subtitle}
           isInspectDisabled={false}

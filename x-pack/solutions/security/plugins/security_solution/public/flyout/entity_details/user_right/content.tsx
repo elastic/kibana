@@ -14,6 +14,7 @@ import { EntityHighlightsAccordion } from '../../../entity_analytics/components/
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
+import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
 import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 import { USER_PANEL_OBSERVED_USER_QUERY_ID, USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
 import type { EntityDetailsPath } from '../shared/components/left_panel/left_panel_header';
@@ -34,6 +35,7 @@ interface UserPanelContentProps {
   identityFields: IdentityFields;
   observedUser: ObservedUserData;
   riskScoreState: RiskScoreState<EntityType.user>;
+  entityRiskScores: EntityRiskScoresState<EntityType.user>;
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
@@ -52,6 +54,7 @@ export const UserPanelContent = ({
   identityFields,
   observedUser,
   riskScoreState,
+  entityRiskScores,
   recalculatingScore,
   contextID,
   scopeId,
@@ -84,6 +87,7 @@ export const UserPanelContent = ({
           <>
             <FlyoutRiskSummary
               riskScoreData={riskScoreState}
+              entityRiskScores={entityRiskScores}
               recalculatingScore={recalculatingScore}
               queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
               openDetailsPanel={openDetailsPanel}

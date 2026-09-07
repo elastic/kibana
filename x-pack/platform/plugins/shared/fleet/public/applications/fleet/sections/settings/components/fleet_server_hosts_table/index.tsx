@@ -15,6 +15,7 @@ import {
   EuiIconTip,
   EuiIcon,
   EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -125,47 +126,55 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 {isDeleteVisible && (
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="trash"
-                    onClick={() => deleteFleetServerHost(fleetServerHost)}
-                    title={i18n.translate(
+                  <EuiToolTip
+                    content={i18n.translate(
                       'xpack.fleet.settings.fleetServerHostsTable.deleteButtonTitle',
                       {
                         defaultMessage: 'Delete',
                       }
                     )}
-                    aria-label={i18n.translate(
-                      'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
-                      {
-                        defaultMessage: 'Delete host',
-                      }
-                    )}
-                    data-test-subj="fleetServerHostsTable.delete.btn"
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="trash"
+                      onClick={() => deleteFleetServerHost(fleetServerHost)}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
+                        {
+                          defaultMessage: 'Delete host',
+                        }
+                      )}
+                      data-test-subj="fleetServerHostsTable.delete.btn"
+                    />
+                  </EuiToolTip>
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="pencil"
-                  href={getHref('settings_edit_fleet_server_hosts', {
-                    itemId: fleetServerHost.id,
-                  })}
-                  title={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.fleet.settings.fleetServerHostsTable.editButtonTitle',
                     {
                       defaultMessage: 'Edit',
                     }
                   )}
-                  aria-label={i18n.translate(
-                    'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
-                    {
-                      defaultMessage: 'Edit host',
-                    }
-                  )}
-                  data-test-subj="fleetServerHostsTable.edit.btn"
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    color="text"
+                    iconType="pencil"
+                    href={getHref('settings_edit_fleet_server_hosts', {
+                      itemId: fleetServerHost.id,
+                    })}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
+                      {
+                        defaultMessage: 'Edit host',
+                      }
+                    )}
+                    data-test-subj="fleetServerHostsTable.edit.btn"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           );

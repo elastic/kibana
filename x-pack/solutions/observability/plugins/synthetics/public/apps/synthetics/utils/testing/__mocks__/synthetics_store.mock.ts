@@ -163,7 +163,6 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     error: null,
   },
-  maintenanceWindows: {},
   monitorHealth: {
     data: null,
     loading: false,

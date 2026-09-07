@@ -60,6 +60,33 @@ describe('Package Policy Utils', () => {
         version: 'abc',
       });
     });
+
+    it('should return inputs as empty array when SO attributes has undefined inputs', () => {
+      const attributes = PackagePolicyMocks.generatePackagePolicySOAttributes({
+        inputs: undefined,
+      });
+      const soItem = PackagePolicyMocks.generatePackagePolicySavedObjectFindResponse([
+        attributes,
+      ]).saved_objects.at(0)!;
+
+      expect(mapPackagePolicySavedObjectToPackagePolicy(soItem).inputs).toEqual([]);
+    });
+
+    it('should use namespaces over stale spaceIds stored in SO attributes', () => {
+      const soItem = {
+        id: 'so-stale',
+        type: 'fleet-package-policies',
+        version: 'abc',
+        references: [],
+        attributes: {
+          ...PackagePolicyMocks.generatePackagePolicySOAttributes(),
+          spaceIds: ['space-a'],
+        } as any,
+        namespaces: ['space-b'],
+      };
+
+      expect(mapPackagePolicySavedObjectToPackagePolicy(soItem).spaceIds).toEqual(['space-b']);
+    });
   });
 
   describe('preflightCheckPackagePolicy', () => {

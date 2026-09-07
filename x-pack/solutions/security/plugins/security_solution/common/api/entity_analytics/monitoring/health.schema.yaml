@@ -9,8 +9,9 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivMonHealth
+      deprecated: true
       summary: Health check on Privilege Monitoring
-
+      description: '**Deprecated in 9.4.0.**'
       responses:
         "200":
           description: Successful response
@@ -19,7 +20,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  status: 
+                  status:
                     $ref: './common.schema.yaml#/components/schemas/PrivilegeMonitoringEngineStatus'
                   error:
                     type: object

@@ -13,7 +13,7 @@ export function SimulatedFunctionCallingCallout() {
     <EuiCallOut color="warning">
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="warning" />
+          <EuiIcon type="warning" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiText size="s">

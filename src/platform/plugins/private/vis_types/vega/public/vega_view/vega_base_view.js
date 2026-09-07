@@ -235,7 +235,14 @@ export class VegaBaseView {
 
     const vegaSpec = this._parser.isVegaLite ? this._parser.vlspec : this._parser.spec;
     const usermetaLoaderOptions = vegaSpec.usermeta?.embedOptions?.loader;
-    vegaLoader.options = usermetaLoaderOptions ?? {};
+    const ALLOWED_LOADER_OPTIONS = ['target', 'rel'];
+    const sanitizedLoaderOptions = {};
+    for (const key of ALLOWED_LOADER_OPTIONS) {
+      if (usermetaLoaderOptions?.[key] != null) {
+        sanitizedLoaderOptions[key] = String(usermetaLoaderOptions[key]);
+      }
+    }
+    vegaLoader.options = sanitizedLoaderOptions;
 
     config.loader = vegaLoader;
 

@@ -245,6 +245,7 @@ describe('updateGlobalPacksCreateCallback', () => {
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,
       pack_id: 'pack-so-id-4',
+      pack_name: 'embedded-pack',
       queries: {
         query1: {
           name: 'test-query',

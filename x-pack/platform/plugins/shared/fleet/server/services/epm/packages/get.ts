@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import pMap from 'p-map';
 import type { MMRegExp } from 'minimatch';
 import { minimatch } from 'minimatch';
@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -271,6 +272,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -440,7 +442,7 @@ export async function getInstalledPackageManifests(
 
   const parsedManifests = result.saved_objects.reduce<Map<string, PackageSpecManifest>>(
     (acc, asset) => {
-      acc.set(asset.attributes.asset_path, load(asset.attributes.data_utf8));
+      acc.set(asset.attributes.asset_path, parse(asset.attributes.data_utf8));
       return acc;
     },
     new Map()
@@ -802,11 +804,20 @@ export async function getInstallationObject(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   logger?: Logger;
+  failOnUnexpectedError?: boolean;
 }) {
-  const { savedObjectsClient, pkgName, logger } = options;
+  const { savedObjectsClient, pkgName, logger, failOnUnexpectedError } = options;
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
+      // Not being installed is an expected condition (e.g. fetching input schema for a package
+      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return undefined;
+      }
+      if (failOnUnexpectedError) {
+        throw e;
+      }
       logger?.error(e);
       return undefined;
     });

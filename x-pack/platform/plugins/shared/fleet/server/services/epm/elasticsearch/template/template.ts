@@ -30,10 +30,14 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  PackageInfo,
   RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
-import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  dataStreamUsesOtelInput,
+} from '../../../../../common/services';
 import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
@@ -48,6 +52,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { retryDataStreamUpdateOnClusterEventTimeout } from './retry_data_stream_update';
 import { isUserSettingsTemplate, fillConstantKeywordValues } from './utils';
 
 interface Properties {
@@ -858,6 +863,43 @@ export function generateTemplateIndexPattern(
   }
 }
 
+/**
+ * Same as `generateTemplateIndexPattern`, but pins the namespace segment to an exact match
+ * (no trailing wildcard) instead of `-*`. Used by the identity-free agentless OTel incoming-data
+ * check, which has no `agent.id` to narrow the match once the identity filter is dropped, so the
+ * pattern itself must not resolve to any namespace other than the caller's own.
+ */
+export function generateNamespaceTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  namespace: string,
+  isOtelInputType?: boolean
+): string {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-' + namespace;
+  } else {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-' + namespace;
+  }
+}
+
+/**
+ * Returns true if the given data stream should use the `.otel` dataset suffix: it effectively
+ * uses the OTel collector input (`dataStreamUsesOtelInput`) and the `enableOtelIntegrations`
+ * experimental feature is enabled. All pattern-producing call sites (template installation, the
+ * live incoming-data handler, and stored `es_index_patterns`) must use this same decision so they
+ * cannot diverge.
+ */
+export function isOtelDataStream(
+  dataStream: RegistryDataStream,
+  packageInfo: Pick<PackageInfo, 'policy_templates'>
+): boolean {
+  return (
+    !!appContextService.getExperimentalFeatures()?.enableOtelIntegrations &&
+    dataStreamUsesOtelInput(packageInfo, dataStream)
+  );
+}
+
 // Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
 // See also https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
 //
@@ -880,9 +922,12 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
+ * @param packageInfo package context used to detect OTel input data streams, which carry a
+ * `.otel` dataset suffix. Callers that omit it get unsuffixed patterns.
  */
 export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
 ): Record<string, string> {
   if (!dataStreams) {
     return {};
@@ -890,7 +935,10 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(
+      dataStream,
+      packageInfo ? isOtelDataStream(dataStream, packageInfo) : undefined
+    );
   }
   return patterns;
 }
@@ -1029,12 +1077,25 @@ const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   "[enabled] parameter can't be updated for the object mapping",
 ];
 
-function errorNeedRollover(err: any) {
+/**
+ * Returns true when the ES error indicates that the mapping change is incompatible with the
+ * current write index and a data-stream rollover is the right recovery action.
+ *
+ * `total_fields` limit breaches are deliberately excluded: they surface as
+ * `illegal_argument_exception` but a rollover cannot fix them — the new write index is built
+ * from the same index template and inherits the same field-count limit, so the oversized
+ * mapping would fail again immediately.  Callers should surface those errors clearly instead.
+ */
+function errorNeedRollover(err: any): boolean {
   if (
     isResponseError(err) &&
     err.statusCode === 400 &&
     err.body?.error?.type === 'illegal_argument_exception'
   ) {
+    // total_fields limit errors cannot be resolved by a rollover — skip them.
+    if (isTotalFieldsLimitError(err)) {
+      return false;
+    }
     return true;
   }
   if (
@@ -1046,23 +1107,34 @@ function errorNeedRollover(err: any) {
   ) {
     return true;
   }
+  return false;
 }
 
-const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
-  try {
-    // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
-    return esClient.transport.request({
-      method: 'POST',
-      path: `/${dataStreamName}/_rollover`,
-      querystring: {
-        lazy: true,
-      },
-    });
-  } catch (error) {
-    throw new PackageESError(
-      `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
-    );
-  }
+/**
+ * Returns true when the error is an ES `total_fields` limit breach
+ * (`index.mapping.total_fields.limit` exceeded).
+ */
+export function isTotalFieldsLimitError(err: any): boolean {
+  const reason: string = err.body?.error?.reason ?? '';
+  return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
+}
+
+const rolloverDataStream = (
+  dataStreamName: string,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) => {
+  return retryDataStreamUpdateOnClusterEventTimeout(
+    () =>
+      esClient.transport.request({
+        method: 'POST',
+        path: `/${dataStreamName}/_rollover`,
+        querystring: {
+          lazy: true,
+        },
+      }),
+    { logger, dataStreamName }
+  );
 };
 
 const updateAllDataStreams = async (
@@ -1176,9 +1248,23 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient);
+        await rolloverDataStream(dataStreamName, esClient, logger);
         return;
       }
+    }
+    // total_fields limit errors cannot be resolved by a rollover (the new write index inherits
+    // the same limit from the index template).  Log clearly and skip the rollover so we don't
+    // add churn to an already-overloaded cluster.
+    if (isTotalFieldsLimitError(err)) {
+      logger.warn(
+        `Mappings update for ${dataStreamName} failed because the index mapping total_fields limit has been exceeded. ` +
+          `Skipping rollover as it would not resolve the issue. ` +
+          `The total_fields limit must be raised on the index template to allow this mapping update: ${err}`
+      );
+      if (options?.ignoreMappingUpdateErrors !== true) {
+        throw err;
+      }
+      return;
     }
     logger.error(`Mappings update for ${dataStreamName} failed due to unexpected error: ${err}`);
     logger.trace(`Attempted mappings: ${mappings}`);
@@ -1233,7 +1319,7 @@ const updateExistingDataStream = async ({
           ? `Dynamic dimension mappings changed for ${dataStreamName}, triggering a rollover`
           : `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient);
+      await rolloverDataStream(dataStreamName, esClient, logger);
     }
   }
 

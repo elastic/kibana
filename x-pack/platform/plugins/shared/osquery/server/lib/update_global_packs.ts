@@ -79,6 +79,7 @@ export const updateGlobalPacksCreateCallback = async (
           shard: 100,
           pack_id: pack.saved_object_id,
           queries: convertSOQueriesToPackConfig(pack.queries, resolvedSpaceId),
+          pack_name: pack.name,
         });
       });
 

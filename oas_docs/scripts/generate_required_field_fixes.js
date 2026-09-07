@@ -36,7 +36,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const yaml = require('js-yaml');
+const { parse } = require('yaml');
 
 const OAS_DOCS_DIR = path.resolve(__dirname, '..');
 const STATEFUL_INPUT = path.join(OAS_DOCS_DIR, 'output', 'kibana.yaml');
@@ -53,7 +53,7 @@ function loadSpec(filePath) {
   if (!fs.existsSync(filePath)) return null;
   const raw = fs.readFileSync(filePath, 'utf8');
   if (filePath.endsWith('.json')) return JSON.parse(raw);
-  return yaml.load(raw);
+  return parse(raw);
 }
 
 /**

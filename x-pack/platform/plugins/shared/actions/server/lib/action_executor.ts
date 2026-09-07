@@ -473,28 +473,6 @@ export class ActionExecutor {
           );
         }
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig;
-        let validatedSecrets;
-        try {
-          const validationResult = validateAction(
-            {
-              actionId,
-              actionType,
-              params,
-              config,
-              secrets,
-              taskInfo,
-            },
-            { configurationUtilities }
-          );
-          validatedParams = validationResult.validatedParams;
-          validatedConfig = validationResult.validatedConfig;
-          validatedSecrets = validationResult.validatedSecrets;
-        } catch (err) {
-          return err.result;
-        }
-
         if (span) {
           span.name = `${executeLabel} ${actionTypeId}`;
           addSpanLabels({
@@ -503,7 +481,14 @@ export class ActionExecutor {
         }
 
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
-        logger.debug(`executing action ${actionLabel}`);
+        logger.debug(`executing action ${actionLabel}`, {
+          labels: {
+            actionLabel,
+            actionTypeId,
+            actionId,
+            spaceId,
+          },
+        });
 
         const task = taskInfo
           ? {
@@ -550,6 +535,43 @@ export class ActionExecutor {
         });
 
         eventLogger.logEvent(startEvent);
+
+        let validatedParams: Record<string, unknown>;
+        let validatedConfig;
+        let validatedSecrets;
+        try {
+          const validationResult = validateAction(
+            {
+              actionId,
+              actionType,
+              params,
+              config,
+              secrets,
+              taskInfo,
+            },
+            { configurationUtilities }
+          );
+          validatedParams = validationResult.validatedParams;
+          validatedConfig = validationResult.validatedConfig;
+          validatedSecrets = validationResult.validatedSecrets;
+        } catch (err) {
+          eventLogger.stopTiming(event);
+          span?.setOutcome('failure');
+          event.event!.outcome = 'failure';
+          event.message = `action execution failure: ${actionLabel}`;
+          event.error = { message: err.message };
+          logger.warn(`action execution failure: ${actionLabel}: ${err.message}`, {
+            labels: {
+              actionTypeId,
+              actionLabel,
+              actionId,
+              spaceId,
+              name,
+            },
+          });
+          eventLogger.logEvent(event);
+          return err.result;
+        }
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
@@ -639,11 +661,32 @@ export class ActionExecutor {
             event.error.message = actionErrorToMessage(result);
             if (result.error) {
               logger.error(result.error, {
-                tags: [actionTypeId, actionId, 'action-run-failed', `${result.errorSource}-error`],
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+                tags: ['action-run-failed', `${result.errorSource}-error`],
                 error: { stack_trace: result.error.stack },
               });
             }
-            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`, {
+              labels: {
+                actionLabel,
+                actionTypeId,
+                actionId,
+                spaceId,
+                name,
+                alertId: validatedParams.alertId,
+                alertExecutionId: validatedParams.alertExecutionId,
+                ruleId: validatedParams.ruleId,
+              },
+            });
           } else {
             span?.setOutcome('failure');
             event.event!.outcome = 'failure';
@@ -651,7 +694,19 @@ export class ActionExecutor {
             event.error = event.error || {};
             event.error.message = 'action execution returned unexpected result';
             logger.warn(
-              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`,
+              {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+              }
             );
           }
 
@@ -692,8 +747,29 @@ export class ActionExecutor {
               }
             })
             .catch((err) => {
-              logger.error('Failed to calculate tokens from streaming response');
-              logger.error(err);
+              logger.error('Failed to calculate tokens from streaming response', {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                },
+              });
+              logger.error(err, {
+                labels: {
+                  actionLabel,
+                  actionTypeId,
+                  actionId,
+                  spaceId,
+                  name,
+                  alertId: validatedParams.alertId,
+                  alertExecutionId: validatedParams.alertExecutionId,
+                  ruleId: validatedParams.ruleId,
+                },
+              });
             })
             .finally(() => {
               completeEventLogging();

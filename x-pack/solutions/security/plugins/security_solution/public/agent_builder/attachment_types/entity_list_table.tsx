@@ -12,8 +12,9 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiText,
-  useEuiTheme,
+  EuiToolTip,
   type EuiBasicTableColumn,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +31,7 @@ import { RiskScoreLevel } from '../../entity_analytics/components/severity/commo
 import { EntityIconByType } from '../../entity_analytics/components/entity_store/helpers';
 import { TruncatedBadgeList } from '../../flyout/entity_details/shared/components/entity_source_value';
 import { formatEntitySource } from './entity_attachment/entity_table/entity_data_source_utils';
+import { normalizeMultiValueField } from './normalize_multi_value_field';
 
 export interface EntityListRow {
   entity_type: 'host' | 'user' | 'service' | 'generic';
@@ -74,23 +76,6 @@ const OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityListAttachment.openEntityInEntityAnalyticsAria',
   { defaultMessage: 'Open entity in Entity Analytics' }
 );
-
-/**
- * Coerce the `source` column value into the multi-value string array shape of
- * `entity.source`. Rows from the entity store project `entity.source` as
- * either a single string (legacy) or an array of strings. We accept either
- * and drop anything non-string so the badge renderer only has to deal with
- * `string[]`.
- */
-const normalizeEntitySources = (source: unknown): string[] => {
-  if (typeof source === 'string') {
-    return source ? [source] : [];
-  }
-  if (Array.isArray(source)) {
-    return source.filter((v): v is string => typeof v === 'string' && v.length > 0);
-  }
-  return [];
-};
 
 const NAME_COLUMN_WIDTH = '260px';
 
@@ -194,29 +179,34 @@ export const EntityListTable: React.FC<{
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType={icon}
-                  display="empty"
-                  aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
-                  onClick={() => {
-                    const displayName = row.entity_name ?? row.entity_id;
-                    const rightPanel = buildEntityRightPanel({
-                      identifierType: row.entity_type,
-                      identifier: displayName,
-                      entityStoreId: row.entity_id,
-                    });
-                    // Close the canvas first: both navigation helpers only
-                    // update the URL (and, when wired, the Agent Builder
-                    // sidebar). Leaving the canvas open would overlay the
-                    // expandable flyout that the URL change is about to open.
-                    closeCanvas?.();
-                    if (rightPanel) {
-                      navigateWithFlyout({ preview: [], right: rightPanel });
-                    } else {
-                      navigateToHome();
-                    }
-                  }}
-                />
+                <EuiToolTip
+                  content={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType={icon}
+                    display="empty"
+                    aria-label={OPEN_ENTITY_IN_ENTITY_ANALYTICS_ARIA}
+                    onClick={() => {
+                      const displayName = row.entity_name ?? row.entity_id;
+                      const rightPanel = buildEntityRightPanel({
+                        identifierType: row.entity_type,
+                        identifier: displayName,
+                        entityStoreId: row.entity_id,
+                      });
+                      // Close the canvas first: both navigation helpers only
+                      // update the URL (and, when wired, the Agent Builder
+                      // sidebar). Leaving the canvas open would overlay the
+                      // expandable flyout that the URL change is about to open.
+                      closeCanvas?.();
+                      if (rightPanel) {
+                        navigateWithFlyout({ preview: [], right: rightPanel });
+                      } else {
+                        navigateToHome();
+                      }
+                    }}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
                 <EuiText
@@ -243,7 +233,7 @@ export const EntityListTable: React.FC<{
         ),
         width: '140px',
         render: (source: unknown) => {
-          const list = normalizeEntitySources(source);
+          const list = normalizeMultiValueField(source);
           if (list.length === 0) {
             return getEmptyTagValue();
           }

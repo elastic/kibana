@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.subtype).to.be(BulletSubtype.horizontal);
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
-      expect(debugData?.value).to.be(14005);
+      expect(debugData?.value).to.be(14004);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.subtype).to.be(BulletSubtype.vertical);
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
-      expect(debugData?.value).to.be(14005);
+      expect(debugData?.value).to.be(14004);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.subtype).to.be(BulletSubtype.halfCircle);
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
-      expect(debugData?.value).to.be(14005);
+      expect(debugData?.value).to.be(14004);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.subtype).to.be(BulletSubtype.twoThirdsCircle);
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
-      expect(debugData?.value).to.be(14005);
+      expect(debugData?.value).to.be(14004);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.subtype).to.be(BulletSubtype.circle);
       expect(debugData?.title).to.be('custom title');
       expect(debugData?.subtitle).to.be('custom subtitle');
-      expect(debugData?.value).to.be(14005);
+      expect(debugData?.value).to.be(14004);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
     });

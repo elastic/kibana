@@ -60,14 +60,17 @@ export const buildFakeScopedRequest = ({
 export const buildScopedInternalSavedObjectsClientUnsafe = ({
   coreStart,
   namespace,
+  includedHiddenTypes,
 }: {
   coreStart: CoreStart;
   namespace: string;
+  includedHiddenTypes?: string[];
 }) => {
   const fakeScopedRequest = buildFakeScopedRequest({ coreStart, namespace });
 
   return coreStart.savedObjects.getScopedClient(fakeScopedRequest, {
     excludedExtensions: [SECURITY_EXTENSION_ID],
+    includedHiddenTypes,
   });
 };
 

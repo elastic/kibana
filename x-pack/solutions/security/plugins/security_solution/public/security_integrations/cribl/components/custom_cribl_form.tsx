@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,6 +32,10 @@ import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import {
+  DATA_ID_MAX_LENGTH,
+  isValidDataId,
+} from '../../../../common/security_integrations/cribl/sanitize';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
@@ -71,6 +76,15 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
       ? isValidNamespace(routeEntry.namespace, false)
       : undefined;
     const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
+    const isDataIdInvalid = !!routeEntry.dataId && !isValidDataId(routeEntry.dataId);
+    const dataIdError = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.invalidDataId',
+      {
+        defaultMessage:
+          "Invalid Cribl dataId. Only letters, numbers, '.', '_', and '-' are allowed (max {maxLength} characters).",
+        values: { maxLength: DATA_ID_MAX_LENGTH },
+      }
+    );
 
     const options = datastreamOpts.map((o) => ({
       label: o,
@@ -78,13 +92,23 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
 
     const selectedOption = options.filter((o) => o.label === routeEntry.datastream);
 
+    const removeEntryLabel = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.removeEntry',
+      { defaultMessage: 'Remove entry' }
+    );
+
     return (
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Cribl _dataId field">
+            <EuiFormRow
+              label="Cribl _dataId field"
+              isInvalid={isDataIdInvalid}
+              error={isDataIdInvalid ? dataIdError : undefined}
+            >
               <EuiFieldText
                 value={routeEntry.dataId}
+                isInvalid={isDataIdInvalid}
                 onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)}
               />
             </EuiFormRow>
@@ -139,15 +163,17 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
             <span
               style={{ display: 'inline-flex', alignItems: 'center', blockSize: euiTheme.size.xxl }}
             >
-              <EuiButtonIcon
-                color="danger"
-                iconType="trash"
-                onClick={() => onDeleteEntry(index)}
-                isDisabled={routeEntries.length === 1}
-                aria-label="entryDeleteButton"
-                className="itemEntryDeleteButton"
-                data-test-subj="itemEntryDeleteButton"
-              />
+              <EuiToolTip content={removeEntryLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="danger"
+                  iconType="trash"
+                  onClick={() => onDeleteEntry(index)}
+                  isDisabled={routeEntries.length === 1}
+                  aria-label={removeEntryLabel}
+                  className="itemEntryDeleteButton"
+                  data-test-subj="itemEntryDeleteButton"
+                />
+              </EuiToolTip>
             </span>
           </EuiFormRow>
         </EuiFlexGroup>
@@ -250,12 +276,16 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       const allNamespacesValid = updatedRouteEntries.every(
         (entry) => !entry.namespace || isValidNamespace(entry.namespace, false).valid
       );
+      const allDataIdsValid = updatedRouteEntries.every(
+        (entry) => !entry.dataId || isValidDataId(entry.dataId)
+      );
 
       // must have at least one filled in and all entries must have both filled in or neither
       const isValid =
         hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
         allRouteEntriesArePaired(updatedRouteEntries) &&
-        allNamespacesValid;
+        allNamespacesValid &&
+        allDataIdsValid;
 
       onChange({
         isValid,

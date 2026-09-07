@@ -72,7 +72,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
       </g>
     </svg>
     <div
-      class="css-1oyht0a-MarkerContainer eoof5b20"
+      class="css-1oyht0a-MarkerContainer e1ttoyky0"
       style="left: -9955.5px;"
     >
       <span
@@ -80,10 +80,10 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
         id="timeToFirstByte-wrapper"
       >
         <div
-          class="css-1ejn3a9-Container en0jakt1"
+          class="css-1ejn3a9-Container ex8slh61"
         >
           <span
-            class="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator ex8slh60"
             color="#8E9FBC"
             shape="circle"
           />
@@ -91,7 +91,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
       </span>
     </div>
     <div
-      class="css-1oyht0a-MarkerContainer eoof5b20"
+      class="css-1oyht0a-MarkerContainer e1ttoyky0"
       style="left: -10955.5px;"
     >
       <span
@@ -99,10 +99,10 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
         id="domInteractive-wrapper"
       >
         <div
-          class="css-1ejn3a9-Container en0jakt1"
+          class="css-1ejn3a9-Container ex8slh61"
         >
           <span
-            class="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator ex8slh60"
             color="#8E9FBC"
             shape="circle"
           />
@@ -110,7 +110,7 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
       </span>
     </div>
     <div
-      class="css-1oyht0a-MarkerContainer eoof5b20"
+      class="css-1oyht0a-MarkerContainer e1ttoyky0"
       style="left: -18955.5px;"
     >
       <span
@@ -118,10 +118,10 @@ exports[`Timeline Components renders TimelineAxisContainer with data 1`] = `
         id="domComplete-wrapper"
       >
         <div
-          class="css-1ejn3a9-Container en0jakt1"
+          class="css-1ejn3a9-Container ex8slh61"
         >
           <span
-            class="css-xbgcmn-Indicator en0jakt0"
+            class="css-xbgcmn-Indicator ex8slh60"
             color="#8E9FBC"
             shape="circle"
           />

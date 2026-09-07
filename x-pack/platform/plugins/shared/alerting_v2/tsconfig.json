@@ -52,7 +52,6 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/apm-utils",
     "@kbn/default-tracer",
-    "@kbn/core-user-profile-common",
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-server",
     "@kbn/es-mappings",
@@ -92,7 +91,8 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/core-http-browser",
     "@kbn/utility-types",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-user-profile-common"
   ],
   "exclude": ["target/**/*"]
 }

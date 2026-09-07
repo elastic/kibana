@@ -9,10 +9,13 @@ import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
   LATEST_INDEX,
+  UPDATES_INDEX,
 } from '../fixtures/constants';
+import { forceLogExtraction } from '../fixtures/helpers';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 type ApiWorkerFixtures = Parameters<Parameters<typeof apiTest>[2]>[0];
@@ -25,12 +28,17 @@ const getExtractEntityTaskId = (entityType: string) =>
 
 apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
+  let internalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
       ...PUBLIC_HEADERS,
+    };
+    internalHeaders = {
+      ...credentials.cookieHeader,
+      ...INTERNAL_HEADERS,
     };
     await kbnClient.uiSettings.update({ [FF_ENABLE_ENTITY_STORE_V2]: true });
   });
@@ -119,6 +127,47 @@ apiTest.describe('Entity Store uninstall', { tag: ENTITY_STORE_TAGS }, () => {
     const existsAfter = await esClient.indices.exists({ index: LATEST_INDEX });
     expect(existsAfter).toBe(false);
   });
+
+  // Regression for https://github.com/elastic/security-team/issues/18143:
+  // the latest index, updates/metadata data streams and EUID scripts are shared per
+  // namespace. Uninstalling one entity type must NOT delete them while other engines
+  // are still installed — otherwise the surviving engines' extraction fails with
+  // `verification_exception: Unknown index [...]` / `index_not_found_exception`.
+  apiTest(
+    'keeps shared assets when only one of several engines is uninstalled',
+    async ({ apiClient, esClient }) => {
+      await install(apiClient, { entityTypes: ['user', 'host'] });
+
+      // Shared assets exist after install.
+      expect(await esClient.indices.exists({ index: LATEST_INDEX })).toBe(true);
+      const updatesBefore = await esClient.indices.getDataStream({ name: UPDATES_INDEX });
+      expect(updatesBefore.data_streams).toHaveLength(1);
+
+      // Uninstall a single type; the other engine stays installed.
+      await uninstall(apiClient, { entityTypes: ['host'] });
+
+      // Shared assets must still exist for the surviving `user` engine.
+      expect(await esClient.indices.exists({ index: LATEST_INDEX })).toBe(true);
+      const updatesAfter = await esClient.indices.getDataStream({ name: UPDATES_INDEX });
+      expect(updatesAfter.data_streams).toHaveLength(1);
+
+      // End-to-end: the surviving engine's extraction still succeeds (this is what
+      // fails in production when the shared index/data stream get deleted).
+      const extraction = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        '2026-01-20T11:00:00Z',
+        '2026-01-20T13:00:00Z'
+      );
+      expect(extraction.statusCode).toBe(200);
+      expect(extraction.body).toMatchObject({ success: true });
+
+      // Uninstalling the last remaining engine tears the shared index down as expected.
+      await uninstall(apiClient, { entityTypes: ['user'] });
+      expect(await esClient.indices.exists({ index: LATEST_INDEX })).toBe(false);
+    }
+  );
 
   apiTest('uninstall is a no-op when entity store is not installed', async ({ apiClient }) => {
     const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {

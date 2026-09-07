@@ -30,6 +30,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn, EuiComboBoxOptionOption } from '@elastic/eui';
@@ -397,14 +398,22 @@ export const ReviewApproveModal: React.FC<{
       name: '',
       width: '32px',
       render: (item: ReviewTableRow) => (
-        <EuiButtonIcon
-          iconType="expand"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
             { defaultMessage: 'Open data stream results flyout' }
           )}
-          onClick={() => setSelectedDataStreamForFlyout(item.dataStream)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="expand"
+            aria-label={i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
+              { defaultMessage: 'Open data stream results flyout' }
+            )}
+            onClick={() => setSelectedDataStreamForFlyout(item.dataStream)}
+          />
+        </EuiToolTip>
       ),
     },
     {

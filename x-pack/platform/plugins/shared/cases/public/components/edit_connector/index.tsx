@@ -9,12 +9,13 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiText,
-  EuiHorizontalRule,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiHorizontalRule,
+  EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 
@@ -114,12 +115,14 @@ export const EditConnector = React.memo(
           </EuiFlexItem>
           {!isLoading && !isEdit && hasPushPermissions && canUseConnectors ? (
             <EuiFlexItem data-test-subj="connector-edit" grow={false}>
-              <EuiButtonIcon
-                data-test-subj="connector-edit-button"
-                aria-label={i18n.EDIT_CONNECTOR_ARIA}
-                iconType="pencil"
-                onClick={onEditClick}
-              />
+              <EuiToolTip content={i18n.EDIT_CONNECTOR_ARIA} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="connector-edit-button"
+                  aria-label={i18n.EDIT_CONNECTOR_ARIA}
+                  iconType="pencil"
+                  onClick={onEditClick}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>

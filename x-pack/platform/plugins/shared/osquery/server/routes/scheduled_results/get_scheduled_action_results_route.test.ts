@@ -14,6 +14,7 @@ import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/cons
 import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 
@@ -101,7 +102,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   const expectedSearchOptions = {
     abortSignal: expect.any(AbortSignal),
-    strategy: 'osquerySearchStrategy',
+    strategy: OSQUERY_SEARCH_STRATEGY,
   };
 
   const registerRoute = (osqueryContext: OsqueryAppContext) => {

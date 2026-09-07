@@ -15,11 +15,12 @@ import {
   EuiExpression,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   useEuiPaddingCSS,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
@@ -221,16 +222,24 @@ export const DataViewSelectPopover: React.FunctionComponent<DataViewSelectPopove
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="closeDataViewPopover"
-                iconType="cross"
-                color="danger"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
                   { defaultMessage: 'Close' }
                 )}
-                onClick={closeDataViewPopover}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="closeDataViewPopover"
+                  iconType="cross"
+                  color="danger"
+                  aria-label={i18n.translate(
+                    'xpack.stackAlerts.components.ui.alertParams.closeDataViewPopoverLabel',
+                    { defaultMessage: 'Close' }
+                  )}
+                  onClick={closeDataViewPopover}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPopoverTitle>

@@ -365,20 +365,30 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                     </EuiFlexItem>
                                   )}
                                   <EuiFlexItem grow={false}>
-                                    <EuiButtonIcon
-                                      iconType="cross"
-                                      aria-label={i18n.translate(
+                                    <EuiToolTip
+                                      content={i18n.translate(
                                         'xpack.searchInferenceEndpoints.settings.removeModel',
                                         {
                                           defaultMessage: 'Remove model',
                                         }
                                       )}
-                                      size="s"
-                                      color="text"
-                                      onClick={() => handleRemove(index)}
-                                      isDisabled={endpointIds.length <= 1}
-                                      data-test-subj={`remove-endpoint-${endpointId}`}
-                                    />
+                                      disableScreenReaderOutput
+                                    >
+                                      <EuiButtonIcon
+                                        iconType="cross"
+                                        aria-label={i18n.translate(
+                                          'xpack.searchInferenceEndpoints.settings.removeModel',
+                                          {
+                                            defaultMessage: 'Remove model',
+                                          }
+                                        )}
+                                        size="s"
+                                        color="text"
+                                        onClick={() => handleRemove(index)}
+                                        isDisabled={endpointIds.length <= 1}
+                                        data-test-subj={`remove-endpoint-${endpointId}`}
+                                      />
+                                    </EuiToolTip>
                                   </EuiFlexItem>
                                 </EuiFlexGroup>
                               </EuiSplitPanel.Inner>

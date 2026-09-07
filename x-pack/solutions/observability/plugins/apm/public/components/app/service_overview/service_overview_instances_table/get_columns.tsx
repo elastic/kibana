@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon, RIGHT_ALIGNMENT, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonIcon, EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React from 'react';
@@ -273,14 +273,21 @@ export function getColumns({
             isOpen={itemIdToOpenActionMenuRowMap[instanceItem.serviceNodeName]}
             anchorPosition="leftCenter"
             button={
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.apm.getColumns.euiButtonIcon.editLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.apm.getColumns.euiButtonIcon.editLabel', {
                   defaultMessage: 'Edit',
                 })}
-                data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
-                iconType="boxesVertical"
-                onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate('xpack.apm.getColumns.euiButtonIcon.editLabel', {
+                    defaultMessage: 'Edit',
+                  })}
+                  data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
+                  iconType="boxesVertical"
+                  onClick={() => toggleRowActionMenu(instanceItem.serviceNodeName)}
+                />
+              </EuiToolTip>
             }
           >
             <InstanceActionsMenu
@@ -307,19 +314,24 @@ export function getColumns({
       width: '40px',
       isExpander: true,
       render: (instanceItem: MainStatsServiceInstanceItem) => {
+        const isExpanded = Boolean(itemIdToExpandedRowMap[instanceItem.serviceNodeName]);
+        const toggleLabel = isExpanded
+          ? i18n.translate('xpack.apm.serviceOverview.instancesTable.collapse', {
+              defaultMessage: 'Collapse',
+            })
+          : i18n.translate('xpack.apm.serviceOverview.instancesTable.expand', {
+              defaultMessage: 'Expand',
+            });
+
         return (
-          <EuiButtonIcon
-            data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
-            onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
-            aria-label={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName] ? 'Collapse' : 'Expand'
-            }
-            iconType={
-              itemIdToExpandedRowMap[instanceItem.serviceNodeName]
-                ? 'chevronSingleUp'
-                : 'chevronSingleDown'
-            }
-          />
+          <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`instanceDetailsButton_${instanceItem.serviceNodeName}`}
+              onClick={() => toggleRowDetails(instanceItem.serviceNodeName)}
+              aria-label={toggleLabel}
+              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
+            />
+          </EuiToolTip>
         );
       },
     },

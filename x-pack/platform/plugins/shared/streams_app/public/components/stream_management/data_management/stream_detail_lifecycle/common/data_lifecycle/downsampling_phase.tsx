@@ -16,6 +16,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { DownsampleStep } from '@kbn/streams-schema/src/models/ingest/lifecycle';
@@ -160,21 +161,32 @@ export const DownsamplingPhase = ({
 
                 {onRemoveStep && (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      display="base"
-                      iconType="trash"
-                      size="s"
-                      color="danger"
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
                         {
                           defaultMessage: 'Remove downsample step {stepNumber}',
                           values: { stepNumber },
                         }
                       )}
-                      data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
-                      onClick={handleRemoveStep}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        iconType="trash"
+                        size="s"
+                        color="danger"
+                        aria-label={i18n.translate(
+                          'xpack.streams.streamDetailLifecycle.removeDownsampleStep.ariaLabel',
+                          {
+                            defaultMessage: 'Remove downsample step {stepNumber}',
+                            values: { stepNumber },
+                          }
+                        )}
+                        data-test-subj={`downsamplingPopover-step${stepNumber}-removeButton`}
+                        onClick={handleRemoveStep}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>

@@ -1,0 +1,150 @@
+{
+  "sha1": "ff85e10debe38e67dca898bcd4228ebb69f1e407",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "3eabf3c64db686b-744ce32675c025c",
+      "title": "Setup environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/global.setup.ts",
+        "line": 10,
+        "column": 16
+      }
+    },
+    {
+      "id": "5f463ac1423e49e-a27e59b0bd3f0a0",
+      "title": "Discover integration - Classic Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in Data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/discover_integration_classic.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "5f463ac1423e49e-2878526f6235f60",
+      "title": "Discover integration - Classic Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/discover_integration_classic.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "a7e0343687e2180-1fb86a9dc3c504c",
+      "title": "Discover integration - Wired Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in Data view mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/discover_integration_wired.spec.ts",
+        "line": 37,
+        "column": 9
+      }
+    },
+    {
+      "id": "a7e0343687e2180-b55d04c6e12793c",
+      "title": "Discover integration - Wired Stream - Navigate to Stream processing from document flyout should navigate to Stream processing page from Discover document flyout in ES|QL mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/discover_integration_wired.spec.ts",
+        "line": 83,
+        "column": 9
+      }
+    },
+    {
+      "id": "47427c7cef2c4f9-6d06fadffc97195",
+      "title": "TSDB-aware Discover links list view: should use TS source command for TSDB stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 141,
+        "column": 9
+      }
+    },
+    {
+      "id": "47427c7cef2c4f9-3daf716e15a7750",
+      "title": "TSDB-aware Discover links list view: should use FROM source command for regular stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 162,
+        "column": 9
+      }
+    },
+    {
+      "id": "47427c7cef2c4f9-baf7923fdfed447",
+      "title": "TSDB-aware Discover links detail page header: should use TS source command for TSDB stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 183,
+        "column": 9
+      }
+    },
+    {
+      "id": "47427c7cef2c4f9-2c05d1f5c077fe5",
+      "title": "TSDB-aware Discover links detail page header: should use FROM source command for regular stream Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/tsdb_discover_links.spec.ts",
+        "line": 204,
+        "column": 9
+      }
+    },
+    {
+      "id": "c6b480a939a8109-7132d4e40af07dc",
+      "title": "Teardown environment for streams tests",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/integrations/ui/tests/global.teardown.ts",
+        "line": 10,
+        "column": 19
+      }
+    }
+  ]
+}

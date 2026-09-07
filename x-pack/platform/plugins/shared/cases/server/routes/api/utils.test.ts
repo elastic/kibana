@@ -59,19 +59,18 @@ describe('Utils', () => {
 
   describe('logDeprecatedEndpoint', () => {
     const logger = loggingSystemMock.createLogger();
-    const kibanaHeader = { 'kbn-version': '8.1.0', referer: 'test' };
 
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     it('does NOT log when the request is from the kibana client', () => {
-      logDeprecatedEndpoint(logger, kibanaHeader, 'test');
+      logDeprecatedEndpoint(logger, true, 'test');
       expect(logger.warn).not.toHaveBeenCalledWith('test');
     });
 
     it('does log when the request is NOT from the kibana client', () => {
-      logDeprecatedEndpoint(logger, {}, 'test');
+      logDeprecatedEndpoint(logger, false, 'test');
       expect(logger.warn).toHaveBeenCalledWith('test');
     });
   });

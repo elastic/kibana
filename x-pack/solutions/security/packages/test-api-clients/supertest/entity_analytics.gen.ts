@@ -128,6 +128,10 @@ const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to check privileges for managing asset criticality.
+
+      */
   assetCriticalityGetPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/privileges', kibanaSpace))
@@ -160,7 +164,9 @@ is added to its existing source labels instead.
       .send(props.body as object);
   },
   /**
-      * Bulk upsert up to 1000 asset criticality records.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to bulk assign asset criticality.
+
+Bulk upsert up to 1000 asset criticality records.
 
 If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
 
@@ -201,7 +207,9 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-      * Create or update an asset criticality record for a specific entity.
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to assign asset criticality to an entity.
+
+Create or update an asset criticality record for a specific entity.
 
 If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
 
@@ -217,6 +225,10 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   createEntitySource(props: CreateEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source', kibanaSpace))
@@ -225,6 +237,10 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   createPrivilegesImportIndex(
     props: CreatePrivilegesImportIndexProps,
     kibanaSpace: string = 'default'
@@ -236,6 +252,10 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+      */
   createPrivMonUser(props: CreatePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users', kibanaSpace))
@@ -272,8 +292,11 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-   * Delete the asset criticality record for a specific entity.
-   */
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to unassign asset criticality for a specific entity.
+
+Delete the asset criticality record for a specific entity.
+
+      */
   deleteAssetCriticalityRecord(
     props: DeleteAssetCriticalityRecordProps,
     kibanaSpace: string = 'default'
@@ -306,6 +329,10 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   deleteEntitySource(props: DeleteEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
@@ -318,6 +345,9 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/delete', kibanaSpace))
@@ -326,6 +356,10 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+      */
   deletePrivMonUser(props: DeletePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .delete(
@@ -388,6 +422,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   disableMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/disable', kibanaSpace))
@@ -428,7 +465,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * List asset criticality records, paging, sorting and filtering as needed.
+   * **Deprecated in 9.4.0.** List asset criticality records, paging, sorting and filtering as needed.
    */
   findAssetCriticalityRecords(
     props: FindAssetCriticalityRecordsProps,
@@ -442,7 +479,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .query(props.query);
   },
   /**
-   * Get the asset criticality record for a specific entity.
+   * **Deprecated in 9.4.0.** Get the asset criticality record for a specific entity.
    */
   getAssetCriticalityRecord(
     props: GetAssetCriticalityRecordProps,
@@ -455,6 +492,10 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Entity Store APIs to get asset criticality status for a specific entity.
+
+      */
   getAssetCriticalityStatus(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/internal/asset_criticality/status', kibanaSpace))
@@ -477,6 +518,10 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   getEntitySource(props: GetEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -576,6 +621,9 @@ The entity will be immediately deleted from the latest index.  It will remain av
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   initMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/engine/init', kibanaSpace))
@@ -641,6 +689,10 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   listEntitySources(props: ListEntitySourcesProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source/list', kibanaSpace))
@@ -649,6 +701,10 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+      */
   listPrivMonUsers(props: ListPrivMonUsersProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/list', kibanaSpace))
@@ -694,6 +750,10 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+      */
   privmonBulkUploadUsersCsv(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/users/_csv', kibanaSpace))
@@ -701,6 +761,9 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   privMonHealth(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/health', kibanaSpace))
@@ -709,8 +772,11 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Check if the current user has all required permissions for Privilege Monitoring
-   */
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+Check if the current user has all required permissions for Privilege Monitoring.
+
+      */
   privMonPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -741,6 +807,9 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+   * **Deprecated in 9.4.0.**
+   */
   scheduleMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
       .post(
@@ -760,6 +829,10 @@ Each row will match up to 10,000 entities.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   searchPrivilegesIndices(props: SearchPrivilegesIndicesProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
@@ -850,6 +923,10 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+      */
   updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .put(
@@ -863,6 +940,10 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+      */
   updatePrivMonUser(props: UpdatePrivMonUserProps, kibanaSpace: string = 'default') {
     return supertest
       .put(
@@ -908,6 +989,10 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
+
+      */
   uploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/asset_criticality/upload_csv', kibanaSpace))
