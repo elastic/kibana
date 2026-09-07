@@ -87,8 +87,21 @@ export function buildWorkflowContext(
   const renderContext = buildInputDefaultRenderContext(workflowExecution, coreStart, dependencies);
   const inputsWithDefaults = applyInputDefaults(renderContext.inputs, normalizedInputsSchema);
 
+  // Alias event.inputs from defaulted inputs when the run has inputs but no real
+  // event (manual / workflow.execute). Refresh leftover event.type === 'manual'
+  // rows. Leave event undefined when there is nothing to alias.
+  const rawEvent = renderContext.event as Record<string, unknown> | undefined;
+  const shouldAliasInputs =
+    rawEvent?.type === 'manual' || (!rawEvent && inputsWithDefaults !== undefined);
+  const event = (
+    shouldAliasInputs
+      ? { spaceId: workflowExecution.spaceId, ...rawEvent, inputs: inputsWithDefaults }
+      : rawEvent
+  ) as WorkflowContext['event'];
+
   return {
     ...renderContext,
     inputs: inputsWithDefaults,
+    event,
   };
 }
