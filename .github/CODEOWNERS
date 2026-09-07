@@ -1053,6 +1053,7 @@ x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/sear
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
+x-pack/platform/packages/shared/custom-content/custom-content-renderer @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/custom-content/custom-content-server @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/search-ml-ux
 x-pack/platform/packages/shared/file-upload-common @elastic/search-ml-ux
