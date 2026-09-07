@@ -42,25 +42,16 @@ Start here:
 
 ## Developer documentation
 
-Pick the location by reader. One canonical explanation per audience. Link complementary docs; do not publish the same guide in two places.
+Developer documentation can be segmented into two types: internal plugin details, and information on extending Kibana. This guide is meant to serve the latter.
 
-| Location | Audience and content |
-| --- | --- |
-| Public Developer Guide (`docs/extend`) | Public plugin-author APIs and integration tutorials. This page is part of that guide. |
-| Codex `docs-dev/chrome` | Internal plugin/API consumers: sidebar registration, recently viewed, headers, menus. Published only to [Elastic Internal Docs](https://codex.elastic.dev). |
-| Codex `docs-dev/kbn-ui` | Component consumers: props, composition, usage examples, Storybook. Also Codex-only. |
-| Package README | Package maintainers: purpose, boundaries, architecture, implementation, development and testing |
-
-A private component can have a Codex consumer guide without becoming a supported plugin dependency. State that boundary on the page.
-
-READMEs must contain useful package-local information, not just a pointer somewhere else.
-
-Keep implementation details out of consumer documentation.
+Internal plugin details can be kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin or package folder.
 
 ### Structure
 
 The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../../getting-started/index.md) and [Key concepts](../../key-concepts/index.md) sections are _explanation_ oriented, while
 [Tutorials](../../tutorials/index.md) falls under both _tutorials_ and _how to_.
+
+Developers may choose to keep information that is specific to a particular plugin or package alongside the code.
 
 ### Best practices
 
@@ -70,7 +61,7 @@ A fresh pair of eyes are invaluable. Recruit new hires to read, review and updat
 
 #### Consider your target audience
 
-Use the table above. Public Developer Guide pages are for plugin authors. Implementation, architecture, and how to work in the package belong in the README.
+Documentation in the Kibana Developer Guide is targeted towards developers building Kibana plugins. Keep implementation details about internal plugin code out of these docs.
 
 #### High to low level
 
