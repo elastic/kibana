@@ -19,7 +19,7 @@ import {
   useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { AppHeader } from '@kbn/app-header';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
@@ -213,7 +213,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
     setViewsPendingDelete(null);
   }, [http, notifications, viewsPendingDelete]);
 
-  const menu = useMemo(
+  const menu = useMemo<AppHeaderMenu>(
     () => ({
       primaryActionItem: {
         id: 'createEsqlView',
@@ -308,7 +308,7 @@ export const EsqlViewsApp: React.FunctionComponent<EsqlViewsAppProps> = ({
       <AppHeader
         title={i18n.translate('esqlViews.pageTitle', { defaultMessage: 'ES|QL Views' })}
         menu={menu}
-        padding={{ bleed: 'm' }}
+        spacing="bleed"
       />
       <EuiSpacer size="l" />
       <EuiInMemoryTable
