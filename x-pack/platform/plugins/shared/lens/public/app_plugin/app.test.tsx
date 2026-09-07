@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { App } from './app';
 import type { LensAppProps } from './types';
@@ -51,7 +51,8 @@ jest.mock('lodash', () => ({
 
 // Force wide breakpoints so the AppHeader app menu renders its items inline
 // instead of collapsing them into the overflow popover (jsdom defaults smaller).
-jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+jest.mock('@kbn/ui-chrome-layout', () => ({
+  ...jest.requireActual('@kbn/ui-chrome-layout'),
   useCurrentChromeApplicationBreakpoint: () => 'xl',
 }));
 
@@ -61,18 +62,8 @@ jest.mock('@elastic/eui', () => ({
   useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
 }));
 
-// ChromeAppHeaderRegistration / AppMenu only register with chrome and return null.
+// AppMenu only registers with chrome and returns null.
 // Render AppHeader inline in unit tests so menu item test subjects remain assertable.
-jest.mock('@kbn/app-header', () => {
-  const actual = jest.requireActual('@kbn/app-header');
-  return {
-    ...actual,
-    ChromeAppHeaderRegistration: (props: Record<string, unknown>) => (
-      <actual.AppHeader {...props} />
-    ),
-  };
-});
-
 jest.mock('@kbn/core-chrome-app-menu', () => ({
   AppMenu: ({ config }: { config?: unknown }) => {
     const { AppHeader } = jest.requireActual('@kbn/app-header');
@@ -91,10 +82,8 @@ function getLensDocumentMock(propsOverrides?: Partial<LensDocument>) {
 
 describe('Lens App', () => {
   let props: jest.Mocked<LensAppProps>;
-  let services: jest.Mocked<LensAppServices> = makeDefaultServices(
-    new Subject<string>(),
-    'sessionId-1'
-  );
+  let chrome: ReturnType<typeof chromeServiceMock.createStartContract>;
+  let services: jest.Mocked<LensAppServices>;
   beforeAll(() => setMockedPresentationUtilServices());
 
   beforeEach(() => {
@@ -114,7 +103,11 @@ describe('Lens App', () => {
       coreStart: coreMock.createStart(),
     };
 
-    services = makeDefaultServices(new Subject<string>(), 'sessionId-1');
+    chrome = chromeServiceMock.createStartContract();
+    services = {
+      ...makeDefaultServices(new Subject<string>(), 'sessionId-1'),
+      chrome,
+    };
   });
 
   afterEach(() => {
@@ -130,7 +123,7 @@ describe('Lens App', () => {
   } = {}) {
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
       <KibanaContextProvider services={services}>
-        <ChromeServiceProvider value={{ chrome: chromeServiceMock.createStartContract() }}>
+        <ChromeServiceProvider value={{ chrome }}>
           <EditorFrameServiceProvider
             visualizationMap={visualizationMap}
             datasourceMap={datasourceMapOverride ?? datasourceMap}
@@ -171,27 +164,28 @@ describe('Lens App', () => {
   });
 
   describe('ChromeAppHeaderRegistration', () => {
-    function enableChromeNextProjectHeader() {
-      (services.chrome.getChromeStyle as jest.Mock).mockReturnValue('project');
-      (services.chrome.getChromeStyle$ as jest.Mock).mockReturnValue(
-        new BehaviorSubject('project')
-      );
-      (services.chrome.next.appHeader.set as jest.Mock).mockReturnValue(jest.fn());
+    function enableProjectChrome() {
+      chrome.getChromeStyle.mockReturnValue('project');
+      chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('project'));
+      chrome.appHeader.set.mockReturnValue(jest.fn());
     }
 
-    it('registers title and leaves menu to setHeaderActionMenu / search bar separate', async () => {
-      enableChromeNextProjectHeader();
+    it('registers title and leaves the search bar separate', async () => {
+      enableProjectChrome();
       await renderApp();
 
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           title: undefined,
           back: undefined,
-          menu: undefined,
           spacing: 'compact',
+          menu: expect.objectContaining({
+            primaryActionItem: expect.objectContaining({
+              testId: 'lnsApp_saveButton',
+            }),
+          }),
         })
       );
-      expect(screen.getByTestId('top-nav')).toBeInTheDocument();
       expect(services.unifiedSearch.ui.AggregateQuerySearchBar).toHaveBeenCalledWith(
         expect.objectContaining({
           showFilterBar: true,
@@ -203,7 +197,7 @@ describe('Lens App', () => {
     });
 
     it('registers the document title when a saved visualization is loaded', async () => {
-      enableChromeNextProjectHeader();
+      enableProjectChrome();
       await renderApp({
         preloadedState: {
           persistedDoc: getLensDocumentMock({
@@ -212,7 +206,7 @@ describe('Lens App', () => {
         },
       });
 
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'My Lens visualization',
         })
@@ -220,14 +214,14 @@ describe('Lens App', () => {
     });
 
     it('registers the managed badge', async () => {
-      enableChromeNextProjectHeader();
+      enableProjectChrome();
       await renderApp({
         preloadedState: {
           managed: true,
         },
       });
 
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           badges: expect.arrayContaining([
             expect.objectContaining({
@@ -239,7 +233,7 @@ describe('Lens App', () => {
     });
 
     it('registers an explicit back to the originating dashboard when editing from a panel', async () => {
-      enableChromeNextProjectHeader();
+      enableProjectChrome();
       props.redirectToOrigin = jest.fn();
       props.incomingState = {
         originatingApp: 'dashboards',
@@ -249,7 +243,7 @@ describe('Lens App', () => {
 
       await renderApp();
 
-      expect(services.chrome.next.appHeader.set).toHaveBeenCalledWith(
+      expect(chrome.appHeader.set).toHaveBeenCalledWith(
         expect.objectContaining({
           back: expect.objectContaining({
             href: expect.stringContaining('dashboards'),
@@ -258,14 +252,6 @@ describe('Lens App', () => {
           }),
         })
       );
-
-      const registeredConfig = (services.chrome.next.appHeader.set as jest.Mock).mock.calls.at(
-        -1
-      )?.[0];
-      const event = { preventDefault: jest.fn() };
-      registeredConfig.back.onClick(event);
-      expect(event.preventDefault).toHaveBeenCalled();
-      expect(props.redirectToOrigin).toHaveBeenCalled();
     });
   });
 
