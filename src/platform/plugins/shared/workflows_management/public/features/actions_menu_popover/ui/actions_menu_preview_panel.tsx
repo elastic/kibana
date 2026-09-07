@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -19,14 +18,21 @@ import {
   EuiTab,
   EuiTabs,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getBaseConnectorType } from '@kbn/workflows-ui';
+import {
+  defaultPanelStyles,
+  panelStyles,
+  previewStepRowStyles,
+  resourceCardStyles,
+} from './actions_menu_preview_panel.styles';
+import { ActionsMenuAiIcon } from './ai_icon_tile';
 import { WORKFLOWS_DOCUMENTATION_URL } from '../../../../common';
 import { stepSchemas } from '../../../../common/step_schemas';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -35,7 +41,6 @@ import { useWorkflowJsonSchema } from '../../validate_workflow_yaml/model/use_wo
 import { getIconGlyphColor } from '../lib/get_action_options';
 import { getFieldsFromZodSchema } from '../lib/get_step_preview_fields';
 import type { ActionOptionData, JumpToStepEntry } from '../types';
-import { ActionsMenuAiIcon, aiIconTileCss } from './ai_icon_tile';
 import {
   isActionConnectorGroup,
   isActionConnectorOption,
@@ -53,7 +58,6 @@ interface ActionsMenuPreviewPanelProps {
   /** Pin step detail; when `parentSection` is set, also navigate left into that category. */
   onPinPreview?: (action: ActionOptionData, parentSection?: ActionOptionData) => void;
 }
-
 export function ActionsMenuPreviewPanel({
   hoveredOption,
   hoveredJumpEntry,
@@ -143,7 +147,6 @@ export function ActionsMenuPreviewPanel({
     />
   );
 }
-
 /* ── Default state ── */
 
 function DefaultPanel() {
@@ -214,7 +217,7 @@ function DefaultPanel() {
             defaultMessage: 'Download schema',
           })}
           description={i18n.translate('workflows.actionsMenu.preview.downloadSchemaDesc', {
-            defaultMessage: 'Schema the full JSON schema',
+            defaultMessage: 'Download the full JSON schema',
           })}
           iconType="download"
           onClick={handleDownloadSchema}
@@ -223,7 +226,6 @@ function DefaultPanel() {
     </div>
   );
 }
-
 function ResourceCard({
   title,
   description,
@@ -274,7 +276,6 @@ function ResourceCard({
     </button>
   );
 }
-
 /* ── Jump step YAML preview ── */
 
 function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
@@ -302,7 +303,6 @@ function JumpStepPanel({ entry }: { entry: JumpToStepEntry }) {
     </div>
   );
 }
-
 /* ── Section preview ── */
 
 function SectionPreviewPanel({
@@ -351,7 +351,6 @@ function SectionPreviewPanel({
     </div>
   );
 }
-
 /* ── Step detail ── */
 
 function StepDetailPanel({
@@ -556,448 +555,80 @@ function PreviewStepRow({
   const preferMenuIcon =
     iconType === 'sparkles' || iconType === 'database' || iconType === 'branch';
   const showLeafActions = !isGroup && (onAdd || onPinPreview);
+  const viewDetailsLabel = i18n.translate('workflows.actionsMenu.viewDetails', {
+    defaultMessage: 'View details',
+  });
+  const addStepLabel = i18n.translate('workflows.actionsMenu.addStep', {
+    defaultMessage: 'Add step',
+  });
 
   return (
-    <button type="button" css={styles.row} onClick={onClick}>
-      <span css={[styles.iconContainer, getPreviewIconContainerStyle(step, styles)]}>
-        {preferMenuIcon && iconType === 'sparkles' ? (
-          <ActionsMenuAiIcon />
-        ) : preferMenuIcon && iconType ? (
-          <EuiIcon type={iconType} size="m" color={glyphColor} aria-hidden />
-        ) : isActionConnectorGroup(step) || isActionConnectorOption(step) ? (
-          <StepIcon
-            stepType={getBaseConnectorType(step.connectorType)}
-            executionStatus={undefined}
-          />
-        ) : isActionGroup(step) || isActionOption(step) ? (
-          step.iconType === 'sparkles' ? (
+    <div css={styles.row}>
+      <button type="button" css={styles.rowMain} onClick={onClick}>
+        <span css={[styles.iconContainer, getPreviewIconContainerStyle(step, styles)]}>
+          {preferMenuIcon && iconType === 'sparkles' ? (
             <ActionsMenuAiIcon />
-          ) : (
-            <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />
-          )
-        ) : null}
-      </span>
-      <span css={styles.info}>
-        <span css={styles.labelText}>{step.label}</span>
-        {step.description && (
-          <EuiText size="xs" color="subdued" css={styles.description}>
-            {step.description}
-          </EuiText>
+          ) : preferMenuIcon && iconType ? (
+            <EuiIcon type={iconType} size="m" color={glyphColor} aria-hidden />
+          ) : isActionConnectorGroup(step) || isActionConnectorOption(step) ? (
+            <StepIcon
+              stepType={getBaseConnectorType(step.connectorType)}
+              executionStatus={undefined}
+            />
+          ) : isActionGroup(step) || isActionOption(step) ? (
+            step.iconType === 'sparkles' ? (
+              <ActionsMenuAiIcon />
+            ) : (
+              <EuiIcon type={step.iconType} size="m" color={glyphColor} aria-hidden />
+            )
+          ) : null}
+        </span>
+        <span css={styles.info}>
+          <span css={styles.labelText}>{step.label}</span>
+          {step.description && (
+            <EuiText size="xs" color="subdued" css={styles.description}>
+              {step.description}
+            </EuiText>
+          )}
+        </span>
+        {isGroup && (
+          <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden css={styles.chevron} />
         )}
-      </span>
-      {isGroup && (
-        <EuiIcon type="arrowRight" size="s" color="subdued" aria-hidden css={styles.chevron} />
-      )}
+      </button>
       {showLeafActions && (
         <span className="rowActions" css={styles.rowActions}>
           {onPinPreview && (
-            <EuiButtonIcon
-              iconType="info"
-              size="m"
-              iconSize="m"
-              color="text"
-              display="empty"
-              css={styles.rowActionButton}
-              aria-label={i18n.translate('workflows.actionsMenu.viewDetails', {
-                defaultMessage: 'View details',
-              })}
-              data-test-subj="actionsMenuPreviewItemInfo"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onPinPreview();
-              }}
-              onMouseDown={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            />
+            <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="info"
+                size="m"
+                iconSize="m"
+                color="text"
+                display="empty"
+                css={styles.rowActionButton}
+                aria-label={viewDetailsLabel}
+                data-test-subj="actionsMenuPreviewItemInfo"
+                onClick={onPinPreview}
+              />
+            </EuiToolTip>
           )}
           {onAdd && (
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              size="m"
-              iconSize="m"
-              color="text"
-              display="base"
-              css={styles.rowActionButton}
-              aria-label={i18n.translate('workflows.actionsMenu.addStep', {
-                defaultMessage: 'Add step',
-              })}
-              data-test-subj="actionsMenuPreviewItemAdd"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onAdd();
-              }}
-              onMouseDown={(e: React.MouseEvent) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            />
+            <EuiToolTip content={addStepLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="plusInCircle"
+                size="m"
+                iconSize="m"
+                color="text"
+                display="base"
+                css={styles.rowActionButton}
+                aria-label={addStepLabel}
+                data-test-subj="actionsMenuPreviewItemAdd"
+                onClick={onAdd}
+              />
+            </EuiToolTip>
           )}
         </span>
       )}
-    </button>
+    </div>
   );
 }
-
-/* ── Styles ── */
-
-const panelStyles = {
-  // Category preview: title stays put; list scrolls with scrollbar flush to panel edge
-  sectionPanel: css({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    overflow: 'hidden',
-    paddingTop: '12px',
-    gap: '16px',
-  }),
-  sectionTitle: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-    padding: '0 16px',
-  }),
-  stepListScroll: css({
-    flex: 1,
-    minHeight: 0,
-    overflowY: 'auto',
-    // Left/bottom inset for the card; no right padding so the scrollbar
-    // sits flush against the right panel edge.
-    padding: '0 0 16px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch',
-  }),
-  // Figma: Frame 8 steps list — r=8, connected rows with outer card border.
-  // Sizes to content; scroll appears on stepListScroll when it overflows.
-  // overflow:hidden keeps row backgrounds clipped to the card radius.
-  stepList: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flex: '0 0 auto',
-      alignSelf: 'flex-start',
-      boxSizing: 'border-box',
-      // Full width minus the flush-scrollbar gutter
-      width: 'calc(100% - 16px)',
-      borderRadius: euiTheme.border.radius.medium,
-      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      overflow: 'hidden',
-    }),
-  // Figma: Info frame — bg=gray, r=4, pad=[16,24,24,24], gap=16
-  panel: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      overflowY: 'auto',
-      borderRadius: '4px',
-      padding: `12px 16px 16px 16px`,
-      gap: euiTheme.size.base,
-    }),
-  titleBlock: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '6px',
-  }),
-  // Borealis: semiBold token is 500; 600 (`bold`) is the visible semibold weight
-  titleBlockText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: '14px',
-      fontWeight: euiTheme.font.weight.bold,
-      lineHeight: '24px',
-      color: euiTheme.colors.textParagraph,
-      margin: 0,
-    }),
-  detailActions: css({
-    marginTop: '2px',
-  }),
-  descriptionText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: '12px',
-      fontWeight: 400,
-      lineHeight: '18px',
-      color: euiTheme.colors.textSubdued,
-      margin: 0,
-      display: '-webkit-box',
-      WebkitBoxOrient: 'vertical',
-      WebkitLineClamp: 3,
-      overflow: 'hidden',
-    }),
-  // Tabs + field list; 8px gap between tab underline and the bordered list
-  tabsAndFields: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  }),
-  tabs: css({
-    flexShrink: 0,
-  }),
-  tabCount: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginInlineStart: euiTheme.size.xs,
-    }),
-  // Mockup: bordered field list — r=8, connected rows
-  fieldList: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: '8px',
-      overflow: 'hidden',
-    }),
-  // Figma: field-inner — pad=[16,16,16,16], gap=4
-  fieldRow: css({
-    padding: '16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-  }),
-  fieldLabelRow: css({
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-  }),
-  // Neutral text-token chip (matches EuiCode default), uppercase monospace
-  typeBadge: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'inline-block',
-      padding: '2px 6px',
-      borderRadius: euiTheme.border.radius.small,
-      backgroundColor: euiTheme.colors.backgroundLightText,
-      color: euiTheme.colors.textParagraph,
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: '10px',
-      fontWeight: 600,
-      lineHeight: '12px',
-      letterSpacing: '0.02em',
-      textTransform: 'uppercase',
-      maxWidth: '200px',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      flexShrink: 1,
-      verticalAlign: 'middle',
-    }),
-  fieldName: css({
-    fontWeight: 600,
-  }),
-  // Mockup: Required uses danger/red emphasis on the trailing edge
-  requiredBadge: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      marginLeft: 'auto',
-      flexShrink: 0,
-      fontSize: '10px',
-      fontWeight: 500,
-      lineHeight: '16px',
-      color: euiTheme.colors.textDanger,
-      letterSpacing: '0.02em',
-    }),
-  fieldDescription: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    display: 'block',
-  }),
-  fieldDivider: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      height: '1px',
-      backgroundColor: euiTheme.colors.borderBaseSubdued,
-    }),
-  emptyFields: css({
-    padding: '16px',
-  }),
-  codeText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      margin: 0,
-      fontFamily: euiTheme.font.familyCode,
-      fontSize: '12px',
-      lineHeight: '19px',
-      whiteSpace: 'pre',
-    }),
-  yamlPreview: css({
-    padding: '16px',
-  }),
-};
-
-const defaultPanelStyles = {
-  root: css({
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-  }),
-  // Figma: Info hero — r=4, pad=[16,24,24,24], gap=16, flex:1
-  hero: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '16px',
-      flex: 1,
-      justifyContent: 'center',
-      borderRadius: '4px',
-      padding: `${euiTheme.size.base} 24px 24px 24px`,
-    }),
-  illustration: css({
-    width: '128px',
-    height: '128px',
-    flexShrink: 0,
-  }),
-  // Figma: TEXT — fs=14, fw=500, lh=24
-  heroText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: '14px',
-      fontWeight: 500,
-      lineHeight: '24px',
-      color: euiTheme.colors.textParagraph,
-      margin: 0,
-      textAlign: 'center',
-    }),
-  // Figma: connected Documentation + Download schema block
-  cardsSection: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      flexShrink: 0,
-      margin: '16px',
-      borderRadius: euiTheme.border.radius.medium,
-      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      overflow: 'hidden',
-    }),
-};
-
-const resourceCardStyles = {
-  row: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'block',
-      width: '100%',
-      padding: `12px ${euiTheme.size.base}`,
-      border: 'none',
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: 0,
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      textAlign: 'left',
-      textDecoration: 'none',
-      color: 'inherit',
-      cursor: 'pointer',
-      '&:last-child': {
-        borderBottom: 'none',
-      },
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        textDecoration: 'none',
-      },
-      '&:focus': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-        outline: 'none',
-      },
-    }),
-};
-
-const previewStepRowStyles = {
-  row: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      display: 'flex',
-      alignItems: 'center',
-      width: '100%',
-      padding: `12px ${euiTheme.size.base}`,
-      gap: '11px',
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      border: 'none',
-      borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-      borderRadius: 0,
-      cursor: 'pointer',
-      textAlign: 'left',
-      margin: 0,
-      '&:last-child': {
-        borderBottom: 'none',
-      },
-      '&:hover': {
-        backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      },
-      '& .rowActions': {
-        opacity: 0,
-        pointerEvents: 'none',
-      },
-      '&:hover .rowActions': {
-        opacity: 1,
-        pointerEvents: 'auto',
-      },
-    }),
-  // Keep radius on the same rule as fill so corners render cleanly
-  iconContainer: css({
-    width: '40px',
-    height: '40px',
-    flexShrink: 0,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: '8px',
-    boxSizing: 'border-box',
-  }),
-  // AI — Primary→Assistance gradients (same recipe as AiButton / AI Agent)
-  iconContainerPlatform: aiIconTileCss,
-  iconContainerTrigger: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccent,
-      border: `1px solid ${euiTheme.colors.borderBaseAccent}`,
-    }),
-  iconContainerAppLogo: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      border: `1px solid ${euiTheme.colors.borderBasePlain}`,
-    }),
-  iconContainerFlowControl: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseAccentSecondary,
-      border: `1px solid ${euiTheme.colors.borderBaseAccentSecondary}`,
-    }),
-  iconContainerDataTransformation: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
-      border: `1px solid ${euiTheme.colors.borderBaseWarning}`,
-    }),
-  info: css({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '2px',
-    flex: 1,
-    minWidth: 0,
-  }),
-  labelText: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      fontSize: '12px',
-      fontWeight: 700,
-      lineHeight: '15px',
-      color: euiTheme.colors.textParagraph,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      display: 'block',
-    }),
-  description: css({
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    display: 'block',
-  }),
-  chevron: css({
-    flexShrink: 0,
-  }),
-  rowActions: css({
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: '4px',
-  }),
-  rowActionButton: css({
-    inlineSize: '32px',
-    blockSize: '32px',
-    width: '32px',
-    height: '32px',
-  }),
-};

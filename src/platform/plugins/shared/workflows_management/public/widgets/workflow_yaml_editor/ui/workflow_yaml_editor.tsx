@@ -14,7 +14,7 @@ import throttle from 'lodash/throttle';
 import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import type YAML from 'yaml';
+import { type Document, parseDocument } from 'yaml';
 import { monaco, YAML_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
@@ -265,7 +265,7 @@ export const WorkflowYAMLEditor = ({
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
   const yamlLineCounter = useSelector(selectEditorYamlLineCounter);
-  const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
+  const yamlDocumentRef = useRef<Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
@@ -421,11 +421,14 @@ export const WorkflowYAMLEditor = ({
         const editor = editorRef.current;
         const model = editor?.getModel();
         const stepInfo = focusedStepInfoRef.current;
-        const doc = yamlDocumentRef.current;
-        if (!editor || !model || !stepInfo || !doc || isReadOnlyYamlRef.current) {
+        if (!editor || !model || !stepInfo || isReadOnlyYamlRef.current) {
           return;
         }
-        const result = reorderStep(model, doc, stepInfo.stepId, direction, editor);
+        const currentDocument = parseDocument(model.getValue());
+        if (currentDocument.errors.length > 0) {
+          return;
+        }
+        const result = reorderStep(model, currentDocument, stepInfo.stepId, direction, editor);
         if (!result) {
           return;
         }

@@ -494,11 +494,6 @@ export function getIconGlyphColor(
   }
 }
 
-/** @deprecated Use {@link getIconGlyphColor}; filled tiles no longer use inverse glyphs. */
-export function usesInverseIconColor(_variant: IconVariant | undefined): boolean {
-  return false;
-}
-
 function assignIconVariants(
   options: ActionOptionData[],
   parentVariant: IconVariant | undefined,
@@ -514,11 +509,7 @@ function assignIconVariants(
       opt.iconColor = glyphColor;
     }
     if ('options' in opt && childVariant) {
-      assignIconVariants(
-        (opt as ActionGroup | ActionConnectorGroup).options,
-        childVariant,
-        euiTheme
-      );
+      assignIconVariants(opt.options, childVariant, euiTheme);
     }
   }
 }

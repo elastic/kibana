@@ -9,7 +9,7 @@
 
 import { type Document, isScalar, isSeq, visit, type YAMLMap, type YAMLSeq } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getStepNode, isStepLikeMap } from '@kbn/workflows-yaml';
+import { getStepNode, isNestedStepKey, isStepLikeMap } from '@kbn/workflows-yaml';
 import type { InsertedLineRange } from './get_line_range_for_edit';
 import { getMonacoRangeFromYamlNode } from '../utils';
 
@@ -29,7 +29,7 @@ function findParentStepSeq(document: Document, stepNode: YAMLMap): YAMLSeq | nul
       if (!pair.key || !isScalar(pair.key)) {
         return;
       }
-      if (pair.key.value !== 'steps' && pair.key.value !== 'else') {
+      if (!isNestedStepKey(pair.key.value)) {
         return;
       }
       const seq = pair.value;
@@ -204,7 +204,8 @@ export function reorderStep(
 
   const neighborLineCount = lowerText.split('\n').length;
   const movedLineCount = upperText.split('\n').length;
-  const lineStart = upper.startLine + neighborLineCount;
+  const separatorLineBreakCount = separator.split('\n').length - 1;
+  const lineStart = upper.startLine + neighborLineCount - 1 + separatorLineBreakCount;
   return {
     lineStart,
     lineEnd: lineStart + movedLineCount - 1,

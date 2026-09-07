@@ -45,7 +45,6 @@ jest.mock('../../../../common/schema', () => ({
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn().mockReturnValue([]),
   flattenOptions: jest.fn().mockReturnValue([]),
-  usesInverseIconColor: jest.fn().mockReturnValue(false),
   getIconGlyphColor: jest.fn().mockReturnValue(undefined),
 }));
 

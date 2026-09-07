@@ -70,6 +70,30 @@ describe('getStepMoveState', () => {
       index: 0,
     });
   });
+
+  it('supports steps in an on-failure fallback block', () => {
+    const yaml = `steps:
+  - name: try_step
+    type: action
+    on-failure:
+      fallback:
+        - name: fallback_a
+          type: wait
+        - name: fallback_b
+          type: wait`;
+    const doc = parseDocument(yaml);
+
+    expect(getStepMoveState(doc, 'fallback_a')).toMatchObject({
+      canMoveUp: false,
+      canMoveDown: true,
+      index: 0,
+    });
+    expect(getStepMoveState(doc, 'fallback_b')).toMatchObject({
+      canMoveUp: true,
+      canMoveDown: false,
+      index: 1,
+    });
+  });
 });
 
 describe('reorderStep', () => {
@@ -125,6 +149,21 @@ describe('reorderStep', () => {
       ],
       expect.any(Function)
     );
+  });
+
+  it('includes blank separator lines in the moved step range', () => {
+    const yaml = `steps:
+  - name: first
+    type: wait
+
+  - name: second
+    type: wait`;
+    const model = createFakeMonacoModel(yaml);
+    const doc = parseDocument(yaml);
+
+    const result = reorderStep(model as unknown as monaco.editor.ITextModel, doc, 'first', 'down');
+
+    expect(result).toEqual({ lineStart: 5, lineEnd: 6 });
   });
 
   it('returns undefined when the step cannot move further', () => {

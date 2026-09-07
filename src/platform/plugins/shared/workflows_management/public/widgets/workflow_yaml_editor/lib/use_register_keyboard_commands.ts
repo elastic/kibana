@@ -145,9 +145,12 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           label: i18n.translate('workflows.workflowDetail.yamlEditor.action.moveStepUp', {
             defaultMessage: 'Move step up',
           }),
-          // eslint-disable-next-line no-bitwise
           keybindings: [
-            monaco.KeyMod.CtrlCmd | monaco.KeyMod.Alt | monaco.KeyMod.Shift | monaco.KeyCode.UpArrow,
+            // eslint-disable-next-line no-bitwise
+            monaco.KeyMod.CtrlCmd |
+              monaco.KeyMod.Alt |
+              monaco.KeyMod.Shift |
+              monaco.KeyCode.UpArrow,
           ],
           run: withReadOnlyCheck(() => {
             moveStepUp();
@@ -160,8 +163,8 @@ export function useRegisterKeyboardCommands(): UseRegisterKeyboardCommandsReturn
           label: i18n.translate('workflows.workflowDetail.yamlEditor.action.moveStepDown', {
             defaultMessage: 'Move step down',
           }),
-          // eslint-disable-next-line no-bitwise
           keybindings: [
+            // eslint-disable-next-line no-bitwise
             monaco.KeyMod.CtrlCmd |
               monaco.KeyMod.Alt |
               monaco.KeyMod.Shift |

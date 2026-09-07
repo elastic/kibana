@@ -54,7 +54,7 @@ export function useDisplayOptions({
 
 const MAX_ACTION_MATCH_RANK = 5;
 
-function getActionMatchRank(option: ActionOptionData, normalizedTerm: string): number {
+export function getActionMatchRank(option: ActionOptionData, normalizedTerm: string): number {
   if (!normalizedTerm) return 0;
   const id = option.id.toLowerCase();
   const label = option.label.toLowerCase();
@@ -69,7 +69,7 @@ function getActionMatchRank(option: ActionOptionData, normalizedTerm: string): n
   return MAX_ACTION_MATCH_RANK + 1;
 }
 
-function isActionSearchMatch(option: ActionOptionData, normalizedTerm: string): boolean {
+export function isActionSearchMatch(option: ActionOptionData, normalizedTerm: string): boolean {
   return getActionMatchRank(option, normalizedTerm) <= MAX_ACTION_MATCH_RANK;
 }
 

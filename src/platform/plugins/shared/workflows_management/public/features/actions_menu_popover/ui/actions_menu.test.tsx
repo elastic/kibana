@@ -56,7 +56,6 @@ const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 
 jest.mock('../lib/get_action_options', () => ({
   getActionOptions: jest.fn(() => mockOptions),
-  usesInverseIconColor: jest.fn(() => false),
   getIconGlyphColor: jest.fn(() => undefined),
   flattenOptions: jest.fn((options: ActionOptionData[]) => {
     const flat: ActionOptionData[] = [];
@@ -196,6 +195,9 @@ describe('ActionsMenu', () => {
 
       fireEvent.keyDown(searchInput, { key: 'ArrowDown' });
       expect(getKeyboardActiveLabel()).toContain('Triggers');
+      const activeDescendantId = searchInput.getAttribute('aria-activedescendant');
+      expect(activeDescendantId).not.toBeNull();
+      expect(document.getElementById(activeDescendantId ?? '')).toHaveTextContent('Triggers');
 
       fireEvent.keyDown(searchInput, { key: 'ArrowUp' });
       // Wrap: from first Up goes to last actionable root item
