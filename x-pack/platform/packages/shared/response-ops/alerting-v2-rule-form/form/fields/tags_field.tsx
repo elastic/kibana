@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
-import { useRuleFormMeta } from '../contexts';
+import { useRuleFormMeta, useRuleFormServices } from '../contexts';
+import { useFetchRuleTags } from '../hooks/use_fetch_rule_tags';
 
 export const validateTags = (value?: string[]): true | string => {
   if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
@@ -32,6 +34,14 @@ export const validateTags = (value?: string[]): true | string => {
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
+  const { http } = useRuleFormServices();
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(searchQuery, 200);
+  const { data: existingTags, isLoading } = useFetchRuleTags({
+    http,
+    search: debouncedQuery,
+  });
+  const tagOptions = (existingTags ?? []).map((tag: string) => ({ label: tag }));
 
   return (
     <Controller
@@ -40,8 +50,6 @@ export const TagsField = () => {
       rules={{ validate: validateTags }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
-        const options = selectedOptions;
-        const atTagCountLimit = (field.value?.length ?? 0) >= MAX_TAGS;
 
         return (
           <EuiFormRow
@@ -56,17 +64,26 @@ export const TagsField = () => {
             fullWidth
           >
             <EuiComboBox
+              aria-label={i18n.translate('xpack.alertingV2.ruleForm.tagsAriaLabel', {
+                defaultMessage: 'Tags',
+              })}
+              placeholder={i18n.translate('xpack.alertingV2.ruleForm.tagsPlaceholder', {
+                defaultMessage: 'Add tags to organize and filter rules',
+              })}
               data-test-subj="ruleTagsInput"
-              options={options}
+              async
+              isLoading={isLoading}
+              options={tagOptions}
               selectedOptions={selectedOptions}
+              onSearchChange={setSearchQuery}
+              onBlur={field.onBlur}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}
-              onCreateOption={
-                atTagCountLimit
-                  ? undefined
-                  : (searchValue) => {
-                      field.onChange([...(field.value ?? []), searchValue]);
-                    }
-              }
+              onCreateOption={(searchValue) => {
+                const trimmed = searchValue.trim();
+                if (trimmed.length > 0 && !(field.value ?? []).includes(trimmed)) {
+                  field.onChange([...(field.value ?? []), trimmed]);
+                }
+              }}
               isClearable={true}
               isInvalid={!!error}
               fullWidth
