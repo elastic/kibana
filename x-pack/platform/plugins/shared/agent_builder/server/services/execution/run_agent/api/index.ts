@@ -11,7 +11,6 @@ export type {
   ApiRegistryDefinition,
   ApiRegistryMeta,
   ApiRequest,
-  ApiTarget,
   LoadedApi,
 } from './types';
 export { loadApi } from './load_api';
