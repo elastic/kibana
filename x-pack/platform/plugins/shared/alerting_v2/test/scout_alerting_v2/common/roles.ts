@@ -150,6 +150,25 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
   ],
 };
 
+/**
+ * Composite read-only role over rules + alerts. Used by routes that require
+ * both `rules.read` and `alerts.read`, such as matcher value suggestions.
+ */
+export const ALERTING_V2_RULES_AND_ALERTS_READ_ROLE: KibanaRole = {
+  elasticsearch: READER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_rules: ['read'],
+        alerting_v2_alerts: ['read'],
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
 export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
   kibana: [
