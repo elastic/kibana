@@ -51,6 +51,16 @@ export const readCachedEisConnectors = (): Record<string, object> | undefined =>
       return undefined;
     }
 
+    // Caches written before the switch to inference endpoints hold stack-connector
+    // shapes (no inferenceId); loading those would fail every run until the TTL
+    // expires, so treat them as a miss.
+    const hasStaleShape = Object.values(cached.connectors).some(
+      (connector) => typeof (connector as { inferenceId?: unknown }).inferenceId !== 'string'
+    );
+    if (hasStaleShape) {
+      return undefined;
+    }
+
     return cached.connectors;
   } catch {
     return undefined;
