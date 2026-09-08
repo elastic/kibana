@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { KibanaCodeEditorWrapper, type ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { LensPageObjects } from '../../fixtures';
 import {
   applyLensInlineEditorAndWaitClosed,
   cancelLensInlineEditorAndWaitClosed,
@@ -15,6 +17,45 @@ import {
   test,
   testData,
 } from '../../fixtures';
+
+/**
+ * Asserts the generated ES|QL query for the fixture inline metric
+ * (average of bytes + static max 10000 on logstash-*).
+ */
+async function expectConvertedInlineMetricQuery(page: ScoutPage) {
+  const codeEditor = new KibanaCodeEditorWrapper(page);
+  await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+
+  await expect
+    .poll(async () => {
+      const query = await codeEditor.getCodeEditorValue();
+      return {
+        fromLogstash: query.includes('FROM logstash-*'),
+        avgBytes: query.includes('AVG(bytes)'),
+        staticMax: query.includes('static_max_value = 10000'),
+        timeStart: query.includes('?_tstart'),
+        timeEnd: query.includes('?_tend'),
+      };
+    })
+    .toStrictEqual({
+      fromLogstash: true,
+      avgBytes: true,
+      staticMax: true,
+      timeStart: true,
+      timeEnd: true,
+    });
+}
+
+/**
+ * Asserts the inline metric panel still shows Average of bytes with its max progress bar.
+ * Scoped to the panel embeddable — the dashboard also has a library metric with the same title.
+ */
+async function expectConvertedInlineMetricPanel(dashboard: LensPageObjects['dashboard']) {
+  const panel = dashboard.getPanelByEmbeddableId(testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC);
+  await expect(panel).toContainText('Average of bytes');
+  await expect(panel).toContainText('5,727.314');
+  await expect(panel.locator('.echSingleMetricProgress')).toBeVisible();
+}
 
 test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings, apiServices }) => {
@@ -55,7 +96,7 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
     pageObjects,
     page,
   }) => {
-    const { lens } = pageObjects;
+    const { dashboard, lens } = pageObjects;
 
     await openInlineEditorAndWaitVisible(
       pageObjects,
@@ -64,17 +105,26 @@ test.describe('Lens Convert to ES|QL', { tag: '@local-stateful-classic' }, () =>
 
     await convertToEsqlViaModal({ pageObjects, page });
 
+    // Conversion produced the expected query and the metric still renders correctly
+    await expectConvertedInlineMetricQuery(page);
+    await expect(
+      lens.dimensions.getDimensionTriggersLocator('lnsMetric_primaryMetricDimensionPanel')
+    ).toHaveText('Average of bytes');
+    await expectConvertedInlineMetricPanel(dashboard);
+
     await applyLensInlineEditorAndWaitClosed({ lens });
 
-    // Open editor again and check the "Apply and close" button is disabled
+    // Dashboard panel keeps the converted metric after apply
+    await expectConvertedInlineMetricPanel(dashboard);
+
+    // Reopen: still text-based, no unsaved changes, query persisted
     await openInlineEditorAndWaitVisible(
       pageObjects,
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
     await expect(page.getByText('ES|QL Query Results')).toBeVisible();
     await expect(lens.applyFlyoutButton).toBeDisabled();
-
-    // TODO: Add conversion assertions: https://github.com/elastic/kibana/issues/250385
+    await expectConvertedInlineMetricQuery(page);
   });
 
   test('should update and reflect the visualization configuration after the conversion', async ({
