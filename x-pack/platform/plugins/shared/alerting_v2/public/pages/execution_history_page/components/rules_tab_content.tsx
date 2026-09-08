@@ -16,6 +16,8 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiTablePagination,
+  useEuiTheme,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -60,11 +62,53 @@ const noFlexGrowCss = css`
   flex-grow: 0;
 `;
 
+// Full-height flex chain so the grid (not the page) owns the scroll: the root fills the tab area,
+// the table area grows to fill what's left below the filter, and the grid fills that with an
+// internal scroll while the pager stays pinned below it.
+const rootCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-block-size: 0;
+  min-inline-size: 0;
+`;
+
+const tableAreaCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-block-size: 0;
+`;
+
+const gridWrapperCss = css`
+  flex-grow: 1;
+  min-block-size: 0;
+`;
+
 const gridStyleOverride = {
-  border: 'all' as const,
   header: 'shade' as const,
   stripes: false,
 };
+
+// UnifiedDataTable draws cell borders but not an outer frame, so the wrapper supplies the border,
+// rounded corners, and toolbar/header padding. Targeting the grid's internal classes is the only
+// way to reach its chrome; the episodes list page styles it the same way.
+const getTableCss = (euiTheme: EuiThemeComputed) => css`
+  height: 100%;
+  border: ${euiTheme.border.thin};
+  border-radius: ${euiTheme.border.radius.medium};
+  overflow: hidden;
+
+  & .euiDataGrid__controls {
+    padding-inline-start: ${euiTheme.size.s};
+    padding-top: ${euiTheme.size.s};
+    padding-bottom: ${euiTheme.size.s};
+  }
+
+  & .unifiedDataTable__cellValue {
+    font-family: unset;
+  }
+`;
 
 const RULES_DEFAULT_VISIBLE_COLUMNS: string[] = [
   RULE_EXECUTION_FIELDS.startedAt,
@@ -180,6 +224,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   const dateTimeFormat = settings.client.get<string>('dateFormat');
   const canReadRules = useService(UserCapabilities).canRead('rules');
 
+  const { euiTheme } = useEuiTheme();
   const services = useUnifiedDataTableServices();
   const { dataView, error: dataViewError } = useRuleExecutionsDataView();
   const { visibleColumns, setVisibleColumns, settings: tableSettings, onColumnResize, rowHeight, setRowHeight } =
@@ -246,37 +291,40 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
     }
 
     return (
-      <div data-test-subj="ruleExecutionHistoryTable">
-        <EuiScreenReaderOnly>
-          <span id="ruleExecutionHistoryTableAriaLabel">
-            {i18n.translate('xpack.alertingV2.executionHistory.rulesTab.tableCaption', {
-              defaultMessage: 'Rule execution history',
-            })}
-          </span>
-        </EuiScreenReaderOnly>
-        <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
-          <UnifiedDataTable
-            ariaLabelledBy="ruleExecutionHistoryTableAriaLabel"
-            dataView={dataView}
-            columns={visibleColumns}
-            onSetColumns={setVisibleColumns}
-            rows={rows}
-            loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-            sampleSizeState={rows.length}
-            totalHits={total}
-            isPaginationEnabled={false}
-            isSortEnabled={false}
-            sort={EMPTY_SORT}
-            showTimeCol={false}
-            settings={tableSettings}
-            onResize={onColumnResize}
-            rowHeightState={rowHeight}
-            onUpdateRowHeight={setRowHeight}
-            externalCustomRenderers={externalCustomRenderers}
-            gridStyleOverride={gridStyleOverride}
-            services={services}
-          />
-        </CellActionsProvider>
+      <div css={tableAreaCss}>
+        <div css={gridWrapperCss} data-test-subj="ruleExecutionHistoryTable">
+          <EuiScreenReaderOnly>
+            <span id="ruleExecutionHistoryTableAriaLabel">
+              {i18n.translate('xpack.alertingV2.executionHistory.rulesTab.tableCaption', {
+                defaultMessage: 'Rule execution history',
+              })}
+            </span>
+          </EuiScreenReaderOnly>
+          <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
+            <UnifiedDataTable
+              ariaLabelledBy="ruleExecutionHistoryTableAriaLabel"
+              css={getTableCss(euiTheme)}
+              dataView={dataView}
+              columns={visibleColumns}
+              onSetColumns={setVisibleColumns}
+              rows={rows}
+              loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
+              sampleSizeState={rows.length}
+              totalHits={total}
+              isPaginationEnabled={false}
+              isSortEnabled={false}
+              sort={EMPTY_SORT}
+              showTimeCol={false}
+              settings={tableSettings}
+              onResize={onColumnResize}
+              rowHeightState={rowHeight}
+              onUpdateRowHeight={setRowHeight}
+              externalCustomRenderers={externalCustomRenderers}
+              gridStyleOverride={gridStyleOverride}
+              services={services}
+            />
+          </CellActionsProvider>
+        </div>
         <EuiSpacer size="s" />
         <EuiTablePagination
           aria-label={i18n.translate(
@@ -300,7 +348,7 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
   }
 
   return (
-    <>
+    <div css={rootCss}>
       <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={noFlexGrowCss}>
         <EuiFlexItem grow={false}>
           <EuiSelect
@@ -321,6 +369,6 @@ export const RulesTabContent = ({ onRuleClick }: Props) => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {renderContent()}
-    </>
+    </div>
   );
 };
