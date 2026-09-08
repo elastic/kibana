@@ -53,6 +53,9 @@ const styles = ({ euiTheme }: UseEuiTheme) => {
     fullTextSizer: css`
       visibility: hidden;
       white-space: nowrap;
+      /* EuiTextTruncate measures an integer-rounded width; without this cushion a sub-pixel
+         deficit makes it truncate text that already fits. */
+      padding-inline-end: 1px;
     `,
     truncationOverlay: css`
       position: absolute;
@@ -75,7 +78,12 @@ export const MetaBlocks: FunctionComponent<MetaBlocksProps> = ({ items, ...rest 
         const isStringValue = typeof item.value === 'string';
 
         return (
-          <EuiText key={index} size="s" css={memoized.item} data-test-subj={item['data-test-subj']}>
+          <EuiText
+            key={item.id ?? index}
+            size="s"
+            css={memoized.item}
+            data-test-subj={item['data-test-subj']}
+          >
             <span css={memoized.key}>{item.title}</span>
             {isStringValue ? (
               <span css={memoized.truncatedValue}>
