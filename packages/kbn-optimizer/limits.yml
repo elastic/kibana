@@ -34,6 +34,7 @@ pageLoadAssetSize:
   contextEngine: 7557
   contextEngineAgentBuilder: 4999
   controls: 10300
+  conversationProposals: 12663
   core: 563693
   cps: 9209
   crossClusterReplication: 12662
