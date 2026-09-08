@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   resolveSignificantEventsTuningConfig,

@@ -160,8 +160,8 @@
       }
     },
     {
-      "id": "ecbf3d1a454ed9a-062b47897c70dec",
-      "title": "Significant Events run quota API denies a non-critical admission at a finite limit without incrementing",
+      "id": "ecbf3d1a454ed9a-7c9fd91e22b351c",
+      "title": "Significant Events run quota API denies an admission at a finite limit without incrementing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -176,8 +176,8 @@
       }
     },
     {
-      "id": "ecbf3d1a454ed9a-689b83733437b03",
-      "title": "Significant Events run quota API allows and counts a critical investigation beyond its finite limit",
+      "id": "ecbf3d1a454ed9a-6b943913f2a8fcb",
+      "title": "Significant Events run quota API denies an investigation at a finite limit without incrementing",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -187,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
-        "line": 154,
-        "column": 48
+        "line": 152,
+        "column": 46
       }
     },
     {
