@@ -29,6 +29,12 @@ export class AlertEpisodesListPage {
    * appears when more mutating actions are available than fit inline (editors).
    */
   public readonly rowActionsMenuButton: Locator;
+  /** Details flyout container; privilege-independent anchor that it opened. */
+  public readonly episodeFlyout: Locator;
+  /** Privilege-independent close control in the flyout footer. */
+  public readonly episodeFlyoutCloseButton: Locator;
+  /** "Add to chat" in the flyout footer; hidden without Agent Builder `show`. */
+  public readonly episodeFlyoutAddToChatButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.pageContainer = this.page.testSubj.locator('alertingV2EpisodesListPage');
@@ -39,9 +45,31 @@ export class AlertEpisodesListPage {
     this.rowActionsMenuButton = this.page.testSubj.locator(
       'unifiedDataTable_additionalRowControl_actionsMenu'
     );
+    this.episodeFlyout = this.page.testSubj.locator('alertingV2EpisodeFlyout');
+    this.episodeFlyoutCloseButton = this.page.testSubj.locator(
+      'alertingV2EpisodeFlyoutCloseButton'
+    );
+    this.episodeFlyoutAddToChatButton = this.page.testSubj.locator(
+      'alertingV2EpisodeAddToChatButton'
+    );
   }
 
   async goto() {
     await this.page.gotoApp('management/alertingV2/episodes');
+  }
+
+  /**
+   * Opens the details flyout for the first visible episode row. Suites that
+   * call this seed a single matching episode so the grid has exactly one row.
+   */
+  async openEpisodeFlyout() {
+    const expandButton = this.pageContainer.locator(
+      '[data-grid-visible-row-index="0"] [data-test-subj="docTableExpandToggleColumn"]'
+    );
+    await expandButton.waitFor({ state: 'visible' });
+    await expandButton.scrollIntoViewIfNeeded();
+    await expandButton.hover();
+    await expandButton.click();
+    await this.episodeFlyout.waitFor({ state: 'visible' });
   }
 }

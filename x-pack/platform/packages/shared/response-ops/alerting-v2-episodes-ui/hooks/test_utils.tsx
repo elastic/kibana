@@ -17,6 +17,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
@@ -56,6 +57,7 @@ export const createMockServices = (
   uiSettings: createMockUiSettings(),
   unifiedDocViewer: createMockUnifiedDocViewer(),
   userProfile: userProfileServiceMock.createStart(),
+  application: applicationServiceMock.createStartContract(),
   ...overrides,
 });
 

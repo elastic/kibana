@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { AttachmentConverter } from '../../types';
@@ -18,12 +19,21 @@ import {
 
 export interface ManualAddToChatServices {
   agentBuilder?: AgentBuilderPluginStart;
+  application?: ApplicationStart;
 }
 
 export interface UseManualAddToChatResult {
   addToChat: () => void;
   isAddToChatAvailable: boolean;
 }
+
+/** True when the agent builder plugin is present and the user can open chat. */
+export const canManuallyAddToChat = (item: unknown, services: ManualAddToChatServices): boolean =>
+  Boolean(
+    item &&
+      services.agentBuilder?.openChat &&
+      services.application?.capabilities.agentBuilder?.show === true
+  );
 
 export const useManualAddToChat = <FocusedItem>(
   item: FocusedItem | undefined,
@@ -78,7 +88,7 @@ export const useManualAddToChat = <FocusedItem>(
     };
   }, [agentBuilder]);
 
-  const isAddToChatAvailable = Boolean(agentBuilder?.openChat && item);
+  const isAddToChatAvailable = canManuallyAddToChat(item, services);
 
   const addToChat = useCallback(() => {
     if (!item) {

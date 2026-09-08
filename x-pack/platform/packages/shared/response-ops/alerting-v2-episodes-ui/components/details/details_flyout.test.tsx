@@ -8,6 +8,13 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { EpisodeAddToChatButton } from '@kbn/alerting-v2-browser-shared';
+import type { AlertEpisodeDetailsServices } from './types';
+import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RuleStateStatus } from '../../types/rule_state';
 import {
@@ -18,6 +25,12 @@ import {
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 jest.mock('../../hooks/use_fetch_rule');
+jest.mock('../../hooks/use_fetch_episode_query');
+
+jest.mock('@kbn/alerting-v2-browser-shared', () => ({
+  ...jest.requireActual('@kbn/alerting-v2-browser-shared'),
+  EpisodeAddToChatButton: jest.fn(() => <div data-test-subj="alertingV2EpisodeAddToChatButton" />),
+}));
 
 jest.mock('./details_header_section', () => ({
   AlertEpisodeDetailsHeaderSection: () => <div data-test-subj="headerSectionStub" />,
@@ -36,10 +49,40 @@ jest.mock('./runbook_section', () => ({
 }));
 
 const mockUseFetchRule = jest.mocked(useFetchRule);
+const mockUseFetchEpisodeQuery = jest.mocked(useFetchEpisodeQuery);
+const mockEpisodeAddToChatButton = jest.mocked(EpisodeAddToChatButton);
 
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
+
+const createAddToChatServices = (
+  overrides: Partial<AlertEpisodeDetailsServices> = {}
+): AlertEpisodeDetailsServices => {
+  const application = applicationServiceMock.createStartContract();
+  application.capabilities = {
+    ...application.capabilities,
+    agentBuilder: { show: true },
+  };
+  return createMockServices({
+    http: mockHttp,
+    application,
+    agentBuilder: agentBuilderMocks.createStart(),
+    ...overrides,
+  });
+};
+
 const Wrapper = createQueryClientWrapper(createTestQueryClient());
+
+const mockEpisode = {
+  '@timestamp': '2026-01-01T00:00:00.000Z',
+  'episode.id': 'ep-1',
+  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+  'rule.id': 'rule-1',
+  group_hash: 'gh-1',
+  first_timestamp: '2026-01-01T00:00:00.000Z',
+  last_timestamp: '2026-01-01T01:00:00.000Z',
+  duration: 3600000,
+} as AlertEpisode;
 
 const loadedRuleState = {
   status: RuleStateStatus.loaded,
@@ -60,6 +103,9 @@ describe('AlertEpisodeDetailsFlyout', () => {
     mockUseFetchRule.mockReturnValue({
       ruleState: loadedRuleState,
     } as ReturnType<typeof useFetchRule>);
+    mockUseFetchEpisodeQuery.mockReturnValue({
+      data: mockEpisode,
+    } as ReturnType<typeof useFetchEpisodeQuery>);
   });
 
   it('renders header and the overview tab body by default', () => {
@@ -80,6 +126,78 @@ describe('AlertEpisodeDetailsFlyout', () => {
       'href',
       mockHttp.basePath.prepend('/app/management/alertingV2/episodes/ep-1')
     );
+  });
+
+  it('renders the add to chat button in the footer with the loaded episode and rule', () => {
+    const services = createAddToChatServices();
+    render(<AlertEpisodeDetailsFlyout {...baseProps} services={services} />, { wrapper: Wrapper });
+
+    expect(mockEpisodeAddToChatButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        episode: mockEpisode,
+        rule: loadedRuleState.rule,
+        services,
+      }),
+      expect.anything()
+    );
+    expect(screen.getByTestId('alertingV2EpisodeAddToChatButton')).toBeInTheDocument();
+  });
+
+  it('omits the rule from add to chat when the rule is not loaded', () => {
+    mockUseFetchRule.mockReturnValue({
+      ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
+    } as ReturnType<typeof useFetchRule>);
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} services={createAddToChatServices()} />, {
+      wrapper: Wrapper,
+    });
+
+    expect(mockEpisodeAddToChatButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        episode: mockEpisode,
+        rule: undefined,
+      }),
+      expect.anything()
+    );
+  });
+
+  it('does not render the add to chat button when the episode has not loaded', () => {
+    mockUseFetchEpisodeQuery.mockReturnValue({
+      data: undefined,
+    } as ReturnType<typeof useFetchEpisodeQuery>);
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} services={createAddToChatServices()} />, {
+      wrapper: Wrapper,
+    });
+
+    expect(mockEpisodeAddToChatButton).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('alertingV2EpisodeAddToChatButton')).not.toBeInTheDocument();
+  });
+
+  it('does not render the add to chat button when agent builder is unavailable', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(mockEpisodeAddToChatButton).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('alertingV2EpisodeAddToChatButton')).not.toBeInTheDocument();
+  });
+
+  it('does not render the add to chat button when the user lacks agent builder privilege', () => {
+    const application = applicationServiceMock.createStartContract();
+    application.capabilities = {
+      ...application.capabilities,
+      agentBuilder: { show: false },
+    };
+
+    render(
+      <AlertEpisodeDetailsFlyout
+        {...baseProps}
+        services={createAddToChatServices({ application })}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    expect(mockEpisodeAddToChatButton).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('alertingV2EpisodeAddToChatButton')).not.toBeInTheDocument();
   });
 
   it('switches to related tab', () => {

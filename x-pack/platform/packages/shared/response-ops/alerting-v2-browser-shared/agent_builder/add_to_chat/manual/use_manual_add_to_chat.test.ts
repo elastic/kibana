@@ -7,6 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
+import type { ApplicationStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { AttachmentConverter } from '../../types';
@@ -46,10 +47,13 @@ describe('useManualAddToChat', () => {
           ui: { activeConversation$: activeConversation$.asObservable() },
         },
       } as unknown as AgentBuilderPluginStart,
+      application: {
+        capabilities: { agentBuilder: { show: true } },
+      } as unknown as ApplicationStart,
     };
   });
 
-  it('reports available when agentBuilder and item are present', () => {
+  it('reports available when agentBuilder, privilege, and item are present', () => {
     const { result } = renderHook(() => useManualAddToChat({ id: 'item-1' }, converter, services));
 
     expect(result.current.isAddToChatAvailable).toBe(true);
@@ -63,7 +67,28 @@ describe('useManualAddToChat', () => {
 
   it('reports unavailable when agentBuilder is not available', () => {
     const { result } = renderHook(() =>
-      useManualAddToChat({ id: 'item-1' }, converter, { agentBuilder: undefined })
+      useManualAddToChat({ id: 'item-1' }, converter, { ...services, agentBuilder: undefined })
+    );
+
+    expect(result.current.isAddToChatAvailable).toBe(false);
+  });
+
+  it('reports unavailable when the user lacks the agentBuilder.show privilege', () => {
+    const { result } = renderHook(() =>
+      useManualAddToChat({ id: 'item-1' }, converter, {
+        ...services,
+        application: {
+          capabilities: { agentBuilder: { show: false } },
+        } as unknown as ApplicationStart,
+      })
+    );
+
+    expect(result.current.isAddToChatAvailable).toBe(false);
+  });
+
+  it('reports unavailable when application capabilities are missing', () => {
+    const { result } = renderHook(() =>
+      useManualAddToChat({ id: 'item-1' }, converter, { agentBuilder: services.agentBuilder })
     );
 
     expect(result.current.isAddToChatAvailable).toBe(false);
