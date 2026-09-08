@@ -9,6 +9,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createRouteDependencies } from '../test_utils';
 import { SuggestUserProfilesRoute } from './suggest_user_profiles_route';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 
 const request = httpServerMock.createKibanaRequest({ body: { name: 'john', size: 10 } });
 const securityStart = securityMock.createStart();
@@ -17,7 +18,7 @@ describe('SuggestUserProfilesRoute', () => {
   it('returns suggested profiles for current space', async () => {
     const { ctx } = createRouteDependencies();
 
-    securityStart.userProfiles.suggest.mockResolvedValue([{ uid: 'u-1' } as any]);
+    securityStart.userProfiles.suggest.mockResolvedValue([{ uid: 'u-1' } as UserProfile]);
 
     const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
 
