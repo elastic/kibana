@@ -49,6 +49,7 @@ import { ObsCasesContext } from './obs_cases_context';
 import { AddToCaseButton } from './add_to_case_button';
 import { useDiscoverUrl } from '../hooks/use_discover_url/use_discover_url';
 import { ALERT_DETAILS_EBT_ELEMENTS } from '../ebt_constants';
+import { useInvestigationAvailability } from '../../../hooks/use_investigation_availability';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;
@@ -101,6 +102,17 @@ export function HeaderActions({
     http,
     notifications,
   } = services;
+  const alertId = alert?.fields[ALERT_UUID];
+  const hasInvestigationActionPrerequisites = Boolean(
+    services.application?.capabilities?.agentBuilder?.write === true && alertId
+  );
+  const isInvestigationAvailable = useInvestigationAvailability({
+    enabled: hasInvestigationActionPrerequisites,
+    skipAlertsQueryContext: true,
+  });
+  const showInvestigateAction = Boolean(
+    hasInvestigationActionPrerequisites && isInvestigationAvailable
+  );
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
@@ -116,6 +128,7 @@ export function HeaderActions({
   const canAddToCase = Boolean(casesPermissions?.read && casesPermissions?.createComment);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [isInvestigating, setIsInvestigating] = useState(false);
   const [isRuleSnoozeModalOpen, setRuleSnoozeModalOpen] = useState<boolean>(false);
   const [isAlertSnoozeFormOpen, setIsAlertSnoozeFormOpen] = useState<boolean>(false);
 
@@ -169,6 +182,30 @@ export function HeaderActions({
       onUntrackAlert();
     }
   }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
+
+  const handleInvestigate = async () => {
+    if (!alertId) return;
+
+    setIsInvestigating(true);
+    setIsPopoverOpen(false);
+    try {
+      await http.post(`/internal/observability/alerts/${encodeURIComponent(alertId)}/investigate`);
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.observability.alertDetails.investigateSuccessTitle', {
+          defaultMessage: 'Investigation started',
+        }),
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.observability.alertDetails.investigateErrorTitle', {
+          defaultMessage: 'Failed to start investigation',
+        }),
+        text: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      setIsInvestigating(false);
+    }
+  };
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
@@ -236,6 +273,23 @@ export function HeaderActions({
                 <div style={{ width: '220px' }}>
                   <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
                     <div />
+
+                    {showInvestigateAction && (
+                      <EuiButtonEmpty
+                        size="s"
+                        color="text"
+                        iconType="inspect"
+                        onClick={handleInvestigate}
+                        disabled={isInvestigating}
+                        data-test-subj="alertDetailsInvestigate"
+                      >
+                        <EuiText size="s">
+                          {i18n.translate('xpack.observability.alertDetails.investigate', {
+                            defaultMessage: 'Investigate',
+                          })}
+                        </EuiText>
+                      </EuiButtonEmpty>
+                    )}
 
                     {cases && canAddToCase && (
                       <AddToCaseButton

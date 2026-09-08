@@ -61,6 +61,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
         targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
+        metadataDocsFailed: result.totalMetadataDocsFailed,
       },
       sources: collector.sources,
       ...(Object.keys(collector.relationshipTypeApplied).length > 0 && {
@@ -72,7 +73,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     });
 
     logger.info(
-      `[accesses_frequently_and_infrequently] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[accesses_frequently_and_infrequently] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
     return result;
   },

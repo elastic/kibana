@@ -8,12 +8,13 @@ AI indices attach a logical name to an existing user index pattern or data
 stream. AI index records are stored in a hidden Kibana system index
 (`.contextengine-ai-indices`), separate from the backing data.
 
-| Method   | Path                                  | Description                     |
-| -------- | ------------------------------------- | ------------------------------- |
-| `PUT`    | `/api/context_engine/ai_index/{id}`   | Create or update an AI index    |
-| `GET`    | `/api/context_engine/ai_index/{id}`   | Get an AI index by id           |
-| `GET`    | `/api/context_engine/ai_index`        | List AI indices (max 100)       |
-| `DELETE` | `/api/context_engine/ai_index/{id}`   | Delete an AI index              |
+| Method   | Path                                                            | Description                          |
+| -------- | --------------------------------------------------------------- | ------------------------------------ |
+| `PUT`    | `/api/context_engine/ai_index/{id}`                               | Create or update an AI index         |
+| `GET`    | `/api/context_engine/ai_index/{id}`                               | Get an AI index by id                |
+| `GET`    | `/api/context_engine/ai_index`                                    | List AI indices (max 100)            |
+| `DELETE` | `/api/context_engine/ai_index/{id}`                               | Delete an AI index                   |
+| `PUT`    | `/internal/context_engine/ai_index/{id}/feedback_analysis`        | Update the feedback analysis config  |
 
 Notes:
 
@@ -39,6 +40,62 @@ Notes:
   Required, may be empty.
 - Deleting an AI index deletes **only** the AI index entry. Backing indices
   are left untouched and must be removed with the Delete index API if desired.
+- `feedback_analysis` configures this index's feedback loop. See
+  [Feedback analysis configuration](#feedback-analysis-configuration) below.
+
+## Feedback analysis configuration
+
+Signal *generation* is global — one background task, one advanced setting.
+Signal *analysis* is per AI index, because the improvement it proposes targets
+that index's KI pipeline. The configuration therefore lives on the AI index
+record:
+
+```json
+{
+  "enabled": true,
+  "agent_id": "my-analysis-agent",
+  "schedule": { "interval": "24h" },
+  "signal_time_range": { "type": "relative", "from": "now-30d" },
+  "signal_filter": "tags: query_error",
+  "allowed_actions": ["add_ki", "edit_ki"]
+}
+```
+
+- `enabled` is *desired* state. A schedule also needs credentials bound to it,
+  so the scheduler stays authoritative for whether analysis is really running.
+- `agent_id` is the Agent Builder agent that analyzes this index's signals. It
+  is also the agent the interactive "Analyze & improve" hand-off opens.
+- `schedule.interval` defaults to `24h` and must be at least 15 minutes. Every
+  run is an LLM analysis over a window of signals, so the interval is a cost
+  control rather than only a scheduling detail.
+- `signal_time_range` defaults to `now-30d` and is a **read filter only**: it
+  narrows which signals a run selects over, and never deletes or retains
+  them. A `relative` window must cover at least one schedule interval, or
+  signals arriving between runs would never be analyzed. Overlapping windows
+  are harmless, because re-proposals are de-duplicated downstream. An
+  `absolute` window is an open-ended "since this date", so it is always
+  accepted.
+- `signal_filter` is KQL narrowing which signals a run analyzes, applied on top
+  of `signal_time_range`. It is validated as KQL when written, so a typo cannot
+  silently disable every scheduled run. It belongs here rather than in the
+  generation pipeline: generation is global and stateful, so dropping a signal
+  at write time would drop it for every consumer, permanently, whereas a read
+  filter is per index and reversible.
+- `allowed_actions` defaults to the full [improvement action
+  taxonomy](common/http_api/improvement_actions.ts) and bounds what the
+  analysis may propose for this index. Deployments routinely want an agent that
+  may suggest KIs but never touch workflows, and an agent asked in a prompt to
+  avoid an action is not prevented from taking it — so the allowed set is
+  config that the apply step enforces, not prompt text. An empty list is
+  observe-only: the run still reports what it found but may not propose a
+  change.
+
+The dedicated `PUT .../feedback_analysis` route replaces only this block,
+leaving the rest of the record untouched. Unlike a full AI index replace it is
+permitted on **managed** AI indices: their definition is owned by the plugin
+that registers them, but which agent analyzes them and how often is operator
+preference. Without that carve-out, the indices that ship by default would be
+the only ones that could never be analyzed.
 
 ## Connector sources
 

@@ -50,6 +50,12 @@ export {
   type SimilarFeatureHit,
 } from './src/features/identify_features';
 export {
+  formatRawDocument,
+  DEFAULT_INFERENCE_DOCUMENT_LIMITS,
+  type InferenceDocument,
+  type InferenceDocumentLimits,
+} from './src/features/utils/format_raw_document';
+export {
   generateAllComputedFeatures,
   DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
   type ComputedFeatureGenerationResult,
