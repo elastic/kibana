@@ -90,7 +90,8 @@ export type {
   AlertingV2PageProps,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2HostApp } from './locators';
+export { createAlertingV2HostApp, MANAGEMENT_HOST } from './locator_host';
+export type { AlertingV2HostApp, AlertingV2LocatorHost } from './locator_host';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
@@ -98,8 +99,6 @@ export type {
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
 } from './locators';
-export { createAlertingV2HostApp, MANAGEMENT_HOST } from './locators';
-export type { AlertingV2LocatorHost } from './locators';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
