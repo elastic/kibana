@@ -221,7 +221,8 @@ export async function migrateLegacySecurityAssets({
   await migrateLatestIndex({ esClient, logger: log, namespace });
   await migrateUpdatesDataStream({ esClient, logger: log, namespace });
   await migrateMetadataDataStream({ esClient, logger: log, namespace });
-  await migrateHistorySnapshotIndices({ esClient, logger: log, namespace });
+  // Enable this line if at any point we would like to migrate history.
+  // await migrateHistorySnapshotIndices({ esClient, logger: log, namespace });
   await cleanupLegacyTemplatesAndPipelines({ esClient, logger: log, namespace });
 
   log.info(`Finished migrating legacy security-scoped entity store assets in ${namespace}`);
