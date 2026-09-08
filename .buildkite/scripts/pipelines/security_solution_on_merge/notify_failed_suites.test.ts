@@ -20,7 +20,6 @@ import {
   displayNameForJob,
   groupJobsByChannel,
   notifyFailedSuites,
-  slackNotifyStepKey,
 } from './notify_failed_suites';
 
 import { FALLBACK_SLACK_CHANNEL } from './failed_suite_channels';
@@ -184,16 +183,20 @@ describe('buildNotifyPipelineYaml', () => {
       steps: Array<{
         key?: string;
         agents?: { preemptible?: boolean };
+        retry?: { automatic: Array<{ exit_status: string | number; limit: number }> };
         notify?: Array<{ slack: { channels: string[]; message: string } }>;
       }>;
     };
     const notifySteps = parsed.steps.filter((step) => step.notify);
 
     expect(notifySteps).toHaveLength(2);
-    expect(notifySteps[0].key).toBe(slackNotifyStepKey('#security-threat-hunting'));
-    expect(notifySteps[1].key).toBe(slackNotifyStepKey('#security-defend-workflows'));
+    expect(notifySteps[0].key).toBe('notify-owning-team-security-threat-hunting');
+    expect(notifySteps[1].key).toBe('notify-owning-team-security-defend-workflows');
     expect(notifySteps[0].agents?.preemptible).toBe(false);
     expect(notifySteps[1].agents?.preemptible).toBe(false);
+    expect(notifySteps[0].retry).toEqual({
+      automatic: [{ exit_status: -1, limit: 3 }],
+    });
     expect(notifySteps[0].notify?.[0].slack.channels).toEqual(['#security-threat-hunting']);
     expect(notifySteps[0].notify?.[0].slack.message).toBe('threat hunting failed');
     expect(notifySteps[1].notify?.[0].slack.channels).toEqual(['#security-defend-workflows']);
@@ -251,6 +254,29 @@ describe('notifyFailedSuites', () => {
     expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   });
 
+  it('does not false-alarm SDH when meta-data fails after a successful upload', async () => {
+    const upload = jest.fn();
+    const buildkite = {
+      getMetadata: jest.fn().mockReturnValue(null),
+      setMetadata: jest.fn().mockImplementation(() => {
+        throw new Error('meta-data write failed');
+      }),
+      setAnnotation: jest.fn(),
+      getCurrentBuild: jest.fn().mockResolvedValue({
+        web_url: 'https://buildkite.com/elastic/kibana-security-solution-on-merge/builds/473',
+        number: 473,
+        jobs: [job({ id: 'failed', state: 'failed' })],
+      }),
+      getJobStatus: jest.fn().mockReturnValue({ success: false, state: 'failed' }),
+    };
+
+    await expect(notifyFailedSuites(buildkite as any, { upload })).resolves.toBeUndefined();
+
+    expect(upload).toHaveBeenCalledTimes(1);
+    expect(upload.mock.calls[0][0]).toContain('#security-detection-engineering-team');
+    expect(buildkite.setAnnotation).not.toHaveBeenCalled();
+  });
+
   it('posts to #sdh-security-team when fan-out fails, then rethrows', async () => {
     const upload = jest.fn();
     const buildkite = {
@@ -276,10 +302,10 @@ describe('notifyFailedSuites', () => {
       'error',
       expect.stringContaining(FALLBACK_SLACK_CHANNEL)
     );
-    expect(buildkite.setMetadata).not.toHaveBeenCalled();
+    expect(buildkite.setMetadata).toHaveBeenCalledWith(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
   });
 
-  it('still rethrows when the SDH fallback upload also fails', async () => {
+  it('annotates even when the SDH fallback upload also fails, then rethrows', async () => {
     const upload = jest.fn().mockImplementation(() => {
       throw new Error('pipeline upload failed');
     });
@@ -298,8 +324,13 @@ describe('notifyFailedSuites', () => {
     await expect(notifyFailedSuites(buildkite as any, { upload })).rejects.toThrow(
       'pipeline upload failed'
     );
-    // Main upload fails, then fallback upload is attempted (and also fails).
+    // Main upload fails, annotate runs, then fallback upload is attempted (and also fails).
     expect(upload).toHaveBeenCalledTimes(2);
+    expect(buildkite.setAnnotation).toHaveBeenCalledWith(
+      'security-solution-on-merge-slack-fanout',
+      'error',
+      expect.stringContaining('pipeline upload failed')
+    );
     expect(buildkite.setMetadata).not.toHaveBeenCalled();
   });
 });

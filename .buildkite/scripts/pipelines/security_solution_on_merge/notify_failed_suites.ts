@@ -145,6 +145,11 @@ export function buildNotifyPipelineYaml(
       machineType: 'n2-standard-2',
       preemptible: false,
     },
+    // Safe to retry leaf notify steps: Slack only fires when the attempt passes.
+    // Meta-data is already set after fan-out upload, so a flake here won't SDH-fallback.
+    retry: {
+      automatic: [{ exit_status: -1, limit: 3 }],
+    },
     notify: [
       {
         slack: {
@@ -175,11 +180,42 @@ function uploadNotifyPipeline(yaml: string): void {
   });
 }
 
+function markSlackNotifyUploaded(buildkite: BuildkiteClient): void {
+  if (DRY_RUN || !process.env.BUILDKITE) {
+    return;
+  }
+
+  try {
+    buildkite.setMetadata(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
+  } catch (error) {
+    // Upload already succeeded; do not treat metadata failure as a fan-out miss
+    // (that would false-alarm #sdh-security-team while team notifies are queued).
+    console.error(
+      `Failed to set ${SLACK_NOTIFY_UPLOADED_META_KEY} after Slack notify upload; continuing`,
+      error
+    );
+  }
+}
+
 function notifyFanOutFailure(
   error: unknown,
   buildkite: BuildkiteClient,
   upload: (yaml: string) => void
 ): void {
+  const detail = error instanceof Error ? error.message : String(error);
+
+  // Annotate before the Slack upload so Buildkite still surfaces the miss when
+  // pipeline upload itself is broken.
+  try {
+    buildkite.setAnnotation(
+      'security-solution-on-merge-slack-fanout',
+      'error',
+      `Owning-team Slack fan-out failed; alerting ${FALLBACK_SLACK_CHANNEL}. ${detail}`
+    );
+  } catch (annotationError) {
+    console.error('Failed to annotate fan-out failure', annotationError);
+  }
+
   const message = composeFanOutFailureMessage(error);
   const yaml = buildNotifyPipelineYaml(new Map([[FALLBACK_SLACK_CHANNEL, message]]), {
     // Distinct from a successful unmatched-step notify to the same channel.
@@ -190,18 +226,7 @@ function notifyFanOutFailure(
     `Fan-out failed; uploading fallback Slack notify to ${FALLBACK_SLACK_CHANNEL}`
   );
   upload(yaml);
-
-  try {
-    buildkite.setAnnotation(
-      'security-solution-on-merge-slack-fanout',
-      'error',
-      `Owning-team Slack fan-out failed; alerted ${FALLBACK_SLACK_CHANNEL}. ${
-        error instanceof Error ? error.message : String(error)
-      }`
-    );
-  } catch (annotationError) {
-    console.error('Failed to annotate fan-out failure', annotationError);
-  }
+  markSlackNotifyUploaded(buildkite);
 }
 
 async function runNotifyFailedSuites(
@@ -236,9 +261,8 @@ async function runNotifyFailedSuites(
   upload(yaml);
 
   // Mark after a successful upload so a retried notify step cannot double-post.
-  if (!DRY_RUN && process.env.BUILDKITE) {
-    buildkite.setMetadata(SLACK_NOTIFY_UPLOADED_META_KEY, 'true');
-  }
+  // Metadata failures must not invert success into an SDH false alarm.
+  markSlackNotifyUploaded(buildkite);
 }
 
 export async function notifyFailedSuites(
