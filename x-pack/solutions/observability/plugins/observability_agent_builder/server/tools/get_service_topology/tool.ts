@@ -19,6 +19,7 @@ import { timeRangeSchemaOptional } from '../../utils/tool_schemas';
 import { MAX_SHORT_STRING_LENGTH } from '../../utils/schema_limits';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { getToolHandler } from './handler';
+import type { ServiceTopologyNode } from './types';
 
 export const OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID = 'observability.get_service_topology';
 
@@ -75,7 +76,11 @@ export function createGetServiceTopologyTool({
     },
     description: `Retrieves the service topology (dependency graph) for a service, with RED metrics (latency, throughput, error rate) per connection.
 
-Returns connections with source/target nodes and RED metrics. Supports downstream, upstream, or both directions.
+Returns:
+- \`connections\`: source/target nodes with RED metrics. Each service node has a \`service.name\` field; external dependency nodes have a \`span.destination.service.resource\` field.
+- \`nodeMetadata\` (best-effort, may be absent): per-service badge data keyed by service name. Each entry may contain \`alertsCount\`, \`sloStatus\`, \`sloCount\`, \`anomalySeverity\`, \`anomalyScore\`. Pass this field through verbatim when building an \`observability.service-map\` attachment.
+
+Supports downstream, upstream, or both directions.
 
 When to use:
 - Checking which direct dependencies are failing or slow (depth: 1)
@@ -115,12 +120,39 @@ After reviewing topology results, consider:
           end,
         });
 
+        // Collect all service names from the topology connections (best-effort)
+        const serviceNamesInTopology = new Set<string>();
+        for (const conn of topology.connections) {
+          for (const node of [conn.source, conn.target]) {
+            if ('service.name' in node) {
+              serviceNamesInTopology.add((node as ServiceTopologyNode)['service.name']);
+            }
+          }
+        }
+
+        // Enrich with per-service badge metadata (alerts, SLOs, ML anomalies).
+        // Best-effort: failures are logged and do not prevent topology from being returned.
+        let nodeMetadata: Record<string, unknown> | undefined;
+        if (serviceNamesInTopology.size > 0) {
+          try {
+            nodeMetadata = await dataRegistry.getData('servicesAlertsAndSlo', {
+              request,
+              serviceNames: [...serviceNamesInTopology],
+              start,
+              end,
+            });
+          } catch (enrichError) {
+            logger.debug(`Failed to enrich topology with badge metadata: ${enrichError.message}`);
+          }
+        }
+
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
                 connections: topology.connections,
+                ...(nodeMetadata !== undefined && { nodeMetadata }),
               },
             },
           ],
