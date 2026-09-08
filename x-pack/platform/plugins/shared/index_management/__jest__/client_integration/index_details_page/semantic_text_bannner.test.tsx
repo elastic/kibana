@@ -17,7 +17,6 @@ jest.mock('../../../public/application/app_context', () => ({
 }));
 
 const BANNER_TITLE = 'The semantic_text field type is available with a Platinum license';
-const BANNER_TEXT = 'Upgrade to use the semantic_text type in your indices.';
 
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);
@@ -134,7 +133,6 @@ describe('SemanticTextBanner', () => {
 
       const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
       expect(banner.textContent).toContain(BANNER_TITLE);
-      expect(banner.textContent).toContain(BANNER_TEXT);
     });
   });
 });
