@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields, Script } from '@elastic/elasticsearch/lib/api/types';
 import {
   RuntimeFieldTypeEnum,
   type RuntimeFieldMapping,
@@ -31,6 +31,9 @@ export type BulkCloseRuntimeMappings = Record<string, RuntimeFieldMapping>;
  * than a silent no-op (the old behaviour).
  */
 const SUPPORTED_RUNTIME_FIELD_TYPES = new Set<string>(Object.values(RuntimeFieldTypeEnum));
+
+const isSupportedType = (type: string): type is RuntimeFieldMapping['type'] =>
+  SUPPORTED_RUNTIME_FIELD_TYPES.has(type);
 
 /**
  * Convert the full `MappingRuntimeFields` from `dataView.getRuntimeMappings()`
@@ -59,11 +62,9 @@ export const toBulkCloseRuntimeMappings = (
 
   const result = Object.entries(runtimeMappings).reduce<BulkCloseRuntimeMappings>(
     (acc, [name, field]) => {
-      if (!SUPPORTED_RUNTIME_FIELD_TYPES.has(field.type)) return acc;
+      if (!isSupportedType(field.type)) return acc;
 
-      const mapping: BulkCloseRuntimeMappings[string] = {
-        type: field.type as BulkCloseRuntimeMappings[string]['type'],
-      };
+      const mapping: BulkCloseRuntimeMappings[string] = { type: field.type };
 
       if (field.script != null) {
         // A data view runtime field script may be stored as a bare string
@@ -72,8 +73,8 @@ export const toBulkCloseRuntimeMappings = (
         if (typeof field.script === 'string') {
           mapping.script = { source: field.script };
         } else {
-          const scriptObj = field.script as Record<string, unknown>;
-          const source = scriptObj.source as string | undefined;
+          const scriptObj = field.script as Script;
+          const source = typeof scriptObj.source === 'string' ? scriptObj.source : undefined;
 
           if (!source || Object.keys(scriptObj).some((k) => k !== 'source')) {
             // Drop the entry when:
