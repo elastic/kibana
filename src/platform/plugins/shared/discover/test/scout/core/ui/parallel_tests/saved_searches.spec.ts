@@ -1,19 +1,21 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest, testData } from '../fixtures';
-import type { ExtParallelRunTestFixtures } from '../fixtures';
+import type { DiscoverTestFixtures } from '../../../common/ui/fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 const assertNoFilterAndEmptyQuery = async (
   filterBadge: { field: string; value: string },
-  pageObjects: ExtParallelRunTestFixtures['pageObjects'],
-  page: ExtParallelRunTestFixtures['page']
+  pageObjects: DiscoverTestFixtures['pageObjects'],
+  page: DiscoverTestFixtures['page']
 ) => {
   expect(
     // checking if filter exists, enabled or disabled
@@ -49,9 +51,9 @@ spaceTest.describe(
     };
 
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.ECOMMERCE);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.ECOMMERCE);
+      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+      await scoutSpace.savedObjects.load(testData.ECOMMERCE_KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.ECOMMERCE_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultTime({ from: START_TIME, to: END_TIME });
     });
 
@@ -87,7 +89,7 @@ spaceTest.describe(
       async ({ pageObjects, page }) => {
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
-          testData.DATA_VIEW_NAME.ECOMMERCE
+          testData.ECOMMERCE_DATA_VIEW
         );
         await pageObjects.filterBar.addFilter({
           ...filterFieldAndValue,
@@ -117,28 +119,28 @@ spaceTest.describe(
         // create new search
         await pageObjects.discover.clickNewSearch();
         await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
-          testData.DATA_VIEW_NAME.ECOMMERCE
+          testData.ECOMMERCE_DATA_VIEW
         );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view
-        await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.LOGSTASH);
+        await pageObjects.discover.selectDataView(testData.DEFAULT_DATA_VIEW);
         await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
-          testData.DATA_VIEW_NAME.LOGSTASH
+          testData.DEFAULT_DATA_VIEW
         );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // change data view again
-        await pageObjects.discover.selectDataView(testData.DATA_VIEW_NAME.ECOMMERCE);
+        await pageObjects.discover.selectDataView(testData.ECOMMERCE_DATA_VIEW);
         await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
-          testData.DATA_VIEW_NAME.ECOMMERCE
+          testData.ECOMMERCE_DATA_VIEW
         );
         await assertNoFilterAndEmptyQuery(filterFieldAndValue, pageObjects, page);
 
         // create new search again
         await pageObjects.discover.clickNewSearch();
         await expect(pageObjects.discover.getSelectedDataView()).toHaveText(
-          testData.DATA_VIEW_NAME.ECOMMERCE
+          testData.ECOMMERCE_DATA_VIEW
         );
       }
     );

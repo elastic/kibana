@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
-import { spaceTest, testData, assertionMessages } from '../fixtures';
+import { spaceTest, testData } from '../../../common/ui/fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions non-time based',
@@ -22,8 +24,8 @@ spaceTest.describe(
   // for running this test against the Security serverless project.
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.NO_TIME_FIELD);
-      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.NO_TIME_FIELD);
+      await scoutSpace.savedObjects.load(testData.INDEX_PATTERN_WITHOUT_TIMEFIELD_KBN_ARCHIVE);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.NO_TIME_FIELD_DATA_VIEW);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -42,7 +44,7 @@ spaceTest.describe(
         await page.testSubj.fill('queryInput', 'type.keyword : ');
         await expect(
           page.testSubj.locator('autoCompleteSuggestionText'),
-          assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+          testData.SUGGESTIONS_COUNT_ASSERTION_MESSAGE
         ).toHaveCount(1);
         const actualSuggestions = await page.testSubj
           .locator('autoCompleteSuggestionText')
