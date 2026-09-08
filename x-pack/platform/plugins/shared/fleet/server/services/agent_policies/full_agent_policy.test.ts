@@ -1816,6 +1816,153 @@ describe('getFullAgentPolicy', () => {
     ).not.toHaveProperty('indices');
   });
 
+  it('should emit _managed_otlp_apm output permissions for an agentless policy on the managed OTLP endpoint', async () => {
+    const MANAGED_OTLP_HOST = 'my-otlp-host.elastic.cloud';
+    const OTLP_OUTPUT_ID = 'my-otlp-output';
+
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: MANAGED_OTLP_HOST },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    } as any);
+
+    const otlpOutput = {
+      id: OTLP_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Managed OTLP output',
+      type: 'otlp' as const,
+      otlp_exporter: { endpoint: `${MANAGED_OTLP_HOST}:4317`, protocol: 'grpc' as const },
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [otlpOutput],
+      proxies: [],
+      dataOutput: otlpOutput,
+      monitoringOutput: otlpOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    } as any);
+    mockAgentPolicy({ supports_agentless: true, data_output_id: OTLP_OUTPUT_ID });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions).toEqual({
+      [OTLP_OUTPUT_ID]: {
+        _managed_otlp_apm: {
+          applications: [{ application: 'apm', privileges: ['event:write'], resources: ['*'] }],
+        },
+      },
+    });
+    expect(agentPolicy?.output_permissions?.[OTLP_OUTPUT_ID]?._managed_otlp_apm).not.toHaveProperty(
+      'indices'
+    );
+  });
+
+  it('should not emit _managed_otlp_apm for an OTLP output that does not match the managed endpoint', async () => {
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'my-otlp-host.elastic.cloud' },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    } as any);
+
+    const otlpOutput = {
+      id: 'custom-otlp',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Custom OTLP output',
+      type: 'otlp' as const,
+      otlp_exporter: { endpoint: 'other-host.example.com:4317', protocol: 'grpc' as const },
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [otlpOutput],
+      proxies: [],
+      dataOutput: otlpOutput,
+      monitoringOutput: otlpOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    } as any);
+    mockAgentPolicy({ supports_agentless: true, data_output_id: 'custom-otlp' });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions?.['custom-otlp']).toBeUndefined();
+  });
+
+  it('should not emit _managed_otlp_apm for a non-agentless policy even if endpoint matches', async () => {
+    const MANAGED_OTLP_HOST = 'my-otlp-host.elastic.cloud';
+    const OTLP_OUTPUT_ID = 'my-otlp-output';
+
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: MANAGED_OTLP_HOST },
+    } as any);
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    } as any);
+
+    const otlpOutput = {
+      id: OTLP_OUTPUT_ID,
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'Managed OTLP output',
+      type: 'otlp' as const,
+      otlp_exporter: { endpoint: `${MANAGED_OTLP_HOST}:4317`, protocol: 'grpc' as const },
+    };
+    mockedFetchRelatedSavedObjects.mockResolvedValue({
+      outputs: [otlpOutput],
+      proxies: [],
+      dataOutput: otlpOutput,
+      monitoringOutput: otlpOutput,
+      downloadSource: {
+        id: 'default-download-source-id',
+        is_default: true,
+        name: 'Default host',
+        host: 'http://default-registry.co',
+      },
+      downloadSourceProxy: undefined,
+      fleetServerHost: {
+        name: 'default Fleet Server',
+        id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+        is_default: true,
+        host_urls: ['http://fleetserver:8220'],
+        is_preconfigured: false,
+      },
+    } as any);
+    mockAgentPolicy({ supports_agentless: false, data_output_id: OTLP_OUTPUT_ID });
+
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.output_permissions?.[OTLP_OUTPUT_ID]).toBeUndefined();
+  });
+
   it('should return a policy with advanced settings', async () => {
     mockAgentPolicy({
       advanced_settings: {
@@ -3113,17 +3260,35 @@ ssl.test: 123
     expect(policyOutput.ssl).not.toHaveProperty('key');
   });
 
-  it('should throw for OTLP outputs because compilation is not yet implemented', () => {
-    expect(() =>
-      transformOutputToFullPolicyOutput({
-        id: 'otlp-id',
-        is_default: false,
-        is_default_monitoring: false,
-        name: 'test otlp output',
-        type: 'otlp',
-        otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
-      } as any)
-    ).toThrow('OTLP output "otlp-id" cannot be compiled into an agent policy output');
+  it('should compile an OTLP output to type only, stripping SO metadata and otlp_exporter', () => {
+    const result = transformOutputToFullPolicyOutput({
+      id: 'otlp-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test otlp output',
+      type: 'otlp',
+      otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+    } as any);
+
+    expect(result).toEqual({ type: 'otlp' });
+  });
+
+  it('should include secrets in a compiled OTLP output when present', () => {
+    const tlsSecret = { id: 'secret-ref-abc' };
+    const result = transformOutputToFullPolicyOutput({
+      id: 'otlp-id',
+      is_default: false,
+      is_default_monitoring: false,
+      name: 'test otlp output',
+      type: 'otlp',
+      otlp_exporter: { endpoint: 'https://otlp.example.com:4317', protocol: 'grpc' },
+      secrets: { otlp_exporter: { tls: { key_pem: tlsSecret } } },
+    } as any);
+
+    expect(result).toEqual({
+      type: 'otlp',
+      secrets: { otlp_exporter: { tls: { key_pem: tlsSecret } } },
+    });
   });
 });
 
