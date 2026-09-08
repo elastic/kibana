@@ -76,6 +76,12 @@ const transferFns: Record<string, CommandTransfer> = {
   keep: keepTransfer,
 };
 
+/**
+ * Folds the tracked column's scope state through the pipeline, applying each
+ * command's transfer function in order (RENAME remaps the name, KEEP projects
+ * it, all other commands preserve scope). With `ensureKept`, KEEP commands are
+ * mutated so the column survives the whole segment.
+ */
 const walkColumn = (
   commands: ESQLCommand[],
   columnName: string,

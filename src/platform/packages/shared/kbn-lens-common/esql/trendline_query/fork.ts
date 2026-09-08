@@ -18,7 +18,7 @@ import {
   isQuery,
 } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
-import { walkTrackedColumn } from './scope_walker';
+import { resolveTrackedColumn } from './scope_walker';
 
 /** Synthetic discriminator column added by FORK to its merged output. */
 const FORK_DISCRIMINATOR_COLUMN = '_fork';
@@ -70,7 +70,7 @@ const branchProducesColumn = (branch: ESQLCommand[], columnName: string): boolea
   const producedColumns = getStatsResultColumns(branch[statsIndex]);
   const commandsAfterStats = branch.slice(statsIndex + 1);
   return producedColumns.some(
-    (column) => walkTrackedColumn(commandsAfterStats, column).name === columnName
+    (column) => resolveTrackedColumn(commandsAfterStats, column).name === columnName
   );
 };
 
