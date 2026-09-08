@@ -8,7 +8,7 @@ echo "--- Setup Node"
 
 NODE_VERSION="$(cat "$KIBANA_DIR/.node-version")"
 export NODE_VERSION
-export NODE_DIR="$CACHE_DIR/node/$NODE_VERSION"
+export NODE_DIR="$NODE_CACHE_DIR/node/$NODE_VERSION"
 export NODE_BIN_DIR="$NODE_DIR/bin"
 
 ## Install node for whatever the current os/arch are
