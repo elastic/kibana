@@ -314,22 +314,7 @@ function RecommendationRow({
         />
       }
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow>
-          <FlyoutFormattedText text={titlePreview} bold />
-        </EuiFlexItem>
-        {recommendation.confidence != null && (
-          <EuiFlexItem grow={false}>
-            <EuiBadge color={recommendation.confidence >= 0.9 ? 'success' : 'hollow'}>
-              <FormattedMessage
-                id="xpack.nightshift.investigation.recommendationConfidence"
-                defaultMessage="{confidence, number, percent}"
-                values={{ confidence: recommendation.confidence }}
-              />
-            </EuiBadge>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <FlyoutFormattedText text={titlePreview} bold />
     </InvestigationFlyoutRow>
   );
 }

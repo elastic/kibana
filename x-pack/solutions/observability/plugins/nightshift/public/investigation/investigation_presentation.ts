@@ -23,14 +23,7 @@ export {
   isInvestigationTerminalFailure,
 } from '../common/investigation_progress_status';
 
-/**
- * One row of the Try next list: either a recommendation the agent emitted structurally, or one
- * derived from a hypothesis when the investigation reported none — the only case carrying a
- * `confidence`, since the agent's own recommendations have no such notion.
- */
-export interface RecommendationItem extends InvestigationRecommendation {
-  confidence?: number;
-}
+export type RecommendationItem = InvestigationRecommendation;
 
 export type BlindSpotItem = InvestigationBlindSpot;
 

@@ -72,13 +72,47 @@ describe('updateInvestigation body schema', () => {
       conclusion: 'Log rotation was disabled.',
       severity: '60-high',
       hypotheses: [{ candidate: 'Log rotation disabled', confidence: 0.9, status: 'confirmed' }],
-      recommendations: [{ title: 'Re-enable log rotation' }],
-      blind_spots: [{ title: 'No metrics', description: 'Host metrics were not shipped.' }],
+      recommendations: [
+        { title: 'Add a disk alert', confidence: 0.7 },
+        { title: 'Re-enable log rotation', confidence: 0.95 },
+      ],
+      blind_spots: [
+        { title: 'No profiling', confidence: 0.6, description: 'Profiles were unavailable.' },
+        { title: 'No metrics', confidence: 0.8, description: 'Host metrics were not shipped.' },
+      ],
       impact: { entities: [] },
       conversation_id: 'conv-1',
     };
 
-    expect(parseBody(body)).toEqual(expect.objectContaining(body));
+    expect(parseBody(body)).toEqual(
+      expect.objectContaining({
+        ...body,
+        recommendations: [
+          { title: 'Re-enable log rotation', confidence: 0.95 },
+          { title: 'Add a disk alert', confidence: 0.7 },
+        ],
+        blind_spots: [
+          { title: 'No metrics', confidence: 0.8, description: 'Host metrics were not shipped.' },
+          { title: 'No profiling', confidence: 0.6, description: 'Profiles were unavailable.' },
+        ],
+      })
+    );
+  });
+
+  it('rejects unscored or oversized current output lists', () => {
+    expect(() =>
+      parseBody({ status: 'completed', recommendations: [{ title: 'Restart the service' }] })
+    ).toThrow();
+    expect(() =>
+      parseBody({
+        status: 'completed',
+        blind_spots: Array.from({ length: 4 }, (_, index) => ({
+          title: `Gap ${index}`,
+          confidence: 0.5,
+          description: 'Missing data.',
+        })),
+      })
+    ).toThrow();
   });
 
   it('still rejects a severity outside the canonical tiers', () => {
