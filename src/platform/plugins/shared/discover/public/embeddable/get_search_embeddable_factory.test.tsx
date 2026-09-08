@@ -137,6 +137,18 @@ describe('saved search embeddable', () => {
     return { search, resolveSearch: () => resolveSearch() };
   };
 
+  const createSearchErrorFnMock = (error: Error) => {
+    let rejectSearch = () => {};
+    const search = jest.fn(() => {
+      return new Observable((subscriber) => {
+        rejectSearch = () => {
+          subscriber.error(error);
+        };
+      });
+    });
+    return { search, rejectSearch: () => rejectSearch() };
+  };
+
   const finalizeApiMock = (
     api: EmbeddableApiRegistration<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
   ) => ({
@@ -226,6 +238,35 @@ describe('saved search embeddable', () => {
       expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
+    });
+
+    it('should render a custom error prompt instead of the grid when the query fails', async () => {
+      const searchError = new Error('Query failed');
+      const { search, rejectSearch } = createSearchErrorFnMock(searchError);
+      runtimeState = getInitialRuntimeState({ searchMock: search });
+      const { Component, api } = await factory.buildEmbeddable({
+        initializeDrilldownsManager: mockInitializeDrilldownsManager,
+        initialState: { ref_id: 'id', overrides: {} },
+        finalizeApi: finalizeApiMock,
+        uuid,
+        parentApi: mockedDashboardApi,
+      });
+      await waitOneTick(); // wait for build to complete
+      const discoverComponent = renderWithI18n(<Component />);
+
+      // wait for data fetching
+      expect(api.dataLoading$.getValue()).toBe(true);
+      rejectSearch();
+      await waitOneTick();
+      expect(api.dataLoading$.getValue()).toBe(false);
+
+      await waitFor(() => {
+        expect(discoverComponent.getByTestId('discoverEmbeddableErrorCallout')).toBeInTheDocument();
+        expect(discoverComponent.queryByTestId('discoverDocTable')).not.toBeInTheDocument();
+      });
+
+      // search errors are non-blocking and must not trigger the panel-level error overlay
+      expect(api.blockingError$.getValue()).toBeUndefined();
     });
   });
 

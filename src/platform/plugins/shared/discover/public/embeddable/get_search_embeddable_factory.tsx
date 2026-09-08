@@ -38,6 +38,7 @@ import { SearchEmbeddablFieldStatsTableComponent } from './components/search_emb
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
 import { SearchEmbeddableInlineEditHoverActions } from './components/search_embeddable_inline_edit_hover_actions';
 import { SearchEmbeddableDeletedTabPrompt } from './components/search_embeddable_deleted_tab_prompt';
+import { SearchEmbeddableErrorPrompt } from './components/search_embeddable_error_prompt';
 import { SearchEmbeddableMissingDataViewPrompt } from './components/search_embeddable_missing_data_view_prompt';
 import { initializeEditApi } from './initialize_edit_api';
 import { initializeFetch, isEsqlMode } from './initialize_fetch';
@@ -102,6 +103,8 @@ export const getSearchEmbeddableFactory = ({
 
       /** All other state */
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+      // Query/fetch errors are non-blocking: they only replace the embeddable's own content, unlike blockingError$.
+      const searchError$ = new BehaviorSubject<Error | undefined>(undefined);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const fetchContext$ = new BehaviorSubject<FetchContext | undefined>(undefined);
       const fetchWarnings$ = new BehaviorSubject<SearchResponseIncompleteWarning[]>([]);
@@ -327,7 +330,6 @@ export const getSearchEmbeddableFactory = ({
           dataViews$: searchEmbeddable.api.dataViews$,
           savedObjectId$,
           dataLoading$,
-          blockingError$,
           fetchContext$,
           fetchWarnings$,
         },
@@ -336,7 +338,7 @@ export const getSearchEmbeddableFactory = ({
         scopedProfilesManager,
         refreshTrigger$,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
-        setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+        setSearchError: (error: Error | undefined) => searchError$.next(error),
       });
       cancelRequests = _cancelRequests;
 
@@ -350,13 +352,15 @@ export const getSearchEmbeddableFactory = ({
             draftSelectedTabId,
             selectedTabId,
             isInlineEditDirty,
+            searchError,
           ] = useBatchedPublishingSubjects(
             api.savedSearch$,
             api.dataViews$,
             inlineEditingApi.isInlineEditing$,
             inlineEditingApi.draftSelectedTabId$,
             selectedTabId$,
-            inlineEditingApi.inlineEditDirty$
+            inlineEditingApi.inlineEditDirty$,
+            searchError$
           );
 
           const expandedDoc = useObservable(expandedDoc$, expandedDoc$.getValue());
@@ -425,6 +429,20 @@ export const getSearchEmbeddableFactory = ({
                 }}
                 isByReference={Boolean(savedObjectId$.getValue())}
                 onEditInDiscover={editApi?.onEdit}
+              />
+            );
+          }
+
+          if (searchError) {
+            return (
+              <SearchEmbeddableErrorPrompt
+                error={searchError}
+                inlineEditing={{
+                  hasPendingChanges: hasPendingInlineTabChanges,
+                  isActive: isInlineEditing,
+                  onApply: inlineEditingApi.applyInlineTabSelection,
+                  onCancel: inlineEditingApi.cancelInlineTabSelection,
+                }}
               />
             );
           }
