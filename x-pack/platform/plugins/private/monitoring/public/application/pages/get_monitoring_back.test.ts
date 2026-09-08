@@ -5,25 +5,11 @@
  * 2.0.
  */
 
-import {
-  getHasClusterListing,
-  getMonitoringBack,
-  setHasClusterListing,
-} from './get_monitoring_back';
+import { getMonitoringBack } from './get_monitoring_back';
 
 const createHref = (route: string) => `#${route}`;
 
 describe('getMonitoringBack', () => {
-  beforeEach(() => {
-    setHasClusterListing(false);
-  });
-
-  it('records whether the cluster listing is a real destination', () => {
-    expect(getHasClusterListing()).toBe(false);
-    setHasClusterListing(true);
-    expect(getHasClusterListing()).toBe(true);
-  });
-
   it('returns no back on listing and setup routes', () => {
     expect(getMonitoringBack('/home', createHref)).toBeUndefined();
     expect(getMonitoringBack('/no-data', createHref)).toBeUndefined();

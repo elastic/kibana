@@ -35,7 +35,8 @@ import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { useUiTracker } from '../hooks/use_track_metric';
 import { Legacy } from '../../legacy_shims';
 import type { MonitoringStartServices } from '../../types';
-import { getHasClusterListing, getMonitoringBack } from './get_monitoring_back';
+import { useClusterListingAvailability } from '../contexts/cluster_listing_availability_context';
+import { getMonitoringBack } from './get_monitoring_back';
 
 export interface TabMenuItem {
   id: string;
@@ -68,6 +69,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   useTitle('', title);
 
   const { currentTimerange } = useMonitoringTimeContainerContext();
+  const { hasClusterListing } = useClusterListingAvailability();
   const [loaded, setLoaded] = useState(false);
   const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
@@ -198,9 +200,9 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   const back = useMemo(
     () =>
       getMonitoringBack(pathname, createHref, {
-        hasClusterListing: getHasClusterListing(),
+        hasClusterListing,
       }),
-    [pathname, createHref]
+    [pathname, createHref, hasClusterListing]
   );
 
   const menu = useMemo<AppHeaderMenu>(() => {
@@ -277,7 +279,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
     >
       <EuiPageTemplate.Section>
         <AppHeader
-          title={pageTitle ?? title}
+          title={pageTitle || title}
           tabs={headerTabs}
           back={back}
           menu={menu}

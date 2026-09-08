@@ -62,17 +62,6 @@ const productRootPaths = new Set([
   '/enterprise_search',
 ]);
 
-let clusterListingAvailable = false;
-
-/** Remember whether `/home` is a real destination (more than one cluster). */
-export function setHasClusterListing(isAvailable: boolean): void {
-  clusterListingAvailable = isAvailable;
-}
-
-export function getHasClusterListing(): boolean {
-  return clusterListingAvailable;
-}
-
 export interface GetMonitoringBackOptions {
   /**
    * The cluster listing immediately redirects to overview when only one cluster
