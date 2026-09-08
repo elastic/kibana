@@ -44,7 +44,6 @@ steps:
         plugin-id: 'context_engine_feedback_analysis'
         aggregate-by: 'context_engine'
         create-conversation: true
-        public-conversation: true
         timeout: '30m'
         with:
           message: '{{ steps.fetch_context.output.briefing }}'

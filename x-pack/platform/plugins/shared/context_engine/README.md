@@ -263,7 +263,9 @@ the analysis playbook whichever agent the index is configured with. The
 to the interactive setup conversation.
 
 The `ai.agent` step runs under the workflow owner's identity — the user who
-turned analysis on.
+turned analysis on. The conversation it creates is private to that user, Agent
+Builder's default: a run reads the index's data under the owner's privileges,
+and its rounds quote what it read.
 
 The workflow carries a `concurrency` guard keyed on the AI index with
 `strategy: drop`, so two runs for one index never overlap.
