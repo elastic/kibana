@@ -107,7 +107,7 @@ function useFallbackProps(): FallbackProps {
 
 function useAppHeaderConfig(): ChromeAppHeaderConfig | undefined {
   const chrome = useChromeService();
-  const config$ = useMemo(() => chrome.next.appHeader.get$(), [chrome]);
+  const config$ = useMemo(() => chrome.appHeader.get$(), [chrome]);
   return useObservable(config$, undefined);
 }
 

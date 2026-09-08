@@ -835,6 +835,23 @@ On merge commits, Scout tests run in a non-blocking mode.
 | 2         | No tests in Playwright config                                                                                 |
 | 10        | Tests failed                                                                                                  |
 
+#### Finding flaky tests
+
+Test events from every framework (Jest, FTR, Cypress and Scout/Playwright) are shipped to the AppEx QA cluster. The `discover-flaky-tests` command aggregates them into a ranked list of flaky and consistently failing tests and stores it under `.scout/flaky_tests.json`:
+
+```bash
+# Last 7 days of kibana-on-merge, all frameworks
+node scripts/scout discover-flaky-tests
+
+# Include PR builds, widen the window, restrict to Jest and FTR
+node scripts/scout discover-flaky-tests --pipelines kibana-on-merge,kibana-pull-request --lookbackDays 14 --frameworks jest,ftr
+
+# Show the 25 worst offenders in the printed summary (the JSON report is bounded by --maxTests)
+node scripts/scout discover-flaky-tests --summaryLimit 25
+```
+
+The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
+
 ### AI prompts to help you migrate from FTR
 
 The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-scout-info/llms) to help you migrate FTR test files.
