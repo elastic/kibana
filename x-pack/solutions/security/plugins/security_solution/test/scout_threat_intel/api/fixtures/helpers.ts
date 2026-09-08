@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  THREAT_INTEL_SOURCES_INDEX,
-  THREAT_REPORTS_INDEX,
-} from '../../../../common/threat_intel';
+import { THREAT_INTEL_SOURCES_INDEX, THREAT_REPORTS_INDEX } from '../../../../common/threat_intel';
 
 /** Minimal ES client surface these tests rely on. */
 interface EsLike {
