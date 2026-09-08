@@ -24,6 +24,7 @@ export function registerChangeHistoryRoute(
 ) {
   registerAddToHistoryRoute(services, router);
   registerGetHistoryRoute(services, core, router);
+  registerGetHistoryDetailsRoute(services, core, router);
 }
 
 const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestHandlerContext>) => {
@@ -79,6 +80,7 @@ const registerAddToHistoryRoute = (services: SetupDeps, router: IRouter<RequestH
       } catch {
         return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
       }
+      console.log('!!!!!! TYPEOF', typeof req.body);
       const change: ObjectChange = {
         objectType: 'dashboard',
         objectId: req.params.id,
@@ -178,14 +180,12 @@ const registerGetHistoryRoute = (
       const profiles = await coreStart.userProfile.bulkGet({ uids });
       const fullNameByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
 
-      console.log({ items, uids, profiles, fullNameByUid });
       return res.ok({
         body: {
           total,
           items: items.map((item) => {
             const user = item.user;
             const profile = user.id ? fullNameByUid.get(user.id) : undefined;
-
             return {
               id: item.event.id,
               action: item.event.action,
@@ -197,6 +197,83 @@ const registerGetHistoryRoute = (
               changes: item.object.snapshot,
             };
           }),
+        },
+      });
+    }
+  );
+};
+
+const registerGetHistoryDetailsRoute = (
+  services: SetupDeps,
+  coreSetup: CoreSetup<StartDeps, DashboardPluginStart>,
+  router: IRouter<RequestHandlerContext>
+) => {
+  router.get(
+    {
+      path: '/internal/dashboard/change_history/{id}/{changeId}',
+      validate: {
+        request: {
+          params: z
+            .object({
+              id: asCodeIdSchema,
+              changeId: z.string(),
+            })
+            .strict(),
+        },
+        response: {
+          200: {
+            body: () =>
+              z.object({
+                snapshot: getDashboardStateSchema(true),
+              }),
+            description: 'success',
+          },
+        },
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+    },
+    async (ctx, req, res) => {
+      const core = await ctx.core;
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+        application: [
+          {
+            application: `kibana-.kibana`,
+            resources: ['*'],
+            privileges: [`feature_dashboard_v2.edit`],
+          },
+        ],
+      });
+
+      if (!hasAllPrivileges) {
+        return res.forbidden();
+      }
+
+      let client;
+      try {
+        client = getChangeHistoryClient();
+      } catch {
+        return res.customError({ statusCode: 503, body: 'Change history service is not ready' });
+      }
+      const spaceId = services.spaces?.spacesService.getSpaceId(req) ?? 'default';
+
+      const { total, items } = await client.getHistory(spaceId, 'dashboard', req.params.id, {
+        additionalFilters: [{ term: { 'event.id': req.params.changeId } }],
+        size: 1,
+      });
+      console.log({
+        total,
+        changeId: req.params.changeId,
+        item: JSON.stringify(items[0]?.object.snapshot, null, 2),
+      });
+      return res.ok({
+        body: {
+          snapshot: items[0]?.object.snapshot,
         },
       });
     }

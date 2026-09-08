@@ -79,12 +79,13 @@ export async function loadDashboardApi({
     : undefined;
 
   const { viewMode, ...overrideState } = creationOptions?.getInitialInput?.() ?? {};
+  console.log({ viewMode, overrideState });
   if (overrideState.panels) {
     overrideState.panels = await transformPanels(overrideState.panels, overrideState.references);
   }
 
   // Back up any view mode passed in explicitly.
-  if (viewMode) {
+  if (viewMode && creationOptions?.useSessionStorageIntegration) {
     getDashboardBackupService().storeViewMode(viewMode);
   }
 

@@ -10,13 +10,16 @@
 import {
   type ChangeHistoryHttpClient,
   ChangeHistoryModal,
+  ChangeHistoryPreviewRenderFn,
   ChangeHistoryProvider,
   ChangeHistoryTrigger,
   createChangeHistoryHttpAdapter,
 } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { coreServices } from '../services/kibana_services';
+import { CodeEditor } from '@kbn/code-editor';
+import { DashboardApi, DashboardInitializationState, DashboardRenderer } from '..';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -42,6 +45,7 @@ export const DashboardChangeHistoryProvider = ({
     return createChangeHistoryHttpAdapter({
       http: coreServices.http as ChangeHistoryHttpClient,
       listPath: `/internal/dashboard/change_history/{objectId}`,
+      detailPath: `/internal/dashboard/change_history/{objectId}/{eventId}`,
     });
   }, []);
 
@@ -53,12 +57,24 @@ export const DashboardChangeHistoryProvider = ({
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
-      renderPreview={() => {
-        <>Here</>;
-      }}
+      renderPreview={(props) => <DashboardPreview {...props} />}
+      // renderPreview={({ change, compareSpec, diffTelemetry }) => {
+      //   console.log({ change, compareSpec, diffTelemetry });
+      //   return (
+      //     <CodeEditor
+      //       dataTestSubj={'consoleMonacoEditor'}
+      //       languageId={'json'}
+      //       value={JSON.stringify(change.snapshot, null, 2)}
+      //       fullWidth={true}
+      //       links={true}
+      //       enableFindAction={true}
+      //       enableCustomContextMenu={true}
+      //     />
+      //   );
+      // }}
       labels={{
         previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
-          defaultMessage: 'Back to workflow',
+          defaultMessage: 'Back to dashboard',
         }),
         previewTitle: dashboardId,
       }}
@@ -83,3 +99,39 @@ export const DashboardChangeHistoryProvider = ({
 
 //   return <ChangeHistoryListGroupItem />;
 // };
+
+const DashboardPreview: ChangeHistoryPreviewRenderFn = ({ change, compareSpec, diffTelemetry }) => {
+  console.log({ change, compareSpec, diffTelemetry });
+
+  const initialState = useRef<DashboardInitializationState>({
+    ...change,
+    viewMode: 'view' as const,
+  });
+
+  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
+
+  useEffect(() => {
+    if (!dashboardApi) return;
+    dashboardApi.setState({
+      ...change.snapshot,
+    });
+  }, [change, dashboardApi]);
+
+  return (
+    <DashboardRenderer
+      getCreationOptions={() =>
+        Promise.resolve({
+          getInitialInput: () => initialState.current,
+        })
+      }
+      onApiAvailable={setDashboardApi}
+      // getCreationOptions={async () => ({
+      //   useSessionStorageIntegration: false,
+      //   getInitialInput: () => ({
+      //     ...(compareSpec ? compareSpec.target.snapshot : change.snapshot),
+      //     viewMode: 'view',
+      //   }),
+      // })}
+    />
+  );
+};
