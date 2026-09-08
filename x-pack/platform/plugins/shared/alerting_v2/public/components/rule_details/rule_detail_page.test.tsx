@@ -17,6 +17,7 @@ import { RuleDetailPage } from './rule_detail_page';
 import { RuleProvider } from './rule_context';
 import { paths } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
+import { useRuleAutoAttach } from '../../agent_builder/use_rule_auto_attach';
 
 const mockHistoryPush = jest.fn();
 jest.mock('react-router-dom', () => ({
@@ -26,23 +27,29 @@ jest.mock('react-router-dom', () => ({
 
 let mockCanWriteRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    if (typeof token === 'function') {
-      // UserCapabilities service token
-      return {
-        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-        canRead: () => true,
-        can: () => mockCanWriteRules,
-      };
-    }
-    return {};
-  },
-  CoreStart: (key: string) => key,
+jest.mock('../../agent_builder/use_rule_auto_attach', () => ({
+  useRuleAutoAttach: jest.fn(),
 }));
+
+jest.mock('@kbn/core-di-browser', () => {
+  return {
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (p: string) => p } };
+      }
+      if (typeof token === 'function') {
+        // UserCapabilities service token
+        return {
+          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canRead: () => true,
+          can: () => mockCanWriteRules,
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 const mockUseBreadcrumbs = jest.fn();
 jest.mock('../../hooks/use_breadcrumbs', () => ({
@@ -75,6 +82,7 @@ const mockOpenCloneFlyout = jest.fn();
 jest.mock('../../hooks/use_compose_discover_flyout', () => ({
   useComposeDiscoverFlyout: () => ({
     flyout: null,
+    confirmationModal: null,
     openCreateFlyout: jest.fn(),
     openEditFlyout: mockOpenEditFlyout,
     openCloneFlyout: mockOpenCloneFlyout,
@@ -143,6 +151,8 @@ const baseRule: RuleApiResponse = {
   updated_by: 'bob@example.com',
   updated_at: '2026-03-04T12:00:00.000Z',
 };
+
+const mockUseRuleAutoAttach = jest.mocked(useRuleAutoAttach);
 
 const renderPage = (rule: RuleApiResponse) =>
   render(
@@ -419,5 +429,47 @@ describe('RuleDetailPage', () => {
     const menuAfterToggle =
       mockAppHeaderRender.mock.calls[mockAppHeaderRender.mock.calls.length - 1][0];
     expect(menuAfterToggle).toBe(menuBeforeToggle);
+  });
+
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded rule to useRuleAutoAttach', () => {
+      renderPage(baseRule);
+
+      expect(mockUseRuleAutoAttach).toHaveBeenCalledWith(baseRule);
+    });
+
+    it('passes the new rule to useRuleAutoAttach when the rule id changes', () => {
+      const { rerender } = render(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={baseRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      const nextRule = {
+        ...baseRule,
+        id: 'rule-2',
+        metadata: { ...baseRule.metadata, name: 'Next' },
+      };
+
+      rerender(
+        <MemoryRouter>
+          <I18nProvider>
+            <MockChromeContextProvider>
+              <RuleProvider rule={nextRule}>
+                <RuleDetailPage />
+              </RuleProvider>
+            </MockChromeContextProvider>
+          </I18nProvider>
+        </MemoryRouter>
+      );
+
+      expect(mockUseRuleAutoAttach).toHaveBeenLastCalledWith(nextRule);
+    });
   });
 });

@@ -72,6 +72,7 @@ export const createVegaFn = (
       executionContext: context.getExecutionContext(),
       projectRouting: context.getSearchContext().projectRouting,
       isApproximate: context.getSearchContext().isApproximate ?? false,
+      esqlVariables: get(input, 'esqlVariables'),
     });
 
     return {

@@ -15,6 +15,7 @@ import { getQueriesFromOutput } from '../types';
 export const expectedCategoryCoverageEvaluator: KIQueryGenerationEvaluator = {
   name: 'expected_category_coverage',
   kind: 'CODE' as const,
+  direction: 'maximize',
   evaluate: async ({ output, expected }) => {
     const expectedCategories = (expected.expected_categories ?? []).map((c) => c.toLowerCase());
     if (expectedCategories.length === 0) {

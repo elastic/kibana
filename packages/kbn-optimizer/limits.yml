@@ -26,7 +26,7 @@ pageLoadAssetSize:
   cloudDefend: 8146
   cloudExperiments: 98888
   cloudFullStory: 4752
-  cloudLinks: 42432
+  cloudLinks: 68205
   cloudSecurityPosture: 19743
   console: 31191
   contentConnectors: 33014
@@ -127,6 +127,7 @@ pageLoadAssetSize:
   maps: 36004
   mapsEms: 6734
   metricsDataAccess: 44950
+  mitreAttack: 2022
   ml: 99842
   mockIdpPlugin: 7421
   monitoring: 28983

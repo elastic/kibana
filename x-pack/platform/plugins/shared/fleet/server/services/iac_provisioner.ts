@@ -26,6 +26,15 @@ import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 const RENDER_ENDPOINT = '/api/v1/render';
 const RENDER_TIMEOUT_MS = 30_000;
 
+/** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
+const formatIacProvisionerNetworkError = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return String(error);
+  }
+  const causeMessage = error.cause instanceof Error ? error.cause.message : undefined;
+  return causeMessage ? `${error.message}: ${causeMessage}` : error.message;
+};
+
 export interface IacProvisionerRenderPolicyTemplate {
   name: string;
   enabledInputs: string[];
@@ -168,10 +177,11 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       // stalled or wasn't JSON. Logged distinctly from HTTP errors:
       // availability signal, not contract.
       const latencyMs = Date.now() - startTime;
+      const detail = formatIacProvisionerNetworkError(error);
       logger.error(
-        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${error.message}) [Request Id: ${traceId}]`
+        `[IaC Provisioner] No response from provider after ${latencyMs}ms (${detail}) [Request Id: ${traceId}]`
       );
-      throw new IacProvisionerUnavailableError(`no response from provider (${error.message})`);
+      throw new IacProvisionerUnavailableError(`no response from provider (${detail})`);
     } finally {
       clearTimeout(timeout);
     }
@@ -253,6 +263,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         enabled: Boolean(tls?.certificate && tls?.key),
         certificate: tls?.certificate,
         key: tls?.key,
+        // Unset keeps Mozilla roots (ECH / Let's Encrypt).
         certificateAuthorities: tls?.ca,
       })
     );
@@ -265,6 +276,13 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
         // carries server-side client-auth semantics and defaults to false —
         // not applicable to an outbound client connection.
         rejectUnauthorized: true,
+        // The applications, including Kibana, running inside the MKI cluster
+        // should not need access to things like the root CA and should be able
+        // to work with the CAs related to that particular cluster. The trust
+        // bundle we currently deploy in the Kibana pods includes only the
+        // intermediate CA that is scoped to the application cluster.
+        // Therefore, we need to allow partial trust chain validation.
+        allowPartialTrustChain: true,
       },
     });
   }

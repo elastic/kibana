@@ -27,7 +27,7 @@ export const buildEpisodeQuery = (
   groupHash: string
 ): TypedEsqlQuery<AlertEpisodeEsqlRow> =>
   asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    buildEpisodesBaseQuery(spaceId, undefined, groupHash).where`episode.id == ${episodeId}`
+    buildEpisodesBaseQuery(spaceId, { groupHash }).where`episode.id == ${episodeId}`
       .pipe`LIMIT 1`.keep(...ALERT_EPISODE_FIELDS)
   );
 

@@ -305,13 +305,18 @@ upload_tmp_artifact() {
   return 0
 }
 
-upload_tmp_artifact_to_region() {
+upload_tmp_artifact_to_region() (
   local local_path="$1" artifact_name="$2" build_id="$3" region="$4"
+  local config_dir
 
-  retry 3 5 env CLOUDSDK_STORAGE_PARALLEL_COMPOSITE_UPLOAD_ENABLED=False gcloud storage cp \
+  config_dir="$(mktemp -d -t gcloud-upload-XXXXXX)"
+  trap 'rm -rf "$config_dir"' EXIT
+  cp -a "${CLOUDSDK_CONFIG:-$HOME/.config/gcloud}/." "$config_dir/"
+
+  retry 3 5 env "CLOUDSDK_CONFIG=$config_dir" gcloud storage cp \
     "$local_path" \
     "gs://kibana-ci-artifacts-${region}/tmp/builds/${build_id}/${artifact_name}"
-}
+)
 
 print_if_dry_run() {
   if [[ "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
@@ -391,4 +396,19 @@ force_clean_ports() {
 clean_cached_images() {
   docker images -q | sort -u | xargs -r docker rmi -f || true
   docker image prune -af || true
+}
+
+# Move the first existing source dir onto dest (no-op if none exist).
+copy_first_available() {
+  local dest="$1"
+  shift
+  local src
+  for src in "$@"; do
+    if [[ -d "$src" ]]; then
+      echo "Using $src as a starting point"
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      return 0
+    fi
+  done
 }

@@ -46,6 +46,7 @@ export const setDynamicSettings = async ({
     defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
     defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
     privateLocationsSyncInterval: settings.privateLocationsSyncInterval,
+    rebalancePrivateLocationShardsEnabled: settings.rebalancePrivateLocationShardsEnabled,
   };
   return await apiService.put(
     SYNTHETICS_API_URLS.DYNAMIC_SETTINGS,

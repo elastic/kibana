@@ -140,7 +140,9 @@ dependsOn:
   - '@kbn/core-spaces-common'
   - '@kbn/core-feature-flags-server'
   - '@kbn/cps'
+  - '@kbn/cps-utils'
   - '@kbn/cps-server-utils'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

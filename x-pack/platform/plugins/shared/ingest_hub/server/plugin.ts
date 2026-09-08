@@ -12,9 +12,9 @@ import type { IngestHubServerSetupDeps, IngestHubServerStartDeps } from './types
 export class IngestHubPlugin
   implements Plugin<void, void, IngestHubServerSetupDeps, IngestHubServerStartDeps>
 {
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<IngestHubServerStartDeps, void>): void {}
+  public setup(_core: CoreSetup<IngestHubServerStartDeps, void>): void {}
 
   public start(_core: CoreStart, plugins: IngestHubServerStartDeps): void {}
 

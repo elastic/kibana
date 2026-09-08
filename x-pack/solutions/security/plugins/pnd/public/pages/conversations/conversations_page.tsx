@@ -7,7 +7,13 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  useEuiTheme,
+} from '@elastic/eui';
 import {
   CONVERSATION_QUEUE_CATEGORIES,
   type Investigation,
@@ -19,12 +25,12 @@ import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { useInvestigations } from '../../hooks/use_investigations_api';
 import { QUEUE_PAGE_INFO } from './translations';
 import { ConversationQueue } from '../../components/conversation_queue';
-import {
-  type BaseActionsProps,
-  type CardActionType,
-} from '../../components/conversation_card/base_actions';
+import { type ConversationsActionsGroupProps } from '../../components/conversation_card';
+import { type BaseActionsProps, type CardActionType } from '../../components/actions';
 import { BlastRadius } from '../../components/filters/blast_radius';
 import { AssignActionModal, BaseActionModal, MODAL_TRANSLATIONS } from '../../components/modals';
+import { ApprovalModal } from '../../components/modals/approval_modal';
+import { ConversationDetailsFlyout } from '../../components/details';
 
 const QUEUE_STATUSES = new Set(['open', 'investigating', 'in-progress', 'escalated']);
 
@@ -32,15 +38,24 @@ const isQueueRow = (investigation: Investigation): boolean =>
   QUEUE_STATUSES.has(investigation.status ?? 'open');
 
 export const ConversationsPage: React.FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { data, isLoading, error } = useInvestigations();
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   usePndDocTitle(QUEUE_PAGE_INFO.pageTitle);
 
+  const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
+    string | undefined
+  >(undefined);
+
+  const [selectedIdForDetails, setSelectedIdForDetails] = useState<string | undefined>(undefined);
   const [modalState, setModalState] = useState<{
     type: CardActionType | null;
     recordId: Investigation['recordId'] | null;
     assignee?: string | null;
   }>({ type: null, recordId: null, assignee: null });
+
+  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
+  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback(
     (action, recordId, assignee = null) => {
@@ -49,8 +64,34 @@ export const ConversationsPage: React.FC = () => {
     [setModalState]
   );
 
-  // TODO: update data fetching to use the new conversations API (useConversations) and remove the useInvestigations hook
-  const conversations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+  const onClickCard = useCallback(
+    (id: Investigation['recordId']) => {
+      setSelectedIdForDetails(id);
+    },
+    [setSelectedIdForDetails]
+  );
+
+  const onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'] =
+    useCallback(
+      ({ id }) => {
+        setSelectedIdForRecommendedAction(id);
+      },
+      [setSelectedIdForRecommendedAction]
+    );
+
+  const selectedRecommendedActionConversation = useMemo(
+    () =>
+      selectedIdForRecommendedAction
+        ? conversations.find((c) => c.id === selectedIdForRecommendedAction)
+        : undefined,
+    [conversations, selectedIdForRecommendedAction]
+  );
+
+  const selectedDetailsConversation: Investigation | undefined = useMemo(
+    () =>
+      selectedIdForDetails ? conversations.find((c) => c.id === selectedIdForDetails) : undefined,
+    [conversations, selectedIdForDetails]
+  );
 
   const sortedConversations = useMemo(
     () =>
@@ -92,15 +133,34 @@ export const ConversationsPage: React.FC = () => {
 
   return (
     <PndPageSection
-      restrictWidth
-      css={css`
-        align-self: center;
-        @media (min-width: 1920px) {
-          max-width: 1300px;
-        }
-        max-width: 960px;
-      `}
+      contentProps={{
+        css: css`
+          padding-block: ${euiTheme.size.xxl};
+          align-self: center;
+          max-width: 1000px;
+        `,
+      }}
     >
+      {selectedIdForRecommendedAction && selectedRecommendedActionConversation && (
+        <ApprovalModal
+          selectedRecommendedActionConversation={selectedRecommendedActionConversation}
+          onConfirm={() =>
+            // TODO: use action API call hook
+            setSelectedIdForRecommendedAction(undefined)
+          }
+          onClose={() => setSelectedIdForRecommendedAction(undefined)}
+        />
+      )}
+
+      {selectedIdForDetails && selectedDetailsConversation && (
+        <ConversationDetailsFlyout
+          investigation={selectedDetailsConversation}
+          onClose={() => setSelectedIdForDetails(undefined)}
+          onClickAction={onClickAction}
+          onClickRecommendedAction={onClickRecommendedAction}
+        />
+      )}
+
       {modalState.type === 'assign' && modalState.recordId && (
         <AssignActionModal
           recordId={modalState.recordId}
@@ -179,7 +239,9 @@ export const ConversationsPage: React.FC = () => {
                   briefingType={group.id as RecommendedAction}
                   briefingList={group.items}
                   isFiltered={filteredQueueItems.length !== sortedConversations.length}
+                  onClickRecommendedAction={onClickRecommendedAction}
                   onClickAction={onClickAction}
+                  onClickCard={onClickCard}
                 />
               </EuiFlexItem>
             ))

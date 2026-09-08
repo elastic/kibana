@@ -37,7 +37,7 @@ describe('useEditModal', () => {
     const preventDefault = jest.fn();
     act(() => onSubmit({ preventDefault } as unknown as SyntheticEvent));
     expect(error).toBeFalsy();
-    expect(onSave).toBeCalled();
-    expect(preventDefault).toBeCalled();
+    expect(onSave).toHaveBeenCalled();
+    expect(preventDefault).toHaveBeenCalled();
   });
 });
