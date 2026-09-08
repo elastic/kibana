@@ -115,7 +115,10 @@ export function openSaveModal({
           const beforeAddTime = window.performance.now();
 
           const saveResult = await saveDashboard({
-            saveOptions: { confirmOverwrite: false, saveAsCopy: lastSavedId ? true : newCopyOnSave },
+            saveOptions: {
+              confirmOverwrite: false,
+              saveAsCopy: lastSavedId ? true : newCopyOnSave,
+            },
             dashboardState: dashboardStateToSave,
             lastSavedId,
             accessMode: shouldAddAccessControl && newAccessMode ? newAccessMode : undefined,
@@ -171,4 +174,3 @@ function getCustomModalTitle(viewMode: ViewMode, lastSavedId: string | undefined
     });
   return undefined;
 }
-
