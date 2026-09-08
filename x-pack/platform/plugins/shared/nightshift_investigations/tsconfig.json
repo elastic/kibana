@@ -27,6 +27,9 @@
     "@kbn/i18n",
     "@kbn/core-saved-objects-server",
     "@kbn/es-query",
-    "@kbn/search-inference-endpoints"
+    "@kbn/search-inference-endpoints",
+    "@kbn/task-manager-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/rule-registry-plugin"
   ]
 }
