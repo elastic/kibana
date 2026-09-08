@@ -25,6 +25,7 @@ const conversation = {
 describe('createPublicConversationTemplatesContract', () => {
   const setup = () => {
     const context: ConversationTemplateUIContext = {
+      attachmentsService: agentBuilderMocks.createStart().attachments,
       openSidebarConversation: jest.fn(),
       openFullscreenConversation: jest.fn().mockResolvedValue(undefined),
     };
@@ -96,7 +97,6 @@ describe('createPublicConversationTemplatesContract', () => {
     if (!TabContent) throw new Error('Expected a registered tab');
     const props = {
       conversation: { ...conversation, rounds: [] },
-      attachmentsService: agentBuilderMocks.createStart().attachments,
     };
     const { rerender } = render(<TabContent {...props} />);
     fireEvent.click(screen.getByText('Open sidebar'));

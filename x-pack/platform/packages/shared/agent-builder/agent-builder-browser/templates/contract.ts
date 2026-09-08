@@ -19,8 +19,6 @@ import type { AttachmentServiceStartContract } from '../attachments';
 export interface ConversationTemplateTabRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
-  /** Public service for looking up attachment UI definitions. */
-  attachmentsService: AttachmentServiceStartContract;
 }
 
 /**
@@ -46,6 +44,8 @@ export interface ConversationTemplateBriefCardRenderProps {
 
 /** Shared capabilities supplied by Agent Builder to all template UI registration callbacks. */
 export interface ConversationTemplateUIContext {
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
   /** Opens the sidebar using the existing conversation navigation behavior. */
   openSidebarConversation: (conversationId: string) => void;
   /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
