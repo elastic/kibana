@@ -716,8 +716,17 @@ describe('Lens App', () => {
 
     describe('save buttons', () => {
       const querySaveButton = () => screen.queryByTestId('lnsApp_saveButton');
-      const clickSaveButton = async () =>
-        await act(async () => await userEvent.click(screen.getByTestId('lnsApp_saveButton')));
+      const saveMenuUser = userEvent.setup({ pointerEventsCheck: 0, delay: null });
+      const openSaveOptionsIfNeeded = async () => {
+        const saveOptions = screen.queryByTestId('lnsApp_saveAndReturnButton-secondary-button');
+        if (saveOptions) {
+          await saveMenuUser.click(saveOptions);
+        }
+      };
+      const clickSaveButton = async () => {
+        await openSaveOptionsIfNeeded();
+        await saveMenuUser.click(await screen.findByTestId('lnsApp_saveButton'));
+      };
 
       const querySaveAndReturnButton = () => screen.queryByTestId('lnsApp_saveAndReturnButton');
       const waitForModalVisible = async () =>
@@ -835,7 +844,8 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save to library');
+        await openSaveOptionsIfNeeded();
+        expect(await screen.findByTestId('lnsApp_saveButton')).toHaveTextContent('Save to library');
       });
 
       it('Shows Save and Return and Save As buttons in edit by reference mode', async () => {
@@ -852,7 +862,8 @@ describe('Lens App', () => {
         });
 
         expect(querySaveAndReturnButton()).toBeEnabled();
-        expect(querySaveButton()).toHaveTextContent('Save as');
+        await openSaveOptionsIfNeeded();
+        expect(await screen.findByTestId('lnsApp_saveButton')).toHaveTextContent('Save as');
       });
 
       it('applies all changes on-save', async () => {

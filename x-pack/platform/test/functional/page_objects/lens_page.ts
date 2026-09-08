@@ -842,6 +842,23 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Save the current Lens visualization.
      */
+    async openSaveOptionsIfNeeded() {
+      if (await testSubjects.exists('lnsApp_saveButton')) {
+        return;
+      }
+      const secondarySubjects = [
+        'lnsApp_saveAndReturnButton-secondary-button',
+        'lnsApp_replaceInDashboardButton-secondary-button',
+        'lnsApp_replaceInCanvasButton-secondary-button',
+      ];
+      for (const subject of secondarySubjects) {
+        if (await testSubjects.exists(subject)) {
+          await testSubjects.click(subject);
+          return;
+        }
+      }
+    },
+
     async save(
       title: string,
       saveAsNew?: boolean,
@@ -852,6 +869,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       description?: string
     ) {
       await header.waitUntilLoadingHasFinished();
+      await this.openSaveOptionsIfNeeded();
       await testSubjects.click('lnsApp_saveButton');
 
       await this.saveModal(

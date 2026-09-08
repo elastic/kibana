@@ -83,7 +83,7 @@ function getSaveButtonMeta({
             defaultMessage: 'Save and return',
           }),
       emphasize: true,
-      iconType: contextFromEmbeddable ? 'save' : 'checkCircleFill',
+      iconType: 'save',
       testId: 'lnsApp_saveAndReturnButton',
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
@@ -224,7 +224,7 @@ function getLensTopNavConfig(options: {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
-      iconType: 'arrowLeft',
+      iconType: 'sortLeft',
       testId: 'lnsApp_goBackToAppButton',
       disableButton: !actions.goBack.enabled,
       order: 0,
@@ -333,11 +333,6 @@ function getLensTopNavConfig(options: {
     });
   }
 
-  const isSaveEmphasized =
-    showReplaceInDashboard || showReplaceInCanvas ? false : !showSaveAndReturn;
-
-  let primaryActionItem: AppMenuPrimaryActionItem | undefined;
-
   const saveButtonItem = {
     id: 'lnsApp_saveButton',
     label: saveButtonLabel,
@@ -347,12 +342,6 @@ function getLensTopNavConfig(options: {
     run: wrapTopNavRun(actions.showSaveModal.execute),
   };
 
-  if (isSaveEmphasized) {
-    primaryActionItem = saveButtonItem;
-  } else {
-    items.push({ ...saveButtonItem, order: 1 });
-  }
-
   const saveButtonMeta = getSaveButtonMeta({
     showSaveAndReturn,
     showReplaceInDashboard,
@@ -360,16 +349,24 @@ function getLensTopNavConfig(options: {
     contextFromEmbeddable,
   });
 
-  if (saveButtonMeta) {
-    primaryActionItem = {
-      id: saveButtonMeta.testId,
-      label: saveButtonMeta.label,
-      iconType: saveButtonMeta.iconType,
-      testId: saveButtonMeta.testId,
-      disableButton: !actions.saveAndReturn.enabled,
-      run: wrapTopNavRun(actions.saveAndReturn.execute),
-    };
-  }
+  const primaryActionItem: AppMenuPrimaryActionItem | undefined = saveButtonMeta
+    ? {
+        id: saveButtonMeta.testId,
+        label: saveButtonMeta.label,
+        iconType: saveButtonMeta.iconType,
+        testId: saveButtonMeta.testId,
+        disableButton: !actions.saveAndReturn.enabled,
+        run: wrapTopNavRun(actions.saveAndReturn.execute),
+        popoverWidth: 170,
+        popoverTestId: 'lnsApp_saveButtonPopover',
+        splitButtonProps: {
+          secondaryButtonAriaLabel: i18n.translate('xpack.lens.app.saveOptionsAriaLabel', {
+            defaultMessage: 'Save options',
+          }),
+          items: [saveButtonItem],
+        },
+      }
+    : saveButtonItem;
 
   return { items, primaryActionItem };
 }
