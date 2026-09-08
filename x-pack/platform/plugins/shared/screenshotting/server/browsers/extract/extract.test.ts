@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+
+/* eslint-disable @kbn/eslint/require-license-header */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -101,7 +106,7 @@ describe('extract', () => {
         }
 
         expect(thrownException).toBeInstanceOf(ExtractError);
-        expect(thrownException.cause.code).toEqual('EACCES');
+        expect(thrownException.cause.message).toMatch('Unable to write file:');
       });
     }
   });

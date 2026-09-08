@@ -41,41 +41,41 @@ const buildRegistry = () => {
   const registry = new UnifiedAttachmentTypeRegistry();
   registry.register({
     id: 'security.alert',
-    displayName: 'Alerts',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an alert' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Alerts',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an alert' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-alerts-table">{'Alerts table'}</div>,
     }),
     schema: z.object({}),
   });
   registry.register({
     id: 'security.event',
-    displayName: 'Events',
-    icon: 'bell',
-    getAttachmentViewObject: () => ({ event: 'added an event' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Events',
+    getIcon: () => 'bell',
+    getCreationActivity: () => ({ event: 'added an event' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-events-table">{'Events table'}</div>,
     }),
     schema: z.object({}),
   });
   registry.register({
     id: 'file',
-    displayName: 'Files',
-    icon: 'document',
-    getAttachmentViewObject: () => ({ event: 'added a file' }),
-    getAttachmentTabViewObject: () => ({
+    getLabel: () => 'Files',
+    getIcon: () => 'document',
+    getCreationActivity: () => ({ event: 'added a file' }),
+    getAttachmentList: () => ({
       children: () => <div data-test-subj="test-files-table">{'Files table'}</div>,
     }),
     schema: z.object({}),
   });
-  // Comment is intentionally registered without `getAttachmentTabViewObject`
+  // Comment is intentionally registered without `getAttachmentList`
   // to mirror production: comments live in the activity tab, not here.
   registry.register({
     id: 'comment',
-    displayName: 'Comment',
-    icon: 'comment',
-    getAttachmentViewObject: () => ({ event: 'added a comment' }),
+    getLabel: () => 'Comment',
+    getIcon: () => 'comment',
+    getCreationActivity: () => ({ event: 'added a comment' }),
     schema: z.object({}),
   });
   return registry;

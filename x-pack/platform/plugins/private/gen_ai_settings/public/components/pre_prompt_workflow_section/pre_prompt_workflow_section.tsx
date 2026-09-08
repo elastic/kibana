@@ -50,7 +50,11 @@ export const PrePromptWorkflowSection: React.FC = () => {
         return [];
       }
       const response = await agentBuilder.tools.listWorkflows({ page: 1, limit: 1000 });
-      return response.results.map((workflow) => ({ id: workflow.id, name: workflow.name }));
+      return response.results.map((workflow) => ({
+        id: workflow.id,
+        name: workflow.name,
+        enabled: workflow.enabled,
+      }));
     },
   });
 

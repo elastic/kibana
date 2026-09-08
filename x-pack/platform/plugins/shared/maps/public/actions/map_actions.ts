@@ -38,7 +38,6 @@ import {
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import {
-  CLEAR_GOTO,
   CLEAR_MOUSE_COORDINATES,
   CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
   MAP_DESTROYED,
@@ -47,7 +46,6 @@ import {
   ROLLBACK_MAP_SETTINGS,
   SET_EMBEDDABLE_SEARCH_CONTEXT,
   SET_EXECUTION_CONTEXT,
-  SET_GOTO,
   SET_MAP_INIT_ERROR,
   SET_MAP_SETTINGS,
   SET_MOUSE_COORDINATES,
@@ -69,7 +67,6 @@ import { addLayer, addLayerWithoutDataSync } from './layer_actions';
 import type {
   CustomIcon,
   DrawState,
-  MapCenterAndZoom,
   MapExtent,
   MapSettings,
   Timeslice,
@@ -282,17 +279,6 @@ export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) 
 
 export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
-}
-
-export function setGotoWithCenter({ lat, lon, zoom }: MapCenterAndZoom) {
-  return {
-    type: SET_GOTO,
-    center: { lat, lon, zoom },
-  };
-}
-
-export function clearGoto() {
-  return { type: CLEAR_GOTO };
 }
 
 export function setQuery({

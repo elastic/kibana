@@ -96,14 +96,18 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Optional test subject applied to the existing flyout header.
+   */
+  dataTestSubj?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
-    const { openNotes, openDocumentFlyoutFromIndex } = useFlyoutApi();
+  ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
+    const { openNotes, openDocumentFlyoutFromPattern } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -134,7 +138,11 @@ export const DocumentFlyout = memo(
     // Maps each ancestor document id to the index it lives in, so a Source event value in the Table
     // tab can open that specific ancestor document. Threshold rules are excluded (see helper).
     const ancestorsIndexById = useMemo(
-      () => getAncestorsIndexById(getTimelineEventsDetailsFromRecord(hit)),
+      () =>
+        getAncestorsIndexById(
+          getTimelineEventsDetailsFromRecord(hit),
+          hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
+        ),
       [hit]
     );
 
@@ -144,9 +152,14 @@ export const DocumentFlyout = memo(
       (props: OpenFlyoutLinkProps) => {
         // Source event: the raw `kibana.alert.ancestors.id` field (or its legacy `signal.ancestors.id`
         // equivalent) can list several ancestor documents, so each value is matched to its own index
-        // and opened in a new flyout (the same open method used by the sibling host/user/rule links).
-        // Values without a resolved index (e.g. a threshold rule's synthetic ancestor) render as
-        // plain text.
+        // and opened in a new flyout. Values without a resolved index (e.g. a threshold rule's
+        // synthetic ancestor) render as plain text.
+        //
+        // We resolve by *pattern* (routing the search at the ancestor index) rather than by concrete
+        // `_index`: the from-index path pins the lookup with a `term` filter on `_index`, which never
+        // matches a cross-cluster document (on the remote the stored `_index` is bare, while the
+        // resolved index carries the `cluster:` alias). Routing at the index reaches the document,
+        // like the legacy flyout. See SDH https://github.com/elastic/sdh-security-team/issues/1666.
         if (
           props.field === EVENT_SOURCE_FIELD_NAME ||
           props.field === LEGACY_EVENT_SOURCE_FIELD_NAME
@@ -158,7 +171,7 @@ export const DocumentFlyout = memo(
           return (
             <EuiLink
               onClick={() =>
-                openDocumentFlyoutFromIndex({
+                openDocumentFlyoutFromPattern({
                   documentId: props.value,
                   indexName,
                   origin: FLYOUT_ORIGIN.FLYOUT_FIELD_LINK,
@@ -184,7 +197,7 @@ export const DocumentFlyout = memo(
         }
         return <OpenFlyoutLink {...props} />;
       },
-      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromIndex]
+      [ruleId, isRulePreview, ancestorsIndexById, openDocumentFlyoutFromPattern]
     );
 
     const onShowNotesFromHeader = useCallback(() => {
@@ -206,7 +219,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader css={headerStyles}>
+        <EuiFlyoutHeader css={headerStyles} data-test-subj={dataTestSubj}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}

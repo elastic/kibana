@@ -14,6 +14,12 @@ import type {
   ReportWorkflowAccessDeniedServerlessTierActionParams,
   ReportWorkflowCreateOpenedActionParams,
   ReportWorkflowDetailViewedActionParams,
+  ReportWorkflowExecutionsDetailOpenedActionParams,
+  ReportWorkflowExecutionsFilterAppliedActionParams,
+  ReportWorkflowExecutionsOpenInEditorClickedActionParams,
+  ReportWorkflowExecutionsPageViewedActionParams,
+  ReportWorkflowExecutionsSearchUsedActionParams,
+  ReportWorkflowExecutionsStepExpandedActionParams,
   ReportWorkflowListViewedActionParams,
 } from './types';
 import { WorkflowUIEventTypes } from './types';
@@ -27,6 +33,13 @@ export const workflowUIEventNames = {
   [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: 'Workflow access with invalid license',
   [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]:
     'Workflow access with invalid serverless tier',
+  [WorkflowUIEventTypes.WorkflowExecutionsPageViewed]: 'Workflow executions page viewed',
+  [WorkflowUIEventTypes.WorkflowExecutionsFilterApplied]: 'Workflow executions filter applied',
+  [WorkflowUIEventTypes.WorkflowExecutionsSearchUsed]: 'Workflow executions search used',
+  [WorkflowUIEventTypes.WorkflowExecutionsDetailOpened]: 'Workflow execution detail opened',
+  [WorkflowUIEventTypes.WorkflowExecutionsStepExpanded]: 'Workflow execution step expanded',
+  [WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked]:
+    'Workflow execution open in editor clicked',
 };
 
 const eventNameSchema: RootSchema<{ eventName: string }> = {
@@ -110,6 +123,70 @@ const workflowAccessDeniedLicenseSchema: RootSchema<ReportWorkflowAccessDeniedLi
 const workflowAccessDeniedServerlessTierSchema: RootSchema<ReportWorkflowAccessDeniedServerlessTierActionParams> =
   { ...eventNameSchema };
 
+const workflowExecutionsPageViewedSchema: RootSchema<ReportWorkflowExecutionsPageViewedActionParams> =
+  { ...eventNameSchema };
+
+const workflowExecutionsFilterAppliedSchema: RootSchema<ReportWorkflowExecutionsFilterAppliedActionParams> =
+  {
+    ...eventNameSchema,
+    filterTypes: {
+      type: 'array',
+      items: {
+        type: 'keyword',
+        _meta: { description: 'Active filter slot name', optional: false },
+      },
+      _meta: {
+        description:
+          "Active filter slots on submission, e.g. ['status', 'workflowId', 'timeRange', 'query'].",
+        optional: false,
+      },
+    },
+  };
+
+const workflowExecutionsSearchUsedSchema: RootSchema<ReportWorkflowExecutionsSearchUsedActionParams> =
+  {
+    ...eventNameSchema,
+    hasQuery: {
+      type: 'boolean',
+      _meta: { description: 'Whether a non-empty KQL query was submitted', optional: false },
+    },
+  };
+
+const workflowExecutionsDetailOpenedSchema: RootSchema<ReportWorkflowExecutionsDetailOpenedActionParams> =
+  {
+    ...eventNameSchema,
+    executionId: {
+      type: 'keyword',
+      _meta: { description: 'The execution ID whose detail flyout was opened', optional: false },
+    },
+  };
+
+const workflowExecutionsStepExpandedSchema: RootSchema<ReportWorkflowExecutionsStepExpandedActionParams> =
+  {
+    ...eventNameSchema,
+    stepType: {
+      type: 'keyword',
+      _meta: { description: 'The step type of the expanded tree node', optional: false },
+    },
+  };
+
+const workflowExecutionsOpenInEditorClickedSchema: RootSchema<ReportWorkflowExecutionsOpenInEditorClickedActionParams> =
+  {
+    ...eventNameSchema,
+    workflowId: {
+      type: 'keyword',
+      _meta: { description: 'The workflow ID to open in the editor', optional: false },
+    },
+    origin: {
+      type: 'keyword',
+      _meta: {
+        description:
+          "Where the click originated: 'table_actions' (row action menu) or 'flyout_actions' (flyout footer)",
+        optional: false,
+      },
+    },
+  };
+
 export const workflowUIEventSchemas = {
   [WorkflowUIEventTypes.WorkflowListViewed]: workflowListViewedSchema,
   [WorkflowUIEventTypes.WorkflowDetailViewed]: workflowDetailViewedSchema,
@@ -118,4 +195,11 @@ export const workflowUIEventSchemas = {
   [WorkflowUIEventTypes.WorkflowAccessDeniedLicense]: workflowAccessDeniedLicenseSchema,
   [WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier]:
     workflowAccessDeniedServerlessTierSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsPageViewed]: workflowExecutionsPageViewedSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsFilterApplied]: workflowExecutionsFilterAppliedSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsSearchUsed]: workflowExecutionsSearchUsedSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsDetailOpened]: workflowExecutionsDetailOpenedSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsStepExpanded]: workflowExecutionsStepExpandedSchema,
+  [WorkflowUIEventTypes.WorkflowExecutionsOpenInEditorClicked]:
+    workflowExecutionsOpenInEditorClickedSchema,
 };

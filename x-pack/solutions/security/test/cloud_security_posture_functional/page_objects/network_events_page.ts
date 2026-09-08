@@ -24,6 +24,7 @@ export class NetworkEventsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly queryBar = this.ctx.getService('queryBar');
   private readonly defaultTimeoutMs = this.ctx.getService('config').get('timeouts.waitFor');
 
   async navigateToNetworkEventsPage(urlQueryParams: string = ''): Promise<void> {
@@ -47,11 +48,17 @@ export class NetworkEventsPageObject extends FtrService {
   }
 
   /**
-   * Clicks the refresh button on the network events page and waits for it to complete
+   * Refreshes the network events page query and waits for it to complete.
+   *
+   * Submits via the query input + Enter rather than clicking the `querySubmitButton`
+   * directly. When the document-details flyout is open its fixed-position header
+   * overlaps the refresh button at the top of the viewport and intercepts the click,
+   * causing flaky ElementClickInterceptedError failures. The query input sits on the
+   * opposite (left) side of the bar and is never covered by the flyout header.
    */
   async clickRefresh(): Promise<void> {
     await this.ensureOnNetworkEventsPage();
-    await this.testSubjects.click('querySubmitButton');
+    await this.queryBar.submitQuery();
 
     // wait for refresh to complete
     await this.retry.waitFor(

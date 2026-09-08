@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import type { CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
+import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 export interface UseCheckAlertAttachmentsProps {
@@ -46,7 +47,18 @@ export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
 }: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
-  const selectedDocumentIds = (getAttachments?.({ theCase: undefined }) ?? [])
+  const { owner } = useCasesContext();
+  // getAttachments is called here without a real case to collect the document IDs it
+  // would attach, so we can flag cases that already contain them. Callers that branch on
+  // `theCase` (e.g. to resolve the owner) need a non-undefined value, so synthesize one from
+  // the current context owner. Only the ID fields matter here, not the attachment `type`,
+  // so any owner in scope is safe to use even when multiple owners are active.
+  const attachmentOwner = owner[0];
+  const selectedDocumentIds = (
+    getAttachments?.({
+      theCase: attachmentOwner ? ({ owner: attachmentOwner } as CaseUI) : undefined,
+    }) ?? []
+  )
     .filter(hasDocReferences)
     .flatMap(({ alertId, eventId, externalReferenceId, attachmentId }) =>
       [alertId, eventId, externalReferenceId, attachmentId].flat()

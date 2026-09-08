@@ -392,7 +392,10 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
     const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
-      ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
+      ? fromSavedObjectTabToTabState({
+          tab: byValueEmbeddableTab,
+          profileStateRegistry: services.profileStateRegistry,
+        })
       : undefined;
 
     const initialTabsState = tabsStorageManager.loadLocally({
@@ -518,9 +521,9 @@ export const openInNewTab: InternalStateThunkActionCreator<
 export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
   [OpenInNewTabParams],
   Promise<void>
-> = ({ query, tabLabel, timeRange }) =>
+> = ({ query, tabLabel, timeRange, esqlApproximation }) =>
   function openInNewTabExtPointActionThunkFn(dispatch) {
-    const appState: TabState['appState'] = { query };
+    const appState: TabState['appState'] = { query, esqlApproximation };
     const globalState: TabState['globalState'] = { timeRange };
 
     return dispatch(

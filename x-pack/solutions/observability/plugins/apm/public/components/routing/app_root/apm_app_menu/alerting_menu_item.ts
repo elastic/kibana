@@ -8,6 +8,7 @@
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import { i18n } from '@kbn/i18n';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import { APM_APP_MENU_EBT_ACTIONS, apmAppMenuEbt } from './ebt_constants';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts',
@@ -65,16 +66,23 @@ export function getAlertingMenuItem({
       id: 'createThreshold',
       label: createThresholdAlertLabel,
       testId: 'apmAlertsMenuItemCreateThreshold',
+      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_CREATE_THRESHOLD_RULE_MENU),
       items: [
         {
           id: 'createLatencyRule',
           label: transactionDurationLabel,
-          run: () => onCreateRule(ApmRuleType.TransactionDuration),
+          ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_LATENCY_RULE),
+          run: () => {
+            onCreateRule(ApmRuleType.TransactionDuration);
+          },
         },
         {
           id: 'createFailedTransactionRateRule',
           label: transactionErrorRateLabel,
-          run: () => onCreateRule(ApmRuleType.TransactionErrorRate),
+          ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_FAILED_TRANSACTION_RATE_RULE),
+          run: () => {
+            onCreateRule(ApmRuleType.TransactionErrorRate);
+          },
         },
       ],
     });
@@ -84,7 +92,10 @@ export function getAlertingMenuItem({
         id: 'createAnomalyRule',
         label: createAnomalyAlertLabel,
         testId: 'apmAlertsMenuItemCreateAnomaly',
-        run: () => onCreateRule(ApmRuleType.Anomaly),
+        ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_ANOMALY_RULE),
+        run: () => {
+          onCreateRule(ApmRuleType.Anomaly);
+        },
       });
     }
 
@@ -92,7 +103,10 @@ export function getAlertingMenuItem({
       id: 'createErrorCountRule',
       label: errorCountLabel,
       testId: 'apmAlertsMenuItemErrorCount',
-      run: () => onCreateRule(ApmRuleType.ErrorCount),
+      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.CREATE_ERROR_COUNT_RULE),
+      run: () => {
+        onCreateRule(ApmRuleType.ErrorCount);
+      },
     });
   }
 
@@ -102,6 +116,7 @@ export function getAlertingMenuItem({
       label: manageRulesLabel,
       iconType: 'tableOfContents',
       href: manageRulesHref,
+      ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.MANAGE_RULES),
       testId: 'apmAlertsMenuItemManageRules',
     });
   }
@@ -115,6 +130,7 @@ export function getAlertingMenuItem({
     label: alertLabel,
     iconType: 'bell',
     testId: 'apmAlertAndRulesHeaderLink',
+    ebt: apmAppMenuEbt(APM_APP_MENU_EBT_ACTIONS.OPEN_ALERTS_MENU),
     items: alertItems,
     order,
   };

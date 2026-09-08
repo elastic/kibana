@@ -39,8 +39,8 @@ const createRequest = (overrides: Partial<KibanaRequest> = {}): KibanaRequest =>
     ...overrides,
   } as KibanaRequest);
 
-const createFakeRequest = (headers: Record<string, string> = {}): KibanaRequest =>
-  mockRouter.createFakeKibanaRequest({ headers });
+const createFakeRequest = (headers: Record<string, string> = {}, spaceId?: string): KibanaRequest =>
+  mockRouter.createFakeKibanaRequest({ headers, spaceId });
 
 const createClient = ({
   publicBaseUrl = 'https://kibana.example.com/base',
@@ -357,6 +357,35 @@ describe('InternalHttpSelfScopedClient', () => {
 
     const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
     expect(outboundRequest.headers.get('authorization')).toBe('ApiKey essu_credential_123');
+  });
+
+  it('prepends the server base path for a fake request, which carries no base path', async () => {
+    const { self } = createClient();
+
+    await self.asScoped(createFakeRequest()).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
+  });
+
+  it('prepends the space prefix for a fake request scoped to a non-default space', async () => {
+    const { self } = createClient();
+
+    await self.asScoped(createFakeRequest({}, 'marketing')).fetch('/api/status');
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.url).toBe('https://kibana.example.com/base/s/marketing/api/status');
+  });
+
+  it('honours prependBasePath: false for a fake request', async () => {
+    const { self } = createClient();
+
+    await self
+      .asScoped(createFakeRequest({}, 'marketing'))
+      .fetch('/base/api/status', { prependBasePath: false });
+
+    const outboundRequest = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
+    expect(outboundRequest.url).toBe('https://kibana.example.com/base/api/status');
   });
 
   it('forwards safe request headers without forwarding cookies', async () => {
