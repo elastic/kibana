@@ -18757,8 +18757,6 @@
     "xpack.datasetQuality.alerts.validation.error.requiredDataViewText": "Data View ist erforderlich.",
     "xpack.datasetQuality.alerts.validation.error.requiredSearchConfiguration": "Die Konfiguration der Search-Quelle ist erforderlich.",
     "xpack.datasetQuality.alerts.validation.threshold": "Ein gültiger prozentualer Schwellenwert ist erforderlich (0–100).",
-    "xpack.datasetQuality.appDescription": "Überwachen Sie die Datensatzqualität für {types}-Datenströme, die dem {dsNamingSchemeLink} folgen.",
-    "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "Benennungsschema für Datenströme",
     "xpack.datasetQuality.appTitle": "Qualität des Datensatzes",
     "xpack.datasetQuality.betaBadgeDescription": "Dieses Feature befindet sich derzeit in der Beta-Version. Sollten Sie auf Fehler stoßen oder Feedback haben, würden wir uns freuen, von Ihnen zu hören. Bitte eröffnen Sie ein Support-Ticket und/oder besuchen Sie unser Diskussionsforum.",
     "xpack.datasetQuality.betaBadgeLabel": "Beta",

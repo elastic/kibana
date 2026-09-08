@@ -18722,8 +18722,6 @@
     "xpack.datasetQuality.alerts.validation.error.requiredDataViewText": "La vue de données est requise.",
     "xpack.datasetQuality.alerts.validation.error.requiredSearchConfiguration": "La configuration de la source de recherche est requise.",
     "xpack.datasetQuality.alerts.validation.threshold": "Un seuil de pourcentage valide est requis (0-100).",
-    "xpack.datasetQuality.appDescription": "Surveillez la qualité du jeu de données pour les flux de données {types} suivant le {dsNamingSchemeLink}.",
-    "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "Schéma de dénomination du flux de données",
     "xpack.datasetQuality.appTitle": "Qualité de l’ensemble de données",
     "xpack.datasetQuality.betaBadgeDescription": "Cette fonctionnalité est actuellement en version bêta. Nous aimerions beaucoup savoir si vous avez des commentaires ou si vous rencontrez des bugs. Veuillez ouvrir un dossier d'assistance et/ou consulter notre forum de discussion.",
     "xpack.datasetQuality.betaBadgeLabel": "Bêta",

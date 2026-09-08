@@ -18810,8 +18810,6 @@
     "xpack.datasetQuality.alerts.validation.error.requiredDataViewText": "データビューは必須です。",
     "xpack.datasetQuality.alerts.validation.error.requiredSearchConfiguration": "検索ソース構成が必要です。",
     "xpack.datasetQuality.alerts.validation.threshold": "有効なパーセンテージのしきい値（0-100）が必要です。",
-    "xpack.datasetQuality.appDescription": "{dsNamingSchemeLink}に従う{types}データストリームのデータセット品質を監視します。",
-    "xpack.datasetQuality.appDescription.dsNamingSchemeLinkText": "データストリーム命名スキーム",
     "xpack.datasetQuality.appTitle": "データセット品質",
     "xpack.datasetQuality.betaBadgeDescription": "現在、この機能はベータです。バグが発生した場合やフィードバックがある場合は、お問い合わせください。サポート問題をオープンするか、ディスカッションフォーラムをご覧ください。",
     "xpack.datasetQuality.betaBadgeLabel": "ベータ",
