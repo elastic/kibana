@@ -15,6 +15,7 @@ import {
   type EntityDefinition,
   type EntityField,
   type EntityType,
+  type ProcessId,
 } from '../../../common/domain/definitions/entity_schema';
 import {
   getEuidEsqlEvaluation,
@@ -69,6 +70,7 @@ interface LogsExtractionQueryParams {
   pagination?: PaginationParams;
   logsPageCursorStart?: LogSlicePaginationParams;
   logsPageCursorEnd?: LogSlicePaginationParams;
+  processId?: ProcessId;
 }
 
 export function buildLogsExtractionEsqlQuery({
