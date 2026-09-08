@@ -54,25 +54,6 @@ export function shouldClearSession(location: {
 }
 
 /**
- * Recursively converts typed SO values back to session-storage-compatible strings.
- * At SO write time, multi-value fields (e.g. `regions`) are stored as string arrays.
- * Session storage expects raw comma-separated strings so that toTyped() can re-convert them.
- *
- * @internal Exported for testing only.
- */
-export function detypifyVarsForSession(value: unknown): unknown {
-  if (Array.isArray(value)) return value.join(',');
-  if (value !== null && typeof value === 'object') {
-    const result: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      result[k] = detypifyVarsForSession(v);
-    }
-    return result;
-  }
-  return value;
-}
-
-/**
  * Fetches the SO and writes non-secret fields to session storage before React renders.
  * Clear must happen first so react-use's useSessionStorage does not re-write stale defaults.
  * Best-effort: any fetch or write error leaves the form empty and the user can start over.
@@ -92,7 +73,7 @@ async function hydrateOnboardingSession(
       getOnboardingSessionKey(integrationId, 'serviceSettingsStep'),
       JSON.stringify({
         globalRegion: item.globalRegion ?? '',
-        serviceVars: detypifyVarsForSession(item.serviceVars ?? {}),
+        serviceVars: item.serviceVars ?? {},
       })
     );
     sessionStorage.setItem(
