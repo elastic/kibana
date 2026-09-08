@@ -224,11 +224,18 @@ steps:
     default:
       # Only unexpected verdicts land here (all canonical verdicts have dedicated cases above).
       - name: report_only
-        type: data.set
+        type: waitForApproval
+        timeout: "72h"
         with:
-          note: >-
-            Verdict {{ steps.coverage_check.output.structured_output.verdict }}:
-            no automated action. See the run output.
+          approveLabel: Acknowledged
+          rejectLabel: Dismiss
+          message: |-
+            The coverage check returned an unexpected verdict and no automated action was taken.
+
+            Verdict: {{ steps.coverage_check.output.structured_output.verdict }}
+            Detection gap: {{ inputs.gap_description }}
+
+            Review the check: /app/agent_builder/conversations/{{ steps.coverage_check.output.conversation_id }}
 
   - name: emit_result
     type: workflow.output

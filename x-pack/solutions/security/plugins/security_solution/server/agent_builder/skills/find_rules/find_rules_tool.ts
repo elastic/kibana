@@ -205,16 +205,11 @@ type RuleFromFind = Awaited<ReturnType<typeof findRules>>['data'][number];
 function summarizeRule(rule: RuleFromFind) {
   const params = (rule.params ?? {}) as Record<string, unknown>;
 
-  // Description and query are what a match judgement runs on: a rule's name alone often hides
-  // the behavior it detects, and the query is the ground truth of it.
-  const truncate = (value: unknown, max: number) =>
-    typeof value === 'string' && value.length > max ? `${value.slice(0, max)}…` : value;
-
   return {
     id: rule.id,
     ruleId: params.rule_id ?? params.ruleId,
     name: rule.name,
-    description: truncate(params.description, 500),
+    description: params.description,
     query: params.query,
     // The match rubric requires the same data source, so the index patterns are evidence,
     // not decoration: without them a Windows-endpoint rule can be judged to cover a Linux
