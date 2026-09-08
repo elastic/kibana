@@ -37,40 +37,39 @@ export const HostsPage = (): React.ReactElement => {
   );
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
-  const { hasData, loading } = useHostsHasData();
-  const showOnboarding = !loading && !hasData;
+  const { showOnboarding } = useHostsHasData();
 
   // Template noDataConfig ignores children; Hosts renders onboarding as body instead.
   return (
     <div className={APP_WRAPPER_CLASS}>
-      <InfraPageTemplate
-        hasDataOverride={!showOnboarding}
-        header={
-          <>
-            <AppHeader title={hostsTitle} menu={menu} spacing="standard" />
-            {flyouts}
-          </>
-        }
-        pageSectionProps={{
-          paddingSize: 'none',
-          contentProps: {
-            css: css`
-              display: flex;
-              flex-direction: column;
-              flex: 1 1 auto;
-              min-height: 0;
-              height: 100%;
-              width: 100%;
-              padding-bottom: 0;
-            `,
-          },
-        }}
-      >
-        {showOnboarding ? (
-          <HostsOnboardingPage />
-        ) : (
-          <UnifiedSearchProvider>
-            <HostsTimeRangeMetadataProvider>
+      <UnifiedSearchProvider>
+        <HostsTimeRangeMetadataProvider>
+          <InfraPageTemplate
+            hasDataOverride={!showOnboarding}
+            header={
+              <>
+                <AppHeader title={hostsTitle} menu={menu} spacing="standard" />
+                {flyouts}
+              </>
+            }
+            pageSectionProps={{
+              paddingSize: 'none',
+              contentProps: {
+                css: css`
+                  display: flex;
+                  flex-direction: column;
+                  flex: 1 1 auto;
+                  min-height: 0;
+                  height: 100%;
+                  width: 100%;
+                  padding-bottom: 0;
+                `,
+              },
+            }}
+          >
+            {showOnboarding ? (
+              <HostsOnboardingPage />
+            ) : (
               <EuiPageSection
                 paddingSize="m"
                 grow
@@ -109,10 +108,10 @@ export const HostsPage = (): React.ReactElement => {
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPageSection>
-            </HostsTimeRangeMetadataProvider>
-          </UnifiedSearchProvider>
-        )}
-      </InfraPageTemplate>
+            )}
+          </InfraPageTemplate>
+        </HostsTimeRangeMetadataProvider>
+      </UnifiedSearchProvider>
     </div>
   );
 };

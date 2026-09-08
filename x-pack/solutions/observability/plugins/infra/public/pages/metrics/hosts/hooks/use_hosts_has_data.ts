@@ -6,10 +6,16 @@
  */
 
 import type { GetHasDataResponse } from '../../../../../common/metrics_sources/get_has_data';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isPending, isSuccess, useFetcher } from '../../../../hooks/use_fetcher';
 
-/** Fetches whether any host metrics exist so Hosts can keep AppHeader mounted on onboarding. */
-export const useHostsHasData = (): { hasData: boolean; loading: boolean } => {
+export interface HostsHasData {
+  hasData: boolean;
+  loading: boolean;
+  showOnboarding: boolean;
+}
+
+/** Cluster-level host metrics existence (`source=host`), not the current table time range. */
+export const useHostsHasData = (): HostsHasData => {
   const { data, status } = useFetcher(async (callApi) => {
     return await callApi<GetHasDataResponse>('/api/metrics/source/hasData', {
       method: 'GET',
@@ -17,8 +23,11 @@ export const useHostsHasData = (): { hasData: boolean; loading: boolean } => {
     });
   }, []);
 
+  const hasData = Boolean(data?.hasData);
+
   return {
-    hasData: Boolean(data?.hasData),
+    hasData,
     loading: isPending(status),
+    showOnboarding: isSuccess(status) && !hasData,
   };
 };

@@ -42,8 +42,9 @@ jest.mock('../../../hooks/use_fetcher', () => ({
   },
   isPending: (status: string) =>
     status === 'loading' || status === 'not_initiated' || status === 'pending',
+  isSuccess: (status: string) => status === 'success',
   useFetcher: () => ({
-    data: { hasData: mockFetcherState.hasData },
+    data: mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
     status: mockFetcherState.status,
   }),
 }));
@@ -155,6 +156,19 @@ describe('HostsPage', () => {
   it('does not show onboarding while host data is loading', async () => {
     mockFetcherState.hasData = false;
     mockFetcherState.status = 'loading';
+
+    renderHostsPage();
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(hostsTitle);
+    expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
+    expect(screen.getByTestId('hostsSearchBar')).toBeInTheDocument();
+    expect(screen.getByTestId('hostsContainer')).toBeInTheDocument();
+    expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
+  });
+
+  it('keeps search and table mounted when the has-data check fails', async () => {
+    mockFetcherState.hasData = false;
+    mockFetcherState.status = 'failure';
 
     renderHostsPage();
 
