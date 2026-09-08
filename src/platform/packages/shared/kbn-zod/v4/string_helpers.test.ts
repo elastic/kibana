@@ -65,6 +65,7 @@ describe.each([
       helper: name,
       library: 'zod',
       maxLength,
+      length: maxLength + 1,
       label: 'dashboard.panelId',
     });
     expect(() => reporting.parse(42)).toThrow();

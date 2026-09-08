@@ -65,6 +65,7 @@ describe.each([
       helper: name,
       library: 'config-schema',
       maxLength,
+      length: maxLength + 1,
       label: 'dashboard.panelId',
     });
     expect(() => reporting.validate(42)).toThrow();

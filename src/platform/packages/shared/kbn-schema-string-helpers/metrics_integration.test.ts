@@ -18,21 +18,42 @@ class TestMetricReader extends sdkMetrics.MetricReader {
 
 test('records after the global provider is initialized, even if reporting ran earlier', async () => {
   metrics.disable();
-  reportStringLengthViolation({ helper: 'savedObjectId', library: 'zod', maxLength: 512 });
+  reportStringLengthViolation({
+    helper: 'savedObjectId',
+    library: 'zod',
+    maxLength: 512,
+    length: 600,
+  });
 
   const reader = new TestMetricReader();
   const provider = new sdkMetrics.MeterProvider({ readers: [reader] });
   metrics.setGlobalMeterProvider(provider);
   try {
-    reportStringLengthViolation({ helper: 'savedObjectId', library: 'zod', maxLength: 512 });
-    reportStringLengthViolation({ helper: 'savedObjectId', library: 'zod', maxLength: 512 });
-    reportStringLengthViolation({ helper: 'spaceId', library: 'config-schema', maxLength: 512 });
+    reportStringLengthViolation({
+      helper: 'savedObjectId',
+      library: 'zod',
+      maxLength: 512,
+      length: 600,
+    });
+    reportStringLengthViolation({
+      helper: 'savedObjectId',
+      library: 'zod',
+      maxLength: 512,
+      length: 200000,
+    });
+    reportStringLengthViolation({
+      helper: 'spaceId',
+      library: 'config-schema',
+      maxLength: 512,
+      length: 600,
+    });
     const { resourceMetrics } = await reader.collect();
     expect(resourceMetrics.scopeMetrics).toHaveLength(1);
     const [scope] = resourceMetrics.scopeMetrics;
     expect(scope.scope.name).toBe('kibana.schema');
     expect(scope.metrics).toHaveLength(1);
-    expect(scope.metrics[0].descriptor.name).toBe('kibana.schema.string_length_violation');
+    expect(scope.metrics[0].descriptor.name).toBe('kibana.schema.string_length_violation.length');
+    expect(scope.metrics[0].dataPoints).toHaveLength(2);
     expect(scope.metrics[0].dataPoints).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -41,7 +62,19 @@ test('records after the global provider is initialized, even if reporting ran ea
             'schema.library': 'zod',
             'schema.max_length': 512,
           },
-          value: 2,
+          value: expect.objectContaining({
+            count: 2,
+            sum: 200600,
+            min: 600,
+            max: 200000,
+            buckets: {
+              boundaries: [
+                0, 16, 64, 256, 512, 1024, 2048, 4096, 8192, 10000, 16384, 32768, 65536, 100000,
+                131072, 262144, 524288, 1048576,
+              ],
+              counts: [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+            },
+          }),
         }),
         expect.objectContaining({
           attributes: {
@@ -49,7 +82,7 @@ test('records after the global provider is initialized, even if reporting ran ea
             'schema.library': 'config-schema',
             'schema.max_length': 512,
           },
-          value: 1,
+          value: expect.objectContaining({ count: 1, sum: 600, min: 600, max: 600 }),
         }),
       ])
     );

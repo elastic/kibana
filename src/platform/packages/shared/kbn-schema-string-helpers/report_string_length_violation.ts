@@ -8,43 +8,52 @@
  */
 
 import { metrics, ValueType } from '@opentelemetry/api';
-import type { Counter, MeterProvider } from '@opentelemetry/api';
+import type { Histogram, MeterProvider } from '@opentelemetry/api';
 import type { StringHelperName } from './limits';
 
-const counters = new WeakMap<MeterProvider, Counter>();
+const histograms = new WeakMap<MeterProvider, Histogram>();
 
-const getCounter = (): Counter => {
+const getHistogram = (): Histogram => {
   // Schema libraries can load before telemetry initializes the global provider.
   const provider = metrics.getMeterProvider();
-  const existing = counters.get(provider);
+  const existing = histograms.get(provider);
   if (existing) {
     return existing;
   }
-  const counter = provider
+  const histogram = provider
     .getMeter('kibana.schema')
-    .createCounter('kibana.schema.string_length_violation', {
-      description: 'String validations exceeding the configured maximum length in reporting mode.',
-      unit: '{violation}',
+    .createHistogram('kibana.schema.string_length_violation.length', {
+      description:
+        'Lengths of strings exceeding the configured maximum in reporting mode, in UTF-16 code units.',
+      unit: '{code_unit}',
       valueType: ValueType.INT,
+      advice: {
+        explicitBucketBoundaries: [
+          0, 16, 64, 256, 512, 1024, 2048, 4096, 8192, 10000, 16384, 32768, 65536, 100000, 131072,
+          262144, 524288, 1048576,
+        ],
+      },
     });
-  counters.set(provider, counter);
-  return counter;
+  histograms.set(provider, histogram);
+  return histogram;
 };
 
-/** Counts overlong values without recording input contents or request-specific lengths. */
+/** Records overlong string lengths without including input contents or lengths in attributes. */
 export const reportStringLengthViolation = ({
   helper,
   library,
   maxLength,
+  length,
   label,
 }: {
   helper: StringHelperName;
   library: 'config-schema' | 'zod';
   maxLength: number;
+  length: number;
   label?: string;
 }): void => {
   try {
-    getCounter().add(1, {
+    getHistogram().record(length, {
       'schema.helper': helper,
       'schema.library': library,
       'schema.max_length': maxLength,

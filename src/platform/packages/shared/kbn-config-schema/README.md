@@ -184,12 +184,17 @@ while recording a violation. Only maximum length enforcement is disabled; minimu
 length and other validators remain active. A `maxLength` override changes the
 reporting threshold. Call `.warn()` before composing the returned schema.
 
-Each overlong string validation increments `kibana.schema.string_length_violation`
-on the `kibana.schema` OTel meter. The counter has unit `{violation}` and attributes
+Each overlong string validation records its length in the histogram
+`kibana.schema.string_length_violation.length` on the `kibana.schema` OTel meter.
+The histogram measures UTF-16 code units (`{code_unit}`) and has attributes
 `schema.helper`, `schema.library` (`config-schema` or `zod`), `schema.max_length`,
 and optional `schema.label`. Labels must be static field identifiers, never
 request values or user IDs. Neither input contents nor actual input lengths are
-recorded as attributes. Counts represent validation attempts, including repeated
+recorded as attributes. The histogram count gives the number of violations; its
+sum, minimum, maximum and buckets describe the lengths of violating strings.
+Suggested bucket boundaries cover lengths through 1,048,576 code units, with
+larger values in the overflow bucket; exporter or provider views may override
+these boundaries. Counts represent validation attempts, including repeated
 validation and unsuccessful union branches, rather than distinct requests.
 
 Reporting uses the existing OTel provider and exporters. Without a configured
@@ -197,7 +202,7 @@ provider it is a no-op. Enable and configure `telemetry.metrics` as described in
 [`@kbn/metrics`](../../private/opentelemetry/kbn-metrics/README.md).
 Where metrics are shipped to the serverless metrics cluster, query
 `serverless-metrics-*:metrics-*.otel-*` for
-`metrics.kibana.schema.string_length_violation:*` and group by the attributes above.
+`metrics.kibana.schema.string_length_violation.length:*` and group by the attributes above.
 Calling `.warn()` does not enable exporters or impose a maximum length; switch to
 the strict helper once the observed bounds have been reviewed.
 

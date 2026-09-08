@@ -39,7 +39,13 @@ const makeHelper = (helper: StringHelperName): SchemaHelper => {
       maxLength: undefined,
       validate: (value) => {
         if (value.length > maxLength) {
-          reportStringLengthViolation({ helper, library: 'config-schema', maxLength, label });
+          reportStringLengthViolation({
+            helper,
+            library: 'config-schema',
+            maxLength,
+            length: value.length,
+            label,
+          });
         }
         return validate?.(value);
       },

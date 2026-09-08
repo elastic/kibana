@@ -43,7 +43,13 @@ const makeHelper = (helper: StringHelperName): ZodStringHelper => {
       .min(minLength)
       .superRefine((value) => {
         if (value.length > maxLength) {
-          reportStringLengthViolation({ helper, library: 'zod', maxLength, label });
+          reportStringLengthViolation({
+            helper,
+            library: 'zod',
+            maxLength,
+            length: value.length,
+            label,
+          });
         }
       });
   };
