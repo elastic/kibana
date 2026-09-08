@@ -16,7 +16,7 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AiIndexProperties } from '../common/http_api/ai_indices';
-import type { AiIndexReadServiceApi } from './ai_indices/read_service';
+import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SignalsServiceApi } from './signals/service';
@@ -25,7 +25,7 @@ export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
 }
 
-export interface GetAiIndexReadServiceParams {
+export interface GetAiIndexDataReadServiceParams {
   /** Request-scoped client; Elasticsearch authorizes every read. */
   esClient: ElasticsearchClient;
   /** Space and audit scope are resolved from this request. */
@@ -35,7 +35,7 @@ export interface GetAiIndexReadServiceParams {
 export interface ContextEnginePluginStart {
   getAiIndexService: () => AiIndexService;
   /** Caller-scoped AI-index reads (query, and later describe/list). */
-  getAiIndexReadService: (params: GetAiIndexReadServiceParams) => AiIndexReadServiceApi;
+  getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   /** The signals store. */
   getSignalsService: () => SignalsServiceApi;
   /**

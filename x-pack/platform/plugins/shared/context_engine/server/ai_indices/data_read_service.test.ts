@@ -8,13 +8,13 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
-import { AiIndexReadService } from './read_service';
+import { AiIndexDataReadService } from './data_read_service';
 
-describe('AiIndexReadService', () => {
+describe('AiIndexDataReadService', () => {
   const esqlQuery = jest.fn();
   const esClient = { esql: { query: esqlQuery } } as unknown as ElasticsearchClient;
   const auditLogger = { log: jest.fn() } as unknown as jest.Mocked<AuditLogger>;
-  const service = new AiIndexReadService({ esClient, spaceId: 'marketing', auditLogger });
+  const service = new AiIndexDataReadService({ esClient, spaceId: 'marketing', auditLogger });
 
   beforeEach(() => {
     esqlQuery.mockReset();

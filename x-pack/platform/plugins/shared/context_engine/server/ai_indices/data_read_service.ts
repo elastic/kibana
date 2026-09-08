@@ -15,11 +15,11 @@ import { AiIndexAuditAction, aiIndexAuditEvent } from './audit_events';
 import { queryAiIndices } from './query';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
-export interface AiIndexReadServiceApi {
+export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
 }
 
-export class AiIndexReadService implements AiIndexReadServiceApi {
+export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
   constructor(
     private readonly deps: {
       esClient: ElasticsearchClient;

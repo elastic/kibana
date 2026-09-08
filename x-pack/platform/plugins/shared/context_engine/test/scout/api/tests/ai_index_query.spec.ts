@@ -62,6 +62,8 @@ const idsOf = (body: { columns: Array<{ name: string }>; values: unknown[][] }):
   return body.values.map((row) => String(row[idColumn]));
 };
 
+const messageOf = (body: { message: string }): string => body.message;
+
 apiTest.describe('context engine AI index query API', { tag: tags.stateful.classic }, () => {
   let queryCredentials: RoleApiCredentials;
   let noIndexReadCredentials: RoleApiCredentials;
@@ -215,6 +217,8 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
     });
 
     expect(response).toHaveStatusCode(403);
+    // Elasticsearch refused the read; not Kibana's own authz layer.
+    expect(messageOf(response.body)).toMatch(/security_exception|unauthorized/i);
   });
 
   apiTest('returns 400 for invalid ES|QL', async ({ apiClient }) => {
@@ -225,6 +229,7 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(messageOf(response.body)).toMatch(/parsing_exception|verification_exception/i);
   });
 
   apiTest('rejects a body without a query', async ({ apiClient }) => {
@@ -235,5 +240,7 @@ apiTest.describe('context engine AI index query API', { tag: tags.stateful.class
     });
 
     expect(response).toHaveStatusCode(400);
+    // Route schema, not the ES|QL parser, produced this 400.
+    expect(messageOf(response.body)).toMatch(/\[request body\.query\]/);
   });
 });

@@ -41,10 +41,10 @@ import {
   InvalidAiIndexQueryError,
   KiNotFoundError,
 } from '../ai_indices/errors';
-import type { AiIndexReadServiceApi } from '../ai_indices/read_service';
+import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
-import type { GetAiIndexReadServiceParams } from '../types';
+import type { GetAiIndexDataReadServiceParams } from '../types';
 
 interface RegisteredRoute {
   config: {
@@ -107,8 +107,8 @@ describe('ai indices routes', () => {
     Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
-  let readService: jest.Mocked<AiIndexReadServiceApi>;
-  let readServiceParams: GetAiIndexReadServiceParams[];
+  let readService: jest.Mocked<AiIndexDataReadServiceApi>;
+  let readServiceParams: GetAiIndexDataReadServiceParams[];
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
@@ -194,7 +194,7 @@ describe('ai indices routes', () => {
       router,
       logger,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
-      getAiIndexReadService: (params) => {
+      getAiIndexDataReadService: (params) => {
         readServiceParams.push(params);
         return readService;
       },

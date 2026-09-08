@@ -79,10 +79,10 @@ import {
   InvalidConnectorSourceError,
   KiNotFoundError,
 } from '../ai_indices/errors';
-import type { AiIndexReadServiceApi } from '../ai_indices/read_service';
+import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
 import type { ImprovementsServiceApi } from '../improvements/service';
-import type { GetAiIndexReadServiceParams } from '../types';
+import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
 import { validateSignalFilter } from '../ai_indices/signal_filter';
@@ -365,14 +365,14 @@ export const registerAiIndexRoutes = ({
   router,
   logger,
   getAiIndexService,
-  getAiIndexReadService,
+  getAiIndexDataReadService,
   getImprovementsService,
   getActions,
 }: {
   router: IRouter;
   logger: Logger;
   getAiIndexService: () => AiIndexService;
-  getAiIndexReadService: (params: GetAiIndexReadServiceParams) => AiIndexReadServiceApi;
+  getAiIndexDataReadService: (params: GetAiIndexDataReadServiceParams) => AiIndexDataReadServiceApi;
   getImprovementsService: (esClient: ElasticsearchClient) => ImprovementsServiceApi;
   getActions: () => Promise<ActionsPluginStart>;
 }) => {
@@ -563,7 +563,7 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         try {
-          const body: QueryAiIndicesResponse = await getAiIndexReadService({
+          const body: QueryAiIndicesResponse = await getAiIndexDataReadService({
             esClient,
             request,
           }).query(request.body);

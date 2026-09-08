@@ -27,8 +27,8 @@ export interface QueryAiIndicesParams extends QueryAiIndicesRequest {
 }
 
 /**
- * Runs caller-supplied ES|QL with server-owned space filter and row cap. Pass-through otherwise:
- * `query` decides target, ES RBAC bounds it. `allow_partial_results` may silently drop failed shards.
+ * Runs caller-supplied ES|QL with server-owned space filter and row cap.
+ * `allow_partial_results` may silently drop failed shards.
  */
 export const queryAiIndices = async ({
   esClient,
