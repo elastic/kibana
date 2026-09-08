@@ -13,18 +13,18 @@ import type { Hop, Point, IndexedEdges } from './types';
  * The wire runs horizontally to a vertical "branch" column, down/up, then to the target.
  */
 export function buildPolyline(
-  sx: number,
-  sy: number,
-  tx: number,
-  ty: number,
+  sourceX: number,
+  sourceY: number,
+  targetX: number,
+  targetY: number,
   branchX?: number
 ): Point[] {
-  const midX = branchX ?? (sx + tx) / 2;
+  const midX = branchX ?? (sourceX + targetX) / 2;
   return [
-    { x: sx, y: sy },
-    { x: midX, y: sy },
-    { x: midX, y: ty },
-    { x: tx, y: ty },
+    { x: sourceX, y: sourceY },
+    { x: midX, y: sourceY },
+    { x: midX, y: targetY },
+    { x: targetX, y: targetY },
   ];
 }
 
@@ -33,8 +33,7 @@ export function buildPolyline(
  * small arc (bridge) at each hop so crossing wires appear to overlap cleanly.
  */
 export function polylineToPath(points: Point[], hops: Hop[], hopRadius: number): string {
-  const HOP_R = hopRadius;
-  let d = `M ${points[0].x} ${points[0].y}`;
+  let draw = `M ${points[0].x} ${points[0].y}`;
 
   for (let i = 0; i < points.length - 1; i++) {
     const a = points[i];
@@ -43,7 +42,7 @@ export function polylineToPath(points: Point[], hops: Hop[], hopRadius: number):
     const segHops = hops.filter((h) => h.segIndex === i).sort((h1, h2) => h1.at - h2.at);
 
     if (segHops.length === 0) {
-      d += ` L ${b.x} ${b.y}`;
+      draw += ` L ${b.x} ${b.y}`;
       continue;
     }
 
@@ -51,28 +50,28 @@ export function polylineToPath(points: Point[], hops: Hop[], hopRadius: number):
       const dir = b.x > a.x ? 1 : -1;
       for (const h of segHops) {
         const cx = a.x + dir * h.at;
-        const before = cx - dir * HOP_R;
-        const after = cx + dir * HOP_R;
-        d += ` L ${before} ${a.y}`;
+        const before = cx - dir * hopRadius;
+        const after = cx + dir * hopRadius;
+        draw += ` L ${before} ${a.y}`;
         // arc bumps "up" (negative y) regardless of dir
         const sweep = dir === 1 ? 1 : 0;
-        d += ` A ${HOP_R} ${HOP_R} 0 0 ${sweep} ${after} ${a.y}`;
+        draw += ` A ${hopRadius} ${hopRadius} 0 0 ${sweep} ${after} ${a.y}`;
       }
-      d += ` L ${b.x} ${b.y}`;
+      draw += ` L ${b.x} ${b.y}`;
     } else {
       const dir = b.y > a.y ? 1 : -1;
       for (const h of segHops) {
         const cy = a.y + dir * h.at;
-        const before = cy - dir * HOP_R;
-        const after = cy + dir * HOP_R;
-        d += ` L ${a.x} ${before}`;
+        const before = cy - dir * hopRadius;
+        const after = cy + dir * hopRadius;
+        draw += ` L ${a.x} ${before}`;
         const sweep = dir === 1 ? 0 : 1;
-        d += ` A ${HOP_R} ${HOP_R} 0 0 ${sweep} ${a.x} ${after}`;
+        draw += ` A ${hopRadius} ${hopRadius} 0 0 ${sweep} ${a.x} ${after}`;
       }
-      d += ` L ${b.x} ${b.y}`;
+      draw += ` L ${b.x} ${b.y}`;
     }
   }
-  return d;
+  return draw;
 }
 
 /** Resolve the absolute canvas position of a node handle (or a sensible fallback). */
@@ -82,17 +81,17 @@ export function getHandlePos(
   handleId: string | null | undefined,
   type: 'source' | 'target'
 ): Point | null {
-  const n = nodeLookup.get(nodeId);
-  if (!n) return null;
-  const abs = n.internals?.positionAbsolute ?? n.position;
-  const hbs = n.internals?.handleBounds?.[type] ?? [];
+  const node = nodeLookup.get(nodeId);
+  if (!node) return null;
+  const abs = node.internals?.positionAbsolute ?? node.position;
+  const hbs = node.internals?.handleBounds?.[type] ?? [];
   let hb = handleId ? hbs.find((h) => h.id === handleId) : null;
   if (!hb) hb = hbs[0];
   if (hb) {
     return { x: abs.x + hb.x + hb.width / 2, y: abs.y + hb.y + hb.height / 2 };
   }
-  const w = n.measured?.width ?? 150;
-  const h = n.measured?.height ?? 40;
+  const w = node.measured?.width ?? 150;
+  const h = node.measured?.height ?? 40;
   if (type === 'source') return { x: abs.x + w, y: abs.y + h / 2 };
   return { x: abs.x, y: abs.y + h / 2 };
 }
