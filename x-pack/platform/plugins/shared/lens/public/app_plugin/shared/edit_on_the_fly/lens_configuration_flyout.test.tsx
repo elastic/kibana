@@ -311,8 +311,8 @@ describe('LensEditConfigurationFlyout', () => {
       state: {
         ...lensAttributes.state,
         datasourceStates: {
-          formBased: mockFormBasedStateChanged,
-          textBased: mockTextBasedState,
+          formBased: mockFormBasedState,
+          textBased: mockTextBasedStateChanged,
         },
       },
     } as unknown as TypedLensSerializedState['attributes'];
@@ -324,13 +324,13 @@ describe('LensEditConfigurationFlyout', () => {
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
 
     expect(updatePanelStateSpy).toHaveBeenCalledWith(
-      mockFormBasedStateChanged,
+      mockTextBasedStateChanged,
       expect.anything(),
       undefined,
-      'formBased',
+      'textBased',
       {
-        formBased: { isLoading: false, state: mockFormBasedStateChanged },
-        textBased: { isLoading: false, state: mockTextBasedState },
+        formBased: { isLoading: false, state: mockFormBasedState },
+        textBased: { isLoading: false, state: mockTextBasedStateChanged },
       }
     );
   });
