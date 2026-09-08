@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
   IacProvisionerRenderError,
@@ -75,9 +75,7 @@ describe('renderIacTemplateHandler', () => {
     jest.clearAllMocks();
     response = httpServerMock.createResponseFactory();
     mockedIsEnabled.mockReturnValue(true);
-    const logger = { info: jest.fn(), error: jest.fn(), get: jest.fn() };
-    logger.get.mockReturnValue(logger);
-    jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(loggingSystemMock.createLogger());
   });
 
   it('returns 404 when the IaC Provisioner is not enabled', async () => {
@@ -120,21 +118,23 @@ describe('renderIacTemplateHandler', () => {
       response
     );
 
+    // mergeIntegrationSelections sorts packages in code-point order for stable output;
+    // cloud_asset_inventory (a) sorts before cloud_security_posture (s).
     expect(mockedRenderTemplate).toHaveBeenCalledWith({
       provider: 'aws',
       integrations: [
-        {
-          name: 'cloud_security_posture',
-          version: '3.5.0',
-          // cis_gcp filtered out — not an aws input
-          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
-        },
         {
           name: 'cloud_asset_inventory',
           version: '1.7.0',
           policyTemplates: [
             { name: 'asset_inventory', enabledInputs: ['cloudbeat/asset_inventory_aws'] },
           ],
+        },
+        {
+          name: 'cloud_security_posture',
+          version: '3.5.0',
+          // cis_gcp filtered out — not an aws input
+          policyTemplates: [{ name: 'cspm', enabledInputs: ['cloudbeat/cis_aws'] }],
         },
       ],
     });
