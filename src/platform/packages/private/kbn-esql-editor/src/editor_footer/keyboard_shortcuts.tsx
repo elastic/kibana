@@ -79,6 +79,12 @@ const renderShortcutKeys = (keys: readonly string[]) =>
     </Fragment>
   ));
 
+const toListItems = (keysFirst = true) =>
+  shortcuts.map(({ keys, label: shortcutLabel }) => ({
+    title: keysFirst ? renderShortcutKeys(keys) : shortcutLabel,
+    description: keysFirst ? shortcutLabel : renderShortcutKeys(keys),
+  }));
+
 export interface KeyboardShortcutsProps {
   display?: 'popover' | 'inline';
 }
@@ -96,13 +102,7 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
 
   if (display === 'inline') {
     return (
-      <EuiText
-        size="m"
-        data-test-subj="editorKeyboardShortcutsInline"
-        css={css`
-          min-width: ${mathWithUnits(euiTheme.size.xxl, (x) => x * 7)};
-        `}
-      >
+      <EuiText size="m" data-test-subj="editorKeyboardShortcutsInline">
         <h3 id={labelId}>{label}</h3>
         <EuiDescriptionList
           aria-labelledby={labelId}
@@ -110,10 +110,7 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
           columnWidths={['auto', 'auto']}
           columnGutterSize="m"
           compressed
-          listItems={shortcuts.map(({ keys, label: shortcutLabel }) => ({
-            title: shortcutLabel,
-            description: renderShortcutKeys(keys),
-          }))}
+          listItems={toListItems(false)}
         />
       </EuiText>
     );
@@ -164,10 +161,7 @@ export function KeyboardShortcuts({ display = 'popover' }: KeyboardShortcutsProp
             columnWidths={['auto', 'auto']}
             align="center"
             compressed
-            listItems={shortcuts.map(({ keys, label: shortcutLabel }) => ({
-              title: renderShortcutKeys(keys),
-              description: shortcutLabel,
-            }))}
+            listItems={toListItems()}
           />
         </EuiText>
       </EuiPopover>
