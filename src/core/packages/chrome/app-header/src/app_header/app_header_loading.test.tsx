@@ -29,17 +29,17 @@ describe('AppHeaderLoading', () => {
     const chrome = chromeServiceMock.createStartContract();
     const { unmount } = renderLoading(<AppHeaderLoading />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(true);
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderLoading(<AppHeaderLoadingView />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.set).not.toHaveBeenCalled();
   });
 });
