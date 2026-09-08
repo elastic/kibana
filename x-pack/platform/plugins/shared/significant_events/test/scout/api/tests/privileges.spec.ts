@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { significantEventsApiTest as apiTest, getSignificantEventsUsers } from '../fixtures';
+import { significantEventsApiTest as apiTest, getStreamsUsers } from '../fixtures';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
 
 const AVAILABILITY_PATH = 'internal/significant_events/availability';
@@ -22,7 +22,7 @@ apiTest.describe(
       'nightshift all can call availability and both engine manage routes',
       async ({ apiClient, samlAuth, config }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getSignificantEventsUsers(config).nightshiftAll
+          getStreamsUsers(config).nightshiftAll
         );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
@@ -46,7 +46,7 @@ apiTest.describe(
       'context engine all can manage context but not detection',
       async ({ apiClient, samlAuth, config }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getSignificantEventsUsers(config).contextEngineAll
+          getStreamsUsers(config).contextEngineAll
         );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
@@ -70,7 +70,7 @@ apiTest.describe(
       'detection engine all can manage detection but not context',
       async ({ apiClient, samlAuth, config }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getSignificantEventsUsers(config).detectionEngineAll
+          getStreamsUsers(config).detectionEngineAll
         );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 
@@ -94,7 +94,7 @@ apiTest.describe(
       'streams only is denied on availability and both engine manage routes',
       async ({ apiClient, samlAuth, config }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getSignificantEventsUsers(config).streamsOnly
+          getStreamsUsers(config).streamsOnly
         );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
 

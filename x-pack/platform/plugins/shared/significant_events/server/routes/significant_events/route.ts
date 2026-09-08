@@ -7,7 +7,6 @@
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { QueryOccurrencesResponse } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-
 import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createSignificantEventsTracedEsClient } from '../../lib/significant_events/create_significant_events_traced_es_client';
 import { BUCKET_SIZE_PATTERN } from '../../lib/significant_events/helpers/fill_bucket_gaps';

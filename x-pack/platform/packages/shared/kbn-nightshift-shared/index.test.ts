@@ -8,9 +8,6 @@
 import {
   NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
-  canPauseNightshiftActivity,
-  canShowNightshiftLanding,
-  canShowNightshiftManagement,
   getNightshiftCapabilities,
 } from '.';
 
@@ -36,35 +33,5 @@ describe('getNightshiftCapabilities', () => {
       canManageContext: false,
       canManageDetection: false,
     });
-  });
-});
-
-describe('Nightshift capability combinators', () => {
-  const contextOnly = getNightshiftCapabilities({
-    [NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.show]: true,
-  });
-  const detectionOnly = getNightshiftCapabilities({
-    [NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show]: true,
-  });
-  const contextManage = getNightshiftCapabilities({
-    [NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage]: true,
-  });
-  const detectionManage = getNightshiftCapabilities({
-    [NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage]: true,
-  });
-
-  it('opens landing for Detection show only', () => {
-    expect(canShowNightshiftLanding(contextOnly)).toBe(false);
-    expect(canShowNightshiftLanding(detectionOnly)).toBe(true);
-  });
-
-  it('opens management for Context or Detection show', () => {
-    expect(canShowNightshiftManagement(contextOnly)).toBe(true);
-    expect(canShowNightshiftManagement(detectionOnly)).toBe(true);
-  });
-
-  it('pauses activity for Context or Detection manage', () => {
-    expect(canPauseNightshiftActivity(contextManage)).toBe(true);
-    expect(canPauseNightshiftActivity(detectionManage)).toBe(true);
   });
 });

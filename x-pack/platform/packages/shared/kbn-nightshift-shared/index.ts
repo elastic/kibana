@@ -75,18 +75,6 @@ export const NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES = [
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
 ] as const;
 
-/** Deployment-wide pause/resume/cleanup. */
-export const NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES = [
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
-] as const;
-
-/** Public queries and occurrence series. */
-export const NIGHTSHIFT_QUERY_READ_PRIVILEGES = [
-  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.read,
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read,
-] as const;
-
 export interface INightshiftCapabilities {
   canShowContext: boolean;
   canShowDetection: boolean;
@@ -103,18 +91,4 @@ export function getNightshiftCapabilities(
     canManageContext: nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true,
     canManageDetection: nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true,
   };
-}
-
-/** Detection show. Context Engine alone does not open `/app/nightshift`. */
-export function canShowNightshiftLanding(capabilities: INightshiftCapabilities): boolean {
-  return capabilities.canShowDetection;
-}
-
-/** Context or Detection show. */
-export function canShowNightshiftManagement(capabilities: INightshiftCapabilities): boolean {
-  return capabilities.canShowContext || capabilities.canShowDetection;
-}
-
-export function canPauseNightshiftActivity(capabilities: INightshiftCapabilities): boolean {
-  return capabilities.canManageContext || capabilities.canManageDetection;
 }

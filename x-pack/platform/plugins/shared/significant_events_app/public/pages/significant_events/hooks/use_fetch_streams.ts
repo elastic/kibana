@@ -36,15 +36,13 @@ export function useFetchStreams(
   const canReadStreams = streams?.show === true;
 
   const fetchStreams = async ({ signal }: QueryFunctionContext): Promise<StreamsFetchResult> => {
-    // GET /internal/streams is Streams `read_stream` (`capabilities.streams.show`),
-    // not a Nightshift engine privilege. Nightshift Management can open without
-    // Streams read; skip the list rather than 403 the page.
     return streamsRepositoryClient.fetch('GET /internal/streams', { signal: signal ?? null });
   };
 
   return useQuery<StreamsFetchResult, Error>({
     queryKey: ['streamList'],
     queryFn: fetchStreams,
+    // Streams `read_stream`, not a Nightshift engine privilege.
     enabled: canReadStreams,
     onError: showFetchErrorToast,
     select: options?.select,

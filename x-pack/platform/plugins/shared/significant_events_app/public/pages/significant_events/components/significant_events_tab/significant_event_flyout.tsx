@@ -358,6 +358,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
           <SignificantEventDetails event={event} />
 
           <EuiHorizontalRule margin="none" />
+
           <EventInvestigations event={latestEvent} />
 
           <EuiHorizontalRule margin="none" />
@@ -391,9 +392,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
               <EuiButton
                 iconType="inspect"
                 onClick={() => {
-                  if (!isTriggering) {
-                    triggerInvestigation(latestEvent.event_uuid);
-                  }
+                  if (!isTriggering) triggerInvestigation(latestEvent.event_uuid);
                 }}
                 isDisabled={isTriggering || blocksActivity}
                 hasAriaDisabled={blocksActivity}

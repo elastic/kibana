@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
-import { NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 
 const forbiddenActivityManage = () =>
@@ -28,7 +28,7 @@ export const assertCanManageNightshiftActivityGlobally = async ({
   }
 
   const result = await authz.checkPrivilegesWithRequest(request).globally({
-    kibana: NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES.map((privilege) =>
+    kibana: NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES.map((privilege) =>
       authz.actions.api.get(privilege)
     ),
   });

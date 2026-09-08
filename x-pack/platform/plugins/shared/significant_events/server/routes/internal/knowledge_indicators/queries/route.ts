@@ -19,7 +19,6 @@ import {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
-
 import { generateKIQueries } from '../../../../lib/significant_events/ki_queries_generation_service';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';

@@ -49,7 +49,7 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
-import { canPauseNightshiftActivity, getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
@@ -86,7 +86,7 @@ export function SettingsTab() {
     core.application.capabilities.nightshift
   );
   const { canManageContext, canManageDetection } = nightshiftCapabilities;
-  const canPauseActivity = canPauseNightshiftActivity(nightshiftCapabilities);
+  const canPauseActivity = canManageContext || canManageDetection;
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditContextSettings = canManageContext && canSaveAdvancedSettings;
   const canEditDetectionSettings = canManageDetection && canSaveAdvancedSettings;
@@ -865,7 +865,6 @@ export function SettingsTab() {
         </EuiPanel>
       </EuiPanel>
 
-      {/* Slack connect/disconnect and channel bind stay on Streams privileges. */}
       {isAppsEnabled && <AppsSection canEdit={canManageSlack} />}
 
       {isConfirmingZeroMatch && (

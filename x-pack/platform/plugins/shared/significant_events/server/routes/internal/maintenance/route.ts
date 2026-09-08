@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES,
+  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
   NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
@@ -71,7 +71,7 @@ const pauseRoute = createServerRoute({
     authz: {
       requiredPrivileges: [
         {
-          anyRequired: [...NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES],
+          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
         },
       ],
     },
@@ -105,7 +105,7 @@ const resumeRoute = createServerRoute({
     authz: {
       requiredPrivileges: [
         {
-          anyRequired: [...NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES],
+          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
         },
       ],
     },

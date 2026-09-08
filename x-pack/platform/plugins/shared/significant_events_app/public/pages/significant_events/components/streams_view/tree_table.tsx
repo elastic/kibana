@@ -4,7 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CriteriaWithPagination, Direction, EuiTableSelectionType, Query } from '@elastic/eui';
+import type {
+  CriteriaWithPagination,
+  Direction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  Query,
+} from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -225,6 +231,7 @@ export function StreamsTreeTable({
           selection={selection}
           loading={loading}
           data-test-subj="streamsTable"
+          // prettier-ignore
           columns={[
             {
               field: 'nameSortKey',
@@ -384,62 +391,56 @@ export function StreamsTreeTable({
               align: 'left',
               render: (item: TableRow) => <SignificantEventsColumn streamName={item.stream.name} />,
             },
-            ...(canManage
-              ? [
-                  {
-                    field: 'definition',
-                    name: ACTIONS_COLUMN_HEADER,
-                    width: '60px',
-                    align: 'left' as const,
-                    sortable: false,
-                    dataType: 'string' as const,
-                    render: (_: unknown, item: TableRow) => {
-                      const onboardingResult = streamOnboardingResultMap[item.stream.name];
+            {
+              field: 'definition',
+              name: ACTIONS_COLUMN_HEADER,
+              width: '60px',
+              align: 'left',
+              sortable: false,
+              dataType: 'string',
+              render: (_: unknown, item: TableRow) => {
+                const onboardingResult = streamOnboardingResultMap[item.stream.name];
 
-                      if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
-                        return (
-                          <EuiToolTip
-                            position="top"
-                            content={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                            display="block"
-                            disableScreenReaderOutput
-                          >
-                            <EuiButtonIcon
-                              iconType="stop"
-                              aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
-                              disabled={
-                                onboardingResult.status ===
-                                SignificantEventsWorkflowStatus.BeingCanceled
-                              }
-                              onClick={() => onStopOnboardingActionClick(item.stream.name)}
-                            />
-                          </EuiToolTip>
-                        );
-                      }
+                if (KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(onboardingResult?.status)) {
+                  return (
+                    <EuiToolTip
+                      position="top"
+                      content={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+                      display="block"
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType="stop"
+                        aria-label={STOP_STREAM_ONBOARDING_BUTTON_LABEL}
+                        disabled={
+                          onboardingResult.status === SignificantEventsWorkflowStatus.BeingCanceled
+                        }
+                        onClick={() => onStopOnboardingActionClick(item.stream.name)}
+                      />
+                    </EuiToolTip>
+                  );
+                }
 
-                      return (
-                        <EuiToolTip
-                          position="top"
-                          content={getOnboardStreamTooltip({
-                            activityBlockTooltip,
-                            isCpsMultiProject,
-                          })}
-                          display="block"
-                          disableScreenReaderOutput
-                        >
-                          <EuiButtonIcon
-                            iconType="radar"
-                            aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
-                            disabled={blocksActivity}
-                            onClick={() => onOnboardStreamActionClick(item.stream.name)}
-                          />
-                        </EuiToolTip>
-                      );
-                    },
-                  },
-                ]
-              : []),
-          ]}
+                return (
+                  <EuiToolTip
+                    position="top"
+                    content={getOnboardStreamTooltip({ activityBlockTooltip, isCpsMultiProject })}
+                    display="block"
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      iconType="radar"
+                      aria-label={RUN_STREAM_ONBOARDING_BUTTON_LABEL}
+                      disabled={blocksActivity}
+                      onClick={() => onOnboardStreamActionClick(item.stream.name)}
+                    />
+                  </EuiToolTip>
+                );
+              },
+            },
+          ].filter((column) => canManage || column.field !== 'definition') as Array<
+            EuiBasicTableColumn<TableRow>
+          >}
           itemId="nameSortKey"
           items={items}
           sorting={sorting}

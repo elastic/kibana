@@ -26,11 +26,11 @@ export const PUBLIC_API_HEADERS = {
 } as const;
 
 /**
- * Returns Significant Events user roles with privileges appropriate for the
- * deployment type. Some cluster privileges (manage_ilm,
- * manage_data_stream_global_retention) are not supported in serverless mode.
+ * Returns streams user roles with privileges appropriate for the deployment type.
+ * Some cluster privileges (manage_ilm, manage_data_stream_global_retention) are not
+ * supported in serverless mode.
  */
-export function getSignificantEventsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
+export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaRole> {
   const isServerless = config.serverless;
 
   // Cluster privileges that are only available in stateful deployments
@@ -66,7 +66,7 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
   });
 
   return {
-    significantEventsAdmin: {
+    streamsAdmin: {
       kibana: [
         {
           base: ['all'],
@@ -79,24 +79,14 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
 
     nightshiftAll: nightshiftRole(['all']),
     nightshiftRead: nightshiftRole(['read']),
-
     contextEngineAll: nightshiftRole([
       'minimal_all',
       NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.all,
-    ]),
-    contextEngineRead: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.read,
     ]),
     detectionEngineAll: nightshiftRole([
       'minimal_all',
       NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
     ]),
-    detectionEngineRead: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
-    ]),
-
     streamsOnly: {
       kibana: [
         {
@@ -108,7 +98,7 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
       elasticsearch: adminElasticsearch,
     },
 
-    significantEventsReadOnly: {
+    streamsReadOnly: {
       kibana: [
         {
           base: ['read'],
@@ -127,7 +117,7 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
       },
     },
 
-    unauthorized: {
+    streamsUnauthorized: {
       kibana: [
         {
           base: [],

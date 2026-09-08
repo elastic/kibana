@@ -9,11 +9,7 @@ import { EuiButton, EuiCallOut, EuiLoadingElastic, EuiSpacer } from '@elastic/eu
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import {
-  canPauseNightshiftActivity,
-  canShowNightshiftManagement,
-  getNightshiftCapabilities,
-} from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { getFormattedError } from '../../util/errors';
@@ -29,7 +25,7 @@ import {
 } from '../../components/page_template';
 import {
   KnowledgeIndicatorsTable,
-  KiGenerationProvider,
+  OptionalKiGenerationProvider,
 } from './components/knowledge_indicators_table';
 import { SignificantEventsPageProvider } from './context/significant_events_page_context';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
@@ -75,10 +71,10 @@ export function SignificantEventsPage() {
     },
   } = useKibana();
 
-  const nightshiftCapabilities = getNightshiftCapabilities(nightshift);
-  const { canShowContext, canShowDetection, canManageContext } = nightshiftCapabilities;
-  const canShowManagement = canShowNightshiftManagement(nightshiftCapabilities);
-  const canPauseActivity = canPauseNightshiftActivity(nightshiftCapabilities);
+  const { canShowContext, canShowDetection, canManageContext, canManageDetection } =
+    getNightshiftCapabilities(nightshift);
+  const canShowManagement = canShowContext || canShowDetection;
+  const canPauseActivity = canManageContext || canManageDetection;
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
   const {
@@ -164,89 +160,77 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  const tabs = useMemo(() => {
-    const items: Array<{
-      id: SignificantEventsTabId;
-      label: string;
-      href: string;
-      isSelected: boolean;
-    }> = [];
+  const allTabs = useMemo(
+    () => [
+      {
+        id: 'streams',
+        label: i18n.translate('xpack.significantEventsApp.streamsTab', {
+          defaultMessage: 'Streams',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'streams' } }),
+        isSelected: tab === 'streams',
+      },
+      {
+        id: 'knowledge_indicators',
+        label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
+          defaultMessage: 'Knowledge Indicators',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
+        isSelected: tab === 'knowledge_indicators',
+      },
+      {
+        id: 'queries',
+        label: i18n.translate('xpack.significantEventsApp.queriesTab', {
+          defaultMessage: 'Rules',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'queries' } }),
+        isSelected: tab === 'queries',
+      },
 
-    if (canShowContext) {
-      items.push(
-        {
-          id: 'streams',
-          label: i18n.translate('xpack.significantEventsApp.streamsTab', {
-            defaultMessage: 'Streams',
-          }),
-          href: router.link('/{tab}', { path: { tab: 'streams' } }),
-          isSelected: tab === 'streams',
-        },
-        {
-          id: 'knowledge_indicators',
-          label: i18n.translate('xpack.significantEventsApp.knowledgeIndicatorsTab', {
-            defaultMessage: 'Knowledge Indicators',
-          }),
-          href: router.link('/{tab}', { path: { tab: 'knowledge_indicators' } }),
-          isSelected: tab === 'knowledge_indicators',
-        },
-        {
-          // Legacy id from the earlier "queries" tab name; keep until bookmarks are gone.
-          id: 'queries',
-          label: i18n.translate('xpack.significantEventsApp.queriesTab', {
-            defaultMessage: 'Rules',
-          }),
-          href: router.link('/{tab}', { path: { tab: 'queries' } }),
-          isSelected: tab === 'queries',
-        }
-      );
-    }
-
-    if (canShowDetection) {
-      items.push(
-        {
-          id: 'detections',
-          label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
-            defaultMessage: 'Detections',
-          }),
-          href: router.link('/{tab}', { path: { tab: 'detections' } }),
-          isSelected: tab === 'detections',
-        },
-        {
-          id: 'significant_events',
-          label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
-            defaultMessage: 'Significant Events',
-          }),
-          href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
-          isSelected: tab === 'significant_events',
-        }
-      );
-    }
-
-    if (canShowContext) {
-      items.push({
+      {
+        id: 'detections',
+        label: i18n.translate('xpack.significantEventsApp.detectionsTab', {
+          defaultMessage: 'Detections',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'detections' } }),
+        isSelected: tab === 'detections',
+      },
+      {
+        id: 'significant_events',
+        label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
+          defaultMessage: 'Significant Events',
+        }),
+        href: router.link('/{tab}', { path: { tab: 'significant_events' } }),
+        isSelected: tab === 'significant_events',
+      },
+      {
         id: 'memory',
         label: i18n.translate('xpack.significantEventsApp.memoryTab', {
           defaultMessage: 'Memory',
         }),
         href: router.link('/{tab}', { path: { tab: 'memory' } }),
         isSelected: tab === 'memory',
-      });
-    }
-
-    if (canShowManagement) {
-      items.push({
+      },
+      {
         id: 'settings',
         label: i18n.translate('xpack.significantEventsApp.settingsTab', {
           defaultMessage: 'Settings',
         }),
         href: router.link('/{tab}', { path: { tab: 'settings' } }),
         isSelected: tab === 'settings',
-      });
+      },
+    ],
+    [tab, router]
+  );
+  const tabs = allTabs.filter((item) => {
+    if (item.id === 'detections' || item.id === 'significant_events') {
+      return canShowDetection;
     }
-
-    return items;
-  }, [canShowContext, canShowDetection, canShowManagement, router, tab]);
+    if (item.id === 'settings') {
+      return canShowManagement;
+    }
+    return canShowContext;
+  });
 
   if (isAvailabilityLoading) {
     return <EuiLoadingElastic size="xxl" />;
@@ -271,127 +255,123 @@ export function SignificantEventsPage() {
     return <RedirectTo path="/{tab}" params={{ path: { tab: tabs[0]?.id ?? 'streams' } }} />;
   }
 
-  const pageBody = (
-    <SignificantEventsPageProvider>
-      <SignificantEventsAppPageTemplate.Body grow>
-        {showMaintenanceBanners && isMaintenanceStatusLoading && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="primary"
-              iconType="clock"
-              data-test-subj="significantEventsStatusLoadingBanner"
-              title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
-                defaultMessage: 'Checking Significant Events activity status',
-              })}
-            >
-              <p>
-                {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
-                  defaultMessage: 'Manual triggers stay disabled until activity status is known.',
-                })}
-              </p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-        {showMaintenanceBanners && isMaintenanceStatusError && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="danger"
-              iconType="error"
-              data-test-subj="significantEventsStatusErrorBanner"
-              title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
-                defaultMessage: 'Could not load Significant Events activity status',
-              })}
-            >
-              <p>
-                {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
-                  defaultMessage:
-                    'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
-                })}
-              </p>
-              {canPauseActivity && (
-                <EuiButton
-                  href={router.link('/{tab}', { path: { tab: 'settings' } })}
-                  color="danger"
-                  size="s"
-                  data-test-subj="significantEventsStatusErrorBannerSettingsLink"
-                >
-                  {i18n.translate('xpack.significantEventsApp.statusErrorBannerSettingsButton', {
-                    defaultMessage: 'Go to Settings',
-                  })}
-                </EuiButton>
-              )}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-        {showMaintenanceBanners && isBlocked && (
-          <>
-            <EuiCallOut
-              announceOnMount
-              color="warning"
-              iconType="pause"
-              data-test-subj="significantEventsPausedBanner"
-              title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
-                defaultMessage: 'Significant Events activity is paused',
-              })}
-            >
-              <p>
-                {canPauseActivity
-                  ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
-                      defaultMessage:
-                        'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
-                    })
-                  : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
-                      defaultMessage:
-                        'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Context Engine or Detection Engine manage must resume activity from Settings.',
-                    })}
-              </p>
-              {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
-                <p>
-                  {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
-                    defaultMessage:
-                      'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
-                  })}
-                </p>
-              )}
-              {canPauseActivity && (
-                <EuiButton
-                  href={router.link('/{tab}', { path: { tab: 'settings' } })}
-                  color="warning"
-                  size="s"
-                  data-test-subj="significantEventsPausedBannerSettingsLink"
-                >
-                  {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
-                    defaultMessage: 'Go to Settings',
-                  })}
-                </EuiButton>
-              )}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-        {tab === 'streams' && <StreamsView />}
-        {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
-        {tab === 'queries' && <QueriesTable />}
-        {tab === 'detections' && <DetectionsTab />}
-        {tab === 'significant_events' && <SignificantEventsTab />}
-        {tab === 'memory' && <MemoryTab />}
-        {tab === 'settings' && <SettingsTab />}
-      </SignificantEventsAppPageTemplate.Body>
-    </SignificantEventsPageProvider>
-  );
-
   return (
     <>
       <SignificantEventsAppHeader title={pageTitle} menu={menu} tabs={tabs} />
-      {canShowContext ? (
-        <KiGenerationProvider onFailed={onOnboardingFailed}>{pageBody}</KiGenerationProvider>
-      ) : (
-        pageBody
-      )}
+      <OptionalKiGenerationProvider enabled={canShowContext} onFailed={onOnboardingFailed}>
+        <SignificantEventsPageProvider>
+          <SignificantEventsAppPageTemplate.Body grow>
+            {showMaintenanceBanners && isMaintenanceStatusLoading && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="primary"
+                  iconType="clock"
+                  data-test-subj="significantEventsStatusLoadingBanner"
+                  title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
+                    defaultMessage: 'Checking Significant Events activity status',
+                  })}
+                >
+                  <p>
+                    {i18n.translate('xpack.significantEventsApp.statusLoadingBannerBody', {
+                      defaultMessage:
+                        'Manual triggers stay disabled until activity status is known.',
+                    })}
+                  </p>
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isMaintenanceStatusError && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="danger"
+                  iconType="error"
+                  data-test-subj="significantEventsStatusErrorBanner"
+                  title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
+                    defaultMessage: 'Could not load Significant Events activity status',
+                  })}
+                >
+                  <p>
+                    {i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
+                      defaultMessage:
+                        'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                    })}
+                  </p>
+                  {canPauseActivity && (
+                    <EuiButton
+                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                      color="danger"
+                      size="s"
+                      data-test-subj="significantEventsStatusErrorBannerSettingsLink"
+                    >
+                      {i18n.translate(
+                        'xpack.significantEventsApp.statusErrorBannerSettingsButton',
+                        { defaultMessage: 'Go to Settings' }
+                      )}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {showMaintenanceBanners && isBlocked && (
+              <>
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="pause"
+                  data-test-subj="significantEventsPausedBanner"
+                  title={i18n.translate('xpack.significantEventsApp.pausedBannerTitle', {
+                    defaultMessage: 'Significant Events activity is paused',
+                  })}
+                >
+                  <p>
+                    {canPauseActivity
+                      ? i18n.translate('xpack.significantEventsApp.pausedBannerBody', {
+                          defaultMessage:
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked until you resume from Settings.',
+                        })
+                      : i18n.translate('xpack.significantEventsApp.pausedBannerBodyReadOnly', {
+                          defaultMessage:
+                            'Significant Events activity is stopped across the deployment: scheduled discovery, continuous onboarding, detections, memory, investigations, and the alerting rules backing knowledge indicator queries. Manual triggers are blocked. An administrator with Context Engine or Detection Engine manage must resume activity from Settings.',
+                        })}
+                  </p>
+                  {(maintenanceStatus?.lastSummary?.partialFailures.length ?? 0) > 0 && (
+                    <p>
+                      {i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
+                        defaultMessage:
+                          'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+                      })}
+                    </p>
+                  )}
+                  {canPauseActivity && (
+                    <EuiButton
+                      href={router.link('/{tab}', { path: { tab: 'settings' } })}
+                      color="warning"
+                      size="s"
+                      data-test-subj="significantEventsPausedBannerSettingsLink"
+                    >
+                      {i18n.translate('xpack.significantEventsApp.pausedBannerSettingsButton', {
+                        defaultMessage: 'Go to Settings',
+                      })}
+                    </EuiButton>
+                  )}
+                </EuiCallOut>
+                <EuiSpacer />
+              </>
+            )}
+            {tab === 'streams' && <StreamsView />}
+            {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
+            {tab === 'queries' && <QueriesTable />}
+            {tab === 'detections' && <DetectionsTab />}
+            {tab === 'significant_events' && <SignificantEventsTab />}
+            {tab === 'memory' && <MemoryTab />}
+            {tab === 'settings' && <SettingsTab />}
+          </SignificantEventsAppPageTemplate.Body>
+        </SignificantEventsPageProvider>
+      </OptionalKiGenerationProvider>
     </>
   );
 }

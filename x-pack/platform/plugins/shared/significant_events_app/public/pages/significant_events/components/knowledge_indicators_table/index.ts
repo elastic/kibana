@@ -6,4 +6,4 @@
  */
 
 export { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
-export { KiGenerationProvider } from './ki_generation_context';
+export { KiGenerationProvider, OptionalKiGenerationProvider } from './ki_generation_context';

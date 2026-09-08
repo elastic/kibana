@@ -25,7 +25,7 @@ export const INVESTIGATIONS_READ_ROLE: KibanaRole = {
   kibana: [{ base: [], feature: { agentBuilder: ['read'] }, spaces: ['*'] }],
 };
 
-export const INVESTIGATIONS_MANAGE_ROLE: KibanaRole = {
+export const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [{ base: [], feature: { agentBuilder: ['all'] }, spaces: ['*'] }],
 };

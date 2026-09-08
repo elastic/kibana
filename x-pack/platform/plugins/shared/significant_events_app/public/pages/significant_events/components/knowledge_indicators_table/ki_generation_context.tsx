@@ -290,3 +290,14 @@ export function useKiGeneration(): KiGenerationContextValue {
 export function useOptionalKiGeneration(): KiGenerationContextValue | undefined {
   return useContext(KiGenerationReactContext) ?? undefined;
 }
+
+export function OptionalKiGenerationProvider({
+  enabled,
+  children,
+  ...props
+}: KiGenerationProviderProps & { enabled: boolean }) {
+  if (!enabled) {
+    return children;
+  }
+  return <KiGenerationProvider {...props}>{children}</KiGenerationProvider>;
+}

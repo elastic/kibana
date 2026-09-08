@@ -11,7 +11,6 @@ import {
   type Detection,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-
 import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';

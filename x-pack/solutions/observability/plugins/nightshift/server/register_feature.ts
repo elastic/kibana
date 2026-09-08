@@ -123,7 +123,6 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         }),
         allId: NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.all,
         readId: NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.read,
-        // Management app only. Landing is Detection or Investigation.
         app: [SIGNIFICANT_EVENTS_APP_ID],
         apiRead: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.read,
         apiManage: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
@@ -137,7 +136,6 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         }),
         allId: NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
         readId: NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
-        // Landing + Management. Detection-only roles must open /app/nightshift.
         app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
         apiRead: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read,
         apiManage: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
@@ -150,7 +148,6 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         }),
         allId: NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
         readId: NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
-        // Landing only. Investigation-only roles stay off Nightshift Management.
         app: [NIGHTSHIFT_APP_ID],
         apiRead: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read,
         apiManage: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,

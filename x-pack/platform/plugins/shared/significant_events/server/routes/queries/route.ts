@@ -13,10 +13,9 @@ import {
   upsertStreamQueryRequestSchema,
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
-
 import {
+  NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
   NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_QUERY_READ_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import { QueryNotFoundError } from '../../lib/errors/query_not_found_error';
 import { queryFromLink } from '../../lib/knowledge_indicators/knowledge_indicator_client/serializers';
@@ -95,7 +94,7 @@ const listQueriesRoute = createServerRoute({
   }),
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_QUERY_READ_PRIVILEGES] }],
+      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES] }],
     },
   },
   async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {

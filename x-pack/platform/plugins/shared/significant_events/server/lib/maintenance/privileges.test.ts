@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import {
-  NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES,
+  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
   NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
@@ -18,9 +18,9 @@ const request = {} as KibanaRequest;
 
 const createServer = (authorizedPrivileges: string[]) => {
   const globally = jest.fn().mockResolvedValue({
-    hasAllRequested: authorizedPrivileges.length === NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES.length,
+    hasAllRequested: authorizedPrivileges.length === NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES.length,
     privileges: {
-      kibana: NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES.map((privilege) => ({
+      kibana: NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES.map((privilege) => ({
         privilege,
         authorized: authorizedPrivileges.includes(privilege),
       })),
@@ -47,7 +47,7 @@ describe('assertCanManageNightshiftActivityGlobally', () => {
       assertCanManageNightshiftActivityGlobally({ request, server })
     ).resolves.toBeUndefined();
     expect(globally).toHaveBeenCalledWith({
-      kibana: [...NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES],
+      kibana: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
     });
   });
 

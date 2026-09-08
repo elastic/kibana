@@ -90,7 +90,6 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-
   return (
     <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
@@ -378,7 +377,7 @@ export const SignificantEventsTab = () => {
   }, [selectedEventId]);
 
   const streamOptions = useMemo(
-    () => (filteredStreams ?? []).map((stream) => stream.stream.name).sort(),
+    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
     [filteredStreams]
   );
 

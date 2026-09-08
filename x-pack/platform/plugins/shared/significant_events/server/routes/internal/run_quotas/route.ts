@@ -134,8 +134,6 @@ const putRunQuotasRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Update Significant Events daily run limits',
-    description:
-      'Context Engine manage is the shared capacity admin for every group, including investigation. The handler then repeats the check globally so a one-space manager cannot change deployment-wide limits.',
   },
   security: {
     authz: {
@@ -167,8 +165,6 @@ const consumeRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Consume one Significant Events scheduled run quota',
-    description:
-      'Route-level Context or Detection manage opens the door. The handler then requires the engine that owns `group` via `authzResult` (detection and investigation / ki_extraction).',
   },
   security: {
     authz: {

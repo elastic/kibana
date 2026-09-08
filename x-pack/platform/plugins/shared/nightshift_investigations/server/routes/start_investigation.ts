@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';

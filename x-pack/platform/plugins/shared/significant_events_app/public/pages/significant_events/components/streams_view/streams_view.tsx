@@ -32,7 +32,7 @@ export function StreamsView() {
       },
     },
   } = useKibana();
-  const { canManageContext, canManageDetection } = getNightshiftCapabilities(nightshift);
+  const { canManageContext } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
@@ -159,18 +159,16 @@ export function StreamsView() {
               />
             </EuiFlexItem>
           )}
-          {canManageDetection && (
-            <EuiFlexItem grow={false}>
-              <FindSignificantEventsButton
-                onRun={handleRun}
-                onCancel={handleCancel}
-                isRunning={isRunning}
-                isCanceling={isCanceling}
-                isDisabled={isRunning || blocksActivity}
-                disabledTooltip={activityBlockTooltip}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <FindSignificantEventsButton
+              onRun={handleRun}
+              onCancel={handleCancel}
+              isRunning={isRunning}
+              isCanceling={isCanceling}
+              isDisabled={isRunning || blocksActivity}
+              disabledTooltip={activityBlockTooltip}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 

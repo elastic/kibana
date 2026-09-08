@@ -17,9 +17,7 @@ import { parseAlertSnapshot } from './build_alert_snapshot';
 const availabilityRoute = createObservabilityServerRoute({
   endpoint: `GET ${ALERTS_API_URLS.INTERNAL_INVESTIGATION_AVAILABILITY}`,
   options: { access: 'internal' },
-  security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
-  },
+  security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
   params: z.object({}),
   handler: async ({ dependencies, request }) => ({
     available:
@@ -30,9 +28,7 @@ const availabilityRoute = createObservabilityServerRoute({
 const investigateRoute = createObservabilityServerRoute({
   endpoint: `POST ${ALERTS_API_URLS.INTERNAL_START_ALERT_INVESTIGATION}`,
   options: { access: 'internal' },
-  security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
-  },
+  security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
   params: z.object({
     path: z.object({ alertId: z.string().min(1).max(500) }),
   }),

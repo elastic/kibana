@@ -8,7 +8,6 @@ import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-eve
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
-
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';

@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { significantEventsApiTest as apiTest, getSignificantEventsUsers } from '../../fixtures';
+import { significantEventsApiTest as apiTest, getStreamsUsers } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
@@ -39,7 +39,7 @@ apiTest.describe(
     apiTest(
       'allows a Nightshift reader to inspect the deployment-wide snapshot',
       async ({ apiClient, samlAuth, config }) => {
-        const users = getSignificantEventsUsers(config);
+        const users = getStreamsUsers(config);
         const { cookieHeader } = await samlAuth.asInteractiveUser(users.nightshiftRead);
 
         const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
@@ -66,7 +66,7 @@ apiTest.describe(
     apiTest(
       'denies a manager whose Context Engine privilege is limited to one space',
       async ({ apiClient, samlAuth, config }) => {
-        const contextEngineAll = getSignificantEventsUsers(config).contextEngineAll;
+        const contextEngineAll = getStreamsUsers(config).contextEngineAll;
         const oneSpaceManager = {
           ...contextEngineAll,
           kibana: contextEngineAll.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
@@ -93,7 +93,7 @@ apiTest.describe(
       'allows an all-spaces Context Engine manager to update and restore settings',
       async ({ apiClient, samlAuth, config }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getSignificantEventsUsers(config).contextEngineAll
+          getStreamsUsers(config).contextEngineAll
         );
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {

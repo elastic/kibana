@@ -100,7 +100,7 @@ apiTest.describe(
     };
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      ({ cookieHeader } = await samlAuth.asSignificantEventsAdmin());
+      ({ cookieHeader } = await samlAuth.asStreamsAdmin());
     });
 
     apiTest.beforeEach(async ({ apiClient }) => {

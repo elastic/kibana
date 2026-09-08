@@ -35,7 +35,6 @@ import {
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
-
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';

@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import {
   apiTest,
-  INVESTIGATIONS_MANAGE_ROLE,
+  INVESTIGATIONS_WRITE_ROLE,
   getInvestigation,
   listInvestigations,
   updateInvestigation,
@@ -32,7 +32,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiServices, samlAuth }) => {
       await apiServices.spaces.create({ id: SPACE_ID, name: SPACE_ID });
-      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE));
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE));
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {
