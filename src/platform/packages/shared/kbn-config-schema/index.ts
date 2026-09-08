@@ -92,15 +92,6 @@ export {
   aggregation,
   querySortField,
   unboundedString,
-  savedObjectIdSchema,
-  savedObjectTypeSchema,
-  savedObjectVersionSchema,
-  spaceIdSchema,
-  displayNameSchema,
-  descriptionSchema,
-  searchFilterSchema,
-  aggregationSchema,
-  querySortFieldSchema,
 } from './src/helpers';
 export type { SchemaHelper, StringWarnOptions, UnboundedStringOptions } from './src/helpers';
 

@@ -101,7 +101,7 @@ DataFlow::Node intentionalUnboundedString() {
           "description", "searchFilter", "aggregation", "querySortField"
         ]
     |
-      result = helpers.getMember([name, name + "Schema"]).getMember("warn").getACall()
+      result = helpers.getMember(name).getMember("warn").getACall()
     )
   )
 }

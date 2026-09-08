@@ -30,7 +30,6 @@ describe.each([
   ['querySortField', 0, 256],
 ] as const)('%s', (name, minLength, maxLength) => {
   const helper = helpers[name];
-  const readySchema = helpers[`${name}Schema`];
 
   test('enforces the default boundaries and string type', () => {
     const strict = helper();
@@ -75,10 +74,12 @@ describe.each([
     expect(() => helper({ maxLength: undefined }).validate('x'.repeat(maxLength + 1))).toThrow();
   });
 
-  test('provides ready-to-use schemas without mutating their strict bounds', () => {
-    expect(readySchema.validate('abc')).toBe('abc');
-    expect(readySchema.warn().validate('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
-    expect(() => readySchema.validate('x'.repeat(maxLength + 1))).toThrow();
+  test('creates reporting schemas without changing strict schemas or future defaults', () => {
+    const strict = helper();
+    expect(strict.validate('abc')).toBe('abc');
+    expect(helper.warn().validate('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
+    expect(() => strict.validate('x'.repeat(maxLength + 1))).toThrow();
+    expect(() => helper().validate('x'.repeat(maxLength + 1))).toThrow();
   });
 });
 

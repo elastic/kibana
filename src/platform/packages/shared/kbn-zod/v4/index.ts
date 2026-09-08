@@ -28,20 +28,10 @@ export {
   aggregation,
   querySortField,
   unboundedString,
-  savedObjectIdSchema,
-  savedObjectTypeSchema,
-  savedObjectVersionSchema,
-  spaceIdSchema,
-  displayNameSchema,
-  descriptionSchema,
-  searchFilterSchema,
-  aggregationSchema,
-  querySortFieldSchema,
 } from './string_helpers';
 export type {
   ZodStringOptions,
   ZodStringWarnOptions,
   ZodStringHelper,
-  ZodStringHelperSchema,
   UnboundedStringOptions,
 } from './string_helpers';

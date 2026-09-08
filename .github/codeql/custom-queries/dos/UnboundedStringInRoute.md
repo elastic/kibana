@@ -41,7 +41,7 @@ Prefer the built-in semantic string helpers in `@kbn/config-schema` and `@kbn/zo
 | `aggregation` | 0 | 100,000 |
 | `querySortField` | 0 | 256 |
 
-For example, use `schema.savedObjectId()` or Zod's `savedObjectIdSchema`.
+For example, use `schema.savedObjectId()` or Zod's `savedObjectId()`.
 Helpers accept explicit overrides when an existing route requires a different
 bound. Use a raw bounded string for fields without a matching semantic helper.
 
@@ -162,7 +162,7 @@ unboundedString({ reason: 'Size is enforced upstream' });
 
 The query treats these library exports as intentional data-flow barriers, including
 aliased imports. Reporting helpers (`schema.savedObjectId.warn()` or
-`savedObjectIdSchema.warn()`) are also intentional barriers: they report maximum
+`savedObjectId.warn()`) are also intentional barriers: they report maximum
 length violations without rejecting them during adoption. Unrelated functions
 with the same names do not suppress alerts.
 

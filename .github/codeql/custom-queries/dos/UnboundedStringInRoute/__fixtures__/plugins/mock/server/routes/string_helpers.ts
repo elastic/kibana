@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  schema,
-  unboundedString as unboundedConfigString,
-  spaceIdSchema,
-} from '@kbn/config-schema';
-import { z, unboundedString as unboundedZodString, savedObjectIdSchema } from '@kbn/zod';
+import { schema, unboundedString as unboundedConfigString, spaceId } from '@kbn/config-schema';
+import { z, unboundedString as unboundedZodString, savedObjectId } from '@kbn/zod';
 import * as zNs from '@kbn/zod/v4';
 
 interface TestRouter {
@@ -30,7 +26,7 @@ export const registerStringHelperRoutes = (router: TestRouter, handler: () => vo
           id: schema.savedObjectId(),
           type: schema.savedObjectType(),
           version: schema.savedObjectVersion(),
-          space: spaceIdSchema,
+          space: spaceId(),
           name: schema.displayName.warn({ label: 'test.name' }),
           description: schema.description(),
           filter: schema.searchFilter(),
@@ -49,11 +45,11 @@ export const registerStringHelperRoutes = (router: TestRouter, handler: () => vo
       path: '/api/helpers/zod',
       validate: {
         body: z.object({
-          id: savedObjectIdSchema,
-          warned: savedObjectIdSchema.warn({ label: 'test.id' }).optional(),
+          id: savedObjectId(),
+          warned: savedObjectId.warn({ label: 'test.id' }).optional(),
           trusted: unboundedZodString({ reason: 'Size enforced upstream' }).optional(),
           versioned: zNs.unboundedString({ reason: 'Size enforced upstream' }),
-          versionedWarn: zNs.spaceIdSchema.warn(),
+          versionedWarn: zNs.spaceId.warn(),
         }),
       },
     },

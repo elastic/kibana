@@ -66,17 +66,3 @@ export const unboundedString = ({ reason, ...options }: UnboundedStringOptions):
   assertUnboundedStringReason(reason);
   return new StringType({ ...options, maxLength: undefined });
 };
-
-export const savedObjectIdSchema = Object.assign(savedObjectId(), { warn: savedObjectId.warn });
-export const savedObjectTypeSchema = Object.assign(savedObjectType(), {
-  warn: savedObjectType.warn,
-});
-export const savedObjectVersionSchema = Object.assign(savedObjectVersion(), {
-  warn: savedObjectVersion.warn,
-});
-export const spaceIdSchema = Object.assign(spaceId(), { warn: spaceId.warn });
-export const displayNameSchema = Object.assign(displayName(), { warn: displayName.warn });
-export const descriptionSchema = Object.assign(description(), { warn: description.warn });
-export const searchFilterSchema = Object.assign(searchFilter(), { warn: searchFilter.warn });
-export const aggregationSchema = Object.assign(aggregation(), { warn: aggregation.warn });
-export const querySortFieldSchema = Object.assign(querySortField(), { warn: querySortField.warn });

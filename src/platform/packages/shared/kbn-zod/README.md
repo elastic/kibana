@@ -21,11 +21,11 @@ The root package and `@kbn/zod/v4` export these helpers with the same defaults a
 | `querySortField` | 0 | 256 |
 
 ```typescript
-import { z, savedObjectIdSchema, spaceIdSchema, displayName, unboundedString } from '@kbn/zod';
+import { z, savedObjectId, spaceId, displayName, unboundedString } from '@kbn/zod';
 
 const params = z.object({
-  spaceId: spaceIdSchema,
-  savedObjectId: savedObjectIdSchema.warn({ label: 'dashboard.panelId' }),
+  spaceId: spaceId(),
+  savedObjectId: savedObjectId.warn({ label: 'dashboard.panelId' }),
 });
 const body = z.object({
   name: displayName({ maxLength: 512 }),
@@ -33,13 +33,13 @@ const body = z.object({
 });
 ```
 
-Each helper is a named factory (for example, `savedObjectId()`) and also has a
-ready-to-use `ZodString` export ending in `Schema` (`savedObjectIdSchema`). Both
-expose `.warn()`. Factories accept Zod string constructor options such as `error`
-in addition to `minLength` and `maxLength`. Use ordinary Zod composition for
+Each helper is a named factory: call `savedObjectId()` for strict validation or
+`savedObjectId.warn()` for reporting mode. Factories accept Zod string constructor
+options such as `error` in addition to `minLength` and `maxLength`. Use ordinary
+Zod composition for
 `.optional()`, `.nullable()`, `.regex()`, `.refine()` and other validation.
 Apply those modifiers **after** selecting strict or reporting mode; `.warn()` is
-available on the original helper/schema, not on schemas returned by Zod modifiers.
+available on the factory. Both modes return ordinary Zod schemas.
 Strict schemas emit their length limits in JSON Schema / OpenAPI; reporting
 schemas omit the maximum they do not enforce.
 

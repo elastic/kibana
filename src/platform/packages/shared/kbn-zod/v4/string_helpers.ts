@@ -28,10 +28,6 @@ export interface ZodStringHelper {
   warn(options?: ZodStringWarnOptions): z.ZodString;
 }
 
-// Bind Zod's fluent return types to ZodString: cloned schemas do not retain warn.
-export type ZodStringHelperSchema = Pick<z.ZodString, keyof z.ZodString> &
-  Pick<ZodStringHelper, 'warn'>;
-
 const makeHelper = (helper: StringHelperName): ZodStringHelper => {
   const strict = (options: ZodStringOptions = {}): z.ZodString => {
     const { minLength, maxLength } = getStringHelperLimits(helper, options);
@@ -64,34 +60,6 @@ export const description = makeHelper('description');
 export const searchFilter = makeHelper('searchFilter');
 export const aggregation = makeHelper('aggregation');
 export const querySortField = makeHelper('querySortField');
-
-export const savedObjectIdSchema: ZodStringHelperSchema = Object.assign(savedObjectId(), {
-  warn: savedObjectId.warn,
-});
-export const savedObjectTypeSchema: ZodStringHelperSchema = Object.assign(savedObjectType(), {
-  warn: savedObjectType.warn,
-});
-export const savedObjectVersionSchema: ZodStringHelperSchema = Object.assign(savedObjectVersion(), {
-  warn: savedObjectVersion.warn,
-});
-export const spaceIdSchema: ZodStringHelperSchema = Object.assign(spaceId(), {
-  warn: spaceId.warn,
-});
-export const displayNameSchema: ZodStringHelperSchema = Object.assign(displayName(), {
-  warn: displayName.warn,
-});
-export const descriptionSchema: ZodStringHelperSchema = Object.assign(description(), {
-  warn: description.warn,
-});
-export const searchFilterSchema: ZodStringHelperSchema = Object.assign(searchFilter(), {
-  warn: searchFilter.warn,
-});
-export const aggregationSchema: ZodStringHelperSchema = Object.assign(aggregation(), {
-  warn: aggregation.warn,
-});
-export const querySortFieldSchema: ZodStringHelperSchema = Object.assign(querySortField(), {
-  warn: querySortField.warn,
-});
 
 export type UnboundedStringOptions = Omit<ZodStringOptions, 'maxLength'> & { reason: string };
 

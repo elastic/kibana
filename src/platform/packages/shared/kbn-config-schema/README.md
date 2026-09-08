@@ -147,11 +147,11 @@ Prefer semantic helpers for HTTP request string fields. They share defaults with
 | `querySortField` | 0 | 256 |
 
 ```typescript
-import { schema, savedObjectIdSchema, spaceIdSchema } from '@kbn/config-schema';
+import { schema, savedObjectId, spaceId } from '@kbn/config-schema';
 
 const params = schema.object({
-  spaceId: spaceIdSchema,
-  savedObjectId: savedObjectIdSchema.warn({ label: 'dashboard.panelId' }),
+  spaceId: spaceId(),
+  savedObjectId: savedObjectId.warn({ label: 'dashboard.panelId' }),
 });
 const body = schema.object({
   name: schema.displayName(),
@@ -160,9 +160,9 @@ const body = schema.object({
 });
 ```
 
-All nine helpers are available on `schema` and as named factory exports, and each
-has a ready-to-use named export ending in `Schema` (for example,
-`savedObjectIdSchema`). Reporting mode preserves custom `validate`, `hostname`,
+All nine helpers are available on `schema` and as named factory exports. Call
+`savedObjectId()` for strict validation or `savedObjectId.warn()` for reporting
+mode. Reporting mode preserves custom `validate`, `hostname`,
 coercion, defaults and metadata options. Default values retain config-schema's
 existing behavior: they are not validated.
 

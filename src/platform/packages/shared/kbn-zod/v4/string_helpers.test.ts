@@ -31,7 +31,6 @@ describe.each([
   ['querySortField', 0, 256],
 ] as const)('%s', (name, minLength, maxLength) => {
   const helper = helpers[name];
-  const readySchema = helpers[`${name}Schema`];
 
   test('enforces the default boundaries and string type', () => {
     const strict = helper();
@@ -76,10 +75,12 @@ describe.each([
     expect(() => helper({ maxLength: undefined }).parse('x'.repeat(maxLength + 1))).toThrow();
   });
 
-  test('provides ready-to-use schemas without mutating their strict bounds', () => {
-    expect(readySchema.parse('abc')).toBe('abc');
-    expect(readySchema.warn().parse('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
-    expect(() => readySchema.parse('x'.repeat(maxLength + 1))).toThrow();
+  test('creates reporting schemas without changing strict schemas or future defaults', () => {
+    const strict = helper();
+    expect(strict.parse('abc')).toBe('abc');
+    expect(helper.warn().parse('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
+    expect(() => strict.parse('x'.repeat(maxLength + 1))).toThrow();
+    expect(() => helper().parse('x'.repeat(maxLength + 1))).toThrow();
   });
 });
 
@@ -102,8 +103,8 @@ describe('unboundedString', () => {
 
 test('supports composition, inference and refinement after warn()', () => {
   const requestSchema = z.object({
-    id: helpers.savedObjectIdSchema.warn().regex(/^a+$/).optional(),
-    description: helpers.descriptionSchema.nullable(),
+    id: helpers.savedObjectId.warn().regex(/^a+$/).optional(),
+    description: helpers.description().nullable(),
   });
   type Request = z.infer<typeof requestSchema>;
   const input: Request = { id: 'a'.repeat(600), description: null };
@@ -122,18 +123,18 @@ test('preserves custom Zod error options', () => {
 });
 
 test('exports accurate JSON Schema limits in both modes', () => {
-  expect(z.toJSONSchema(helpers.savedObjectIdSchema)).toMatchObject({
+  expect(z.toJSONSchema(helpers.savedObjectId())).toMatchObject({
     type: 'string',
     minLength: 1,
     maxLength: 512,
   });
-  const reporting = z.toJSONSchema(helpers.savedObjectIdSchema.warn());
+  const reporting = z.toJSONSchema(helpers.savedObjectId.warn());
   expect(reporting).toMatchObject({ type: 'string', minLength: 1 });
   expect(reporting).not.toHaveProperty('maxLength');
 });
 
-test('does not promise warn() on schemas cloned by Zod modifiers', () => {
-  const modified = helpers.savedObjectIdSchema.min(3);
+test('returns ordinary Zod schemas for composition after selecting the mode', () => {
+  const modified = helpers.savedObjectId().min(3);
   expectType<'warn' extends keyof typeof modified ? true : false>(false);
   expect(modified).not.toHaveProperty('warn');
   expect(() => modified.parse('ab')).toThrow();
