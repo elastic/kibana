@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   createMemoryListTool,
   createMemoryReadTool,
@@ -27,13 +28,16 @@ export const createFeatureIdentificationSkill = (options: MemoryToolsOptions) =>
     excludeFromElasticCapabilities: true,
     description,
     content: groundingContent,
-    getInlineTools: () =>
-      [
+    getInlineTools: () => {
+      const tools: BuiltinSkillBoundedTool[] = [
         createMemorySearchTool(options),
         createMemoryReadTool(options),
         createMemoryListTool(options),
         finalizeFeaturesTool,
-      ].map(({ id, ...rest }) => ({ ...rest, id: id.replaceAll('.', '_') })),
+      ];
+
+      return tools.map(({ id, ...rest }) => ({ ...rest, id: id.replaceAll('.', '_') }));
+    },
   });
 
 export { FINALIZE_FEATURES_TOOL_ID } from './finalize_features_tool';

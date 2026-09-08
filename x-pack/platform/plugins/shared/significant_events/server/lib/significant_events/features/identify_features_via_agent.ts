@@ -13,6 +13,7 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   AgentExecutionMode,
   CONVERSATION_TITLE_MAX_LENGTH,
+  ConversationAccessControlMode,
   isRoundCompleteEvent,
   isToolCallEvent,
 } from '@kbn/agent-builder-common';
@@ -79,7 +80,7 @@ export async function executeFeatureIdentificationAgent({
   const conversation = await conversationClient.create({
     agentId: FEATURE_IDENTIFICATION_AGENT_ID,
     title: `Feature identification: ${streamName}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
-    accessControl: { access_mode: 'private' },
+    accessControl: { access_mode: ConversationAccessControlMode.Private },
   });
 
   const { events$ } = await agentBuilder.execution.executeAgent({
