@@ -38,6 +38,7 @@ export interface ImportWizardState {
   mapping: ImportFieldMapping;
   examples: AddExamplesPayload[];
   validationErrors: ImportRowError[];
+  blockingValidationErrors: string[];
   isImporting: boolean;
   result?: ImportResult;
 }
@@ -57,7 +58,12 @@ export type ImportWizardAction =
   | { type: 'setMapping'; column: string; destination: ImportFieldMapping[string] }
   | { type: 'next' }
   | { type: 'back' }
-  | { type: 'validationReady'; examples: AddExamplesPayload[]; errors: ImportRowError[] }
+  | {
+      type: 'validationReady';
+      examples: AddExamplesPayload[];
+      errors: ImportRowError[];
+      blockingErrors: string[];
+    }
   | { type: 'importStarted' }
   | { type: 'importFinished'; result: ImportResult };
 
@@ -72,6 +78,7 @@ export const createInitialState = (initialDatasetId?: string): ImportWizardState
   mapping: {},
   examples: [],
   validationErrors: [],
+  blockingValidationErrors: [],
   isImporting: false,
 });
 
@@ -90,7 +97,11 @@ export const canAdvance = (state: ImportWizardState): boolean => {
     case 'map':
       return hasValidMapping(state.mapping);
     case 'validate':
-      return state.examples.length > 0 && !state.isImporting;
+      return (
+        state.examples.length > 0 &&
+        state.blockingValidationErrors.length === 0 &&
+        !state.isImporting
+      );
     case 'result':
       return false;
   }
@@ -118,6 +129,7 @@ export const importWizardReducer = (
         mapping: action.mapping,
         examples: [],
         validationErrors: [],
+        blockingValidationErrors: [],
         result: undefined,
       };
     case 'clearFile':
@@ -129,6 +141,7 @@ export const importWizardReducer = (
         mapping: {},
         examples: [],
         validationErrors: [],
+        blockingValidationErrors: [],
       };
     case 'setMapping':
       return {
@@ -152,13 +165,20 @@ export const importWizardReducer = (
         step: 'validate',
         examples: action.examples,
         validationErrors: action.errors,
+        blockingValidationErrors: action.blockingErrors,
       };
     case 'back':
       if (state.step === 'map') {
         return { ...state, step: 'file' };
       }
       if (state.step === 'validate') {
-        return { ...state, step: 'map', examples: [], validationErrors: [] };
+        return {
+          ...state,
+          step: 'map',
+          examples: [],
+          validationErrors: [],
+          blockingValidationErrors: [],
+        };
       }
       return state;
     case 'importStarted':

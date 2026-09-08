@@ -926,7 +926,11 @@ export const DatasetDetailPage: React.FC = () => {
 
       {isImportFlyoutOpen ? (
         <ImportDatasetFlyout
-          initialDatasetId={datasetId}
+          initialDataset={
+            dataset
+              ? { id: dataset.id, name: dataset.name, examplesCount: dataset.examples.length }
+              : undefined
+          }
           onClose={() => setIsImportFlyoutOpen(false)}
         />
       ) : null}

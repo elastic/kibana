@@ -13,13 +13,17 @@ import * as translations from './translations';
 interface ValidateStepProps {
   validCount: number;
   errors: ImportRowError[];
+  blockingErrors: string[];
 }
 
-export const ValidateStep = ({ validCount, errors }: ValidateStepProps) => {
+export const ValidateStep = ({ validCount, errors, blockingErrors }: ValidateStepProps) => {
   const hasValidRows = validCount > 0;
   const hasErrors = errors.length > 0;
-  const color = hasValidRows ? (hasErrors ? 'warning' : 'success') : 'danger';
-  const title = hasValidRows
+  const isBlocked = blockingErrors.length > 0;
+  const color = isBlocked || !hasValidRows ? 'danger' : hasErrors ? 'warning' : 'success';
+  const title = isBlocked
+    ? translations.VALIDATION_BLOCKED_TITLE
+    : hasValidRows
     ? hasErrors
       ? translations.VALIDATION_WARNING_TITLE
       : translations.VALIDATION_SUCCESS_TITLE
@@ -29,6 +33,13 @@ export const ValidateStep = ({ validCount, errors }: ValidateStepProps) => {
     <>
       <EuiCallOut color={color} title={title}>
         <p>{translations.getValidationDescription(validCount, errors.length)}</p>
+        {isBlocked ? (
+          <ul>
+            {blockingErrors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        ) : null}
       </EuiCallOut>
       {hasErrors ? (
         <>

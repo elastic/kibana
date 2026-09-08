@@ -37,8 +37,11 @@ import {
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   GetEvaluationDatasetsRequestQuery,
+  MAX_DATASET_EXAMPLES_REQUEST_BYTES,
+  MAX_EXAMPLES_PER_DATASET,
 } from '@kbn/evals-common';
 import { DatasetAlreadyExistsError } from '../../storage/datasets/dataset_already_exists_error';
+import { DatasetExamplesLimitExceededError } from '../../storage/datasets/dataset_examples_limit_exceeded_error';
 import { ExampleAlreadyExistsError } from '../../storage/datasets/example_already_exists_error';
 import { ExampleNotFoundError } from '../../storage/datasets/example_not_found_error';
 import {
@@ -704,6 +707,22 @@ describe('dataset routes', () => {
   });
 
   describe('POST /internal/evals/datasets/{datasetId}/examples', () => {
+    it('registers the route with the dataset examples body cap', () => {
+      const router = httpServiceMock.createRouter();
+
+      registerAddExamplesRoute({
+        router,
+        logger: loggingSystemMock.createLogger(),
+        canEncrypt: true,
+        getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      } as any);
+
+      const versionedRouter = router.versioned as MockedVersionedRouter;
+      const routeConfig = versionedRouter.post.mock.calls[0][0];
+
+      expect(routeConfig.options?.body?.maxBytes).toBe(MAX_DATASET_EXAMPLES_REQUEST_BYTES);
+    });
+
     it('adds examples for an existing dataset', async () => {
       const { handler, context, datasetClient } = buildRouteSetup({
         registerRoute: registerAddExamplesRoute,
@@ -839,6 +858,32 @@ describe('dataset routes', () => {
 
       expect(response.status).toBe(409);
       expect(response.payload.message).toContain('already exists');
+    });
+
+    it('returns 409 when the dataset example limit would be exceeded', async () => {
+      const { handler, context, datasetClient } = buildRouteSetup({
+        registerRoute: registerAddExamplesRoute,
+        method: 'post',
+        path: EVALS_DATASET_EXAMPLES_URL,
+      });
+      datasetClient.datasetExists.mockResolvedValueOnce(true);
+      datasetClient.addExamples.mockRejectedValueOnce(
+        new DatasetExamplesLimitExceededError(MAX_EXAMPLES_PER_DATASET)
+      );
+
+      const response = await handler(
+        context as any,
+        httpServerMock.createKibanaRequest({
+          method: 'post',
+          path: EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', datasetId),
+          params: { datasetId },
+          body: { examples: [{ input: datasetExample.input }] },
+        }),
+        kibanaResponseFactory
+      );
+
+      expect(response.status).toBe(409);
+      expect(response.payload.message).toContain('at most');
     });
   });
 

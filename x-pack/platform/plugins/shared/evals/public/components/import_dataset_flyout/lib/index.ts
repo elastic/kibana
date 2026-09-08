@@ -6,8 +6,14 @@
  */
 
 export { applyMapping } from './apply_mapping';
-export { chunkExamples, IMPORT_CHUNK_SIZE } from './chunk';
+export { chunkExamples, createImportRequestBody, ImportExampleTooLargeError } from './chunk';
 export { parseCsv } from './parse_csv';
 export { parseJsonl } from './parse_jsonl';
 export { suggestMapping } from './suggest_mapping';
-export type { ImportFieldMapping, ImportRow, ImportRowError, ParseImportFileResult } from './types';
+export type {
+  ImportDatasetOption,
+  ImportFieldMapping,
+  ImportRow,
+  ImportRowError,
+  ParseImportFileResult,
+} from './types';

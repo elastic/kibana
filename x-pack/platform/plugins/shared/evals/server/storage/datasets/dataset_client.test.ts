@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { InternalIStorageClient } from '@kbn/storage-adapter';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { buildSpaceFilter, getDatasetId } from '@kbn/evals-common';
+import { buildSpaceFilter, getDatasetId, MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import type { DatasetExampleStorageProperties } from './examples_storage';
 import type { DatasetStorageProperties } from './datasets_storage';
 import type {
@@ -19,6 +19,7 @@ import type {
 } from './dataset_client';
 import { DatasetClient } from './dataset_client';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
+import { DatasetExamplesLimitExceededError } from './dataset_examples_limit_exceeded_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
 import { ExampleNotFoundError } from './example_not_found_error';
 
@@ -847,6 +848,22 @@ describe('DatasetClient', () => {
 
     const dataset = await client.get(created.id);
     expect(dataset?.examples).toHaveLength(1);
+  });
+
+  it('rejects additions that would exceed the dataset example limit before writing', async () => {
+    const { client, examplesStorage } = createClient();
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [],
+    });
+    const search = examplesStorage.client.search as jest.Mock;
+    search.mockResolvedValueOnce({ hits: { hits: [], total: MAX_EXAMPLES_PER_DATASET } });
+
+    await expect(client.addExamples(created.id, [baseExampleA])).rejects.toThrow(
+      DatasetExamplesLimitExceededError
+    );
+    expect(examplesStorage.client.bulk).not.toHaveBeenCalled();
   });
 
   it('stamps imported examples with their source', async () => {

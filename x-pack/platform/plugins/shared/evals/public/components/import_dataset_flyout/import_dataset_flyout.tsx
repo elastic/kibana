@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useReducer, useState } from 'react';
+import React, { useMemo, useReducer, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,9 +19,20 @@ import {
   EuiStepsHorizontal,
   EuiTitle,
 } from '@elastic/eui';
+import { MAX_EXAMPLES_PER_DATASET } from '@kbn/evals-common';
 import { getErrorMessage } from '../../utils/get_error_message';
 import { useAddExamples, useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
-import { applyMapping, chunkExamples, parseCsv, parseJsonl, suggestMapping } from './lib';
+import {
+  applyMapping,
+  chunkExamples,
+  createImportRequestBody,
+  ImportExampleTooLargeError,
+  parseCsv,
+  parseJsonl,
+  suggestMapping,
+  type ImportDatasetOption,
+  type ImportRowError,
+} from './lib';
 import { FileStep } from './file_step';
 import { MapStep } from './map_step';
 import {
@@ -36,6 +47,7 @@ import * as translations from './translations';
 import { ValidateStep } from './validate_step';
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const MAX_FILE_ERROR_DETAILS = 20;
 
 const detectFormat = (fileName: string): ImportFileFormat | undefined => {
   const normalizedName = fileName.toLowerCase();
@@ -65,18 +77,41 @@ const getStepStatus = (step: ImportWizardStep, currentStep: ImportWizardStep) =>
 
 export interface ImportDatasetFlyoutProps {
   onClose: () => void;
-  initialDatasetId?: string;
+  initialDataset?: ImportDatasetOption;
 }
 
-export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDatasetFlyoutProps) => {
-  const [state, dispatch] = useReducer(importWizardReducer, initialDatasetId, createInitialState);
-  const [fileError, setFileError] = useState<string>();
+const formatFileErrors = (errors: ImportRowError[]): string[] => {
+  const visibleErrors = errors
+    .slice(0, MAX_FILE_ERROR_DETAILS)
+    .map(({ rowNumber, message }) => translations.getRowError(rowNumber, message));
+  const hiddenErrorCount = errors.length - visibleErrors.length;
+
+  return hiddenErrorCount > 0
+    ? [...visibleErrors, translations.getAdditionalFileErrorsDescription(hiddenErrorCount)]
+    : visibleErrors;
+};
+
+export const ImportDatasetFlyout = ({ onClose, initialDataset }: ImportDatasetFlyoutProps) => {
+  const [state, dispatch] = useReducer(importWizardReducer, initialDataset?.id, createInitialState);
+  const [fileErrors, setFileErrors] = useState<string[]>();
+  const [isReadingFile, setIsReadingFile] = useState(false);
+  const fileSelectionGeneration = useRef(0);
   const { data: datasetsResponse, isLoading: isLoadingDatasets } = useDatasets({
     page: 1,
     perPage: 1000,
   });
   const createDataset = useCreateDataset();
   const addExamples = useAddExamples();
+  const datasets = useMemo<ImportDatasetOption[]>(() => {
+    const listedDatasets = (datasetsResponse?.datasets ?? []).map(
+      ({ id, name, examples_count: examplesCount }) => ({ id, name, examplesCount })
+    );
+    if (!initialDataset || listedDatasets.some(({ id }) => id === initialDataset.id)) {
+      return listedDatasets;
+    }
+    return [initialDataset, ...listedDatasets];
+  }, [datasetsResponse?.datasets, initialDataset]);
+  const selectedDataset = datasets.find(({ id }) => id === state.datasetId);
 
   const steps = useMemo(
     () => [
@@ -105,32 +140,39 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
   );
 
   const onFileChange = async (fileList: FileList | null) => {
+    const selectionGeneration = ++fileSelectionGeneration.current;
     const file = fileList?.item(0);
-    setFileError(undefined);
+    setFileErrors(undefined);
+    setIsReadingFile(false);
+    dispatch({ type: 'clearFile' });
     if (!file) {
-      dispatch({ type: 'clearFile' });
       return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      dispatch({ type: 'clearFile' });
-      setFileError(translations.FILE_TOO_LARGE_ERROR);
+      setFileErrors([translations.FILE_TOO_LARGE_ERROR]);
       return;
     }
 
     const format = detectFormat(file.name);
     if (!format) {
-      dispatch({ type: 'clearFile' });
-      setFileError(translations.UNSUPPORTED_FILE_ERROR);
+      setFileErrors([translations.UNSUPPORTED_FILE_ERROR]);
       return;
     }
 
+    setIsReadingFile(true);
     try {
       const contents = await file.text();
+      if (selectionGeneration !== fileSelectionGeneration.current) {
+        return;
+      }
       const preview = parseFile(contents, format);
       if (preview.columns.length === 0 || preview.rows.length === 0) {
-        dispatch({ type: 'clearFile' });
-        setFileError(translations.EMPTY_FILE_ERROR);
+        setFileErrors(
+          preview.errors.length > 0
+            ? formatFileErrors(preview.errors)
+            : [translations.EMPTY_FILE_ERROR]
+        );
         return;
       }
       dispatch({
@@ -140,8 +182,13 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
         mapping: suggestMapping(preview.columns),
       });
     } catch {
-      dispatch({ type: 'clearFile' });
-      setFileError(translations.READ_FILE_ERROR);
+      if (selectionGeneration === fileSelectionGeneration.current) {
+        setFileErrors([translations.READ_FILE_ERROR]);
+      }
+    } finally {
+      if (selectionGeneration === fileSelectionGeneration.current) {
+        setIsReadingFile(false);
+      }
     }
   };
 
@@ -152,12 +199,28 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
 
     const parsed = parseFile(state.file.contents, state.file.format);
     const mapped = applyMapping(parsed.rows, state.mapping);
+    const blockingErrors: string[] = [];
+    const existingExamples =
+      state.datasetMode === 'existing' ? selectedDataset?.examplesCount ?? 0 : 0;
+    if (existingExamples + mapped.examples.length > MAX_EXAMPLES_PER_DATASET) {
+      blockingErrors.push(translations.getDatasetCapacityError(MAX_EXAMPLES_PER_DATASET));
+    }
+    try {
+      chunkExamples(mapped.examples);
+    } catch (error) {
+      if (error instanceof ImportExampleTooLargeError) {
+        blockingErrors.push(translations.EXAMPLE_TOO_LARGE_ERROR);
+      } else {
+        throw error;
+      }
+    }
     dispatch({
       type: 'validationReady',
       examples: mapped.examples,
       errors: [...parsed.errors, ...mapped.errors].sort(
         (first, second) => first.rowNumber - second.rowNumber
       ),
+      blockingErrors,
     });
   };
 
@@ -186,7 +249,7 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
         try {
           const response = await addExamples.mutateAsync({
             datasetId,
-            body: { examples, source: 'import', on_duplicate: 'skip' },
+            body: createImportRequestBody(examples),
           });
           added += response.added;
           skippedDuplicates += response.skipped_duplicates;
@@ -269,9 +332,10 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
             datasetId={state.datasetId}
             newDatasetName={state.newDatasetName}
             newDatasetDescription={state.newDatasetDescription}
-            datasets={datasetsResponse?.datasets ?? []}
+            datasets={datasets}
             isLoadingDatasets={isLoadingDatasets}
-            fileError={fileError}
+            isReadingFile={isReadingFile}
+            fileErrors={fileErrors}
             onDatasetModeChange={(mode) => dispatch({ type: 'setDatasetMode', mode })}
             onDatasetIdChange={(datasetId) => dispatch({ type: 'setDatasetId', datasetId })}
             onNewDatasetNameChange={(name) => dispatch({ type: 'setNewDatasetName', name })}
@@ -292,7 +356,11 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
           />
         ) : null}
         {state.step === 'validate' ? (
-          <ValidateStep validCount={state.examples.length} errors={state.validationErrors} />
+          <ValidateStep
+            validCount={state.examples.length}
+            errors={state.validationErrors}
+            blockingErrors={state.blockingValidationErrors}
+          />
         ) : null}
         {state.step === 'result' && state.result ? <ResultStep result={state.result} /> : null}
       </EuiFlyoutBody>

@@ -21,4 +21,10 @@ export interface ParseImportFileResult {
   errors: ImportRowError[];
 }
 
+export interface ImportDatasetOption {
+  id: string;
+  name: string;
+  examplesCount: number;
+}
+
 export type ImportFieldMapping = Record<string, 'input' | 'output' | 'metadata' | 'ignore'>;

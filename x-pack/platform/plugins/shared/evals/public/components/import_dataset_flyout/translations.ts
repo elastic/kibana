@@ -146,6 +146,23 @@ export const NO_VALID_ROWS_TITLE = i18n.translate(
   'xpack.evals.importDatasetFlyout.noValidRowsTitle',
   { defaultMessage: 'No valid rows to import' }
 );
+export const VALIDATION_BLOCKED_TITLE = i18n.translate(
+  'xpack.evals.importDatasetFlyout.validationBlockedTitle',
+  { defaultMessage: 'File cannot be imported' }
+);
+export const getDatasetCapacityError = (limit: number) =>
+  i18n.translate('xpack.evals.importDatasetFlyout.datasetCapacityErrorMessage', {
+    defaultMessage:
+      'A dataset can contain at most {limit, number} examples. Reduce the number of rows in this import.',
+    values: { limit },
+  });
+export const EXAMPLE_TOO_LARGE_ERROR = i18n.translate(
+  'xpack.evals.importDatasetFlyout.exampleTooLargeErrorMessage',
+  {
+    defaultMessage:
+      'At least one example exceeds the request size limit. Reduce the size of its mapped values.',
+  }
+);
 export const ERROR_DETAILS_BUTTON_LABEL = i18n.translate(
   'xpack.evals.importDatasetFlyout.errorDetailsButtonLabel',
   { defaultMessage: 'View row errors' }
@@ -160,6 +177,12 @@ export const getRowError = (rowNumber: number, message: string) =>
   i18n.translate('xpack.evals.importDatasetFlyout.rowErrorMessage', {
     defaultMessage: 'Row {rowNumber}: {message}',
     values: { rowNumber, message },
+  });
+export const getAdditionalFileErrorsDescription = (count: number) =>
+  i18n.translate('xpack.evals.importDatasetFlyout.additionalFileErrorsDescription', {
+    defaultMessage:
+      '{count, plural, one {# additional file error was omitted.} other {# additional file errors were omitted.}}',
+    values: { count },
   });
 export const RESULT_SUCCESS_TITLE = i18n.translate(
   'xpack.evals.importDatasetFlyout.resultSuccessTitle',

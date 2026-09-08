@@ -31,6 +31,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { DatasetStorageProperties } from './datasets_storage';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
+import { DatasetExamplesLimitExceededError } from './dataset_examples_limit_exceeded_error';
 import { ExampleNotFoundError } from './example_not_found_error';
 import { LastSpaceError } from './last_space_error';
 import type { datasetsStorageSettings } from './datasets_storage';
@@ -765,10 +766,18 @@ export class DatasetClient {
       touchDataset?: boolean;
       rejectDuplicates?: boolean;
       source?: 'import';
+      enforceDatasetLimit?: boolean;
     } = {}
   ): Promise<{ added: number }> {
     if (examples.length === 0) {
       return { added: 0 };
+    }
+
+    if (options.enforceDatasetLimit ?? true) {
+      const existingExamples = await this.countExamplesByDatasetId(datasetId);
+      if (existingExamples + examples.length > MAX_EXAMPLES_PER_DATASET) {
+        throw new DatasetExamplesLimitExceededError(MAX_EXAMPLES_PER_DATASET);
+      }
     }
 
     const rejectDuplicates = options.rejectDuplicates ?? true;
@@ -999,7 +1008,11 @@ export class DatasetClient {
     const toDelete = Array.from(existingExampleIdsByHash.values());
 
     const [{ added }] = await Promise.all([
-      this.addExamples(existing.id, toAdd, { touchDataset: false, rejectDuplicates: false }),
+      this.addExamples(existing.id, toAdd, {
+        touchDataset: false,
+        rejectDuplicates: false,
+        enforceDatasetLimit: false,
+      }),
       this.examplesStorage.bulk({
         operations: toDelete.map((id) => ({
           delete: { _id: id },

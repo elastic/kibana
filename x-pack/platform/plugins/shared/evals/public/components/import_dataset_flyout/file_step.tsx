@@ -16,11 +16,8 @@ import {
   EuiTextArea,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import {
-  MAX_DATASET_DESCRIPTION_LENGTH,
-  MAX_DATASET_NAME_LENGTH,
-  type DatasetSummary,
-} from '@kbn/evals-common';
+import { MAX_DATASET_DESCRIPTION_LENGTH, MAX_DATASET_NAME_LENGTH } from '@kbn/evals-common';
+import type { ImportDatasetOption } from './lib';
 import type { ImportDatasetMode } from './reducer';
 import * as translations from './translations';
 
@@ -29,9 +26,10 @@ interface FileStepProps {
   datasetId: string;
   newDatasetName: string;
   newDatasetDescription: string;
-  datasets: DatasetSummary[];
+  datasets: ImportDatasetOption[];
   isLoadingDatasets: boolean;
-  fileError?: string;
+  isReadingFile: boolean;
+  fileErrors?: string[];
   onDatasetModeChange: (mode: ImportDatasetMode) => void;
   onDatasetIdChange: (datasetId: string) => void;
   onNewDatasetNameChange: (name: string) => void;
@@ -46,7 +44,8 @@ export const FileStep = ({
   newDatasetDescription,
   datasets,
   isLoadingDatasets,
-  fileError,
+  isReadingFile,
+  fileErrors,
   onDatasetModeChange,
   onDatasetIdChange,
   onNewDatasetNameChange,
@@ -112,14 +111,15 @@ export const FileStep = ({
       <EuiSpacer size="m" />
       <EuiFormRow
         label={translations.FILE_LABEL}
-        isInvalid={fileError !== undefined}
-        error={fileError}
+        isInvalid={fileErrors !== undefined}
+        error={fileErrors}
         fullWidth
       >
         <EuiFilePicker
           accept=".csv,.jsonl,.ndjson"
           initialPromptText={translations.FILE_PICKER_PROMPT}
-          isInvalid={fileError !== undefined}
+          isInvalid={fileErrors !== undefined}
+          isLoading={isReadingFile}
           onChange={onFileChange}
           fullWidth
         />

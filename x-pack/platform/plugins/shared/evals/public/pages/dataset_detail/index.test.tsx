@@ -37,14 +37,14 @@ jest.mock('@kbn/llm-trace-waterfall', () => ({
 }));
 jest.mock('../../components/import_dataset_flyout', () => ({
   ImportDatasetFlyout: ({
-    initialDatasetId,
+    initialDataset,
     onClose,
   }: {
-    initialDatasetId?: string;
+    initialDataset?: { id: string };
     onClose: () => void;
   }) => (
     <div data-test-subj="importDatasetFlyoutMock">
-      <span>{initialDatasetId}</span>
+      <span>{initialDataset?.id}</span>
       <button type="button" onClick={onClose}>
         Close import
       </button>

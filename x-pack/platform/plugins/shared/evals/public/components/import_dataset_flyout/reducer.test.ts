@@ -48,6 +48,7 @@ describe('import dataset flyout reducer', () => {
       type: 'validationReady',
       examples: [{ metadata: { notes: 'hello' } }],
       errors: [],
+      blockingErrors: [],
     });
 
     expect(mapState.step).toBe('map');
@@ -67,10 +68,28 @@ describe('import dataset flyout reducer', () => {
       type: 'validationReady',
       examples: [{ input: { prompt: 'hello' } }],
       errors: [],
+      blockingErrors: [],
     });
 
     expect(canAdvance(mapState)).toBe(true);
     expect(validateState.step).toBe('validate');
     expect(canAdvance(validateState)).toBe(true);
+  });
+
+  it('does not import when validation has a blocking error', () => {
+    const state = {
+      ...createInitialState('dataset-1'),
+      step: 'map' as const,
+      mapping: { prompt: 'input' as const },
+    };
+    const validateState = importWizardReducer(state, {
+      type: 'validationReady',
+      examples: [{ input: { prompt: 'hello' } }],
+      errors: [],
+      blockingErrors: ['Dataset capacity exceeded'],
+    });
+
+    expect(validateState.step).toBe('validate');
+    expect(canAdvance(validateState)).toBe(false);
   });
 });
