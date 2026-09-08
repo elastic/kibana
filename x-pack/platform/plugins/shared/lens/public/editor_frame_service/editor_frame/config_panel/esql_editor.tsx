@@ -185,9 +185,12 @@ export function ESQLEditor({
             esqlVariables,
             isApproximate
           );
+          // Commit the grid and fieldlist cache only after the layer accepted the
+          // query; otherwise a rejected query (e.g. missing-dimension validation)
+          // would leave them showing results the layer state does not reflect.
+          await onLayerQuerySubmit(q, gridAttrs.columns, abortController);
           addColumnsToCache(q, gridAttrs.columns);
           setDataGridAttrs(gridAttrs);
-          await onLayerQuerySubmit(q, gridAttrs.columns, abortController);
           prevQuery.current = q;
           setSubmittedQuery(q);
         } catch (error) {
