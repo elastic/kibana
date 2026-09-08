@@ -95,7 +95,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     schema.string({
       meta: {
         description:
-          'Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the wizard on resume.',
+          'Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume.',
       },
     })
   ),

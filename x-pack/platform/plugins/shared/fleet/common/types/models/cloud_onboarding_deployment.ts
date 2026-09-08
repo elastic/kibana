@@ -31,7 +31,7 @@ export interface CloudOnboardingDeployment {
   statusMessage?: string;
   attemptCount: number;
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
-  /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the wizard on resume. */
+  /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
   packagePolicyIds?: string[];
   /** Agent policy ID for agent_based mechanism. Separate from packagePolicyIds (in agentless those are equal; for agent_based the agent policy is user-managed). */
