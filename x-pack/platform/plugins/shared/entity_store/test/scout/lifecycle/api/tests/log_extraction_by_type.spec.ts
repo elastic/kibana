@@ -280,6 +280,50 @@ apiTest.describe(
     );
 
     apiTest(
+      'keeps per entity-type fields that a later single-field update does not mention',
+      async ({ apiClient }) => {
+        await installAllEntityTypes(apiClient, defaultHeaders);
+
+        const first = await update(apiClient, {
+          logExtractionByType: { service: { frequency: '10m', delay: '2m' } },
+        });
+        expect(first.statusCode).toBe(200);
+        expect(await engineConfig(apiClient, 'service')).toStrictEqual({
+          frequency: '10m',
+          delay: '2m',
+        });
+
+        const second = await update(apiClient, {
+          logExtractionByType: { service: { frequency: '20m' } },
+        });
+        expect(second.statusCode).toBe(200);
+
+        expect(await engineConfig(apiClient, 'service')).toStrictEqual({
+          frequency: '20m',
+          delay: '2m',
+        });
+      }
+    );
+
+    apiTest('clears only the per entity-type field that is set to null', async ({ apiClient }) => {
+      await installAllEntityTypes(apiClient, defaultHeaders);
+
+      await update(apiClient, {
+        logExtractionByType: { service: { frequency: '10m', delay: '2m' } },
+      });
+
+      const cleared = await update(apiClient, {
+        logExtractionByType: { service: { frequency: null } },
+      });
+      expect(cleared.statusCode).toBe(200);
+
+      expect(await engineConfig(apiClient, 'service')).toStrictEqual({
+        frequency: '1m',
+        delay: '2m',
+      });
+    });
+
+    apiTest(
       'validates per entity-type params the same way as store-wide ones',
       async ({ apiClient }) => {
         await installAllEntityTypes(apiClient, defaultHeaders);
