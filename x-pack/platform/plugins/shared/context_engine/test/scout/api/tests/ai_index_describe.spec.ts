@@ -25,13 +25,25 @@ const DATA_STREAM_AI_INDEX_ID = `scout-describe-ds-${RUN_ID}`;
 
 const describePath = (id: string) => `${AI_INDEX_COLLECTION_PATH}/${id}/_describe`;
 
-interface DescribedFields {
-  fields: Array<{ path: string; type: string; searchable: boolean; aggregatable: boolean }>;
-  semantic_fields: string[];
-}
+const blockOf = (body: { response: string }): string => body.response;
 
-const fieldNamed = (fields: DescribedFields['fields'], path: string) =>
-  fields.find((field) => field.path === path);
+/** Lines under `heading` (exact, or `heading (…)`) up to the next blank line. */
+const sectionLines = (block: string, heading: string): string[] => {
+  const lines = block.split('\n');
+  const start = lines.findIndex((line) => line === heading || line.startsWith(`${heading} (`));
+  if (start < 0) {
+    return [];
+  }
+  const rest = lines.slice(start + 1);
+  const end = rest.indexOf('');
+  return end < 0 ? rest : rest.slice(0, end);
+};
+
+const fieldLine = (block: string, path: string): string | undefined =>
+  sectionLines(block, 'Fields').find((line) => line.startsWith(`${path}: `));
+
+const fieldPaths = (block: string): string[] =>
+  sectionLines(block, 'Fields').map((line) => line.slice(0, line.indexOf(': ')));
 
 const API_HEADERS = {
   ...testData.COMMON_HEADERS,
@@ -144,35 +156,30 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toMatchObject({
-      id: PATTERN_AI_INDEX_ID,
-      esql_target: INDEX_PATTERN,
-      dest: { type: 'index', value: INDEX_PATTERN },
-      managed: false,
-      truncated: { fields: false, query_templates: false },
-    });
+    const block = blockOf(response.body);
+    expect(block.split('\n').slice(0, 3)).toStrictEqual([
+      `AI index: ${PATTERN_AI_INDEX_ID}`,
+      `Scout describe fixture ${PATTERN_AI_INDEX_ID}`,
+      `Query with ES|QL against: ${INDEX_PATTERN}`,
+    ]);
+    // Fields not truncated: plain heading, no `(showing …)`.
+    expect(block).toContain('\n\nFields\n');
 
-    const { fields, semantic_fields: semanticFields } = response.body as DescribedFields;
-    expect(fieldNamed(fields, 'status')).toStrictEqual({
-      path: 'status',
-      type: 'conflict',
-      searchable: true,
-      aggregatable: true,
-    });
-    expect(fieldNamed(fields, 'title.keyword')).toStrictEqual({
-      path: 'title.keyword',
-      type: 'keyword',
-      searchable: true,
-      aggregatable: true,
-    });
-    expect(fieldNamed(fields, 'permissions.kibana.privileges')).toMatchObject({ type: 'nested' });
-    const paths = fields.map(({ path }) => path);
+    expect(fieldLine(block, 'status')).toBe('status: conflict, searchable, aggregatable');
+    expect(fieldLine(block, 'title.keyword')).toBe(
+      'title.keyword: keyword, searchable, aggregatable'
+    );
+    expect(fieldLine(block, 'permissions.kibana.privileges')).toMatch(
+      /^permissions\.kibana\.privileges: nested/
+    );
+    const paths = fieldPaths(block);
     expect(paths).toStrictEqual([...paths].sort());
 
     // Built-in `ai-index-idx-*` template adds `semantic_text` fields.
+    const semanticFields = sectionLines(block, 'Semantic fields');
     expect(semanticFields.length).toBeGreaterThan(0);
     for (const path of semanticFields) {
-      expect(fieldNamed(fields, path)).toMatchObject({ type: 'semantic_text', searchable: true });
+      expect(fieldLine(block, path)).toBe(`${path}: semantic_text, searchable`);
     }
   });
 
@@ -183,13 +190,9 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.esql_target).toBe(INDEX_A);
-    expect(fieldNamed(response.body.fields, 'status')).toStrictEqual({
-      path: 'status',
-      type: 'keyword',
-      searchable: true,
-      aggregatable: true,
-    });
+    const block = blockOf(response.body);
+    expect(block).toContain(`\nQuery with ES|QL against: ${INDEX_A}\n`);
+    expect(fieldLine(block, 'status')).toBe('status: keyword, searchable, aggregatable');
   });
 
   apiTest('resolves a data stream through its backing indices', async ({ apiClient }) => {
@@ -199,17 +202,20 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.esql_target).toBe(DATA_STREAM);
-    expect(fieldNamed(response.body.fields, '@timestamp')).toMatchObject({ type: 'date' });
+    const block = blockOf(response.body);
+    expect(block).toContain(`\nQuery with ES|QL against: ${DATA_STREAM}\n`);
+    expect(fieldLine(block, '@timestamp')).toMatch(/^@timestamp: date/);
   });
 
   apiTest('returns 404 for an unregistered AI index', async ({ apiClient }) => {
-    const response = await apiClient.get(describePath(`scout-describe-missing-${RUN_ID}`), {
+    const missingId = `scout-describe-missing-${RUN_ID}`;
+    const response = await apiClient.get(describePath(missingId), {
       headers: { ...describeCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.message).toBe(`AI index '${missingId}' not found`);
   });
 
   apiTest(
@@ -221,6 +227,8 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
       });
 
       expect(response).toHaveStatusCode(403);
+      // Elasticsearch refused `_mapping`; not Kibana's own authz layer.
+      expect(response.body.message).toMatch(/security_exception|unauthorized/i);
     }
   );
 });

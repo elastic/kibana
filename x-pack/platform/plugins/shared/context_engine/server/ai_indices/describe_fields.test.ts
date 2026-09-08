@@ -79,11 +79,7 @@ describe('describeAiIndexFields', () => {
       },
     });
 
-    const {
-      fields,
-      semantic_fields: semanticFields,
-      truncated,
-    } = await describeAiIndexFields({
+    const { fields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
       esClient,
       target: 'ai-index-idx-a',
     });
@@ -106,7 +102,42 @@ describe('describeAiIndexFields', () => {
       { path: 'title.keyword', type: 'keyword', searchable: true, aggregatable: true },
     ]);
     expect(semanticFields).toEqual([]);
-    expect(truncated).toBe(false);
+    expect(omittedFieldCount).toBe(0);
+  });
+
+  it('includes mapping-defined runtime fields and composite subfields', async () => {
+    getMapping.mockResolvedValue({
+      'ai-index-idx-a': {
+        mappings: {
+          properties: { title: { type: 'text' } },
+          runtime: {
+            day_of_week: { type: 'keyword', script: { source: 'emit("mon")' } },
+            parsed: {
+              type: 'composite',
+              script: { source: 'emit("code", 1L)' },
+              fields: { code: { type: 'long' } },
+            },
+          },
+        },
+      },
+    });
+    fieldCaps.mockResolvedValue({
+      indices: ['ai-index-idx-a'],
+      fields: {
+        title: { text: caps(true, false) },
+        day_of_week: { keyword: caps(true, true) },
+        'parsed.code': { long: caps(true, true) },
+      },
+    });
+
+    const { fields } = await describeAiIndexFields({ esClient, target: 'ai-index-idx-a' });
+
+    expect(fields).toEqual([
+      { path: 'day_of_week', type: 'keyword', searchable: true, aggregatable: true },
+      { path: 'parsed', type: 'composite', searchable: false, aggregatable: false },
+      { path: 'parsed.code', type: 'long', searchable: true, aggregatable: true },
+      { path: 'title', type: 'text', searchable: true, aggregatable: false },
+    ]);
   });
 
   it('reports conflict when matched indices map a path to different types', async () => {
@@ -160,7 +191,7 @@ describe('describeAiIndexFields', () => {
       },
     });
 
-    const { semantic_fields: semanticFields } = await describeAiIndexFields({
+    const { semanticFields } = await describeAiIndexFields({
       esClient,
       target: 'ai-index-idx-a',
     });
@@ -168,7 +199,7 @@ describe('describeAiIndexFields', () => {
     expect(semanticFields).toEqual(['content.semantic']);
   });
 
-  it('caps fields and derives semantic_fields from the capped list', async () => {
+  it('caps fields, counts the omitted ones and derives semantic fields from the capped list', async () => {
     const properties = Object.fromEntries(
       Array.from({ length: MAX_AI_INDEX_DESCRIBE_FIELDS + 1 }, (_, i) => [
         `field_${String(i).padStart(4, '0')}`,
@@ -186,11 +217,7 @@ describe('describeAiIndexFields', () => {
       },
     });
 
-    const {
-      fields,
-      semantic_fields: semanticFields,
-      truncated,
-    } = await describeAiIndexFields({
+    const { fields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
       esClient,
       target: 'ai-index-idx-a',
     });
@@ -198,7 +225,8 @@ describe('describeAiIndexFields', () => {
     expect(fields).toHaveLength(MAX_AI_INDEX_DESCRIBE_FIELDS);
     expect(fields.some(({ path }) => path === 'zzz_semantic')).toBe(false);
     expect(semanticFields).toEqual(['aaa_semantic']);
-    expect(truncated).toBe(true);
+    // MAX + 1 keywords plus two semantic fields, minus the MAX kept.
+    expect(omittedFieldCount).toBe(3);
   });
 
   it('bounds both metadata responses and maps overflow to a typed error', async () => {

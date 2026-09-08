@@ -632,22 +632,11 @@ describe('ai indices routes', () => {
   });
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}/_describe', () => {
-    const description = {
-      id: 'a',
-      esql_target: 'ai-index-idx-a',
-      dest: { type: 'index', value: 'ai-index-idx-a' },
-      managed: false,
-      fields: [{ path: 'title', type: 'text', searchable: true, aggregatable: false }],
-      semantic_fields: [],
-      ki_type_counts: [],
-      tag_counts: [],
-      query_templates: [],
-      suggested_queries: {},
-      truncated: { fields: false, query_templates: false },
-    } satisfies DescribeAiIndexResponse;
+    const contextBlock = 'AI index: a\nQuery with ES|QL against: ai-index-idx-a\n\nFields\n(none)';
+    const description = { response: contextBlock } satisfies DescribeAiIndexResponse;
 
     it('builds the read service from the current user client and request, then describes', async () => {
-      readService.describe.mockResolvedValue({ status: 'ok', result: description });
+      readService.describe.mockResolvedValue({ status: 'ok', response: contextBlock });
 
       const request = httpServerMock.createKibanaRequest({ params: { aiIndexId: 'a' } });
       await getRoute('GET', aiIndexDescribePath).handler(createContext(), request, response);

@@ -586,7 +586,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI index',
-      description: `Returns what a query against the AI index can use: its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic. Field metadata is read as the current user, so Elasticsearch index privileges bound what it can reach.`,
+      description: `Returns a free-form text context block for an agent: the AI index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic. Field metadata is read as the current user, so Elasticsearch index privileges bound what it can reach.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },
@@ -613,7 +613,7 @@ export const registerAiIndexRoutes = ({
               body: { message: new AiIndexNotFoundError(described.id).message },
             });
           }
-          const body: DescribeAiIndexResponse = described.result;
+          const body: DescribeAiIndexResponse = { response: described.response };
           return response.ok({ body });
         } catch (error) {
           return handleReadError(error, response);

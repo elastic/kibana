@@ -15,8 +15,8 @@ import {
   MAX_AI_INDEX_DESCRIBE_FIELDS,
   MAX_AI_INDEX_DESCRIBE_METADATA_BYTES,
 } from '../../common/constants';
-import type { AiIndexField } from '../../common/http_api/ai_indices';
 import { AiIndexDescribeResponseTooLargeError } from './errors';
+import type { AiIndexField } from './types';
 
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
@@ -31,8 +31,10 @@ interface MappingProperties {
 
 export interface AiIndexFieldsDescription {
   fields: AiIndexField[];
-  semantic_fields: string[];
-  truncated: boolean;
+  /** Searchable `semantic_text` paths among `fields`. */
+  semanticFields: string[];
+  /** Fields beyond `MAX_AI_INDEX_DESCRIBE_FIELDS` that were dropped. */
+  omittedFieldCount: number;
 }
 
 export interface DescribeAiIndexFieldsParams {
@@ -41,7 +43,10 @@ export interface DescribeAiIndexFieldsParams {
   target: string;
 }
 
-/** `[path, type]` per typed property, containers and multi-fields included. */
+/**
+ * `[path, type]` per typed property, containers and multi-fields included. Mapping-defined runtime
+ * fields (`mapping.runtime`, composite subfields under `fields`) are included too.
+ */
 const flattenMappingTypes = (mapping: MappingTypeMapping): Array<[string, string]> => {
   const walk = (properties: MappingProperties, prefix: string): Array<[string, string]> =>
     Object.entries(properties).flatMap(([name, property]) => {
@@ -53,7 +58,7 @@ const flattenMappingTypes = (mapping: MappingTypeMapping): Array<[string, string
         ...(property.fields ? walk(property.fields, path) : []),
       ];
     });
-  return walk(mapping.properties ?? {}, '');
+  return [...walk(mapping.properties ?? {}, ''), ...walk(mapping.runtime ?? {}, '')];
 };
 
 /** True only if every `_field_caps` type entry for path supports it. */
@@ -70,7 +75,7 @@ const byPath = (a: AiIndexField, b: AiIndexField) =>
 
 /**
  * Types from `_mapping`, `searchable`/`aggregatable` from `_field_caps`. Mixed types across
- * indices: `conflict`. `semantic_fields` is a subset of capped `fields`.
+ * indices: `conflict`. `semanticFields` is a subset of capped `fields`.
  */
 export const describeAiIndexFields = async ({
   esClient,
@@ -106,9 +111,9 @@ export const describeAiIndexFields = async ({
   const fields = allFields.slice(0, MAX_AI_INDEX_DESCRIBE_FIELDS);
   return {
     fields,
-    semantic_fields: fields
+    semanticFields: fields
       .filter(({ type, searchable }) => type === SEMANTIC_TEXT_TYPE && searchable)
       .map(({ path }) => path),
-    truncated: allFields.length > MAX_AI_INDEX_DESCRIBE_FIELDS,
+    omittedFieldCount: allFields.length - fields.length,
   };
 };

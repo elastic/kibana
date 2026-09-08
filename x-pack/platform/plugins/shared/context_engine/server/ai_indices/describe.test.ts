@@ -31,40 +31,75 @@ describe('describeAiIndex', () => {
   beforeEach(() => {
     describeAiIndexFieldsMock.mockReset();
     describeAiIndexFieldsMock.mockResolvedValue({
-      fields: [{ path: 'title', type: 'text', searchable: true, aggregatable: false }],
-      semantic_fields: [],
-      truncated: true,
+      fields: [
+        { path: 'content.semantic', type: 'semantic_text', searchable: true, aggregatable: false },
+        { path: 'title', type: 'text', searchable: true, aggregatable: false },
+        { path: 'type', type: 'keyword', searchable: true, aggregatable: true },
+        { path: 'weight', type: 'binary', searchable: false, aggregatable: false },
+      ],
+      semanticFields: ['content.semantic'],
+      omittedFieldCount: 0,
     });
   });
 
-  it('describes the destination and combines registry data with field metadata', async () => {
-    const result = await describeAiIndex({ esClient, aiIndex });
+  it('renders header, fields and semantic fields one item per line', async () => {
+    const response = await describeAiIndex({ esClient, aiIndex });
 
     expect(describeAiIndexFieldsMock).toHaveBeenCalledWith({
       esClient,
       target: 'ai-index-idx-support*',
     });
-    expect(result).toEqual({
-      id: 'support',
-      esql_target: 'ai-index-idx-support*',
-      description: 'Support KIs',
-      dest: { type: 'index', value: 'ai-index-idx-support*' },
-      managed: false,
-      fields: [{ path: 'title', type: 'text', searchable: true, aggregatable: false }],
-      semantic_fields: [],
-      ki_type_counts: [],
-      tag_counts: [],
-      query_templates: [],
-      suggested_queries: {},
-      truncated: { fields: true, query_templates: false },
-    });
+    expect(response).toBe(
+      [
+        'AI index: support',
+        'Support KIs',
+        'Query with ES|QL against: ai-index-idx-support*',
+        '',
+        'Fields',
+        'content.semantic: semantic_text, searchable',
+        'title: text, searchable',
+        'type: keyword, searchable, aggregatable',
+        'weight: binary',
+        '',
+        'Semantic fields',
+        'content.semantic',
+      ].join('\n')
+    );
   });
 
-  it('omits description when the AI index has none', async () => {
+  it('omits the description line when the AI index has none', async () => {
     const { description, ...withoutDescription } = aiIndex;
 
-    const result = await describeAiIndex({ esClient, aiIndex: withoutDescription });
+    const response = await describeAiIndex({ esClient, aiIndex: withoutDescription });
 
-    expect(result).not.toHaveProperty('description');
+    expect(response.split('\n').slice(0, 2)).toEqual([
+      'AI index: support',
+      'Query with ES|QL against: ai-index-idx-support*',
+    ]);
+  });
+
+  it('reports omitted fields in the heading', async () => {
+    describeAiIndexFieldsMock.mockResolvedValue({
+      fields: [{ path: 'title', type: 'text', searchable: true, aggregatable: false }],
+      semanticFields: [],
+      omittedFieldCount: 3,
+    });
+
+    const response = await describeAiIndex({ esClient, aiIndex });
+
+    expect(response).toContain('\nFields (showing 1 of 4)\n');
+    expect(response).not.toContain('Semantic fields');
+  });
+
+  it('renders a placeholder when the target maps no fields', async () => {
+    describeAiIndexFieldsMock.mockResolvedValue({
+      fields: [],
+      semanticFields: [],
+      omittedFieldCount: 0,
+    });
+
+    const response = await describeAiIndex({ esClient, aiIndex });
+
+    expect(response.endsWith('\n\nFields\n(none)')).toBe(true);
   });
 });

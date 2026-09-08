@@ -68,18 +68,35 @@ errors (bad ES|QL, missing index privilege) are returned with their status.
 ## Describing AI indices
 
 `GET /api/context_engine/ai_index/{id}/_describe` is the step before writing a
-query: it returns the registry entry plus what its backing indices expose.
+query. It returns `{ response: string }`: a free-form text context block meant
+to be handed to an agent as-is, not parsed.
 
-- `esql_target` is `dest.value`, the string to put after `FROM`.
-- `fields` lists every mapped field (`path`, `type`, `searchable`,
-  `aggregatable`), sorted by path and capped at 500 (`truncated.fields`).
-  Types come from `_mapping`; `searchable`/`aggregatable` from `_field_caps`.
-  A path mapped to different types across the matched indices is reported as
-  `type: "conflict"`.
-- `semantic_fields` lists the searchable `semantic_text` fields among `fields`,
-  detected from the mapping type rather than the field name.
-- `ki_type_counts`, `tag_counts`, `query_templates` and `suggested_queries`
-  are placeholders (empty) until a follow-up fills them in.
+```
+AI index: sales-knowledge
+Curated sales knowledge.
+Query with ES|QL against: ai-index-idx-sales-knowledge
+
+Fields
+@timestamp: date, searchable, aggregatable
+content.semantic: semantic_text, searchable
+title: text, searchable
+type: keyword, searchable, aggregatable
+
+Semantic fields
+content.semantic
+```
+
+- The `Query with ES|QL against` line is `dest.value`, the string to put after
+  `FROM`.
+- `Fields` lists every mapped field, mapping-defined runtime fields included
+  (`path: type`, then `searchable` and/or `aggregatable` when true), one per
+  line, sorted by path and capped at 500;
+  the heading becomes `Fields (showing 500 of N)` when capped. Types come from
+  `_mapping`; `searchable`/`aggregatable` from `_field_caps`. A path mapped to
+  different types across the matched indices is reported as `conflict`.
+- `Semantic fields` lists the searchable `semantic_text` fields among those
+  shown, detected from the mapping type rather than the field name. Omitted
+  when there are none.
 
 Field metadata is read as the current user. 404 when the AI index is not
 registered; Elasticsearch 4xx (missing index privilege) is returned with its

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
-import type { AiIndexHttpItem, DescribeAiIndexResponse } from '../../common/http_api/ai_indices';
+import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { AiIndexDataReadService } from './data_read_service';
 import { describeAiIndex } from './describe';
@@ -27,7 +27,7 @@ const aiIndex: AiIndexHttpItem = {
   date_modified: '2026-01-01T00:00:00.000Z',
 };
 
-const description = { id: 'support', fields: [] } as unknown as DescribeAiIndexResponse;
+const contextBlock = 'AI index: support\nQuery with ES|QL against: ai-index-idx-support';
 
 describe('AiIndexDataReadService', () => {
   const esqlQuery = jest.fn();
@@ -88,11 +88,11 @@ describe('AiIndexDataReadService', () => {
   describe('describe', () => {
     it('resolves the registry entry, describes it as the caller, and audits success', async () => {
       aiIndexService.get.mockResolvedValue(aiIndex);
-      describeAiIndexMock.mockResolvedValue(description);
+      describeAiIndexMock.mockResolvedValue(contextBlock);
 
       const result = await service.describe('support');
 
-      expect(result).toEqual({ status: 'ok', result: description });
+      expect(result).toEqual({ status: 'ok', response: contextBlock });
       expect(aiIndexService.get).toHaveBeenCalledWith('support');
       expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex });
       expect(auditLogger.log).toHaveBeenCalledWith(
