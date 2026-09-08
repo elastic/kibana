@@ -218,7 +218,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
           : i18n.translate('xpack.monitoring.setupMode.enter', {
               defaultMessage: 'Enter setup mode',
             }),
-        iconType: 'flag',
+        iconType: enabled ? 'logOut' : 'pencil',
         testId: enabled ? 'exitSetupModeBtn' : 'monitoringSetupModeBtn',
         isSelected: enabled,
         run: () => {

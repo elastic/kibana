@@ -145,7 +145,7 @@ export class WrappedSetupModeRenderer extends React.Component {
                     values={{
                       flagIcon: (
                         <EuiIcon
-                          type="flag"
+                          type="pencil"
                           aria-label={i18n.translate('xpack.monitoring.setupMode.flagIcon', {
                             defaultMessage: 'Flag icon',
                           })}

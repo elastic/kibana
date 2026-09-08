@@ -57,7 +57,7 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
                 Object {
                   "flagIcon": <EuiIcon
                     aria-label="Flag icon"
-                    type="flag"
+                    type="pencil"
                   />,
                 }
               }
@@ -148,7 +148,7 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
                 Object {
                   "flagIcon": <EuiIcon
                     aria-label="Flag icon"
-                    type="flag"
+                    type="pencil"
                   />,
                 }
               }
