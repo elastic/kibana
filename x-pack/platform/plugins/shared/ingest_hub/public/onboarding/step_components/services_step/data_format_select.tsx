@@ -72,7 +72,12 @@ interface DataFormatSelectProps {
   disabledReason?: 'deployed' | 'edit_mode';
 }
 
-export function DataFormatSelect({ dataFormat, onChange, disabled, disabledReason }: DataFormatSelectProps) {
+export function DataFormatSelect({
+  dataFormat,
+  onChange,
+  disabled,
+  disabledReason,
+}: DataFormatSelectProps) {
   const disabledTooltip =
     disabledReason === 'edit_mode'
       ? i18n.translate('xpack.ingestHub.servicesStep.dataFormat.disabledTooltip.editMode', {
