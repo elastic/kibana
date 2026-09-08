@@ -10,6 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AttachmentsService } from '../services/attachments';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { ConversationDetailsFlyoutSnapshot } from './conversation_details_flyout';
@@ -20,6 +21,7 @@ export interface OpenConversationDetailsFlyoutOptions {
   core: CoreStart;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
+  attachmentsService: AttachmentsService;
   conversationId: string;
   onClose?: () => void;
 }
@@ -28,6 +30,7 @@ export const openConversationDetailsFlyout = async ({
   core,
   conversationsService,
   conversationTemplatesService,
+  attachmentsService,
   conversationId,
   onClose,
 }: OpenConversationDetailsFlyoutOptions): Promise<() => void> => {
@@ -41,6 +44,7 @@ export const openConversationDetailsFlyout = async ({
           conversationId={conversationId}
           conversationsService={conversationsService}
           conversationTemplatesService={conversationTemplatesService}
+          attachmentsService={attachmentsService}
           titleId={titleId}
         />
       </QueryClientProvider>,

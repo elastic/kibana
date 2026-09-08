@@ -10,7 +10,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType } from '@kbn/streams-schema';
+import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
@@ -18,7 +18,6 @@ import {
   type IterationResult,
   isComputedFeature,
   normalizeFeatureSlug,
-  normalizeFeatureSlugForMatching,
 } from '@kbn/significant-events-schema';
 import {
   EMPTY_TOKENS,
@@ -26,13 +25,15 @@ import {
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-} from '@kbn/streams-ai';
+  type AnalysisTarget,
+} from '@kbn/nightshift-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
 import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
@@ -46,15 +47,13 @@ import {
   toFeatureSummary,
   toFeatureProjection,
 } from './reconcile_features';
-import {
-  createFeatureSimilaritySearch,
-  type FeatureSimilaritySearch,
-} from './agent_builder_feature_similarity_search';
+import { createInferenceToolsFromAgentBuilder } from '../../agent_builder/inference_tool_bridge';
 
 export { findSimilarFeatures } from './feature_similarity_search';
+import { buildFeatureSimilarityInferenceTools } from './feature_similarity_search';
+import { streamToAnalysisTarget } from '../stream_to_analysis_target';
 
 const DEFAULT_MAX_PREVIOUSLY_IDENTIFIED_FEATURES = 100;
-const MAX_FEATURE_ALIASES = 10;
 
 export const selectPreviouslyIdentifiedFeatures = (
   features: ReadonlyArray<Feature>,
@@ -160,100 +159,6 @@ export const buildKnownFeatureIds = (
   return { text, droppedCount };
 };
 
-const getAliases = (meta: Record<string, unknown> | undefined): string[] => {
-  const aliases = meta?.aliases;
-  return Array.isArray(aliases)
-    ? aliases
-        .filter((alias): alias is string => typeof alias === 'string')
-        .map(normalizeFeatureSlug)
-        .filter((alias) => alias.length > 0)
-    : [];
-};
-
-export interface SemanticFeatureSearchRecord {
-  candidateId: string;
-  type: string;
-  hitIds: ReadonlySet<string>;
-}
-
-const getTypedFeatureId = (type: string, id: string): string =>
-  `${type}:${normalizeFeatureSlug(id)}`;
-
-const getTypedFeatureMatchingId = (type: string, id: string): string =>
-  `${type}:${normalizeFeatureSlugForMatching(id)}`;
-
-export const applySemanticFeatureAliases = (
-  features: ReadonlyArray<BaseFeature>,
-  searchRecords: ReadonlyArray<SemanticFeatureSearchRecord>
-): { features: BaseFeature[]; reuseCount: number } => {
-  let reuseCount = 0;
-  const finalizedFeatureIds = new Set<string>();
-  const featureIdsByMatchingId = new Map<string, Set<string>>();
-  for (const feature of features) {
-    const matchingId = getTypedFeatureMatchingId(feature.type, feature.id);
-    const featureIds = featureIdsByMatchingId.get(matchingId) ?? new Set<string>();
-    featureIds.add(getTypedFeatureId(feature.type, feature.id));
-    featureIdsByMatchingId.set(matchingId, featureIds);
-    finalizedFeatureIds.add(getTypedFeatureId(feature.type, feature.id));
-  }
-  const aliasesToAddByFeatureId = new Map<string, string[]>();
-
-  for (const { candidateId, type, hitIds } of searchRecords) {
-    const normalizedCandidateId = normalizeFeatureSlug(candidateId);
-    if (normalizedCandidateId.length === 0) {
-      continue;
-    }
-
-    const candidateFeatureId = getTypedFeatureId(type, candidateId);
-    // The model emitted the candidate too, so nothing was abandoned — no alias.
-    if (finalizedFeatureIds.has(candidateFeatureId)) {
-      continue;
-    }
-    const reusedFeatureIds = new Set<string>();
-    for (const hitId of hitIds) {
-      const matchingFeatureIds = featureIdsByMatchingId.get(getTypedFeatureMatchingId(type, hitId));
-      for (const matchingFeatureId of matchingFeatureIds ?? []) {
-        if (matchingFeatureId !== candidateFeatureId) {
-          reusedFeatureIds.add(matchingFeatureId);
-        }
-      }
-    }
-    // Save the alias only when the model reused exactly one search hit.
-    if (reusedFeatureIds.size !== 1) {
-      continue;
-    }
-
-    const reusedFeatureId = reusedFeatureIds.values().next().value;
-    if (!reusedFeatureId) {
-      continue;
-    }
-    const aliases = aliasesToAddByFeatureId.get(reusedFeatureId) ?? [];
-    aliases.push(normalizedCandidateId);
-    aliasesToAddByFeatureId.set(reusedFeatureId, aliases);
-    reuseCount++;
-  }
-
-  const featuresWithAliases = features.map((feature) => {
-    const aliasesToAdd = aliasesToAddByFeatureId.get(getTypedFeatureId(feature.type, feature.id));
-    if (!aliasesToAdd || aliasesToAdd.length === 0) {
-      return feature;
-    }
-
-    const aliases = Array.from(new Set([...getAliases(feature.meta), ...aliasesToAdd])).slice(
-      -MAX_FEATURE_ALIASES
-    );
-    return {
-      ...feature,
-      meta: {
-        ...(feature.meta ?? {}),
-        aliases,
-      },
-    };
-  });
-
-  return { features: featuresWithAliases, reuseCount };
-};
-
 // ---------------------------------------------------------------------------
 // Tuning params type (subset of SignificantEventsTuningConfig)
 // ---------------------------------------------------------------------------
@@ -284,8 +189,6 @@ export interface FeaturesIdentifiedTelemetry {
   features_new: number;
   features_updated: number;
   features_remapped: number;
-  semantic_verify_calls: number;
-  semantic_verify_reuses: number;
   input_tokens_used: number;
   output_tokens_used: number;
   total_tokens_used: number;
@@ -320,8 +223,6 @@ export function buildTelemetry(
         llmIgnoredCount: number;
         codeIgnoredCount: number;
         remappedCount: number;
-        semanticVerifyCalls: number;
-        semanticVerifyReuses: number;
       }
 ): FeaturesIdentifiedTelemetry {
   if (outcome.state !== 'success') {
@@ -332,8 +233,6 @@ export function buildTelemetry(
       features_new: 0,
       features_updated: 0,
       features_remapped: 0,
-      semantic_verify_calls: 0,
-      semantic_verify_reuses: 0,
       input_tokens_used: 0,
       output_tokens_used: 0,
       total_tokens_used: 0,
@@ -350,8 +249,6 @@ export function buildTelemetry(
     features_new: outcome.newCount,
     features_updated: outcome.updatedCount,
     features_remapped: outcome.remappedCount,
-    semantic_verify_calls: outcome.semanticVerifyCalls,
-    semantic_verify_reuses: outcome.semanticVerifyReuses,
     input_tokens_used: tokensUsed.prompt,
     output_tokens_used: tokensUsed.completion,
     total_tokens_used: tokensUsed.total,
@@ -374,16 +271,6 @@ type InferenceResult =
     }
   | { success: false };
 
-// Aliases are code-owned matching keys, written only by applySemanticFeatureAliases after a
-// verified reuse. The finalize schema leaves meta free-form, so drop whatever the model put there.
-export const stripModelAssignedAliases = (feature: BaseFeature): BaseFeature => {
-  if (!feature.meta || !('aliases' in feature.meta)) {
-    return feature;
-  }
-  const { aliases, ...meta } = feature.meta;
-  return { ...feature, meta: Object.keys(meta).length > 0 ? meta : undefined };
-};
-
 async function tryIdentifyFeatures(
   args: Parameters<typeof identifyFeatures>[0]
 ): Promise<InferenceResult> {
@@ -391,7 +278,7 @@ async function tryIdentifyFeatures(
     const result = await identifyFeatures(args);
     return {
       success: true,
-      rawFeatures: result.features.map(stripModelAssignedAliases),
+      rawFeatures: result.features,
       ignoredFeatures: result.ignoredFeatures,
       tokensUsed: result.tokensUsed,
     };
@@ -412,6 +299,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
+  target: AnalysisTarget;
   runId: string;
   allFeatures: Feature[];
   discoveredFeatures: Feature[];
@@ -426,7 +314,6 @@ interface RunInferredIterationOptions {
   signal: AbortSignal;
   tuning: IterationTuningParams;
   iteration: number;
-  featureSimilaritySearch: FeatureSimilaritySearch;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
@@ -447,14 +334,13 @@ interface InferredIterationResult {
         ignoredFeatures: IgnoredFeature[];
         codeIgnoredCount: number;
         remappedCount: number;
-        semanticVerifyCalls: number;
-        semanticVerifyReuses: number;
       };
 }
 
 async function runInferredIteration({
   kiClient,
   streamName,
+  target,
   runId,
   allFeatures,
   discoveredFeatures,
@@ -469,7 +355,6 @@ async function runInferredIteration({
   signal,
   tuning,
   iteration,
-  featureSimilaritySearch,
   additionalTools,
   additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
@@ -494,18 +379,12 @@ async function runInferredIteration({
       `known_feature_ids inventory for stream "${streamName}" exceeded its budget; dropped the ${knownFeatureIdsDropped} stalest ids`
     );
   }
-  const searchRecordsByCandidate = new Map<
-    string,
-    { candidateId: string; type: string; hitIds: Set<string> }
-  >();
-  let semanticVerifyCalls = 0;
-
   const excludedSummaries: ExcludedFeatureSummary[] = excludedFeatures
     .slice(0, maxExcludedFeaturesInPrompt)
     .map(toFeatureProjection);
 
   const inferResult = await tryIdentifyFeatures({
-    streamName,
+    target,
     sampleDocuments: documents,
     excludedFeatures: excludedSummaries,
     inferenceClient,
@@ -514,21 +393,6 @@ async function runInferredIteration({
     signal,
     previouslyIdentifiedFeatures: topRanked.map(toFeatureProjection),
     knownFeatureIds,
-    searchSimilarFeatures: async (args) => {
-      semanticVerifyCalls++;
-      const hits = await featureSimilaritySearch(args);
-      const recordKey = getTypedFeatureId(args.type, args.candidate_id);
-      const searchRecord = searchRecordsByCandidate.get(recordKey) ?? {
-        candidateId: args.candidate_id,
-        type: args.type,
-        hitIds: new Set<string>(),
-      };
-      for (const hit of hits) {
-        searchRecord.hitIds.add(hit.id);
-      }
-      searchRecordsByCandidate.set(recordKey, searchRecord);
-      return hits;
-    },
     additionalTools,
     additionalToolCallbacks,
   });
@@ -544,11 +408,7 @@ async function runInferredIteration({
     };
   }
 
-  const { features: rawFeatures, reuseCount: semanticVerifyReuses } = applySemanticFeatureAliases(
-    inferResult.rawFeatures,
-    Array.from(searchRecordsByCandidate.values())
-  );
-  const { ignoredFeatures, tokensUsed } = inferResult;
+  const { rawFeatures, ignoredFeatures, tokensUsed } = inferResult;
 
   const { newFeatures, updatedFeatures, codeIgnoredCount, remappedCount } =
     reconcileInferredFeatures({
@@ -575,8 +435,6 @@ async function runInferredIteration({
       ignoredFeatures,
       codeIgnoredCount,
       remappedCount,
-      semanticVerifyCalls,
-      semanticVerifyReuses,
     },
   };
 }
@@ -595,6 +453,7 @@ export interface IdentifyInferredFeaturesOptions {
   signal: AbortSignal;
   streamName: string;
   streamType: StreamType;
+  definition: Streams.all.Definition;
   runId: string;
   documents: InferenceDocument[];
   totalFilters: number;
@@ -625,6 +484,7 @@ export async function identifyInferredFeatures({
   signal,
   streamName,
   streamType,
+  definition,
   runId,
   documents,
   totalFilters,
@@ -670,13 +530,41 @@ export async function identifyInferredFeatures({
     (toolset): toolset is MemoryDiscoveryTools | KiExtractionContextTools => toolset !== undefined
   );
 
+  // Bridge the managed Agent Builder tool when available (single schema source; stream_name injected
+  // server-side), else a direct KI-client fallback so dedup still works without Agent Builder.
+  let searchTools =
+    agentBuilderTools && request
+      ? await createInferenceToolsFromAgentBuilder({
+          tools: agentBuilderTools,
+          request,
+          specs: [
+            {
+              sourceToolId: platformSignificantEventsTools.searchSimilarFeatures,
+              name: 'search_similar_features',
+              hiddenParams: ['stream_name'],
+              prepare: () => ({ params: { stream_name: streamName } }),
+            },
+          ],
+          logger: logger.get('feature_similarity_search'),
+        })
+      : buildFeatureSimilarityInferenceTools({ kiClient, streamName });
+
+  if (
+    !searchTools.tools.search_similar_features ||
+    !searchTools.callbacks.search_similar_features
+  ) {
+    searchTools = buildFeatureSimilarityInferenceTools({ kiClient, streamName });
+  }
+
   const additionalTools: Record<string, ToolDefinition> = Object.assign(
     {},
-    ...groundingToolsets.map((toolset) => toolset.tools)
+    ...groundingToolsets.map((toolset) => toolset.tools),
+    searchTools.tools
   );
   const additionalToolCallbacks: Record<string, ToolCallback> = Object.assign(
     {},
-    ...groundingToolsets.map((toolset) => toolset.callbacks)
+    ...groundingToolsets.map((toolset) => toolset.callbacks),
+    searchTools.callbacks
   );
   const combinedSystemPrompt = groundingToolsets.reduce(
     (prompt, toolset) => `${prompt}\n${toolset.promptSnippet}`,
@@ -684,17 +572,11 @@ export async function identifyInferredFeatures({
   );
 
   const startedAt = Date.now();
-  const featureSimilaritySearch = createFeatureSimilaritySearch({
-    agentBuilderTools,
-    request,
-    kiClient,
-    streamName,
-    logger,
-  });
 
   const iterationResult = await runInferredIteration({
     kiClient,
     streamName,
+    target: streamToAnalysisTarget(definition),
     runId,
     allFeatures,
     discoveredFeatures,
@@ -709,7 +591,6 @@ export async function identifyInferredFeatures({
     signal,
     tuning,
     iteration,
-    featureSimilaritySearch,
     additionalTools,
     additionalToolCallbacks,
   });
@@ -760,8 +641,6 @@ export async function identifyInferredFeatures({
     ignoredFeatures,
     codeIgnoredCount,
     remappedCount,
-    semanticVerifyCalls,
-    semanticVerifyReuses,
   } = outcome;
 
   const allChanged = [...newFeatures, ...updatedFeatures];
@@ -801,8 +680,6 @@ export async function identifyInferredFeatures({
       llmIgnoredCount: ignoredFeatures.length,
       codeIgnoredCount,
       remappedCount,
-      semanticVerifyCalls,
-      semanticVerifyReuses,
     })
   );
 
