@@ -1,5 +1,5 @@
 {
-  "sha1": "de9d732f7b57eebf296edd8fb538c5f014a37cf1",
+  "sha1": "7691aefe097afcc0e80d15868a2fb2c4eb8b3afc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -68,6 +68,20 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/auto_upgrade_policies.spec.ts",
         "line": 71,
         "column": 51
+      }
+    },
+    {
+      "id": "22912baa484e96f-8f09e233a3b358a",
+      "title": "ClassicPrivateLocationNoCondition never stamps a condition on a classic private location, on create or edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/classic_private_location_no_condition.spec.ts",
+        "line": 45,
+        "column": 25
       }
     },
     {
@@ -841,6 +855,32 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_monitor_crud.spec.ts",
         "line": 59,
         "column": 28
+      }
+    },
+    {
+      "id": "98be7930df3264d-2f00ed353422bcc",
+      "title": "ScalablePrivateLocationPlacement places proportionally more monitors on the higher-capacity agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_placement.spec.ts",
+        "line": 83,
+        "column": 51
+      }
+    },
+    {
+      "id": "6faf871c5041796-a511d209d7cca3e",
+      "title": "ScalablePrivateLocationRebalance moves a stale agent\u2019s monitors to the survivor with no drops and a revision bump",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/scalable_private_location_rebalance.spec.ts",
+        "line": 80,
+        "column": 38
       }
     }
   ]

@@ -250,6 +250,7 @@ export function ActionsPopover({
             configId: monitor.configId,
             location: locationName,
             id: monitor.monitorQueryId,
+            spaces: monitor.spaces,
           })
         );
         setIsPopoverOpen(false);
