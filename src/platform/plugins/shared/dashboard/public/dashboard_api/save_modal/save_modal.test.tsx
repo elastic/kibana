@@ -17,12 +17,7 @@ jest.mock('@kbn/content-management-access-control-public', () => ({
 }));
 
 jest.mock('@kbn/saved-objects-plugin/public', () => ({
-  SavedObjectSaveModal: ({
-    options,
-  }: {
-    children: React.ReactNode;
-    options: React.ReactNode;
-  }) => (
+  SavedObjectSaveModal: ({ options }: { children: React.ReactNode; options: React.ReactNode }) => (
     <div data-test-subj="save-modal">
       <div data-test-subj="save-modal-options">{options}</div>
     </div>
