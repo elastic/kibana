@@ -42,6 +42,28 @@ describe('fetchScoreDocs', () => {
     });
   });
 
+  it('filters on example.id by default', async () => {
+    await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], executionIds: ['e1'] });
+
+    expect(body(0).query.bool.filter).toContainEqual({ term: { 'example.id': 'a' } });
+  });
+
+  // attack-discovery stores example.id = '0' on every document, so filtering
+  // that field there returns one scenario and silently drops the other eight.
+  it('filters on the caller-supplied join field instead of example.id', async () => {
+    await fetchScoreDocs({
+      esUrl,
+      apiKey,
+      exampleIds: ['wmi-lateral'],
+      joinField: 'example.metadata.scenarioKey',
+      executionIds: ['e1'],
+    });
+
+    const filters = body(0).query.bool.filter;
+    expect(filters).toContainEqual({ term: { 'example.metadata.scenarioKey': 'wmi-lateral' } });
+    expect(filters).not.toContainEqual({ term: { 'example.id': 'wmi-lateral' } });
+  });
+
   it('falls back to the config model list when no explicit models are given', async () => {
     await fetchScoreDocs({ esUrl, apiKey, exampleIds: ['a'], configModelIds: ['m1'] });
 

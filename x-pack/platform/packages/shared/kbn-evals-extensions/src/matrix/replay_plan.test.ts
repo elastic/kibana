@@ -326,4 +326,57 @@ describe('planReplay with a suite jury', () => {
     }).cells;
     expect(cell.expectedStructured).toEqual({ criteria: ['c1'] });
   });
+
+  describe('join field', () => {
+    // Every attack-discovery document carries example.id = '0'. Keying cells on
+    // the id therefore collapses nine distinct scenarios into a single cell and
+    // grades eight of them against the wrong scenario's ground truth.
+    const scenarioDocs = ['wmi-lateral', 'linux-curl', 'encoded-powershell'].map((key) =>
+      doc({
+        example: {
+          id: '0',
+          metadata: { scenarioKey: key },
+          input: { question: `q-${key}` },
+          output: {},
+        },
+        metadata: { execution_id: 'exec-ad', suite_id: 'attack-discovery-agent-builder' },
+        task: { model: { id: 'm' }, output: { insights: [{ title: key }] } },
+      })
+    );
+
+    it('collapses distinct scenarios into one cell when keyed on example.id', () => {
+      const plan = planReplay(scenarioDocs, () => 'ref', { jury: adJury as any });
+
+      // The defect this guards against: three scenarios, one surviving cell.
+      expect(plan.cells).toHaveLength(1);
+    });
+
+    it('keeps one cell per scenario when keyed on the scenario key', () => {
+      const plan = planReplay(scenarioDocs, () => 'ref', {
+        jury: adJury as any,
+        joinField: 'example.metadata.scenarioKey',
+      });
+
+      expect(plan.cells).toHaveLength(3);
+      expect(plan.cells.map((c) => c.exampleId).sort()).toEqual([
+        'encoded-powershell',
+        'linux-curl',
+        'wmi-lateral',
+      ]);
+    });
+
+    it('looks up each scenario reference by its own key', () => {
+      const seen: string[] = [];
+      planReplay(
+        scenarioDocs,
+        (id) => {
+          seen.push(id);
+          return `ref-${id}`;
+        },
+        { jury: adJury as any, joinField: 'example.metadata.scenarioKey' }
+      );
+
+      expect(seen.sort()).toEqual(['encoded-powershell', 'linux-curl', 'wmi-lateral']);
+    });
+  });
 });

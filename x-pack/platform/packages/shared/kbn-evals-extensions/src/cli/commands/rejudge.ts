@@ -33,6 +33,7 @@ import {
   selectAdapter,
   buildStructuredReferences,
   REFERENCE_ADAPTERS,
+  DEFAULT_JOIN_FIELD,
 } from '../../matrix/reference_adapters';
 import { selectJury, checkJuryCoverage, JURY_ADAPTERS } from '../../matrix/jury_adapters';
 import type { JuryAdapter, JuryArgs } from '../../matrix/jury_adapters';
@@ -54,6 +55,7 @@ async function loadReferences(
   references: Map<string, string>;
   structured: Map<string, Record<string, unknown>>;
   adapterName: string;
+  joinField: string;
 }> {
   const resolved = Path.resolve(process.cwd(), datasetPath);
   if (!Fs.existsSync(resolved)) {
@@ -96,6 +98,7 @@ async function loadReferences(
     references,
     structured: buildStructuredReferences(examples),
     adapterName: adapter.name,
+    joinField: adapter.joinField ?? DEFAULT_JOIN_FIELD,
   };
 }
 
@@ -178,7 +181,10 @@ export const rejudgeCmd: Command<any> = {
     );
 
     const config = configPath ? loadMatrixConfig(configPath) : undefined;
-    const { references, structured, adapterName } = await loadReferences(datasetPath, log);
+    const { references, structured, adapterName, joinField } = await loadReferences(
+      datasetPath,
+      log
+    );
     log.info(`Loaded ${references.size} dataset reference(s) from ${datasetPath}`);
 
     // The jury is resolved from the suite the scores belong to, not from the
@@ -257,6 +263,7 @@ export const rejudgeCmd: Command<any> = {
       esUrl,
       apiKey: esApiKey,
       exampleIds: [...references.keys()],
+      joinField,
       executionIds,
       modelIds: modelFilter.size > 0 ? [...modelFilter] : undefined,
       configModelIds: config?.models.flatMap((m) => [m.id, ...(m.matchIds ?? [])]),
@@ -270,6 +277,7 @@ export const rejudgeCmd: Command<any> = {
     // disagree with the plan it is reported alongside.
     const plan = planReplay(docs as never[], (id) => references.get(id), {
       jury,
+      joinField,
       structuredReferenceFor: (id) => structured.get(id),
     });
     const cellsToJudge = plan.cells;

@@ -49,28 +49,30 @@ describe('reference adapters', () => {
       { output: { criteria: ['Insights reference web-prod-07.'] } },
     ];
 
-    // Golden records attack-discovery example.id positionally ('0', '1'), so a
-    // scenarioKey-keyed reference would never join to a score document.
-    it('joins positionally because the dataset carries no ids', () => {
+    // Verified against 351 golden docs (2026-09-08): attack-discovery writes
+    // example.id = '0' on every document across 9 distinct scenario datasets, so
+    // a positional join matches one scenario and mis-grades the rest. The
+    // scenario key is the field golden actually varies.
+    it('joins by scenario key when the dataset supplies one', () => {
       const refs = attackDiscoveryAdapter.build(examples);
-      expect([...refs.keys()]).toEqual(['0', '1']);
+      expect([...refs.keys()]).toEqual(['encoded-powershell', '1']);
     });
 
     it('renders every criterion into the reference text', () => {
-      const ref = attackDiscoveryAdapter.build(examples).get('0')!;
+      const ref = attackDiscoveryAdapter.build(examples).get('encoded-powershell')!;
       expect(ref).toContain('Insights mention encoded PowerShell.');
       expect(ref).toContain('Insights reference wks-alice-01.');
     });
 
     it('includes expected discovery detail and tactics', () => {
-      const ref = attackDiscoveryAdapter.build(examples).get('0')!;
+      const ref = attackDiscoveryAdapter.build(examples).get('encoded-powershell')!;
       expect(ref).toContain('Encoded PowerShell on wks-alice-01');
       expect(ref).toContain('Execution, Persistence');
     });
 
     // The header is what tells the judge criteria are conjunctive, not a menu.
     it('instructs the judge that all criteria must hold', () => {
-      const ref = attackDiscoveryAdapter.build(examples).get('0')!;
+      const ref = attackDiscoveryAdapter.build(examples).get('encoded-powershell')!;
       expect(ref).toContain('must satisfy all of the following');
     });
 
@@ -141,6 +143,51 @@ describe('reference adapters', () => {
 
     it('returns no adapter for an unrecognised suite shape', () => {
       expect(selectAdapter([{ id: 'a', output: { somethingElse: 1 } }])).toBeUndefined();
+    });
+  });
+
+  describe('attack-discovery join key', () => {
+    // Golden writes example.id = '0' on EVERY attack-discovery document because
+    // each scenario is registered as its own single-example dataset. Keying the
+    // references positionally therefore matches one scenario and grades the
+    // other eight against scenario 0's ground truth.
+    const scenarioExamples = [
+      {
+        metadata: { scenarioKey: 'encoded-powershell' },
+        output: { criteria: ['powershell criterion'] },
+      },
+      { metadata: { scenarioKey: 'wmi-lateral' }, output: { criteria: ['wmi criterion'] } },
+      { metadata: { scenarioKey: 'linux-curl' }, output: { criteria: ['curl criterion'] } },
+    ];
+
+    it('declares example.metadata.scenarioKey as its join field', () => {
+      expect(attackDiscoveryAdapter.joinField).toBe('example.metadata.scenarioKey');
+    });
+
+    it('keys references by scenario key, not array index', () => {
+      const refs = attackDiscoveryAdapter.build(scenarioExamples);
+
+      expect([...refs.keys()].sort()).toEqual(['encoded-powershell', 'linux-curl', 'wmi-lateral']);
+      // The positional contract would have produced '0', '1', '2'.
+      expect(refs.has('0')).toBe(false);
+    });
+
+    it('binds each scenario to its OWN criteria', () => {
+      const refs = attackDiscoveryAdapter.build(scenarioExamples);
+
+      expect(refs.get('wmi-lateral')).toContain('wmi criterion');
+      expect(refs.get('wmi-lateral')).not.toContain('powershell criterion');
+      expect(refs.get('linux-curl')).toContain('curl criterion');
+    });
+
+    it('falls back to id then index when a scenario key is absent', () => {
+      const refs = attackDiscoveryAdapter.build([
+        { id: 'explicit-id', output: { criteria: ['a'] } },
+        { output: { criteria: ['b'] } },
+      ]);
+
+      expect(refs.has('explicit-id')).toBe(true);
+      expect(refs.has('1')).toBe(true);
     });
   });
 });

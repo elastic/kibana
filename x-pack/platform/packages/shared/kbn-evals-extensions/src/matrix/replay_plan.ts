@@ -7,6 +7,21 @@
 
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import type { JuryAdapter } from './jury_adapters';
+import { DEFAULT_JOIN_FIELD } from './reference_adapters';
+
+/**
+ * Reads a dotted golden field (e.g. `example.metadata.scenarioKey`) off a score
+ * document. Suites disagree on which field identifies an example, so the join
+ * key is a path rather than a fixed property.
+ */
+function joinValue(doc: unknown, path: string): string {
+  let node: unknown = doc;
+  for (const segment of path.split('.')) {
+    if (node === null || typeof node !== 'object') return '';
+    node = (node as Record<string, unknown>)[segment];
+  }
+  return typeof node === 'string' || typeof node === 'number' ? String(node) : '';
+}
 
 /**
  * Replay planning for judge-only re-scoring.
@@ -153,16 +168,23 @@ export function planReplay(
     jury?: JuryAdapter;
     /** Structured ground truth lookup, for juries that grade objects. */
     structuredReferenceFor?: (exampleId: string) => unknown;
+    /**
+     * Golden field the reference keys correspond to, matching the adapter's
+     * `joinField`. attack-discovery documents all carry `example.id = '0'`, so
+     * keying cells on the id there merges nine scenarios into one and grades
+     * eight of them against the wrong ground truth.
+     */
+    joinField?: string;
   } = {}
 ): ReplayPlan {
-  const { jury, structuredReferenceFor } = options;
+  const { jury, structuredReferenceFor, joinField = DEFAULT_JOIN_FIELD } = options;
   const cells = new Map<string, ReplayCell>();
   const skipped: PlanIssue[] = [];
   const seenSkips = new Set<string>();
 
   for (const doc of docs) {
     const executionId = doc.metadata?.execution_id ?? '';
-    const exampleId = doc.example?.id ?? '';
+    const exampleId = joinValue(doc, joinField);
     const key = `${executionId}::${exampleId}`;
     if (cells.has(key)) {
       continue;

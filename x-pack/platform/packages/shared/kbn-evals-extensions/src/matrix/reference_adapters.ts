@@ -14,15 +14,16 @@
  * rule silently yields nothing for most of them:
  *
  *   persona-matrix : `output.reference` is already a prose string.
- *   attack-discovery : truth is a `criteria[]` array plus expected discoveries,
- *                      and examples have NO id -- golden records them
- *                      positionally ('0', '1', ...), so the join is by index.
+ *   attack-discovery : truth is a `criteria[]` array plus expected discoveries.
+ *                      Golden writes `example.id = '0'` for EVERY attack-discovery
+ *                      document (each scenario is its own single-example dataset),
+ *                      so the join is by `example.metadata.scenarioKey`, not by id.
  *   automatic-migrations : truth is structured translation fields
  *                          (translation_result / esql_query / is_unsupported),
  *                          most of them nullable, joined by a real example id.
  *
  * An adapter turns whatever a suite stores into the single thing the judge
- * needs: a reference STRING keyed by the `example.id` golden actually recorded.
+ * needs: a reference STRING keyed by the golden field named in `joinField`.
  * Rendering structured truth as text is deliberate -- the correctness judge
  * compares prose, so the adapter must state the expectation explicitly rather
  * than hand the judge a JSON blob it has to reverse-engineer.
@@ -41,11 +42,21 @@ export interface ReferenceAdapter {
   name: string;
   /** Export names to look for in the dataset module, in priority order. */
   exportNames: string[];
+  /**
+   * Golden field whose value the reference map is keyed by. Suites disagree:
+   * most record a usable `example.id`, but attack-discovery writes '0' for every
+   * document and varies `example.metadata.scenarioKey` instead. Defaults to
+   * `example.id` when omitted.
+   */
+  joinField?: string;
   /** True when this adapter recognises the module's examples. */
   matches: (examples: DatasetExample[]) => boolean;
-  /** exampleId -> reference string. */
+  /** joinField value -> reference string. */
   build: (examples: DatasetExample[]) => Map<string, string>;
 }
+
+/** Golden field used to join references when an adapter does not name one. */
+export const DEFAULT_JOIN_FIELD = 'example.id';
 
 const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.length > 0;
 
@@ -70,11 +81,17 @@ export const personaMatrixAdapter: ReferenceAdapter = {
 };
 
 /**
- * attack-discovery: criteria[] + expected discoveries, joined POSITIONALLY.
+ * attack-discovery: criteria[] + expected discoveries, joined by scenario key.
  *
- * The dataset carries no ids and golden stores `example.id` as the array index
- * ('0', '1', ...), so the index IS the join key. Keying by scenarioKey instead
- * would produce references no score document can ever match.
+ * Golden does NOT store a positional `example.id` for this suite: every AD score
+ * document carries `example.id = '0'` regardless of scenario, because each AD
+ * scenario is registered as its own single-example dataset. Joining on the array
+ * index therefore matches only index 0 and -- worse -- applies scenario 0's
+ * ground truth to every other scenario, manufacturing confident wrong verdicts.
+ *
+ * `example.metadata.scenarioKey` is the field golden actually varies per
+ * scenario, so it is the join key. Verified 2026-09-08 against 351 golden docs:
+ * example.id was '0' for 351/351 across 9 distinct dataset names.
  */
 export const attackDiscoveryAdapter: ReferenceAdapter = {
   name: 'attack-discovery',
@@ -84,6 +101,7 @@ export const attackDiscoveryAdapter: ReferenceAdapter = {
     'default',
     'dataset',
   ],
+  joinField: 'example.metadata.scenarioKey',
   matches: (examples) => examples.some((e) => Array.isArray(e?.output?.criteria)),
   build: (examples) => {
     const refs = new Map<string, string>();
@@ -117,7 +135,13 @@ export const attackDiscoveryAdapter: ReferenceAdapter = {
       // An example with neither criteria nor discoveries has no ground truth;
       // emitting a placeholder would grade answers against nothing.
       if (parts.length === 0) return;
-      refs.set(example.id ?? String(index), parts.join('\n\n'));
+
+      // Key on the scenario key golden varies per document. Fall back to an
+      // explicit id, then the index, so datasets that DO carry ids still join.
+      const scenarioKey = (example as { metadata?: { scenarioKey?: unknown } })?.metadata
+        ?.scenarioKey;
+      const key = isNonEmptyString(scenarioKey) ? scenarioKey : example.id ?? String(index);
+      refs.set(key, parts.join('\n\n'));
     });
     return refs;
   },

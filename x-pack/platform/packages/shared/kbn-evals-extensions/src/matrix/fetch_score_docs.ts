@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { DEFAULT_JOIN_FIELD } from './reference_adapters';
+
 /**
  * The subset of a golden score document the replay path reads. Only the fields
  * a judge needs are modelled; everything else on the doc is ignored.
@@ -15,7 +17,11 @@ export interface RawScoreDoc {
     model?: { id?: string };
     output?: { messages?: Array<{ message?: { content?: unknown } }> };
   };
-  example?: { id?: string; input?: { question?: string } };
+  example?: {
+    id?: string;
+    input?: { question?: string };
+    metadata?: Record<string, unknown>;
+  };
 }
 
 const SCORES_INDEX = '.ds-.evaluation-scores*';
@@ -34,6 +40,7 @@ const SOURCE_FIELDS = [
   'task.model.id',
   'task.output',
   'example.id',
+  'example.metadata',
   'example.input',
 ];
 
@@ -69,6 +76,7 @@ export const fetchScoreDocs = async ({
   esUrl,
   apiKey,
   exampleIds,
+  joinField = DEFAULT_JOIN_FIELD,
   executionIds,
   modelIds,
   configModelIds,
@@ -78,6 +86,12 @@ export const fetchScoreDocs = async ({
   esUrl: string;
   apiKey: string;
   exampleIds: string[];
+  /**
+   * Golden field the reference keys correspond to. attack-discovery stores
+   * `example.id = '0'` on every document, so filtering that field there returns
+   * one scenario's documents and silently drops the other eight.
+   */
+  joinField?: string;
   executionIds?: string[];
   modelIds?: string[];
   configModelIds?: string[];
@@ -124,7 +138,14 @@ export const fetchScoreDocs = async ({
   const effectiveExecutionIds =
     executionIds?.length && executionIds.length > 0
       ? executionIds
-      : await resolveLatestExecutions({ esUrl, apiKey, exampleIds, modelIds: models, suiteIds });
+      : await resolveLatestExecutions({
+          esUrl,
+          apiKey,
+          exampleIds,
+          joinField,
+          modelIds: models,
+          suiteIds,
+        });
 
   if (effectiveExecutionIds.length === 0) {
     return [];
@@ -150,7 +171,7 @@ export const fetchScoreDocs = async ({
       body: JSON.stringify({
         size: PAGE_SIZE,
         track_total_hits: false,
-        query: { bool: { filter: [...filter, { term: { 'example.id': exampleId } }] } },
+        query: { bool: { filter: [...filter, { term: { [joinField]: exampleId } }] } },
         // A trajectory is written once per evaluator, and only some of those
         // documents carry the graded payload (`task.output.messages` for prose
         // suites, `task.output.insights` for attack discovery). `collapse`
@@ -211,12 +232,14 @@ async function resolveLatestExecutions({
   esUrl,
   apiKey,
   exampleIds,
+  joinField = DEFAULT_JOIN_FIELD,
   modelIds,
   suiteIds,
 }: {
   esUrl: string;
   apiKey: string;
   exampleIds: string[];
+  joinField?: string;
   modelIds?: string[];
   suiteIds?: string[];
 }): Promise<string[]> {
@@ -241,7 +264,7 @@ async function resolveLatestExecutions({
       },
       body: JSON.stringify({
         size: 0,
-        query: { bool: { filter: [...filter, { term: { 'example.id': exampleId } }] } },
+        query: { bool: { filter: [...filter, { term: { [joinField]: exampleId } }] } },
         aggs: {
           by_model: {
             terms: { field: 'task.model.id', size: 50 },
