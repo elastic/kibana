@@ -48,7 +48,7 @@ export interface RuleMigrationResult {
 }
 
 export class RuleMigrationClient {
-  constructor(private readonly fetch: KbnEvalsHttpHandler, private readonly log: ToolingLog) { }
+  constructor(private readonly fetch: KbnEvalsHttpHandler, private readonly log: ToolingLog) {}
 
   public async migrateRule(
     input: { original_rule: Record<string, unknown>; resources: Array<Record<string, unknown>> },
