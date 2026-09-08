@@ -36,6 +36,7 @@ import {
   validateExtractionWindow,
 } from './extraction_window';
 import { capAtMaxLogsPerWindow, pickSampleProbability } from './effective_page_limits';
+import { getMergedConfig } from './merge_config';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { executeEsqlQueryRetryingRemoteResources } from '../../infra/elasticsearch/remote_resource_not_supported';
@@ -49,15 +50,15 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import { type LogExtractionConfig } from '../saved_objects';
+import { type LogExtractionConfig, type LogExtractionTypeOverride } from '../saved_objects';
 import {
   type EngineDescriptorClient,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
-import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionInstallParams } from '../../routes/constants';
+import { EntityStoreNotRunningError, EntityTypeNotInstalledError } from '../errors';
+import type { LogExtractionByTypeParams, LogExtractionInstallParams } from '../../routes/constants';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -138,8 +139,20 @@ export class LogsExtractionClient {
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
-    const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    const globalOverrides = await this.globalStateClient.findLogExtractionOverrides();
+    return {
+      config: getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig),
+      engineState: engineDescriptor.logExtractionState,
+    };
+  }
+
+  /** Config in effect for one entity type, without requiring the engine to be started. */
+  public async getMergedConfigForType(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engineDescriptor] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engineDescriptor.logExtractionConfig);
   }
 
   public async extractLogs(
@@ -209,8 +222,34 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionInstallParams): Promise<LogExtractionConfig> {
+  public async updateConfig(
+    params?: LogExtractionInstallParams,
+    byType?: LogExtractionByTypeParams
+  ): Promise<LogExtractionConfig> {
+    const perTypeEntries = Object.entries(byType ?? {}) as Array<
+      [EntityType, LogExtractionTypeOverride]
+    >;
+
+    // Checked before any write, so a rejected request does not leave a partial update behind.
+    if (perTypeEntries.length > 0) {
+      const installed = new Set(
+        (await this.engineDescriptorClient.getAll()).map((engine) => engine.type)
+      );
+      const missing = perTypeEntries
+        .map(([type]) => type)
+        .filter((type) => !installed.has(type))
+        .sort();
+      if (missing.length > 0) {
+        throw new EntityTypeNotInstalledError(missing);
+      }
+    }
+
     const state = await this.globalStateClient.update({ logsExtraction: params });
+    await Promise.all(
+      perTypeEntries.map(([type, override]) =>
+        this.engineDescriptorClient.updateLogExtractionConfig(type, override)
+      )
+    );
     return state.logsExtraction;
   }
 
