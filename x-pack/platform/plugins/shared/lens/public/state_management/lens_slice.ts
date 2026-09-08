@@ -1045,7 +1045,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const currentDatasource = datasourceMap[state.activeDatasourceId];
           const targetDatasourceId = datasourceId ?? state.activeDatasourceId;
           const targetDatasource = datasourceMap[targetDatasourceId];
-          // reuse the current datasource dataView id for the new layer
+          // Intentionally read from the *active* datasource even when the layer is
+          // inserted into a different target datasource: e.g. a form-based reference
+          // line layer added to an ES|QL chart reuses the chart's (ad hoc) data view.
           const currentDataViewsId = currentDatasource.getUsedDataView(
             state.datasourceStates[state.activeDatasourceId].state
           );

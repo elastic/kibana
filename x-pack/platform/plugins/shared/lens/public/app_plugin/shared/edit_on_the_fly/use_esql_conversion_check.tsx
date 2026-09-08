@@ -179,10 +179,14 @@ export const useEsqlConversionCheck = (
 
       const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
 
+      // Trendlines are excluded above via trendlineLayerId; this guard only narrows
+      // the type (ConvertibleLayer['type'] excludes 'metricTrendline').
+      if (layerType === layerTypes.METRIC_TRENDLINE) {
+        continue;
+      }
+
       if (layerType !== layerTypes.DATA) {
-        convertibleLayers.push(
-          makeNonConvertibleLayer(layerId, layerType as ConvertibleLayer['type'])
-        );
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerType));
         continue;
       }
 

@@ -289,7 +289,12 @@ export function ESQLEditor({
         setDataGridAttrs(gridAttrs);
       })
       .catch(() => {
-        // The chart itself will surface query errors via its own error handling path
+        if (abortController.signal.aborted) {
+          // expected: the effect cleanup aborted the request (unmount/re-run)
+          return;
+        }
+        // deliberately not surfaced here: the chart itself reports query errors
+        // via its own error handling path
       });
     return () => {
       abortController.abort();

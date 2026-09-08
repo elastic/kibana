@@ -574,18 +574,17 @@ export function LayerPanel(props: LayerPanelProps) {
                 />
               )}
             {shouldRenderESQLEditor ? (
-              <React.Fragment key={layerId}>
-                <ESQLEditor
-                  uiSettings={core.uiSettings}
-                  http={core.http}
-                  isTextBasedLanguage={isTextBasedLanguage}
-                  framePublicAPI={framePublicAPI}
-                  layerId={layerId}
-                  layerQuery={layerQuery}
-                  onLayerQuerySubmit={usesLayerScopedQuery ? updateLayerQuery : undefined}
-                  {...editorProps}
-                />
-              </React.Fragment>
+              <ESQLEditor
+                key={layerId}
+                uiSettings={core.uiSettings}
+                http={core.http}
+                isTextBasedLanguage={isTextBasedLanguage}
+                framePublicAPI={framePublicAPI}
+                layerId={layerId}
+                layerQuery={layerQuery}
+                onLayerQuerySubmit={usesLayerScopedQuery ? updateLayerQuery : undefined}
+                {...editorProps}
+              />
             ) : null}
             {activeVisualization.LayerPanelComponent && (
               <activeVisualization.LayerPanelComponent
