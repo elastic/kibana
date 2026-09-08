@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
+
 export const ConversationDetailsFlyoutHeader: React.FC<{ onClose: () => void }> = memo(
   ({ onClose }) => {
     const { euiTheme } = useEuiTheme();

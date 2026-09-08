@@ -9,27 +9,27 @@ import { i18n } from '@kbn/i18n';
 
 export const MODAL_TRANSLATIONS = Object.freeze({
   assign: {
-    title: i18n.translate('xpack.pnd.assignModal.title', {
+    title: i18n.translate('xpack.alertzero.assignModal.title', {
       defaultMessage: 'Assign proposal',
     }),
-    rationalePlaceholder: i18n.translate('xpack.pnd.assignModal.rationalePlaceholder', {
+    rationalePlaceholder: i18n.translate('xpack.alertzero.assignModal.rationalePlaceholder', {
       defaultMessage: 'What should the assignee focus on?',
     }),
-    actionButtonLabel: i18n.translate('xpack.pnd.assignModal.actionButtonLabel', {
+    actionButtonLabel: i18n.translate('xpack.alertzero.assignModal.actionButtonLabel', {
       defaultMessage: 'Assign',
     }),
-    assigneeSelectAriaLabel: i18n.translate('xpack.pnd.assignModal.assigneeSelectAriaLabel', {
+    assigneeSelectAriaLabel: i18n.translate('xpack.alertzero.assignModal.assigneeSelectAriaLabel', {
       defaultMessage: 'Select assignee',
     }),
   },
   dismiss: {
-    title: i18n.translate('xpack.pnd.dismissModal.title', {
+    title: i18n.translate('xpack.alertzero.dismissModal.title', {
       defaultMessage: 'Dismiss proposal',
     }),
-    rationalePlaceholder: i18n.translate('xpack.pnd.dismissModal.rationalePlaceholder', {
+    rationalePlaceholder: i18n.translate('xpack.alertzero.dismissModal.rationalePlaceholder', {
       defaultMessage: 'Why are you dismissing this proposal?',
     }),
-    actionButtonLabel: i18n.translate('xpack.pnd.dismissModal.actionButtonLabel', {
+    actionButtonLabel: i18n.translate('xpack.alertzero.dismissModal.actionButtonLabel', {
       defaultMessage: 'Dismiss',
     }),
   },

@@ -16,12 +16,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { Investigation } from '@kbn/pnd-common';
+import { getActionButtonIconProps } from '../../helpers';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { BlastRadiusSection } from './blast_radius_section';
 import { ApprovalActorRow } from './approval_actor_row';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
-import { getActionButtonIconProps } from '../../helpers';
 
 const TITLE_ID = 'approvalModalTitle';
 

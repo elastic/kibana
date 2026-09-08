@@ -132,8 +132,6 @@ export const BaseActions = memo<BaseActionsProps>(
                 icon: 'productAgent',
                 name: ACTIONS_TRANSLATIONS.buttons.openInChat,
                 onClick: onOpenChat,
-                // TODO: Add a isDisabled for actions that are disabled
-                // might apply to openIncident if the investigation already has an incident created
               },
             ]
           : []),
@@ -142,8 +140,6 @@ export const BaseActions = memo<BaseActionsProps>(
           icon: 'document',
           name: ACTIONS_TRANSLATIONS.buttons.openIncident,
           onClick: () => onClickAction('openIncident', investigation.recordId),
-          // TODO: Add a isDisabled for actions that are disabled
-          // might apply to openIncident if the investigation already has an incident created
         },
         {
           key: 'assign',

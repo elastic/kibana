@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const BLAST_RADIUS_LABELS = Object.freeze({
-  title: i18n.translate('xpack.pnd.blastRadius.title', {
-    defaultMessage: 'Blast radius',
-  }),
-});
+export { ApprovalModal, type ApprovalModalProps } from './approval_modal';

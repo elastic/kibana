@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 
 export const EMPTY_CONVERSATION_QUEUE = Object.freeze({
-  emptyQueue: i18n.translate('xpack.pnd.conversationQueue.emptyBucket', {
+  emptyQueue: i18n.translate('xpack.alertzero.conversationQueue.emptyBucket', {
     defaultMessage: 'No events in this category.',
   }),
-  emptyQueueWithFilter: i18n.translate('xpack.pnd.conversationQueue.emptyBucketWithFilter', {
+  emptyQueueWithFilter: i18n.translate('xpack.alertzero.conversationQueue.emptyBucketWithFilter', {
     defaultMessage: 'No events match the current filter.',
   }),
 });

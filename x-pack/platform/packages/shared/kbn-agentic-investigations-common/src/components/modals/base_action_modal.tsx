@@ -57,7 +57,7 @@ export const BaseActionModal = memo<BaseActionModalProps>(
 
     return (
       <EuiModal
-        aria-label={i18n.translate('xpack.pnd.actionModal.ariaLabel', {
+        aria-label={i18n.translate('xpack.alertzero.actionModal.ariaLabel', {
           defaultMessage: 'Action modal',
         })}
         onClose={onClose}
@@ -72,7 +72,7 @@ export const BaseActionModal = memo<BaseActionModalProps>(
             <>
               <EuiText size="s">
                 <p>
-                  {i18n.translate('xpack.pnd.actionModal.bodyText', {
+                  {i18n.translate('xpack.alertzero.actionModal.bodyText', {
                     defaultMessage:
                       "{recordId} — your decision and rationale are recorded in the proposal's decision history.",
                     values: { recordId },
@@ -92,10 +92,10 @@ export const BaseActionModal = memo<BaseActionModalProps>(
 
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.pnd.actionModal.rationaleLabel', {
+            label={i18n.translate('xpack.alertzero.actionModal.rationaleLabel', {
               defaultMessage: 'Rationale',
             })}
-            helpText={i18n.translate('xpack.pnd.actionModal.rationaleHelpText', {
+            helpText={i18n.translate('xpack.alertzero.actionModal.rationaleHelpText', {
               defaultMessage: 'Required — captured for audit and evaluation.',
             })}
           >
@@ -112,7 +112,7 @@ export const BaseActionModal = memo<BaseActionModalProps>(
 
         <EuiModalFooter>
           <EuiButtonEmpty onClick={onClose}>
-            {i18n.translate('xpack.pnd.actionModal.cancel', {
+            {i18n.translate('xpack.alertzero.actionModal.cancel', {
               defaultMessage: 'Cancel',
             })}
           </EuiButtonEmpty>

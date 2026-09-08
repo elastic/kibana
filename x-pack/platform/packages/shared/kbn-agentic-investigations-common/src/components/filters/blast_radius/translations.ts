@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { AssignActionModal } from './assign_action_modal';
-export { BaseActionModal } from './base_action_modal';
-export { MODAL_TRANSLATIONS } from './translations';
+import { i18n } from '@kbn/i18n';
+
+export const BLAST_RADIUS_LABELS = Object.freeze({
+  title: i18n.translate('xpack.alertzero.blastRadius.title', {
+    defaultMessage: 'Blast radius',
+  }),
+});

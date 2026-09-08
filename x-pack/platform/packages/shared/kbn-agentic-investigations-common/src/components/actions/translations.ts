@@ -8,32 +8,32 @@ import { i18n } from '@kbn/i18n';
 
 export const ACTIONS_TRANSLATIONS = Object.freeze({
   popover: {
-    ariaLabel: i18n.translate('xpack.pnd.baseActions.popover.ariaLabel', {
+    ariaLabel: i18n.translate('xpack.alertzero.baseActions.popover.ariaLabel', {
       defaultMessage: 'Actions menu',
     }),
   },
   buttons: {
-    actions: i18n.translate('xpack.pnd.baseActions.actions', {
+    actions: i18n.translate('xpack.alertzero.baseActions.actions', {
       defaultMessage: 'Actions',
     }),
-    openInChat: i18n.translate('xpack.pnd.baseActions.openInChat', {
+    openInChat: i18n.translate('xpack.alertzero.baseActions.openInChat', {
       defaultMessage: 'Open in chat',
     }),
-    openIncident: i18n.translate('xpack.pnd.baseActions.openIncident', {
+    openIncident: i18n.translate('xpack.alertzero.baseActions.openIncident', {
       defaultMessage: 'Open an incident',
     }),
-    assign: i18n.translate('xpack.pnd.baseActions.assign', {
+    assign: i18n.translate('xpack.alertzero.baseActions.assign', {
       defaultMessage: 'Assign',
     }),
-    dismiss: i18n.translate('xpack.pnd.baseActions.dismiss', {
+    dismiss: i18n.translate('xpack.alertzero.baseActions.dismiss', {
       defaultMessage: 'Dismiss',
     }),
   },
   tooltips: {
-    openMenu: i18n.translate('xpack.pnd.baseActions.openMenu', {
+    openMenu: i18n.translate('xpack.alertzero.baseActions.openMenu', {
       defaultMessage: 'Open actions menu',
     }),
-    openInChat: i18n.translate('xpack.pnd.baseActions.openInChat', {
+    openInChat: i18n.translate('xpack.alertzero.baseActions.tooltips.openInChat', {
       defaultMessage: 'Open in chat',
     }),
   },

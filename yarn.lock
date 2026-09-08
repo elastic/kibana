@@ -4622,6 +4622,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agentic-investigations-common@link:x-pack/platform/packages/shared/kbn-agentic-investigations-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/automatic-import-plugin@link:x-pack/platform/plugins/shared/automatic_import":
   version "0.0.0"
   uid ""
