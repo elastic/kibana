@@ -17,7 +17,13 @@ jest.mock('child_process', () => ({
   execFileSync: jest.fn(),
 }));
 
-import { getPipeline, flushCancelOnGateFailureMetadata, _resetPendingCancelKeys } from './utils';
+import {
+  getPipeline,
+  flushCancelOnGateFailureMetadata,
+  _resetPendingCancelKeys,
+  setEffectiveTargetBranch,
+  _resetEffectiveTargetBranch,
+} from './utils';
 
 const execFileSyncMock = execFileSync as jest.MockedFunction<typeof execFileSync>;
 
@@ -197,5 +203,85 @@ describe('getPipeline', () => {
     }
 
     expect(duplicates).toEqual([]);
+  });
+
+  describe('effective target branch substitution', () => {
+    const securityPipeline = path.resolve(
+      __dirname,
+      '../../pipelines/pull_request/security_solution/explore.yml'
+    );
+
+    beforeEach(() => {
+      _resetEffectiveTargetBranch();
+      process.env.GITHUB_PR_TARGET_BRANCH = 'some/stack-base-branch';
+    });
+
+    afterEach(() => {
+      _resetEffectiveTargetBranch();
+      delete process.env.GITHUB_PR_TARGET_BRANCH;
+    });
+
+    it('leaves the conditional untouched when no stack base was resolved', () => {
+      const yaml = getPipeline(securityPipeline, false);
+
+      expect(yaml).toContain("build.env('GITHUB_PR_TARGET_BRANCH') == 'main'");
+    });
+
+    it('emits byte-identical yaml for a non-stacked PR', () => {
+      const before = getPipeline(securityPipeline, false);
+
+      setEffectiveTargetBranch(undefined);
+
+      expect(getPipeline(securityPipeline, false)).toEqual(before);
+    });
+
+    it('rewrites the real security pipeline conditional to the stack base', () => {
+      setEffectiveTargetBranch('main');
+
+      const yaml = getPipeline(securityPipeline, false);
+
+      // The serverless suites are the steps this gate silently skipped for stacked PRs.
+      expect(yaml).toContain("if: \"'main' == 'main'\"");
+      expect(yaml).not.toContain('GITHUB_PR_TARGET_BRANCH');
+    });
+
+    it('keeps a release-branch stack base gated off main', () => {
+      setEffectiveTargetBranch('9.4');
+
+      const yaml = getPipeline(securityPipeline, false);
+
+      expect(yaml).toContain("if: \"'9.4' == 'main'\"");
+    });
+
+    it('ignores a branch identical to the direct target branch', () => {
+      setEffectiveTargetBranch('some/stack-base-branch');
+
+      expect(getPipeline(securityPipeline, false)).toContain(
+        "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
+      );
+    });
+
+    it('ignores a branch name that could break out of the yaml string literal', () => {
+      setEffectiveTargetBranch("main' || build.env('X') == '");
+
+      expect(getPipeline(securityPipeline, false)).toContain(
+        "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
+      );
+    });
+
+    it('rewrites every occurrence in a multi-step pipeline', () => {
+      setEffectiveTargetBranch('main');
+
+      const yaml = getPipeline(
+        path.resolve(
+          __dirname,
+          '../../pipelines/pull_request/security_solution/rule_management.yml'
+        ),
+        false
+      );
+
+      expect(yaml).not.toContain('GITHUB_PR_TARGET_BRANCH');
+      expect(yaml.match(/'main' == 'main'/g)?.length).toBeGreaterThan(1);
+    });
   });
 });
