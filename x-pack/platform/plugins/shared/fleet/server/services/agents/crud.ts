@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { fromKueryExpression, toElasticsearchQuery, escapeQuotes } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -266,18 +266,25 @@ export async function getAgentsByKuery(
 
   // Hides agents enrolled in agentless policies by excluding the first 1000 agentless policy IDs
   // from the search. This limitation is to avoid hitting the `max_clause_count` limit.
-  // In the future, we should hopefully be able to filter agentless agents using metadata:
-  // https://github.com/elastic/elastic-agent/issues/7946
+  // The exclusion is built as an ES DSL `must_not` (using `terms` queries) rather than a KQL
+  // string so that the clause count stays constant (~4 clauses) regardless of how many policy
+  // IDs are in the list. KQL compiles field:(v1 or v2 or …) to N individual `term` clauses,
+  // which would double to ~2001 at the 1000-policy cap.
+  let agentlessExcludeFilter: ReturnType<typeof buildPolicyBaseIdsWithFallbackEsFilter> | null =
+    null;
   if (showAgentless === false) {
     const agentlessPolicies = await agentPolicyService.list(soClient, {
       perPage: 1000,
       kuery: `${LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
     });
     if (agentlessPolicies.items.length > 0) {
-      filters.push(
-        `NOT policy_id: (${agentlessPolicies.items
-          .map((policy) => `"${escapeQuotes(policy.id)}"`)
-          .join(' or ')})`
+      // Use the policy_base_id-with-fallback ES DSL filter so agents whose policy_id carries a
+      // version suffix (e.g. "<uuid>#9.6") are still excluded. The fallback branch covers
+      // agents enrolled by an older fleet-server that did not yet write policy_base_id.
+      // Using buildPolicyBaseIdsWithFallbackEsFilter (terms queries) rather than the KQL
+      // equivalent keeps the clause count at ~4 instead of ~2N.
+      agentlessExcludeFilter = buildPolicyBaseIdsWithFallbackEsFilter(
+        agentlessPolicies.items.map((policy) => policy.id)
       );
     }
   }
@@ -357,7 +364,16 @@ export async function getAgentsByKuery(
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
-      query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
+      query: (() => {
+        const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
+        if (!agentlessExcludeFilter) return baseQuery;
+        return {
+          bool: {
+            ...(baseQuery ? { filter: [baseQuery] } : {}),
+            must_not: [agentlessExcludeFilter],
+          },
+        };
+      })(),
       ...(currentPitId
         ? {
             pit: {
