@@ -15,7 +15,7 @@ import {
   useEuiTheme,
   EuiTextTruncate,
 } from '@elastic/eui';
-import { type Investigation } from '@kbn/pnd-common';
+import { type Investigation } from '../../types';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 

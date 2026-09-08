@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { type Investigation } from '@kbn/pnd-common';
+import { type Investigation } from '../../types';
 import { getActionButtonIconProps } from '../helpers';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
 import { BaseActions, type BaseActionsProps } from '../actions';

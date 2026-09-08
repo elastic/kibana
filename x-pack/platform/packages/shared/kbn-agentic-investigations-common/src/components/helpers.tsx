@@ -6,7 +6,7 @@
  */
 
 import { type IconType, type EuiButtonEmptyProps } from '@elastic/eui';
-import type { RecommendedAction, Investigation } from '@kbn/pnd-common';
+import type { RecommendedAction, Investigation } from '../types';
 
 export const getEmptyValue = () => '—';
 

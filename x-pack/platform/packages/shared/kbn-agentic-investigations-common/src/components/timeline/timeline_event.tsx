@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 
 export const TimelineEventItem = memo<{
   event: Investigation['events'][number];

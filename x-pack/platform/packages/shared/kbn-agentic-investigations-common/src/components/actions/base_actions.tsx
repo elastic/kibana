@@ -16,7 +16,7 @@ import {
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { type Investigation } from '@kbn/pnd-common';
+import { type Investigation } from '../../types';
 import type { ConversationsActionsGroupProps } from '../conversation_card';
 import { ActionButton } from './action_button';
 import { ACTIONS_TRANSLATIONS } from './translations';

@@ -15,7 +15,7 @@ import {
   EuiModalFooter,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../../types';
 import { getActionButtonIconProps } from '../../helpers';
 import { ApprovalModalHeader } from './approval_modal_header';
 import { BlastRadiusSection } from './blast_radius_section';

@@ -12,7 +12,7 @@ import {
   CONVERSATION_CATEGORY_COLORS,
   type Investigation,
   type RecommendedAction,
-} from '@kbn/pnd-common';
+} from '../../types';
 import {
   EuiAccordion,
   EuiBadge,

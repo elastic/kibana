@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiTimeline, EuiTimelineItem, type IconType } from '@elastic/eui';
-import { type Investigation, type TimelineEvent } from '@kbn/pnd-common';
+import { type Investigation, type TimelineEvent } from '../../types';
 import { TimelineEventItem } from './timeline_event';
 
 const EVENT_TYPE_ICONS: Record<TimelineEvent['type'], IconType> = {

@@ -17,7 +17,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../../types';
 import { BLAST_RADIUS_LABELS } from './translations';
 
 interface BlastRadiusProps {

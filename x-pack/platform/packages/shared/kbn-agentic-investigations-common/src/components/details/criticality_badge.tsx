@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiBadge } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
 

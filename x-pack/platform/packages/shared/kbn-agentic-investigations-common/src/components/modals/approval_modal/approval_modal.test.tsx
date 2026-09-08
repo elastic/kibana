@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../../types';
 import { ApprovalModal, type ApprovalModalProps } from './approval_modal';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

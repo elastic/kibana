@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { ConversationDetailsFlyoutHeader } from './flyout_header';
 import type { BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';

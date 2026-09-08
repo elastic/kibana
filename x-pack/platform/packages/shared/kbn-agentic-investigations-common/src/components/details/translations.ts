@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RecommendedAction } from '@kbn/pnd-common';
+import type { RecommendedAction } from '../../types';
 
 export const DETAILS_FLYOUT_LABELS = Object.freeze({
   ariaLabel: i18n.translate('xpack.alertzero.detailsFlyout.ariaLabel', {

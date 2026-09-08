@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { useOpenInChat } from '../../hooks/use_open_in_chat';
 import { BaseActions, type BaseActionsProps } from '../actions';
 import type { ConversationsActionsGroupProps } from '../conversation_card';

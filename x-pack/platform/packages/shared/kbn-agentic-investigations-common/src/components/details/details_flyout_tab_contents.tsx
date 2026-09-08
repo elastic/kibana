@@ -19,7 +19,7 @@ import {
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { DetailsBlock } from './detail_block';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { TimelineEventList } from '../timeline';

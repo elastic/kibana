@@ -7,7 +7,7 @@
 
 import React, { memo, useState } from 'react';
 import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { AttachmentsTab, OverviewTab, TimelineTab } from './details_flyout_tab_contents';
 import { ConversationDetailsFlyoutTabs } from './details_flyout_tabs';
 import type { FlyoutTab } from './details_flyout_tab_contents';

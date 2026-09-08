@@ -32,6 +32,13 @@ export { useOpenInChat } from './src/hooks/use_open_in_chat';
 
 export { getEmptyValue, getActionButtonIconProps } from './src/components/helpers';
 
+export type { Investigation, RecommendedAction, TimelineEvent } from './src/types/investigation';
+export {
+  CONVERSATION_QUEUE_LABELS,
+  CONVERSATION_QUEUE_CATEGORIES,
+  CONVERSATION_CATEGORY_COLORS,
+} from './src/types/queue';
+
 export { BlastRadius } from './src/components/filters/blast_radius/blast_radius';
 
 export {

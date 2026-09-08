@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Investigation } from '@kbn/pnd-common';
+import type { Investigation } from '../../types';
 import { CriticalityBadge } from './criticality_badge';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import type { FlyoutTab } from './details_flyout_tab_contents';
