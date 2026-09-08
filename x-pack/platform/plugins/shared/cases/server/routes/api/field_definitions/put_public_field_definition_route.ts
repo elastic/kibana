@@ -28,7 +28,7 @@ export const putPublicFieldDefinitionRoute = createCasesRoute({
   security: DEFAULT_CASES_ROUTE_SECURITY,
   routerOptions: {
     access: 'public',
-    summary: 'Update a reusable field definition',
+    summary: 'Update editable attributes of a reusable field definition',
     tags: ['oas-tag:cases'],
   },
   params: {

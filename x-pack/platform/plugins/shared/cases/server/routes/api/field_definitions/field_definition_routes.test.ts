@@ -234,6 +234,18 @@ describe('Public Field Definition Routes', () => {
       expect(response.ok).not.toHaveBeenCalled();
     });
 
+    it('returns 400 when name is an empty string', async () => {
+      const context = createMockContext();
+      const request = { body: { ...validBody, name: '' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await postPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+
     it('returns 409 when client throws a Boom conflict', async () => {
       const client = createMockFieldDefinitionsClient();
       client.createFieldDefinition.mockRejectedValue(
@@ -299,6 +311,18 @@ describe('Public Field Definition Routes', () => {
 
       const body = response.ok.mock.calls[0][0].body;
       expect(body).not.toHaveProperty('legacyKey');
+    });
+
+    it('returns 400 when name is an empty string', async () => {
+      const context = createMockContext();
+      const request = { params: { field_definition_id: 'fd-1' }, body: { ...validBody, name: '' } };
+      const response = createMockResponse();
+
+      // @ts-expect-error: mocking necessary properties for handler logic only
+      await putPublicFieldDefinitionRoute.handler({ context, request, response });
+
+      expect(response.badRequest).toHaveBeenCalled();
+      expect(response.ok).not.toHaveBeenCalled();
     });
 
     it('returns 409 and preserves typed attributes when identity-immutable error is thrown', async () => {
