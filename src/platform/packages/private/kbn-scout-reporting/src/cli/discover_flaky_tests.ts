@@ -8,12 +8,9 @@
  */
 
 import path from 'node:path';
-import CliTable3 from 'cli-table3';
-import dedent from 'dedent';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ToolingLog } from '@kbn/tooling-log';
 import {
   SCOUT_FLAKY_TESTS_PATH,
   SCOUT_REPORTER_ES_API_KEY,
@@ -25,11 +22,9 @@ import {
   DEFAULT_FLAKY_TEST_REPORT_OPTIONS,
   ScoutFlakyTests,
   TEST_FRAMEWORKS,
-  type FlakyTestBranchStats,
-  type FlakyTestEntry,
-  type FlakyTestReport,
   type TestFramework,
 } from '../reporting/flaky_tests';
+import { displaySummary } from './flaky_tests_summary';
 
 // The per-framework aggregations scan hundreds of millions of documents; the client default of
 // 60s is not enough for them.
@@ -70,189 +65,6 @@ const readFrameworks = (flagsReader: FlagsReader): TestFramework[] => {
     );
   }
   return frameworks.filter(isTestFramework);
-};
-
-const TITLE_COL_WIDTH = 40;
-const FILE_COL_WIDTH = 40;
-const OWNERS_COL_WIDTH = 34;
-
-// cell padding takes 2 columns and a broken line ends in the separator
-const contentWidth = (colWidth: number): number => colWidth - 3;
-
-/**
- * cli-table3 only wraps on whitespace and truncates anything longer, so break paths on `/` and
- * owner handles on `-` ourselves, keeping the separator at the end of the broken line. A single
- * segment longer than the width is split hard rather than truncated.
- */
-const wrapOn = (text: string, separator: string, width: number): string => {
-  const lines: string[] = [];
-  let current = '';
-  const flush = () => {
-    for (let start = 0; start < current.length; start += width) {
-      lines.push(current.slice(start, start + width));
-    }
-    current = '';
-  };
-  for (const segment of text.split(separator)) {
-    const candidate = current ? `${current}${separator}${segment}` : segment;
-    if (candidate.length > width && current) {
-      current += separator;
-      flush();
-      current = segment;
-    } else {
-      current = candidate;
-    }
-  }
-  flush();
-  return lines.join('\n');
-};
-
-const formatAge = (from: Date, to: Date): string => {
-  const minutes = Math.max(0, Math.round((to.getTime() - from.getTime()) / 60_000));
-  if (minutes < 60) return `${minutes}m ago`;
-  if (minutes < 24 * 60) return `${Math.round(minutes / 60)}h ago`;
-  return `${Math.round(minutes / (24 * 60))}d ago`;
-};
-
-const formatRate = (rate: number): string => `${(rate * 100).toFixed(1)}%`;
-
-/**
- * Branch with the highest build failure rate. Branches with fewer builds than `minBuilds` only
- * count when no branch has enough, so one failure on a barely exercised branch does not win.
- */
-const flakiestBranch = (
-  byBranch: FlakyTestEntry['byBranch'],
-  minBuilds: number
-): FlakyTestBranchStats | undefined => {
-  const exercised = byBranch.filter((stats) => stats.builds >= minBuilds);
-  return [...(exercised.length > 0 ? exercised : byBranch)].sort(
-    (a, b) => b.buildFailRate - a.buildFailRate
-  )[0];
-};
-
-const formatFlakiestBranch = (flakiest: FlakyTestBranchStats | undefined): string =>
-  flakiest ? `${flakiest.branch} (${formatRate(flakiest.buildFailRate)})` : '-';
-
-/** Latest run on the flakiest branch, falling back to the latest run on any branch. */
-const formatLatestRun = (
-  entry: FlakyTestEntry,
-  flakiest: FlakyTestBranchStats | undefined,
-  now: Date
-): string => {
-  const latestRun = flakiest?.latestRun ?? entry.latestRun;
-  return latestRun ? `${latestRun.status}\n${formatAge(latestRun.timestamp, now)}` : '-';
-};
-
-const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
-  const groups = new Map<string, FlakyTestEntry[]>();
-  for (const entry of entries) {
-    groups.set(entry.filePath, [...(groups.get(entry.filePath) ?? []), entry]);
-  }
-  return groups;
-};
-
-/**
- * Renders the top-ranked tests one per row, with the tests of the same file kept together (in
- * order of first appearance) under a single spanning file cell so whole-suite failures stand out.
- */
-const buildTopFlakyTable = (
-  top: readonly FlakyTestEntry[],
-  all: readonly FlakyTestEntry[],
-  minBuilds: number,
-  now: Date
-): CliTable3.Table => {
-  const table = new CliTable3({
-    head: ['#', 'Framework', 'Owners', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File'],
-    colWidths: [null, null, OWNERS_COL_WIDTH, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
-    wordWrap: true,
-  });
-  const qualifyingPerFile = groupByFile(all);
-
-  let rank = 0;
-  for (const [filePath, entries] of groupByFile(top)) {
-    const notShown = (qualifyingPerFile.get(filePath)?.length ?? 0) - entries.length;
-    const fileCell: CliTable3.Cell = {
-      rowSpan: entries.length,
-      content: [
-        wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
-        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    };
-
-    entries.forEach((entry, index) => {
-      rank += 1;
-      const flakiest = flakiestBranch(entry.byBranch, minBuilds);
-      table.push([
-        rank,
-        entry.framework,
-        entry.owners
-          .map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH)))
-          .join('\n') || '-',
-        `${entry.failedBuilds}/${entry.builds}`,
-        formatFlakiestBranch(flakiest),
-        formatLatestRun(entry, flakiest, now),
-        entry.title,
-        // later rows are laid out around the spanning cell, so only the first row carries it
-        ...(index === 0 ? [fileCell] : []),
-      ]);
-    });
-  }
-
-  return table;
-};
-
-const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog): void => {
-  const { window, scope, summary, flaky } = report;
-  const flakyByFramework = Object.entries(summary.flakyByFramework)
-    .map(([framework, count]) => `${framework}: ${count}`)
-    .join(', ');
-
-  const panel = new CliTable3();
-  panel.push(
-    [{ content: 'Flaky tests summary', hAlign: 'center' }],
-    [
-      dedent(`\
-        Window
-          From     : ${window.from.toISOString()}
-          To       : ${window.to.toISOString()}
-          Lookback : ${window.lookbackDays}d
-        `),
-    ],
-    [
-      dedent(`\
-        Scope
-          Pipelines  : ${scope.pipelines.join(', ') || 'any'}
-          Branches   : ${scope.branches.join(', ') || 'any'}
-          Frameworks : ${scope.frameworks.join(', ')}
-        `),
-    ],
-    [
-      dedent(`\
-        Results
-          Flaky                : ${summary.totalFlaky}${
-        flakyByFramework ? ` (${flakyByFramework})` : ''
-      }
-          Consistently failing : ${summary.totalConsistentlyFailing}
-        `),
-    ]
-  );
-
-  if (flaky.length > 0) {
-    const top = flaky.slice(0, limit);
-    panel.push([
-      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
-        top,
-        flaky,
-        report.thresholds.minBuilds,
-        report.generatedAt
-      ).toString()}`,
-    ]);
-  }
-
-  log.write('\n');
-  log.write(panel.toString());
 };
 
 export const discoverFlakyTests: Command<void> = {
