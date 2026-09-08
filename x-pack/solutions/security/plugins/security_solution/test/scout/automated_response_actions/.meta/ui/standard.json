@@ -1,0 +1,55 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "128d129ba37addf-39165e011011fee",
+      "title": "Alert flyout Response section shows isolate action status for the seeded alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/automated_response_actions/ui/tests/alert_flyout_response.spec.ts",
+        "line": 47,
+        "column": 8
+      }
+    },
+    {
+      "id": "c6b329371d845c8-b036c72ab3f3739",
+      "title": "Rule author cannot add Elastic Defend response actions Elastic Defend keypad stays disabled on create",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/automated_response_actions/ui/tests/rule_author_create.spec.ts",
+        "line": 19,
+        "column": 25
+      }
+    },
+    {
+      "id": "3623721e7147c3b-f616ffbaaf0f6db",
+      "title": "Rule author cannot change existing response actions existing rows stay disabled and force-remove does not drop a row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/automated_response_actions/ui/tests/rule_author_edit.spec.ts",
+        "line": 32,
+        "column": 19
+      }
+    }
+  ]
+}
