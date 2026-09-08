@@ -51,6 +51,7 @@ import {
   createDocumentMigrator,
   createSpySerializer,
   bulkCreateSuccess,
+  getMockMgetResponse,
   getMockBulkCreateResponse,
   expectErrorResult,
   expectErrorInvalidType,
@@ -1094,6 +1095,35 @@ describe('#bulkCreate', () => {
         (securityExtension as any).savedObjectDiffEnabled = false;
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fetch before-state on overwrite when types are not on the allow list', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true });
+
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('fetches before-state on overwrite only for allow-listed types', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockImplementation(
+          (t: string) => t === obj1.type
+        );
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1]));
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2], { overwrite: true });
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
       });
 
       it('emits unknown-outcome events for every object when the bulk request fails', async () => {

@@ -992,6 +992,23 @@ describe('#create', () => {
         );
       });
 
+      it('does not fetch before-state on overwrite when the type is not on the allow list', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
+
+        await createSuccess(type, { title: 'new-title' }, { id, overwrite: true });
+
+        expect(client.get).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            outcome: 'success',
+            before: {},
+          })
+        );
+      });
+
       it('does not call emitSavedObjectDiffAuditEvent when savedObjectDiffEnabled is false', async () => {
         (securityExtension as any).savedObjectDiffEnabled = false;
         await createSuccess(type, attributes, { id });

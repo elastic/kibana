@@ -7183,10 +7183,10 @@ describe('#authorizeChangeAccessControl', () => {
   });
 });
 
-describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
+describe('#emitSavedObjectDiffAuditEvent redaction (attributesToRedact)', () => {
   function setupForEmit(
     savedObjectDiffEnabled = true,
-    extra: { savedObjectDiffTypesToExclude?: string[]; savedObjectDiffFieldSizeLimit?: number } = {}
+    extra: { savedObjectDiffTypesToInclude?: string[]; savedObjectDiffFieldSizeLimit?: number } = {}
   ) {
     const actions = new Actions();
     jest
@@ -7210,6 +7210,8 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       typeRegistry: typeRegistryMocked,
       savedObjectDiffEnabled,
       logger,
+      // Opt-in per type: tests that expect a `kibana.diff` must list the type here.
+      savedObjectDiffTypesToInclude: ['connector', 'dashboard'],
       ...extra,
     });
     return { securityExtension, auditLogger, logger };
@@ -7219,7 +7221,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     addAuditEventSpy.mockClear();
   });
 
-  it('redacts sensitive field values in the diff when fieldsToRedact is provided', () => {
+  it('redacts sensitive field values in the diff when attributesToRedact is provided', () => {
     const { securityExtension } = setupForEmit();
 
     securityExtension.emitSavedObjectDiffAuditEvent({
@@ -7228,7 +7230,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: { name: 'old', secrets: 'plaintext-secret' },
       after: { name: 'new', secrets: 'new-plaintext-secret' },
-      fieldsToRedact: ['secrets'],
+      attributesToRedact: ['secrets'],
     });
 
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
@@ -7261,7 +7263,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: { secrets: 'my-secret' },
       after: { secrets: 'changed' },
-      fieldsToRedact: ['secrets'],
+      attributesToRedact: ['secrets'],
     });
 
     const firstOp = (addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff.ops.find(
@@ -7278,7 +7280,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: { secrets: 'a-totally-different-secret' },
       after: { secrets: 'other' },
-      fieldsToRedact: ['secrets'],
+      attributesToRedact: ['secrets'],
     });
 
     const secondOp = (addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff.ops.find(
@@ -7296,7 +7298,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: { name: 'old', secrets: 'same-secret' },
       after: { name: 'new', secrets: 'same-secret' },
-      fieldsToRedact: ['secrets'],
+      attributesToRedact: ['secrets'],
     });
 
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
@@ -7308,7 +7310,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     expect(nameOp).toBeDefined();
   });
 
-  it('does not redact when fieldsToRedact is undefined', () => {
+  it('does not redact when attributesToRedact is undefined', () => {
     const { securityExtension } = setupForEmit();
 
     securityExtension.emitSavedObjectDiffAuditEvent({
@@ -7345,7 +7347,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: {},
       after: { name: 'My Connector', config: { apiKey: 'secret-key', url: 'https://example.com' } },
-      fieldsToRedact: ['config'],
+      attributesToRedact: ['config'],
     });
 
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
@@ -7370,7 +7372,7 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
       outcome: 'success',
       before: { name: 'My Connector', secrets: 'super-secret-value' },
       after: {},
-      fieldsToRedact: ['secrets'],
+      attributesToRedact: ['secrets'],
     });
 
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
@@ -7383,9 +7385,9 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     expect(secretsOp).toEqual({ op: 'remove', path: '/secrets', oldValue: '[redacted]' });
   });
 
-  it('omits the diff, but still emits the event, for types in savedObjectDiffTypesToExclude', () => {
+  it('omits the diff, but still emits the event, for types not in savedObjectDiffTypesToInclude', () => {
     const { securityExtension } = setupForEmit(true, {
-      savedObjectDiffTypesToExclude: ['telemetry'],
+      savedObjectDiffTypesToInclude: ['dashboard'],
     });
 
     securityExtension.emitSavedObjectDiffAuditEvent({
@@ -7397,15 +7399,15 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     });
 
     // In this mode the pre-operation event is suppressed, so this success event is
-    // the operation's only audit record; exclusion only drops the diff payload.
+    // the operation's only audit record; the allow list only gates the diff payload.
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
     expect((addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff).toBeUndefined();
     expect((addAuditEventSpy.mock.calls[0][0] as any).outcome).toBe('success');
   });
 
-  it('still emits the diff event for types not in the exclude list', () => {
+  it('still emits the diff event for types in the include list', () => {
     const { securityExtension } = setupForEmit(true, {
-      savedObjectDiffTypesToExclude: ['telemetry'],
+      savedObjectDiffTypesToInclude: ['dashboard'],
     });
 
     securityExtension.emitSavedObjectDiffAuditEvent({
@@ -7417,6 +7419,41 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
     });
 
     expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect((addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff).toBeDefined();
+  });
+
+  it('shouldComputeSavedObjectDiff is true only when the feature is on and the type is included', () => {
+    const { securityExtension } = setupForEmit(true, {
+      savedObjectDiffTypesToInclude: ['dashboard'],
+    });
+
+    expect(securityExtension.shouldComputeSavedObjectDiff('dashboard')).toBe(true);
+    expect(securityExtension.shouldComputeSavedObjectDiff('telemetry')).toBe(false);
+  });
+
+  it('shouldComputeSavedObjectDiff is false when the feature is off', () => {
+    const { securityExtension } = setupForEmit(false, {
+      savedObjectDiffTypesToInclude: ['dashboard'],
+    });
+
+    expect(securityExtension.shouldComputeSavedObjectDiff('dashboard')).toBe(false);
+  });
+
+  it('omits the diff for every type when the include list is empty', () => {
+    const { securityExtension } = setupForEmit(true, {
+      savedObjectDiffTypesToInclude: [],
+    });
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { a: 1 },
+      after: { a: 2 },
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    expect((addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff).toBeUndefined();
   });
 
   it('replaces values exceeding savedObjectDiffFieldSizeLimit with the sentinel', () => {
@@ -7467,6 +7504,64 @@ describe('#emitSavedObjectDiffAuditEvent redaction (fieldsToRedact)', () => {
 
     const { savedObject } = addAuditEventSpy.mock.calls[0][0] as any;
     expect(savedObject).toEqual({ type: 'dashboard', id: '1', name: 'My Dashboard' });
+  });
+
+  it('keeps the name attribute in kibana.diff when includeSavedObjectNames is false', () => {
+    const { securityExtension, auditLogger } = setupForEmit();
+    auditLogger.includeSavedObjectNames = false;
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1', name: 'Old Title' },
+      outcome: 'success',
+      before: { name: 'Old Title' },
+      after: { name: 'New Title' },
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(savedObjectDiff.ops).toContainEqual({
+      op: 'replace',
+      path: '/name',
+      value: 'New Title',
+      oldValue: 'Old Title',
+    });
+
+    expect(auditLogger.log).toHaveBeenCalledTimes(1);
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.kibana.saved_object).toEqual({ type: 'dashboard', id: '1' });
+    expect(logged.kibana.diff.ops).toContainEqual({
+      op: 'replace',
+      path: '/name',
+      value: 'New Title',
+      oldValue: 'Old Title',
+    });
+  });
+
+  it('includes the saved object name on the event when includeSavedObjectNames is true', () => {
+    const { securityExtension, auditLogger } = setupForEmit();
+    auditLogger.includeSavedObjectNames = true;
+
+    securityExtension.emitSavedObjectDiffAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1', name: 'Old Title' },
+      outcome: 'success',
+      before: { name: 'Old Title' },
+      after: { name: 'New Title' },
+    });
+
+    const logged = auditLogger.log.mock.calls[0][0] as any;
+    expect(logged.kibana.saved_object).toEqual({
+      type: 'dashboard',
+      id: '1',
+      name: 'New Title',
+    });
+    expect(logged.kibana.diff.ops).toContainEqual({
+      op: 'replace',
+      path: '/name',
+      value: 'New Title',
+      oldValue: 'Old Title',
+    });
   });
 
   it('still emits the event, without a diff, when diff computation fails', () => {

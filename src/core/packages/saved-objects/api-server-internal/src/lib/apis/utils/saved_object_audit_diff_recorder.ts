@@ -85,19 +85,32 @@ export class SavedObjectAuditDiffRecorder {
   }
 
   /**
+   * Whether a field-level diff should be computed for this type. Extra Elasticsearch
+   * reads that exist only to capture before-state must consult this so types not on
+   * the allow list do not pay that cost. Result audit events are still emitted for
+   * every tracked object.
+   */
+  shouldComputeDiff(type: string): boolean {
+    return this.securityExtension.shouldComputeSavedObjectDiff(type);
+  }
+
+  /**
    * Registers a saved object for auditing and returns a handle for recording its
    * before/after attributes and outcome. Re-tracking the same object (e.g. on a
    * conflict retry) replaces its previously recorded state, so the final attempt
-   * determines what is audited.
+   * determines what is audited. `after` can only be recorded via
+   * {@link WriteAuditRecord.setAfter} — call it with the stored (post-encryption)
+   * attributes, never the caller's plaintext, so a record flushed before the write
+   * completes cannot leak unencrypted ESO attributes.
    */
   track(
     savedObject: { type: string; id: string },
-    initial: { before?: Record<string, unknown>; after?: Record<string, unknown> } = {}
+    initial: { before?: Record<string, unknown> } = {}
   ): WriteAuditRecord {
     const record: InternalRecord = {
       savedObject,
       before: initial.before ?? {},
-      after: initial.after ?? {},
+      after: {},
       outcome: 'unknown',
     };
     this.records.set(`${savedObject.type}:${savedObject.id}`, record);
@@ -124,7 +137,7 @@ export class SavedObjectAuditDiffRecorder {
     for (const { savedObject, before, after, outcome } of this.records.values()) {
       try {
         // ESO attributes may appear here as ciphertext; forwarding them as
-        // fieldsToRedact hides their values in the emitted diff.
+        // attributesToRedact hides their values in the emitted diff.
         const encryptedAttributes = this.encryptionExtension?.getEncryptedAttributes(
           savedObject.type
         );
@@ -134,7 +147,7 @@ export class SavedObjectAuditDiffRecorder {
           outcome,
           before,
           after,
-          fieldsToRedact: encryptedAttributes ? [...encryptedAttributes] : undefined,
+          attributesToRedact: encryptedAttributes ? [...encryptedAttributes] : undefined,
         });
       } catch (error) {
         // Use String(error) rather than error.message, which would throw if a

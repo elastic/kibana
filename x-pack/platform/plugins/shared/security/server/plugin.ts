@@ -330,7 +330,7 @@ export class SecurityPlugin
       getCurrentUser,
       savedObjectDiffEnabled:
         config.audit.enabled && (config.audit.savedObjectDiff?.enabled ?? false),
-      savedObjectDiffTypesToExclude: config.audit.savedObjectDiff?.typesToExclude,
+      savedObjectDiffTypesToInclude: config.audit.savedObjectDiff?.typesToInclude,
       savedObjectDiffFieldSizeLimit:
         config.audit.savedObjectDiff?.fieldSizeLimit?.getValueInBytes(),
       logger: this.logger.get('saved-objects-audit'),

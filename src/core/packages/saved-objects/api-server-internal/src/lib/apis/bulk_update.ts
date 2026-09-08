@@ -255,18 +255,16 @@ export const performBulkUpdate = async <T>(
   );
 
   // Track each authorized object for auditing (flushed by the repository once the
-  // operation settles). `after` starts as the requested attributes; `before`/`after`
-  // are refined to the preflight/merged attributes during response mapping. Objects
-  // rejected before authorization are not audited.
+  // operation settles). `before`/`after` are only recorded during response mapping,
+  // from the preflight/merged (stored) attributes — never the caller's plaintext, so
+  // failures flushed before that point cannot leak unencrypted ESO attributes into
+  // the audit log. Objects rejected before authorization are not audited.
   const auditRecordsByKey = new Map<string, WriteAuditRecord>();
   if (auditDiffRecorder) {
     for (const { value } of validObjects) {
       auditRecordsByKey.set(
         `${value.type}:${value.id}`,
-        auditDiffRecorder.track(
-          { type: value.type, id: value.id },
-          { after: (value.documentToSave[value.type] ?? {}) as Record<string, unknown> }
-        )
+        auditDiffRecorder.track({ type: value.type, id: value.id })
       );
     }
   }

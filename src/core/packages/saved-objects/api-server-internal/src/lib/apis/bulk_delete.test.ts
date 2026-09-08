@@ -629,13 +629,12 @@ describe('#bulkDelete', () => {
         );
       });
 
-      it('also emits for multi-namespace deletes (alongside the preflight mget)', async () => {
+      it('reuses the preflight mget for multi-namespace before-state (no second fetch)', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         const multiObjs = [
           { id: 'diff_m1', type: MULTI_NAMESPACE_TYPE },
           { id: 'diff_m2', type: MULTI_NAMESPACE_ISOLATED_TYPE },
         ];
-        // 1st mget = the namespace preflight; 2nd = the gated before-attributes fetch.
         client.mget.mockResponseOnce(
           getMockMgetResponse(
             registry,
@@ -643,14 +642,23 @@ describe('#bulkDelete', () => {
             namespace
           )
         );
-        client.mget.mockResponseOnce(getMockMgetResponse(registry, multiObjs, namespace));
         client.bulk.mockResponseOnce(
           getMockEsBulkDeleteResponse(registry, multiObjs, { namespace })
         );
 
         await repository.bulkDelete(multiObjs, { namespace });
 
-        expect(client.mget).toHaveBeenCalledTimes(2);
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: expect.arrayContaining([
+              expect.objectContaining({
+                _source: expect.arrayContaining([MULTI_NAMESPACE_TYPE]),
+              }),
+            ]),
+          }),
+          expect.anything()
+        );
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -658,6 +666,46 @@ describe('#bulkDelete', () => {
             savedObject: expect.objectContaining({ type: MULTI_NAMESPACE_TYPE, id: 'diff_m1' }),
             before: expect.objectContaining({ title: 'Testing' }),
             after: {},
+          })
+        );
+      });
+
+      it('fetches only single-namespace objects when mixed with multi-namespace deletes', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        const multiObj = { id: 'diff_m1', type: MULTI_NAMESPACE_TYPE };
+        client.mget.mockResponseOnce(
+          getMockMgetResponse(
+            registry,
+            [{ ...multiObj, initialNamespaces: [namespace] }],
+            namespace
+          )
+        );
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1], namespace));
+        client.bulk.mockResponseOnce(
+          getMockEsBulkDeleteResponse(registry, [obj1, multiObj], { namespace })
+        );
+
+        await repository.bulkDelete([obj1, multiObj], { namespace });
+
+        expect(client.mget).toHaveBeenCalledTimes(2);
+        expect(client.mget).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+          })
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            savedObject: expect.objectContaining({ type: MULTI_NAMESPACE_TYPE, id: 'diff_m1' }),
+            before: expect.objectContaining({ title: 'Testing' }),
           })
         );
       });
@@ -671,6 +719,36 @@ describe('#bulkDelete', () => {
 
         expect(client.mget).not.toHaveBeenCalled();
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fetch before-attrs when types are not on the allow list', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
+
+        await bulkDeleteSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
+      });
+
+      it('fetches before-attrs only for allow-listed types', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockImplementation(
+          (t: string) => t === obj1.type
+        );
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1]));
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, [obj1, obj2]));
+
+        await repository.bulkDelete([obj1, obj2]);
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(client.mget).toHaveBeenCalledWith(
+          expect.objectContaining({
+            docs: [expect.objectContaining({ _source: [obj1.type] })],
+          }),
+          expect.anything()
+        );
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
       });
 
       it('emits unknown-outcome events for every object when the bulk request fails', async () => {

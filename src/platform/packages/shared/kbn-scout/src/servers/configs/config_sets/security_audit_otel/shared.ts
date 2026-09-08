@@ -29,3 +29,6 @@ export const securityAuditOtelServerArgs = [
   '--xpack.security.audit.appender.protocol=http',
   `--xpack.security.audit.appender.url=http://127.0.0.1:${OTEL_RECEIVER_PORT}/v1/logs`,
 ];
+// The Serverless flavor of this config set also enables savedObjectDiff (see
+// security_complete.serverless.config.ts) so Scout can assert kibana.diff is
+// JSON-stringified for the OTel SDK. The traditional flavor leaves diffs off.

@@ -153,12 +153,10 @@ export const performCreate = async <T>(
   });
 
   // Track the write for auditing (flushed by the repository once the operation
-  // settles). `after` starts as the requested attributes and is refined to the
-  // migrated (stored) attributes below.
-  const auditRecord = auditDiffRecorder?.track(
-    { type, id },
-    { after: attributes as unknown as Record<string, unknown> }
-  );
+  // settles). `after` is only recorded once encryption/migration has produced the
+  // stored form — never the caller's plaintext, so failures flushed before that
+  // point cannot leak unencrypted ESO attributes into the audit log.
+  const auditRecord = auditDiffRecorder?.track({ type, id });
   if (preflightResult?.error) {
     // This intentionally occurs _after_ the authZ enforcement (which may throw a 403 error earlier)
     throw SavedObjectsErrorHelpers.createConflictError(type, id);
@@ -205,7 +203,7 @@ export const performCreate = async <T>(
   // When overwriting, fetch the previous attributes so the diff is replace/remove ops
   // rather than a full set of adds. Feature-gated and failure-isolated so a miss or
   // get error degrades to before={} (create-shaped diff) instead of failing the write.
-  if (overwrite && auditDiffRecorder) {
+  if (overwrite && auditDiffRecorder?.shouldComputeDiff(type)) {
     try {
       const existing = await client.get<SavedObjectsRawDocSource>(
         {

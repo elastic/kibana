@@ -523,6 +523,70 @@ describe('#delete', () => {
         expect((client.get.mock.calls[0][0] as any)._source_includes).not.toContain(type);
       });
 
+      it('does not fetch full attributes when the type is not on the allow list', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.shouldComputeSavedObjectDiff.mockReturnValue(false);
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
+        await repository.delete(type, id);
+        expect((client.get.mock.calls[0][0] as any)._source_includes).not.toContain(type);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not include before-attributes when a multi-namespace object exists only outside the current space', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        // The object lives in `namespace`; the delete targets 'other-namespace'. The raw ID of a
+        // multi-namespace type is not space-scoped, so the pre-authz get still returns the doc
+        // (with full attributes) before the namespace preflight rejects the delete with a 404.
+        const response = getMockGetResponse(
+          registry,
+          { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
+          namespace
+        );
+        client.get.mockResponse(response);
+
+        await expect(
+          repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace: 'other-namespace' })
+        ).rejects.toThrowError(
+          createGenericNotFoundErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id)
+        );
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
+            outcome: 'unknown',
+            before: {},
+            after: {},
+          })
+        );
+      });
+
+      it('includes before-attributes for a multi-namespace object once the namespace preflight passes', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        const response = getMockGetResponse(
+          registry,
+          { type: MULTI_NAMESPACE_ISOLATED_TYPE, id },
+          namespace
+        );
+        client.get.mockResponse(response);
+        client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
+
+        await repository.delete(MULTI_NAMESPACE_ISOLATED_TYPE, id, { namespace });
+
+        expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
+
       it('emits an unknown-outcome event when the delete fails after authorization', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
         client.get.mockResponse(getMockGetResponse(registry, { type, id }));

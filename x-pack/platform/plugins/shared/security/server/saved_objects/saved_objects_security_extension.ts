@@ -8,7 +8,6 @@
 import type { EcsEvent } from '@elastic/ecs';
 import type { Payload } from '@hapi/boom';
 
-import { computeJsonPatch, type ExtendedJsonPatch } from '@kbn/change-history';
 import type { SavedObjectsClient } from '@kbn/core/server';
 import {
   type Either,
@@ -69,7 +68,8 @@ import { AccessControlService, MANAGE_ACCESS_CONTROL_ACTION } from './access_con
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { SecurityAction } from './types';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { savedObjectEvent } from '../audit';
+import { computeJsonPatch, savedObjectEvent } from '../audit';
+import type { ExtendedJsonPatch } from '../audit';
 
 interface Params {
   actions: Actions;
@@ -79,7 +79,7 @@ interface Params {
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectDiffEnabled?: boolean;
-  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffTypesToInclude?: string[];
   savedObjectDiffFieldSizeLimit?: number;
   logger?: Logger;
 }
@@ -327,7 +327,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
   public readonly savedObjectDiffEnabled: boolean;
-  private readonly savedObjectDiffTypesToExclude: Set<string>;
+  private readonly savedObjectDiffTypesToInclude: Set<string>;
   private readonly savedObjectDiffFieldSizeLimit?: number;
   private readonly logger?: Logger;
 
@@ -339,7 +339,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     getCurrentUser,
     typeRegistry,
     savedObjectDiffEnabled = false,
-    savedObjectDiffTypesToExclude = [],
+    savedObjectDiffTypesToInclude = [],
     savedObjectDiffFieldSizeLimit,
     logger,
   }: Params) {
@@ -349,7 +349,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
     this.savedObjectDiffEnabled = savedObjectDiffEnabled;
-    this.savedObjectDiffTypesToExclude = new Set(savedObjectDiffTypesToExclude);
+    this.savedObjectDiffTypesToInclude = new Set(savedObjectDiffTypesToInclude);
     this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
     this.logger = logger;
 
@@ -628,6 +628,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     return this.savedObjectDiffEnabled ? 'on_success' : 'never';
   }
 
+  /**
+   * Whether a field-level diff should be computed for this saved object type.
+   * Extra Elasticsearch reads that exist only to capture before-state must consult
+   * this so types not on the allow list do not pay that cost.
+   */
+  public shouldComputeSavedObjectDiff(type: string): boolean {
+    return this.savedObjectDiffEnabled && this.savedObjectDiffTypesToInclude.has(type);
+  }
+
   private allAccessControlObjectsAreInaccessible(
     allAccessControlObjects: ObjectRequiringPrivilegeCheckResult[],
     inaccessibleObjects: Set<ObjectRequiringPrivilegeCheckResult>
@@ -872,7 +881,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     outcome: 'success' | 'unknown';
     before: Record<string, unknown>;
     after: Record<string, unknown>;
-    fieldsToRedact?: string[];
+    attributesToRedact?: string[];
   }): void {
     // Only emit when the feature is enabled. The caller also gates on
     // `savedObjectDiffEnabled`, but checking here keeps the public method
@@ -886,24 +895,25 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     // The diff is independent of the outcome: it describes the (attempted) change,
     // including on 'unknown'-outcome events. The pre-operation audit event is
     // suppressed in this mode, so this event is the operation's only audit record:
-    // excluded types still emit it, they just don't carry the attribute diff.
-    // For the same reason the event must survive a diff computation failure — the
-    // diff is best-effort enrichment, so an error here degrades to an event without
-    // `kibana.diff` rather than a missing audit record.
+    // types not in `typesToInclude` still emit it, they just don't carry the
+    // attribute diff. For the same reason the event must survive a diff computation
+    // failure — the diff is best-effort enrichment, so an error here degrades to
+    // an event without `kibana.diff` rather than a missing audit record.
     // `before`/`after` are the object's attributes (not the full SO), so there
     // are no system-managed root fields to filter out here.
     let savedObjectDiff: ExtendedJsonPatch | undefined;
-    if (!this.savedObjectDiffTypesToExclude.has(type)) {
+    if (this.shouldComputeSavedObjectDiff(type)) {
       try {
         savedObjectDiff = computeJsonPatch({
           a: params.before,
           b: params.after,
-          // ESO attributes are compared as ciphertext here; forwarding them as
-          // fieldsToRedact hides their values in the emitted diff. Because ESO
-          // encryption is non-deterministic, an encrypted attribute included in a
-          // write may surface as a (redacted) change even when its plaintext is
-          // unchanged.
-          fieldsToRedact: params.fieldsToRedact,
+          // ESO attributes are compared as ciphertext here; redacting them hides
+          // their values in the emitted diff. Because ESO encryption is
+          // non-deterministic, an encrypted attribute included in a write may
+          // surface as a (redacted) change even when its plaintext is unchanged.
+          // `fieldsToRedact` is the diff helper's generic option name; at the
+          // saved objects layer these are the object's attributes.
+          fieldsToRedact: params.attributesToRedact,
           fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
         });
       } catch (error) {

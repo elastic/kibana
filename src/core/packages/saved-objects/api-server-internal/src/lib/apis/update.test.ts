@@ -988,9 +988,11 @@ describe('#update', () => {
         expect(securityExtension.emitSavedObjectDiffAuditEvent).not.toHaveBeenCalled();
       });
 
-      it('emits an unknown-outcome event when the update fails after authorization', async () => {
+      it('emits an unknown-outcome event without the requested attributes when the update fails after authorization', async () => {
         (securityExtension as any).savedObjectDiffEnabled = true;
-        // Not-found without upsert throws after authorizeUpdate has run
+        // Not-found without upsert throws after authorizeUpdate has run. The requested
+        // attributes are deliberately absent: `after` is only recorded post-encryption,
+        // so an early failure must not flush the caller's plaintext.
         await expect(
           updateSuccess(client, repository, registry, type, id, attributes, undefined, {
             mockGetResponseAsNotFound: { found: false } as estypes.GetResponse,
@@ -1003,7 +1005,8 @@ describe('#update', () => {
             action: 'saved_object_update',
             savedObject: { type, id },
             outcome: 'unknown',
-            after: expect.objectContaining(attributes),
+            before: {},
+            after: {},
           })
         );
       });

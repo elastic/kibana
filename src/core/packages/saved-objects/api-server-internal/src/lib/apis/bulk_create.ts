@@ -242,18 +242,17 @@ export const performBulkCreate = async <T>(
   );
 
   // Track each authorized object for auditing (flushed by the repository once the
-  // operation settles). `after` starts as the requested attributes and is refined to
-  // the migrated (stored) attributes during response mapping; `before` is populated by
-  // the overwrite preflight fetch. Objects rejected before authorization are not audited.
+  // operation settles). `after` is only recorded during response mapping, from the
+  // migrated (stored) attributes — never the caller's plaintext, so failures flushed
+  // before that point cannot leak unencrypted ESO attributes into the audit log;
+  // `before` is populated by the overwrite preflight fetch. Objects rejected before
+  // authorization are not audited.
   const auditRecordsByKey = new Map<string, WriteAuditRecord>();
   if (auditDiffRecorder) {
     for (const { value } of validObjects) {
       auditRecordsByKey.set(
         `${value.type}:${value.id}`,
-        auditDiffRecorder.track(
-          { type: value.type, id: value.id },
-          { after: (value.object.attributes ?? {}) as Record<string, unknown> }
-        )
+        auditDiffRecorder.track({ type: value.type, id: value.id })
       );
     }
   }
@@ -386,6 +385,7 @@ export const performBulkCreate = async <T>(
 
   // When overwriting, capture previous attributes for diffs. Feature-gated and
   // failure-isolated so an mget error degrades to before={} instead of failing the write.
+  // Only allow-listed types are fetched — others still get a result event without a snapshot.
   if (auditDiffRecorder) {
     const overwriteRequests = expectedBulkResults.flatMap((expectedResult) => {
       if (isLeft(expectedResult) || !expectedResult.value.isOverwrite) {
@@ -393,6 +393,9 @@ export const performBulkCreate = async <T>(
       }
       const { requestedId, rawMigratedDoc } = expectedResult.value;
       const type = rawMigratedDoc._source.type;
+      if (!auditDiffRecorder.shouldComputeDiff(type)) {
+        return [];
+      }
       return [
         {
           rawId: rawMigratedDoc._id,

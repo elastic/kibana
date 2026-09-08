@@ -612,7 +612,7 @@ export interface ISavedObjectsSecurityExtension {
    * is the operation's only audit record). The outcome is 'success' when the write
    * completed, or 'unknown' when it was attempted but did not complete. Independently of
    * the outcome, the event carries an attribute diff (`kibana.diff`) of the (attempted)
-   * change whenever `before`/`after` attributes are provided.
+   * change when the object's type is in the configured allow list.
    */
   emitSavedObjectDiffAuditEvent: (params: {
     action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
@@ -620,13 +620,23 @@ export interface ISavedObjectsSecurityExtension {
     outcome: 'success' | 'unknown';
     before: Record<string, unknown>;
     after: Record<string, unknown>;
-    fieldsToRedact?: string[];
+    attributesToRedact?: string[];
   }) => void;
 
   /**
    * Whether saved object diff computation is enabled for audit events.
+   * Extra Elasticsearch reads for before-state are also gated on this flag
+   * together with {@link ISavedObjectsSecurityExtension.shouldComputeSavedObjectDiff}.
    */
   readonly savedObjectDiffEnabled: boolean;
+
+  /**
+   * Whether a field-level diff should be computed for this saved object type.
+   * False when the feature is off or the type is not in `typesToInclude`.
+   * Callers that fetch before-state solely for the diff must consult this
+   * so non-allow-listed types do not pay an extra Elasticsearch read.
+   */
+  shouldComputeSavedObjectDiff: (type: string) => boolean;
 
   /**
    * Retrieves the current user from the request context if available

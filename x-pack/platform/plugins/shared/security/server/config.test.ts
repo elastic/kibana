@@ -1916,7 +1916,7 @@ describe('audit.savedObjectDiff config', () => {
       audit: { enabled: true, savedObjectDiff: { enabled: true } },
     });
     expect(config.audit.savedObjectDiff?.enabled).toBe(true);
-    expect(config.audit.savedObjectDiff?.typesToExclude).toEqual([]);
+    expect(config.audit.savedObjectDiff?.typesToInclude).toEqual([]);
     expect(config.audit.savedObjectDiff?.fieldSizeLimit?.getValueInBytes()).toBe(49152);
   });
 
@@ -1935,7 +1935,7 @@ describe('audit.savedObjectDiff config', () => {
       ConfigSchema.validate({
         audit: {
           enabled: false,
-          savedObjectDiff: { enabled: false, typesToExclude: ['dashboard'] },
+          savedObjectDiff: { enabled: false, typesToInclude: ['dashboard'] },
         },
       })
     ).not.toThrow();

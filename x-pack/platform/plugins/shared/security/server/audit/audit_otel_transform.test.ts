@@ -121,6 +121,30 @@ describe('applyAuditOtelFieldMap', () => {
     expect(result['http.request.method']).toBe('GET');
   });
 
+  it('reassembles flattened kibana.diff.* keys into one JSON string attribute', () => {
+    const ops = [
+      { op: 'replace', path: '/title', value: 'new', oldValue: 'old' },
+      { op: 'add', path: '/description', value: 'added' },
+    ];
+    const noOps = ['/unchanged'];
+    const result = applyAuditOtelFieldMap({
+      'event.action': 'saved_object_update',
+      'kibana.diff.ops': ops as unknown as Attributes[string],
+      'kibana.diff.noOps': noOps,
+    });
+
+    expect(result).not.toHaveProperty('kibana.diff.ops');
+    expect(result).not.toHaveProperty('kibana.diff.noOps');
+    expect(typeof result['kibana.diff']).toBe('string');
+    expect(JSON.parse(result['kibana.diff'] as string)).toEqual({ ops, noOps });
+  });
+
+  it('emits no kibana.diff attribute when the record has no diff keys', () => {
+    const result = applyAuditOtelFieldMap({ 'event.action': 'saved_object_update' });
+
+    expect(result).not.toHaveProperty('kibana.diff');
+  });
+
   it('does not mutate the input attributes', () => {
     const input: Attributes = {
       'kibana.space_id': 'default',

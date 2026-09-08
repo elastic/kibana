@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { computeJsonPatch, dotPathToJsonPointer } from './diff';
-import type { ExtendedJsonPatch } from './types';
+import { computeJsonPatch, dotPathToJsonPointer } from './saved_object_diff';
+import type { ExtendedJsonPatch } from './saved_object_diff';
 
 const opAt = (patch: ExtendedJsonPatch, path: string) => patch.ops.find((op) => op.path === path);
 const noOpPaths = (patch: ExtendedJsonPatch) => patch.noOps.map((noOp) => noOp.path);
@@ -193,6 +193,113 @@ describe('computeJsonPatch', () => {
     });
   });
 
+  describe('literal dots in keys', () => {
+    it('flattens a literal-dot key to a single pointer segment', () => {
+      const patch = computeJsonPatch({ a: {}, b: { 'host.name': 'web-01' } });
+
+      expect(opAt(patch, '/host.name')).toStrictEqual({
+        op: 'add',
+        path: '/host.name',
+        value: 'web-01',
+      });
+    });
+
+    it('does not collide a literal-dot key with an identically-spelled nested path', () => {
+      const patch = computeJsonPatch({
+        a: { 'host.name': 'flat' },
+        b: { host: { name: 'nested' } },
+      });
+
+      expect(opAt(patch, '/host.name')).toStrictEqual({
+        op: 'remove',
+        path: '/host.name',
+        oldValue: 'flat',
+      });
+      expect(opAt(patch, '/host/name')).toStrictEqual({
+        op: 'add',
+        path: '/host/name',
+        value: 'nested',
+      });
+    });
+
+    it('treats an unchanged literal-dot key as a noOp', () => {
+      const patch = computeJsonPatch({ a: { 'host.name': 'x' }, b: { 'host.name': 'x' } });
+
+      expect(patch.ops).toEqual([]);
+      expect(noOpPaths(patch)).toContain('/host.name');
+    });
+
+    it('redacts a top-level key containing a literal dot', () => {
+      const patch = computeJsonPatch({
+        a: {},
+        b: { 'secret.key': 'hunter2' },
+        fieldsToRedact: ['secret.key'],
+      });
+
+      const op = opAt(patch, '/secret.key');
+      expect(op).toBeDefined();
+      expect(op!.value).not.toBe('hunter2');
+    });
+  });
+
+  describe('empty object handling', () => {
+    it('emits an add op when a field appears as an empty object', () => {
+      const patch = computeJsonPatch({ a: {}, b: { settings: {} } });
+
+      expect(opAt(patch, '/settings')).toStrictEqual({ op: 'add', path: '/settings', value: {} });
+    });
+
+    it('emits a remove op when an empty-object field disappears', () => {
+      const patch = computeJsonPatch({ a: { settings: {} }, b: {} });
+
+      expect(opAt(patch, '/settings')).toStrictEqual({
+        op: 'remove',
+        path: '/settings',
+        oldValue: {},
+      });
+    });
+
+    it('treats an unchanged empty-object field as a noOp', () => {
+      const patch = computeJsonPatch({ a: { settings: {} }, b: { settings: {} } });
+
+      expect(patch.ops).toEqual([]);
+      expect(noOpPaths(patch)).toContain('/settings');
+    });
+
+    it('emits a replace op when a leaf value becomes an empty object', () => {
+      const patch = computeJsonPatch({ a: { value: 5 }, b: { value: {} } });
+
+      expect(opAt(patch, '/value')).toStrictEqual({
+        op: 'replace',
+        path: '/value',
+        value: {},
+        oldValue: 5,
+      });
+    });
+
+    it('handles a nested empty object at its full path', () => {
+      const patch = computeJsonPatch({ a: { outer: { inner: 1 } }, b: { outer: { inner: {} } } });
+
+      expect(opAt(patch, '/outer/inner')).toStrictEqual({
+        op: 'replace',
+        path: '/outer/inner',
+        value: {},
+        oldValue: 1,
+      });
+    });
+
+    it('leaves empty objects inside arrays untouched (arrays compare wholesale)', () => {
+      const patch = computeJsonPatch({ a: { panels: [{}] }, b: { panels: [{}, {}] } });
+
+      expect(opAt(patch, '/panels')).toStrictEqual({
+        op: 'replace',
+        path: '/panels',
+        value: [{}, {}],
+        oldValue: [{}],
+      });
+    });
+  });
+
   describe('fieldsToIgnore', () => {
     it('excludes exact-match top-level fields from ops and noOps', () => {
       const patch = computeJsonPatch({
@@ -364,6 +471,19 @@ describe('computeJsonPatch', () => {
       expect(opAt(patch, '/data')).toMatchObject({
         value: 'Value above fieldSizeLimit',
         oldValue: 'small',
+      });
+    });
+
+    it('replaces an oversized non-string value using JSON.stringify size', () => {
+      const patch = computeJsonPatch({
+        a: { tags: ['small'] },
+        b: { tags: new Array(50).fill('abcdefghij') },
+        fieldSizeLimit: 100,
+      });
+
+      expect(opAt(patch, '/tags')).toMatchObject({
+        value: 'Value above fieldSizeLimit',
+        oldValue: ['small'],
       });
     });
 

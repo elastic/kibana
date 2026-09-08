@@ -132,13 +132,12 @@ export const executeUpdate = async <T>(
   });
 
   // Track the write for auditing (flushed by the repository once the operation
-  // settles). `after` starts as the requested attributes and is refined per path
-  // (upsert vs update) below; a conflict retry re-tracks the object, so the final
-  // attempt determines what is audited.
-  const auditRecord = auditDiffRecorder?.track(
-    { type, id },
-    { after: attributes as unknown as Record<string, unknown> }
-  );
+  // settles). `after` is only recorded once encryption/migration has produced the
+  // stored form (per path — upsert vs update — below) — never the caller's
+  // plaintext, so failures flushed before that point cannot leak unencrypted ESO
+  // attributes into the audit log. A conflict retry re-tracks the object, so the
+  // final attempt determines what is audited.
+  const auditRecord = auditDiffRecorder?.track({ type, id });
   // validate if an update (directly update or create the object instead) can be done, based on if the doc exists or not
   const docOutsideNamespace = preflightDocNSResult?.checkResult === 'found_outside_namespace';
   const docNotFound =

@@ -307,7 +307,7 @@ export const ConfigSchema = schema.object({
       savedObjectDiff: schema.maybe(
         schema.object({
           enabled: schema.boolean({ defaultValue: false }),
-          typesToExclude: schema.arrayOf(schema.string(), { defaultValue: [] }),
+          typesToInclude: schema.arrayOf(schema.string(), { defaultValue: [] }),
           fieldSizeLimit: schema.byteSize({ defaultValue: '48kb' }),
         })
       ),

@@ -829,13 +829,16 @@ describe('#bulkUpdate', () => {
 
         await expect(repository.bulkUpdate([obj1, obj2])).rejects.toThrow();
 
+        // The requested attributes are deliberately absent: `after` is only recorded
+        // post-encryption, so an early failure must not flush the caller's plaintext.
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(2);
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
           expect.objectContaining({
             action: 'saved_object_update',
             savedObject: { type: obj1.type, id: obj1.id },
             outcome: 'unknown',
-            after: expect.objectContaining({ title: 'Test One' }),
+            before: {},
+            after: {},
           })
         );
         expect(securityExtension.emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(

@@ -8,16 +8,19 @@
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { scanAuditLog, waitForAuditEvent } from '../helpers/audit_log';
+import {
+  scanAuditLog,
+  waitForAuditEvent,
+} from '../../../scout_security_audit/api/helpers/audit_log';
 
 // `index-pattern` is a standard, non-hidden type creatable through the public
 // saved objects HTTP API, and its attributes are plain strings — convenient for
 // asserting exact diff values.
 const TYPE = 'index-pattern';
 
-// Configured in `typesToExclude` on the test server (see config_sets/security_audit/shared.ts).
+// Not listed in `typesToInclude` on the test server (see config_sets/security_audit_so_diff/shared.ts).
 // A non-hidden, publicly-creatable type whose create schema accepts a bare `{ title }`.
-const EXCLUDED_TYPE = 'visualization';
+const NON_INCLUDED_TYPE = 'visualization';
 
 // The public saved objects API is internal-origin gated and state-changing.
 const KBN_HEADERS = { 'kbn-xsrf': 'x', 'x-elastic-internal-origin': 'kibana' };
@@ -276,21 +279,21 @@ apiTest.describe(
     );
 
     apiTest(
-      'does not emit a diff for saved object types in typesToExclude',
+      'does not emit a diff for saved object types outside typesToInclude',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const headers = { ...cookieHeader, ...KBN_HEADERS };
-        const excludedId = `so-diff-excluded-${Date.now()}`;
+        const omittedId = `so-diff-omitted-${Date.now()}`;
         const controlId = `so-diff-control-${Date.now()}`;
 
-        // `visualization` is configured in typesToExclude. Create it first, then a control
-        // `index-pattern` (not excluded) to give a definite "the pipeline has flushed" signal.
-        const excludedRes = await apiClient.post(
-          `api/saved_objects/${EXCLUDED_TYPE}/${excludedId}`,
-          { headers, body: { attributes: { title: 'excluded' } }, responseType: 'json' }
+        // `visualization` is not in `typesToInclude`. Create it first, then a control
+        // `index-pattern` (allow-listed) to give a definite "the pipeline has flushed" signal.
+        const omittedRes = await apiClient.post(
+          `api/saved_objects/${NON_INCLUDED_TYPE}/${omittedId}`,
+          { headers, body: { attributes: { title: 'omitted' } }, responseType: 'json' }
         );
-        expect(excludedRes).toHaveStatusCode(200);
-        savedObjectsToCleanUp.push({ type: EXCLUDED_TYPE, id: excludedId });
+        expect(omittedRes).toHaveStatusCode(200);
+        savedObjectsToCleanUp.push({ type: NON_INCLUDED_TYPE, id: omittedId });
 
         const controlRes = await apiClient.post(`api/saved_objects/${TYPE}/${controlId}`, {
           headers,
@@ -300,12 +303,12 @@ apiTest.describe(
         expect(controlRes).toHaveStatusCode(200);
         savedObjectsToCleanUp.push({ type: TYPE, id: controlId });
 
-        // Once the control's diff event is present, the earlier excluded-type create has
+        // Once the control's diff event is present, the earlier non-allow-listed create has
         // been processed too — so if it were going to emit a diff, it already would have.
         await waitForDiffEvent('saved_object_create', controlId);
 
-        // The excluded type still gets its normal audit event, but no diff-bearing one.
-        expect(scanForDiff('saved_object_create', excludedId)).toBeUndefined();
+        // The non-allow-listed type still gets its normal audit event, but no diff-bearing one.
+        expect(scanForDiff('saved_object_create', omittedId)).toBeUndefined();
       }
     );
 

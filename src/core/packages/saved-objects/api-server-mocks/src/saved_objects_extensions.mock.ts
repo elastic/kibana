@@ -48,6 +48,11 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
     auditObjectsForSpaceDeletion: jest.fn(),
     emitSavedObjectDiffAuditEvent: jest.fn(),
     savedObjectDiffEnabled: false,
+    // Mirrors production: extra before-state reads only happen when the feature is on.
+    // Tests that assert allow-list skipping override this with mockReturnValue(false).
+    shouldComputeSavedObjectDiff: jest.fn(function (this: { savedObjectDiffEnabled: boolean }) {
+      return this.savedObjectDiffEnabled;
+    }),
     getCurrentUser: jest.fn(),
     includeSavedObjectNames: jest.fn(),
     authorizeChangeAccessControl: jest.fn(),

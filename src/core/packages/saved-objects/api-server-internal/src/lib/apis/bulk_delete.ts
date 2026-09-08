@@ -8,6 +8,7 @@
  */
 
 import pMap from 'p-map';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   AuthorizeUpdateObject,
   ISavedObjectTypeRegistry,
@@ -78,7 +79,8 @@ export const performBulkDelete = async <T>(
     objects,
     allowedTypes,
     registry,
-    securityExtension
+    securityExtension,
+    auditDiffRecorder
   );
   if (expectedBulkGetResults.length === 0) {
     return { statuses: [] };
@@ -173,41 +175,49 @@ export const performBulkDelete = async <T>(
     return { statuses: [...savedObjects] };
   }
 
-  // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
-  // mget keyed by object covers both single- and multi-namespace types correctly, and a
-  // normal (diff-disabled) bulk delete pays nothing extra. Results are matched back to
-  // objects by the returned `_id` (not by array position), so a reordered or partial mget
-  // response can never misattribute one object's attributes to another in the audit log.
-  // Failure-isolated: an mget error must not fail the delete — degrade to no before-state.
+  // Capture pre-delete attributes for the diff audit event (feature-gated).
+  // Multi-namespace objects already went through a preflight mget; when the
+  // type is allow-listed that request also pulls attributes, so we reuse it
+  // instead of a second round-trip. Single-namespace objects have no preflight,
+  // so they still need a dedicated mget. Results are matched by `_id` (not
+  // array position). Failure-isolated: an mget error must not fail the delete.
   if (auditDiffRecorder) {
     try {
-      const beforeAttrsRequests = validObjects.map(({ value: { type, id } }) => ({
+      const toBeforeRequest = ({ type, id }: { type: string; id: string }) => ({
         rawId: serializer.generateRawId(namespace, type, id),
         type,
         id,
-      }));
-      const objectByRawId = new Map(beforeAttrsRequests.map((req) => [req.rawId, req]));
-      const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
-        {
-          docs: beforeAttrsRequests.map(({ rawId, type }) => ({
-            _id: rawId,
-            _index: commonHelper.getIndexForType(type),
-            _source: [type],
-          })),
-        },
-        { ignore: [404] }
-      );
-      beforeDocs.docs?.forEach((doc) => {
-        if (!isMgetDoc(doc)) return;
-        const target = objectByRawId.get(doc._id);
-        if (!target) return;
-        const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
-        if (attrs) {
-          auditRecordsByKey
-            .get(`${target.type}:${target.id}`)
-            ?.setBefore(attrs as Record<string, unknown>);
-        }
       });
+
+      const multiNsRequests = validObjects.flatMap(({ value: { type, id } }) =>
+        registry.isMultiNamespace(type) && auditDiffRecorder.shouldComputeDiff(type)
+          ? [toBeforeRequest({ type, id })]
+          : []
+      );
+      applyBeforeAttrsFromMgetDocs(
+        multiNamespaceDocsResponse?.body.docs,
+        multiNsRequests,
+        auditRecordsByKey
+      );
+
+      const singleNsRequests = validObjects.flatMap(({ value: { type, id } }) =>
+        !registry.isMultiNamespace(type) && auditDiffRecorder.shouldComputeDiff(type)
+          ? [toBeforeRequest({ type, id })]
+          : []
+      );
+      if (singleNsRequests.length > 0) {
+        const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+          {
+            docs: singleNsRequests.map(({ rawId, type }) => ({
+              _id: rawId,
+              _index: commonHelper.getIndexForType(type),
+              _source: [type],
+            })),
+          },
+          { ignore: [404] }
+        );
+        applyBeforeAttrsFromMgetDocs(beforeDocs.docs, singleNsRequests, auditRecordsByKey);
+      }
     } catch (error) {
       logger.error(
         `Failed to fetch before-state for saved object diff on bulk delete: ${String(error)}`
@@ -324,7 +334,8 @@ function presortObjectsByNamespaceType(
   objects: SavedObjectsBulkDeleteObject[],
   allowedTypes: string[],
   registry: ISavedObjectTypeRegistry,
-  securityExtension?: ISavedObjectsSecurityExtension
+  securityExtension?: ISavedObjectsSecurityExtension,
+  auditDiffRecorder?: SavedObjectAuditDiffRecorder
 ) {
   let bulkGetRequestIndexCounter = 0;
   return objects.map<BulkDeleteExpectedBulkGetResult>((object) => {
@@ -337,16 +348,43 @@ function presortObjectsByNamespaceType(
       });
     }
     const requiresNamespacesCheck = registry.isMultiNamespace(type);
+    const nameFields = securityExtension?.includeSavedObjectNames()
+      ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
+      : [];
+    // Widen the preflight `_source` so allow-listed multi-namespace objects
+    // already have attributes for the diff — no second mget for those types.
+    const diffFields =
+      requiresNamespacesCheck && auditDiffRecorder?.shouldComputeDiff(type) ? [type] : [];
 
     return right({
       type,
       id,
-      fields: securityExtension?.includeSavedObjectNames()
-        ? SavedObjectsUtils.getIncludedNameFields(type, registry.getNameAttribute(type))
-        : [],
+      fields: [...nameFields, ...diffFields],
       ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
     });
   });
+}
+
+function applyBeforeAttrsFromMgetDocs(
+  docs: Array<estypes.MgetResponseItem<unknown>> | undefined,
+  requests: Array<{ rawId: string; type: string; id: string }>,
+  auditRecordsByKey: Map<string, WriteAuditRecord>
+) {
+  if (!docs || requests.length === 0) {
+    return;
+  }
+  const objectByRawId = new Map(requests.map((req) => [req.rawId, req]));
+  for (const doc of docs) {
+    if (!isMgetDoc(doc)) continue;
+    const target = objectByRawId.get(doc._id);
+    if (!target) continue;
+    const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
+    if (attrs) {
+      auditRecordsByKey
+        .get(`${target.type}:${target.id}`)
+        ?.setBefore(attrs as Record<string, unknown>);
+    }
+  }
 }
 
 /**

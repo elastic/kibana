@@ -95,5 +95,18 @@ export const applyAuditOtelFieldMap: OtelAttributesTransform = (attributes) => {
     attrs['http.request.method'] = method.toUpperCase();
   }
 
+  // kibana.diff.ops is an array of objects — not a valid OTel AttributeValue, so the SDK
+  // would silently drop it. Reassemble the flattened diff keys into one JSON string.
+  const diffPrefix = 'kibana.diff.';
+  const diffEntries = Object.entries(attrs).filter(([key]) => key.startsWith(diffPrefix));
+  if (diffEntries.length > 0) {
+    const diff: Record<string, unknown> = {};
+    for (const [key, value] of diffEntries) {
+      diff[key.slice(diffPrefix.length)] = value;
+      delete attrs[key];
+    }
+    attrs['kibana.diff'] = JSON.stringify(diff);
+  }
+
   return attrs;
 };

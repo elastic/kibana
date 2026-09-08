@@ -62,9 +62,9 @@ export const performDelete = async <T>(
         _source_includes: [
           ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
           'accessControl',
-          // Only fetch the full attributes (needed for the saved object diff) when the
-          // feature is enabled, to avoid paying that cost on every delete.
-          ...(auditDiffRecorder ? [type] : []),
+          // Only fetch the full attributes (needed for the saved object diff) when
+          // this type is on the allow list, to avoid paying that cost otherwise.
+          ...(auditDiffRecorder?.shouldComputeDiff(type) ? [type] : []),
         ],
       },
       { ignore: [404], meta: true }
@@ -90,9 +90,14 @@ export const performDelete = async <T>(
   const rawId = serializer.generateRawId(namespace, type, id);
 
   // Track the delete for auditing (flushed by the repository once the operation
-  // settles). The before-attributes were captured by the feature-gated fetch above;
-  // empty attributes still audit — the delete itself is the audit signal.
-  const auditRecord = auditDiffRecorder?.track({ type, id }, { before: deleteBeforeAttributes });
+  // settles). For multi-namespace types the raw ID is not space-scoped, so the
+  // fetched before-attributes may belong to an object outside the current space;
+  // recording them is deferred until the namespace preflight below confirms the
+  // object is in scope, so out-of-space rejections audit without a snapshot.
+  const auditRecord = auditDiffRecorder?.track(
+    { type, id },
+    registry.isMultiNamespace(type) ? {} : { before: deleteBeforeAttributes }
+  );
   let preflightResult: PreflightCheckNamespacesResult | undefined;
 
   if (registry.isMultiNamespace(type)) {
@@ -117,6 +122,7 @@ export const performDelete = async <T>(
         'Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway'
       );
     }
+    auditRecord?.setBefore(deleteBeforeAttributes);
   }
 
   const { body, statusCode, headers } = await client.delete(

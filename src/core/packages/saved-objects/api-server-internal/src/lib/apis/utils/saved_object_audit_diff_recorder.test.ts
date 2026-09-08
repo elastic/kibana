@@ -25,6 +25,7 @@ describe('SavedObjectAuditDiffRecorder', () => {
     emitSavedObjectDiffAuditEvent = jest.fn();
     securityExtension = {
       emitSavedObjectDiffAuditEvent,
+      shouldComputeSavedObjectDiff: jest.fn().mockReturnValue(true),
     } as unknown as ISavedObjectsSecurityExtension;
     encryptionExtension = {
       getEncryptedAttributes: jest.fn().mockReturnValue(undefined),
@@ -38,6 +39,14 @@ describe('SavedObjectAuditDiffRecorder', () => {
     });
   };
 
+  it('shouldComputeDiff delegates to the security extension allow list', () => {
+    const recorder = setup();
+    (securityExtension.shouldComputeSavedObjectDiff as jest.Mock).mockReturnValueOnce(false);
+
+    expect(recorder.shouldComputeDiff('dashboard')).toBe(false);
+    expect(securityExtension.shouldComputeSavedObjectDiff).toHaveBeenCalledWith('dashboard');
+  });
+
   it('emits an unknown-outcome event with empty attributes for a tracked object by default', () => {
     const recorder = setup();
     recorder.track({ type: 'dashboard', id: '1' });
@@ -50,13 +59,13 @@ describe('SavedObjectAuditDiffRecorder', () => {
       outcome: 'unknown',
       before: {},
       after: {},
-      fieldsToRedact: undefined,
+      attributesToRedact: undefined,
     });
   });
 
   it('emits a success event with the recorded before/after attributes', () => {
     const recorder = setup();
-    const record = recorder.track({ type: 'dashboard', id: '1' }, { after: { title: 'req' } });
+    const record = recorder.track({ type: 'dashboard', id: '1' });
     record.setBefore({ title: 'old' });
     record.setAfter({ title: 'new' });
     record.succeed();
@@ -71,22 +80,23 @@ describe('SavedObjectAuditDiffRecorder', () => {
     );
   });
 
-  it('forwards the encryption extension attributes as fieldsToRedact', () => {
+  it('forwards the encryption extension attributes as attributesToRedact', () => {
     const recorder = setup();
     (encryptionExtension.getEncryptedAttributes as jest.Mock).mockReturnValue(new Set(['secrets']));
-    recorder.track({ type: 'connector', id: '1' }, { after: { secrets: 'x' } });
+    recorder.track({ type: 'connector', id: '1' }).setAfter({ secrets: 'x' });
     recorder.flush();
 
     expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ fieldsToRedact: ['secrets'] })
+      expect.objectContaining({ attributesToRedact: ['secrets'] })
     );
   });
 
   it('re-tracking the same object replaces its recorded state', () => {
     const recorder = setup();
-    const first = recorder.track({ type: 'dashboard', id: '1' }, { after: { title: 'a' } });
+    const first = recorder.track({ type: 'dashboard', id: '1' });
+    first.setAfter({ title: 'a' });
     first.succeed();
-    recorder.track({ type: 'dashboard', id: '1' }, { after: { title: 'b' } });
+    recorder.track({ type: 'dashboard', id: '1' }).setAfter({ title: 'b' });
     recorder.flush();
 
     expect(emitSavedObjectDiffAuditEvent).toHaveBeenCalledTimes(1);

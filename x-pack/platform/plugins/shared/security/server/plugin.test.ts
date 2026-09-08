@@ -120,18 +120,18 @@ describe('Security Plugin', () => {
       return (setupSavedObjects as jest.Mock).mock.calls[0][0];
     };
 
-    it('derives enabled + typesToExclude + fieldSizeLimit (in bytes) when the block is on', () => {
+    it('derives enabled + typesToInclude + fieldSizeLimit (in bytes) when the block is on', () => {
       const params = setupWithAudit({
         enabled: true,
         savedObjectDiff: {
           enabled: true,
-          typesToExclude: ['dashboard'],
+          typesToInclude: ['dashboard'],
           fieldSizeLimit: '20kb',
         },
       });
       expect(params).toMatchObject({
         savedObjectDiffEnabled: true,
-        savedObjectDiffTypesToExclude: ['dashboard'],
+        savedObjectDiffTypesToInclude: ['dashboard'],
         savedObjectDiffFieldSizeLimit: 20480,
       });
     });
@@ -139,7 +139,7 @@ describe('Security Plugin', () => {
     it('leaves enabled=false and the other params undefined when the block is absent', () => {
       const params = setupWithAudit({ enabled: true });
       expect(params.savedObjectDiffEnabled).toBe(false);
-      expect(params.savedObjectDiffTypesToExclude).toBeUndefined();
+      expect(params.savedObjectDiffTypesToInclude).toBeUndefined();
       expect(params.savedObjectDiffFieldSizeLimit).toBeUndefined();
     });
 
@@ -151,7 +151,7 @@ describe('Security Plugin', () => {
       const params = setupWithAudit({ enabled: true, savedObjectDiff: { enabled: false } });
       expect(params).toMatchObject({
         savedObjectDiffEnabled: false,
-        savedObjectDiffTypesToExclude: [],
+        savedObjectDiffTypesToInclude: [],
         savedObjectDiffFieldSizeLimit: 49152,
       });
     });

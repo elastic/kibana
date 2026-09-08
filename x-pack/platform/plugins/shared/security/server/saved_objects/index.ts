@@ -24,7 +24,7 @@ interface SetupSavedObjectsParams {
   savedObjects: CoreSetup['savedObjects'];
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   savedObjectDiffEnabled?: boolean;
-  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffTypesToInclude?: string[];
   savedObjectDiffFieldSizeLimit?: number;
   logger?: Logger;
 }
@@ -35,7 +35,7 @@ export function setupSavedObjects({
   savedObjects,
   getCurrentUser,
   savedObjectDiffEnabled,
-  savedObjectDiffTypesToExclude,
+  savedObjectDiffTypesToInclude,
   savedObjectDiffFieldSizeLimit,
   logger,
 }: SetupSavedObjectsParams) {
@@ -67,7 +67,7 @@ export function setupSavedObjects({
           getCurrentUser: () => getCurrentUser(request),
           typeRegistry,
           savedObjectDiffEnabled,
-          savedObjectDiffTypesToExclude,
+          savedObjectDiffTypesToInclude,
           savedObjectDiffFieldSizeLimit,
           logger,
         })
