@@ -45,6 +45,7 @@ describe('registerNightshiftFeature', () => {
     expect(feature).toMatchObject({
       id: NIGHTSHIFT_FEATURE_ID,
       category: DEFAULT_APP_CATEGORIES.observability,
+      minimumLicense: 'enterprise',
       app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
       privileges: {
         all: {
@@ -87,6 +88,8 @@ describe('registerNightshiftFeature', () => {
       NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read
     );
 
+    expect(feature.subFeatures?.[0].name).toBe('Context Engine');
+
     expect(contextAll).toMatchObject({
       includeIn: 'all',
       app: [SIGNIFICANT_EVENTS_APP_ID],
@@ -109,7 +112,7 @@ describe('registerNightshiftFeature', () => {
     });
     expect(detectionAll).toMatchObject({
       includeIn: 'all',
-      app: [SIGNIFICANT_EVENTS_APP_ID],
+      app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
       api: [
         NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read,
         NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
@@ -121,7 +124,7 @@ describe('registerNightshiftFeature', () => {
     });
     expect(detectionRead).toMatchObject({
       includeIn: 'read',
-      app: [SIGNIFICANT_EVENTS_APP_ID],
+      app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
       api: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
       ui: [NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.show],
     });

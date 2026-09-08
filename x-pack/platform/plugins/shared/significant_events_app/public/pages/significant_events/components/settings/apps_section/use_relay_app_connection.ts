@@ -39,9 +39,14 @@ export interface UseRelayAppConnection {
 
 export function useRelayAppConnection(): UseRelayAppConnection {
   const {
-    core: { http, notifications },
+    core: {
+      http,
+      notifications,
+      application: { capabilities },
+    },
   } = useKibana();
   const queryClient = useQueryClient();
+  const canReadStreams = capabilities.streams?.show === true;
 
   // Deadline until which we keep polling status while an install is in progress.
   // Reset to 0 (no polling) on disconnect, and pushed forward on connect.
@@ -49,6 +54,7 @@ export function useRelayAppConnection(): UseRelayAppConnection {
 
   const statusQuery = useQuery<SlackAppStatusResponse, Error>({
     queryKey: RELAY_APP_CONNECTION_STATUS_QUERY_KEY,
+    enabled: canReadStreams,
     queryFn: ({ signal }) => http.get<SlackAppStatusResponse>(STATUS_ROUTE, { signal }),
     // Status is best-effort; surface nothing on transient errors.
     retry: false,

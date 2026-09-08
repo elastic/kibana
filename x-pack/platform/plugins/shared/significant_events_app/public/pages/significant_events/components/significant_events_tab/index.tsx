@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { capitalize } from 'lodash';
 import useInterval from 'react-use/lib/useInterval';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import {
   getSeverityLabel,
   severitySchema,
@@ -43,7 +43,7 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
-import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useOptionalKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
@@ -95,8 +95,7 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
       },
     },
   } = useKibana();
-  const canManageInvestigation =
-    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const { canManageInvestigation } = getNightshiftCapabilities(nightshift);
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
 
@@ -124,9 +123,17 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
 };
 
 const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
+  const {
+    core: {
+      application: {
+        capabilities: { nightshift },
+      },
+    },
+  } = useKibana();
+  const { canManageDetection } = getNightshiftCapabilities(nightshift);
   const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
 
-  if (event.status === 'closed') {
+  if (!canManageDetection || event.status === 'closed') {
     return null;
   }
 
@@ -351,7 +358,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { filteredStreams } = useKiGeneration();
+  const { filteredStreams } = useOptionalKiGeneration() ?? {};
   // Closed events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
@@ -383,7 +390,7 @@ export const SignificantEventsTab = () => {
   }, [selectedEventId]);
 
   const streamOptions = useMemo(
-    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
+    () => (filteredStreams ?? []).map((stream) => stream.stream.name).sort(),
     [filteredStreams]
   );
 

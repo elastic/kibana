@@ -14,7 +14,7 @@ const request = {} as KibanaRequest;
 
 const createServer = (hasAllRequested: boolean) => {
   const globally = jest.fn().mockResolvedValue({ hasAllRequested });
-  const get = jest.fn().mockReturnValue('streams-manage-action');
+  const get = jest.fn().mockImplementation((privilege: string) => privilege);
   const server = {
     security: {
       authz: {
@@ -34,7 +34,7 @@ describe('run quota global management privilege', () => {
     await expect(canManageRunQuotas({ request, server })).resolves.toBe(true);
     expect(get).toHaveBeenCalledWith(NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage);
     expect(globally).toHaveBeenCalledWith({
-      kibana: ['streams-manage-action'],
+      kibana: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
     });
   });
 

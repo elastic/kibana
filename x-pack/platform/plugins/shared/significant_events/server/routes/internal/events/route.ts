@@ -21,10 +21,11 @@ import {
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { notFound, serverUnavailable } from '@hapi/boom';
+import { forbidden, notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import {
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_EVENT_READ_PRIVILEGES,
   NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import {
@@ -99,7 +100,7 @@ const eventsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_EVENT_READ_PRIVILEGES] }],
     },
   },
   params: z.object({
@@ -164,7 +165,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_EVENT_READ_PRIVILEGES] }],
     },
   },
   params: z.object({
@@ -242,6 +243,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   security: {
     authz: {
       requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      extendedPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -260,6 +262,14 @@ const eventsAttachInvestigationRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
+    const canMutateDetectionFields =
+      request.authzResult?.[NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage] === true;
+
+    if (triggerFeedback != null && triggerFeedback.length > 0 && !canMutateDetectionFields) {
+      throw forbidden(
+        'Applying trigger feedback requires Detection Engine manage; Investigation Engine manage can only attach the run record'
+      );
+    }
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),

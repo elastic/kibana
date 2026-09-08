@@ -9,7 +9,7 @@ export { apiTest } from '@kbn/scout';
 export {
   COMMON_HEADERS,
   INVESTIGATIONS_READ_ROLE,
-  INVESTIGATIONS_WRITE_ROLE,
+  INVESTIGATIONS_MANAGE_ROLE,
   NO_INVESTIGATION_ENGINE_ROLE,
 } from './constants';
 export {

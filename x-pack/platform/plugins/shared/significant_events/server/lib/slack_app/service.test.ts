@@ -169,7 +169,7 @@ describe('SlackAppService', () => {
           {
             spaces: ['*'],
             feature: {
-              significantEvents: ['read'],
+              nightshift: ['read'],
               streams: ['read'],
               agentBuilder: ['read'],
               actions: ['read'],

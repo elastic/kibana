@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
+  NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES,
   NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
+  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import type {
   SignificantEventsMaintenanceStatus,
@@ -16,6 +17,7 @@ import type {
 } from '../../../../common/maintenance/types';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertCanManageNightshiftActivityGlobally } from '../../../lib/maintenance/privileges';
 import { bootstrapCleanupWorkflow } from '../../../lib/workflows/cleanup_workflow';
 
 const bootstrapCleanupRoute = createServerRoute({
@@ -23,14 +25,12 @@ const bootstrapCleanupRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Bootstrap stale Significant Events cleanup for the current space',
+    description:
+      'Detection Engine manage only. The minted cleanup key calls events/_cleanup, which is Detection manage. Context Engine can pause activity but must not install a key that cannot run cleanup.',
   },
   security: {
     authz: {
-      requiredPrivileges: [
-        {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
-        },
-      ],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({}),
@@ -65,13 +65,13 @@ const pauseRoute = createServerRoute({
     summary: 'Pause Significant Events activity',
     description:
       'Disables all Significant Events managed workflows across every Kibana space, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. Existing data is kept. Idempotent while paused. ' +
-      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization uses the caller’s space-scoped Context Engine, Detection Engine, or Investigation Engine manage privilege; there is no separate cluster-level privilege today — treat any engine manage privilege as sufficient to pause the whole deployment.',
+      'This is a deployment-wide control (agnostic saved object), not per-space. Authorization requires Context Engine or Detection Engine manage in every space. Investigation Engine manage is not enough.',
   },
   security: {
     authz: {
       requiredPrivileges: [
         {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
+          anyRequired: [...NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES],
         },
       ],
     },
@@ -85,6 +85,7 @@ const pauseRoute = createServerRoute({
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCanManageNightshiftActivityGlobally({ request, server });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.pause({ request, updatedBy });
@@ -98,13 +99,13 @@ const resumeRoute = createServerRoute({
     summary: 'Resume Significant Events activity',
     description:
       'Re-enables the managed workflows and alerting rules that Pause disabled across the deployment. Does not restart cancelled executions. Idempotent while enabled. ' +
-      'Deployment-wide (same privilege model as Pause): any Nightshift engine manage privilege gates the call.',
+      'Deployment-wide (same privilege model as Pause): Context Engine or Detection Engine manage in every space.',
   },
   security: {
     authz: {
       requiredPrivileges: [
         {
-          anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES],
+          anyRequired: [...NIGHTSHIFT_ACTIVITY_MANAGE_PRIVILEGES],
         },
       ],
     },
@@ -118,6 +119,7 @@ const resumeRoute = createServerRoute({
   }): Promise<SignificantEventsMaintenanceSummary> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    await assertCanManageNightshiftActivityGlobally({ request, server });
 
     const updatedBy = server.core.security.authc.getCurrentUser(request)?.username;
     return maintenanceService.resume({ request, updatedBy });

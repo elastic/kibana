@@ -21,6 +21,11 @@ export function useFetchStreams(
   } = {}
 ) {
   const {
+    core: {
+      application: {
+        capabilities: { streams },
+      },
+    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -28,18 +33,19 @@ export function useFetchStreams(
     },
   } = useKibana();
   const showFetchErrorToast = useFetchErrorToast();
+  const canReadStreams = streams?.show === true;
 
   const fetchStreams = async ({ signal }: QueryFunctionContext): Promise<StreamsFetchResult> => {
-    // GET /internal/streams is authorized with Streams `read_stream`, not
-    // `read_significant_events`. A significantEvents-only role can open this
-    // app and still 403 the stream list. Streams read stays required for the
-    // Streams tab and Settings stream matching until we add an SE-owned list.
+    // GET /internal/streams is Streams `read_stream` (`capabilities.streams.show`),
+    // not a Nightshift engine privilege. Nightshift Management can open without
+    // Streams read; skip the list rather than 403 the page.
     return streamsRepositoryClient.fetch('GET /internal/streams', { signal: signal ?? null });
   };
 
   return useQuery<StreamsFetchResult, Error>({
     queryKey: ['streamList'],
     queryFn: fetchStreams,
+    enabled: canReadStreams,
     onError: showFetchErrorToast,
     select: options?.select,
   });

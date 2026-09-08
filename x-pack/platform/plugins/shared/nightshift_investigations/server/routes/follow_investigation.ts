@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { notFound } from '@hapi/boom';
 import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { concat, from, map, of, switchMap, takeWhile, timer } from 'rxjs';
-import type { InvestigationStatusEvent } from '../../common';
-import { InvestigationNotFoundError } from '../client/errors';
+import { MAX_KEYWORD_LENGTH, type InvestigationStatusEvent } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
 const POLL_INTERVAL_MS = 2_000;
 type SerializableInvestigationStatusEvent = InvestigationStatusEvent & Record<string, unknown>;
@@ -45,7 +44,7 @@ export const followInvestigationRoute = createNightshiftInvestigationsServerRout
   },
   params: z.object({
     path: z.object({
-      id: z.string().min(1).max(500),
+      id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
     }),
   }),
   handler: async ({ request, params, getInvestigationsClient }) => {
@@ -53,11 +52,8 @@ export const followInvestigationRoute = createNightshiftInvestigationsServerRout
     const getInvestigation = async () => {
       try {
         return await investigationClient.get(params.path.id);
-      } catch (err) {
-        if (err instanceof InvestigationNotFoundError) {
-          throw notFound(err.message);
-        }
-        throw err;
+      } catch (error) {
+        rethrowInvestigationClientError(error);
       }
     };
 

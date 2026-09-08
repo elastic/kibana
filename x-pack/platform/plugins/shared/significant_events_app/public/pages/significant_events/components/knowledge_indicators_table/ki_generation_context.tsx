@@ -286,3 +286,7 @@ export function useKiGeneration(): KiGenerationContextValue {
   }
   return context;
 }
+
+export function useOptionalKiGeneration(): KiGenerationContextValue | undefined {
+  return useContext(KiGenerationReactContext) ?? undefined;
+}

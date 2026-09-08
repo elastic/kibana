@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { internalEventsRoutes } from './route';
 
 const mockCleanupStaleEvents = jest.fn();
+const mockAttachInvestigationToEvent = jest.fn();
 
 jest.mock('../../../lib/significant_events/events/cleanup_stale_events', () => ({
   cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+}));
+
+jest.mock('../../../lib/significant_events/events/attach_investigation', () => ({
+  attachInvestigationToEvent: (...args: unknown[]) => mockAttachInvestigationToEvent(...args),
 }));
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -20,10 +26,28 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 
 const investigateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
+const attachRoute =
+  internalEventsRoutes['POST /internal/significant_events/events/{id}/investigations'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
+
+const attachInvestigationBody = {
+  workflow_execution_id: 'exec-1',
+  started_at: '2026-01-01T00:00:00.000Z',
+  completed_at: '2026-01-01T00:01:00.000Z',
+};
+
+const triggerFeedback = [
+  {
+    field: 'severity' as const,
+    from: '40-medium' as const,
+    to: '80-critical' as const,
+    reason: 'The outage is broader than the original medium rating.',
+    evidence: [{ description: 'Error rate stayed above 40% for 20 minutes.' }],
+  },
+];
 
 type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
 
@@ -54,6 +78,80 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       candidateRuleIds: ['rule-1'],
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
+  });
+});
+
+describe('POST /internal/significant_events/events/{id}/investigations', () => {
+  const handlerParams = {
+    params: {
+      path: { id: 'event-1' },
+      body: attachInvestigationBody,
+    },
+    request: { authzResult: {} },
+    getScopedClients: jest.fn().mockResolvedValue({
+      licensing: {},
+      getEventClient: () => ({}),
+    }),
+    server: {},
+    logger: { warn: jest.fn() },
+  };
+
+  beforeEach(() => {
+    mockAttachInvestigationToEvent.mockReset();
+  });
+
+  it('rejects trigger_feedback without Detection Engine manage', async () => {
+    await expect(
+      attachRoute.handler({
+        ...handlerParams,
+        params: {
+          path: { id: 'event-1' },
+          body: { ...attachInvestigationBody, trigger_feedback: triggerFeedback },
+        },
+      } as never)
+    ).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(mockAttachInvestigationToEvent).not.toHaveBeenCalled();
+  });
+
+  it('applies trigger_feedback when Detection Engine manage is granted', async () => {
+    mockAttachInvestigationToEvent.mockResolvedValue({ updated: 1, ignored: 0 });
+
+    await expect(
+      attachRoute.handler({
+        ...handlerParams,
+        params: {
+          path: { id: 'event-1' },
+          body: { ...attachInvestigationBody, trigger_feedback: triggerFeedback },
+        },
+        request: {
+          authzResult: {
+            [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage]: true,
+          },
+        },
+      } as never)
+    ).resolves.toEqual({ updated: 1, ignored: 0 });
+    expect(mockAttachInvestigationToEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventId: 'event-1',
+        triggerFeedback,
+      })
+    );
+  });
+
+  it('attaches the run record without Detection Engine manage when trigger_feedback is absent', async () => {
+    mockAttachInvestigationToEvent.mockResolvedValue({ updated: 1, ignored: 0 });
+
+    await expect(attachRoute.handler(handlerParams as never)).resolves.toEqual({
+      updated: 1,
+      ignored: 0,
+    });
+    expect(mockAttachInvestigationToEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerFeedback: undefined,
+      })
+    );
   });
 });
 

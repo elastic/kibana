@@ -69,12 +69,36 @@ describe('useRelayAppConnection', () => {
       core: {
         http: { get: httpGet, post: httpPost },
         notifications: { toasts: { addError } },
+        application: {
+          capabilities: {
+            streams: { show: true },
+          },
+        },
       },
     } as any);
   });
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('does not fetch Slack status without Streams show', async () => {
+    mockUseKibana.mockReturnValue({
+      core: {
+        http: { get: httpGet, post: httpPost },
+        notifications: { toasts: { addError } },
+        application: {
+          capabilities: {
+            streams: { show: false },
+          },
+        },
+      },
+    } as any);
+    const { wrapper } = createSetup();
+    renderHook(() => useRelayAppConnection(), { wrapper });
+
+    await flush();
+    expect(httpGet).not.toHaveBeenCalled();
   });
 
   it('does not poll when the connection is not in progress', async () => {

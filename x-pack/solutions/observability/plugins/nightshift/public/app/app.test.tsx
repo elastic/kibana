@@ -152,6 +152,13 @@ describe('NightshiftApp', () => {
       services: {
         agentBuilder: { openChat },
         application: {
+          capabilities: {
+            nightshift: {
+              detection_engine_show: true,
+              detection_engine_manage: true,
+              context_engine_show: true,
+            },
+          },
           getUrlForApp: (appId: string, options?: { path?: string; deepLinkId?: string }) => {
             // Mirror the registered appRoute (`/app/significant_events`), not the camelCase app id.
             const base =

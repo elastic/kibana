@@ -93,6 +93,15 @@ const mockOpenChat = jest.fn();
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
+      application: {
+        capabilities: {
+          nightshift: {
+            investigation_engine_show: true,
+            detection_engine_show: true,
+          },
+        },
+        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+      },
       http: { basePath: { prepend: (path: string) => path } },
       agentBuilder: { openChat: mockOpenChat },
       notifications: {
@@ -112,9 +121,6 @@ jest.mock('../hooks/use_kibana', () => ({
             get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
           },
         },
-      },
-      application: {
-        getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
       },
     },
   }),

@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KIS_ONBOARDING_IN_PROGRESS_STATUSES } from '@kbn/significant-events-schema';
 import React, { useCallback, useMemo, useState } from 'react';
-import { NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { TableRow } from './utils';
 import { parseSearchQuery } from './utils';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -32,7 +32,7 @@ export function StreamsView() {
       },
     },
   } = useKibana();
-  const canManage = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
+  const { canManageContext, canManageDetection } = getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
 
@@ -132,7 +132,7 @@ export function StreamsView() {
               isClearable
             />
           </EuiFlexItem>
-          {canManage && (
+          {canManageContext && (
             <EuiFlexItem grow={false}>
               <GenerateSplitButton
                 size="s"
@@ -159,7 +159,7 @@ export function StreamsView() {
               />
             </EuiFlexItem>
           )}
-          {canManage && (
+          {canManageDetection && (
             <EuiFlexItem grow={false}>
               <FindSignificantEventsButton
                 onRun={handleRun}
@@ -191,9 +191,9 @@ export function StreamsView() {
           searchQuery={searchQuery}
           blocksActivity={blocksActivity}
           activityBlockTooltip={activityBlockTooltip}
-          canManage={canManage}
+          canManage={canManageContext}
           selection={
-            canManage
+            canManageContext
               ? {
                   selected: selectedStreams,
                   onSelectionChange: setSelectedStreams,

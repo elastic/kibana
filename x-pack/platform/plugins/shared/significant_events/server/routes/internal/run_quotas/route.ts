@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES,
+  NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
+  NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import {
   MAX_RUN_LIMIT,
   MIN_RUN_LIMIT,
@@ -55,6 +62,12 @@ const consumeRequestSchema = z.discriminatedUnion('group', [
   z.object({ group: z.literal('investigation'), critical: z.boolean() }).strict(),
 ]);
 
+const CONSUME_GROUP_PRIVILEGES = {
+  detection: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
+  ki_extraction: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
+  investigation: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
+} as const;
+
 const readRunQuotaSnapshot = async ({
   internalRepository,
   settings,
@@ -99,7 +112,7 @@ const getRunQuotasRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES] }],
     },
   },
   params: z.object({}),
@@ -122,6 +135,8 @@ const putRunQuotasRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Update Significant Events daily run limits',
+    description:
+      'Context Engine manage is the shared capacity admin for every group, including investigation. The handler then repeats the check globally so a one-space manager cannot change deployment-wide limits.',
   },
   security: {
     authz: {
@@ -153,10 +168,12 @@ const consumeRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Consume one Significant Events scheduled run quota',
+    description:
+      'Route-level any-engine manage opens the door. The handler then requires the engine that owns `group` via `authzResult` (detection / ki_extraction / investigation).',
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_ANY_ENGINE_MANAGE_PRIVILEGES] }],
     },
   },
   params: z.object({
@@ -165,6 +182,10 @@ const consumeRoute = createServerRoute({
   handler: async ({ params, request, server, getScopedClients }) => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
+    const requiredPrivilege = CONSUME_GROUP_PRIVILEGES[params.body.group];
+    if (request.authzResult?.[requiredPrivilege] !== true) {
+      throw forbidden(`Consuming ${params.body.group} run quota requires ${requiredPrivilege}`);
+    }
     const allowOverLimit = params.body.group === 'investigation' && params.body.critical;
 
     return consumeRunQuota({

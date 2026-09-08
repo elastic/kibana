@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import {
   apiTest,
   INVESTIGATIONS_READ_ROLE,
-  INVESTIGATIONS_WRITE_ROLE,
+  INVESTIGATIONS_MANAGE_ROLE,
   seedInvestigation,
   deleteInvestigation,
   getInvestigation,
@@ -26,7 +26,7 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth }) => {
-      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE));
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE));
     });
 
     apiTest.beforeEach(async ({ kbnClient }) => {

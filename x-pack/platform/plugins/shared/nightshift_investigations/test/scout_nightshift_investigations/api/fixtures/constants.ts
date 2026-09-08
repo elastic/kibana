@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout';
+import { NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES } from '@kbn/nightshift-shared';
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'true',
@@ -25,18 +26,22 @@ export const INVESTIGATIONS_READ_ROLE: KibanaRole = {
   kibana: [
     {
       base: [],
-      feature: { nightshift: ['minimal_all', 'investigation_engine_read'] },
+      feature: {
+        nightshift: ['minimal_all', NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read],
+      },
       spaces: ['*'],
     },
   ],
 };
 
-export const INVESTIGATIONS_WRITE_ROLE: KibanaRole = {
+export const INVESTIGATIONS_MANAGE_ROLE: KibanaRole = {
   elasticsearch: { cluster: [], indices: [] },
   kibana: [
     {
       base: [],
-      feature: { nightshift: ['minimal_all', 'investigation_engine_all'] },
+      feature: {
+        nightshift: ['minimal_all', NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all],
+      },
       spaces: ['*'],
     },
   ],

@@ -40,17 +40,7 @@ apiTest.describe(
       'allows a Nightshift reader to inspect the deployment-wide snapshot',
       async ({ apiClient, samlAuth, config }) => {
         const users = getSignificantEventsUsers(config);
-        const nightshiftRead = {
-          ...users.nightshiftAll,
-          kibana: [
-            {
-              base: [],
-              feature: { nightshift: ['read'] },
-              spaces: ['*'],
-            },
-          ],
-        };
-        const { cookieHeader } = await samlAuth.asInteractiveUser(nightshiftRead);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(users.nightshiftRead);
 
         const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },

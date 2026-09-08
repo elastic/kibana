@@ -28,7 +28,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import {
@@ -62,7 +62,7 @@ export function MemoryTab() {
       },
     },
   } = useKibana();
-  const canManage = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
+  const { canManageContext } = getNightshiftCapabilities(nightshift);
 
   const { data: treeData, isLoading: isTreeLoading } = useMemoryTree();
   const { data: searchData, isLoading: isSearchLoading } = useMemorySearch(searchQuery);
@@ -198,7 +198,7 @@ export function MemoryTab() {
                     data-test-subj="streamsMemorySearch"
                   />
                 </EuiFlexItem>
-                {canManage && (
+                {canManageContext && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
                       content={i18n.translate('xpack.significantEventsApp.memory.newEntryButton', {
@@ -220,7 +220,7 @@ export function MemoryTab() {
                     </EuiToolTip>
                   </EuiFlexItem>
                 )}
-                {canManage && (
+                {canManageContext && (
                   <EuiFlexItem grow={false}>
                     <EuiPopover
                       aria-label={i18n.translate(
@@ -302,7 +302,7 @@ export function MemoryTab() {
                                 )}
                           </EuiContextMenuItem>,
                           ...workflowActions
-                            .filter((action) => !action.requiresManage || canManage)
+                            .filter((action) => !action.requiresManage || canManageContext)
                             .map((action) => {
                               const isDisabled =
                                 action.mutation.isLoading ||
@@ -407,7 +407,7 @@ export function MemoryTab() {
                 />
               ) : (
                 <EuiText color="subdued">
-                  {canManage
+                  {canManageContext
                     ? i18n.translate('xpack.significantEventsApp.memory.empty', {
                         defaultMessage:
                           'No memory entries yet. Agents will automatically create entries as they learn, or you can create entries manually.',
@@ -464,7 +464,7 @@ export function MemoryTab() {
         <EntryFlyout
           entryId={selectedEntryId}
           onClose={() => setSelectedEntryId(null)}
-          canManage={canManage}
+          canManage={canManageContext}
         />
       )}
       {selectedChange && (

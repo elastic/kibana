@@ -37,7 +37,12 @@ jest.mock('../../../../hooks/use_kibana', () => ({
     core: {
       notifications: { toasts: { addSuccess: jest.fn() } },
       application: {
-        capabilities: { nightshift: { investigation_engine_manage: true } },
+        capabilities: {
+          nightshift: {
+            investigation_engine_manage: true,
+            detection_engine_manage: true,
+          },
+        },
       },
     },
     dependencies: {
@@ -97,6 +102,7 @@ jest.mock('../../../../hooks/use_time_range_update', () => ({
 }));
 jest.mock('../knowledge_indicators_table/ki_generation_context', () => ({
   useKiGeneration: jest.fn(() => ({ filteredStreams: [] })),
+  useOptionalKiGeneration: jest.fn(() => ({ filteredStreams: [] })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({

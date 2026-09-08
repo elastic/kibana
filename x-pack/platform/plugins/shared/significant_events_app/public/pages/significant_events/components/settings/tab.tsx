@@ -49,11 +49,7 @@ import {
   MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES,
   MIN_SIG_EVENTS_SCHEDULED_REVIEW_PASSES,
 } from '@kbn/significant-events-plugin/common';
-import {
-  NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { canPauseNightshiftActivity, getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useModelSettingsUrl } from '../../../../hooks/use_model_settings_url';
 import { getFormattedError } from '../../../../util/errors';
@@ -86,13 +82,11 @@ export function SettingsTab() {
   // routes used by `core.settings.client` / `globalClient` (require
   // `advancedSettings.save`). Gate each section on the engine that owns it so
   // the user never triggers a partial save that 403s halfway through.
-  const nightshift = core.application.capabilities.nightshift;
-  const canManageContext = nightshift?.[NIGHTSHIFT_CONTEXT_ENGINE_UI_PRIVILEGES.manage] === true;
-  const canManageDetection =
-    nightshift?.[NIGHTSHIFT_DETECTION_ENGINE_UI_PRIVILEGES.manage] === true;
-  const canManageInvestigation =
-    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
-  const canManage = canManageContext || canManageDetection || canManageInvestigation;
+  const nightshiftCapabilities = getNightshiftCapabilities(
+    core.application.capabilities.nightshift
+  );
+  const { canManageContext, canManageDetection } = nightshiftCapabilities;
+  const canPauseActivity = canPauseNightshiftActivity(nightshiftCapabilities);
   const canSaveAdvancedSettings = core.application.capabilities.advancedSettings?.save === true;
   const canEditContextSettings = canManageContext && canSaveAdvancedSettings;
   const canEditDetectionSettings = canManageDetection && canSaveAdvancedSettings;
@@ -316,7 +310,7 @@ export function SettingsTab() {
           <EuiSpacer />
         </>
       )}
-      <MaintenanceSection canManage={canManage} />
+      <MaintenanceSection canManage={canPauseActivity} />
 
       <EuiSpacer />
 

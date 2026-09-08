@@ -444,6 +444,10 @@ steps:
                           ${{ steps.check_prior_investigation.error != null
                             or steps.check_prior_investigation.output.count == 0 }}
                         steps:
+                          # Fail closed: a 403/5xx consume has no `allowed` body.
+                          # `allowed != false` treated that as a green light and
+                          # launched unmetered investigations. Manual runs skip
+                          # consume (`if: scheduled`); those still launch.
                           - name: consume_investigation_quota
                             type: kibana.request
                             if: '${{ inputs.rootTriggeredBy == "scheduled" }}'
@@ -461,7 +465,7 @@ steps:
 
                           - name: guard_investigation_quota
                             type: if
-                            condition: '${{ steps.consume_investigation_quota.output.allowed != false }}'
+                            condition: '${{ inputs.rootTriggeredBy != "scheduled" or steps.consume_investigation_quota.output.allowed == true }}'
                             steps:
                               - name: trigger_investigation
                                 type: workflow.executeAsync

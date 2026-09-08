@@ -6,6 +6,11 @@
  */
 
 import type { KibanaRole, ScoutTestConfig } from '@kbn/scout';
+import {
+  NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES,
+  NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES,
+  NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 
 // Headers for internal APIs (version 1)
 export const COMMON_API_HEADERS = {
@@ -50,6 +55,17 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
     ],
   };
 
+  const nightshiftRole = (privileges: string[]): KibanaRole => ({
+    kibana: [
+      {
+        base: [],
+        feature: { nightshift: privileges },
+        spaces: ['*'],
+      },
+    ],
+    elasticsearch: adminElasticsearch,
+  });
+
   return {
     significantEventsAdmin: {
       kibana: [
@@ -62,49 +78,33 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
       elasticsearch: adminElasticsearch,
     },
 
-    nightshiftAll: {
-      kibana: [
-        {
-          base: [],
-          feature: { nightshift: ['all'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: adminElasticsearch,
-    },
+    nightshiftAll: nightshiftRole(['all']),
+    nightshiftRead: nightshiftRole(['read']),
 
-    contextEngineAll: {
-      kibana: [
-        {
-          base: [],
-          feature: { nightshift: ['minimal_all', 'context_engine_all'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: adminElasticsearch,
-    },
-
-    detectionEngineAll: {
-      kibana: [
-        {
-          base: [],
-          feature: { nightshift: ['minimal_all', 'detection_engine_all'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: adminElasticsearch,
-    },
-
-    investigationEngineAll: {
-      kibana: [
-        {
-          base: [],
-          feature: { nightshift: ['minimal_all', 'investigation_engine_all'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: adminElasticsearch,
-    },
+    contextEngineAll: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.all,
+    ]),
+    contextEngineRead: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.read,
+    ]),
+    detectionEngineAll: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
+    ]),
+    detectionEngineRead: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
+    ]),
+    investigationEngineAll: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
+    ]),
+    investigationEngineRead: nightshiftRole([
+      'minimal_all',
+      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
+    ]),
 
     streamsOnly: {
       kibana: [

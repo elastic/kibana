@@ -7,7 +7,12 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { apiTest, COMMON_HEADERS, INVESTIGATIONS_WRITE_ROLE } from '../fixtures';
+import {
+  apiTest,
+  COMMON_HEADERS,
+  INVESTIGATIONS_MANAGE_ROLE,
+  INVESTIGATIONS_READ_ROLE,
+} from '../fixtures';
 
 const START_PATH = 'internal/nightshift/investigations';
 
@@ -28,7 +33,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('returns 400 when the request body is empty', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
       const response = await apiClient.post(START_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {},
@@ -38,7 +43,7 @@ apiTest.describe(
     });
 
     apiTest('returns 400 for an invalid subject type', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
       const response = await apiClient.post(START_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: { subject: { type: 'not_a_valid_type', id: 'some-id' } },
@@ -50,7 +55,7 @@ apiTest.describe(
     apiTest(
       'returns 400 when subject.id exceeds 500 characters',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           // Context has to be valid, or this passes on the missing snapshots instead of the id.
@@ -73,7 +78,7 @@ apiTest.describe(
     // the only thing this test speaks to. Listing them beats `not.toBe(400)`, which also passed
     // on a 500 and would have hidden a genuine fault in the alert branch.
     apiTest('accepts a well-formed alert body', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+      const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
       const response = await apiClient.post(START_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
         body: {
@@ -91,7 +96,7 @@ apiTest.describe(
     apiTest(
       'returns 400 for an alert context carrying keys other than alerts',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
@@ -107,7 +112,7 @@ apiTest.describe(
     apiTest(
       'returns 400 for an alert subject with no alert snapshots',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: { subject: { type: 'alert', id: 'alert-uuid-1' } },
@@ -120,7 +125,7 @@ apiTest.describe(
     apiTest(
       'returns 400 for an alert subject whose context has an empty alerts array',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: { subject: { type: 'alert', id: 'alert-uuid-1' }, context: { alerts: [] } },
@@ -133,7 +138,7 @@ apiTest.describe(
     apiTest(
       'returns 400 when an alert snapshot is missing a required field',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const { status, ...withoutStatus } = alertSnapshot;
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -150,7 +155,7 @@ apiTest.describe(
     apiTest(
       'returns 400 when more than 20 alerts are supplied',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_WRITE_ROLE);
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_MANAGE_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: {
@@ -171,7 +176,7 @@ apiTest.describe(
     apiTest(
       'returns 403 for a user without Investigation Engine manage',
       async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
+        const { cookieHeader } = await samlAuth.asInteractiveUser(INVESTIGATIONS_READ_ROLE);
         const response = await apiClient.post(START_PATH, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
           body: { subject: { type: 'alert', id: 'some-id' } },

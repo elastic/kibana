@@ -32,7 +32,7 @@ import {
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { formatTimestamp } from '../../../../util/formatters';
 import { useFetchSignificantEventLifecycle } from '../../../../hooks/use_fetch_significant_event_lifecycle';
@@ -173,8 +173,8 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       },
     },
   } = useKibana();
-  const canManageInvestigation =
-    nightshift?.[NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage] === true;
+  const { canManageDetection, canManageInvestigation, canShowInvestigation } =
+    getNightshiftCapabilities(nightshift);
   const {
     data: lifecycleData,
     isLoading: isLifecycleLoading,
@@ -243,7 +243,7 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
       hideCloseButton
     >
       <FlyoutToolbarHeader>
-        {!isClosed && (
+        {!isClosed && canManageDetection && (
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_BUTTON_ARIA_LABEL}
@@ -358,9 +358,12 @@ export const SignificantEventFlyout = ({ event, onClose }: SignificantEventFlyou
         <EuiFlexGroup direction="column" gutterSize="m">
           <SignificantEventDetails event={event} />
 
-          <EuiHorizontalRule margin="none" />
-
-          <EventInvestigations event={latestEvent} />
+          {canShowInvestigation && (
+            <>
+              <EuiHorizontalRule margin="none" />
+              <EventInvestigations event={latestEvent} />
+            </>
+          )}
 
           <EuiHorizontalRule margin="none" />
 
