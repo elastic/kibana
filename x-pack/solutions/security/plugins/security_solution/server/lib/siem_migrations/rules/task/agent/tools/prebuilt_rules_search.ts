@@ -34,7 +34,7 @@ const SCHEMA = z.object({
 /**
  * Wraps `RuleMigrationsRetriever#prebuiltRules.search` as a LangChain `tool()` so it has a name,
  * description and validated schema. Bound to the model in the v2 `matchPrebuiltRule` subgraph's
- * `agent` node (`sub_graphs/match_prebuilt_rule/nodes/match_prebuilt_rule.ts`) and executed by a
+ * `agent` node (`sub_graphs/match_prebuilt_rule/nodes/agent/agent.ts`) and executed by a
  * real `ToolNode` in `sub_graphs/match_prebuilt_rule/graph.ts` — the model itself decides when to
  * call it and with what query, as part of the graph's own agent/tools loop (security-team#18589).
  *
