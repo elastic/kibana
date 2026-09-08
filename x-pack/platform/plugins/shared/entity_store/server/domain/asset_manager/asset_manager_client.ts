@@ -32,15 +32,20 @@ import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
+import type { LogExtractionConfig } from '../saved_objects';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
-  LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import type {
+  HistorySnapshotBodyParams,
+  LogExtractionByTypeParams,
+  LogExtractionInstallParams,
+} from '../../routes/constants';
+import { getMergedConfig } from '../logs_extraction/merge_config';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
   EntityStoreStatus,
@@ -132,13 +137,14 @@ export class AssetManagerClient {
     request: KibanaRequest,
     entityTypes: EntityType[],
     logsExtractionParams?: LogExtractionInstallParams,
-    historySnapshotParams?: HistorySnapshotBodyParams
+    historySnapshotParams?: HistorySnapshotBodyParams,
+    logsExtractionByTypeParams?: LogExtractionByTypeParams
   ) {
     try {
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
-      const [globalState] = await Promise.all([
+      await Promise.all([
         this.globalStateClient.init({ historySnapshot, logsExtraction: logsExtractionParams }),
 
         // V1 cleanup is legacy migration work — run it as the internal user so enabling the
@@ -177,7 +183,9 @@ export class AssetManagerClient {
       // so scheduling them in parallel with initEntity can tear down a freshly
       // scheduled status task mid-install.
       await Promise.all(
-        entityTypes.map((type) => this.initEntity(request, type, globalState.logsExtraction))
+        entityTypes.map((type) =>
+          this.initEntity(request, type, logsExtractionByTypeParams?.[type])
+        )
       );
 
       // Phase 3: Schedule namespace-scoped background tasks after descriptors exist.
@@ -214,11 +222,13 @@ export class AssetManagerClient {
     }
   }
 
-  public async start(request: KibanaRequest, type: EntityType, { frequency }: LogExtractionConfig) {
+  public async start(request: KibanaRequest, type: EntityType) {
     try {
       this.logger.get(type).debug(`Scheduling extract entity task for type: ${type}`);
 
       await this.engineDescriptorClient.update(type, { status: ENGINE_STATUS.STARTED });
+
+      const { frequency } = await this.getLogExtractionConfig(type);
 
       await scheduleExtractEntityTask({
         logger: this.logger,
@@ -340,13 +350,20 @@ export class AssetManagerClient {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }] =
+      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }, globalOverrides] =
         await Promise.all([
           this.engineDescriptorClient.getAll(),
           this.globalStateClient.findOrThrow(),
+          this.globalStateClient.findLogExtractionOverrides(),
         ]);
 
       const status = this.calculateEntityStoreStatus(engines);
+      const logsExtractionConfigByType = Object.fromEntries(
+        engines.map((engine) => [
+          engine.type,
+          getMergedConfig(engine.type, globalOverrides, engine.logExtractionConfig),
+        ])
+      ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
         const enginesWithComponents = await Promise.all(
@@ -357,10 +374,17 @@ export class AssetManagerClient {
           engines: enginesWithComponents,
           historySnapshot,
           logsExtractionConfig,
+          logsExtractionConfigByType,
         };
       }
 
-      return { status, engines, historySnapshot, logsExtractionConfig };
+      return {
+        status,
+        engines,
+        historySnapshot,
+        logsExtractionConfig,
+        logsExtractionConfigByType,
+      };
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return { status: ENTITY_STORE_STATUS.NOT_INSTALLED, engines: [] };
@@ -371,19 +395,26 @@ export class AssetManagerClient {
     }
   }
 
-  public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.find();
-    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+  /** Log extraction config in effect for one entity type. */
+  public async getLogExtractionConfig(type: EntityType): Promise<LogExtractionConfig> {
+    const [globalOverrides, engine] = await Promise.all([
+      this.globalStateClient.findLogExtractionOverrides(),
+      this.engineDescriptorClient.findOrThrow(type),
+    ]);
+    return getMergedConfig(type, globalOverrides, engine.logExtractionConfig);
   }
 
   private async initEntity(
     request: KibanaRequest,
     type: EntityType,
-    logsExtractionConfig: LogExtractionConfig
+    logsExtractionTypeParams?: LogExtractionByTypeParams[EntityType]
   ): Promise<boolean> {
     const installed = await this.install(type);
     if (installed) {
-      await this.start(request, type, logsExtractionConfig);
+      if (logsExtractionTypeParams !== undefined) {
+        await this.engineDescriptorClient.updateLogExtractionConfig(type, logsExtractionTypeParams);
+      }
+      await this.start(request, type);
     }
     this.analytics.reportEvent(ENTITY_STORE_INITIALIZATION_EVENT, {
       entityType: type,

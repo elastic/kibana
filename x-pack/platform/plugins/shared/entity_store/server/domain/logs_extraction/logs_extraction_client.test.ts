@@ -122,7 +122,12 @@ type GlobalStateLogExtractionOverrides = Partial<{
 
 function createMockGlobalStateClient(
   logExtractionOverrides?: GlobalStateLogExtractionOverrides
-): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
+): jest.Mocked<
+  Pick<
+    EntityStoreGlobalStateClient,
+    'find' | 'findOrThrow' | 'findLogExtractionOverrides' | 'update'
+  >
+> {
   const logsExtraction = LogExtractionConfig.parse({
     docsLimit: logExtractionOverrides?.docsLimit ?? 10000,
     additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
@@ -140,6 +145,7 @@ function createMockGlobalStateClient(
   return {
     find: jest.fn().mockResolvedValue(state),
     findOrThrow: jest.fn().mockResolvedValue(state),
+    findLogExtractionOverrides: jest.fn().mockResolvedValue(logsExtraction),
     update: jest.fn().mockImplementation(async (partial: EntityStoreGlobalStateOverrides) => ({
       ...state,
       logsExtraction: LogExtractionConfig.parse({
@@ -148,6 +154,16 @@ function createMockGlobalStateClient(
       }),
     })),
   };
+}
+
+/** Points every global-state read at the same fixture. The extraction path consumes `findLogExtractionOverrides`, not `findOrThrow`. */
+function setGlobalState(
+  mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>,
+  state: EntityStoreGlobalState
+): void {
+  mockGlobalStateClient.find.mockResolvedValue(state);
+  mockGlobalStateClient.findOrThrow.mockResolvedValue(state);
+  mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue(state.logsExtraction);
 }
 
 interface TestContext {
@@ -463,8 +479,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -510,8 +525,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -548,8 +562,7 @@ describe('LogsExtractionClient', () => {
           maxTimeWindowSize: '999d',
         }),
       } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      setGlobalState(mockGlobalStateClient, globalStateWithDelay5s);
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', { lastExecutionTimestamp }) as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -965,8 +978,7 @@ describe('LogsExtractionClient', () => {
             maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'drop',
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1311,8 +1323,7 @@ describe('LogsExtractionClient', () => {
             maxTimeWindowSize: overrides.maxTimeWindowSize,
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user', {
             lastExecutionTimestamp: overrides.lastExecutionTimestamp,
@@ -1395,8 +1406,7 @@ describe('LogsExtractionClient', () => {
             maxTimeWindowSize: '5m',
           }),
         } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        setGlobalState(mockGlobalStateClient, globalState);
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>

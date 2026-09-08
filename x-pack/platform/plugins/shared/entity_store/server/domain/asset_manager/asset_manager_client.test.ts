@@ -97,13 +97,16 @@ describe('AssetManagerClient', () => {
   let mockEngineDescriptorClient: {
     getAll: jest.Mock;
     init: jest.Mock;
+    findOrThrow: jest.Mock;
     update: jest.Mock;
+    updateLogExtractionConfig: jest.Mock;
     delete: jest.Mock;
   };
   let mockGlobalStateClient: {
     init: jest.Mock;
     findOrThrow: jest.Mock;
     find: jest.Mock;
+    findLogExtractionOverrides: jest.Mock;
     delete: jest.Mock;
   };
 
@@ -132,7 +135,9 @@ describe('AssetManagerClient', () => {
     mockEngineDescriptorClient = {
       getAll: jest.fn().mockResolvedValue([]),
       init: jest.fn().mockResolvedValue(undefined),
+      findOrThrow: jest.fn().mockResolvedValue({ type: 'user', status: 'started' }),
       update: jest.fn().mockResolvedValue(undefined),
+      updateLogExtractionConfig: jest.fn().mockResolvedValue(undefined),
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -146,6 +151,7 @@ describe('AssetManagerClient', () => {
         logsExtraction: {},
       }),
       find: jest.fn().mockResolvedValue(undefined),
+      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
       delete: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -522,6 +528,7 @@ describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
         init: jest.fn(),
         findOrThrow: jest.fn(),
         find: jest.fn(),
+        findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
         delete: jest.fn(),
       } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
       namespace,
@@ -685,6 +692,7 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
       findOrThrow: jest.fn().mockResolvedValue({ historySnapshot: {}, logsExtraction: {} }),
       init: jest.fn(),
       find: jest.fn(),
+      findLogExtractionOverrides: jest.fn().mockResolvedValue({}),
       delete: jest.fn(),
     };
 
