@@ -578,7 +578,7 @@ const buildPersistenceEvents = ({
 
   // A resume of an events-native conversation appends a new execution (append-only); the pause is
   // never rewritten. Legacy (non-events-native) resumes and regenerate keep the rounds-path write.
-  if (isResume && isEventsNativeVersion(conversation.schema_version)) {
+  if (isResume && !isRegenerate && isEventsNativeVersion(conversation.schema_version)) {
     return appendResumeExecution$({
       conversation,
       conversationClient,

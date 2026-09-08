@@ -6,7 +6,7 @@
  */
 
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
+import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
 import type {
   CompactionSummary,
   ConversationRoundStep,
@@ -18,6 +18,7 @@ import {
   ConversationRoundStatus,
   ConversationRoundStepType,
   ExecutionStatus,
+  TimelineEventType,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -28,7 +29,16 @@ import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
-import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
+import type { ProcessedConversation } from './prepare_conversation';
+import {
+  eventsNativeConversation,
+  pausedAndResumedRoundTimeline,
+  roundsOfTimeline,
+  timelineFromRounds,
+  type ProcessedConversationRound,
+} from '../../../../test_utils/timeline';
+import { eventsForContext } from '../../../conversation/client/events_to_rounds';
+import type { ProcessedTimelineEvent } from './context_timeline';
 
 describe('prepareMessages', () => {
   const now = new Date().toISOString();
@@ -78,12 +88,17 @@ describe('prepareMessages', () => {
     tools: [],
   });
 
-  const createConversation = (
-    parts: Partial<ProcessedConversation> = {}
-  ): ProcessedConversation => {
+  // Rounds fixtures are normalized to the timeline the pipeline consumes, so every expectation
+  // below also checks the rounds -> events -> messages path.
+  const createConversation = ({
+    previousRounds = [],
+    ...parts
+  }: Partial<Omit<ProcessedConversation, 'timeline'>> & {
+    previousRounds?: ProcessedConversationRound[];
+  } = {}): ProcessedConversation => {
     return {
       nextInput: { message: '', attachments: [] },
-      previousRounds: [],
+      timeline: timelineFromRounds(previousRounds),
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
         getTypeDefinition: (type: string) =>
@@ -1406,7 +1421,7 @@ describe('prepareMessages — relevant_skills replay', () => {
   const conversationWith = (steps: ConversationRoundStep[]): ProcessedConversation =>
     ({
       nextInput: { message: 'current', attachments: [] },
-      previousRounds: [
+      timeline: timelineFromRounds([
         {
           id: 'round-1',
           status: ConversationRoundStatus.completed,
@@ -1418,7 +1433,7 @@ describe('prepareMessages — relevant_skills replay', () => {
           time_to_last_token: 0,
           model_usage: { connector_id: 'x', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
         },
-      ],
+      ]),
       attachments: [],
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
@@ -1487,5 +1502,56 @@ describe('prepareMessages — relevant_skills replay', () => {
       .filter(isHumanMessage)
       .some((m) => (m.content as string).includes('<relevant_skills>'));
     expect(hasNotice).toBe(false);
+  });
+});
+
+describe('prepareMessages — multi-execution (HITL) timelines', () => {
+  const baseConversation = (timeline: ProcessedTimelineEvent[]): ProcessedConversation => ({
+    nextInput: { message: 'current', attachments: [] },
+    timeline,
+    attachmentTypes: [],
+    attachmentStateManager: createAttachmentStateManager([], {
+      getTypeDefinition: () => undefined,
+    } as any),
+  });
+
+  // The pipeline normalizes the stored timeline (eventsForContext) and processes user_message
+  // payloads (prepareConversation) before prepareMessages sees it; mirror both steps here.
+  const normalizedAndProcessed = (stored: ReturnType<typeof pausedAndResumedRoundTimeline>) =>
+    eventsForContext(eventsNativeConversation(stored)).map((event) =>
+      event.type === TimelineEventType.userMessage
+        ? { ...event, data: { ...event.data, attachments: [] } }
+        : event
+    ) as ProcessedTimelineEvent[];
+
+  it('renders the paused execution, the answer and the resume as one round', async () => {
+    const messages = await prepareMessages({
+      conversation: baseConversation(normalizedAndProcessed(pausedAndResumedRoundTimeline())),
+    });
+
+    // user message, ask_user_question tool call + answer, assistant response, next input
+    expect(messages).toHaveLength(5);
+    expect(messages[0].content as string).toContain('do it');
+    expect(isAIMessage(messages[1]) && messages[1].tool_calls?.[0].name).toBe('ask_user_question');
+    expect(isToolMessage(messages[2])).toBe(true);
+    expect(messages[2].content as string).toContain('"selected_options":["a"]');
+    expect(messages[3].content).toBe('done');
+    expect(messages[4].content).toBe('current');
+  });
+
+  it('is byte-identical to the same round stored as a single execution', async () => {
+    const appendOnly = normalizedAndProcessed(pausedAndResumedRoundTimeline());
+    const [folded] = roundsOfTimeline(appendOnly);
+    const singleExecution = timelineFromRounds([
+      { ...folded, input: { ...folded.input, attachments: [] } },
+    ]);
+
+    const fromAppendOnly = await prepareMessages({ conversation: baseConversation(appendOnly) });
+    const fromSingle = await prepareMessages({ conversation: baseConversation(singleExecution) });
+
+    // The materialized ask_user_question tool call gets a fresh id on every render.
+    const withoutToolCallIds = (messages: unknown) =>
+      JSON.stringify(messages).replace(/[0-9a-f]{8}-[0-9a-f-]{27}/g, '<id>');
+    expect(withoutToolCallIds(fromAppendOnly)).toEqual(withoutToolCallIds(fromSingle));
   });
 });

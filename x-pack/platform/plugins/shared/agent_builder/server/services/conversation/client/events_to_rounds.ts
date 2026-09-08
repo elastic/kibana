@@ -26,16 +26,21 @@ import {
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { isAskUserQuestionPromptResponse } from '@kbn/agent-builder-common/agents/prompts';
-import { parseExecutionId } from './rounds_to_events';
+import { parseExecutionId, roundsToEvents } from './rounds_to_events';
 import { applyResumeResolution } from './merge_rounds';
 
-/** Rounds derived from events timeline with a fallback to rounds if no events are present. */
-export const roundsForContext = (conversation: Conversation): ConversationRound[] =>
+/**
+ * The normalized timeline the agent context is built from: one execution per round, with HITL
+ * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
+ * stored rounds; events-native conversations are folded and re-serialized. Context only, never
+ * persisted, so downstream consumers can read events without reconstructing rounds.
+ */
+export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   isEventsNativeVersion(conversation.schema_version) &&
   conversation.events &&
   conversation.events.length > 0
-    ? eventsToRounds(conversation.events)
-    : conversation.rounds;
+    ? roundsToEvents({ ...conversation, rounds: eventsToRounds(conversation.events) })
+    : roundsToEvents(conversation);
 
 /** A single execution reconstructed into a partial round, awaiting the fold. */
 interface ExecutionPartial {
@@ -71,10 +76,8 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
   // Bucket executions by the round they belong to, preserving round (first-seen) order.
   const buckets = new Map<string, ExecutionPartial[]>();
   for (const [executionId, group] of executions) {
-    const execution = parseExecutionId(executionId);
-    if (!execution) {
-      continue;
-    }
+    // An execution id outside the round scheme identifies its own (single-execution) round.
+    const execution = parseExecutionId(executionId) ?? { roundId: executionId, index: 0 };
     const triggerId = group.find((event) => event.trigger_event_id)?.trigger_event_id;
     const trigger = triggerId ? byId.get(triggerId) : undefined;
 
@@ -178,7 +181,8 @@ const stepsFromEvents = (events: ExecutionStepEvent[]): ConversationRoundStep[] 
 
 const toRoundInput = (userMessage: UserMessageEvent): RoundInput => userMessage.data;
 
-const authorAndOrigin = (
+/** Round authorship carried by a `user_message` actor. */
+export const authorAndOrigin = (
   userMessage: UserMessageEvent
 ): Pick<ConversationRound, 'author' | 'origin'> => {
   const { actor } = userMessage;

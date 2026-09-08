@@ -20,7 +20,7 @@ describe('getStructuredAnswerPrompt', () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -58,7 +58,7 @@ describe('getStructuredAnswerPrompt', () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],

@@ -23,7 +23,7 @@ describe('getResearchAgentPrompt', () => {
     ({
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
@@ -221,7 +221,7 @@ describe('getResearchAgentPrompt', () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
-        previousRounds: [],
+        timeline: [],
         nextInput: { message: '', attachments: [] },
         attachments: [],
         attachmentTypes: [],
