@@ -14,7 +14,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/automated_response_actions/ui/tests/automated_response_actions.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/tests/automated_response_actions.spec.ts",
         "line": 50,
         "column": 3
       }
