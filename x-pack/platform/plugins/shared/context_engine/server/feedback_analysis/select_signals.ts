@@ -152,10 +152,6 @@ const buildBaseQuery = ({
   return filters;
 };
 
-const MANAGEMENT_AGENT_CLAUSE: QueryDslQueryContainer = {
-  term: { 'data.agent.class': 'management' },
-};
-
 const TOOL_CALL_CLAUSE: QueryDslQueryContainer = { term: { signal_type: 'tool_call' } };
 
 /** Keys a pattern by the triple that defines it. */
@@ -251,7 +247,6 @@ export const selectSignals = async (
                 { term: { 'data.query_kind': 'ki_retrieval' } },
                 destMatch,
               ],
-              must_not: [MANAGEMENT_AGENT_CLAUSE],
             },
           },
           aggs: {
@@ -304,7 +299,6 @@ export const selectSignals = async (
         filter: baseFilter,
         should: attribution,
         minimum_should_match: 1,
-        must_not: [MANAGEMENT_AGENT_CLAUSE],
       },
     },
     // Signals are written in trace batches and share timestamps, so `signal_id` breaks ties.

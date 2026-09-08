@@ -12,7 +12,6 @@ import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import {
   AGENT_BUILDER_TRACES_INDEX_PREFIX,
   ANALYZE_AND_IMPROVE_SKILL_ID,
-  MANAGEMENT_AGENT_ID,
 } from '../../common/constants';
 import type { AgentInfo, ExecuteToolSpan } from './transform';
 
@@ -191,11 +190,9 @@ export const buildConvAgentMap = (rows: InvokeAgentSpanRow[]): Map<string, Agent
     if (!row.trace_id || map.has(row.trace_id)) {
       continue;
     }
-    const id = row['attributes.gen_ai.agent.id'] ?? '';
     map.set(row.trace_id, {
       name: row['attributes.gen_ai.agent.name'] ?? '',
-      id,
-      class: id === MANAGEMENT_AGENT_ID ? 'management' : 'user',
+      id: row['attributes.gen_ai.agent.id'] ?? '',
       conversationId: row['attributes.gen_ai.conversation.id'] ?? '',
     });
   }

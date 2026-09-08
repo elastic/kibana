@@ -255,7 +255,9 @@ installed once per AI index with the index id and interval templated in. Its
 shape is three steps: fetch the context, run the index's agent against it with
 a forced output schema, record the result.
 
-The briefing is handed over as the agent's `message`. The
+The briefing is handed over as the agent's `message`. It instructs the agent to
+load the `analyze-and-improve` skill before reading anything, so the run carries
+the analysis playbook whichever agent the index is configured with. The
 `platform.context_engine.ai_index` attachment is not used: it carries the
 `save_automation` tool and instructions to ask the user questions, which belong
 to the interactive setup conversation.
@@ -292,9 +294,6 @@ with no restriction by signal type. A signal's type governs how it is
    or `target_index`, so the window and the index's `signal_filter` are what
    scope it. It reaches the run's total but forms no pattern, since patterns are
    keyed on fields it does not have.
-
-Management-agent signals are excluded. Signals carrying no `data.agent.class`
-are unaffected.
 
 **Every space is read**, because an AI index is global while signals are
 per-space. The spaces a run drew from are recorded on each improvement's

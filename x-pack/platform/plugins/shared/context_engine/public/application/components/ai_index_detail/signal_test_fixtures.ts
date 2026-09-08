@@ -27,7 +27,7 @@ export const buildSignal = (
     producer: 'agent-builder',
     span_id: 'span-1',
     conversation_id: 'conv-1',
-    agent: { id: 'a1', name: 'Support', class: 'user' },
+    agent: { id: 'a1', name: 'Support' },
     query: 'FROM ai-index-ds-support | LIMIT 10',
     returned: { columns: [], row_count: 0 },
     error: 'boom',

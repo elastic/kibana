@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ANALYZE_AND_IMPROVE_SKILL_ID } from '../../common/constants';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import type {
   FeedbackAnalysisRunContext,
@@ -139,12 +140,18 @@ const renderHistory = (history: Improvement[]): string => {
   return lines.join('\n');
 };
 
+const LOAD_SKILL_RULE = `- **Load the \`${ANALYZE_AND_IMPROVE_SKILL_ID}\` skill before you look at anything.** It carries the playbook for reading these signals. If you cannot load it, say so in \`summary\` and work from this briefing alone.`;
+
 const renderTask = (allowedActions: ImprovementAction[]): string => {
   if (allowedActions.length === 0) {
     return [
       '## Your task',
       '',
       'This index is configured for observation only. Report what you found in `summary`. Do not propose changes — none would be recorded.',
+      '',
+      'Rules for this run:',
+      '',
+      LOAD_SKILL_RULE,
     ].join('\n');
   }
 
@@ -155,6 +162,7 @@ const renderTask = (allowedActions: ImprovementAction[]): string => {
     '',
     'Rules for this run:',
     '',
+    LOAD_SKILL_RULE,
     '- **Nobody is watching.** This runs on a schedule. Do not ask clarifying questions; there is no one to answer them. Reach the best conclusion the evidence supports and report it.',
     '- **Propose, do not apply.** Your answer is a proposal for a human to review. Do not write knowledge indicators, edit workflows, or change the index.',
     `- **Only these actions are permitted here**: ${allowedActions

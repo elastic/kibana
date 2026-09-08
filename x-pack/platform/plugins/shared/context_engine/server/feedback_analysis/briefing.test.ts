@@ -121,6 +121,11 @@ describe('renderBriefing', () => {
     expect(render()).toContain('Nobody is watching');
   });
 
+  it('tells the run to load the analysis skill, whatever the index is configured with', () => {
+    expect(render()).toContain('Load the `analyze-and-improve` skill');
+    expect(render({ allowedActions: [] })).toContain('Load the `analyze-and-improve` skill');
+  });
+
   it('lists prior proposals with their outcome so they are not raised again', () => {
     const briefing = render({
       history: [

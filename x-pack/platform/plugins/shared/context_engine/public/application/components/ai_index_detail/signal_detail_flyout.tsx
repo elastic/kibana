@@ -125,7 +125,7 @@ export const SignalDetailFlyout = ({
       title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.agent', {
         defaultMessage: 'Agent',
       }),
-      description: `${signalData.agent.name} (${signalData.agent.class})`,
+      description: signalData.agent.name,
     },
     {
       title: i18n.translate('xpack.contextEngine.aiIndexDetail.signals.field.producer', {

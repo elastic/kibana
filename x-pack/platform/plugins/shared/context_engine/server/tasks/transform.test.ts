@@ -94,15 +94,13 @@ describe('parseReturned', () => {
 const userAgent: AgentInfo = {
   name: 'support-agent',
   id: 'agent-1',
-  class: 'user',
   conversationId: 'conversation-1',
 };
 
-const managementAgent: AgentInfo = {
-  name: 'Context Engine',
-  id: 'platform.context_engine.agent',
-  class: 'management',
-  conversationId: 'conversation-mgmt',
+const otherAgent: AgentInfo = {
+  name: 'triage-agent',
+  id: 'agent-2',
+  conversationId: 'conversation-2',
 };
 
 const toolRow = (overrides: Partial<ExecuteToolSpan> = {}): ExecuteToolSpan => ({
@@ -145,7 +143,7 @@ describe('build', () => {
     expect(signal.data.producer).toBe(SIGNAL_PRODUCER);
     expect(signal.data.span_id).toBe('span-1');
     expect(signal.data.tool).toBe('platform.core.execute_esql');
-    expect(signal.data.agent).toEqual({ name: 'support-agent', id: 'agent-1', class: 'user' });
+    expect(signal.data.agent).toEqual({ name: 'support-agent', id: 'agent-1' });
     expect(signal.data.conversation_id).toBe('conversation-1');
     expect(signal.data.query).toBe('FROM ai-index-idx-foo | LIMIT 10');
     expect(signal.data.query_kind).toBe('ki_retrieval');
@@ -168,16 +166,8 @@ describe('build', () => {
 
   it('falls back to an unknown user agent when the round has no invoke_agent span', () => {
     const [signal] = build({ toolRows: [toolRow()], convAgent: new Map() });
-    expect(signal.data.agent).toEqual({ name: '', id: '', class: 'user' });
+    expect(signal.data.agent).toEqual({ name: '', id: '' });
     expect(signal.data.conversation_id).toBeUndefined();
-  });
-
-  it('attributes management-agent rounds with class "management"', () => {
-    const [signal] = build({
-      toolRows: [toolRow()],
-      convAgent: new Map([['trace-1', managementAgent]]),
-    });
-    expect(signal.data.agent.class).toBe('management');
   });
 
   it('does not emit a signal for a tool call with no parsed query (query_kind "other")', () => {
@@ -298,15 +288,13 @@ describe('build', () => {
       toolRows: rows,
       convAgent: new Map([
         ['trace-1', userAgent],
-        ['trace-2', managementAgent],
+        ['trace-2', otherAgent],
       ]),
     });
 
     expect(signals).toHaveLength(2);
-    expect(signals.find((s) => s.signal_id === 'trace-1:span-1')?.data.agent.class).toBe('user');
-    expect(signals.find((s) => s.signal_id === 'trace-2:span-1')?.data.agent.class).toBe(
-      'management'
-    );
+    expect(signals.find((s) => s.signal_id === 'trace-1:span-1')?.data.agent.id).toBe('agent-1');
+    expect(signals.find((s) => s.signal_id === 'trace-2:span-1')?.data.agent.id).toBe('agent-2');
   });
 
   describe('self-referential exclusion', () => {

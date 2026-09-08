@@ -40,7 +40,7 @@ export interface EsqlToolCallSignal extends SignalEnvelope {
     producer: string;
     span_id: string;
     conversation_id?: string;
-    agent: { id: string; name: string; class: 'user' | 'management' };
+    agent: { id: string; name: string };
     query?: string;
     // `columns` is optional because the paginated list read strips it from `_source`
     // (`SIGNAL_SOURCE_EXCLUDES` in server/signals/read.ts) — only `row_count` is needed there.

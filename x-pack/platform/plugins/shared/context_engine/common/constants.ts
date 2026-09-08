@@ -114,9 +114,6 @@ export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
 export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
 export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
 
-/** Agent id whose tool calls are left untagged. */
-export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
-
 /** Skill id of the feedback loop's own analysis skill; rounds that load it are excluded from signal generation. */
 export const ANALYZE_AND_IMPROVE_SKILL_ID = 'analyze-and-improve';
 

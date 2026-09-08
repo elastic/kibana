@@ -11,10 +11,6 @@ import type { EsqlToolCallSignal } from '../../common/http_api/signals';
 export const classify = (signal: EsqlToolCallSignal): string[] => {
   const { data } = signal;
 
-  if (data.agent.class === 'management') {
-    return [];
-  }
-
   const tags: string[] = [];
 
   // Outcome tags are mutually exclusive: a query either failed, or ran and returned

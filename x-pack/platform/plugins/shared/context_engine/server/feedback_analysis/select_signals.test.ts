@@ -156,7 +156,6 @@ describe('selectSignals', () => {
             },
           },
         ]),
-        must_not: [{ term: { 'data.agent.class': 'management' } }],
       },
     });
   });

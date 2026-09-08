@@ -12,11 +12,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
-  MANAGEMENT_AGENT_ID,
-  SIGNAL_GENERATOR_TASK_ID,
-  SIGNAL_GENERATOR_TASK_TYPE,
-} from '../../common/constants';
+import { SIGNAL_GENERATOR_TASK_ID, SIGNAL_GENERATOR_TASK_TYPE } from '../../common/constants';
 import type { Signal } from '../../common/http_api/signals';
 import type { SignalsServiceApi } from '../signals/service';
 import {
@@ -53,27 +49,6 @@ describe('spaceFromTracesIndex', () => {
 });
 
 describe('buildConvAgentMap', () => {
-  it('flags the management agent by id, not by display name', () => {
-    const map = buildConvAgentMap([
-      {
-        trace_id: 'trace-1',
-        'attributes.gen_ai.conversation.id': 'conv-1',
-        'attributes.gen_ai.agent.id': MANAGEMENT_AGENT_ID,
-        'attributes.gen_ai.agent.name': 'Context Engine',
-      },
-      {
-        trace_id: 'trace-2',
-        'attributes.gen_ai.conversation.id': 'conv-2',
-        // A user agent that happens to share the management display name.
-        'attributes.gen_ai.agent.id': 'user-agent-9',
-        'attributes.gen_ai.agent.name': 'Context Engine',
-      },
-    ]);
-
-    expect(map.get('trace-1')?.class).toBe('management');
-    expect(map.get('trace-2')?.class).toBe('user');
-  });
-
   it('keeps only the first invoke_agent span per round', () => {
     const map = buildConvAgentMap([
       { trace_id: 'trace-1', 'attributes.gen_ai.agent.id': 'agent-a' },
@@ -375,29 +350,28 @@ describe('signal generator task run()', () => {
     expect(result.state).toEqual({ watermark: '2026-07-08T12:10:30.000Z' });
   });
 
-  it('resolves invoke_agent by trace_id, so a management round is excluded even when its tool spans are the only batch', async () => {
+  it('resolves the round agent by trace_id, parameterizing the invoke_agent query with the batch', async () => {
     const { writes, esClient } = await run({
-      toolRows: [toolRow({ trace_id: 'trace-mgmt', span_id: 'span-1' })],
+      toolRows: [toolRow({ trace_id: 'trace-a', span_id: 'span-1' })],
       agentRows: [
         {
-          trace_id: 'trace-mgmt',
-          'attributes.gen_ai.conversation.id': 'conv-mgmt',
-          'attributes.gen_ai.agent.id': MANAGEMENT_AGENT_ID,
-          'attributes.gen_ai.agent.name': 'Context Engine',
+          trace_id: 'trace-a',
+          'attributes.gen_ai.conversation.id': 'conv-a',
+          'attributes.gen_ai.agent.id': 'agent-9',
+          'attributes.gen_ai.agent.name': 'Support',
         },
       ],
       state: { watermark: '2026-01-01T00:00:00.000Z' },
     });
 
     const [signal] = writes[0].signals;
-    expect(signal.data.agent.class).toBe('management');
-    expect(signal.tags).toEqual([]);
+    expect(signal.data.agent).toEqual({ id: 'agent-9', name: 'Support' });
+    expect(signal.data.conversation_id).toBe('conv-a');
 
-    // The invoke_agent query is parameterized by the batch's trace_ids.
     const invokeCall = (esClient.esql.query as jest.Mock).mock.calls.find(([arg]) =>
       arg.query.includes('invoke_agent')
     );
-    expect(invokeCall?.[0].params).toEqual(['trace-mgmt']);
+    expect(invokeCall?.[0].params).toEqual(['trace-a']);
   });
 
   it('reads only execute_esql tool spans (filters non-ES|QL tools at read-time)', async () => {

@@ -18,17 +18,15 @@ const KI_RETRIEVAL_PREFIXES = ['.ai-index', 'ki-', 'ai-index'];
 export const SIGNAL_PRODUCER = 'trace_tool';
 
 type QueryKind = EsqlToolCallSignal['data']['query_kind'];
-type AgentClass = EsqlToolCallSignal['data']['agent']['class'];
 
 /** The `invoke_agent` span's identity, attached to every signal in its round. */
 export interface AgentInfo {
   name: string;
   id: string;
-  class: AgentClass;
   conversationId: string;
 }
 
-const UNKNOWN_AGENT: AgentInfo = { name: '', id: '', class: 'user', conversationId: '' };
+const UNKNOWN_AGENT: AgentInfo = { name: '', id: '', conversationId: '' };
 
 /** One `execute_tool` span projected to the columns the builder needs. */
 export interface ExecuteToolSpan {
@@ -235,7 +233,7 @@ export const build = ({ toolRows, convAgent }: BuildInput): EsqlToolCallSignal[]
           producer: SIGNAL_PRODUCER,
           span_id: row.span_id,
           ...(agent.conversationId ? { conversation_id: agent.conversationId } : {}),
-          agent: { id: agent.id, name: agent.name, class: agent.class },
+          agent: { id: agent.id, name: agent.name },
           ...(query ? { query } : {}),
           returned,
           ...(errorMessage ? { error: errorMessage } : {}),
