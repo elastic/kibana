@@ -23,7 +23,7 @@ import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types
 import { z } from '@kbn/zod';
 import * as t from 'io-ts';
 import { decode, type DecodeOutcome } from './test_helpers/codec_agnostic';
-import { expectSameOutcome } from './test_helpers/parity';
+import { expectSameOutcome, ioTsCustomMessages, zodMessages } from './test_helpers/parity';
 import {
   getNonEmptyStringCodec,
   InlineScriptString,
@@ -241,5 +241,49 @@ describe.each([
 ])('$label io-ts/zod parity', ({ ioTs, zod, corpus }) => {
   it.each(asCases([...corpus.valid, ...corpus.invalid]))('agrees on %p', (input) => {
     expectSameOutcome(ioTs, zod, input);
+  });
+});
+
+/**
+ * Whether a codec carries a custom failure message is part of its user-facing
+ * contract: `formatErrors` prefers `error.message` and otherwise renders
+ * `Invalid value "x" supplied to "<key>"` from the field key. These tests pin
+ * which codecs supply one, so a twin can neither drop a message users see today
+ * nor invent one they don't.
+ */
+describe('custom failure messages', () => {
+  it.each([
+    {
+      label: 'NameSpaceString',
+      ioTs: NameSpaceString,
+      zod: zodCommon.NameSpaceString,
+      input: 'Not A Namespace',
+    },
+    {
+      label: 'getNonEmptyStringCodec',
+      ioTs: getNonEmptyStringCodec('host'),
+      zod: zodCommon.getNonEmptyStringCodec('host'),
+      input: '   ',
+    },
+    {
+      label: 'InlineScriptString',
+      ioTs: InlineScriptString,
+      zod: zodCommon.InlineScriptString,
+      input: 'journey("a journey", () => {})',
+    },
+  ])('$label: the zod twin reproduces the io-ts message verbatim', ({ ioTs, zod, input }) => {
+    const expected = ioTsCustomMessages(ioTs, input);
+    expect(expected).not.toHaveLength(0);
+    expect(zodMessages(zod, input)).toEqual(expected);
+  });
+
+  // These two report through the field key instead, so inventing a message for
+  // the twin would silently change what users see. Reproducing the key-derived
+  // text is the job of the shared zod error formatter in a later phase.
+  it.each([
+    { label: 'TimeoutString', ioTs: TimeoutString, input: 'not-a-number' },
+    { label: 'NonEmptyString', ioTs: NonEmptyString, input: '   ' },
+  ])('$label: io-ts supplies no custom message', ({ ioTs, input }) => {
+    expect(ioTsCustomMessages(ioTs, input)).toEqual([]);
   });
 });
