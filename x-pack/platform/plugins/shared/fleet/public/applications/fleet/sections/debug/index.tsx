@@ -50,8 +50,6 @@ export const DebugPage: React.FunctionComponent<{
 }> = ({ isInitialized, setupError }) => {
   const { chrome, docLinks } = useStartServices();
   const { getHref } = useLink();
-  const { enableCloudOnboardingDeployments } = ExperimentalFeaturesService.get();
-
   const panels = [
     {
       title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
@@ -109,17 +107,13 @@ export const DebugPage: React.FunctionComponent<{
       id: 'agentlessResourcesToggle',
       component: <AgentlessResourcesToggle />,
     },
-    ...(enableCloudOnboardingDeployments
-      ? [
-          {
-            title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
-              defaultMessage: 'Cloud Onboarding Deployment Debugger',
-            }),
-            id: 'cloudOnboardingDeploymentDebugger',
-            component: <CloudOnboardingDeploymentDebugger />,
-          },
-        ]
-      : []),
+    {
+      title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
+        defaultMessage: 'Cloud Onboarding Deployment Debugger',
+      }),
+      id: 'cloudOnboardingDeploymentDebugger',
+      component: <CloudOnboardingDeploymentDebugger />,
+    },
   ];
 
   chrome.docTitle.change(['Debug', 'Fleet']);
