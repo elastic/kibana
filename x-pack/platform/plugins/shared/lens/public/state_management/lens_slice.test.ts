@@ -830,7 +830,12 @@ describe('lensSlice', () => {
           customStoreWithDrop.dispatch(
             onDropToDimension({
               source: { id: 'col1', humanData: { label: 'Col 1' } },
-              target: { layerId: 'refLayer', columnId: 'col2', groupId: 'testGroup' },
+              target: {
+                layerId: 'refLayer',
+                columnId: 'col2',
+                groupId: 'testGroup',
+                filterOperations: () => true,
+              },
               dropType: 'duplicate_compatible',
             })
           );
