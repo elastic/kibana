@@ -6,12 +6,13 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { GLOBAL_SPACE_ID, CATALOG_SOURCE_URLS } from '../../../common/threat_intel';
 import {
-  DEFAULT_SOURCES,
-  LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-  seedDefaultSources,
-} from './seed_default_sources';
+  APPROVED_SOURCE_IDS,
+  GLOBAL_SPACE_ID,
+  CATALOG_SOURCE_URLS,
+  THREAT_INTEL_SOURCES_INDEX,
+} from '../../../common/threat_intel';
+import { DEFAULT_SOURCES, seedDefaultSources } from './seed_default_sources';
 
 const TOTAL = DEFAULT_SOURCES.length;
 
@@ -53,19 +54,20 @@ const successfulBulkResponse = (operations: Array<Record<string, unknown>>) => (
 const run = async ({
   documents = missingDocuments(),
   bulkImpl = successfulBulkResponse,
+  updateByQueryImpl = () => ({ updated: 0, version_conflicts: 0 }),
 }: {
   documents?: Array<Record<string, unknown>>;
   bulkImpl?: (operations: Array<Record<string, unknown>>) => unknown;
+  updateByQueryImpl?: () => Record<string, unknown>;
 } = {}) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.mget.mockResolvedValue({ docs: documents } as never);
-  esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
-  esClient.update.mockResolvedValue({} as never);
   esClient.bulk.mockImplementation((async ({
     operations,
   }: {
     operations?: Array<Record<string, unknown>>;
   }) => bulkImpl(operations ?? [])) as never);
+  esClient.updateByQuery.mockImplementation(updateByQueryImpl as never);
   const logger = loggingSystemMock.createLogger();
   const result = await seedDefaultSources({ esClient, logger });
   return { esClient, logger, result };
@@ -285,69 +287,61 @@ describe('seedDefaultSources', () => {
     );
   });
 
-  it('pages through all enabled legacy sources with search_after', async () => {
-    const firstPage = Array.from({ length: LEGACY_SOURCE_DISABLE_PAGE_SIZE }, (_, index) => ({
-      _id: `legacy:page1-${index}`,
-      // `_doc` sort values are integers, matching what Elasticsearch returns.
-      sort: [index],
-      _source: { enabled: true },
-    }));
-    const secondPage = [
-      {
-        _id: 'legacy:page2-0',
-        sort: [LEGACY_SOURCE_DISABLE_PAGE_SIZE],
-        _source: { enabled: true },
-      },
-    ];
-
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
-    esClient.search
-      .mockResolvedValueOnce({ hits: { hits: firstPage } } as never)
-      .mockResolvedValueOnce({ hits: { hits: secondPage } } as never);
-    esClient.update.mockResolvedValue({} as never);
-
-    const result = await seedDefaultSources({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
+  it('disables legacy sources outside the approved catalog with updateByQuery', async () => {
+    const { esClient, result } = await run({
+      documents: currentDocuments(),
+      updateByQueryImpl: () => ({ updated: 5, version_conflicts: 0 }),
     });
 
-    expect(esClient.search).toHaveBeenCalledTimes(2);
-    // Pin the sort field: `_id` needs fielddata that Elasticsearch disables by
-    // default, so it throws on a real cluster while a mocked client happily
-    // accepts it. A mock cannot catch that, so assert the field explicitly.
-    expect(esClient.search.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ sort: ['_doc'] })
-    );
-    expect(esClient.search.mock.calls[1][0]).toEqual(
+    expect(esClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(esClient.updateByQuery.mock.calls[0][0]).toEqual(
       expect.objectContaining({
-        sort: ['_doc'],
-        search_after: [LEGACY_SOURCE_DISABLE_PAGE_SIZE - 1],
+        index: THREAT_INTEL_SOURCES_INDEX,
+        refresh: false,
+        conflicts: 'proceed',
+        wait_for_completion: true,
+        query: {
+          bool: {
+            filter: [{ term: { enabled: true } }],
+            must_not: [{ ids: { values: expect.arrayContaining([...APPROVED_SOURCE_IDS]) } }],
+          },
+        },
+        script: expect.objectContaining({
+          source: expect.stringContaining('ctx._source.enabled = false'),
+          lang: 'painless',
+          params: { now: expect.any(String) },
+        }),
       })
     );
-    expect(esClient.update).toHaveBeenCalledTimes(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
-    expect(result.updated).toBe(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);
-    expect(result.failed).toBe(0);
+    expect(result).toEqual(
+      expect.objectContaining({ total: TOTAL, created: 0, updated: 5, skipped: TOTAL, failed: 0 })
+    );
   });
 
-  it('counts a failed legacy-source disable so bootstrap can retry', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.mget.mockResolvedValue({ docs: currentDocuments() } as never);
-    esClient.search.mockResolvedValue({
-      hits: {
-        hits: [
-          { _id: 'legacy:custom-feed', sort: ['legacy:custom-feed'], _source: { enabled: true } },
-        ],
-      },
-    } as never);
-    esClient.update.mockRejectedValue(new Error('version_conflict_engine_exception'));
-
-    const result = await seedDefaultSources({
-      esClient,
-      logger: loggingSystemMock.createLogger(),
+  it('counts updateByQuery version conflicts as failed legacy-source disables', async () => {
+    const { result } = await run({
+      documents: currentDocuments(),
+      updateByQueryImpl: () => ({ updated: 0, version_conflicts: 3 }),
     });
 
-    expect(result.updated).toBe(0);
-    expect(result.failed).toBe(1);
+    expect(result).toEqual(
+      expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 3 })
+    );
+  });
+
+  it('counts an updateByQuery failure as a failed legacy-source disable', async () => {
+    const { logger, result } = await run({
+      documents: currentDocuments(),
+      updateByQueryImpl: () => {
+        throw new Error('cluster_block_exception');
+      },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({ total: TOTAL, created: 0, updated: 0, skipped: TOTAL, failed: 1 })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to disable legacy sources')
+    );
   });
 });

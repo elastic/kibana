@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   GLOBAL_SPACE_ID,
@@ -327,9 +326,6 @@ export const seedDefaultSources = async ({
   return result;
 };
 
-/** Page size for disabling out-of-catalog enabled sources. Exported for multi-page tests. */
-export const LEGACY_SOURCE_DISABLE_PAGE_SIZE = 1000;
-
 const disableLegacySources = async ({
   esClient,
   logger,
@@ -340,68 +336,44 @@ const disableLegacySources = async ({
   now: string;
 }): Promise<{ disabled: number; failed: number }> => {
   const log = logger.get('seed-default-sources');
-  let disabled = 0;
-  let failed = 0;
-  let searchAfter: estypes.SortResults | undefined;
 
-  for (;;) {
-    const response = await esClient.search<{ enabled?: boolean }>({
+  try {
+    const response = await esClient.updateByQuery({
       index: THREAT_INTEL_SOURCES_INDEX,
-      size: LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-      // `_doc` is the cheapest total ordering for an exhaustive scan and needs
-      // neither fielddata nor a PIT. Sorting on `_id` requires fielddata on
-      // `_id`, which Elasticsearch disallows unless
-      // `indices.id_field_data.enabled` is set, so that form threw
-      // `illegal_argument_exception` on a stock cluster and failed the whole
-      // bootstrap. Order is only a pagination tie-breaker here; every matching
-      // document is updated regardless of the sequence it arrives in.
-      sort: ['_doc'],
-      ...(searchAfter ? { search_after: searchAfter } : {}),
-      _source: ['enabled'],
+      refresh: false,
+      conflicts: 'proceed',
+      wait_for_completion: true,
       query: {
         bool: {
           filter: [{ term: { enabled: true } }],
           must_not: [{ ids: { values: [...APPROVED_SOURCE_IDS] } }],
         },
       },
+      script: {
+        source: `
+          ctx._source.enabled = false;
+          ctx._source.updated_at = params.now;
+        `,
+        lang: 'painless',
+        params: { now },
+      },
     });
 
-    const hits = (response.hits.hits ?? []).filter((document) => document._id);
-    if (hits.length === 0) {
-      break;
+    const disabled = response.updated ?? 0;
+    const failed = response.version_conflicts ?? 0;
+
+    if (disabled > 0) {
+      log.info(`Disabled ${disabled} legacy source(s) outside the fixed catalog`);
+    }
+    if (failed > 0) {
+      log.warn(
+        `${failed} legacy source(s) outside the fixed catalog could not be disabled due to version conflicts`
+      );
     }
 
-    for (const hit of hits) {
-      const sourceId = hit._id as string;
-      try {
-        await esClient.update({
-          index: THREAT_INTEL_SOURCES_INDEX,
-          id: sourceId,
-          doc: { enabled: false, updated_at: now },
-          refresh: false,
-        });
-        disabled += 1;
-        log.info(`Disabled legacy source outside the fixed catalog: ${sourceId}`);
-      } catch (err) {
-        failed += 1;
-        log.warn(`Failed to disable legacy source ${sourceId}: ${(err as Error).message}`);
-      }
-    }
-
-    if (hits.length < LEGACY_SOURCE_DISABLE_PAGE_SIZE) {
-      break;
-    }
-
-    const lastSort = hits[hits.length - 1]?.sort;
-    if (!lastSort) {
-      throw new Error('Legacy source search page is missing sort values for search_after');
-    }
-    searchAfter = lastSort;
+    return { disabled, failed };
+  } catch (err) {
+    log.warn(`Failed to disable legacy sources: ${(err as Error).message}`);
+    return { disabled: 0, failed: 1 };
   }
-
-  if (disabled > 0) {
-    await esClient.indices.refresh({ index: THREAT_INTEL_SOURCES_INDEX });
-  }
-
-  return { disabled, failed };
 };
