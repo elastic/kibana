@@ -7,19 +7,22 @@
 
 import { useEffect, useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { PluginStart } from '@kbn/core-di';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
+import { registerAutoAttach } from './auto_attach';
+import type { AttachmentConverter } from '../../types';
+
+export interface AutoAttachServices {
+  chrome: ChromeStart;
+  agentBuilder?: AgentBuilderPluginStart;
+}
 
 export const useAutoAttach = <FocusedItem>(
   item: FocusedItem | undefined,
-  converter: AttachmentConverter<FocusedItem>
+  converter: AttachmentConverter<FocusedItem>,
+  services: AutoAttachServices
 ): void => {
-  const chrome = useService(CoreStart('chrome'));
-  const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
-    | AgentBuilderPluginStart
-    | undefined;
+  const { chrome, agentBuilder } = services;
 
   const focusedItem$ = useRef(new BehaviorSubject<FocusedItem | undefined>(undefined)).current;
 

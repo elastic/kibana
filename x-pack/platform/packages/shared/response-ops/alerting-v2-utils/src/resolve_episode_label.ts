@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { MAX_EPISODE_LABEL_LENGTH, type AlertEpisode } from '@kbn/alerting-v2-schemas';
-import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
+import { parseEpisodeDataJson, getValueByFieldPath } from './episode_data';
 
 const GROUP_NAME_SEPARATOR = ' · ';
 

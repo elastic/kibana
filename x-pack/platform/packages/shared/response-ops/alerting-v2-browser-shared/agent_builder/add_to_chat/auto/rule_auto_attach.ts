@@ -10,15 +10,13 @@ import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { RULE_ATTACHMENT_TYPE, type RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import type { RuleApiResponse } from '../services/rules_api';
-import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { registerAutoAttach } from './auto_attach';
+import type { AttachmentConverter } from '../../types';
 
-export type PendingRuleAttachment = AttachmentInput<
-  typeof RULE_ATTACHMENT_TYPE,
-  RuleAttachmentData
->;
+type PendingRuleAttachment = AttachmentInput<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
-export const ruleAttachmentConverter: AttachmentConverter<RuleApiResponse> = {
+export const ruleAttachmentConverter: AttachmentConverter<RuleResponse> = {
   toAttachment: (rule): PendingRuleAttachment => ({
     id: `rule:${rule.id}`,
     type: RULE_ATTACHMENT_TYPE,
@@ -35,7 +33,7 @@ export const registerRuleAutoAttach = ({
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
-  focusedRule$: Observable<RuleApiResponse | undefined>;
+  focusedRule$: Observable<RuleResponse | undefined>;
 }): (() => void) =>
   registerAutoAttach({
     agentBuilder,
