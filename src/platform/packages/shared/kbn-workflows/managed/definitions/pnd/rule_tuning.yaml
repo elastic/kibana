@@ -294,9 +294,7 @@ steps:
           can_apply_query: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'query'
               and steps.diagnose_rule.output.structured_output.proposed_query != ''
-              and steps.fetch_rule.output.type == 'query'
-              and steps.preview_proposed_query.output.succeeded == true
-              and steps.preview_proposed_query.output.is_aborted == false }}
+              and steps.fetch_rule.output.type == 'query' }}
           can_apply_exception: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.diagnose_rule.output.structured_output.exception_entries != null
