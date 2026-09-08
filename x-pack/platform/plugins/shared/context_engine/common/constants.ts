@@ -99,10 +99,6 @@ export const MAX_AI_INDEX_QUERY_LIMIT = 1000;
 /** AI-index describe API bounds. */
 export const MAX_AI_INDEX_DESCRIBE_FIELDS = 500;
 export const MAX_AI_INDEX_DESCRIBE_TAG_COUNTS = 20;
-export const MAX_AI_INDEX_QUERY_TEMPLATES = 50;
-export const MAX_AI_INDEX_QUERY_TEMPLATE_ESQL_LENGTH = 10000;
-/** Serialized size of all `query_templates` in one response. */
-export const MAX_AI_INDEX_QUERY_TEMPLATES_BYTES = 200 * 1024;
 
 export const MAX_FEEDBACK_ANALYSIS_INTERVAL_LENGTH = 16;
 export const MAX_FEEDBACK_ANALYSIS_TIME_RANGE_FROM_LENGTH = 64;
