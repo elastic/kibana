@@ -1587,6 +1587,154 @@ describe('Output Service', () => {
           expect.anything()
         );
       });
+
+      describe('managed OTLP endpoint defaults', () => {
+        const MANAGED_HOST = 'managed-otlp.ingest.elastic.cloud';
+
+        beforeEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({
+            managedOtlp: { url: MANAGED_HOST },
+          } as any);
+          mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
+          mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+        });
+
+        afterEach(() => {
+          mockedAppContextService.getCloud.mockReturnValue({} as any);
+        });
+
+        it('applies recommended sending_queue defaults when none is provided', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP',
+              type: 'otlp',
+              otlp_exporter: { endpoint: MANAGED_HOST, protocol: 'grpc' },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  enabled: true,
+                  sizer: 'bytes',
+                  queue_size: 50_000_000,
+                  block_on_overflow: true,
+                  batch: expect.objectContaining({
+                    flush_timeout: '1s',
+                    min_size: 1_000_000,
+                    max_size: 4_000_000,
+                  }),
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('merges user-provided sending_queue over defaults', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP custom queue',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: { enabled: false, queue_size: 10_000_000 },
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({
+                sending_queue: expect.objectContaining({
+                  enabled: false, // user wins
+                  queue_size: 10_000_000, // user wins
+                  sizer: 'bytes', // from defaults
+                  block_on_overflow: true, // from defaults
+                }),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('does not apply defaults when sending_queue is explicitly null', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Managed OTLP no queue',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: MANAGED_HOST,
+                protocol: 'grpc',
+                sending_queue: null,
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.objectContaining({ sending_queue: null }),
+            }),
+            expect.anything()
+          );
+        });
+
+        it('does not apply defaults for a non-managed OTLP endpoint', async () => {
+          const soClient = getMockedSoClient();
+
+          await outputService.create(
+            soClient,
+            esClientMock,
+            {
+              is_default: false,
+              is_default_monitoring: false,
+              name: 'Non-managed OTLP',
+              type: 'otlp',
+              otlp_exporter: {
+                endpoint: 'my-own-collector.example.com:4317',
+                protocol: 'grpc',
+              },
+            },
+            { id: 'output-test' }
+          );
+
+          expect(soClient.create).toBeCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+              otlp_exporter: expect.not.objectContaining({
+                sending_queue: expect.anything(),
+              }),
+            }),
+            expect.anything()
+          );
+        });
+      });
     });
 
     it('should throw FleetError when given an invalid id', async () => {
