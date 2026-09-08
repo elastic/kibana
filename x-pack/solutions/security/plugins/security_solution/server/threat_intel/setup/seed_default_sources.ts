@@ -355,7 +355,7 @@ const disableLegacySources = async ({
       // `illegal_argument_exception` on a stock cluster and failed the whole
       // bootstrap. Order is only a pagination tie-breaker here; every matching
       // document is updated regardless of the sequence it arrives in.
-      sort: [{ _doc: 'asc' }],
+      sort: ['_doc'],
       ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: ['enabled'],
       query: {

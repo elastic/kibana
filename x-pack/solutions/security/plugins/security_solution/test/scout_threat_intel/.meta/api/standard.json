@@ -1,5 +1,5 @@
 {
-  "sha1": "d544ef9bb2702a8d5ce156bdba7fe2b1383f76c1",
+  "sha1": "b255e536cb140e7c54bcf6ca6057cb12a859d9cc",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 10
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 75,
+        "line": 76,
         "column": 10
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 101,
+        "line": 105,
         "column": 10
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_threat_intel/api/tests/source_catalog.spec.ts",
-        "line": 120,
+        "line": 124,
         "column": 10
       }
     }

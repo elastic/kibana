@@ -317,11 +317,11 @@ describe('seedDefaultSources', () => {
     // default, so it throws on a real cluster while a mocked client happily
     // accepts it. A mock cannot catch that, so assert the field explicitly.
     expect(esClient.search.mock.calls[0][0]).toEqual(
-      expect.objectContaining({ sort: [{ _doc: 'asc' }] })
+      expect.objectContaining({ sort: ['_doc'] })
     );
     expect(esClient.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
-        sort: [{ _doc: 'asc' }],
+        sort: ['_doc'],
         search_after: [LEGACY_SOURCE_DISABLE_PAGE_SIZE - 1],
       })
     );
