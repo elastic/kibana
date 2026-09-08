@@ -10,12 +10,13 @@ import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
 import {
-  AttachmentNotFoundError,
-  AttachmentConflictError,
-  AttachmentValidationError,
-} from '@kbn/agent-builder-server';
+  createAttachmentNotFoundError,
+  createAttachmentAlreadyExistsError,
+  createAttachmentPermanentDeleteBlockedError,
+  createAttachmentInvalidError,
+} from '@kbn/agent-builder-common';
+import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { ConversationService } from '../conversation';
 import type { AttachmentServiceStart } from './types';
@@ -59,7 +60,7 @@ export const createAttachmentPublicClient = ({
       const { stateManager } = await loadState(conversationId);
       const record = stateManager.getAttachmentRecord(attachmentId);
       if (!record) {
-        throw new AttachmentNotFoundError(attachmentId);
+        throw createAttachmentNotFoundError({ attachmentId });
       }
       return record;
     },
@@ -68,7 +69,7 @@ export const createAttachmentPublicClient = ({
       const { conversationClient, stateManager } = await loadState(conversationId);
 
       if (id && stateManager.getAttachmentRecord(id)) {
-        throw new AttachmentConflictError(`Attachment with ID '${id}' already exists`);
+        throw createAttachmentAlreadyExistsError({ attachmentId: id });
       }
 
       const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
@@ -86,7 +87,7 @@ export const createAttachmentPublicClient = ({
           resolveContext
         );
       } catch (e) {
-        throw new AttachmentValidationError((e as Error).message);
+        throw createAttachmentInvalidError((e as Error).message);
       }
 
       await conversationClient.update({
@@ -102,10 +103,10 @@ export const createAttachmentPublicClient = ({
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
       if (!existing) {
-        throw new AttachmentNotFoundError(attachmentId);
+        throw createAttachmentNotFoundError({ attachmentId });
       }
       if (existing.active === false) {
-        throw new AttachmentValidationError(
+        throw createAttachmentInvalidError(
           `Cannot update deleted attachment '${attachmentId}'. Restore it first.`
         );
       }
@@ -118,11 +119,11 @@ export const createAttachmentPublicClient = ({
           ATTACHMENT_REF_ACTOR.user
         );
       } catch (e) {
-        throw new AttachmentValidationError((e as Error).message);
+        throw createAttachmentInvalidError((e as Error).message);
       }
 
       if (!updated) {
-        throw new AttachmentValidationError(`Failed to update attachment '${attachmentId}'`);
+        throw createAttachmentInvalidError(`Failed to update attachment '${attachmentId}'`);
       }
 
       await conversationClient.update({
@@ -138,37 +139,39 @@ export const createAttachmentPublicClient = ({
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
       if (!existing) {
-        throw new AttachmentNotFoundError(attachmentId);
+        throw createAttachmentNotFoundError({ attachmentId });
       }
       if (existing.type === 'screen_context') {
-        throw new AttachmentValidationError('Screen context attachments cannot be deleted');
+        throw createAttachmentInvalidError('Screen context attachments cannot be deleted');
       }
 
       if (permanent) {
         if (hasClientId(existing)) {
-          throw new AttachmentConflictError(
-            `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`
-          );
+          throw createAttachmentPermanentDeleteBlockedError({
+            attachmentId,
+            reason: 'client_id',
+          });
         }
         if (isAttachmentReferencedInRounds(attachmentId, conversation.rounds)) {
-          throw new AttachmentConflictError(
-            `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`
-          );
+          throw createAttachmentPermanentDeleteBlockedError({
+            attachmentId,
+            reason: 'referenced_in_rounds',
+          });
         }
 
         const ok = stateManager.permanentDelete(attachmentId);
         if (!ok) {
-          throw new AttachmentValidationError(
+          throw createAttachmentInvalidError(
             `Failed to permanently delete attachment '${attachmentId}'`
           );
         }
       } else {
         if (existing.active === false) {
-          throw new AttachmentValidationError(`Attachment '${attachmentId}' is already deleted`);
+          throw createAttachmentInvalidError(`Attachment '${attachmentId}' is already deleted`);
         }
         const ok = stateManager.delete(attachmentId, ATTACHMENT_REF_ACTOR.user);
         if (!ok) {
-          throw new AttachmentValidationError(`Failed to delete attachment '${attachmentId}'`);
+          throw createAttachmentInvalidError(`Failed to delete attachment '${attachmentId}'`);
         }
       }
 

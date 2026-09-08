@@ -11,11 +11,7 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import {
-  AttachmentNotFoundError,
-  AttachmentConflictError,
-  AttachmentValidationError,
-} from '@kbn/agent-builder-server';
+import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -156,8 +152,11 @@ export function registerAttachmentRoutes({
           const attachment = await client.get({ conversationId, attachmentId });
           return response.ok<GetAttachmentResponse>({ body: { attachment } });
         } catch (e) {
-          if (e instanceof AttachmentNotFoundError) {
-            return response.notFound({ body: { message: e.message } });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
           }
           throw e;
         }
@@ -328,11 +327,11 @@ export function registerAttachmentRoutes({
           const attachment = await client.create({ conversationId, ...request.body });
           return response.ok<CreateAttachmentResponse>({ body: { attachment } });
         } catch (e) {
-          if (e instanceof AttachmentConflictError) {
-            return response.conflict({ body: { message: e.message } });
-          }
-          if (e instanceof AttachmentValidationError) {
-            return response.badRequest({ body: { message: e.message } });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
           }
           throw e;
         }
@@ -410,11 +409,11 @@ export function registerAttachmentRoutes({
             body: { attachment: updated, new_version: updated.current_version },
           });
         } catch (e) {
-          if (e instanceof AttachmentNotFoundError) {
-            return response.notFound({ body: { message: e.message } });
-          }
-          if (e instanceof AttachmentValidationError) {
-            return response.badRequest({ body: { message: e.message } });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
           }
           throw e;
         }
@@ -490,14 +489,11 @@ export function registerAttachmentRoutes({
             body: { success: true, permanent: permanent ?? false },
           });
         } catch (e) {
-          if (e instanceof AttachmentNotFoundError) {
-            return response.notFound({ body: { message: e.message } });
-          }
-          if (e instanceof AttachmentConflictError) {
-            return response.conflict({ body: { message: e.message } });
-          }
-          if (e instanceof AttachmentValidationError) {
-            return response.badRequest({ body: { message: e.message } });
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
           }
           throw e;
         }

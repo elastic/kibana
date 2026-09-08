@@ -170,11 +170,6 @@ export type {
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
 } from './attachments';
-export {
-  AttachmentNotFoundError,
-  AttachmentConflictError,
-  AttachmentValidationError,
-} from './attachments';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

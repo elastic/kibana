@@ -138,9 +138,7 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.get({ conversationId: 'c1', attachmentId: 'missing' })
-      ).rejects.toMatchObject({
-        name: 'AttachmentNotFoundError',
-      });
+      ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
   });
 
@@ -179,7 +177,7 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.create({ conversationId: 'c1', id: 'a1', type: 'text', data: { text: 'x' } })
-      ).rejects.toMatchObject({ name: 'AttachmentConflictError' });
+      ).rejects.toMatchObject({ code: 'attachmentAlreadyExists' });
     });
 
     it('throws AttachmentValidationError when the type validation fails', async () => {
@@ -199,7 +197,7 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.create({ conversationId: 'c1', type: 'text', data: { wrong: true } })
-      ).rejects.toMatchObject({ name: 'AttachmentValidationError' });
+      ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
   });
 
@@ -241,7 +239,7 @@ describe('createAttachmentPublicClient', () => {
           attachmentId: 'missing',
           data: { text: 'x' },
         })
-      ).rejects.toMatchObject({ name: 'AttachmentNotFoundError' });
+      ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
 
     it('throws AttachmentValidationError when the attachment is deleted', async () => {
@@ -260,7 +258,7 @@ describe('createAttachmentPublicClient', () => {
           attachmentId: 'a1',
           data: { text: 'x' },
         })
-      ).rejects.toMatchObject({ name: 'AttachmentValidationError' });
+      ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
   });
 
@@ -293,9 +291,7 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.delete({ conversationId: 'c1', attachmentId: 'missing' })
-      ).rejects.toMatchObject({
-        name: 'AttachmentNotFoundError',
-      });
+      ).rejects.toMatchObject({ code: 'attachmentNotFound' });
     });
 
     it('rejects deletion of screen_context attachments', async () => {
@@ -310,9 +306,7 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.delete({ conversationId: 'c1', attachmentId: 'sc' })
-      ).rejects.toMatchObject({
-        name: 'AttachmentValidationError',
-      });
+      ).rejects.toMatchObject({ code: 'attachmentInvalid' });
     });
 
     it('permanent delete succeeds when unreferenced and no client_id', async () => {
@@ -329,7 +323,7 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.update).toHaveBeenCalled();
     });
 
-    it('permanent delete throws AttachmentConflictError when attachment has client_id', async () => {
+    it('permanent delete throws attachmentPermanentDeleteBlocked when attachment has client_id', async () => {
       const deps = buildDeps();
       deps.conversationClient.get.mockResolvedValue({
         id: 'c1',
@@ -341,7 +335,10 @@ describe('createAttachmentPublicClient', () => {
 
       await expect(
         client.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true })
-      ).rejects.toMatchObject({ name: 'AttachmentConflictError' });
+      ).rejects.toMatchObject({
+        code: 'attachmentPermanentDeleteBlocked',
+        meta: { reason: 'client_id' },
+      });
     });
   });
 });

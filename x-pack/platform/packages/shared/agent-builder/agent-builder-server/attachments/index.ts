@@ -38,8 +38,3 @@ export type {
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
 } from './public_client';
-export {
-  AttachmentNotFoundError,
-  AttachmentConflictError,
-  AttachmentValidationError,
-} from './errors';
