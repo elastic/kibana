@@ -27,6 +27,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const INDEX_NAME = 'kbn-ftr-custom-threshold-group-by-no-data';
     const DATA_VIEW_NAME = 'group-by-no-data-pattern-name';
     const DATA_VIEW_ID = 'data-view-id-group-by-no-data';
+    // Long enough for a host's last document to fall outside the rule's 20s lookback
+    // window, with headroom for request latency. A host is only detected as missing by
+    // the first execution that happens after its documents age out, so each phase below
+    // waits this long and then forces a run rather than waiting on the 1m schedule.
+    const STALENESS_WAIT_MS = 28000;
     let ruleId: string;
 
     const indexDocsFor = async (hosts: string[]) => {
@@ -39,16 +44,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     };
 
-    // Keeps `hosts` reporting fresh documents every 10s for `durationMs`, so any host NOT
-    // in the list naturally ages out of the rule's 1-minute lookback window as real time
-    // passes -- this is what drives the "group disappears" scenarios below.
-    const keepIndexingFor = async (hosts: string[], durationMs: number) => {
-      const intervalMs = 10000;
-      const iterations = Math.ceil(durationMs / intervalMs);
-      for (let i = 0; i < iterations; i++) {
-        await indexDocsFor(hosts);
-        await new Promise((resolve) => setTimeout(resolve, intervalMs));
-      }
+    // Refreshes `hosts` with a fresh document every 5s until `.stop()` is awaited, so a
+    // host stays "healthy" for however long a test's polling actually takes. The hosts
+    // NOT passed here are what drive the "group disappears" scenarios below.
+    const startKeepAlive = (hosts: string[]) => {
+      let stopped = false;
+      const loopPromise = (async () => {
+        while (!stopped) {
+          await indexDocsFor(hosts);
+          await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+      })();
+      return {
+        stop: async () => {
+          stopped = true;
+          await loopPromise;
+        },
+      };
     };
 
     const runRuleTwice = async () => {
@@ -95,20 +107,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await supertestWithoutAuth
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set(roleAuthc.apiKeyHeader)
-        .set(internalReqHeader);
-      await esClient.deleteByQuery({
-        index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-        conflicts: 'proceed',
-      });
-      await esClient.deleteByQuery({
-        index: '.kibana-event-log-*',
-        query: { term: { 'rule.id': ruleId } },
-        conflicts: 'proceed',
-      });
+      // Rule-scoped teardown only runs when the rule was actually created; otherwise a
+      // failure in the creation test would bury itself under `undefined`-keyed errors.
+      if (ruleId) {
+        await supertestWithoutAuth
+          .delete(`/api/alerting/rule/${ruleId}`)
+          .set(roleAuthc.apiKeyHeader)
+          .set(internalReqHeader);
+        await esClient.deleteByQuery({
+          index: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+          query: { term: { 'kibana.alert.rule.uuid': ruleId } },
+          conflicts: 'proceed',
+        });
+        await esClient.deleteByQuery({
+          index: '.kibana-event-log-*',
+          query: { term: { 'rule.id': ruleId } },
+          conflicts: 'proceed',
+        });
+      }
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
         roleAuthc,
@@ -125,14 +141,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           consumer: 'logs',
           name: 'Group by no-data rule',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          schedule: { interval: '10s' },
+          // Serverless enforces `xpack.alerting.rules.minimumScheduleInterval` (1m) and
+          // rejects anything shorter, so this is the floor available to a deployment-agnostic
+          // suite. Executions are driven explicitly via `runRuleTwice` rather than by this
+          // interval, so the tests below never wait on a scheduled run.
+          schedule: { interval: '1m' },
           params: {
+            // A short lookback window keeps the disappearance waits below to a few tens of
+            // seconds: the in-query lastPeriod/currentPeriod comparison depends on real time
+            // elapsing between rule executions, not just on document timestamps.
             criteria: [
               {
                 comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
                 threshold: [0],
-                timeSize: 1,
-                timeUnit: 'm',
+                timeSize: 20,
+                timeUnit: 's',
                 metrics: [{ name: 'A', aggType: Aggregators.COUNT }],
               },
             ],
@@ -151,6 +174,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('does not alert while every group is reporting data', async () => {
+        // Refresh both hosts here rather than relying on the `before` hook's seed docs
+        // staying fresh -- this keeps the test's freshness assumption self-contained
+        // regardless of how much time setup took.
+        await indexDocsFor(['host-a', 'host-b']);
         await runRuleTwice();
         await alertingApi.waitForRuleStatus({ roleAuthc, ruleId, expectedStatus: 'ok' });
 
@@ -158,26 +185,38 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(alerts).to.eql([]);
       });
 
-      it('alerts for the disappeared group only when one group stops reporting, never the ungrouped "*" instance', async function () {
-        this.timeout(180000);
+      it('alerts for the disappeared group only when one group stops reporting, never the ungrouped "*" instance', async () => {
+        // host-b stops entirely. host-a is kept refreshed concurrently for as long as
+        // this test runs, so its freshness never depends on how long the assertions take.
+        await indexDocsFor(['host-a', 'host-b']);
+        const hostAKeepAlive = startKeepAlive(['host-a']);
+        try {
+          // Establish lastPeriodEnd while both hosts are still current, then let host-b
+          // age out before forcing the run that should notice it.
+          await runRuleTwice();
+          await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
+          await runRuleTwice();
 
-        // host-b stops; host-a keeps reporting so its docs stay inside the 1m lookback
-        // window while host-b's age out of it.
-        await keepIndexingFor(['host-a'], 80000);
-        await runRuleTwice();
+          const resp = await alertingApi.waitForAlertInIndex({
+            indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
+            ruleId,
+            filters: [{ term: { 'kibana.alert.instance.id': 'host-b' } }],
+          });
+          expect(resp.hits.hits[0]._source).property('kibana.alert.status', 'active');
+          expect(resp.hits.hits[0]._source).property(
+            'kibana.alert.reason',
+            'Document count reported no data in the last 20s for host-b'
+          );
 
-        const resp = await alertingApi.waitForAlertInIndex({
-          indexName: CUSTOM_THRESHOLD_RULE_ALERT_INDEX,
-          ruleId,
-          filters: [{ term: { 'kibana.alert.instance.id': 'host-b' } }],
-        });
-        expect(resp.hits.hits[0]._source).property('kibana.alert.status', 'active');
-        expect(resp.hits.hits[0]._source).property(
-          'kibana.alert.reason',
-          'Document count reported no data in the last 1m for host-b'
-        );
+          const hostAAlerts = (await getAlertsForRule()).filter(
+            (alert) => alert['kibana.alert.instance.id'] === 'host-a'
+          );
+          expect(hostAAlerts).to.eql([]);
 
-        await expectNoUngroupedAlert();
+          await expectNoUngroupedAlert();
+        } finally {
+          await hostAKeepAlive.stop();
+        }
       });
 
       it('recovers the disappeared group when it resumes, without emitting "*"', async () => {
@@ -197,13 +236,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectNoUngroupedAlert();
       });
 
-      it('alerts per-group for every group when they all stop reporting simultaneously, never collapsing into "*"', async function () {
-        this.timeout(180000);
-
-        // Neither host is re-indexed here: both age out of the 1m window together. This
-        // is the total-outage shape the removed 0-bucket guard used to convert into a
-        // false '*' alert -- it must still resolve to one alert per group.
-        await new Promise((resolve) => setTimeout(resolve, 80000));
+      it('alerts per-group for every group when they all stop reporting simultaneously, never collapsing into "*"', async () => {
+        // Anchor the freshness point explicitly, then let both hosts age out of the
+        // lookback window together without re-indexing either one -- a total outage
+        // must still resolve to one alert per group, never a single ungrouped alert.
+        await indexDocsFor(['host-a', 'host-b']);
+        await runRuleTwice();
+        await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
         await runRuleTwice();
 
         const respA = await alertingApi.waitForAlertInIndex({
