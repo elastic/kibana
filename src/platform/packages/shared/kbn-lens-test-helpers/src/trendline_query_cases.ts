@@ -247,6 +247,22 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       metricFields: ['bytes'],
     },
     {
+      description: 'FORK query with WHERE prefix kept before the selected branch',
+      sourceQuery: `FROM ${index} | WHERE bytes > 0 | FORK (STATS a = COUNT(*)) (STATS b = MAX(bytes))`,
+      expectedQuery: `FROM ${index} | WHERE bytes > 0 | STATS b = MAX(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['b'],
+      metricFields: ['b'],
+    },
+    {
+      description: 'FORK query dropping a KEEP that only referenced the _fork discriminator',
+      sourceQuery: `FROM ${index} | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | KEEP _fork`,
+      expectedQuery: `FROM ${index} | STATS a = COUNT(*) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
+      expectedTimeField: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      expectedMetricFields: ['a'],
+      metricFields: ['a'],
+    },
+    {
       description: 'FORK query with EVAL prefix shared by both branches',
       sourceQuery: `FROM ${index} | EVAL kb = bytes / 1024 | FORK (STATS avg_kb = AVG(kb)) (STATS total = COUNT(*))`,
       expectedQuery: `FROM ${index} | EVAL kb = bytes / 1024 | STATS avg_kb = AVG(kb) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,

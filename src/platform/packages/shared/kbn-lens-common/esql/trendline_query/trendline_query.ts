@@ -23,10 +23,13 @@ import { walkTrackedColumn } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
 
-/** Returns true when the ES|QL query contains at least one STATS command. */
+/**
+ * Returns true when the ES|QL query contains at least one STATS command,
+ * including STATS commands nested inside FORK branches.
+ */
 export const queryHasStatsCommand = (esqlQuery: string): boolean => {
   const { root } = Parser.parse(esqlQuery);
-  return root.commands.some((command) => command.name === 'stats');
+  return commandsHaveStats(root.commands);
 };
 
 /** Returns true when the ES|QL query uses the TS source command. */

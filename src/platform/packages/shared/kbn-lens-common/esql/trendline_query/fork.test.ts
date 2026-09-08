@@ -7,35 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { appendTimeBucketToEsqlQuery, queryHasStatsCommand } from './trendline_query';
+import { queryHasStatsCommand } from './trendline_query';
 
-// Common FORK rewrite shapes are covered by the shared case matrix from
+// FORK rewrite shapes are covered by the shared case matrix from
 // @kbn/lens-test-helpers (see trendline_query_cases.test.ts); this file keeps
-// behaviors the matrix does not exercise.
-describe('appendTimeBucketToEsqlQuery with FORK', () => {
-  it('keeps commands before FORK and handles WHERE branches', () => {
-    const result = appendTimeBucketToEsqlQuery(
-      'FROM index | WHERE region == "us" | FORK (STATS a = COUNT(*)) (STATS b = MAX(bytes))',
-      'timestamp',
-      ['b']
-    );
-    expect(result).toBe(
-      'FROM index | WHERE region == "us" | STATS b = MAX(bytes) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
-    );
-  });
-
-  it('drops a KEEP that only referenced the synthetic _fork column', () => {
-    const result = appendTimeBucketToEsqlQuery(
-      'FROM index | FORK (STATS a = COUNT(*)) (STATS b = COUNT(*)) | KEEP _fork',
-      'timestamp',
-      ['a']
-    );
-    expect(result).toBe(
-      'FROM index | STATS a = COUNT(*) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
-    );
-  });
-});
-
+// FORK-aware detection behaviors the matrix does not exercise.
 describe('queryHasStatsCommand', () => {
   it('returns true for a top-level STATS command', () => {
     expect(queryHasStatsCommand('FROM index | STATS COUNT(*)')).toBe(true);
