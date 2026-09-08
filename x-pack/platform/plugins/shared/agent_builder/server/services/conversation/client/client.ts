@@ -918,14 +918,10 @@ class ConversationClientImpl implements ConversationClient {
 
     let allowed = false;
     const conversation = fromEsWithoutRounds(document, this.user);
-    // Access predicates operate on the stored document shape (flat `user_id` / `user_name`),
-    // not the API-facing conversation (nested `user`). Passing the converted object made every
-    // ownership check read `undefined` and deny access.
-    const properties = document._source;
 
     switch (access) {
       case 'converse':
-        allowed = hasConversationConverseAccess({ conversation: properties, user: this.user });
+        allowed = hasConversationConverseAccess({ conversation, user: this.user });
 
         if (allowed) {
           try {
@@ -944,7 +940,7 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'owner':
-        allowed = hasConversationOwnerAccess({ conversation: properties, user: this.user });
+        allowed = hasConversationOwnerAccess({ conversation, user: this.user });
         break;
 
       case 'rename':
@@ -956,7 +952,7 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'updateAccessControl':
-        allowed = hasConversationUpdateAccessControlAccess({ conversation: properties, user: this.user });
+        allowed = hasConversationUpdateAccessControlAccess({ conversation, user: this.user });
         break;
     }
 

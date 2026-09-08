@@ -13,7 +13,7 @@ import { createSpaceDslFilter } from '../../../../utils/spaces';
 import { createClient, createSystemClient, type AgentClient } from './client';
 
 const testSpace = 'default';
-const mockUser = { id: 'user-1', username: 'test-user' };
+const mockUser = { id: 'user-1', username: 'test-user', isAdmin: false };
 
 interface MockEsClient {
   search: jest.Mock;
