@@ -2117,6 +2117,17 @@ paths:
         content:
           application/json:
             examples:
+              createConversationFromTemplateExample:
+                description: Example request applying a conversation template and seeding metadata (each key must be declared by the template)
+                value:
+                  metadata:
+                    on_call: true
+                    services:
+                      - checkout
+                      - payments
+                    severity: high
+                  template_id: incident-response
+                  title: Incident triage
               createConversationRequestExample:
                 description: Example request for creating a private shared conversation with a custom title and two members
                 value:
@@ -2180,6 +2191,25 @@ paths:
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
                   maxLength: 256
+                  type: string
+                metadata:
+                  additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - type: number
+                      - type: boolean
+                      - items:
+                          maxLength: 2000
+                          type: string
+                        maxItems: 100
+                        type: array
+                  description: Initial metadata values. Each key must be declared by the referenced template; each value is validated against the field definition (type, options, min/max, regex, max_length). Requires `template_id`.
+                  type: object
+                template_id:
+                  description: Optional ID of a conversation template to apply. When set, the template seeds default metadata and any caller-supplied `metadata` is validated against the template field definitions.
+                  maxLength: 256
+                  minLength: 1
                   type: string
                 title:
                   description: Title for the conversation. Defaults to "New conversation".
