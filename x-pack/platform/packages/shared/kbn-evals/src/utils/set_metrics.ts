@@ -19,15 +19,6 @@ export interface SetMetrics {
  * Computes set-based Precision, Recall, and F1 for an unordered predicted set
  * against an expected set.
  *
- * Empty-set behavior {precision, recall, f1}:
- *   - both sets empty                        -> {1, 1, 1}
- *   - predicted empty, expected non-empty    -> {0, 0, 0}
- *   - expected empty, predicted non-empty    -> {0, 0, 0}
- *
- * Note: T must be a primitive type (string | number). Object values are compared
- * by reference identity, which will silently produce 0 even for structurally equal
- * objects. Pass a string key (e.g. entity ID) rather than the entity itself.
- */
 export const calculateSetMetrics = <T extends string | number>(
   predicted: Set<T>,
   expected: Set<T>
