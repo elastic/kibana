@@ -1106,6 +1106,7 @@ x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-mcp-client @elastic/workchat-eng
+x-pack/platform/packages/shared/kbn-nightshift-ai @elastic/obs-sig-events-team @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-profiler-cli @elastic/observability-ui
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
@@ -1116,7 +1117,7 @@ x-pack/platform/packages/shared/kbn-streamlang @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-tests @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streamlang-yaml-editor @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-streams-ai @elastic/streams-ui @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-ui @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-ui
 x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status @elastic/response-ops
 x-pack/platform/packages/shared/llm-trace-waterfall @elastic/nightshift-context-and-research-team @elastic/workchat-eng
 x-pack/platform/packages/shared/logs-overview @elastic/obs-signals-logs-team
@@ -1945,10 +1946,6 @@ x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/memory_an
 x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/default_index_patterns.ts @elastic/obs-sig-events-team
 x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/stream_matches_index_patterns.ts @elastic/obs-sig-events-team
-# ai
-x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-ai/src/features @elastic/obs-sig-events-team
-x-pack/platform/packages/shared/kbn-streams-ai/src/knowledge_indicators @elastic/obs-sig-events-team
 # server
 x-pack/platform/plugins/shared/significant_events/test/scout/api/tests/significant_events @elastic/obs-sig-events-team
 
@@ -2174,8 +2171,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/search_ai_lake/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
 /x-pack/platform/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
@@ -2652,6 +2648,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitori
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_threat_intelligence/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
@@ -3801,7 +3798,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # No owner - generated files covered by CI checks
 **/moon.yml
-**/version_dependencies.txt
 
 # Operations (last-match override)
 /src/platform/test/package @elastic/kibana-operations
