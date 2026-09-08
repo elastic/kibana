@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
@@ -91,6 +91,7 @@ describe('color mapping', () => {
     const data: ColorMappingInputData = {
       type: 'categories',
       categories: [
+        // the other bucket is handled as a special assignment, not as a regular one
         '__other__',
         '__empty__',
         '',
@@ -104,17 +105,17 @@ describe('color mapping', () => {
     fireEvent.click(screen.getByTestId(ASSIGNMENTS_PROMPT_ADD_ALL));
 
     const assignmentsList = screen.getByTestId(ASSIGNMENTS_LIST);
-    expect(assignmentsList.children.length).toEqual(data.categories.length);
+    expect(assignmentsList.children.length).toEqual(data.categories.length - 1);
 
-    expect(screen.getByTestId(ASSIGNMENT_ITEM(0))).toHaveTextContent('Other');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(0))).toHaveTextContent('(Empty)');
     expect(screen.getByTestId(ASSIGNMENT_ITEM(1))).toHaveTextContent('(Empty)');
-    expect(screen.getByTestId(ASSIGNMENT_ITEM(2))).toHaveTextContent('(Empty)');
-    expect(screen.getByTestId(ASSIGNMENT_ITEM(3))).toHaveTextContent('   with-whitespaces   ', {
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(2))).toHaveTextContent('   with-whitespaces   ', {
       normalizeWhitespace: false,
     });
-    expect(screen.getByTestId(ASSIGNMENT_ITEM(4))).toHaveTextContent('{"keys":["gz","CN"]}');
-    expect(screen.getByTestId(ASSIGNMENT_ITEM(5))).toHaveTextContent(
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(3))).toHaveTextContent('{"keys":["gz","CN"]}');
+    expect(screen.getByTestId(ASSIGNMENT_ITEM(4))).toHaveTextContent(
       '{"gte":0,"lt":1000,"label":""}'
     );
+    expect(within(assignmentsList).queryByText('Other')).not.toBeInTheDocument();
   });
 });

@@ -8,13 +8,23 @@
  */
 
 import type { KbnPaletteId } from '@kbn/palettes';
-import type { CategoricalColor, Color, ColorCode, GradientColor, LoopColor } from './colors';
-import type { ColorRule, RuleOthers } from './rules';
+import type {
+  CategoricalColor,
+  Color,
+  ColorCode,
+  GradientColor,
+  LoopColor,
+  ThemeColor,
+} from './colors';
+import type { ColorRule, RuleOthers, RuleOthersBucket } from './rules';
 
 /**
  * An assignment is the connection link between a rule and a color
  */
-export interface AssignmentBase<R extends ColorRule | RuleOthers, C extends Color> {
+export interface AssignmentBase<
+  R extends ColorRule | RuleOthers | RuleOthersBucket,
+  C extends R extends RuleOthersBucket ? ThemeColor | Color : Color
+> {
   /**
    * Describe the rule used to assign the color.
    */
@@ -46,9 +56,17 @@ export interface GradientColorMode {
   sort: 'asc' | 'desc';
 }
 
+export type OtherAssignment = AssignmentBase<RuleOthers, CategoricalColor | ColorCode | LoopColor>;
+export type OtherBucketAssignment = AssignmentBase<
+  RuleOthersBucket,
+  ThemeColor | CategoricalColor | ColorCode
+>;
+
+export type SpecialAssignment = OtherAssignment | OtherBucketAssignment;
+
 interface BaseConfig {
   paletteId: KbnPaletteId;
-  specialAssignments: Array<AssignmentBase<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
+  specialAssignments: Array<OtherAssignment | OtherBucketAssignment>;
 }
 
 /**
@@ -78,7 +96,6 @@ export type Config = BaseConfig & {
 };
 
 export type Assignment = Config['assignments'][number];
-export type SpecialAssignment = BaseConfig['specialAssignments'][number];
 
 export type * from './colors';
 export type * from './rules';

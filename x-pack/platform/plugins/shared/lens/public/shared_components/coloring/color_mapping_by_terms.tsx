@@ -181,7 +181,7 @@ export function ColorMappingByTerms({
               {!useLegacyPalettes ? (
                 <CategoricalColorMapping
                   isDarkMode={isDarkMode}
-                  model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
+                  model={colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG}
                   onModelUpdate={setColorMapping}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={palettes}

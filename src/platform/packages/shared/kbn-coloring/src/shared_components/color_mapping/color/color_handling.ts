@@ -15,11 +15,12 @@ import { deserializeField } from '@kbn/data-plugin/common';
 import type { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import type { ColorMappingInputData } from '../categorical_color_mapping';
-import type { GradientColorMode } from '../config/types';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
+import { type GradientColorMode } from '../config/types';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
 import { getValueKey } from './utils';
-import { getOtherAssignmentColor } from '../config/utils';
+import { getOtherAssignmentColor, getOtherBucketAssignment } from '../config/utils';
+import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
+import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
 const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
@@ -27,7 +28,8 @@ export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
     | ColorMapping.Assignment['color']
-    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number })
+    | ColorMapping.ThemeColor,
   palettes: KbnPalettes,
   isDarkMode: boolean,
   index: number,
@@ -37,7 +39,8 @@ export function getAssignmentColor(
     case 'colorCode':
     case 'categorical':
     case 'loop':
-      return getColor(color, palettes);
+    case 'theme':
+      return getColor(color, palettes, isDarkMode);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
         return FALLBACK_ASSIGNMENT_COLOR;
@@ -58,9 +61,16 @@ export function getColor(
   color:
     | ColorMapping.ColorCode
     | ColorMapping.CategoricalColor
-    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number }),
-  palettes: KbnPalettes
+    | (ColorMapping.LoopColor & { paletteId: KbnPaletteId; colorIndex: number })
+    | ColorMapping.ThemeColor,
+  palettes: KbnPalettes,
+  isDarkMode?: boolean
 ): string {
+  if (color.type === 'theme') {
+    const themeColor = color.color[isDarkMode ? 'DARK' : 'LIGHT'];
+    return getColor(themeColor, palettes, isDarkMode);
+  }
+
   return color.type === 'colorCode'
     ? color.colorCode
     : getValidColor(palettes.get(color.paletteId).getColor(color.colorIndex)).hex();
@@ -88,7 +98,10 @@ export function getColorFactory(
       assignmentIndex: i,
     }));
 
+  const othersBucketAssignment = getOtherBucketAssignment(specialAssignments)?.assignment;
+
   const assignmentMatcher = getColorAssignmentMatcher(assignments);
+
   // find all categories that don't match with an assignment
   const unassignedAutoAssignmentsMap = new Map(
     data.type === 'categories'
@@ -109,6 +122,17 @@ export function getColorFactory(
 
   return (rawValue: RawValue) => {
     const key = getValueKey(rawValue);
+
+    if (key === OTHER_BUCKET_VALUE && othersBucketAssignment) {
+      return getAssignmentColor(
+        colorMode,
+        othersBucketAssignment.color,
+        palettes,
+        isDarkMode,
+        0,
+        0
+      );
+    }
 
     if (unassignedAutoAssignmentsMap.has(key)) {
       const {
@@ -168,6 +192,7 @@ export function getColorFactory(
         assignments.length
       );
     }
+
     return getColor(
       {
         type: 'categorical',

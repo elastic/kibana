@@ -8,6 +8,7 @@
  */
 
 import type { ColorMappingCategoricalType } from '../../../schema/color';
+import { DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../../schema/color';
 
 /**
  * Lens-known defaults for XY chart styling.
@@ -27,7 +28,6 @@ export const DEFAULT_BARS_MINIMUM_HEIGHT = 1;
 export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
 export const DEFAULT_AREAS_FILL = 'solid' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
-  mode: 'categorical',
+  ...DEFAULT_CATEGORICAL_COLOR_MAPPING,
   palette: 'elastic_line_optimized',
-  mapping: [],
 };

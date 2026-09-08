@@ -235,6 +235,29 @@ describe('xy_visualization', () => {
                     ],
                     "touched": false,
                   },
+                  Object {
+                    "color": Object {
+                      "color": Object {
+                        "DARK": Object {
+                          "colorIndex": 3,
+                          "paletteId": "neutral",
+                          "type": "categorical",
+                        },
+                        "LIGHT": Object {
+                          "colorIndex": 1,
+                          "paletteId": "neutral",
+                          "type": "categorical",
+                        },
+                      },
+                      "type": "theme",
+                    },
+                    "rules": Array [
+                      Object {
+                        "type": "others_bucket",
+                      },
+                    ],
+                    "touched": false,
+                  },
                 ],
               },
               "layerId": "l1",

@@ -276,6 +276,20 @@ const colorCodeSchema = z
 
 const colorDefSchema = z.union([colorFromPaletteSchema, colorCodeSchema]);
 
+const themeColorSchema = z
+  .object({
+    type: z.literal('theme'),
+    color: z.record(z.enum(['LIGHT', 'DARK']), colorDefSchema).meta({
+      description: 'Color per theme color mode (LIGHT/DARK).',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'themeColor',
+    title: 'Theme Color',
+    description: 'A color that switches based on the light/dark theme mode.',
+  });
+
 const unassignedColorSchema = z.union([colorFromPaletteSchema, colorCodeSchema]).meta({
   id: 'unassignedColorSchema',
   description: 'The color to use for unassigned values.',
@@ -299,6 +313,7 @@ const categoricalColorMappingSchema = z
       )
       .max(1000),
     unassigned: unassignedColorSchema.optional(),
+    other: z.union([themeColorSchema, colorDefSchema]).optional(),
   })
   .strict()
   .meta({
@@ -331,6 +346,7 @@ const gradientColorMappingSchema = z
       .optional(),
     gradient: z.array(colorDefSchema).max(3).optional(),
     unassigned: unassignedColorSchema.optional(),
+    other: z.union([themeColorSchema, colorDefSchema]).optional(),
   })
   .strict()
   .meta({
@@ -343,6 +359,21 @@ const DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE: z.output<typeof categoricalColorM
   mode: 'categorical',
   palette: 'default',
   mapping: [],
+  other: {
+    type: 'theme',
+    color: {
+      LIGHT: {
+        type: 'from_palette',
+        index: 1,
+        palette: 'neutral',
+      },
+      DARK: {
+        type: 'from_palette',
+        index: 3,
+        palette: 'neutral',
+      },
+    },
+  },
 };
 
 export const colorMappingSchema = z
@@ -404,6 +435,7 @@ export type ColorMappingType = z.output<typeof colorMappingSchema>;
 export type ColorMappingCategoricalType = z.output<typeof categoricalColorMappingSchema>;
 export type ColorMappingGradientType = z.output<typeof gradientColorMappingSchema>;
 export type ColorMappingColorDefType = z.output<typeof colorDefSchema>;
+export type ThemeColorType = z.output<typeof themeColorSchema>;
 export type NoColorType = z.output<typeof noColorSchema>;
 export type AutoColorType = z.output<typeof autoColorSchema>;
 export type AllColoringTypes = z.output<typeof allColoringTypeSchema>;
