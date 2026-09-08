@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { unstableRowCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutRowCss } from '@kbn/css-utils/public/layout_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -26,7 +26,7 @@ export const ConnectToElasticsearch = () => {
   }, [status]);
 
   return (
-    <div css={unstableRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
+    <div css={layoutRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
       <EuiText color="subdued" size="s">
         <p>
           {i18n.translate('xpack.searchHomepage.connectToElasticsearch.p.endpointLabel', {

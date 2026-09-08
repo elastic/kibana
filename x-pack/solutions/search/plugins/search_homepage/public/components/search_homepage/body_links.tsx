@@ -16,7 +16,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { unstableRowOrStackCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutRowOrStackCss } from '@kbn/css-utils/public/layout_css';
 import { docLinks } from '../../../common/doc_links';
 
 interface BodyLink {
@@ -142,7 +142,7 @@ export const BodyLinks = () => {
   ];
 
   return (
-    <div css={unstableRowOrStackCss({ threshold: '70ch', gap: euiTheme.size.xl })}>
+    <div css={layoutRowOrStackCss({ threshold: '70ch', gap: euiTheme.size.xl })}>
       {BODY_LINKS.map((bodyLink, index) => (
         <BodyLink key={`bodylink-${index}`} {...bodyLink} />
       ))}

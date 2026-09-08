@@ -21,7 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { unstableAutoGridCss, unstableRowOrStackCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutAutoGridCss, layoutRowOrStackCss } from '@kbn/css-utils/public/layout_css';
 import { docLinks } from '../../../common/doc_links';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibana } from '../../hooks/use_kibana';
@@ -54,7 +54,7 @@ const ResourceCard = ({
       direction="row"
       responsive={false}
       data-test-subj={dataTestSubj}
-      css={[unstableRowOrStackCss({ threshold: CARD_MIN_WIDTH }), css({ height: '100%' })]}
+      css={[layoutRowOrStackCss({ threshold: CARD_MIN_WIDTH }), css({ height: '100%' })]}
     >
       <EuiSplitPanel.Inner paddingSize="none" color="subdued">
         <EuiFlexGroup
@@ -194,7 +194,7 @@ export const CloudResources = () => {
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem>
-        <div css={unstableAutoGridCss({ minItemWidth: CARD_MIN_WIDTH, gap: euiTheme.size.l })}>
+        <div css={layoutAutoGridCss({ minItemWidth: CARD_MIN_WIDTH, gap: euiTheme.size.l })}>
           {cards.map((card, index) => (
             <ResourceCard
               key={`resource-${index}`}

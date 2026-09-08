@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
-import { unstableAutoGridCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutAutoGridCss } from '@kbn/css-utils/public/layout_css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -111,7 +111,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
         <EuiSpacer />
 
-        <div css={unstableAutoGridCss({ minItemWidth: '15rem', gap: euiTheme.size.l })}>
+        <div css={layoutAutoGridCss({ minItemWidth: '15rem', gap: euiTheme.size.l })}>
           {features.map((feature) => (
             <Synopsis
               description={feature.description}

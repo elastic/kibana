@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { unstableAutoGridCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutAutoGridCss } from '@kbn/css-utils/public/layout_css';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { ApplicationStart } from '@kbn/core/public';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -233,7 +233,7 @@ export const MetricPanels = () => {
     <EuiFlexItem>
       <EuiSpacer size="l" />
       <div
-        css={unstableAutoGridCss({ minItemWidth: '21rem', gap: euiTheme.size.l })}
+        css={layoutAutoGridCss({ minItemWidth: '21rem', gap: euiTheme.size.l })}
         data-test-subj="searchHomepageNavLinksTabGrid"
       >
         {panels.map((panel, index) => (

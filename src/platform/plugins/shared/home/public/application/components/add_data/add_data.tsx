@@ -19,7 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { unstableRowOrStackCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutRowOrStackCss } from '@kbn/css-utils/public/layout_css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -63,7 +63,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         paddingSize="xl"
         aria-labelledby="homeDataAdd__title"
       >
-        <div css={unstableRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}>
+        <div css={layoutRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}>
           <div>
             <EuiTitle size="s">
               <h2 id="homeDataAdd__title">
@@ -87,7 +87,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
 
             <EuiSpacer />
 
-            <div css={unstableRowOrStackCss({ threshold: '36rem', gap: euiTheme.size.m })}>
+            <div css={layoutRowOrStackCss({ threshold: '36rem', gap: euiTheme.size.m })}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButton
                 data-test-subj="homeAddData"

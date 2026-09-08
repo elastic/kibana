@@ -12,7 +12,7 @@ import React from 'react';
 import { EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { unstableAutoGridCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutAutoGridCss } from '@kbn/css-utils/public/layout_css';
 import { SolutionPanel } from './solution_panel';
 import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
 
@@ -50,7 +50,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
         </h2>
       </EuiScreenReaderOnly>
 
-      <div css={unstableAutoGridCss({ minItemWidth: '15rem', gap: euiTheme.size.base })}>
+      <div css={layoutAutoGridCss({ minItemWidth: '15rem', gap: euiTheme.size.base })}>
         {sortedSolutions.map((solution) => (
           <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
         ))}

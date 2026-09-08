@@ -10,7 +10,7 @@
 import { css } from '@emotion/react';
 
 /**
- * INTERIM intrinsic layout primitives. Everything here is `unstable*` on purpose.
+ * INTERIM intrinsic layout primitives. Treat every export here as experimental.
  *
  * Why these exist
  * ---------------
@@ -55,7 +55,7 @@ const JUSTIFY_CONTENT: Record<Justify, string> = {
   spaceBetween: 'space-between',
 };
 
-export interface UnstableRowOptions {
+export interface LayoutRowOptions {
   /** Gap between children. Usually a `euiTheme.size.*` token. */
   gap?: string;
   /** Cross-axis alignment. Defaults to `'center'`. */
@@ -89,14 +89,14 @@ export interface UnstableRowOptions {
  *
  * This is the primitive for leaf content (buttons, badges, chips, a heading beside a
  * control). Reach for it whenever items should keep their natural width, rather than
- * asking `unstableRowOrStackCss` not to grow its children.
+ * asking `layoutRowOrStackCss` not to grow its children.
  */
-export const unstableRowCss = ({
+export const layoutRowCss = ({
   gap,
   align = 'center',
   justify = 'start',
   shrinkItems = true,
-}: UnstableRowOptions = {}) =>
+}: LayoutRowOptions = {}) =>
   css({
     display: 'flex',
     flexWrap: 'wrap',
@@ -110,7 +110,7 @@ export const unstableRowCss = ({
     },
   });
 
-export interface UnstableFillRowOptions {
+export interface LayoutFillRowOptions {
   /** Gap between children. Usually a `euiTheme.size.*` token. */
   gap?: string;
   /** Cross-axis alignment. Defaults to `'start'`. */
@@ -124,7 +124,7 @@ export interface UnstableFillRowOptions {
  * Use it when one trailing element must hold its position (a version badge, a count, an
  * overflow menu) while the content beside it is free to reflow.
  */
-export const unstableFillRowCss = ({ gap, align = 'start' }: UnstableFillRowOptions = {}) =>
+export const layoutFillRowCss = ({ gap, align = 'start' }: LayoutFillRowOptions = {}) =>
   css({
     display: 'flex',
     flexWrap: 'nowrap',
@@ -143,7 +143,7 @@ export const unstableFillRowCss = ({ gap, align = 'start' }: UnstableFillRowOpti
     },
   });
 
-export interface UnstableRowOrStackOptions {
+export interface LayoutRowOrStackOptions {
   /**
    * The **container** width below which the row becomes a stack, as any non-percentage
    * CSS length. Percentages will not work. Because it is compared against the container
@@ -172,19 +172,19 @@ export interface UnstableRowOrStackOptions {
  * filled final line.
  *
  * Children always fill the line they are on, which is what panels and cards want. For a
- * row of content-sized leaf items, use `unstableRowCss` instead. (Should a content-sized
+ * row of content-sized leaf items, use `layoutRowCss` instead. (Should a content-sized
  * variant ever be needed here, the supported way to cap a child is
  * `max-inline-size: fit-content`. Intrinsic keywords are not valid inside CSS math
  * functions, so `min(max-content, 100%)` is dropped by the browser.)
  *
- * Prefer this over `unstableAutoGridCss` for a small set of *peer* items, where a ragged
+ * Prefer this over `layoutAutoGridCss` for a small set of *peer* items, where a ragged
  * trailing row would imply a hierarchy the design does not intend.
  */
-export const unstableRowOrStackCss = ({
+export const layoutRowOrStackCss = ({
   threshold,
   gap,
   align = 'stretch',
-}: UnstableRowOrStackOptions) =>
+}: LayoutRowOrStackOptions) =>
   css({
     display: 'flex',
     flexWrap: 'wrap',
@@ -197,7 +197,7 @@ export const unstableRowOrStackCss = ({
     },
   });
 
-export interface UnstableAutoGridOptions {
+export interface LayoutAutoGridOptions {
   /**
    * The ideal minimum width of a single grid track, as a CSS length (e.g. `'20rem'`).
    * Tracks narrower than this collapse the grid into fewer columns.
@@ -212,7 +212,7 @@ export interface UnstableAutoGridOptions {
  *
  * Use it for many items of equal standing where a wrapped, ragged final row is fine.
  */
-export const unstableAutoGridCss = ({ minItemWidth, gap }: UnstableAutoGridOptions) =>
+export const layoutAutoGridCss = ({ minItemWidth, gap }: LayoutAutoGridOptions) =>
   css({
     display: 'grid',
     gap,

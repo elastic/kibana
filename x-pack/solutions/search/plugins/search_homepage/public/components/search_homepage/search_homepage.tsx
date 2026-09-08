@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { unstableFillRowCss, unstableRowCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutFillRowCss, layoutRowCss } from '@kbn/css-utils/public/layout_css';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
@@ -53,9 +53,9 @@ export const SearchHomepagePage = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
       <KibanaPageTemplate.Section restrictWidth={true} grow={false}>
-        <div css={unstableRowCss({ gap: euiTheme.size.m, justify: 'spaceBetween' })}>
+        <div css={layoutRowCss({ gap: euiTheme.size.m, justify: 'spaceBetween' })}>
           <div
-            css={unstableRowCss({ gap: euiTheme.size.s, shrinkItems: false })}
+            css={layoutRowCss({ gap: euiTheme.size.s, shrinkItems: false })}
             data-test-subj="searchHomepageHeaderLeftsideGroup"
           >
             <EuiTitle size="s">
@@ -78,7 +78,7 @@ export const SearchHomepagePage = () => {
             {cloud?.isCloudEnabled && cloud?.baseUrl ? (
               // Grouped so the separator wraps with the pill instead of being orphaned
               // at the end of the previous line.
-              <div css={unstableRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
+              <div css={layoutRowCss({ gap: euiTheme.size.s, shrinkItems: false })}>
                 <span css={verticalSeparatorStyle} />
                 <CloudLinks cloud={cloud} />
               </div>
@@ -88,7 +88,7 @@ export const SearchHomepagePage = () => {
         </div>
 
         <EuiHorizontalRule margin="s" />
-        <div css={unstableFillRowCss({ gap: euiTheme.size.s })}>
+        <div css={layoutFillRowCss({ gap: euiTheme.size.s })}>
           <BasicMetricBadges />
           <KibanaVersionBadge
             docLink={

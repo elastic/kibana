@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiBadge, EuiText, EuiTextColor, useEuiTheme } from '@elastic/eui';
-import { unstableRowCss } from '@kbn/css-utils/public/unstable_layout_css';
+import { layoutRowCss } from '@kbn/css-utils/public/layout_css';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
@@ -134,7 +134,7 @@ export const BasicMetricBadges = () => {
   ];
   return (
     <div
-      css={unstableRowCss({ gap: euiTheme.size.s, shrinkItems: false })}
+      css={layoutRowCss({ gap: euiTheme.size.s, shrinkItems: false })}
       data-test-subj="searchHomepageMetricBadges"
     >
       {basicPanels.map((panel) => {
