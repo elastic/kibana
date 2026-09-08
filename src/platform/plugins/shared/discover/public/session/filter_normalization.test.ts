@@ -15,7 +15,7 @@ import { createDiscoverServicesMock } from '../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import { getPersistedTabMock } from '../application/main/state_management/redux/__mocks__/internal_state.mocks';
 import { selectHasUnsavedChanges } from '../application/main/state_management/redux';
-import type { DiscoverSessionClient } from './api_client';
+import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
 import { createDiscoverSessionPersistence } from './persistence';
 
 describe('filter normalization when loading a Discover session', () => {
@@ -51,7 +51,7 @@ describe('filter normalization when loading a Discover session', () => {
       });
       filterManager.setAppFilters([]);
 
-      const apiResponse: Awaited<ReturnType<DiscoverSessionClient['get']>> = {
+      const apiResponse: DiscoverSessionGetResult = {
         id: 'session-id',
         meta: { managed: false },
         resolve: { outcome: 'exactMatch' },

@@ -23,6 +23,7 @@ import {
   registerEmbeddablePublicDefinition,
   type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
+import type { DiscoverSessionApiResponse } from '../../server';
 import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import { DiscoverToolkitTestProvider } from '../__mocks__/test_provider';
 import { useESQLVariables } from '../application/main/components/top_nav/use_esql_variables';
@@ -52,7 +53,7 @@ describe('control order after saving a Discover session', () => {
         { type: ESQL_CONTROL, width: 'medium', grow: true, ...controlConfig, order },
       ])
     );
-    const savedResponse: Awaited<ReturnType<DiscoverSessionClient['upsert']>> = {
+    const savedResponse: DiscoverSessionApiResponse = {
       id: 'session-id',
       meta: { managed: false },
       data: {

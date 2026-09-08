@@ -11,10 +11,9 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import type { DiscoverSessionClient } from './api_client';
+import type { DiscoverSessionApiTab } from '../../server';
 
-type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['get']>>;
-type ApiControlPanels = NonNullable<ApiResponse['data']['tabs'][number]['control_panels']>;
+type ApiControlPanels = NonNullable<DiscoverSessionApiTab['control_panels']>;
 type RuntimeControlPanel = ControlPanelsState<OptionsListESQLControlState>[string];
 
 // TODO: Move this mapping to a shared Discover module when the client and server use common

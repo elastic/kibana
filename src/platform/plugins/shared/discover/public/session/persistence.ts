@@ -13,6 +13,7 @@ import type {
   SaveDiscoverSessionParams,
   SavedSearchPublicPluginStart,
 } from '@kbn/saved-search-plugin/public';
+import type { DiscoverSessionApiResponse, DiscoverSessionWarning } from '../../server';
 import type { DiscoverSessionClient } from './api_client';
 import { prepareDiscoverSession } from './prepare_session';
 import { getDiscoverSessionReferences, toDiscoverSessionApiData } from './state_adapter';
@@ -22,13 +23,9 @@ type LegacyDiscoverSessionClient = Pick<
   'getDiscoverSession' | 'saveDiscoverSession'
 >;
 
-type DiscoverSessionLoadWarning = NonNullable<
-  Awaited<ReturnType<DiscoverSessionClient['get']>>['warnings']
->[number];
-
 interface DiscoverSessionLoadResult {
   session: DiscoverSession;
-  warnings: DiscoverSessionLoadWarning[];
+  warnings: DiscoverSessionWarning[];
 }
 
 // Keep the legacy save types while callers use the existing save flow.
@@ -65,7 +62,7 @@ export const createDiscoverSessionPersistence = ({
     },
     save: async (session, options) => {
       const data = toDiscoverSessionApiData(session);
-      let response: Awaited<ReturnType<DiscoverSessionClient['create']>>;
+      let response: DiscoverSessionApiResponse;
 
       if (options.copyOnSave || session.id === undefined) {
         response = await apiClient.create(data);

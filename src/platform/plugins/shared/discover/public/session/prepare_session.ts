@@ -14,17 +14,14 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import { stableStringify } from '@kbn/std';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { DiscoverSessionClient } from './api_client';
+import type { DiscoverSessionApiResponse, DiscoverSessionApiTab } from '../../server';
+import type { DiscoverSessionResolve } from './api_client';
 import { fromDiscoverSessionApiResponse } from './state_adapter';
-
-type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['create']>>;
-type ApiResolve = Awaited<ReturnType<DiscoverSessionClient['get']>>['resolve'];
-type ApiTab = ApiResponse['data']['tabs'][number];
 
 /** Prepares a loaded API session for Discover, assigning inline IDs and normalizing filters. */
 export const prepareDiscoverSession = (
-  response: ApiResponse,
-  resolve?: ApiResolve
+  response: DiscoverSessionApiResponse,
+  resolve?: DiscoverSessionResolve
 ): DiscoverSession => {
   const session = fromDiscoverSessionApiResponse(response, resolve);
   // Share IDs for matching inline specs only within this session, not across separate loads.
@@ -40,7 +37,7 @@ export const prepareDiscoverSession = (
 
 const prepareTab = (
   tab: DiscoverSessionTab,
-  apiTab: ApiTab,
+  apiTab: DiscoverSessionApiTab,
   inlineDataViewIds: Map<string, string>
 ): DiscoverSessionTab => {
   const searchSource = assignInlineDataViewId(
@@ -56,7 +53,7 @@ const prepareTab = (
 };
 
 const assignInlineDataViewId = (
-  apiTab: ApiTab,
+  apiTab: DiscoverSessionApiTab,
   searchSource: SerializedSearchSourceFields,
   inlineDataViewIds: Map<string, string>
 ): SerializedSearchSourceFields => {

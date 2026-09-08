@@ -13,25 +13,22 @@ import {
   ESQL_CONTROL,
 } from '@kbn/controls-constants';
 import { DataGridDensity, UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
-import { FilterStateStore, updateFilterReferences } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
-import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import type { DiscoverSessionApiClassicTab, DiscoverSessionApiResponse } from '../../server';
 import { prepareDiscoverSession } from './prepare_session';
-import { createDiscoverSessionPersistence } from './persistence';
 import {
   fromDiscoverSessionApiResponse,
   getDiscoverSessionReferences,
   toDiscoverSessionApiData,
 } from './state_adapter';
 
-type ApiResponse = Parameters<typeof fromDiscoverSessionApiResponse>[0];
-type ApiTab = ApiResponse['data']['tabs'][number];
-type ApiClassicTab = Exclude<ApiTab, { data_source: { type: 'esql' } }>;
-type ApiEsqlTab = Extract<ApiTab, { data_source: { type: 'esql' } }>;
-type ApiInlineDataView = Extract<ApiClassicTab['data_source'], { type: 'data_view_spec' }>;
+type ApiInlineDataView = Extract<
+  DiscoverSessionApiClassicTab['data_source'],
+  { type: 'data_view_spec' }
+>;
 
 jest.mock('uuid', () => ({ v4: jest.fn(() => 'runtime-inline-id') }));
 
@@ -50,7 +47,7 @@ const changedInlineDataView: ApiInlineDataView = {
   field_filters: ['private.*'],
 };
 
-const inlineApiTab: ApiClassicTab = {
+const inlineApiTab: DiscoverSessionApiClassicTab = {
   id: 'classic-inline',
   label: 'Inline',
   sort: [],
@@ -72,7 +69,7 @@ const inlineApiTab: ApiClassicTab = {
   hide_table: false,
 };
 
-const response: ApiResponse = {
+const response: DiscoverSessionApiResponse = {
   id: 'session-id',
   data: {
     title: 'Operations',
@@ -162,7 +159,7 @@ const response: ApiResponse = {
 
 const createInlineTabsResponse = (
   dataSources: [ApiInlineDataView, ApiInlineDataView] = [inlineApiDataView, inlineApiDataView]
-): ApiResponse => {
+): DiscoverSessionApiResponse => {
   return {
     ...response,
     data: {
@@ -247,7 +244,7 @@ describe('Discover session conversion and UI preparation', () => {
   });
 
   it('restores an ES|QL chart fingerprint on a classic tab without inheriting its interval', () => {
-    const classicTab: ApiClassicTab = {
+    const classicTab: DiscoverSessionApiClassicTab = {
       ...inlineApiTab,
       data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
       chart_interval: 'h',
@@ -272,28 +269,8 @@ describe('Discover session conversion and UI preparation', () => {
     });
   });
 
-  it('keeps the submitted chart and its live fingerprint after saving', async () => {
-    const session = prepareDiscoverSession(response);
-    const requestData = {
-      dataViewId: 'current-esql-data-view',
-      timeField: '@timestamp',
-      breakdownField: 'service.name',
-    };
-    session.tabs[2].visContext = {
-      suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
-      attributes: response.data.tabs[2].vis_context?.attributes,
-      requestData,
-    };
-    const tabsBeforeSave = cloneDeep(session.tabs);
-
-    const savedSession = await saveSession(session, response);
-
-    expect(savedSession?.tabs[2].visContext).toStrictEqual(tabsBeforeSave[2].visContext);
-    expect(session.tabs).toStrictEqual(tabsBeforeSave);
-  });
-
   it('preserves a chart whose ES|QL fingerprint cannot be reconstructed', () => {
-    const classicTab: ApiClassicTab = {
+    const classicTab: DiscoverSessionApiClassicTab = {
       ...inlineApiTab,
       data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
       chart_interval: 'h',
@@ -303,7 +280,7 @@ describe('Discover session conversion and UI preparation', () => {
         attributes: { visualizationType: 'lnsXY' },
       },
     };
-    const chartResponse: ApiResponse = {
+    const chartResponse: DiscoverSessionApiResponse = {
       ...response,
       data: { ...response.data, tabs: [classicTab] },
     };
@@ -320,86 +297,20 @@ describe('Discover session conversion and UI preparation', () => {
     );
   });
 
-  it.each([
-    { label: 'unchanged', ids: ['first', 'last'], expectedOrders: [0, 2] },
-    { label: 'reordered', ids: ['last', 'first'], expectedOrders: [0, 1] },
-  ])(
-    'keeps the submitted orders and configuration for $label controls after saving',
-    async ({ ids, expectedOrders }) => {
-      const apiControls: NonNullable<ApiTab['control_panels']> = ids.map((id) => ({
-        id,
-        type: ESQL_CONTROL,
-        width: CONTROL_WIDTH_MEDIUM,
-        grow: true,
-        config: {
-          control_type: 'STATIC_VALUES',
-          available_options: ['api', 'web'],
-          selected_options: ['web'],
-          single_select: true,
-          variable_name: id,
-          variable_type: 'values',
-        },
-      }));
-      const saveResponse: ApiResponse = {
-        ...response,
-        data: {
-          ...response.data,
-          tabs: [{ ...response.data.tabs[2], control_panels: apiControls }],
-        },
-      };
-      const session = prepareDiscoverSession(saveResponse);
-      session.tabs[0].controlGroupJson = JSON.stringify(
-        Object.fromEntries(
-          apiControls.map(({ id, type, width, grow, config }, index) => [
-            id,
-            {
-              type,
-              width,
-              grow,
-              ...config,
-              order: expectedOrders[index],
-            },
-          ])
-        )
-      );
-      const tabsBeforeSave = cloneDeep(session.tabs);
-
-      const savedSession = await saveSession(session, saveResponse);
-
-      expect(JSON.parse(savedSession?.tabs[0].controlGroupJson ?? '{}')).toEqual(
-        Object.fromEntries(
-          apiControls.map(({ id, type, width, grow, config }, index) => [
-            id,
-            { type, width, grow, ...config, order: expectedOrders[index] },
-          ])
-        )
-      );
-      expect(session.tabs).toStrictEqual(tabsBeforeSave);
-    }
-  );
-
   it('round-trips the complete API document', () => {
     const session = prepareDiscoverSession(response);
+    const data = toDiscoverSessionApiData(session);
 
     const expectedInlineTab = {
       ...inlineApiTab,
       filters: inlineApiTab.filters.map((filter) => ({ ...filter, disabled: false })),
     };
 
-    expect(toDiscoverSessionApiData(session)).toEqual({
+    expect(data).toEqual({
       ...response.data,
       tabs: [response.data.tabs[0], expectedInlineTab, response.data.tabs[2]],
     });
-  });
-
-  it('round-trips ES|QL filtering as part of the query', () => {
-    const session = fromDiscoverSessionApiResponse(response);
-    const esqlTab = toDiscoverSessionApiData(session).tabs.find(
-      (tab): tab is ApiEsqlTab => tab.data_source.type === 'esql'
-    );
-
-    expect(esqlTab?.data_source.query).toBe('FROM logs-* | WHERE status == 500');
-    expect(esqlTab).not.toHaveProperty('filters');
+    expect(data.tabs[2]).not.toHaveProperty('filters');
   });
 
   it('keeps inline IDs runtime-only and preserves filters for other data views', () => {
@@ -467,53 +378,6 @@ describe('Discover session conversion and UI preparation', () => {
     ]);
   });
 
-  it('keeps the inline spec and its ID when the API omits runtime-only fields', async () => {
-    const firstSession = prepareDiscoverSession(response);
-    const inlineDataView = firstSession.tabs[1].serializedSearchSource.index;
-    expect(inlineDataView).toEqual(expect.any(Object));
-    if (!inlineDataView || typeof inlineDataView === 'string') {
-      return;
-    }
-
-    Object.assign(inlineDataView, {
-      fieldFormats: {},
-      runtimeFieldMap: {},
-      fieldAttrs: {},
-      allowNoIndex: false,
-      allowHidden: false,
-      managed: false,
-    });
-    const specBeforeSave = cloneDeep(inlineDataView);
-    const secondSession = await saveSession(firstSession, response);
-
-    expect(secondSession?.tabs[1].serializedSearchSource.index).toStrictEqual(specBeforeSave);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
-  });
-
-  it('keeps inline IDs and pinned filters unchanged across consecutive saves', async () => {
-    const session = prepareDiscoverSession(response);
-    const inlineTab = session.tabs[1];
-    inlineTab.serializedSearchSource.filter = [
-      ...(inlineTab.serializedSearchSource.filter ?? []),
-      {
-        meta: { index: 'runtime-inline-id' },
-        query: { term: { environment: 'production' } },
-        $state: { store: FilterStateStore.GLOBAL_STATE },
-      },
-    ];
-    const tabsBeforeSave = cloneDeep(session.tabs);
-
-    const firstSave = await saveSession(session, response);
-    const secondSave = await saveSession(session, response);
-
-    expect(secondSave).toStrictEqual(firstSave);
-    expect(firstSave?.tabs).toStrictEqual(tabsBeforeSave);
-    expect(secondSave?.tabs).toStrictEqual(tabsBeforeSave);
-    expect(secondSave?.tabs[1].serializedSearchSource.filter).toHaveLength(3);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
-    expect(session.tabs).toStrictEqual(tabsBeforeSave);
-  });
-
   it('reuses one runtime ID for identical inline data views in different tabs', () => {
     mockedUuidv4.mockReturnValueOnce('runtime-inline-a');
 
@@ -524,35 +388,6 @@ describe('Discover session conversion and UI preparation', () => {
     );
     expect(session.tabs[1].serializedSearchSource.index).toEqual(
       expect.objectContaining({ id: 'runtime-inline-a' })
-    );
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
-  });
-
-  it('preserves per-tab runtime IDs for separate inline data views with identical specs', async () => {
-    mockedUuidv4.mockReturnValueOnce('runtime-inline-a');
-
-    const sharedResponse = createInlineTabsResponse();
-    const session = prepareDiscoverSession(sharedResponse);
-    const secondDataView = session.tabs[1].serializedSearchSource.index;
-    expect(secondDataView).toEqual(expect.any(Object));
-    if (!secondDataView || typeof secondDataView === 'string') {
-      return;
-    }
-
-    secondDataView.id = 'runtime-inline-b';
-    session.tabs[1].serializedSearchSource.filter = updateFilterReferences(
-      session.tabs[1].serializedSearchSource.filter ?? [],
-      'runtime-inline-a',
-      'runtime-inline-b'
-    );
-
-    const savedSession = await saveSession(session, sharedResponse);
-
-    expect(savedSession?.tabs[0].serializedSearchSource.index).toEqual(
-      expect.objectContaining({ id: 'runtime-inline-a' })
-    );
-    expect(savedSession?.tabs[1].serializedSearchSource.index).toEqual(
-      expect.objectContaining({ id: 'runtime-inline-b' })
     );
     expect(mockedUuidv4).toHaveBeenCalledTimes(1);
   });
@@ -570,42 +405,6 @@ describe('Discover session conversion and UI preparation', () => {
     expect(session.tabs[1].serializedSearchSource.index).toEqual(
       expect.objectContaining({ id: 'runtime-inline-b' })
     );
-  });
-
-  it('keeps the ID assigned by editing an inline data view without changing the other tab', async () => {
-    mockedUuidv4.mockReturnValueOnce('runtime-inline-a');
-
-    const sharedResponse = createInlineTabsResponse();
-    const sharedSession = prepareDiscoverSession(sharedResponse);
-    const editedTab = sharedSession.tabs[0];
-    // Discover assigns a new ID when editing an inline data view, before saving the session.
-    editedTab.serializedSearchSource.index = {
-      id: 'edited-inline-id',
-      title: 'logs-*',
-      name: 'Inline logs',
-      timeFieldName: '@timestamp',
-      sourceFilters: [{ value: 'private.*' }],
-    };
-    editedTab.serializedSearchSource.filter = updateFilterReferences(
-      editedTab.serializedSearchSource.filter ?? [],
-      'runtime-inline-a',
-      'edited-inline-id'
-    );
-    const tabsBeforeSave = cloneDeep(sharedSession.tabs);
-
-    const changedSession = await saveSession(
-      sharedSession,
-      createInlineTabsResponse([changedInlineDataView, inlineApiDataView])
-    );
-
-    expect(changedSession?.tabs[0].serializedSearchSource.index).toEqual(
-      expect.objectContaining({ id: 'edited-inline-id' })
-    );
-    expect(changedSession?.tabs[1].serializedSearchSource.index).toEqual(
-      expect.objectContaining({ id: 'runtime-inline-a' })
-    );
-    expect(changedSession?.tabs).toStrictEqual(tabsBeforeSave);
-    expect(mockedUuidv4).toHaveBeenCalledTimes(1);
   });
 
   it('maps alias resolution metadata into the runtime session', () => {
@@ -702,17 +501,3 @@ describe('Discover session conversion and UI preparation', () => {
     );
   });
 });
-
-const saveSession = (session: SaveDiscoverSessionParams, saveResponse: ApiResponse) => {
-  const persistence = createDiscoverSessionPersistence({
-    apiClient: {
-      get: jest.fn(),
-      create: jest.fn().mockResolvedValue(saveResponse),
-      upsert: jest.fn().mockResolvedValue(saveResponse),
-    },
-    legacyClient: savedSearchPluginMock.createStartContract(),
-    useHttpApi: true,
-  });
-
-  return persistence.save(session, {});
-};

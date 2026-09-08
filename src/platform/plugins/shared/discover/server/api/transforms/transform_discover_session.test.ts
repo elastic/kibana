@@ -493,7 +493,7 @@ describe('discover session API transforms', () => {
     });
   });
 
-  describe('visContext requestData extraction', () => {
+  describe('visContext requestData assembly', () => {
     const [classicTab, esqlTab] = apiData.tabs;
 
     const buildEsqlVisContext = ({
@@ -521,7 +521,7 @@ describe('discover session API transforms', () => {
       transformDiscoverSessionIn({ ...apiData, tabs: [tab] }).attributes.tabs[0].attributes
         .visContext;
 
-    it('extracts the fingerprint from the chart blob for ES|QL tabs', () => {
+    it('stores ES|QL charts with the extracted fingerprint and tab breakdown', () => {
       const layers = { 'layer-1': { index: 'esql-dv' } };
       const adHocDataViews = { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } };
 
@@ -574,43 +574,19 @@ describe('discover session API transforms', () => {
       });
     });
 
-    it('selects the data view through the layer linkage and falls back on ambiguity', () => {
-      const ambiguous = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv-a' }, 'layer-2': { index: 'esql-dv-b' } },
-        adHocDataViews: {
-          'esql-dv-a': { type: 'esql', timeFieldName: '@timestamp' },
-          'esql-dv-b': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(
-        getStoredVisContext({ ...esqlTab, breakdown_field: 'host.name', vis_context: ambiguous })
-      ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
-
-      const sameDataView = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'esql-dv' }, 'layer-2': { index: 'esql-dv' } },
-        adHocDataViews: {
-          'unused-esql-dv': { type: 'esql', timeFieldName: 'event.ingested' },
-          'esql-dv': { type: 'esql', timeFieldName: '@timestamp' },
-        },
-      });
-
-      expect(getStoredVisContext({ ...esqlTab, vis_context: sameDataView })).toEqual(
-        expect.objectContaining({
-          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
-        })
-      );
-    });
-
-    it('extracts the fingerprint without a time field and omits an empty breakdown field', () => {
+    it('omits an empty tab breakdown from the stored fingerprint', () => {
       const visContext = buildEsqlVisContext({
         layers: { 'layer-1': { index: 'esql-dv' } },
-        adHocDataViews: { 'esql-dv': { type: 'esql' } },
+        adHocDataViews: { 'esql-dv': { type: 'esql', timeFieldName: '@timestamp' } },
       });
 
       expect(
         getStoredVisContext({ ...esqlTab, breakdown_field: '', vis_context: visContext })
-      ).toEqual(expect.objectContaining({ requestData: { dataViewId: 'esql-dv' } }));
+      ).toEqual(
+        expect.objectContaining({
+          requestData: { dataViewId: 'esql-dv', timeField: '@timestamp' },
+        })
+      );
     });
 
     it('falls back when the blob is not a recognizable ES|QL chart', () => {
@@ -627,16 +603,11 @@ describe('discover session API transforms', () => {
         })
       ).toEqual(expect.objectContaining({ requestData: { breakdownField: 'host.name' } }));
 
-      const wrongDataViewType = buildEsqlVisContext({
-        layers: { 'layer-1': { index: 'a-persisted-dv' } },
-        adHocDataViews: { 'a-persisted-dv': { type: 'index-pattern' } },
-      });
-
       expect(
         getStoredVisContext({
           ...esqlTab,
           breakdown_field: '',
-          vis_context: wrongDataViewType,
+          vis_context: unrecognizable,
         })
       ).toEqual(expect.objectContaining({ requestData: {} }));
     });

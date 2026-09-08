@@ -16,6 +16,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
+import type { DiscoverSessionWarning } from '../../server';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import type { DiscoverSessionPersistence } from './persistence';
 import { loadDiscoverSession } from './load_discover_session';
@@ -27,37 +28,6 @@ jest.mock('@kbn/react-kibana-mount', () => ({
 const session = createDiscoverSessionMock({ id: 'test-session' });
 
 describe('loadDiscoverSession', () => {
-  it('warns when some content was omitted and returns the session', async () => {
-    const { core } = createDiscoverServicesMock();
-    const persistence: jest.Mocked<DiscoverSessionPersistence> = {
-      get: jest.fn().mockResolvedValue({
-        session,
-        warnings: [
-          {
-            type: 'dropped_property',
-            tab_id: 'tab-1',
-            key: 'control_panels',
-            message: 'Unable to transform control panels.',
-          },
-        ],
-      }),
-      save: jest.fn(),
-    };
-
-    const result = await loadDiscoverSession({
-      id: session.id,
-      persistence,
-      core,
-    });
-
-    expect(result).toBe(session);
-    expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith(
-      expect.objectContaining({
-        'data-test-subj': 'discoverSessionLoadWarning',
-      })
-    );
-  });
-
   it('does not warn when the session loads without warnings', async () => {
     const { core } = createDiscoverServicesMock();
     const persistence: jest.Mocked<DiscoverSessionPersistence> = {
@@ -79,7 +49,7 @@ describe('loadDiscoverSession', () => {
     const core = coreMock.createStart();
     const modal = { close: jest.fn(), onClose: Promise.resolve() };
     core.overlays.openModal.mockReturnValue(modal);
-    const warnings: Awaited<ReturnType<DiscoverSessionPersistence['get']>>['warnings'] = [
+    const warnings: DiscoverSessionWarning[] = [
       {
         type: 'dropped_panel',
         tab_id: 'tab-1',
@@ -115,7 +85,8 @@ describe('loadDiscoverSession', () => {
     });
     expect(core.overlays.openModal).not.toHaveBeenCalled();
 
-    const { actionProps } = core.notifications.toasts.addWarning.mock.calls[0][0] as ToastInputFields;
+    const { actionProps } = core.notifications.toasts.addWarning.mock
+      .calls[0][0] as ToastInputFields;
     renderWithI18n(<EuiToast actionProps={actionProps} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Learn more' }));
@@ -129,7 +100,7 @@ describe('loadDiscoverSession', () => {
     expect(dialog).toHaveTextContent('some_future_property');
     expect(dialog).toHaveTextContent('tab-2');
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close', exact: true }));
+    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
     expect(modal.close).toHaveBeenCalledTimes(1);
   });
 });

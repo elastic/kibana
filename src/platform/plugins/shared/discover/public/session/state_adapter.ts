@@ -17,22 +17,22 @@ import {
 } from '@kbn/data-plugin/common';
 import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { fromStoredTab, toStoredSort, toStoredTab } from '../../common/embeddable/transform_utils';
-import type { DiscoverSessionClient } from './api_client';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiResponse,
+  DiscoverSessionApiTab,
+} from '../../server';
+import type { DiscoverSessionResolve } from './api_client';
 import { toApiControlPanels, toControlGroupJson } from './control_panels';
 import { fromApiVisContext, toApiVisContext } from './vis_context';
 
 // The HTTP path uses this adapter because Discover still works with saved-search-shaped state.
 // Removing the legacy persistence path does not remove the need for these conversions.
 
-type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['create']>>;
-type ApiResolve = Awaited<ReturnType<DiscoverSessionClient['get']>>['resolve'];
-type ApiData = ApiResponse['data'];
-type ApiTab = ApiResponse['data']['tabs'][number];
-
 /** Converts API fields and charts; session preparation adds inline IDs and filter defaults. */
 export const fromDiscoverSessionApiResponse = (
-  response: ApiResponse,
-  resolve?: ApiResolve
+  response: DiscoverSessionApiResponse,
+  resolve?: DiscoverSessionResolve
 ): DiscoverSession => {
   const tabsWithReferences = response.data.tabs.map(fromApiTab);
   const { references: tagReferences } = toStoredTags({ tags: response.data.tags });
@@ -52,7 +52,7 @@ export const fromDiscoverSessionApiResponse = (
 /** Converts a Discover session into a create or upsert request body. */
 export const toDiscoverSessionApiData = (
   session: Pick<DiscoverSession, 'title' | 'description' | 'tabs' | 'tags'>
-): ApiData => ({
+): DiscoverSessionApiData => ({
   title: session.title,
   description: session.description,
   ...(session.tags !== undefined && { tags: session.tags }),
@@ -60,7 +60,9 @@ export const toDiscoverSessionApiData = (
 });
 
 /** Rebuilds saved-object references from the API document without rebuilding Discover tabs. */
-export const getDiscoverSessionReferences = (data: ApiData): SavedObjectReference[] => {
+export const getDiscoverSessionReferences = (
+  data: DiscoverSessionApiData
+): SavedObjectReference[] => {
   const { references: tagReferences } = toStoredTags({ tags: data.tags });
   const tabReferences = data.tabs.flatMap((tab) => {
     const { references } = toStoredTab(tab, { refNamePrefix: `tab_${tab.id}` });
@@ -71,7 +73,7 @@ export const getDiscoverSessionReferences = (data: ApiData): SavedObjectReferenc
 };
 
 const fromApiTab = (
-  apiTab: ApiTab
+  apiTab: DiscoverSessionApiTab
 ): { tab: DiscoverSessionTab; references: SavedObjectReference[] } => {
   // Reuse the stored-format conversion to rebuild search source fields and references in memory.
   const { state: storedTab, references } = toStoredTab(apiTab, {
@@ -118,7 +120,7 @@ const fromApiTab = (
   };
 };
 
-const toApiTab = (tab: DiscoverSessionTab): ApiTab => {
+const toApiTab = (tab: DiscoverSessionTab): DiscoverSessionApiTab => {
   const { id, label, serializedSearchSource: _searchSource, ...tabAttributes } = tab;
   // Only the search source needs a different shape here. The transformer selects the API fields.
   const storedTab: Parameters<typeof fromStoredTab>[0] = {
@@ -140,7 +142,7 @@ const toApiTab = (tab: DiscoverSessionTab): ApiTab => {
     }),
     ...(tab.breakdownField !== undefined && { breakdown_field: tab.breakdownField }),
     ...(tab.chartInterval !== undefined && {
-      chart_interval: tab.chartInterval as NonNullable<ApiTab['chart_interval']>,
+      chart_interval: tab.chartInterval as NonNullable<DiscoverSessionApiTab['chart_interval']>,
     }),
     ...(tab.timeRestore && tab.timeRange !== undefined && { time_range: tab.timeRange }),
     ...(tab.refreshInterval !== undefined && { refresh_interval: tab.refreshInterval }),

@@ -27,12 +27,12 @@ export interface DiscoverSessionClient {
   upsert: (id: string, data: DiscoverSessionApiDataInput) => Promise<DiscoverSessionApiResponse>;
 }
 
-type DiscoverSessionResolve = Pick<
+export type DiscoverSessionResolve = Pick<
   NonNullable<DiscoverSession['sharingSavedObjectProps']>,
   'outcome' | 'aliasTargetId' | 'aliasPurpose'
 >;
 
-type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
+export type DiscoverSessionGetResult = DiscoverSessionGetResponse & {
   resolve: DiscoverSessionResolve;
 };
 

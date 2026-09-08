@@ -14,12 +14,18 @@ import {
 } from '@kbn/saved-search-plugin/common';
 import type { SaveDiscoverSessionParams } from '@kbn/saved-search-plugin/public';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
+import { FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
-import type { DiscoverSessionClient } from './api_client';
+import type {
+  DiscoverSessionApiData,
+  DiscoverSessionApiResponse,
+  DiscoverSessionApiTab,
+} from '../../server';
+import type { DiscoverSessionClient, DiscoverSessionGetResult } from './api_client';
 import { createDiscoverSessionPersistence } from './persistence';
-
-type ApiResponse = Awaited<ReturnType<DiscoverSessionClient['create']>>;
-type ApiGetResponse = Awaited<ReturnType<DiscoverSessionClient['get']>>;
 
 const runtimeTab: DiscoverSessionTab = {
   id: 'logs-tab',
@@ -34,7 +40,7 @@ const runtimeTab: DiscoverSessionTab = {
   serializedSearchSource: { index: 'logs-data-view' },
 };
 
-const apiData: ApiResponse['data'] = {
+const apiData: DiscoverSessionApiData = {
   title: 'Session',
   description: '',
   tabs: [
@@ -52,13 +58,13 @@ const apiData: ApiResponse['data'] = {
   ],
 };
 
-const apiResponse: ApiResponse = {
+const apiResponse: DiscoverSessionApiResponse = {
   id: 'session-id',
   data: apiData,
   meta: { managed: false },
 };
 
-const apiGetResponse: ApiGetResponse = {
+const apiGetResponse: DiscoverSessionGetResult = {
   ...apiResponse,
   resolve: {
     outcome: 'conflict',
@@ -88,7 +94,7 @@ const persistedSession: DiscoverSession = {
 };
 
 describe('Discover session persistence', () => {
-  it('uses the REST client when the local switch is enabled', async () => {
+  it('loads through REST with resolution metadata and warnings when the switch is enabled', async () => {
     const apiClient = createApiClient();
     const legacyClient = savedSearchPluginMock.createStartContract();
     const persistence = createDiscoverSessionPersistence({
@@ -98,16 +104,15 @@ describe('Discover session persistence', () => {
     });
 
     const loaded = await persistence.get('session-id');
-    const savedSession = await persistence.save(session, { copyOnSave: false });
 
     expect(apiClient.get).toHaveBeenCalledWith('session-id');
-    expect(apiClient.upsert).toHaveBeenCalledWith('session-id', apiData);
+    expect(apiClient.upsert).not.toHaveBeenCalled();
     expect(apiClient.create).not.toHaveBeenCalled();
     expect(legacyClient.getDiscoverSession).not.toHaveBeenCalled();
     expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
     expect(loaded.session.sharingSavedObjectProps).toEqual(apiGetResponse.resolve);
     expect(loaded.warnings).toEqual(apiGetResponse.warnings);
-    expect(savedSession).toEqual(
+    expect(loaded.session).toEqual(
       expect.objectContaining({
         id: 'session-id',
         title: 'Session',
@@ -116,65 +121,58 @@ describe('Discover session persistence', () => {
     );
   });
 
-  it('creates a session through the REST client when saving a copy', async () => {
-    const apiClient = createApiClient();
-    const legacyClient = savedSearchPluginMock.createStartContract();
-    const persistence = createDiscoverSessionPersistence({
-      apiClient,
-      legacyClient,
-      useHttpApi: true,
-    });
-
-    const savedSession = await persistence.save(session, { copyOnSave: true });
-
-    expect(apiClient.create).toHaveBeenCalledWith(apiData);
-    expect(apiClient.upsert).not.toHaveBeenCalled();
-    expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
-    expect(savedSession).toEqual(
-      expect.objectContaining({
-        id: 'session-id',
-        tabs: [expect.objectContaining({ id: 'logs-tab' })],
-      })
-    );
-  });
-
   it.each([
-    { action: 'Save', copyOnSave: false, savedId: 'resolved-session-id' },
-    { action: 'Save As', copyOnSave: true, savedId: 'copied-session-id' },
+    {
+      action: 'Save',
+      copyOnSave: false,
+      savedId: 'resolved-session-id',
+      method: 'upsert' as const,
+      unusedMethod: 'create' as const,
+      idArgs: ['session-id'],
+    },
+    {
+      action: 'Save As',
+      copyOnSave: true,
+      savedId: 'copied-session-id',
+      method: 'create' as const,
+      unusedMethod: 'upsert' as const,
+      idArgs: [],
+    },
   ])(
     'keeps the submitted tabs after $action and uses the returned identity and metadata',
-    async ({ copyOnSave, savedId }) => {
-      const submittedSession = cloneDeep(session);
+    async ({ copyOnSave, savedId, method, unusedMethod, idArgs }) => {
+      const { submittedSession, data } = createSaveFixture();
+      const beforeSave = cloneDeep(submittedSession);
       const apiClient = createApiClient();
-      // The response includes defaults, but saving must not reload the already open tabs.
-      const saveResponse: ApiResponse = {
-        ...apiResponse,
+      const legacyClient = savedSearchPluginMock.createStartContract();
+      // The API omits pinned filters, inline IDs, the live fingerprint, and control order numbers.
+      // Saving must keep those local values without rebuilding the tabs from this response.
+      const saveResponse: DiscoverSessionApiResponse = {
         id: savedId,
+        data,
         meta: { managed: true },
       };
       apiClient.create.mockResolvedValue(saveResponse);
       apiClient.upsert.mockResolvedValue(saveResponse);
       const persistence = createDiscoverSessionPersistence({
         apiClient,
-        legacyClient: savedSearchPluginMock.createStartContract(),
+        legacyClient,
         useHttpApi: true,
       });
 
       const savedSession = await persistence.save(submittedSession, { copyOnSave });
 
+      expect(apiClient[method]).toHaveBeenCalledTimes(1);
+      expect(apiClient[method]).toHaveBeenCalledWith(...idArgs, data);
+      expect(apiClient[unusedMethod]).not.toHaveBeenCalled();
+      expect(legacyClient.saveDiscoverSession).not.toHaveBeenCalled();
       expect(savedSession).toStrictEqual({
-        ...submittedSession,
+        ...beforeSave,
         id: savedId,
         managed: true,
-        references: [
-          {
-            id: 'logs-data-view',
-            type: 'index-pattern',
-            name: 'tab_logs-tab.kibanaSavedObjectMeta.searchSourceJSON.index',
-          },
-        ],
+        references: [{ id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' }],
       });
-      expect(submittedSession).toStrictEqual(session);
+      expect(submittedSession).toStrictEqual(beforeSave);
       expect(apiClient.get).not.toHaveBeenCalled();
     }
   );
@@ -218,6 +216,7 @@ describe('Discover session persistence', () => {
     });
     expect(apiClient.get).not.toHaveBeenCalled();
     expect(apiClient.upsert).not.toHaveBeenCalled();
+    expect(apiClient.create).not.toHaveBeenCalled();
     expect(loaded).toEqual({ session: persistedSession, warnings: [] });
     expect(savedSession).toBe(persistedSession);
   });
@@ -228,3 +227,142 @@ const createApiClient = (): jest.Mocked<DiscoverSessionClient> => ({
   get: jest.fn().mockResolvedValue(apiGetResponse),
   upsert: jest.fn().mockResolvedValue(apiResponse),
 });
+
+const createSaveFixture = () => {
+  const controlConfig = {
+    variable_name: 'environment',
+    variable_type: 'values',
+    control_type: 'STATIC_VALUES',
+    available_options: ['production', 'staging'],
+    selected_options: ['production'],
+    single_select: true,
+  } satisfies OptionsListESQLControlState;
+  const chartAttributes = {
+    visualizationType: 'lnsXY',
+    state: {
+      datasourceStates: { textBased: { layers: { 'layer-1': { index: 'stored-esql-id' } } } },
+      adHocDataViews: { 'stored-esql-id': { type: 'esql', timeFieldName: '@timestamp' } },
+    },
+  };
+
+  const submittedSession: SaveDiscoverSessionParams = {
+    ...session,
+    tags: ['tag-1'],
+    tabs: [
+      // Identical specs may have different IDs after editing. Saving must keep both IDs.
+      ...['inline-a', 'inline-b'].map(
+        (id): DiscoverSessionTab => ({
+          ...runtimeTab,
+          id,
+          label: id,
+          usesAdHocDataView: true,
+          serializedSearchSource: {
+            index: {
+              id: `runtime-${id}`,
+              title: 'logs-*',
+              timeFieldName: '@timestamp',
+              sourceFilters: [{ value: 'secret.*' }],
+              fieldFormats: {},
+              runtimeFieldMap: {},
+              fieldAttrs: {},
+              allowNoIndex: false,
+              allowHidden: false,
+              managed: false,
+            },
+            filter: [
+              {
+                meta: { index: `runtime-${id}` },
+                query: { match_all: {} },
+                $state: { store: FilterStateStore.GLOBAL_STATE },
+              },
+            ],
+          },
+        })
+      ),
+      {
+        ...runtimeTab,
+        id: 'esql',
+        label: 'ES|QL',
+        isTextBasedQuery: true,
+        serializedSearchSource: { query: { esql: 'FROM logs-*' } },
+        breakdownField: 'host.name',
+        visContext: {
+          suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+          attributes: chartAttributes,
+          requestData: {
+            dataViewId: 'live-esql-id',
+            timeField: '@timestamp',
+            breakdownField: 'host.name',
+          },
+        },
+        controlGroupJson: JSON.stringify({
+          last: {
+            ...controlConfig,
+            variable_name: 'last',
+            type: ESQL_CONTROL,
+            width: 'medium',
+            grow: true,
+            order: 2,
+          },
+          first: {
+            ...controlConfig,
+            variable_name: 'first',
+            type: ESQL_CONTROL,
+            width: 'medium',
+            grow: true,
+            order: 0,
+          },
+        }),
+      },
+    ],
+  };
+
+  const data: DiscoverSessionApiData = {
+    ...apiData,
+    tags: ['tag-1'],
+    tabs: [
+      ...['inline-a', 'inline-b'].map(
+        (id): DiscoverSessionApiTab => ({
+          id,
+          label: id,
+          sort: [],
+          column_order: [],
+          filters: [],
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            time_field: '@timestamp',
+            allow_hidden_indices: false,
+            field_filters: ['secret.*'],
+          },
+          view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+          hide_chart: false,
+          hide_table: false,
+        })
+      ),
+      {
+        id: 'esql',
+        label: 'ES|QL',
+        sort: [],
+        column_order: [],
+        data_source: { type: 'esql', query: 'FROM logs-*' },
+        hide_chart: false,
+        hide_table: false,
+        breakdown_field: 'host.name',
+        vis_context: {
+          suggestion_type: UnifiedHistogramSuggestionType.histogramForESQL,
+          attributes: chartAttributes,
+        },
+        control_panels: ['first', 'last'].map((id) => ({
+          id,
+          type: ESQL_CONTROL,
+          width: 'medium',
+          grow: true,
+          config: { ...controlConfig, variable_name: id },
+        })),
+      },
+    ],
+  };
+
+  return { submittedSession, data };
+};
