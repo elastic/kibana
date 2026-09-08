@@ -149,6 +149,21 @@ describe('workflowExecutionLoop', () => {
     expect(params.workflowExecutionCursor.stop).toHaveBeenCalled();
   });
 
+  it('treats AbortError DOMException as CANCELLED (not FAILED) — e.g. user-initiated cancel', async () => {
+    const params = createParams();
+    const abortController = new AbortController();
+    const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
+    abortController.abort(new DOMException('timeout', 'AbortError'));
+    await loopPromise;
+
+    expect(params.workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: ExecutionStatus.CANCELLED,
+      })
+    );
+    expect(params.workflowExecutionCursor.captureError).not.toHaveBeenCalled();
+  });
+
   it('marks Task Manager abort as system cancellation and suppresses workflow log errors', async () => {
     const params = createParams();
     const abortController = new AbortController();
