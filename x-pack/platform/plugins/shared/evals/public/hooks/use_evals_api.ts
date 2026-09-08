@@ -23,7 +23,6 @@ import {
   EVALS_DATASETS_URL,
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
-  EVALS_DATASET_IMPORT_URL,
   EVALS_DATASET_EXAMPLE_URL,
   API_VERSIONS,
   type DatasetMaturity,
@@ -38,8 +37,6 @@ import {
   type DeleteEvaluationDatasetResponse,
   type AddEvaluationDatasetExamplesRequestBodyInput,
   type AddEvaluationDatasetExamplesResponse,
-  type ImportEvaluationDatasetExamplesRequestBodyInput,
-  type ImportEvaluationDatasetExamplesResponse,
   type UpdateEvaluationDatasetExampleRequestBodyInput,
   type UpdateEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetExampleResponse,
@@ -108,10 +105,6 @@ interface AddExamplesVariables extends DatasetWithId {
   body: AddEvaluationDatasetExamplesRequestBodyInput;
 }
 
-interface ImportExamplesVariables extends DatasetWithId {
-  body: ImportEvaluationDatasetExamplesRequestBodyInput;
-}
-
 interface DeleteDatasetVariables extends DatasetWithId {
   /**
    * Which outcome the confirmation the user saw described, so the server can
@@ -133,9 +126,6 @@ const getDatasetUrl = (datasetId: string) =>
 
 const getDatasetExamplesUrl = (datasetId: string) =>
   EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
-
-const getDatasetImportUrl = (datasetId: string) =>
-  EVALS_DATASET_IMPORT_URL.replace('{datasetId}', encodeURIComponent(datasetId));
 
 const getDatasetExampleUrl = (datasetId: string, exampleId: string) =>
   EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
@@ -295,32 +285,6 @@ export const useAddExamples = () => {
     }: AddExamplesVariables): Promise<AddEvaluationDatasetExamplesResponse> => {
       return services.http!.post<AddEvaluationDatasetExamplesResponse>(
         getDatasetExamplesUrl(datasetId),
-        {
-          body: JSON.stringify(body),
-          version: API_VERSIONS.internal.v1,
-        }
-      );
-    },
-    onSuccess: async (_response, { datasetId }) => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.all }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.datasets.detail(datasetId) }),
-      ]);
-    },
-  });
-};
-
-export const useImportExamples = () => {
-  const { services } = useKibana();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({
-      datasetId,
-      body,
-    }: ImportExamplesVariables): Promise<ImportEvaluationDatasetExamplesResponse> => {
-      return services.http!.post<ImportEvaluationDatasetExamplesResponse>(
-        getDatasetImportUrl(datasetId),
         {
           body: JSON.stringify(body),
           version: API_VERSIONS.internal.v1,

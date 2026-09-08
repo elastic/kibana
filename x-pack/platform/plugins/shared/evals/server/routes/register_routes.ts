@@ -26,7 +26,6 @@ import { registerGetDatasetRoute } from './datasets/get_dataset';
 import { registerUpdateDatasetRoute } from './datasets/update_dataset';
 import { registerDeleteDatasetRoute } from './datasets/delete_dataset';
 import { registerAddExamplesRoute } from './datasets/add_examples';
-import { registerImportExamplesRoute } from './datasets/import_examples';
 import { registerUpdateExampleRoute } from './datasets/update_example';
 import { registerDeleteExampleRoute } from './datasets/delete_example';
 import { registerUpsertDatasetRoute } from './datasets/upsert_dataset';
@@ -89,7 +88,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerUpdateDatasetRoute(dependencies);
   registerDeleteDatasetRoute(dependencies);
   registerAddExamplesRoute(dependencies);
-  registerImportExamplesRoute(dependencies);
   registerUpdateExampleRoute(dependencies);
   registerDeleteExampleRoute(dependencies);
   registerUpsertDatasetRoute(dependencies);

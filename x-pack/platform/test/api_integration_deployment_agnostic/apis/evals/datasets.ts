@@ -11,7 +11,6 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
-  EVALS_DATASET_IMPORT_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   type AddEvaluationDatasetExamplesResponse,
@@ -20,7 +19,6 @@ import {
   type DeleteEvaluationDatasetResponse,
   type GetEvaluationDatasetResponse,
   type GetEvaluationDatasetsResponse,
-  type ImportEvaluationDatasetExamplesResponse,
   type ResolveEvaluationDatasetResponse,
   type UpdateEvaluationDatasetExampleResponse,
   type UpdateEvaluationDatasetResponse,
@@ -45,8 +43,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplesPath = (datasetId: string) =>
     EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
-  const importExamplesPath = (datasetId: string) =>
-    EVALS_DATASET_IMPORT_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplePath = (datasetId: string, exampleId: string) =>
     EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
       '{exampleId}',
@@ -191,7 +187,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
           })
           .expect(200);
-        expect((addBody as AddEvaluationDatasetExamplesResponse).added).to.eql(2);
+        expect(addBody as AddEvaluationDatasetExamplesResponse).to.eql({
+          added: 2,
+          skipped_duplicates: 0,
+        });
 
         const { body: datasetBody } = await adminClient
           .get(datasetPath(exampleDatasetId))
@@ -273,11 +272,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('imports examples with their source and skips them when re-imported', async () => {
         const { body: importBody } = await adminClient
-          .post(importExamplesPath(importDatasetId))
-          .send({ examples: importPayload })
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
           .expect(200);
 
-        expect(importBody as ImportEvaluationDatasetExamplesResponse).to.eql({
+        expect(importBody as AddEvaluationDatasetExamplesResponse).to.eql({
           added: importPayload.length,
           skipped_duplicates: 0,
         });
@@ -286,20 +285,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(datasetPath(importDatasetId))
           .expect(200);
         const firstDataset = firstDatasetBody as GetEvaluationDatasetResponse;
-        const importedExamples = firstDataset.examples as Array<
-          GetEvaluationDatasetResponse['examples'][number] & { source?: string }
-        >;
+        const importedExamples = firstDataset.examples;
 
         expect(importedExamples.length).to.eql(importPayload.length);
         expect(importedExamples.every(({ source }) => source === 'import')).to.be(true);
 
         const firstExampleIds = importedExamples.map(({ id }) => id).sort();
         const { body: reimportBody } = await adminClient
-          .post(importExamplesPath(importDatasetId))
-          .send({ examples: importPayload })
+          .post(examplesPath(importDatasetId))
+          .send({ examples: importPayload, source: 'import', on_duplicate: 'skip' })
           .expect(200);
 
-        expect(reimportBody as ImportEvaluationDatasetExamplesResponse).to.eql({
+        expect(reimportBody as AddEvaluationDatasetExamplesResponse).to.eql({
           added: 0,
           skipped_duplicates: importPayload.length,
         });

@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { getErrorMessage } from '../../utils/get_error_message';
-import { useCreateDataset, useDatasets, useImportExamples } from '../../hooks/use_evals_api';
+import { useAddExamples, useCreateDataset, useDatasets } from '../../hooks/use_evals_api';
 import { applyMapping, chunkExamples, parseCsv, parseJsonl, suggestMapping } from './lib';
 import { FileStep } from './file_step';
 import { MapStep } from './map_step';
@@ -76,7 +76,7 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
     perPage: 1000,
   });
   const createDataset = useCreateDataset();
-  const importExamples = useImportExamples();
+  const addExamples = useAddExamples();
 
   const steps = useMemo(
     () => [
@@ -184,7 +184,10 @@ export const ImportDatasetFlyout = ({ onClose, initialDatasetId }: ImportDataset
 
       for (const examples of chunkExamples(state.examples)) {
         try {
-          const response = await importExamples.mutateAsync({ datasetId, body: { examples } });
+          const response = await addExamples.mutateAsync({
+            datasetId,
+            body: { examples, source: 'import', on_duplicate: 'skip' },
+          });
           added += response.added;
           skippedDuplicates += response.skipped_duplicates;
         } catch (error) {

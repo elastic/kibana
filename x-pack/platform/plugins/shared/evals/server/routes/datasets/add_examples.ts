@@ -86,7 +86,7 @@ export const registerAddExamplesRoute = ({
           }
 
           const { datasetId } = request.params;
-          const { examples } = request.body;
+          const { examples, source, on_duplicate: onDuplicate } = request.body;
           const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
           const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
@@ -98,11 +98,15 @@ export const registerAddExamplesRoute = ({
             });
           }
 
-          const { added } = await datasetClient.addExamples(datasetId, examples);
+          const { added } = await datasetClient.addExamples(datasetId, examples, {
+            rejectDuplicates: onDuplicate !== 'skip',
+            ...(source ? { source } : {}),
+          });
 
           return response.ok({
             body: {
               added,
+              skipped_duplicates: examples.length - added,
             },
           });
         } catch (error) {

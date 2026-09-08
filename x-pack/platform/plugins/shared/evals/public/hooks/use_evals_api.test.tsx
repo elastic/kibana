@@ -11,7 +11,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { useDataset, useDatasets, useDeleteDataset, useImportExamples } from './use_evals_api';
+import { useAddExamples, useDataset, useDatasets, useDeleteDataset } from './use_evals_api';
 
 const DATASET_ID = 'dataset-1';
 const DATASET_URL = `/internal/evals/datasets/${DATASET_ID}`;
@@ -70,16 +70,20 @@ describe('useDeleteDataset', () => {
   });
 });
 
-describe('useImportExamples', () => {
-  it('URL-encodes the dataset ID and posts the import body', async () => {
+describe('useAddExamples', () => {
+  it('URL-encodes the dataset ID and posts the configured add body', async () => {
     const { http, wrapper } = setup();
-    const { result } = renderHook(() => useImportExamples(), { wrapper });
-    const body = { examples: [{ input: { question: 'Hello?' } }] };
+    const { result } = renderHook(() => useAddExamples(), { wrapper });
+    const body = {
+      examples: [{ input: { question: 'Hello?' } }],
+      source: 'import' as const,
+      on_duplicate: 'skip' as const,
+    };
 
     await result.current.mutateAsync({ datasetId: 'dataset/with spaces', body });
 
     expect(http.post).toHaveBeenCalledWith(
-      '/internal/evals/datasets/dataset%2Fwith%20spaces/examples/_import',
+      '/internal/evals/datasets/dataset%2Fwith%20spaces/examples',
       {
         body: JSON.stringify(body),
         version: '1',

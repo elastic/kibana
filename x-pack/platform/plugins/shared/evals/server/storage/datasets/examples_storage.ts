@@ -29,7 +29,7 @@ export interface DatasetExampleStorageProperties {
   input?: Record<string, unknown>;
   output?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
-  source?: string;
+  source?: 'import';
   created_at: string;
   updated_at: string;
 }
