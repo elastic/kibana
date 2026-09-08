@@ -1205,16 +1205,22 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           return state;
         }
 
-        const activeDatasource = datasourceMap[state.activeDatasourceId];
+        const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
+        // Route the new dimension to the datasource that owns the layer: on mixed
+        // panels (e.g. ES|QL data layers plus a form-based reference line layer) the
+        // layer's datasource can differ from the globally active one.
+        const layerDatasourceId =
+          framePublicAPI.datasourceLayers[layerId]?.datasourceId ?? state.activeDatasourceId;
+        const layerDatasource = datasourceMap[layerDatasourceId];
         const activeVisualization = visualizationMap[state.visualization.activeId];
         const layerType =
           activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
         const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
-          datasourceState: state.datasourceStates[state.activeDatasourceId].state,
+          datasourceState: state.datasourceStates[layerDatasourceId].state,
           visualizationState: state.visualization.state,
-          framePublicAPI: selectFramePublicAPI({ lens: current(state) }, datasourceMap),
+          framePublicAPI,
           activeVisualization,
-          activeDatasource,
+          activeDatasource: layerDatasource,
           layerId,
           layerType,
           columnId,
@@ -1222,7 +1228,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         });
 
         state.visualization.state = activeVisualizationState;
-        state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
+        state.datasourceStates[layerDatasourceId].state = activeDatasourceState;
       })
       .addCase(removeDimension, (state, { payload: { layerId, columnId, datasourceId } }) => {
         if (!state.visualization.activeId) {

@@ -716,6 +716,69 @@ describe('lensSlice', () => {
 
           expect(formBasedWithInit.initializeDimension).not.toHaveBeenCalled();
         });
+
+        it('should route the dimension to the datasource that owns the layer on mixed panels', () => {
+          // active datasource is textBased (ES|QL chart), but the reference line
+          // layer lives in the formBased datasource
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const formBasedWithInit = {
+            ...formBased('formBased'),
+            initializeDimension: jest.fn((state) => state),
+          };
+          const textBasedWithInit = {
+            ...formBased('textBased'),
+            initializeDimension: jest.fn((state) => state),
+          };
+
+          const customStoreWithInit = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'textBased',
+              datasourceStates: {
+                formBased: { isLoading: false, state: ['refLayer'] },
+                textBased: { isLoading: false, state: ['layer2'] },
+              },
+              visualization: {
+                activeId: activeVisId,
+                state: ['refLayer', 'layer2'],
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getSupportedLayers: jest.fn(() => [
+                    {
+                      type: LayerTypes.REFERENCELINE,
+                      label: 'Reference Layer',
+                      initialDimensions: [
+                        { groupId: 'testGroup', columnId: 'testColumn', staticValue: 100 },
+                      ],
+                    },
+                  ]),
+                  getLayerType: jest.fn(() => LayerTypes.REFERENCELINE),
+                  setDimension: jest.fn(({ prevState }) => prevState),
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                formBased: formBasedWithInit,
+                textBased: textBasedWithInit,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          customStoreWithInit.dispatch(
+            setLayerDefaultDimension({
+              layerId: 'refLayer',
+              columnId: 'testColumn',
+              groupId: 'testGroup',
+            })
+          );
+
+          expect(formBasedWithInit.initializeDimension).toHaveBeenCalled();
+          expect(textBasedWithInit.initializeDimension).not.toHaveBeenCalled();
+        });
       });
 
       it('removeLayer: should remove the layer if it is not the only layer', () => {

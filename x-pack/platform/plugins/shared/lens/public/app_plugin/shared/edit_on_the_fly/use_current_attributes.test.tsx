@@ -66,6 +66,7 @@ describe('useCurrentAttributes', () => {
           visualization: {
             activeId: 'testVis',
             state: formBasedAttributes.state.visualization,
+            selectedLayerId: null,
           },
           // Mirrors the inline editor store init: every datasource in the map is
           // initialized, so a pure form-based panel still carries an empty
