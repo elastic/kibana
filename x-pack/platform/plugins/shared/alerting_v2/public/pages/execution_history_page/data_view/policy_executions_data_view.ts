@@ -6,6 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { PolicyExecutionHistoryItem } from '@kbn/alerting-v2-schemas';
 import {
   COLUMN_TIMESTAMP,
@@ -77,4 +78,38 @@ const POLICY_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
   },
 };
 
-export const usePolicyExecutionsDataView = () => useAdHocDataView(POLICY_EXECUTIONS_DATA_VIEW_SPEC);
+export const usePolicyExecutionsDataView = () =>
+  useAdHocDataView(POLICY_EXECUTIONS_DATA_VIEW_SPEC);
+
+// Extra flattened values consumed by cell renderers but not shown as their own column: the outcome
+// cell's failure tooltip (`errorMessage`, `failureReason`) and the rules cell's true total
+// (`totalRuleCount`, since the embedded `rules` array is capped server-side).
+export const POLICY_RECORD_EXTRA_FIELDS = {
+  totalRuleCount: 'total_rule_count',
+  failureReason: 'failure_reason',
+  errorMessage: 'error_message',
+} as const;
+
+// Projects a policy execution into a `DataTableRecord` for `UnifiedDataTable`. Reading the payload
+// through the typed `item` is the drift guard: a shape change in `PolicyExecutionHistoryItem` fails
+// to compile here. Structured columns (policy, rules, workflows) carry their objects/arrays as-is
+// for the custom renderers to consume.
+export const policyExecutionToDataTableRecord = (
+  item: PolicyExecutionHistoryItem,
+  index: number
+): DataTableRecord => ({
+  id: `${item.policy.id}:${item.dispatched_at}:${index}`,
+  raw: {},
+  flattened: {
+    [POLICY_EXECUTION_FIELDS.dispatchedAt]: item.dispatched_at,
+    [POLICY_EXECUTION_FIELDS.policy]: item.policy,
+    [POLICY_EXECUTION_FIELDS.outcome]: item.outcome,
+    [POLICY_EXECUTION_FIELDS.rules]: item.rules,
+    [POLICY_EXECUTION_FIELDS.episodeCount]: item.episode_count,
+    [POLICY_EXECUTION_FIELDS.actionGroupCount]: item.action_group_count,
+    [POLICY_EXECUTION_FIELDS.workflows]: item.workflows,
+    [POLICY_RECORD_EXTRA_FIELDS.totalRuleCount]: item.total_rule_count,
+    [POLICY_RECORD_EXTRA_FIELDS.failureReason]: item.failure_reason ?? null,
+    [POLICY_RECORD_EXTRA_FIELDS.errorMessage]: item.error?.message ?? null,
+  },
+});

@@ -6,6 +6,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import type { RuleExecutionView } from '@kbn/alerting-v2-schemas';
 import {
   COLUMN_TIMESTAMP,
@@ -71,3 +72,20 @@ const RULE_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
 };
 
 export const useRuleExecutionsDataView = () => useAdHocDataView(RULE_EXECUTIONS_DATA_VIEW_SPEC);
+
+// Projects a rule execution into a `DataTableRecord` for `UnifiedDataTable`. Reading the payload
+// through the typed `item` is the drift guard: a shape change in `RuleExecutionView` (e.g. moving
+// `timings.duration` or renaming `rule.id`) fails to compile here. The Rule name and the message
+// success/empty fallbacks are resolved at render time (rule name needs the rules cache, the
+// fallbacks are presentation), so only the raw values are carried here.
+export const ruleExecutionToDataTableRecord = (item: RuleExecutionView): DataTableRecord => ({
+  id: item.id,
+  raw: {},
+  flattened: {
+    [RULE_EXECUTION_FIELDS.startedAt]: item.started_at,
+    [RULE_EXECUTION_FIELDS.ruleId]: item.rule.id,
+    [RULE_EXECUTION_FIELDS.duration]: item.timings.duration,
+    [RULE_EXECUTION_FIELDS.outcome]: item.outcome,
+    [RULE_EXECUTION_FIELDS.message]: item.error?.message ?? item.reason ?? null,
+  },
+});
