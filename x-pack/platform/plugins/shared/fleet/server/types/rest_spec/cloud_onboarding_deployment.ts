@@ -38,14 +38,12 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-const ServiceVarsEntrySchema = schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
-  maxSize: 100,
-});
+const ServiceVarsEntrySchema = schema.recordOf(schema.string(), schema.any());
 
 const RequestServiceVarsSchema = schema.recordOf(
   schema.string({ minLength: 1 }),
   ServiceVarsEntrySchema,
-  { meta: { description: 'Per-service source configs.' } }
+  { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
 const OnboardingDeploymentIdParamSchema = schema.object({
@@ -86,8 +84,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   serviceVars: schema.maybe(
     schema.recordOf(schema.string(), ServiceVarsEntrySchema, {
       meta: {
-        description:
-          'Per-service config keyed by service ID. Each entry is an array of source configs (regions, S3 bucket ARN, etc.).',
+        description: 'Per-service config keyed by instance ID. Each value is the ServiceVars object from the Service Settings step.',
       },
     })
   ),

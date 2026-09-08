@@ -28,6 +28,8 @@ export interface DetectAndReviewStepState {
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
   deployErrors: Record<string, string>;
+  /** SO id of the cloud-onboarding-deployment record created at Deploy time. Used to update the record after allSettled and on retry. */
+  onboardingDeploymentId?: string;
 }
 
 // Only non-sensitive fields are persisted — password values are never written to session storage
@@ -55,6 +57,7 @@ interface PersistedDetectAndReviewStep {
   policyIdsByInstance: Record<string, string>;
   failedInstances: string[];
   deployErrors: Record<string, string>;
+  onboardingDeploymentId?: string;
 }
 
 const DEFAULT_SELECTED_IDS: string[] = [];

@@ -17,7 +17,7 @@ export type CloudOnboardingDeploymentMechanism =
 
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
-export type CloudOnboardingDeploymentServiceVars = Array<Record<string, unknown>>;
+export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
 
 export interface CloudOnboardingDeployment {
   id: string;

@@ -8,6 +8,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
+import {
+  sendCreateCloudOnboardingDeployment,
+  sendUpdateCloudOnboardingDeployment,
+} from '@kbn/fleet-plugin/public';
+
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
@@ -165,6 +170,28 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const globalRegion = serviceSettings?.globalRegion ?? '';
       const storedServiceVars = serviceSettings?.serviceVars ?? {};
 
+      // Create the SO record before dispatch (best-effort; only on the connector path).
+      // On the static-keys path connectorId is undefined and resume isn't supported, so skip.
+      const { connectorId } = authenticateAndDeployStep;
+      let onboardingDeploymentId = isInitialDeploy
+        ? undefined
+        : detectAndReviewStep.onboardingDeploymentId;
+
+      if (isInitialDeploy && connectorId) {
+        const createResp = await sendCreateCloudOnboardingDeployment({
+          provider: 'aws',
+          connectorId,
+          mechanisms: ['agentless'],
+          services: selectedServiceIds,
+          serviceVars: storedServiceVars as Record<string, Record<string, unknown>>,
+          globalRegion,
+        }).catch(() => null);
+        onboardingDeploymentId = createResp?.data?.item?.id;
+        if (onboardingDeploymentId) {
+          updateDetectAndReviewStep({ onboardingDeploymentId });
+        }
+      }
+
       // Promise.allSettled preserves insertion order, so results[i] matches groupsToDeploy[i].
       const results = await Promise.allSettled(
         groupsToDeploy.map((group) =>
@@ -190,6 +217,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       const previouslyFailed = getLatestFailedInstances().filter((id) => !deployedSet.has(id));
       const mergedFailed = [...previouslyFailed, ...newFailed];
 
+      // Update SO with deploy outcome (best-effort).
+      if (onboardingDeploymentId) {
+        await sendUpdateCloudOnboardingDeployment(onboardingDeploymentId, {
+          packagePolicyIds: Object.values(policyIdsByInstance),
+          status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
+        }).catch(() => {});
+      }
+
       setIsDeploying(false);
       setFailedInstances(mergedFailed);
       updateDetectAndReviewStep({
@@ -212,6 +247,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       getLatestFailedInstances,
       detectAndReviewStep.serviceStatuses,
       detectAndReviewStep.failedInstances,
+      detectAndReviewStep.onboardingDeploymentId,
+      selectedServiceIds,
     ]
   );
 

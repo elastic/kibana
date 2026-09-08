@@ -34,10 +34,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   statusMessage: schema.maybe(schema.string()),
   attemptCount: schema.number({ min: 1, defaultValue: 1 }),
   serviceVars: schema.maybe(
-    schema.recordOf(
-      schema.string({ minLength: 1 }),
-      schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
-    )
+    schema.recordOf(schema.string({ minLength: 1 }), schema.recordOf(schema.string(), schema.any()))
   ),
   globalRegion: schema.maybe(schema.string()),
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
