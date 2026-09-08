@@ -18,11 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  CONVERSATION_QUEUE_LABELS,
-  type Investigation,
-  type RecommendedAction,
-} from '../../types';
+import { CONVERSATION_QUEUE_LABELS, type Investigation, type RecommendedAction } from '../../types';
 import { EMPTY_CONVERSATION_QUEUE } from './translations';
 import { ConversationCard, type ConversationsActionsGroupProps } from '../conversation_card';
 import { type BaseActionsProps } from '../actions';
