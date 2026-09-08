@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IacProvisionerRenderFlow } from '../../telemetry/iac_provisioner_events';
+import type { CLOUD_CONNECTOR_RENDER_FLOW } from '../../telemetry/iac_provisioner_events';
 import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
 export interface RenderIacTemplateIntegration {
@@ -22,8 +22,12 @@ export interface RenderIacTemplateIntegration {
 
 export interface RenderIacTemplateRequest {
   provider: typeof AWS_CLOUD_PROVIDER;
-  /** The Kibana flow requesting the render; reported in telemetry. */
-  flow: IacProvisionerRenderFlow;
+  /**
+   * The Kibana flow requesting the render; reported in telemetry. Only
+   * browser-initiated renders use this route — key-only flows call the
+   * provider directly.
+   */
+  flow: typeof CLOUD_CONNECTOR_RENDER_FLOW;
   integrations: RenderIacTemplateIntegration[];
 }
 
