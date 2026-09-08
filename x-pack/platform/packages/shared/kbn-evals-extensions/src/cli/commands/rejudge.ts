@@ -102,6 +102,32 @@ async function loadReferences(
   };
 }
 
+/**
+ * JUDGE_KBN_AUTH is raw `user:pass` and is base64-encoded here. A value that is
+ * already encoded (or already carries the `Basic ` scheme) double-encodes into a
+ * 401 that only surfaces after every cell has been judged and thrown away, so it
+ * is rejected up front rather than after the run.
+ */
+export function buildJudgeAuthHeader({
+  basicAuth,
+  apiKey,
+}: {
+  basicAuth?: string;
+  apiKey?: string;
+}): string | undefined {
+  if (basicAuth) {
+    if (!basicAuth.includes(':')) {
+      throw createFlagError(
+        'JUDGE_KBN_AUTH must be raw "user:pass" -- it is base64-encoded for you. ' +
+          'A pre-encoded or "Basic ..."-prefixed value double-encodes and fails every ' +
+          'judge call with 401 invalid basic authentication header value.'
+      );
+    }
+    return `Basic ${Buffer.from(basicAuth).toString('base64')}`;
+  }
+  return apiKey ? `ApiKey ${apiKey}` : undefined;
+}
+
 export const rejudgeCmd: Command<any> = {
   name: 'rejudge',
   description: `
@@ -322,13 +348,11 @@ export const rejudgeCmd: Command<any> = {
     // JUDGE_KBN_API_KEY is an API key; JUDGE_KBN_AUTH is user:pass for a stack
     // whose inference routes only accept Basic. Locally booted stacks are the
     // latter, so supporting only the former blocks the common dev case.
-    const judgeBasicAuth = process.env.JUDGE_KBN_AUTH;
     const judgeApiKey = process.env.JUDGE_KBN_API_KEY ?? evaluationsKbnApiKey;
-    const authHeader = judgeBasicAuth
-      ? `Basic ${Buffer.from(judgeBasicAuth).toString('base64')}`
-      : judgeApiKey
-      ? `ApiKey ${judgeApiKey}`
-      : undefined;
+    const authHeader = buildJudgeAuthHeader({
+      basicAuth: process.env.JUDGE_KBN_AUTH,
+      apiKey: judgeApiKey,
+    });
 
     const judge: CellJudge = createInferenceJudge({
       kbnUrl: judgeKbnUrl,

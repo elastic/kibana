@@ -235,39 +235,6 @@
       ]
     },
     {
-      "id": "attack-discovery-golden-path",
-      "label": "Golden Path",
-      "group": "Attack Discovery",
-      "suites": [
-        "attack-discovery-agent-builder"
-      ],
-      "datasetIds": [
-        "54609e14-71ba-5b3f-9e5b-5dea57e45d5f"
-      ]
-    },
-    {
-      "id": "attack-discovery-linux-curl",
-      "label": "Linux curl",
-      "group": "Attack Discovery",
-      "suites": [
-        "attack-discovery-agent-builder"
-      ],
-      "datasetIds": [
-        "2cc796b8-5033-59a7-a522-105c4a33d306"
-      ]
-    },
-    {
-      "id": "attack-discovery-wmi-lateral",
-      "label": "WMI Lateral",
-      "group": "Attack Discovery",
-      "suites": [
-        "attack-discovery-agent-builder"
-      ],
-      "datasetIds": [
-        "55c9971d-aa30-536a-b305-663da5a43e38"
-      ]
-    },
-    {
       "id": "migrations-start-e2e",
       "label": "Migration Start (E2E)",
       "group": "Automatic Migrations",
@@ -287,6 +254,105 @@
       ],
       "datasetIds": [
         "07a6c75d-7b4b-5150-ab32-7b66a93ac910"
+      ]
+    },
+    {
+      "id": "attack-discovery-live-retrieval",
+      "label": "GP: live-retrieval",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "8733e3f2-ce30-5de2-b1b6-f0e1ae99122e"
+      ]
+    },
+    {
+      "id": "attack-discovery-provided-alerts",
+      "label": "GP: provided-alerts",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "e527cb2b-8a69-56eb-aa25-11a773090098"
+      ]
+    },
+    {
+      "id": "attack-discovery-missing-alert-retrieval",
+      "label": "GP: missing-alert-retrieval",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "4c2fac6e-7f89-5255-a6fe-a12ab377f96c"
+      ]
+    },
+    {
+      "id": "attack-discovery-multiple-alert-sets",
+      "label": "GP: multiple-alert-sets",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "489d196e-5ea3-5dd9-a978-ff13d3161d9b"
+      ]
+    },
+    {
+      "id": "attack-discovery-status-only",
+      "label": "GP: status-only",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "54609e14-71ba-5b3f-9e5b-5dea57e45d5f"
+      ]
+    },
+    {
+      "id": "attack-discovery-registry-encoded-powershell",
+      "label": "SR: encoded-powershell",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "90c0197c-27d1-5354-a5e1-e31e601c43f6"
+      ]
+    },
+    {
+      "id": "attack-discovery-registry-linux-curl",
+      "label": "SR: linux-curl",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "2cc796b8-5033-59a7-a522-105c4a33d306"
+      ]
+    },
+    {
+      "id": "attack-discovery-registry-bits-mshta",
+      "label": "SR: bits-mshta",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "9ab9bbac-2465-5f64-a2f8-7e6a59269d25"
+      ]
+    },
+    {
+      "id": "attack-discovery-registry-wmi-lateral",
+      "label": "SR: wmi-lateral",
+      "group": "Attack Discovery",
+      "suites": [
+        "attack-discovery-agent-builder"
+      ],
+      "datasetIds": [
+        "55c9971d-aa30-536a-b305-663da5a43e38"
       ]
     }
   ],
