@@ -147,7 +147,7 @@ steps:
             status: open
             description: "{{ foreach.item.2 }} false-positive alerts on rule {{ foreach.item.1 }} in the last {{ inputs.lookback_hours }}h"
             summary: "{{ steps.diagnose_rule.output.structured_output.summary }}"
-            investigation_workflow_id: "{{ execution.id }}"
+            workflow_execution_id: "{{ execution.id }}"
         on-failure:
           continue: true
 
