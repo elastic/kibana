@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 import {
   buildDataStreamName,
+  cleanUpAll,
   deleteDataStreamIfExists,
   getLogsForDataset,
   indexLogs,
@@ -46,8 +47,10 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
-      await deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log);
+      await cleanUpAll([
+        () => deleteDataStreamIfExists(esClient, DATA_STREAM, log),
+        () => deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log),
+      ]);
     });
 
     test('opens the data set in Discover from the page header', async ({ page, pageObjects }) => {

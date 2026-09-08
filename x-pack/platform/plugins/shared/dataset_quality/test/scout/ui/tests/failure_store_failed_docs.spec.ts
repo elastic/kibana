@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import {
   buildDataStreamName,
+  cleanUpAll,
   createComponentTemplate,
   createFailedLogRecord,
   createIndexTemplate,
@@ -47,7 +48,10 @@ test.describe(
   'Dataset quality failure store - failed docs',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean so a leftover stream from an interrupted run does not double the counts.
+      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
+
       // The painless script throws for any unexpected `log.level`, which is how
       // `createFailedLogRecord` gets its documents rejected into the failure store.
       await esClient.ingest.putPipeline({
@@ -79,10 +83,12 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
-      await deleteIndexTemplateIfExists(esClient, INDEX_TEMPLATE, log);
-      await deleteComponentTemplateIfExists(esClient, COMPONENT_TEMPLATE, log);
-      await deletePipelineIfExists(esClient, PIPELINE, log);
+      await cleanUpAll([
+        () => deleteDataStreamIfExists(esClient, DATA_STREAM, log),
+        () => deleteIndexTemplateIfExists(esClient, INDEX_TEMPLATE, log),
+        () => deleteComponentTemplateIfExists(esClient, COMPONENT_TEMPLATE, log),
+        () => deletePipelineIfExists(esClient, PIPELINE, log),
+      ]);
     });
 
     test('shows the failed docs count on the details page', async ({ pageObjects }) => {

@@ -11,6 +11,7 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 import {
   buildDataStreamName,
+  cleanUpAll,
   createDegradedFieldsRecord,
   deleteDataStreamIfExists,
   getLogsForDataset,
@@ -46,7 +47,11 @@ test.describe(
   'Dataset quality details quality issues table',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean: one test ingests a third doc mid-run, so a leftover stream skews the counts.
+      await deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log);
+      await deleteDataStreamIfExists(esClient, CLEAN_DATA_STREAM, log);
+
       await indexLogs(logsSynthtraceEsClient, [
         // Degrades log.level, test_field and cloud.availability_zone.
         createDegradedFieldsRecord({ to: EARLY, count: 1, dataset: DEGRADED_DATASET }),
@@ -66,8 +71,10 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, log }) => {
-      await deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log);
-      await deleteDataStreamIfExists(esClient, CLEAN_DATA_STREAM, log);
+      await cleanUpAll([
+        () => deleteDataStreamIfExists(esClient, DEGRADED_DATA_STREAM, log),
+        () => deleteDataStreamIfExists(esClient, CLEAN_DATA_STREAM, log),
+      ]);
     });
 
     test('shows the no-data state when the data set has no quality issues', async ({

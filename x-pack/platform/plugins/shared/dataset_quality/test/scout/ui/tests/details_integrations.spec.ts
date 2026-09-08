@@ -13,6 +13,7 @@ import {
   PACKAGES,
   PRODUCTION_NAMESPACE,
   buildDataStreamName,
+  cleanUpAll,
   deleteDataStreamIfExists,
   ensurePackageInstalled,
   getLogsForDataset,
@@ -83,11 +84,13 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, log }) => {
-      for (const dataStream of ownedDataStreams) {
-        await deleteDataStreamIfExists(esClient, dataStream, log);
-      }
-      await uninstallApache();
-      await uninstallFleetServer();
+      await cleanUpAll([
+        ...ownedDataStreams.map(
+          (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
+        ),
+        () => uninstallApache(),
+        () => uninstallFleetServer(),
+      ]);
     });
 
     test('hides the integration rows for a data set without an integration', async ({

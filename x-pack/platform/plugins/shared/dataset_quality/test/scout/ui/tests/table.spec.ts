@@ -13,6 +13,7 @@ import {
   DEFAULT_NAMESPACE,
   PACKAGES,
   PRODUCTION_NAMESPACE,
+  cleanUpAll,
   datasetNames,
   ensurePackageInstalled,
   getInitialTestLogs,
@@ -65,8 +66,7 @@ test.describe(
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
-      await uninstallApache();
+      await cleanUpAll([() => logsSynthtraceEsClient.clean(), () => uninstallApache()]);
     });
 
     test('sorts by data set name and shows the namespace', async ({ pageObjects }) => {

@@ -144,7 +144,11 @@ test.describe(
   'Dataset quality details - character limit root cause',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean before the template PUTs: a leftover stream from an interrupted run would
+      // add a third backing index and skew the exact counts asserted below.
+      await deleteDataStreamIfExists(esClient, DATA_STREAM, log);
+
       await createComponentTemplate(esClient, {
         name: COMPONENT_TEMPLATE,
         mappings: logsSynthMappings(),

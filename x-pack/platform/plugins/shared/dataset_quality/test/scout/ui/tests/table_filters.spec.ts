@@ -12,6 +12,7 @@ import { test, testData } from '../fixtures';
 import {
   PACKAGES,
   PRODUCTION_NAMESPACE,
+  cleanUpAll,
   datasetNames,
   ensurePackageInstalled,
   getInitialTestLogs,
@@ -74,8 +75,7 @@ test.describe(
     });
 
     test.afterAll(async ({ logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
-      await uninstallApache();
+      await cleanUpAll([() => logsSynthtraceEsClient.clean(), () => uninstallApache()]);
     });
 
     test('shows full data set names when toggled', async ({ pageObjects }) => {

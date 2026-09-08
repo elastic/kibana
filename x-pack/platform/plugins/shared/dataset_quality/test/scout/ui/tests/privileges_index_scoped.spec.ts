@@ -12,6 +12,7 @@ import { test, testData } from '../fixtures';
 import {
   PACKAGES,
   buildDataStreamName,
+  cleanUpAll,
   deleteDataStreamIfExists,
   ensurePackageInstalled,
   fullAccessRoleWithIndices,
@@ -88,10 +89,12 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, log }) => {
-      for (const dataStream of ownedDataStreams) {
-        await deleteDataStreamIfExists(esClient, dataStream, log);
-      }
-      await uninstallApache();
+      await cleanUpAll([
+        ...ownedDataStreams.map(
+          (dataStream) => () => deleteDataStreamIfExists(esClient, dataStream, log)
+        ),
+        () => uninstallApache(),
+      ]);
     });
 
     test('keeps the app usable for a user scoped to a single data set type', async ({

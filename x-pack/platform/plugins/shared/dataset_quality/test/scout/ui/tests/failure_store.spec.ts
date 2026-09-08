@@ -56,7 +56,14 @@ test.describe(
   'Dataset quality failure store',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ esClient, logsSynthtraceEsClient }) => {
+    test.beforeAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
+      // Pre-clean: these tests toggle the failure store via the UI and that setting sticks on
+      // the stream (recreating templates does not reset it), so an interrupted run would leave
+      // the "starts disabled" streams enabled and fail every rerun until they are deleted.
+      for (const dataStream of [ENABLED_DATA_STREAM, DISABLED_DATA_STREAM, TABLE_DATA_STREAM]) {
+        await deleteDataStreamIfExists(esClient, dataStream, log);
+      }
+
       // The painless script throws for any unexpected `log.level`, which is how
       // `createFailedLogRecord` gets its documents rejected into the failure store.
       await esClient.ingest.putPipeline({
