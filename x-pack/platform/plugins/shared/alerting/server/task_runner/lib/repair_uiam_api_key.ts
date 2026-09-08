@@ -84,19 +84,15 @@ export const isMissingUiamApiKeyLastRunError = (
  * True when the rule write is known not to have committed, so a freshly minted UIAM key is
  * referenced by nothing and can be queued for invalidation.
  *
- * Elasticsearch can reject the write outright (conflict / 404). Client-side validation can
- * also fail before any request is sent: Saved Objects 400s, and the Spaces extension throwing
- * when a caller-supplied namespace is passed to a client that still has that extension
- * enabled. Ambiguous failures (timeouts, dropped connections) are excluded — they may have
- * committed, and revoking a key that did persist would break every subsequent run.
+ * Elasticsearch can reject the write outright (conflict / 404), and Saved Objects can reject it
+ * as a client-side validation error before any request is sent. Ambiguous failures (timeouts,
+ * dropped connections) are excluded — they may have committed, and revoking a key that did
+ * persist would break every subsequent run.
  */
 const isDefiniteNonWrite = (error: Error): boolean =>
   SavedObjectsErrorHelpers.isConflictError(error) ||
   SavedObjectsErrorHelpers.isNotFoundError(error) ||
-  SavedObjectsErrorHelpers.isBadRequestError(error) ||
-  error.message.includes(
-    'Namespace cannot be specified by the caller when the spaces extension is enabled'
-  );
+  SavedObjectsErrorHelpers.isBadRequestError(error);
 
 /**
  * Re-grants a rule's unusable UIAM API key by converting its Elasticsearch API key into a fresh

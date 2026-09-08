@@ -427,12 +427,6 @@ describe('repairUiamApiKey()', () => {
       'Saved Objects rejects the write as a client-side validation error',
       SavedObjectsErrorHelpers.createBadRequestError('invalid attributes'),
     ],
-    [
-      'the Spaces extension rejects the caller-supplied namespace before the write reaches Elasticsearch',
-      new Error(
-        'Namespace cannot be specified by the caller when the spaces extension is enabled. Spaces currently determines the namespace.'
-      ),
-    ],
   ])('queues the minted key for invalidation when %s', async (_, writeError) => {
     const { context, unsafeClient } = setup();
     unsafeClient.update = jest.fn().mockRejectedValue(writeError);
