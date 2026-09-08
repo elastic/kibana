@@ -27,7 +27,7 @@ import { ActionPolicyForm } from '../../components/action_policy/form/action_pol
 import { toCreatePayload, toUpdatePayload } from '../../components/action_policy/form/form_utils';
 import type { ActionPolicyFormState } from '../../components/action_policy/form/types';
 import { useActionPolicyForm } from '../../components/action_policy/form/use_action_policy_form';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useCreateActionPolicy } from '../../hooks/use_create_action_policy';
 import { useCreateInlineWorkflows } from '../../hooks/use_create_inline_workflows';
@@ -37,8 +37,7 @@ import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+  const { actionPolicies } = useAlertingLocators();
 
   const {
     data: existingPolicy,
@@ -52,8 +51,8 @@ export const ActionPolicyFormPage = () => {
   const isReady = !isEditMode || !!existingPolicy;
 
   const navigateToList = useCallback(() => {
-    navigateToUrl(basePath.prepend(paths.actionPolicyList));
-  }, [navigateToUrl, basePath]);
+    actionPolicies.navigateSync({ page: 'list' });
+  }, [actionPolicies]);
 
   const returnButton = (
     <EuiFlexGroup justifyContent="flexStart">

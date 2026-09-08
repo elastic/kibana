@@ -46,7 +46,15 @@ import type { AlertingV2UIConfig } from './kibana_services';
 import type { AlertingV2PublicStart } from './types';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
-import { AlertingV2RuleLibraryLocatorDefinition } from './locator';
+import {
+  type AlertingV2HostApp,
+  MANAGEMENT_HOST,
+  AlertingV2RulesLocatorDefinition,
+  AlertingV2RuleLibraryLocatorDefinition,
+  AlertingV2EpisodesLocatorDefinition,
+  AlertingV2ActionPoliciesLocatorDefinition,
+  AlertingV2ExecutionHistoryLocatorDefinition,
+} from './locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -84,7 +92,15 @@ export type {
   AlertingV2PageProps,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2RuleLibraryLocator, AlertingV2RuleLibraryLocatorParams } from './locator';
+export type { AlertingV2HostApp } from './locators';
+export type {
+  AlertingV2RulesLocatorParams,
+  AlertingV2RuleLibraryLocatorParams,
+  AlertingV2EpisodesLocatorParams,
+  AlertingV2ActionPoliciesLocatorParams,
+  AlertingV2ExecutionHistoryLocatorParams,
+} from './locators';
+export { createAlertingV2HostApp } from './locators';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -96,6 +112,10 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
+
+  let hostApp: AlertingV2HostApp = MANAGEMENT_HOST;
+  const getHostApp = () => hostApp;
+
   bind(Start).toConstantValue({
     CreateRuleOptionsFlyout,
     RulesPage: lazyPageWithContainer(() =>
@@ -121,6 +141,10 @@ const pluginModule = new ContainerModule(({ bind }) => {
         default: m.AlertingV2ExecutionHistoryPage,
       }))
     ),
+    setHostApp: (host: AlertingV2HostApp) => {
+      hostApp = host;
+    },
+    getHostApp,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
@@ -144,11 +168,13 @@ const pluginModule = new ContainerModule(({ bind }) => {
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const share = container.get(PluginSetup('share')) as SharePluginSetup;
-    share.url.locators.create(
-      new AlertingV2RuleLibraryLocatorDefinition({
-        managementAppLocator: management.locator,
-      })
-    );
+    const locatorDeps = { getHostApp };
+
+    share.url.locators.create(new AlertingV2RulesLocatorDefinition(locatorDeps));
+    share.url.locators.create(new AlertingV2RuleLibraryLocatorDefinition(locatorDeps));
+    share.url.locators.create(new AlertingV2EpisodesLocatorDefinition(locatorDeps));
+    share.url.locators.create(new AlertingV2ActionPoliciesLocatorDefinition(locatorDeps));
+    share.url.locators.create(new AlertingV2ExecutionHistoryLocatorDefinition(locatorDeps));
     const alertingSection = management.sections.register({
       id: ALERTING_V2_SECTION_ID,
       title: 'Alerting V2 Preview',

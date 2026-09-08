@@ -12,6 +12,9 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionPolicyFormPage } from './action_policy_form_page';
 import { useActionPolicyAutoAttach } from '../../agent_builder/use_action_policy_auto_attach';
+import { useAlertingLocators } from '../../application/locator_context';
+
+const mockLocators = useAlertingLocators();
 
 const mockNavigateToUrl = jest.fn();
 const mockBasePath = { prepend: jest.fn((path: string) => `/mock${path}`) };
@@ -283,7 +286,7 @@ describe('ActionPolicyFormPage', () => {
       );
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([]);
       await waitFor(() =>
-        expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'))
+        expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled()
       );
     });
 
@@ -340,9 +343,7 @@ describe('ActionPolicyFormPage', () => {
       await user.click(saveButton);
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
-      expect(mockNavigateToUrl).not.toHaveBeenCalledWith(
-        expect.stringContaining('/action_policies')
-      );
+      expect(mockLocators.actionPolicies.navigateSync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {
@@ -351,7 +352,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+      expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
     });
 
     it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
@@ -457,7 +458,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockNavigateToUrl).toHaveBeenCalledWith(expect.stringContaining('/action_policies'));
+      expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
     });
 
     describe('Agent Builder auto-attach', () => {

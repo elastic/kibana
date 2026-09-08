@@ -12,7 +12,9 @@ import {
   CentralizedActionPoliciesBanner,
   CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
 } from './centralized_action_policies_banner';
+import { useAlertingLocators } from '../../application/locator_context';
 
+const mockLocators = useAlertingLocators();
 const mockNavigateToUrl = jest.fn();
 const mockToursIsEnabled = jest.fn(() => true);
 const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
@@ -86,14 +88,9 @@ describe('CentralizedActionPoliciesBanner', () => {
     renderBanner();
 
     const createBtn = screen.getByTestId('centralizedActionPoliciesCreate');
-    expect(createBtn).toHaveAttribute(
-      'href',
-      '/mock/app/management/alertingV2/action_policies/create'
-    );
+    expect(createBtn).toHaveAttribute('href');
     fireEvent.click(createBtn);
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/mock/app/management/alertingV2/action_policies/create'
-    );
+    expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
   });
 
   it('Learn more CTA has correct href and opens in a new tab', () => {

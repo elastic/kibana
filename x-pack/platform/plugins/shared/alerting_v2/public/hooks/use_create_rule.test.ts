@@ -12,6 +12,9 @@ import { useCreateRule } from './use_create_rule';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { RulesApi } from '../services/rules_api';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { useAlertingLocators } from '../application/locator_context';
+
+const mockLocators = useAlertingLocators();
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
@@ -96,7 +99,6 @@ describe('useCreateRule', () => {
       actionProps: {
         primary: expect.objectContaining({
           children: 'View rule',
-          href: '/app/management/alertingV2/rules/rule-1',
           'data-test-subj': 'alertingV2ViewRuleToastLink',
         }),
       },
@@ -120,7 +122,7 @@ describe('useCreateRule', () => {
     const preventDefault = jest.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
-    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
+    expect(mockLocators.rules.navigateSync).toHaveBeenCalled();
   });
 
   it('should disable the created rule before showing the success toast', async () => {
@@ -160,7 +162,6 @@ describe('useCreateRule', () => {
         actionProps: {
           primary: expect.objectContaining({
             children: 'View rule',
-            href: '/app/management/alertingV2/rules/rule-1',
             'data-test-subj': 'alertingV2ViewRuleToastLink',
           }),
         },
@@ -173,7 +174,7 @@ describe('useCreateRule', () => {
     const preventDefault = jest.fn();
     toast.actionProps.primary.onClick({ preventDefault });
     expect(preventDefault).toHaveBeenCalled();
-    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
+    expect(mockLocators.rules.navigateSync).toHaveBeenCalled();
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {

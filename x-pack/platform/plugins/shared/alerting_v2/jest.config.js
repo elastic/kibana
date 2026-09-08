@@ -9,6 +9,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/alerting_v2'],
+  setupFiles: [
+    '<rootDir>/x-pack/platform/plugins/shared/alerting_v2/jest.setup.ts',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/alerting_v2',
   coverageReporters: ['text', 'html'],

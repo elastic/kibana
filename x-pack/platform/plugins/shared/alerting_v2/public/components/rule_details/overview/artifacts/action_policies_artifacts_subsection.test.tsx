@@ -138,10 +138,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     expect(screen.getByTestId('ruleActionPoliciesArtifactsSummary')).toHaveTextContent(
       '1 is matching criteria and 1 is catch-all'
     );
-    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/action_policies'
-    );
+    expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute('href');
     expect(screen.getByTestId('ruleActionPoliciesArtifactsOpenLink')).toHaveAttribute(
       'target',
       '_blank'

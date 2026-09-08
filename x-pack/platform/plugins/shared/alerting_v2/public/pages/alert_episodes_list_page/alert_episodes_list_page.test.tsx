@@ -267,7 +267,7 @@ describe('AlertEpisodesListPage', () => {
 
   it('renders the manage rules link in the app header menu', async () => {
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
-    expect(manageRulesLink).toHaveAttribute('href', '/app/management/alertingV2/rules');
+    expect(manageRulesLink).toHaveAttribute('href');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {

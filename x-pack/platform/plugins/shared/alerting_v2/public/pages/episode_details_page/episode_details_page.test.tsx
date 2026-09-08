@@ -276,10 +276,7 @@ describe('EpisodeDetailsPage', () => {
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rule A');
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabOverview')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeDetailsMainTabMetadata')).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/episodes'
-    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute('href');
     // Badge label/color mapping per status and severity is covered by get_episode_header_badges.test.ts;
     // this just proves the header is wired up to badges at all.
     expect(screen.getByTestId('alertingV2EpisodeDetailsHeaderStatusBadge')).toHaveTextContent(

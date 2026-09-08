@@ -15,6 +15,26 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type { AlertEpisodesKibanaServices } from '../episodes_kibana_services';
+import { LocatorProvider, type AlertingV2Locators } from '../application/locator_context';
+
+const createMockLocator = () => ({
+  useUrl: jest.fn().mockReturnValue('/mock-locator-url'),
+  getUrl: jest.fn().mockResolvedValue('/mock-locator-url'),
+  getRedirectUrl: jest.fn().mockReturnValue('/mock-locator-url'),
+  navigate: jest.fn().mockResolvedValue(undefined),
+  navigateSync: jest.fn(),
+  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
+  getTimeRange: jest.fn(),
+  setTimeRange: jest.fn().mockImplementation((p: unknown) => p),
+});
+
+export const createMockLocators = (): AlertingV2Locators => ({
+  rules: createMockLocator() as unknown as AlertingV2Locators['rules'],
+  ruleLibrary: createMockLocator() as unknown as AlertingV2Locators['ruleLibrary'],
+  episodes: createMockLocator() as unknown as AlertingV2Locators['episodes'],
+  actionPolicies: createMockLocator() as unknown as AlertingV2Locators['actionPolicies'],
+  executionHistory: createMockLocator() as unknown as AlertingV2Locators['executionHistory'],
+});
 
 export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {
   return {
@@ -36,19 +56,23 @@ export const createTestQueryClient = () =>
 export type TestProvidersProps = PropsWithChildren<{
   services?: AlertEpisodesKibanaServices;
   queryClient?: QueryClient;
+  locators?: AlertingV2Locators;
 }>;
 
 export function TestProviders({
   children,
   services = createDefaultServicesMock(),
   queryClient = createTestQueryClient(),
+  locators = createMockLocators(),
 }: TestProvidersProps) {
   return (
-    <KibanaContextProvider services={services}>
-      <QueryClientProvider client={queryClient}>
-        <I18nProvider>{children}</I18nProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>
+    <LocatorProvider locators={locators}>
+      <KibanaContextProvider services={services}>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>{children}</I18nProvider>
+        </QueryClientProvider>
+      </KibanaContextProvider>
+    </LocatorProvider>
   );
 }
 
@@ -62,14 +86,21 @@ export function ListPageTestProviders({
   children,
   queryClient = createTestQueryClient(),
   initialEntries,
-}: PropsWithChildren<{ queryClient?: QueryClient; initialEntries?: string[] }>) {
+  locators = createMockLocators(),
+}: PropsWithChildren<{
+  queryClient?: QueryClient;
+  initialEntries?: string[];
+  locators?: AlertingV2Locators;
+}>) {
   return (
-    <MockChromeContextProvider>
-      <I18nProvider>
-        <MemoryRouter initialEntries={initialEntries}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-        </MemoryRouter>
-      </I18nProvider>
-    </MockChromeContextProvider>
+    <LocatorProvider locators={locators}>
+      <MockChromeContextProvider>
+        <I18nProvider>
+          <MemoryRouter initialEntries={initialEntries}>
+            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          </MemoryRouter>
+        </I18nProvider>
+      </MockChromeContextProvider>
+    </LocatorProvider>
   );
 }

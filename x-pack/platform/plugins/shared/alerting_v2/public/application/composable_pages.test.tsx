@@ -80,11 +80,32 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-const createMockContainer = () => ({
-  get: jest.fn().mockReturnValue({}),
-  getAsync: jest.fn().mockResolvedValue({}),
-  isBound: jest.fn().mockReturnValue(true),
+const createMockLocator = () => ({
+  useUrl: jest.fn().mockReturnValue(''),
+  getUrl: jest.fn().mockResolvedValue(''),
+  getRedirectUrl: jest.fn().mockReturnValue(''),
+  navigate: jest.fn().mockResolvedValue(undefined),
+  navigateSync: jest.fn(),
+  getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
 });
+
+const createMockSharePlugin = () => ({
+  url: {
+    locators: {
+      get: jest.fn().mockReturnValue(createMockLocator()),
+    },
+  },
+});
+
+const createMockContainer = () => {
+  const sharePlugin = createMockSharePlugin();
+  const defaultMock = { ...sharePlugin };
+  return {
+    get: jest.fn().mockReturnValue(defaultMock),
+    getAsync: jest.fn().mockResolvedValue({}),
+    isBound: jest.fn().mockReturnValue(true),
+  };
+};
 
 const createMockCoreStart = () => {
   const container = createMockContainer();
@@ -178,6 +199,81 @@ describe('composable pages', () => {
       const props = defaultProps();
       renderInRouter(<AlertingV2EpisodesPage {...props} />);
       expect(props.container.get).toHaveBeenCalled();
+    });
+  });
+
+  describe('basePath route matching', () => {
+    it('EpisodesPage renders list at basePath/', () => {
+      renderInRouter(
+        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
+        '/inbox'
+      );
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage renders episode detail at basePath/:episodeId', () => {
+      renderInRouter(
+        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
+        '/inbox/ep-1'
+      );
+      expect(screen.getByTestId('episodeDetailsPage')).toBeInTheDocument();
+    });
+
+    it('EpisodesPage at /inbox does not match /:episodeId with "inbox" as the id', () => {
+      renderInRouter(
+        <AlertingV2EpisodesPage {...defaultProps()} basePath="/inbox" />,
+        '/inbox'
+      );
+      expect(screen.queryByTestId('episodeDetailsPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('episodesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders list at basePath/', () => {
+      renderInRouter(
+        <AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />,
+        '/rules/v2'
+      );
+      expect(screen.getByTestId('rulesListPage')).toBeInTheDocument();
+    });
+
+    it('RulesPage renders rule detail at basePath/:ruleId', () => {
+      renderInRouter(
+        <AlertingV2RulesPage {...defaultProps()} basePath="/rules/v2" />,
+        '/rules/v2/some-rule'
+      );
+      expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
+    });
+
+    it('ActionPoliciesPage renders list at basePath/', () => {
+      renderInRouter(
+        <AlertingV2ActionPoliciesPage {...defaultProps()} basePath="/action-policies" />,
+        '/action-policies'
+      );
+      expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
+    });
+
+    it('ActionPoliciesPage renders create at basePath/create', () => {
+      renderInRouter(
+        <AlertingV2ActionPoliciesPage {...defaultProps()} basePath="/action-policies" />,
+        '/action-policies/create'
+      );
+      expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
+    });
+
+    it('RuleLibraryPage renders at basePath/', () => {
+      renderInRouter(
+        <AlertingV2RuleLibraryPage {...defaultProps()} basePath="/rule-library" />,
+        '/rule-library'
+      );
+      expect(screen.getByTestId('ruleLibraryPage')).toBeInTheDocument();
+    });
+
+    it('ExecutionHistoryPage renders at basePath/', () => {
+      renderInRouter(
+        <AlertingV2ExecutionHistoryPage {...defaultProps()} basePath="/execution-history" />,
+        '/execution-history'
+      );
+      expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
     });
   });
 });
