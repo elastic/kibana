@@ -8,15 +8,9 @@
 import type { ESQLColumn } from '@kbn/es-types';
 
 /**
- * Loaded on demand so the template engine ships in its own chunk rather than being embedded
- * in every chunk that renders custom content. A static import puts liquidjs into each
- * importing chunk, and once it appears in three the optimizer extracts it into the shared
- * `vendors` chunk — which is pulled by most of the app, so a template engine only this
- * feature needs would be downloaded far more widely than it is used.
- *
- * The module itself is cached by the loader, so this fetches once; only the engine is
- * constructed per call, which is why no memo is needed. Liquid's own template cache is off,
- * so a reused instance would buy nothing — revisit if that ever changes.
+ * Loaded on demand so liquidjs ships in its own chunk instead of being embedded in every
+ * chunk that renders custom content — a static import lands it in the shared `vendors`
+ * chunk once three chunks use it, which is far wider than this feature.
  */
 const getEngine = async () => {
   const { Liquid } = await import('liquidjs');
