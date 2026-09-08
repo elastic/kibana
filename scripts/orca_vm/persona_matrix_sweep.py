@@ -93,6 +93,13 @@ SUITE_PROFILES = {
         # Uniform grid (every dataset runs all 13 evaluators), so the
         # examples x evaluators product is exact.
         "gate": "exact",
+        # The AD suite does NOT read PERSONA_MATRIX_SHARD: every shard VM runs
+        # the full 9-dataset grid. Measured 2026-09-08: all 24 units exported
+        # exactly 117 docs under per-shard execution_ids, and the gate read
+        # 117/39 FAIL on complete data. With honors_shard False each unit is
+        # gated on the full grid -- and shards act as independent repetitions,
+        # which is what judge-stability analysis wants anyway.
+        "honors_shard": False,
     },
     "security-automatic-migrations": {
         "cli_suite": "security-automatic-migrations",
@@ -1128,6 +1135,13 @@ def self_test() -> int:
         # Doc-count gate: expected docs are per-suite, counted from the datasets.
         check("persona n_examples", SUITE_PROFILES["security-persona-matrix"]["n_examples"], 21)
         check("ad n_examples", SUITE_PROFILES["attack-discovery-agent-builder"]["n_examples"], 9)
+        # AD ignores PERSONA_MATRIX_SHARD (measured 2026-09-08: 24/24 units
+        # exported the full 117-doc grid under per-shard execution_ids), so
+        # its gate must not slice the expectation by shard.
+        check("ad gate not shard-sliced",
+              SUITE_PROFILES["attack-discovery-agent-builder"].get("honors_shard", True), False)
+        check("persona gate still shard-sliced",
+              SUITE_PROFILES["security-persona-matrix"].get("honors_shard", True), True)
         # Migrations has no uniform grid -- per-dataset evaluator counts are
         # 7 (standard-dashboards) / 9 (qradar) / 8 (splunk-spl), measured on the
         # 2026-09-02 canary -- so examples x evaluators is structurally wrong.
@@ -1583,8 +1597,11 @@ def check_golden(model: str, ip: str, shard: Optional[str] = None) -> dict:
         # expect that slice -- not the whole dataset -- or every shard FAILs.
         # Shard sizes follow the suite's stride assignment (index k -> shard
         # k % total), so shard i holds ceil((n - (i-1)) / total) examples.
+        # Only for suites that actually honor PERSONA_MATRIX_SHARD: AD ignores
+        # it and runs the full grid on every VM, so slicing the expectation
+        # there reads complete data as FAIL (117/39 on 2026-09-08).
         n_examples = prof["n_examples"]
-        if shard:
+        if shard and prof.get("honors_shard", True):
             idx, total = (int(x) for x in shard.split("/"))
             n_examples = len(range(idx - 1, n_examples, total))
             result["shard"] = shard
@@ -1765,11 +1782,19 @@ def main() -> int:
     print(f"sweep models ({len(models)}): {', '.join(models)}", flush=True)
     # Fail before provisioning: a missing local asset otherwise surfaces as an
     # scp error on every VM, after the whole farm is already booted and billing.
+    # 2026-09-08: ~/.elastic/eis-ccm-key.json was rotated server-side and never
+    # restored locally; the preflight missed it, so 24 VMs booted and every
+    # unit died at deploy with a per-VM scp 255. deploy() unconditionally scp's
+    # this file to every VM (run_model.sh exports it as KIBANA_EIS_CCM_API_KEY),
+    # so it is load-bearing for EIS sweeps, not optional.
     _required = [GOLDEN_ENV_LOCAL,
-                 os.path.expanduser("~/.elastic/eis-connectors-cache.json")]
+                 os.path.expanduser("~/.elastic/eis-connectors-cache.json"),
+                 os.path.expanduser("~/.elastic/eis-ccm-key.json")]
     _absent = [p for p in _required if not os.path.isfile(p)]
     if _absent:
         print(f"PREFLIGHT FAILED: missing local assets: {_absent}", flush=True)
+        print("hint: restore the CCM key via vault (secret/kibana-issues/dev/"
+              "inference/kibana-eis-ccm) then relaunch.", flush=True)
         return 2
     # Quota gate: refuse to launch a sweep that cannot fit in the region's
     # remaining cores. Launching into a full quota does not fail fast -- it
@@ -1781,9 +1806,26 @@ def main() -> int:
         except Exception as exc:
             print(f"[quota] snapshot unavailable ({exc}); proceeding", flush=True)
         else:
-            # Parked VMs this sweep will reuse are already-provisioned and
-            # consume cores only once started, same as a fresh create.
-            ok, msg = quota_gate(len(units), used, limit, cores_per_vm())
+            # Charge quota only for units that need a NEW VM. An existing VM
+            # for this unit -- running or deallocated -- is ALREADY counted in
+            # `used`, so billing it again double-counts and makes resuming onto
+            # a warm pool impossible: on 2026-09-08 a resume of 24 existing VMs
+            # was refused for "needing" 192 cores that those same VMs already
+            # held. (In this subscription deallocated VMs keep consuming family
+            # vCPU quota, so they cannot be assumed free.)
+            existing = {
+                v.get("name")
+                for v in json.loads(az("vm", "list", "-g", RG, "-o", "json"))
+            }
+            new_units = [u for u in units if vm_name(u[0], u[1]) not in existing]
+            reused = len(units) - len(new_units)
+            if reused:
+                print(
+                    f"[quota] {reused} of {len(units)} unit(s) reuse an existing VM "
+                    f"(already counted in quota); charging {len(new_units)} new VM(s)",
+                    flush=True,
+                )
+            ok, msg = quota_gate(len(new_units), used, limit, cores_per_vm())
             print(f"[quota] {msg}", flush=True)
             if not ok:
                 return 2
