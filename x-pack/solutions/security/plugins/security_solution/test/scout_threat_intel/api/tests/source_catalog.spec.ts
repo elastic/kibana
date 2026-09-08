@@ -10,7 +10,7 @@ import {
   LIST_SOURCES_API_PATH,
   SOURCE_BY_ID_API_PATH,
   THREAT_INTEL_INDICATORS_INDEX,
-} from '../../../../../common/threat_intel';
+} from '../../../../common/threat_intel';
 import { apiTest, tags, testData, SECURITY_READ_ONLY_ROLE } from '../fixtures';
 
 interface ListSourcesResponse {
@@ -109,7 +109,12 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
     );
 
     expect(res).toHaveStatusCode(404);
-    expect((res.body as { message: string }).message).toContain('not found');
+    // Assert the route's own body, not just the status: Kibana answers an
+    // unregistered route with a 404 too, so a status-only assertion passes even
+    // when the feature flag is off and no handler exists.
+    expect((res.body as { message: string }).message).toContain(
+      'Source does-not-exist-source not found'
+    );
   });
 
   apiTest(
@@ -131,7 +136,9 @@ apiTest.describe('Threat Intel - source catalog API', { tag: [...tags.stateful.c
       expect(readRes).toHaveStatusCode(200);
 
       // Write must be refused: THREAT_INTEL_WRITE_AUTHZ additionally requires
-      // RULES_API_ALL, because writing here changes detection behavior.
+      // RULES_API_ALL, because writing here changes detection behavior. Route
+      // authz runs before the handler, so a refusal here is the privilege check
+      // and not the handler's own "unknown source" path.
       const writeRes = await apiClient.patch(
         SOURCE_BY_ID_API_PATH.replace('{sourceId}', 'any-source'),
         {

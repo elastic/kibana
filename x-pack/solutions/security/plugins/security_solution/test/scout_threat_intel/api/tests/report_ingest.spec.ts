@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-security/api';
 import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
-} from '../../../../../common/threat_intel';
+} from '../../../../common/threat_intel';
 import { apiTest, tags, testData, cleanupThreatIntelDocs } from '../fixtures';
 
 interface CreateReportResponse {
