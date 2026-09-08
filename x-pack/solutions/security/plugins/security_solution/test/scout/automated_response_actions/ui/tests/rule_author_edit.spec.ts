@@ -13,7 +13,7 @@ test.describe(
   'Rule author cannot change existing response actions',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let ruleId: string | undefined;
+    let ruleId = '';
 
     test.beforeEach(async ({ browserAuth, kbnClient }) => {
       const rule = await createRuleWithResponseActions(kbnClient);
@@ -23,7 +23,7 @@ test.describe(
 
     test.afterEach(async ({ kbnClient }) => {
       const idToDelete = ruleId;
-      ruleId = undefined;
+      ruleId = '';
       if (idToDelete) {
         await deleteRule(kbnClient, idToDelete);
       }
@@ -32,12 +32,7 @@ test.describe(
     test('existing rows stay disabled and force-remove does not drop a row', async ({
       pageObjects,
     }) => {
-      const id = ruleId;
-      if (!id) {
-        throw new Error('Expected beforeEach to create a rule');
-      }
-
-      await pageObjects.ruleResponseActionsForm.openEditActions(id);
+      await pageObjects.ruleResponseActionsForm.openEditActions(ruleId);
 
       await expect(pageObjects.ruleResponseActionsForm.commandField(0)).toBeDisabled();
       await expect(pageObjects.ruleResponseActionsForm.commandField(0)).toContainText('isolate');
