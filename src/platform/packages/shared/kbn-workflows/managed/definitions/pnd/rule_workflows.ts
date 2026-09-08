@@ -10,8 +10,8 @@
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_RULE_WORKFLOW_MANAGEMENT } from './constants';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
+import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
