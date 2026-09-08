@@ -443,9 +443,9 @@ describe('setupDependencies', () => {
       });
 
       expect(WorkflowEventLoggerService).toHaveBeenCalledWith(
-        expect.anything(), // dataStreams
-        expect.anything(), // logger
-        expect.anything() // enableConsoleLogging
+        mockDependencies.coreStart.dataStreams,
+        mockLogger,
+        mockConfig.logging.console
       );
     });
   });
