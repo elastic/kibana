@@ -22,7 +22,7 @@ export const Primary: Story = {
   render: () => {
     const value = {
       ...emptyMappingEditorValue(),
-      dynamic: 'false' as const,
+      dynamic: false,
       fields: [
         {
           id: '0',

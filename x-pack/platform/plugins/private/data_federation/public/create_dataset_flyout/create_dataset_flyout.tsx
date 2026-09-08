@@ -121,7 +121,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
     }));
 
     return {
-      dynamic: (mappings.dynamic ?? '') as MappingEditorValue['dynamic'],
+      dynamic: mappings.dynamic !== 'false',
       idPath: mappings._id?.path ?? '',
       fields,
     };
@@ -151,7 +151,7 @@ export const CreateDatasetFlyout: FunctionComponent<CreateDatasetFlyoutProps> = 
         format: prop.format ?? '',
       }));
       setMappingsValue({
-        dynamic: (mappings.dynamic ?? '') as MappingEditorValue['dynamic'],
+        dynamic: mappings.dynamic !== 'false',
         idPath: mappings._id?.path ?? '',
         fields,
       });
