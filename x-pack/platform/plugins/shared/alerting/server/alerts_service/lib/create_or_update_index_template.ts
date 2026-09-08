@@ -156,35 +156,29 @@ export const createOrUpdateIndexTemplate = async ({
   logger.debug(`Installing index template ${template.name}`);
 
   let templateToInstall = template;
-  let existing: ExistingIndexTemplateInfo | undefined;
-  try {
-    existing = await getExistingIndexTemplate(esClient, template.name, logger);
+  const existing = await getExistingIndexTemplate(esClient, template.name, logger);
 
-    // Never lower a total_fields.limit that is already higher than the configured value;
-    // a higher limit may have been set manually or by a previous, higher configuration.
-    const templateLimit = getTotalFieldsLimitFromSettings(template.template?.settings);
-    if (
-      existing?.fieldsLimit !== undefined &&
-      templateLimit !== undefined &&
-      existing.fieldsLimit > templateLimit
-    ) {
-      logger.debug(
-        `Preserving existing total_fields.limit of ${existing.fieldsLimit} for index template ${template.name} instead of lowering it to ${templateLimit}`
-      );
-      templateToInstall = {
-        ...template,
-        template: {
-          ...template.template,
-          settings: {
-            ...template.template?.settings,
-            [TOTAL_FIELDS_LIMIT_SETTING]: existing.fieldsLimit,
-          },
+  // Never lower a total_fields.limit that is already higher than the configured value;
+  // a higher limit may have been set manually or by a previous, higher configuration.
+  const templateLimit = getTotalFieldsLimitFromSettings(template.template?.settings);
+  if (
+    existing?.fieldsLimit !== undefined &&
+    templateLimit !== undefined &&
+    existing.fieldsLimit > templateLimit
+  ) {
+    logger.debug(
+      `Preserving existing total_fields.limit of ${existing.fieldsLimit} for index template ${template.name} instead of lowering it to ${templateLimit}`
+    );
+    templateToInstall = {
+      ...template,
+      template: {
+        ...template.template,
+        settings: {
+          ...template.template?.settings,
+          [TOTAL_FIELDS_LIMIT_SETTING]: existing.fieldsLimit,
         },
-      };
-    }
-  } catch (err) {
-    logger.error(`Error fetching existing index template ${template.name} - ${err.message}`, err);
-    throw err;
+      },
+    };
   }
 
   // Stamp the content hash (over the template body, excluding the top-level `_meta`

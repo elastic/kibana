@@ -175,6 +175,7 @@ describe('createOrUpdateIndexTemplate', () => {
       }
     )._meta.content_hash;
     clusterClient.indices.putIndexTemplate.mockClear();
+    clusterClient.indices.simulateTemplate.mockClear();
 
     clusterClient.indices.getIndexTemplate.mockResolvedValue({
       index_templates: [
@@ -191,6 +192,7 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
+    expect(clusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
     expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
 
@@ -211,6 +213,27 @@ describe('createOrUpdateIndexTemplate', () => {
       template: IndexTemplate(),
     });
 
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
+  });
+
+  it(`should PUT when the installed template carries no content hash`, async () => {
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [
+        {
+          name: '.alerts-test.alerts-default-index-template',
+          index_template: { _meta: { managed: true } },
+        },
+      ],
+    } as unknown as Awaited<ReturnType<typeof clusterClient.indices.getIndexTemplate>>);
+
+    await createOrUpdateIndexTemplate({
+      logger,
+      esClient: clusterClient,
+      template: IndexTemplate(),
+    });
+
+    expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(stampedIndexTemplate());
   });
 
