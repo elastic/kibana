@@ -108,10 +108,6 @@ export async function runWorkflow({
     workflowExecutionCursor,
   } = setupResult;
 
-  if (!workflowExecutionRepository) {
-    throw new Error('Persistent workflow execution repository is unavailable');
-  }
-
   const execution = workflowExecutionState.getWorkflowExecution();
   if (isTerminalStatus(execution.status)) {
     logger.debug(
