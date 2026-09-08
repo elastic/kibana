@@ -49,7 +49,7 @@ const getLatestVersionLabel = (cloudStackVersion: CloudStackVersionState): strin
   }
 
   return i18n.translate('xpack.upgradeAssistant.overview.latestAvailableVersionLoading', {
-    defaultMessage: 'Loading latest available version',
+    defaultMessage: 'Loading…',
   });
 };
 
@@ -174,9 +174,7 @@ export const Overview = () => {
 
   return (
     <div data-test-subj="overview">
-      <div data-test-subj="overviewPageHeader">
-        <AppHeader title={pageTitle} description={description} menu={menu} spacing="bleed" />
-      </div>
+      <AppHeader title={pageTitle} description={description} menu={menu} spacing="bleed" />
       <EuiPageBody restrictWidth={true}>
         <EuiPageSection color="transparent" paddingSize="none">
           <EuiSpacer size="l" />

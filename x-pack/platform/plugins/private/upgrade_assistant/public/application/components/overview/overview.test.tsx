@@ -10,6 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -103,8 +104,10 @@ describe('Overview', () => {
 
     renderOverview();
 
-    expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent('Current version: 8.19.0');
-    expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+      'Current version: 8.19.0'
+    );
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
       'Latest available version: 9.3.2'
     );
   });
@@ -119,7 +122,7 @@ describe('Overview', () => {
 
     renderOverview();
 
-    const header = screen.getByTestId('overviewPageHeader');
+    const header = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description);
     expect(header).not.toHaveTextContent('Upgrading to v');
     expect(header).not.toHaveTextContent('From your current version, you can upgrade to');
   });
@@ -140,16 +143,18 @@ describe('Overview', () => {
     renderOverview();
 
     await waitFor(() => {
-      expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent('Current version: 8.17.0');
-      expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
+        'Current version: 8.17.0'
+      );
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
         'Latest available version: 9.3.2'
       );
-      expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
         'From your current version, you can upgrade to versions 8.17.1 - 8.19.13.'
       );
     });
 
-    expect(screen.getByTestId('overviewPageHeader')).toHaveTextContent(
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.description)).toHaveTextContent(
       'Upgrading to v9.3.2 requires v8.19.13.'
     );
   });
