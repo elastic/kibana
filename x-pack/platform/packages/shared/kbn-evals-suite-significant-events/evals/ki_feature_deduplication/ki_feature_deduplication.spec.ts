@@ -25,10 +25,6 @@ import {
   type Evaluator,
   type Example,
 } from '@kbn/evals';
-import {
-  FEATURE_IDENTIFICATION_AGENT_ID,
-  buildFeatureIdentificationUserMessage,
-} from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -55,7 +51,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
-import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
@@ -174,7 +170,8 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',
@@ -194,6 +191,10 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
     });
 
     for (const dataset of activeDatasets) {
@@ -244,7 +245,8 @@ evaluate.describe(
           'KI feature deduplication',
           async ({
             esClient,
-            agentBuilderClient,
+            fetch,
+            connector,
             evaluators,
             evaluationConnector,
             inferenceClient,
@@ -338,27 +340,19 @@ evaluate.describe(
                       .getAll()
                       .map(toPreviouslyIdentifiedFeature);
 
-                    const userMessage = buildFeatureIdentificationUserMessage({
+                    const iterationResult = await runFeatureIdentificationAgent({
+                      fetch,
+                      log,
                       streamName: MANAGED_STREAM_NAME,
-                      sampleDocuments: JSON.stringify(sampleDocuments),
-                      previouslyIdentifiedFeatures:
-                        previouslyIdentifiedFeatures.length > 0
-                          ? JSON.stringify(previouslyIdentifiedFeatures)
-                          : undefined,
+                      connectorId: connector.id,
+                      sampleDocuments,
+                      previouslyIdentifiedFeatures,
                     });
 
-                    const converseResult = await agentBuilderClient.converse({
-                      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-                      input: userMessage,
-                    });
-
-                    const { features: identifiedFeatures } = parseFeaturesFromSteps(
-                      converseResult.steps,
-                      input.stream_name
-                    );
+                    const identifiedFeatures = iterationResult.features;
                     tokensUsed = sumTokens({
                       accumulated: tokensUsed,
-                      added: converseResult.tokensUsed,
+                      added: iterationResult.tokensUsed,
                     });
 
                     iterations.push({

@@ -9,29 +9,27 @@ import { isDuplicateFeature } from '@kbn/significant-events-schema';
 import { type ExcludedFeatureSummary, sumTokens } from '@kbn/streams-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
-import type { AgentBuilderClient } from '@kbn/evals';
+import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  FEATURE_IDENTIFICATION_AGENT_ID,
-  buildFeatureIdentificationUserMessage,
-} from '@kbn/significant-events-plugin/server';
 import { MANAGED_STREAM_NAME } from '../../src/datasets';
 import type { ExcludeExperimentOutput } from '../../src/evaluators/ki_feature_exclusion/evaluators';
 import { fetchSampleDocuments } from './fetch_sample_documents';
-import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 export async function runExcludeExperiment({
   esClient,
   excludeCount,
   followUpRuns,
-  agentBuilderClient,
+  fetch,
+  connectorId,
   sampleSize,
   log,
 }: {
   esClient: Client;
   excludeCount: number;
   followUpRuns: number;
-  agentBuilderClient: AgentBuilderClient;
+  fetch: HttpHandler;
+  connectorId: string;
   sampleSize: number;
   log: ToolingLog;
 }): Promise<ExcludeExperimentOutput> {
@@ -41,20 +39,15 @@ export async function runExcludeExperiment({
     log,
   });
 
-  const initialUserMessage = buildFeatureIdentificationUserMessage({
+  const initialResult = await runFeatureIdentificationAgent({
+    fetch,
+    log,
     streamName: MANAGED_STREAM_NAME,
-    sampleDocuments: JSON.stringify(sampleDocuments),
+    connectorId,
+    sampleDocuments,
   });
 
-  const initialResult = await agentBuilderClient.converse({
-    agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-    input: initialUserMessage,
-  });
-
-  const { features: initialFeatures } = parseFeaturesFromSteps(
-    initialResult.steps,
-    MANAGED_STREAM_NAME
-  );
+  const initialFeatures = initialResult.features;
   let tokensUsed = sumTokens({ added: initialResult.tokensUsed });
 
   log.info(`Initial identification returned ${initialFeatures.length} features`);
@@ -86,21 +79,16 @@ export async function runExcludeExperiment({
   const outputs: ExcludeExperimentOutput['followUpRuns'] = [];
 
   for (let i = 0; i < followUpRuns; i++) {
-    const followUpUserMessage = buildFeatureIdentificationUserMessage({
+    const followUpResult = await runFeatureIdentificationAgent({
+      fetch,
+      log,
       streamName: MANAGED_STREAM_NAME,
-      sampleDocuments: JSON.stringify(sampleDocuments),
-      excludedFeatures: JSON.stringify(excludedFeatures),
+      connectorId,
+      sampleDocuments,
+      excludedFeatures,
     });
 
-    const followUpResult = await agentBuilderClient.converse({
-      agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-      input: followUpUserMessage,
-    });
-
-    const { features: rawFeatures, ignoredFeatures } = parseFeaturesFromSteps(
-      followUpResult.steps,
-      MANAGED_STREAM_NAME
-    );
+    const { features: rawFeatures, ignoredFeatures } = followUpResult;
     tokensUsed = sumTokens({ accumulated: tokensUsed, added: followUpResult.tokensUsed });
 
     const features = rawFeatures.filter(

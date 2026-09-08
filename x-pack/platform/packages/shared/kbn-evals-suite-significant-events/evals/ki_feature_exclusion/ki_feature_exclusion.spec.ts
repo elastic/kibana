@@ -45,7 +45,8 @@ evaluate.describe(
     const activeDatasets = getActiveDatasets();
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-    evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+      await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
       await kbnClient.request({
         path: '/internal/core/_settings',
         method: 'PUT',
@@ -65,6 +66,10 @@ evaluate.describe(
         log
       );
       snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+    });
+
+    evaluate.afterAll(async ({ uiSettings }) => {
+      await uiSettings.unset('agentBuilder:experimentalFeatures');
     });
 
     for (const dataset of activeDatasets) {
@@ -107,7 +112,8 @@ evaluate.describe(
           async ({
             esClient,
             inferenceClient,
-            agentBuilderClient,
+            fetch,
+            connector,
             evaluationConnector,
             evaluators,
             traceEsClient,
@@ -156,7 +162,8 @@ evaluate.describe(
                     esClient,
                     excludeCount: input.exclude_count,
                     followUpRuns: input.follow_up_runs,
-                    agentBuilderClient,
+                    fetch,
+                    connectorId: connector.id,
                     sampleSize: input.sample_document_count,
                     log,
                   });

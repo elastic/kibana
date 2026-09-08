@@ -5,33 +5,30 @@
  * 2.0.
  */
 
+import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
-import { platformStreamsMemoryTools } from '../../../memory_and_investigation/tools/memory/tool_ids';
+import { FEATURE_IDENTIFICATION_SKILL_ID } from '../../skills/feature_identification';
 import { featureIdentificationAgentType } from './feature_identification_agent';
 
 describe('featureIdentificationAgentType', () => {
-  it('exposes only parity-required tools', () => {
-    const toolIds = [
-      platformStreamsMemoryTools.memorySearch,
-      platformStreamsMemoryTools.memoryRead,
-      platformStreamsMemoryTools.memoryList,
-      platformSignificantEventsTools.searchSimilarFeatures,
-      platformSignificantEventsTools.searchEvent,
-      platformSignificantEventsTools.finalizeFeatures,
-    ];
-
-    expect(featureIdentificationAgentType.baseConfiguration.skill_ids).toEqual([]);
-    expect(featureIdentificationAgentType.baseConfiguration.tools).toEqual([{ tool_ids: toolIds }]);
-    expect(toolIds.every(isAllowedBuiltinTool)).toBe(true);
-  });
-
-  it('includes grounding instructions', () => {
-    const { instructions } = featureIdentificationAgentType.baseConfiguration;
-
-    expect(instructions).toContain('call `platform_sig_events_memory_search` at least once');
-    expect(instructions).toContain('`platform_sig_events_event_search`');
-    expect(instructions).toContain('`platform_sig_events_ki_feature_similarity_search`');
-    expect(instructions).toContain('call `platform_sig_events_ki_feature_finalize` exactly once');
+  it('keeps stable instructions and registry tools on the agent type', () => {
+    expect(featureIdentificationAgentType.baseConfiguration.instructions).toContain(
+      'You are extracting **features** from log data'
+    );
+    expect(featureIdentificationAgentType.baseConfiguration.instructions).toContain(
+      'call `platform_sig_events_ki_feature_finalize` exactly once'
+    );
+    expect(featureIdentificationAgentType.baseConfiguration.skill_ids).toEqual([
+      FEATURE_IDENTIFICATION_SKILL_ID,
+    ]);
+    expect(featureIdentificationAgentType.baseConfiguration.tools).toEqual([
+      {
+        tool_ids: [
+          platformSignificantEventsTools.searchSimilarFeatures,
+          platformSignificantEventsTools.searchEvent,
+        ],
+      },
+    ]);
+    expect(isAllowedBuiltinSkill(FEATURE_IDENTIFICATION_SKILL_ID)).toBe(true);
   });
 });

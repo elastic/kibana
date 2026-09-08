@@ -8,7 +8,11 @@
 export { MS_PER_DAY } from './iteration_state';
 export { deriveSuccessCount, deriveTotalTokensUsed } from './iteration_state';
 
-export { identifyInferredFeatures, buildTelemetry } from './identify_inferred_features';
+export {
+  identifyInferredFeatures,
+  buildTelemetry,
+  KNOWN_FEATURE_IDS_MAX_CHARS,
+} from './identify_inferred_features';
 export type {
   FeaturesIdentifiedTelemetry,
   TelemetryContext,

@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-
 const NAMESPACE = 'platform.sig_events.memory';
 
-/**
- * Tool IDs for the Streams memory tools. Defined locally because these are internal tools,
- * inlined via skills — they do not need to be registered or defined in the shared agent-builder-common package.
- */
 export const platformStreamsMemoryTools = {
-  memorySearch: platformSignificantEventsTools.searchMemory,
-  memoryRead: platformSignificantEventsTools.readMemory,
+  memorySearch: `${NAMESPACE}.search`,
+  memoryRead: `${NAMESPACE}.read`,
   memoryWrite: `${NAMESPACE}.write`,
   memoryPatch: `${NAMESPACE}.patch`,
-  memoryList: platformSignificantEventsTools.listMemory,
+  memoryList: `${NAMESPACE}.list`,
   memoryDelete: `${NAMESPACE}.delete`,
   memoryRecentChanges: `${NAMESPACE}.recent_changes`,
 } as const;

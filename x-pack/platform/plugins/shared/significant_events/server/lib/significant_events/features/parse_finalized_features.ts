@@ -35,9 +35,8 @@ function tryParseFilter(maybeFilter: unknown): Condition | undefined {
 }
 
 /**
- * Normalizes, validates, deduplicates, and caps the raw `finalize_features` tool params into KI
- * features. Shared by the production agent runner and the evals suite so both interpret the agent's
- * output identically.
+ * Normalizes, validates, deduplicates, and caps the agent's raw structured feature output into KI
+ * features.
  */
 export function parseFinalizedFeatures(
   rawParams: RawFinalizeFeaturesParams,

@@ -6,10 +6,6 @@
  */
 
 import { formatRawDocument, sumTokens, type InferenceDocument } from '@kbn/streams-ai';
-import {
-  FEATURE_IDENTIFICATION_AGENT_ID,
-  buildFeatureIdentificationUserMessage,
-} from '@kbn/significant-events-plugin/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import {
@@ -34,7 +30,7 @@ import {
 } from '../../src/datasets';
 import { buildAvailableSnapshotsBySource } from '../shared';
 import { collectSampleDocuments } from './collect_sample_documents';
-import { parseFeaturesFromSteps } from '../../src/evaluators/ki_feature_extraction/parse_features_from_steps';
+import { runFeatureIdentificationAgent } from '../../src/run_feature_identification_agent';
 
 const TRUST_UPSTREAM = process.env.SIGEVENTS_TRUST_UPSTREAM === 'true';
 
@@ -47,7 +43,8 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
   const activeDatasets = getActiveDatasets();
   const availableSnapshotsBySource = new Map<string, Set<string>>();
 
-  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+  evaluate.beforeAll(async ({ esClient, kbnClient, log, uiSettings }) => {
+    await uiSettings.set({ 'agentBuilder:experimentalFeatures': true });
     await kbnClient.request({
       path: '/internal/core/_settings',
       method: 'PUT',
@@ -67,6 +64,10 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
       log
     );
     snapshots.forEach((v, k) => availableSnapshotsBySource.set(k, v));
+  });
+
+  evaluate.afterAll(async ({ uiSettings }) => {
+    await uiSettings.unset('agentBuilder:experimentalFeatures');
   });
 
   for (const dataset of activeDatasets) {
@@ -122,7 +123,7 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
 
       evaluate(
         'KI feature extraction',
-        async ({ agentBuilderClient, executorClient, evaluators, traceEsClient, log }) => {
+        async ({ fetch, connector, executorClient, evaluators, traceEsClient, log }) => {
           const heavyDataByScenario = new Map(
             collectedExamples.map(({ scenario, sampleDocuments }) => [
               scenario.input.scenario_id,
@@ -155,21 +156,17 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
                   throw new Error(`No pre-collected data for scenario "${input.scenario_id}"`);
                 }
 
-                const userMessage = buildFeatureIdentificationUserMessage({
+                const { features, tokensUsed } = await runFeatureIdentificationAgent({
+                  fetch,
+                  log,
                   streamName: MANAGED_STREAM_NAME,
-                  sampleDocuments: JSON.stringify(heavy.sampleDocuments),
+                  connectorId: connector.id,
+                  sampleDocuments: heavy.sampleDocuments,
                 });
-
-                const result = await agentBuilderClient.converse({
-                  agentId: FEATURE_IDENTIFICATION_AGENT_ID,
-                  input: userMessage,
-                });
-
-                const { features } = parseFeaturesFromSteps(result.steps, MANAGED_STREAM_NAME);
 
                 return {
                   features,
-                  tokens_used: sumTokens({ added: result.tokensUsed }),
+                  tokens_used: sumTokens({ added: tokensUsed }),
                   traceId: getCurrentTraceId(),
                   sample_documents: heavy.sampleDocuments,
                 };

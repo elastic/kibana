@@ -12,10 +12,10 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import {
   AgentExecutionMode,
-  isToolCallEvent,
+  CONVERSATION_TITLE_MAX_LENGTH,
   isRoundCompleteEvent,
+  isToolCallEvent,
 } from '@kbn/agent-builder-common';
-import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -28,9 +28,12 @@ import {
   type PreviouslyIdentifiedFeature,
 } from '@kbn/streams-ai';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
-import { parseFinalizedFeatures } from './parse_finalized_features';
+import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
+import { parseFinalizedFeatures, type RawFinalizeFeaturesParams } from './parse_finalized_features';
 import { buildFeatureIdentificationUserMessage } from './build_user_message';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
+
+const FEATURE_IDENTIFICATION_MAX_CONTENT_LENGTH = 2 * 1024 * 1024;
 
 export interface ExecuteFeatureIdentificationAgentOptions {
   agentBuilder: AgentBuilderPluginStart;
@@ -72,6 +75,13 @@ export async function executeFeatureIdentificationAgent({
     excludedFeatures: excludedFeatures?.length ? JSON.stringify(excludedFeatures) : undefined,
   });
 
+  const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
+  const conversation = await conversationClient.create({
+    agentId: FEATURE_IDENTIFICATION_AGENT_ID,
+    title: `Feature identification: ${streamName}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
+    accessControl: { access_mode: 'private' },
+  });
+
   const { events$ } = await agentBuilder.execution.executeAgent({
     mode: AgentExecutionMode.conversation,
     request,
@@ -80,7 +90,10 @@ export async function executeFeatureIdentificationAgent({
     params: {
       agentId: FEATURE_IDENTIFICATION_AGENT_ID,
       connectorId,
+      conversationId: conversation.id,
+      storeConversation: true,
       nextInput: { message: userMessage },
+      maxContentLength: FEATURE_IDENTIFICATION_MAX_CONTENT_LENGTH,
       telemetryMetadata: {
         pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
         aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -90,21 +103,15 @@ export async function executeFeatureIdentificationAgent({
 
   const events = await firstValueFrom(events$.pipe(toArray()));
 
-  const normalizeId = (id: string) => id.replace(/\./g, '_');
-  const targetToolId = normalizeId(platformSignificantEventsTools.finalizeFeatures);
-
   const finalizeEvent = events.find(
-    (e) => isToolCallEvent(e) && normalizeId(e.data.tool_id) === targetToolId
+    (event) => isToolCallEvent(event) && event.data.tool_id === FINALIZE_FEATURES_TOOL_ID
   );
-
   if (!finalizeEvent || !isToolCallEvent(finalizeEvent)) {
     throw new Error('Feature identification agent did not call finalize_features');
   }
 
-  const rawParams = finalizeEvent.data.params as {
-    features?: unknown;
-    ignored_features?: unknown;
-  };
+  const roundEvent = events.find(isRoundCompleteEvent);
+  const rawParams = finalizeEvent.data.params as RawFinalizeFeaturesParams;
 
   if (!Array.isArray(rawParams.features)) {
     throw new Error('Feature identification agent returned invalid finalize_features output');
@@ -112,7 +119,6 @@ export async function executeFeatureIdentificationAgent({
 
   const { features, ignoredFeatures } = parseFinalizedFeatures(rawParams, streamName, logger);
 
-  const roundEvent = events.find(isRoundCompleteEvent);
   const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(
     roundEvent?.data.round.model_usage
   ) ?? { ...EMPTY_TOKENS };

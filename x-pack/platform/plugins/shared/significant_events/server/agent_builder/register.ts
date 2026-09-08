@@ -71,6 +71,5 @@ export const registerStreamsAgentBuilder = async ({
     server,
     logger,
     telemetry,
-    memoryToolsOptions: createMemoryToolsOptions({ getScopedClients, server, logger }),
   });
 };

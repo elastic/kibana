@@ -199,6 +199,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'streams-investigation-management',
   'knowledge-indicators-management',
   'ki-identification-management',
+  'feature-identification',
   'streams-memory-synthesis',
   'streams-memory-consolidation',
   'streams-conversation-scraper',

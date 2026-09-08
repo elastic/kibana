@@ -58,6 +58,11 @@ export interface AgentBuilderClientResponse {
   tokensUsed?: ChatCompletionTokenCount;
 }
 
+export interface CreateAgentBuilderConversationParams {
+  agentId: string;
+  title: string;
+}
+
 interface RoundModelUsage {
   input_tokens: number;
   output_tokens: number;
@@ -76,6 +81,7 @@ const RETRIES = 2;
 const MIN_TIMEOUT_MS = 2000;
 
 export interface AgentBuilderClient {
+  createConversation(params: CreateAgentBuilderConversationParams): Promise<{ id: string }>;
   converse(params: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse>;
   /**
    * Loads a persisted conversation by id. Useful for evaluators that need the
@@ -159,6 +165,23 @@ export function createAgentBuilderClient({
     return retryOnFail(`converse(${agentId})`, call);
   };
 
+  const createConversation = ({
+    agentId,
+    title,
+  }: CreateAgentBuilderConversationParams): Promise<{ id: string }> => {
+    return retryOnFail(`createConversation(${agentId})`, () =>
+      fetch<{ id: string }>('/api/agent_builder/conversations', {
+        method: 'POST',
+        version: '2023-10-31',
+        body: JSON.stringify({
+          agent_id: agentId,
+          title,
+          access_control: { access_mode: 'private' },
+        }),
+      })
+    );
+  };
+
   const getConversation = <T = unknown>(conversationId: string): Promise<T> => {
     return retryOnFail(`getConversation(${conversationId})`, async () => {
       return fetch<T>(`/api/agent_builder/conversations/${conversationId}`, {
@@ -168,5 +191,5 @@ export function createAgentBuilderClient({
     });
   };
 
-  return { converse, getConversation };
+  return { createConversation, converse, getConversation };
 }
