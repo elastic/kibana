@@ -416,6 +416,15 @@ describe('WorkflowApi', () => {
         version: VERSION,
       });
     });
+
+    it('should include stepExecutionId when provided', async () => {
+      await api.resumeExecution('exec-1', { input: { answer: 'yes' }, stepExecutionId: 'step-1' });
+
+      expect(http.post).toHaveBeenCalledWith('/api/workflows/executions/exec-1/resume', {
+        body: JSON.stringify({ input: { answer: 'yes' }, stepExecutionId: 'step-1' }),
+        version: VERSION,
+      });
+    });
   });
 
   describe('getExecutionLogs', () => {

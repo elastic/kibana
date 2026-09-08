@@ -7,7 +7,11 @@
 
 import type { ComponentType } from 'react';
 import type { IconType } from '@elastic/eui';
-import type { Conversation } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationWithoutRoundsWithPermissions,
+} from '@kbn/agent-builder-common';
+import type { AttachmentServiceStartContract } from '../attachments';
 
 /**
  * Props passed to a conversation template tab's `content` component.
@@ -15,6 +19,8 @@ import type { Conversation } from '@kbn/agent-builder-common';
 export interface ConversationTemplateTabRenderProps {
   /** The conversation the flyout is showing. */
   conversation: Conversation;
+  /** Public service for looking up attachment UI definitions. */
+  attachmentsService: AttachmentServiceStartContract;
 }
 
 /**
@@ -34,6 +40,20 @@ export interface ConversationTemplateTabDefinition {
   content: ComponentType<ConversationTemplateTabRenderProps>;
 }
 
+export interface ConversationTemplateBriefCardRenderProps {
+  conversation: ConversationWithoutRoundsWithPermissions;
+}
+
+export interface ConversationTemplateUIContext {
+  /** Opens the sidebar using the existing conversation navigation behavior. */
+  openSidebarConversation: (conversationId: string) => void;
+  /** Closes the sidebar and opens an existing conversation in the Agent Builder app. */
+  openFullscreenConversation: (options: {
+    conversationId: string;
+    agentId: string;
+  }) => Promise<void>;
+}
+
 /**
  * UI contributions for a conversation template. Tabs are referenced by id and resolved
  * at render time, so registration order across plugins does not matter.
@@ -45,6 +65,8 @@ export interface ConversationTemplateUIDefinition {
   icon?: IconType;
   /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
   tabs: readonly string[];
+  /** Self-contained card component; capture solution services and providers at registration. */
+  briefCard?: ComponentType<ConversationTemplateBriefCardRenderProps>;
 }
 
 /**
@@ -63,11 +85,11 @@ export interface ConversationTemplateServiceStartContract {
    */
   getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
   /**
-   * Register the UI definition for a template: which tabs it shows, in which order.
+   * Register template UI with a callback invoked once with Agent Builder navigation methods.
    */
   registerTemplateUIDefinition(
     templateId: string,
-    definition: ConversationTemplateUIDefinition
+    createDefinition: (context: ConversationTemplateUIContext) => ConversationTemplateUIDefinition
   ): void;
   /**
    * Resolve the UI definition for a template, if one has been registered.
