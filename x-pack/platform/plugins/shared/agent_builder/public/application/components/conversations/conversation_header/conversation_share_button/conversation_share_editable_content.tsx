@@ -36,6 +36,7 @@ import {
 } from './conversation_share_i18n';
 
 const USER_SEARCH_OPTION_ROW_HEIGHT = 48;
+const AGENT_ACCESS_TOOLTIP_OFFSET = 8;
 
 /**
  * `EuiComboBox` reserves a selection indicator column on every option while `singleSelection` is
@@ -51,16 +52,6 @@ const hiddenOptionIndicatorCss = css`
 
 const currentMembersLabelStyle = ({ euiTheme }: UseEuiTheme) => css`
   row-gap: ${euiTheme.size.s};
-`;
-
-/**
- * `EuiToolTip` positions itself against its anchor wrapper, which is inline and inherits the
- * label's line height, leaving the tooltip floating above the icon. Sizing the wrapper to the
- * icon box keeps the two together.
- */
-const agentAccessHelpAnchorStyle = css`
-  display: inline-flex;
-  vertical-align: text-bottom;
 `;
 
 interface UserSearchOptionProps {
@@ -165,19 +156,21 @@ export const ConversationShareEditableContent: React.FC<ConversationShareEditabl
       <EuiSpacer size="l" />
       <EuiFormRow
         label={
-          <>
-            {currentMembersLabel}{' '}
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{currentMembersLabel}</EuiFlexItem>
             {agentName ? (
-              <EuiIconTip
-                type="question"
-                size="s"
-                color="subdued"
-                aria-label={agentAccessHelpAriaLabel}
-                content={agentAccessHelpLabel(agentName)}
-                anchorProps={{ css: agentAccessHelpAnchorStyle }}
-              />
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="question"
+                  size="s"
+                  color="subdued"
+                  offset={AGENT_ACCESS_TOOLTIP_OFFSET}
+                  aria-label={agentAccessHelpAriaLabel}
+                  content={agentAccessHelpLabel(agentName)}
+                />
+              </EuiFlexItem>
             ) : null}
-          </>
+          </EuiFlexGroup>
         }
         fullWidth
         css={currentMembersLabelStyle}
