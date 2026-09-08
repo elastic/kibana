@@ -488,6 +488,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   } catch (err) {
     logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
   }
+
+  await context.hooks.run(HookLifecycle.afterAgent, {
+    request,
+    abortSignal,
+    agentId,
+    conversationId: conversationId ?? undefined,
+  });
+
   return {
     round,
   };
