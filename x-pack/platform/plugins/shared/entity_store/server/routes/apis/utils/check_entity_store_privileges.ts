@@ -8,6 +8,18 @@
 import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
 import type { AssetManagerClient } from '../../../domain/asset_manager/asset_manager_client';
+import type { LogExtractionByTypeParams, LogExtractionInstallParams } from '../../constants';
+
+/** Every index pattern the request adds, across both config layers. The privilege check has to see all of them. */
+export function collectAdditionalIndexPatterns(
+  logExtraction?: LogExtractionInstallParams,
+  logExtractionByType?: LogExtractionByTypeParams
+): string[] {
+  const perType = Object.values(logExtractionByType ?? {}).flatMap(
+    (override) => override?.additionalIndexPatterns ?? []
+  );
+  return [...(logExtraction?.additionalIndexPatterns ?? []), ...perType];
+}
 
 export function getMissingPrivileges({
   privileges: { kibana, elasticsearch },
