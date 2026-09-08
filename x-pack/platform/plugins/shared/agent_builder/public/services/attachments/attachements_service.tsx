@@ -126,10 +126,7 @@ export class AttachmentsService {
     return attachment;
   }
 
-  async create(
-    conversationId: string,
-    input: CreateAttachmentInput
-  ): Promise<VersionedAttachment> {
+  async create(conversationId: string, input: CreateAttachmentInput): Promise<VersionedAttachment> {
     const { attachment } = await this.http.post<CreateAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments`,
       { body: JSON.stringify(input) }

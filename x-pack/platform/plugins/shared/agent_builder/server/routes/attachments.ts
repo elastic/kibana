@@ -11,6 +11,11 @@ import type { UpdateOriginResponse } from '@kbn/agent-builder-common/attachments
 import type { AttachmentResolveContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentNotFoundError,
+  AttachmentConflictError,
+  AttachmentValidationError,
+} from '@kbn/agent-builder-server';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -24,11 +29,6 @@ import type {
   GetAttachmentResponse,
 } from '../../common/http_api/attachments';
 import { createAttachmentPublicClient } from '../services/attachments';
-import {
-  AttachmentNotFoundError,
-  AttachmentConflictError,
-  AttachmentValidationError,
-} from '@kbn/agent-builder-server';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY } from './route_security';

@@ -10,10 +10,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentPublicClient,
-  ListAttachmentsResult,
-} from '@kbn/agent-builder-server';
+import type { AttachmentPublicClient, ListAttachmentsResult } from '@kbn/agent-builder-server';
 import {
   AttachmentNotFoundError,
   AttachmentConflictError,
@@ -70,9 +67,7 @@ export const createAttachmentPublicClient = ({
       const { conversationClient, stateManager } = await loadState(conversationId);
 
       if (input.id && stateManager.getAttachmentRecord(input.id)) {
-        throw new AttachmentConflictError(
-          `Attachment with ID '${input.id}' already exists`
-        );
+        throw new AttachmentConflictError(`Attachment with ID '${input.id}' already exists`);
       }
 
       const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
@@ -121,9 +116,7 @@ export const createAttachmentPublicClient = ({
       }
 
       if (!updated) {
-        throw new AttachmentValidationError(
-          `Failed to update attachment '${attachmentId}'`
-        );
+        throw new AttachmentValidationError(`Failed to update attachment '${attachmentId}'`);
       }
 
       await conversationClient.update({
@@ -164,9 +157,7 @@ export const createAttachmentPublicClient = ({
         }
       } else {
         if (existing.active === false) {
-          throw new AttachmentValidationError(
-            `Attachment '${attachmentId}' is already deleted`
-          );
+          throw new AttachmentValidationError(`Attachment '${attachmentId}' is already deleted`);
         }
         const ok = stateManager.delete(attachmentId, ATTACHMENT_REF_ACTOR.user);
         if (!ok) {

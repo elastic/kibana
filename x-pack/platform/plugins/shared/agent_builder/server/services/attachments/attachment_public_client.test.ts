@@ -228,9 +228,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(
-        client.update('c1', 'missing', { data: { text: 'x' } })
-      ).rejects.toMatchObject({ name: 'AttachmentNotFoundError' });
+      await expect(client.update('c1', 'missing', { data: { text: 'x' } })).rejects.toMatchObject({
+        name: 'AttachmentNotFoundError',
+      });
     });
 
     it('throws AttachmentValidationError when the attachment is deleted', async () => {
@@ -243,9 +243,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(
-        client.update('c1', 'a1', { data: { text: 'x' } })
-      ).rejects.toMatchObject({ name: 'AttachmentValidationError' });
+      await expect(client.update('c1', 'a1', { data: { text: 'x' } })).rejects.toMatchObject({
+        name: 'AttachmentValidationError',
+      });
     });
   });
 
@@ -320,9 +320,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(
-        client.delete('c1', 'a1', { permanent: true })
-      ).rejects.toMatchObject({ name: 'AttachmentConflictError' });
+      await expect(client.delete('c1', 'a1', { permanent: true })).rejects.toMatchObject({
+        name: 'AttachmentConflictError',
+      });
     });
   });
 });
