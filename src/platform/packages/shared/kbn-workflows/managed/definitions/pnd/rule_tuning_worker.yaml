@@ -2,7 +2,7 @@ version: "1"
 name: Detection Rule Tuning Worker
 description: >
   Harvests rules whose alerts analysts closed as false positives, fans out one
-  tuning proposal workflow per rule so every proposal holds its own approval gate,
+  tuning review workflow per rule so every review holds its own approval gate,
   and joins once every gate has settled to report the decision totals.
 enabled: true
 tags:
@@ -13,8 +13,8 @@ settings:
   # bucket, so a single max would let one space's pending gate drop every other
   # space's scheduled sweep for three days. Five lanes keep that from starving the
   # fleet while still bounding how many joins wait at once.
-  # Overlap is safe now that the harvest skips rules with an in-flight proposal;
-  # for sweeps that start close enough together to miss that, the proposal's own
+  # Overlap is safe now that the harvest skips rules with an in-flight review;
+  # for sweeps that start close enough together to miss that, the review's own
   # per-rule drop concurrency stops the duplicate before it can rediagnose.
   concurrency:
     key: detection-rule-tuning
@@ -29,7 +29,7 @@ triggers:
         min_fp_count:
           type: integer
           # Floor of 2: a single-FP group makes ES|QL return alert_ids as a scalar,
-          # which would fail the proposal's array input schema.
+          # which would fail the review's array input schema.
           minimum: 2
           maximum: 100
           description: Overrides the minimum unreviewed false-positive alerts a rule needs before it is diagnosed.
@@ -54,14 +54,14 @@ triggers:
           # Can only lower the cap: the fan-out's parallel slots are sized for the
           # default, so a larger value could not open every gate at once.
           maximum: 10
-          description: Overrides how many tuning proposals one sweep may launch, up to the default of 10.
+          description: Overrides how many tuning reviews one sweep may launch, up to the default of 10.
       additionalProperties: false
 outputs:
-  - name: proposals_requested
+  - name: reviews_requested
     type: number
-  - name: proposals_approved
+  - name: reviews_approved
     type: number
-  - name: proposals_failed
+  - name: reviews_failed
     type: number
   - name: rules_applied
     type: number
@@ -85,33 +85,33 @@ consts:
   no_rows: []
   reviewed_tag: detection-watch:tuning-reviewed
 steps:
-  # A proposal can outlive its sweep (sweep cancelled or failed while the child sits
-  # at its gate, or a proposal started by hand). Its rule would be re-harvested until
+  # A review can outlive its sweep (sweep cancelled or failed while the child sits
+  # at its gate, or a review started by hand). Its rule would be re-harvested until
   # the gate resolves, wasting one of the max_rules_per_sweep slots on a branch the
-  # child's per-rule drop concurrency then kills. Listing in-flight proposals up front
+  # child's per-rule drop concurrency then kills. Listing in-flight reviews up front
   # lets the harvest skip those rules at the source. Fails open: without this data the
   # sweep still runs and the drop concurrency remains the backstop.
-  - name: list_active_proposals
+  - name: list_active_reviews
     type: kibana.request
     with:
       method: GET
-      path: "/s/{{ workflow.spaceId }}/api/workflows/workflow/system-security-rule-tuning-proposal/executions?statuses=pending&statuses=waiting&statuses=waiting_for_input&statuses=waiting_for_child&statuses=running&statuses=queued&size=100"
+      path: "/s/{{ workflow.spaceId }}/api/workflows/workflow/system-security-rule-tuning-review/executions?statuses=pending&statuses=waiting&statuses=waiting_for_input&statuses=waiting_for_child&statuses=running&statuses=queued&size=100"
       headers:
         elastic-api-version: "2023-10-31"
     on-failure:
       continue: true
 
   # The list response carries each execution's concurrencyGroupKey
-  # (`rule-tuning-proposal-<rule uuid>`), not its inputs. Liquid cannot transform array
+  # (`rule-tuning-review-<rule uuid>`), not its inputs. Liquid cannot transform array
   # elements one by one, so the keys are joined, stripped of the prefix, and split
   # back. Size is computed on its own because comparison operators cannot follow a
   # filter chain.
   - name: collect_active_rules
     type: data.set
     with:
-      parsed: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-proposal-' | split: ',' }}"
-      parsed_count: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-proposal-' | split: ',' | size }}"
-      expected: "${{ steps.list_active_proposals.output.results | default: consts.no_rows | size }}"
+      parsed: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-review-' | split: ',' }}"
+      parsed_count: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | map: 'concurrencyGroupKey' | join: ',' | remove: 'rule-tuning-review-' | split: ',' | size }}"
+      expected: "${{ steps.list_active_reviews.output.results | default: consts.no_rows | size }}"
 
   # A key containing the `,` separator would corrupt the split into fragments that
   # could match unrelated rules (uuids never do, but the keys are external data), so
@@ -141,7 +141,7 @@ steps:
   # in-flight rule here, before STATS/LIMIT, frees its sweep slot for the
   # next-noisiest one; the empty-array `terms` matches nothing, which makes that
   # `must_not` a no-op — the fail-open path when the lookup errored, the parse was
-  # inconsistent, or no proposal is pending.
+  # inconsistent, or no review is pending.
   - name: harvest_fp_alerts_by_rule
     type: elasticsearch.esql.query
     with:
@@ -220,7 +220,7 @@ steps:
       verdict: "${{ steps.resolve_enabled_rules.output.verdict }}"
       rows: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_enabled_rules.output.verdict == null or steps.resolve_enabled_rules.output.verdict contains row[0]' | slice: 0, steps.collect_candidates.output.fanout_limit }}"
 
-  # One proposal execution per rule, launched synchronously inside a parallel
+  # One review execution per rule, launched synchronously inside a parallel
   # branch so this sweep joins once every gate has settled. The gate itself cannot
   # live in this run: waitForApproval is rejected inside a parallel branch, and one
   # execution has exactly one resume slot. Each child parks on its own gate for up
@@ -228,10 +228,10 @@ steps:
   # No `timeout` or `branch-timeout` here: either one aborts the branch and cancels
   # the child while the approver is still thinking. The gate's own 72h timeout is
   # the only clock.
-  - name: run_proposals
+  - name: run_reviews
     type: parallel
     foreach: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows }}"
-    # Settled: one dropped or failed proposal must not skip the other rules'
+    # Settled: one dropped or failed review must not skip the other rules'
     # gates. Failures stay visible in the aggregate results and counts.
     mode: settled
     concurrency:
@@ -243,10 +243,10 @@ steps:
     steps:
       # ES|QL rows arrive as positional arrays in the harvest's KEEP order.
       # `${{ }}` preserves the value's type (numbers, arrays); `{{ }}` stringifies.
-      - name: run_proposal
+      - name: run_review
         type: workflow.execute
         with:
-          workflow-id: system-security-rule-tuning-proposal
+          workflow-id: system-security-rule-tuning-review
           inputs:
             rule_uuid: "{{ foreach.item.0 }}"
             fp_count: "${{ foreach.item.1 }}"
@@ -263,17 +263,17 @@ steps:
   - name: summarize_decisions
     type: data.set
     with:
-      proposals_requested: "${{ steps.resolve_fanout_rows.output.rows | size | default: 0 }}"
-      proposals_failed: "${{ steps.run_proposals.output.failed | default: 0 }}"
-      proposals_approved: "${{ steps.run_proposals.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
-      rules_applied: "${{ steps.run_proposals.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"
+      reviews_requested: "${{ steps.resolve_fanout_rows.output.rows | size | default: 0 }}"
+      reviews_failed: "${{ steps.run_reviews.output.failed | default: 0 }}"
+      reviews_approved: "${{ steps.run_reviews.output.results | map: 'output' | where: 'approved' | size | default: 0 }}"
+      rules_applied: "${{ steps.run_reviews.output.results | map: 'output' | where: 'applied' | size | default: 0 }}"
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      proposals_requested: "${{ steps.summarize_decisions.output.proposals_requested }}"
-      proposals_approved: "${{ steps.summarize_decisions.output.proposals_approved }}"
-      proposals_failed: "${{ steps.summarize_decisions.output.proposals_failed }}"
+      reviews_requested: "${{ steps.summarize_decisions.output.reviews_requested }}"
+      reviews_approved: "${{ steps.summarize_decisions.output.reviews_approved }}"
+      reviews_failed: "${{ steps.summarize_decisions.output.reviews_failed }}"
       rules_applied: "${{ steps.summarize_decisions.output.rules_applied }}"
       harvest_failed: "${{ steps.harvest_fp_alerts_by_rule.error != null }}"

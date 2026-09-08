@@ -11,16 +11,16 @@ import {
   getManagedWorkflowDefinition,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
-  PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
-  PND_RULE_TUNING_WORKFLOW_ID,
+  PND_RULE_TUNING_REVIEW_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKER_WORKFLOW_ID,
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
 
 const DETECTION_WORKFLOW_IDS = [
   PND_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  PND_RULE_TUNING_WORKFLOW_ID,
-  PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
+  PND_RULE_TUNING_WORKER_WORKFLOW_ID,
+  PND_RULE_TUNING_REVIEW_WORKFLOW_ID,
   PND_RULE_CREATION_WORKFLOW_ID,
   PND_RULE_PREVIEW_WORKFLOW_ID,
 ];
@@ -69,7 +69,7 @@ describe('detection rule workflows', () => {
       expect(triggers[0].with).toEqual({ every: '2h' });
     });
 
-    // Async because the sweep joins on its proposal gates and can park for 72h;
+    // Async because the sweep joins on its review gates and can park for 72h;
     // a sync call would park this worker run and stack scheduled runs behind it.
     it('dispatches the tuning sweep asynchronously', () => {
       const calls = flattenSteps(worker.steps as unknown as NestedStep[]).filter(({ type }) =>
@@ -79,7 +79,7 @@ describe('detection rule workflows', () => {
       expect(calls.map(({ name, type }) => [name, type])).toEqual([
         ['run_rule_tuning', 'workflow.executeAsync'],
       ]);
-      expect(calls[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_WORKFLOW_ID);
+      expect(calls[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_WORKER_WORKFLOW_ID);
     });
   });
 
@@ -128,7 +128,7 @@ describe('detection rule workflows', () => {
     // The preview API validates timeframeEnd with zod's `.datetime()`, which rejects a
     // UTC offset and only accepts a `Z` suffix.
     it('sends every preview timeframeEnd as UTC', () => {
-      for (const id of [PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
+      for (const id of [PND_RULE_TUNING_REVIEW_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
         const lines = getManagedYaml(id)
           .split('\n')
           .filter((line) => line.includes('timeframeEnd'));
@@ -142,8 +142,8 @@ describe('detection rule workflows', () => {
 
     // Only `waitForApproval` renders the approve/reject buttons; a `waitForInput` gate
     // makes an analyst hand-author the resume payload as JSON instead.
-    it('gates the proposal and creation workers on approval responses', () => {
-      for (const id of [PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
+    it('gates the review and creation workers on approval responses', () => {
+      for (const id of [PND_RULE_TUNING_REVIEW_WORKFLOW_ID, PND_RULE_CREATION_WORKFLOW_ID]) {
         const { steps } = parse(getManagedYaml(id)) as WorkflowYaml;
         const all = flattenSteps(steps as unknown as NestedStep[]);
         const gates = all.filter(({ type }) => type === 'waitForApproval');
@@ -163,13 +163,13 @@ describe('detection rule workflows', () => {
       }
     });
 
-    // The sweep has no ai.agent step; the diagnosing skill lives in the proposal child.
+    // The sweep has no ai.agent step; the diagnosing skill lives in the review child.
     it('keeps the skills inside the workers themselves', () => {
       const workerSkills = (id: string) =>
         projectSkillsFromDefinition(parse(getManagedYaml(id)) as WorkflowYaml, undefined);
 
-      expect(workerSkills(PND_RULE_TUNING_WORKFLOW_ID)).toEqual([]);
-      expect(workerSkills(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)).toEqual(
+      expect(workerSkills(PND_RULE_TUNING_WORKER_WORKFLOW_ID)).toEqual([]);
+      expect(workerSkills(PND_RULE_TUNING_REVIEW_WORKFLOW_ID)).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: 'investigate-rule', kind: 'skill' })])
       );
       expect(workerSkills(PND_RULE_CREATION_WORKFLOW_ID)).toEqual(
@@ -181,17 +181,17 @@ describe('detection rule workflows', () => {
 
     describe('rule tuning alert marking', () => {
       const tuning = parse(
-        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKFLOW_ID)!.yaml!
+        getManagedWorkflowDefinition(PND_RULE_TUNING_WORKER_WORKFLOW_ID)!.yaml!
       ) as WorkflowYaml;
-      const proposal = parse(
-        getManagedWorkflowDefinition(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID)!.yaml!
+      const review = parse(
+        getManagedWorkflowDefinition(PND_RULE_TUNING_REVIEW_WORKFLOW_ID)!.yaml!
       ) as WorkflowYaml;
       const tuningSteps = flattenSteps(tuning.steps as unknown as NestedStep[]);
-      const proposalSteps = flattenSteps(proposal.steps as unknown as NestedStep[]);
+      const reviewSteps = flattenSteps(review.steps as unknown as NestedStep[]);
       const harvest = tuningSteps.find(({ name }) => name === 'harvest_fp_alerts_by_rule')!;
       const harvestQuery = String(harvest.with?.query);
       const reviewedTag = (tuning.consts as Record<string, string>).reviewed_tag;
-      const tagSteps = proposalSteps.filter(({ type }) => type === 'security.setAlertTags');
+      const tagSteps = reviewSteps.filter(({ type }) => type === 'security.setAlertTags');
 
       // The newest reviewed alert is a per-rule watermark: every FP at or before it
       // counts as addressed, tagged or not, so FPs beyond the tagged newest-100 batch
@@ -212,12 +212,12 @@ describe('detection rule workflows', () => {
         expect(harvestQuery).toContain('fp_rate_count * 100 >= total_count');
       });
 
-      // A proposal can outlive its sweep (cancelled sweep, manual run). Its rule must
+      // A review can outlive its sweep (cancelled sweep, manual run). Its rule must
       // not consume a sweep slot again while the gate is pending, so the harvest
-      // excludes rules with an in-flight proposal, and fails open when the lookup or
+      // excludes rules with an in-flight review, and fails open when the lookup or
       // the group-key parse cannot be trusted.
-      it('skips rules whose proposal is still in flight', () => {
-        const lookup = tuningSteps.find(({ name }) => name === 'list_active_proposals')!;
+      it('skips rules whose review is still in flight', () => {
+        const lookup = tuningSteps.find(({ name }) => name === 'list_active_reviews')!;
         const path = String(lookup.with?.path);
         const nonTerminal = [
           'pending',
@@ -229,7 +229,7 @@ describe('detection rule workflows', () => {
         ];
 
         expect(path).toContain(
-          `/api/workflows/workflow/${PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID}/executions?`
+          `/api/workflows/workflow/${PND_RULE_TUNING_REVIEW_WORKFLOW_ID}/executions?`
         );
         for (const status of nonTerminal) {
           expect(path).toContain(`statuses=${status}`);
@@ -254,12 +254,12 @@ describe('detection rule workflows', () => {
       // drops disabled rules from the fan-out source (a parallel branch body cannot
       // carry a step-level `if`), failing open into a full fan-out when the lookup
       // gave no verdict.
-      it('skips proposals for rules that are no longer enabled', () => {
+      it('skips reviews for rules that are no longer enabled', () => {
         const collect = tuningSteps.find(({ name }) => name === 'collect_candidates')!;
         const lookup = tuningSteps.find(({ name }) => name === 'list_enabled_candidates')!;
         const resolve = tuningSteps.find(({ name }) => name === 'resolve_enabled_rules')!;
         const rows = tuningSteps.find(({ name }) => name === 'resolve_fanout_rows')!;
-        const fanOut = tuningSteps.find(({ name }) => name === 'run_proposals')!;
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')!;
 
         const filterKql = String(collect.with?.filter_kql);
         expect(filterKql).toContain('alert.attributes.enabled: true');
@@ -377,14 +377,14 @@ describe('detection rule workflows', () => {
         }
       });
 
-      // The applied tag must mean this pipeline changed the rule. Proposals that are
-      // not auto-applied stay unreviewed, so a later sweep can retry them.
+      // The applied tag must mean this pipeline changed the rule. A change that is
+      // not auto-applied leaves its alerts untagged, so a later sweep can retry them.
       it('tags applied only when the rule was actually patched', () => {
         const applied = tagSteps.find(({ name }) => name === 'mark_alerts_applied')!;
 
         expect(applied.if).toContain('steps.record_outcome.output.rule_patched == true');
 
-        const outcome = proposalSteps.find(({ name }) => name === 'record_outcome')!;
+        const outcome = reviewSteps.find(({ name }) => name === 'record_outcome')!;
         expect(String(outcome.with?.rule_patched)).toContain(
           'steps.apply_query_tuning.error == null'
         );
@@ -394,11 +394,11 @@ describe('detection rule workflows', () => {
       // edit made in the meantime. Both reads go by saved-object id, so a rule
       // deleted and recreated under the same signature 404s instead of matching.
       it('re-reads the rule after approval and applies only when it is unchanged', () => {
-        const fetches = proposalSteps.filter(({ name }) =>
+        const fetches = reviewSteps.filter(({ name }) =>
           ['fetch_rule', 'refetch_rule'].includes(name)
         );
-        const apply = proposalSteps.find(({ name }) => name === 'apply_query_tuning')!;
-        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        const apply = reviewSteps.find(({ name }) => name === 'apply_query_tuning')!;
+        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         expect(fetches).toHaveLength(2);
         for (const fetch of fetches) {
           expect(String(fetch.with?.path)).toContain('?id={{ inputs.rule_uuid | url_encode }}');
@@ -406,17 +406,18 @@ describe('detection rule workflows', () => {
         expect(String(eligibility.with?.eligible)).toContain(
           'steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at'
         );
-        expect((apply.with?.body as Record<string, string>).id).toBe(
+        expect(apply.type).toBe('security.patchRule');
+        expect((apply.with?.patch as Record<string, string>).id).toBe(
           '{{ steps.refetch_rule.output.id }}'
         );
-        expect(proposalSteps.some(({ name }) => name === 'refetch_rule')).toBe(true);
+        expect(reviewSteps.some(({ name }) => name === 'refetch_rule')).toBe(true);
       });
 
       // Both backtests run inside one preview worker execution: one synchronous
       // child per wake-up cycle is safe, while two consecutive child calls share
-      // one immediate-resume slot and can strand the proposal in waiting_for_child.
+      // one immediate-resume slot and can strand the review in waiting_for_child.
       it('backtests both queries through a single preview worker run', () => {
-        const children = proposalSteps.filter(({ type }) => type === 'workflow.execute');
+        const children = reviewSteps.filter(({ type }) => type === 'workflow.execute');
 
         expect(children.map(({ name }) => name)).toEqual(['run_previews']);
         const [previews] = children;
@@ -435,7 +436,7 @@ describe('detection rule workflows', () => {
       });
 
       it('requires both previews before applying a query change', () => {
-        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         const condition = String(eligibility.with?.eligible);
 
         expect(condition).toContain('current_succeeded == true');
@@ -466,8 +467,8 @@ describe('detection rule workflows', () => {
       });
 
       it('excludes rule modes with omitted preview fields from auto-apply', () => {
-        const support = proposalSteps.find(({ name }) => name === 'record_auto_apply_support')!;
-        const eligibility = proposalSteps.find(({ name }) => name === 'decide_apply')!;
+        const support = reviewSteps.find(({ name }) => name === 'record_auto_apply_support')!;
+        const eligibility = reviewSteps.find(({ name }) => name === 'decide_apply')!;
         const condition = String(eligibility.with?.eligible);
 
         expect(String(support.with?.supported)).toContain(
@@ -482,8 +483,8 @@ describe('detection rule workflows', () => {
         expect(condition).toContain('steps.record_auto_apply_support.output.supported == true');
       });
 
-      it('bounds direct proposal inputs', () => {
-        const [trigger] = proposal.triggers as unknown as Array<{
+      it('bounds direct review inputs', () => {
+        const [trigger] = review.triggers as unknown as Array<{
           inputs: { properties: Record<string, Record<string, unknown>> };
         }>;
         const { properties } = trigger.inputs;
@@ -514,7 +515,7 @@ describe('detection rule workflows', () => {
       });
 
       it('declares one const per decision tag, alongside the reviewed tag the harvest filters', () => {
-        expect(proposal.consts).toEqual(
+        expect(review.consts).toEqual(
           expect.objectContaining({
             reviewed_tag: reviewedTag,
             dismissed_tag: 'detection-watch:tuning-dismissed',
@@ -530,29 +531,29 @@ describe('detection rule workflows', () => {
       // The diagnose prompt names a security_solution inline tool by its string id; a
       // skill-side rename would silently degrade the agent back to re-deriving alerts.
       it('pins the get_alerts_by_ids tool id the diagnose prompt depends on', () => {
-        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const diagnose = reviewSteps.find(({ name }) => name === 'diagnose_rule')!;
         expect(String(diagnose.with?.message)).toContain('investigate-rule.get_alerts_by_ids');
       });
 
       // The harvested ids are the dataset. A security.alerts query would re-fetch the
       // same alerts through a natural-language round trip and burn agent time.
       it('keeps the diagnosis on the supplied ids instead of querying alerts again', () => {
-        const diagnose = proposalSteps.find(({ name }) => name === 'diagnose_rule')!;
+        const diagnose = reviewSteps.find(({ name }) => name === 'diagnose_rule')!;
         const message = String(diagnose.with?.message);
 
         expect(message).toContain('do not run the security.alerts queries');
         expect(message).not.toContain('time_window_hours');
       });
 
-      it('does not use classify_proposal or can_apply', () => {
-        for (const steps of [tuningSteps, proposalSteps]) {
-          expect(steps.some(({ name }) => name === 'classify_proposal')).toBe(false);
+      it('does not use classify_review or can_apply', () => {
+        for (const steps of [tuningSteps, reviewSteps]) {
+          expect(steps.some(({ name }) => name === 'classify_review')).toBe(false);
           expect(JSON.stringify(steps)).not.toContain('can_apply');
         }
       });
 
       // The harvest projects its columns positionally, so reordering KEEP would make the
-      // sweep hand some other column to the proposal as the alert ids.
+      // sweep hand some other column to the review as the alert ids.
       it('passes the alert ids from the column position KEEP assigns them', () => {
         const keepClause = harvestQuery
           .split('\n')
@@ -561,7 +562,7 @@ describe('detection rule workflows', () => {
           .replace('| KEEP', '')
           .split(',')
           .map((column) => column.trim().replace(/`/g, ''));
-        const launch = tuningSteps.find(({ name }) => name === 'run_proposal')!;
+        const launch = tuningSteps.find(({ name }) => name === 'run_review')!;
         const launchInputs = launch.with?.inputs as Record<string, string>;
 
         expect(columns).toContain('alert_ids');
@@ -585,17 +586,17 @@ describe('detection rule workflows', () => {
         expect(harvestQuery).toContain('alert_ids = VALUES(alert_id)');
       });
 
-      // The gates live in the proposal children (one execution = one resume slot),
+      // The gates live in the review children (one execution = one resume slot),
       // while the sweep fans out synchronously and joins once every gate settles.
-      it('fans out one sync proposal per rule and joins on all gates', () => {
-        const fanOut = tuningSteps.find(({ name }) => name === 'run_proposals')! as NestedStep & {
+      it('fans out one sync review per rule and joins on all gates', () => {
+        const fanOut = tuningSteps.find(({ name }) => name === 'run_reviews')! as NestedStep & {
           mode?: string;
           concurrency?: { max: number; 'count-waiting': boolean };
         };
         const launches = tuningSteps.filter(({ type }) => type === 'workflow.execute');
 
         expect(fanOut.type).toBe('parallel');
-        // Settled: one failed proposal must not skip the other rules' gates.
+        // Settled: one failed review must not skip the other rules' gates.
         expect(fanOut.mode).toBe('settled');
         // A slot per launched rule (max_rules_per_sweep; the input can only lower
         // the cap) so every gate opens at once.
@@ -605,13 +606,13 @@ describe('detection rule workflows', () => {
         expect(fanOut).not.toHaveProperty('timeout');
         expect(fanOut).not.toHaveProperty('branch-timeout');
 
-        expect(launches.map(({ name }) => name)).toEqual(['run_proposal']);
-        expect(launches[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID);
+        expect(launches.map(({ name }) => name)).toEqual(['run_review']);
+        expect(launches[0].with?.['workflow-id']).toBe(PND_RULE_TUNING_REVIEW_WORKFLOW_ID);
         expect(launches[0]).not.toHaveProperty('on-failure');
         expect(tuningSteps.map(({ type }) => type)).not.toContain('waitForApproval');
         expect(tuningSteps.map(({ type }) => type)).not.toContain('workflow.executeAsync');
 
-        const { concurrency } = (proposal as unknown as { settings: Record<string, unknown> })
+        const { concurrency } = (review as unknown as { settings: Record<string, unknown> })
           .settings as { concurrency: { key: string; strategy: string; max: number } };
         expect(concurrency.key).toContain('{{ inputs.rule_uuid }}');
         expect(concurrency.strategy).toBe('drop');
@@ -636,13 +637,13 @@ describe('detection rule workflows', () => {
         const emit = tuningSteps.find(({ name }) => name === 'emit_result')!;
         const summaryInput = JSON.stringify(summary.with);
 
-        expect(summaryInput).toContain('steps.run_proposals.output.failed');
+        expect(summaryInput).toContain('steps.run_reviews.output.failed');
         expect(summaryInput).toContain("where: 'approved'");
         expect(summaryInput).toContain("where: 'applied'");
         for (const key of [
-          'proposals_requested',
-          'proposals_approved',
-          'proposals_failed',
+          'reviews_requested',
+          'reviews_approved',
+          'reviews_failed',
           'rules_applied',
         ]) {
           expect(String((emit.with as Record<string, string>)[key])).toContain(

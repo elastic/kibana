@@ -10,13 +10,13 @@
 import { PND_MANAGED_WORKFLOW_PLUGIN_ID, PND_RULE_WORKFLOW_MANAGEMENT } from './constants';
 import RULE_CREATION_YAML from './rule_creation.yaml';
 import RULE_PREVIEW_YAML from './rule_preview.yaml';
-import RULE_TUNING_YAML from './rule_tuning.yaml';
-import RULE_TUNING_PROPOSAL_YAML from './rule_tuning_proposal.yaml';
+import RULE_TUNING_WORKER_YAML from './rule_tuning_worker.yaml';
+import RULE_TUNING_REVIEW_YAML from './rule_tuning_review.yaml';
 import type { ManagedWorkflowDefinition } from '../../types';
 
 export const PND_RULE_PREVIEW_WORKFLOW_ID = 'system-security-rule-preview';
-export const PND_RULE_TUNING_WORKFLOW_ID = 'system-security-rule-tuning';
-export const PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID = 'system-security-rule-tuning-proposal';
+export const PND_RULE_TUNING_WORKER_WORKFLOW_ID = 'system-security-rule-tuning-worker';
+export const PND_RULE_TUNING_REVIEW_WORKFLOW_ID = 'system-security-rule-tuning-review';
 export const PND_RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 
 export const PND_RULE_PREVIEW_WORKFLOW = {
@@ -28,22 +28,22 @@ export const PND_RULE_PREVIEW_WORKFLOW = {
   yaml: RULE_PREVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
-export const PND_RULE_TUNING_WORKFLOW = {
+export const PND_RULE_TUNING_WORKER_WORKFLOW = {
   billable: false,
-  id: PND_RULE_TUNING_WORKFLOW_ID,
+  id: PND_RULE_TUNING_WORKER_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 20,
-  yaml: RULE_TUNING_YAML,
+  version: 21,
+  yaml: RULE_TUNING_WORKER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
-export const PND_RULE_TUNING_PROPOSAL_WORKFLOW = {
+export const PND_RULE_TUNING_REVIEW_WORKFLOW = {
   billable: false,
-  id: PND_RULE_TUNING_PROPOSAL_WORKFLOW_ID,
+  id: PND_RULE_TUNING_REVIEW_WORKFLOW_ID,
   management: PND_RULE_WORKFLOW_MANAGEMENT,
   pluginId: PND_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 12,
-  yaml: RULE_TUNING_PROPOSAL_YAML,
+  version: 13,
+  yaml: RULE_TUNING_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
 export const PND_RULE_CREATION_WORKFLOW = {

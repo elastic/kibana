@@ -1,19 +1,19 @@
 version: "1"
-name: Detection Rule Tuning Proposal
+name: Detection Rule Tuning Review
 description: >
   Diagnoses one rule whose alerts analysts closed as false positives, parks on its own
   approval gate, and applies an approved query change. Launched per rule by the rule
-  tuning sweep so every proposal's gate can be pending at the same time.
+  tuning sweep so every review's gate can be pending at the same time.
 enabled: true
 tags:
   - security
   - detection-rule-tuning
 settings:
   # Keyed per rule so a later sweep cannot open a second gate for a rule whose
-  # proposal is still pending: alerts are only tagged after the gate resolves,
+  # review is still pending: alerts are only tagged after the gate resolves,
   # so the harvest keeps returning such a rule until then.
   concurrency:
-    key: "rule-tuning-proposal-{{ inputs.rule_uuid }}"
+    key: "rule-tuning-review-{{ inputs.rule_uuid }}"
     strategy: drop
     max: 1
 triggers:
@@ -61,7 +61,7 @@ triggers:
           type: string
           maxLength: 128
           description: >-
-            Execution id of the sweep that launched this proposal. Recorded for
+            Execution id of the sweep that launched this review. Recorded for
             traceability only; no step reads it. Empty on a standalone run.
       # Only the rule identity and alert evidence are required. The operational
       # parameters default from consts so the sweep and this workflow can upgrade
@@ -86,7 +86,7 @@ consts:
   preview_invocation_count: 2
   # Written onto every alert that reached a decision, alongside the tag naming the
   # outcome. Filtered out by the sweep's harvest, so a later sweep cannot rediagnose
-  # the same alerts into the same proposal; consts.reviewed_tag in rule_tuning.yaml
+  # the same alerts into the same review; consts.reviewed_tag in rule_tuning_worker.yaml
   # must match this value.
   reviewed_tag: detection-watch:tuning-reviewed
   dismissed_tag: detection-watch:tuning-dismissed
@@ -130,7 +130,7 @@ steps:
         Retrieve exactly these alerts with the investigate-rule.get_alerts_by_ids
         tool, passing the rule's investigation_fields as additional_fields, and use
         them as the confirmed false positives grounding the diagnosis; do not
-        re-derive the closed set. Return one structured tuning proposal.
+        re-derive the closed set. Return one structured tuning recommendation.
 
         These ids are the whole dataset, so do not run the security.alerts queries:
         they would re-fetch alerts already in hand. Base the volume and entity
@@ -273,10 +273,10 @@ steps:
     if: "${{ steps.diagnose_rule.output.structured_output.summary != null }}"
     timeout: "72h"
     with:
-      approveLabel: Approve proposal
+      approveLabel: Approve change
       rejectLabel: Dismiss
       message: |-
-        Rule tuning proposal for {{ steps.fetch_rule.output.name }}
+        Rule tuning review for {{ steps.fetch_rule.output.name }}
         {{ inputs.fp_count }} alerts were closed as false positives in the last
         {{ inputs.analysis_window_days | default: consts.analysis_window_days }} days.
         {% if inputs.fp_count > inputs.alert_ids.size %}
@@ -320,9 +320,9 @@ steps:
         Proposed exception:
         {{ steps.diagnose_rule.output.structured_output.exception_condition }}
         {% endif %}
-        This {{ steps.diagnose_rule.output.structured_output.change_type }} proposal
+        This {{ steps.diagnose_rule.output.structured_output.change_type }} change
         is not applied automatically; apply it manually in the Detection Rules UI if
-        appropriate. Approving does not tag the alerts, so a later sweep can propose
+        appropriate. Approving does not tag the alerts, so a later sweep can surface
         this rule again.
         {% endif %}
 
@@ -331,7 +331,7 @@ steps:
         {% endif %}
 
   # The gate can stay open for 72h; re-read the rule so an analyst edit made in the
-  # meantime is not clobbered by a stale proposal.
+  # meantime is not clobbered by a stale diagnosis.
   - name: refetch_rule
     type: kibana.request
     if: >-
@@ -365,16 +365,10 @@ steps:
           and steps.refetch_rule.output.updated_at == steps.fetch_rule.output.updated_at }}
 
   - name: apply_query_tuning
-    type: kibana.request
+    type: security.patchRule
     if: "${{ steps.decide_apply.output.eligible == true }}"
     with:
-      method: PATCH
-      path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-      headers:
-        kbn-xsrf: string
-        elastic-api-version: "2023-10-31"
-        Content-Type: application/json
-      body:
+      patch:
         id: "{{ steps.refetch_rule.output.id }}"
         query: "{{ steps.diagnose_rule.output.structured_output.proposed_query }}"
 
