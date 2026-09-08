@@ -34,6 +34,7 @@ const LEGACY_CODE_OWNER_AREA_MAPPINGS: { [area in CodeOwnerArea]: string[] } = {
     'elastic/kibana-core',
     'elastic/kibana-data-discovery',
     'elastic/kibana-design',
+    'elastic/kibana-discover',
     'elastic/kibana-esql',
     'elastic/kibana-localization',
     'elastic/kibana-management',
