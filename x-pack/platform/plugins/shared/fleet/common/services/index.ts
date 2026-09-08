@@ -157,6 +157,13 @@ export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_
 export { isNamespaceAllowedByPrefixes } from './namespace_prefixes';
 
 export { getAgentlessThroughputIndexPatterns } from './agentless_throughput_helper';
+export {
+  isKibanaOnlyIntegration,
+  isConnectorVar,
+  getConnectorChecklist,
+  isConnectorSetupComplete,
+} from './kibana_only_integration';
+export type { ConnectorChecklistItem } from './kibana_only_integration';
 
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';
