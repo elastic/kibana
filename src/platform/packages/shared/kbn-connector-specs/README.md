@@ -276,7 +276,7 @@ Actions define what the connector can do:
 ```typescript
 actions: {
   actionName: {
-    isTool?: boolean,              // Whether this action is a tool (for AI workflows)
+    isTool: boolean,               // REQUIRED: true = agent tool (Agent Builder/MCP); false = workflow/ingest-only
     input: z.ZodSchema,            // Input validation schema
     output?: z.ZodSchema,          // Output validation schema (optional)
     handler: async (ctx, input) => {
@@ -289,6 +289,8 @@ actions: {
   },
 }
 ```
+
+**`isTool` classification is mandatory and enforced.** Declare `isTool` on every action. Use `isTool: true` only for actions an AI agent may call directly. Actions that page through large or unbounded datasets (catalog listings, bulk history pulls, org-wide enumeration) are **workflow/ingest-only** and must set `isTool: false` — they are never exposed to Agent Builder / MCP, since a paginating ingest action would flood an agent's context. A contract test (`connector_spec_contract.test.ts`) fails CI on any action missing an explicit `isTool`.
 
 ### Test
 
