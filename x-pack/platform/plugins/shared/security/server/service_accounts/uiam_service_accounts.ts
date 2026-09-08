@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
@@ -22,7 +22,11 @@ import {
   serviceAccountNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
-import { getUiamCredentialsFromRequest, type UiamServicePublic } from '../uiam';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  isExternalApiKey,
+  type UiamServicePublic,
+} from '../uiam';
 
 /** Checks UIAM response compatibility without failing an already successful creation. */
 const serviceAccountSchema = z.object({
@@ -49,6 +53,7 @@ export interface UiamServiceAccountsOptions {
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   cloudProjectContext: CloudProjectContext;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 export class UiamServiceAccounts implements ServiceAccountsBackend {
@@ -57,6 +62,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly uiam: UiamServicePublic;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   private readonly cloudProjectContext: CloudProjectContext;
+  private readonly getCurrentUser: UiamServiceAccountsOptions['getCurrentUser'];
 
   constructor({
     logger,
@@ -64,12 +70,14 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     uiam,
     checkPrivilegesWithRequest,
     cloudProjectContext,
+    getCurrentUser,
   }: UiamServiceAccountsOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
     this.cloudProjectContext = cloudProjectContext;
+    this.getCurrentUser = getCurrentUser;
   }
 
   async create(
@@ -82,7 +90,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const credentials = getUiamCredentialsFromRequest(request);
+    const authorization = getUiamAuthorizationHeaderFromRequest(request);
 
     const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
       elasticsearch: { cluster: ['manage_security'], index: {} },
@@ -100,11 +108,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug('Attempting to create a service account');
 
     try {
-      const result = await this.uiam.createServiceAccount(credentials, {
-        name: params.name,
-        role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
-        assumable_by: buildAssumableBy(this.cloudProjectContext),
-      });
+      const result = await this.uiam.createServiceAccount(
+        authorization,
+        {
+          organization_id: this.cloudProjectContext.organizationId,
+          name: params.name,
+          role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
+          assumable_by: buildAssumableBy(this.cloudProjectContext),
+        },
+        { includeClientAuthentication: !isExternalApiKey(this.getCurrentUser(request)) }
+      );
 
       const parsed = serviceAccountSchema.safeParse(result);
       if (!parsed.success) {

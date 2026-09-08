@@ -509,6 +509,7 @@ export class SecurityPlugin
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
       cloudProjectContext: this.cloudProjectContext,
+      getCurrentUser: this.authenticationStart.getCurrentUser,
     });
 
     this.authorizationService.start({

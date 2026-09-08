@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import { EsServiceAccounts } from './es_service_accounts';
@@ -22,6 +22,7 @@ export interface ServiceAccountsServiceStartParams {
   uiam?: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
   cloudProjectContext?: CloudProjectContext;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 export class ServiceAccountsService {
@@ -37,6 +38,7 @@ export class ServiceAccountsService {
     uiam,
     checkPrivilegesWithRequest,
     cloudProjectContext,
+    getCurrentUser,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
     if (!config.serviceAccounts?.enabled) {
       this.logger.debug('Service accounts are not enabled.');
@@ -58,6 +60,7 @@ export class ServiceAccountsService {
       uiam,
       checkPrivilegesWithRequest,
       cloudProjectContext,
+      getCurrentUser,
     });
   }
 }

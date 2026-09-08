@@ -191,6 +191,12 @@ describe('Create service account route', () => {
       ]);
     });
 
+    it('rejects organization_id, which Kibana derives from cloud context', () => {
+      expect(issuesFor({ ...requestBody, organization_id: 'other-organization' })).toEqual([
+        expect.objectContaining({ code: 'unrecognized_keys', keys: ['organization_id'] }),
+      ]);
+    });
+
     it('rejects an empty name', () => {
       expect(issuePathsFor({ ...requestBody, name: '' })).toContain('name');
     });

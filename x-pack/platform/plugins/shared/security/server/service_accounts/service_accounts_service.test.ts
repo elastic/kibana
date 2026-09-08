@@ -20,6 +20,7 @@ describe('ServiceAccountsService', () => {
     license: licenseMock.create(),
     uiam: uiamServiceMock.create(),
     checkPrivilegesWithRequest: jest.fn(),
+    getCurrentUser: jest.fn(),
     cloudProjectContext: {
       organizationId: 'organization-id',
       projectId: 'project-id',

@@ -43,6 +43,8 @@ import { securityTelemetry } from '../otel/instrumentation';
  * Represents the request body for creating a service account via UIAM.
  */
 interface CreateServiceAccountRequestBody {
+  /** Organization that owns the service account. */
+  organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
   /** Roles granted to the service account, referenced by name. */
@@ -74,16 +76,16 @@ export interface GrantUiamApiKeyRequestBody {
 }
 
 /**
- * Options that control how the grant request itself is authenticated to UIAM.
+ * Options that control how a request is authenticated to UIAM.
  */
-export interface GrantUiamApiKeyOptions {
+export interface UiamClientAuthenticationOptions {
   /**
    * Whether to present Kibana's own client authentication (the shared secret header and, when
-   * configured, the mTLS client certificate) alongside the granting credential. UIAM authenticates
+   * configured, the mTLS client certificate) alongside the caller credential. UIAM authenticates
    * the credential and Kibana independently, and requires the two to agree: an internal API key or
    * a session token must arrive with client authentication, while an external (organization) API
    * key must arrive without it, so that internal credentials that leak cannot be replayed through
-   * customer-facing code paths. Presenting the wrong combination fails the grant.
+   * customer-facing code paths. Presenting the wrong combination fails authentication.
    *
    * Defaults to `true`, which is correct for everything except an external API key.
    */
@@ -239,7 +241,7 @@ export interface UiamServicePublic {
   grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    options?: GrantUiamApiKeyOptions
+    options?: UiamClientAuthenticationOptions
   ): Promise<GrantUiamApiKeyResponse>;
 
   /**
@@ -271,12 +273,14 @@ export interface UiamServicePublic {
    * Called with the caller's own credential, so UIAM downscopes the new account
    * to a subset of that caller's privileges.
    *
-   * @param credentials UIAM bearer-token or API-key credentials.
+   * @param authorization The caller's UIAM authorization header.
    * @param body The request body for creating the service account.
+   * @param options Whether to include Kibana client authentication.
    */
   createServiceAccount(
-    credentials: string,
-    body: CreateServiceAccountRequestBody
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    options?: UiamClientAuthenticationOptions
   ): Promise<ServiceAccount>;
 
   /**
@@ -584,7 +588,7 @@ export class UiamService implements UiamServicePublic {
   async grantApiKey(
     authorization: HTTPAuthorizationHeader,
     params: GrantUiamAPIKeyParams,
-    { includeClientAuthentication = true }: GrantUiamApiKeyOptions = {}
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
   ) {
     this.#logger.debug(
       `Attempting to grant API key using authorization scheme: ${authorization.scheme}`
@@ -711,28 +715,30 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamService.createServiceAccount}.
    */
   async createServiceAccount(
-    credentials: string,
-    body: CreateServiceAccountRequestBody
+    authorization: HTTPAuthorizationHeader,
+    body: CreateServiceAccountRequestBody,
+    { includeClientAuthentication = true }: UiamClientAuthenticationOptions = {}
   ): Promise<ServiceAccount> {
     try {
       this.#logger.debug('Attempting to create service account.');
 
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...(includeClientAuthentication
+            ? { [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret }
+            : {}),
+          Authorization: authorization.toString(),
+        },
+        body: JSON.stringify({ ...body, type: 'project' }),
+        dispatcher: includeClientAuthentication
+          ? this.#dispatcher
+          : this.#getDispatcherWithoutClientCertificate(),
+      };
       const response = await UiamService.#parseUiamResponse(
-        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': this.#userAgentHeader,
-            [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${credentials}`,
-          },
-          body: JSON.stringify({
-            ...body,
-            type: 'project',
-          }),
-          // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
-          dispatcher: this.#dispatcher,
-        })
+        await fetch(`${this.#config.url}/uiam/api/v1/service-accounts`, requestOptions)
       );
 
       this.#logger.debug(`Successfully created service account with id ${response.id}`);

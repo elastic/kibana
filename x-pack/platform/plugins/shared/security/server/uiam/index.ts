@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-export { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+export {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 export { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from './project_type';
+export { isExternalApiKey } from './is_external_api_key';
 export {
   UiamService,
   type UiamServicePublic,

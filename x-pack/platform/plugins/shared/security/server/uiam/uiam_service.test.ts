@@ -1058,6 +1058,7 @@ describe('UiamService', () => {
 
   describe('#createServiceAccount', () => {
     const body = {
+      organization_id: 'organization-id',
       name: 'nightshift-relay',
       role_assignments: { limit: { access: ['application'], resource: ['project'] } },
       assumable_by: [
@@ -1082,9 +1083,12 @@ describe('UiamService', () => {
 
       fetchSpy.mockResolvedValue({ ok: true, json: async () => mockResponse });
 
-      await expect(uiamService.createServiceAccount('access-token', body)).resolves.toEqual(
-        mockResponse
-      );
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).resolves.toEqual(mockResponse);
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/service-accounts', {
@@ -1103,6 +1107,64 @@ describe('UiamService', () => {
       });
     });
 
+    it.each([true, false])(
+      'authenticates API keys with includeClientAuthentication=%s',
+      async (includeClientAuthentication) => {
+        fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+        await uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+          body,
+          { includeClientAuthentication }
+        );
+        expect(fetchSpy).toHaveBeenCalledWith(
+          expect.any(String),
+          expect.objectContaining({
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'Kibana/9.0.0',
+              Authorization: 'ApiKey essu_key',
+              ...(includeClientAuthentication
+                ? { [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret' }
+                : {}),
+            },
+          })
+        );
+      }
+    );
+
+    it('omits the client certificate for external API keys while retaining TLS verification', async () => {
+      const service = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificate: '/client.crt',
+                key: '/client.key',
+                certificateAuthorities: '/ca.crt',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+      agentSpy.mockClear();
+      fetchSpy.mockResolvedValue({ ok: true, json: async () => ({ id: 'service-account-id' }) });
+      await service.createServiceAccount(new HTTPAuthorizationHeader('ApiKey', 'essu_key'), body, {
+        includeClientAuthentication: false,
+      });
+      expect(agentSpy).toHaveBeenCalledTimes(1);
+      const [options] = agentSpy.mock.calls[0];
+      expect(options.connect.ca).toEqual(['mocked file content for /ca.crt']);
+      expect(options.connect.rejectUnauthorized).toBe(true);
+      expect(options.connect.cert).toBeUndefined();
+      expect(options.connect.key).toBeUndefined();
+    });
+
     it('reproduces the UIAM status code and payload when creation fails', async () => {
       fetchSpy.mockResolvedValue({
         ok: false,
@@ -1117,7 +1179,12 @@ describe('UiamService', () => {
         }),
       });
 
-      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toMatchObject({
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).rejects.toMatchObject({
         output: { statusCode: 409 },
       });
     });
@@ -1125,9 +1192,12 @@ describe('UiamService', () => {
     it('logs and rethrows transport errors', async () => {
       fetchSpy.mockRejectedValue(new Error('socket hang up'));
 
-      await expect(uiamService.createServiceAccount('access-token', body)).rejects.toThrowError(
-        'socket hang up'
-      );
+      await expect(
+        uiamService.createServiceAccount(
+          new HTTPAuthorizationHeader('Bearer', 'access-token'),
+          body
+        )
+      ).rejects.toThrowError('socket hang up');
     });
   });
 

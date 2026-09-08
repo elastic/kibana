@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest, ServiceAccount } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, ServiceAccount } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 import type {
   CheckPrivileges,
@@ -28,6 +30,7 @@ describe('UiamServiceAccounts', () => {
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: jest.Mocked<CheckPrivilegesWithRequest>;
   let logger: Logger;
+  let getCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
     hasAllRequested: authorized,
@@ -66,6 +69,7 @@ describe('UiamServiceAccounts', () => {
     mockLicense.isEnabled.mockReturnValue(true);
     logger = loggingSystemMock.create().get('service-accounts');
     mockUiam = uiamServiceMock.create();
+    getCurrentUser = jest.fn().mockReturnValue(null);
     mockCheckPrivileges = {
       atSpace: jest.fn(),
       atSpaces: jest.fn(),
@@ -78,6 +82,7 @@ describe('UiamServiceAccounts', () => {
       license: mockLicense,
       uiam: mockUiam,
       checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
+      getCurrentUser,
       cloudProjectContext: {
         organizationId: 'organization-id',
         projectId: 'project-id',
@@ -95,18 +100,52 @@ describe('UiamServiceAccounts', () => {
       ).resolves.toEqual(validResponse);
 
       expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
-      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith('essu_my_token', {
-        name: 'nightshift-relay',
-        role_assignments: { limit: { access: ['application'], resource: ['project'] } },
-        assumable_by: [
-          {
-            type: 'project-service-account',
-            organization_id: 'organization-id',
-            project_type: 'security',
-            project_id: 'project-id',
-          },
-        ],
-      });
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        new HTTPAuthorizationHeader('Bearer', 'essu_my_token'),
+        {
+          organization_id: 'organization-id',
+          name: 'nightshift-relay',
+          role_assignments: { limit: { access: ['application'], resource: ['project'] } },
+          assumable_by: [
+            {
+              type: 'project-service-account',
+              organization_id: 'organization-id',
+              project_type: 'security',
+              project_id: 'project-id',
+            },
+          ],
+        },
+        { includeClientAuthentication: true }
+      );
+    });
+
+    it.each([true, false])(
+      'preserves API-key authentication when internal=%s',
+      async (internal) => {
+        getCurrentUser.mockReturnValue(
+          mockAuthenticatedUser({
+            authentication_type: 'api_key',
+            api_key: { id: 'key-id', name: 'key-name', managed_by: 'cloud', internal },
+          })
+        );
+        mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+        await serviceAccounts.create(createMockRequest('ApiKey essu_key'), createParams);
+        expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+          expect.objectContaining({ organization_id: 'organization-id' }),
+          { includeClientAuthentication: internal }
+        );
+      }
+    );
+
+    it('uses client authentication when API-key metadata is unavailable', async () => {
+      mockUiam.createServiceAccount.mockResolvedValue(validResponse);
+      await serviceAccounts.create(createMockRequest('ApiKey essu_key'), createParams);
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledWith(
+        new HTTPAuthorizationHeader('ApiKey', 'essu_key'),
+        expect.anything(),
+        { includeClientAuthentication: true }
+      );
     });
 
     it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
