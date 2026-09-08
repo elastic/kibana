@@ -379,12 +379,14 @@
       "label": "Team:Dashboards"
     },
     "responsibilities": [
-      "Dashboards (incl. Dashboard only mode)",
-      "Embeddables",
+      "Dashboards app",
+      "Visualizations (Lens, Timelion, TSVB, Vega, Maps, Graph)"
+      "Markdown embeddable",
+      "Links embeddable",
+      "Embeddable framework",
+      "Unified Search",
       "Input Controls",
-      "Lens",
       "Canvas application",
-      "Visualizations (incl. Timelion, TSVB, Vega, ...; excl. map visualization)"
     ]
   },
   {
