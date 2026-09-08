@@ -127,19 +127,19 @@ describe('RecoveryConditionStep', () => {
   });
 
   it('renders the recovery delay field when recovery type is default', () => {
-    renderRecoveryStep({ recoveryType: 'default' });
+    renderRecoveryStep('no_breach');
 
     expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
   });
 
   it('renders the recovery delay field when recovery type is custom', () => {
-    renderRecoveryStep({ recoveryType: 'custom' }, CUSTOM_RECOVERY_QUERY);
+    renderRecoveryStep('query', {}, CUSTOM_RECOVERY_QUERY);
 
     expect(screen.getByTestId('recoveryDelayFormRow')).toBeInTheDocument();
   });
 
   it('hides the recovery delay field when recovery type is none (delay is inert)', () => {
-    renderRecoveryStep({ recoveryType: 'none' });
+    renderRecoveryStep('none');
 
     expect(screen.queryByTestId('recoveryDelayFormRow')).not.toBeInTheDocument();
   });

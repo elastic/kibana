@@ -157,7 +157,7 @@ export function RecoveryConditionStep({
        * hide it. `no_data_strategy: 'recover'` does not re-enable it — the director
        * bypasses recovering gating for no-data recovery.
        */}
-      {state.recoveryType !== 'none' && (
+      {recoveryStrategy !== 'none' && (
         <>
           <EuiSpacer size="m" />
           <RecoveryDelayField />
