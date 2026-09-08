@@ -105,7 +105,7 @@ export const createChangeHistoryHttpAdapter = (
       }
 
       const path = replaceEventId(replaceObjectId(config.detailPath, objectId), changeId);
-
+      console.log({ path });
       try {
         const body = await config.http.get<unknown>(path, { signal });
         return config.mapDetail ? config.mapDetail(body) : (body as ChangeHistoryDetail);
