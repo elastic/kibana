@@ -6,11 +6,7 @@
  */
 
 import { calculateSetMetrics } from '@kbn/evals';
-import {
-  validateEsqlSyntax,
-  hasRequiredFields,
-  extractMitreTechniques,
-} from './helpers';
+import { validateEsqlSyntax, hasRequiredFields, extractMitreTechniques } from './helpers';
 
 import type { ReferenceRule } from '../datasets/sample_rules';
 
