@@ -11,6 +11,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -168,10 +169,79 @@ describe('Internal dashboard top nav', () => {
 
     expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
       expect.objectContaining({
-        showDatePicker: true,
+        showDatePicker: { disabled: false },
         showFilterBar: true,
         showQueryInput: false,
         showSearchBar: true,
+      }),
+      {}
+    );
+  });
+
+  it('should disable the date picker when no data view is time-based', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { isTimeBased: () => false } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: true },
+      }),
+      {}
+    );
+  });
+
+  it('should keep the date picker enabled when at least one data view is time-based', async () => {
+    const { api, internalApi } = buildMockDashboardApi();
+    const dashboardApi: DashboardApi = {
+      ...api,
+      viewMode$: new BehaviorSubject<ViewMode>('view'),
+      dataViews$: new BehaviorSubject<DataView[] | undefined>([
+        { isTimeBased: () => false } as DataView,
+        { isTimeBased: () => true } as DataView,
+      ]),
+    };
+
+    renderWithChrome(
+      <DashboardContext.Provider value={dashboardApi}>
+        <DashboardInternalContext.Provider value={internalApi}>
+          <InternalDashboardTopNav
+            redirectTo={jest.fn()}
+            embedSettings={{
+              forceShowDatePicker: true,
+              forceHideFilterBar: false,
+              forceShowQueryInput: false,
+              forceShowTopNavMenu: false,
+            }}
+          />
+        </DashboardInternalContext.Provider>
+      </DashboardContext.Provider>
+    );
+
+    expect(unifiedSearchService.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        showDatePicker: { disabled: false },
       }),
       {}
     );

@@ -1246,6 +1246,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               columnId: columnIdMap.get(column.columnId) ?? column.columnId,
             };
             normalizeColumnLabel(remapped, { isTextBased: true });
+            // `null`/`''` are leaked persist; a real Identifier Control name is reconstructed
+            // from `??` on `fieldName` by `buildESQLLayer`.
+            if (!remapped.variable) {
+              delete remapped.variable;
+            }
             return remapped;
           });
 

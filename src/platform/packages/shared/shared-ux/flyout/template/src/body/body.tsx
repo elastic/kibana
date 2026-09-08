@@ -21,13 +21,35 @@ import {
   useFlyoutTabs,
   useFlyoutTemplateConfig,
 } from '../context';
+import { Accordion, ACCORDION_PART_NAME, accordionPart } from './accordion';
+import { Section, SECTION_PART_NAME, sectionPart } from './section';
+import { Subsection } from './subsection';
 import { TAB_PANEL_PART_NAME, TabPanel } from './tab_panel';
 
-/** Renders passthrough children from pre-parsed items in source order. */
+/** Renders `Section`, `Accordion`, and unstructured children from pre-parsed items in source order. */
 const renderBodyItems = (items: ParsedItem[]) =>
-  items.map((item, index) =>
-    item.type === 'child' ? <Fragment key={`passthrough-${index}`}>{item.node}</Fragment> : null
-  );
+  items.map((item, index) => {
+    if (item.type === 'child') {
+      return <Fragment key={`passthrough-${index}`}>{item.node}</Fragment>;
+    }
+    // `instanceId` is only unique per part name, so a section and an accordion sharing an `id`
+    // would collide as sibling keys.
+    if (item.part === SECTION_PART_NAME) {
+      return (
+        <Fragment key={`${item.part}-${item.instanceId}`}>
+          {sectionPart.resolve(item, undefined) ?? null}
+        </Fragment>
+      );
+    }
+    if (item.part === ACCORDION_PART_NAME) {
+      return (
+        <Fragment key={`${item.part}-${item.instanceId}`}>
+          {accordionPart.resolve(item, undefined) ?? null}
+        </Fragment>
+      );
+    }
+    return null;
+  });
 
 const ActiveTabPanel = ({
   activeTab,
@@ -75,7 +97,11 @@ const bodyPart = flyoutAssembly.definePart({ name: BODY_PART_NAME });
 const BaseBody = bodyPart.createComponent<FlyoutBodyProps>();
 BaseBody.displayName = 'FlyoutTemplate.Body';
 
-export const Body = Object.assign(BaseBody, { TabPanel });
+export const Body = Object.assign(BaseBody, {
+  Section: Object.assign(Section, { Subsection }),
+  Accordion: Object.assign(Accordion, { Subsection }),
+  TabPanel,
+});
 
 /** Internal renderer for the body zone, with optional tab-panel mode. */
 export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBodyProps) => {
@@ -83,7 +109,6 @@ export const BodyZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutBod
   const { tabs, selectedTabId } = useFlyoutTabs();
   const items = useMemo(
     () => bodyAssembly.parseChildren(children, { supportsOtherChildren: true }),
-
     [children]
   );
   const { scrollContainerRef } = useFlyoutHeaderCollapse();
