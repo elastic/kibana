@@ -2187,7 +2187,6 @@ paths:
                 agent_id:
                   description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
                   maxLength: 64
-                  minLength: 1
                   type: string
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
