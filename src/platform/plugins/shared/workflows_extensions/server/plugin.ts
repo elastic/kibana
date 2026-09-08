@@ -21,6 +21,7 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import { registerConnectorPreflightRoute } from './routes/connector_preflight';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -74,6 +75,14 @@ export class WorkflowsExtensionsServerPlugin
 
     const router = core.http.createRouter();
 
+    registerConnectorPreflightRoute(
+      router,
+      async (request) => {
+        const [, startDeps] = await core.getStartServices();
+        return startDeps.actions.getActionsClientWithRequest(request);
+      },
+      this.logger
+    );
     registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
