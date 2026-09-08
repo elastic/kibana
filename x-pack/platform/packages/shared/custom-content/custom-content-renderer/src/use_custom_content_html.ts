@@ -93,7 +93,7 @@ export function useCustomContentHtml({
       fetchEsqlData(search, http, esqlQuery, timeRange, controller.signal, fetchOptions)
         .then((response) => {
           if (!controller.signal.aborted) setApproximationApplied?.(response.approximation_applied);
-          fillTemplate(template, response.columns, response.values ?? []);
+          return fillTemplate(template, response.columns, response.values ?? []);
         })
         .then((rawHtml) => {
           if (controller.signal.aborted) return;
