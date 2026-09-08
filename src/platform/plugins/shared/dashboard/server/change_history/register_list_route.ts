@@ -105,12 +105,12 @@ export const registerHistoryListRoute = (
           items: items.map((item, index) => {
             const user = item.user;
             const profile = user.id ? fullNameByUid.get(user.id) : undefined;
-            const previous = index > 0 ? items[index - 1] : undefined;
-            const changes = previous
-              ? jsonpatchFormatter.format(
-                  jsondiffpatch.diff(previous.object.snapshot, item.object.snapshot)
-                )
-              : undefined;
+            const changes =
+              index + 1 < items.length
+                ? jsonpatchFormatter.format(
+                    jsondiffpatch.diff(item.object.snapshot, items[index + 1].object.snapshot)
+                  )
+                : undefined;
             console.log({ changes });
             return {
               id: item.event.id,
