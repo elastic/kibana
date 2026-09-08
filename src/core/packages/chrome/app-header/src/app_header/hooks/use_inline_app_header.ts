@@ -12,17 +12,17 @@ import { useChromeService } from '@kbn/core-chrome-browser-context';
 import type { AppHeaderTitle } from '../../types';
 
 /**
- * Claims the Chrome Next inline app-header slot so Chrome does not also render a chrome-owned header.
+ * Claims the inline app-header slot so Chrome does not also render a chrome-owned header.
  */
 export const useInlineAppHeader = (title?: AppHeaderTitle): void => {
   const chrome = useChromeService();
-  const registrationRef = useRef<ReturnType<typeof chrome.next.inlineAppHeader.register>>();
+  const registrationRef = useRef<ReturnType<typeof chrome.inlineAppHeader.register>>();
   const titleRef = useRef(title);
   const publishedTitleRef = useRef(title);
   titleRef.current = title;
 
   useLayoutEffect(() => {
-    const registration = chrome.next.inlineAppHeader.register(titleRef.current);
+    const registration = chrome.inlineAppHeader.register(titleRef.current);
     registrationRef.current = registration;
     publishedTitleRef.current = titleRef.current;
 

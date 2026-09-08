@@ -228,14 +228,14 @@ describe('AppHeader adapter', () => {
   it('registers its initial title, updates it once, and unregisters', () => {
     const chrome = chromeServiceMock.createStartContract();
     const emissions: Array<{ title?: unknown } | undefined> = [];
-    const subscription = chrome.next.inlineAppHeader
+    const subscription = chrome.inlineAppHeader
       .get$()
       .subscribe((value) => emissions.push(value));
 
     const { rerender, unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.register).toHaveBeenCalledWith('Dashboard');
-    expect(chrome.next.appHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith('Dashboard');
+    expect(chrome.appHeader.set).not.toHaveBeenCalled();
 
     rerender(
       <ChromeServiceProvider value={{ chrome }}>
@@ -257,7 +257,7 @@ describe('AppHeader adapter', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderAppHeader(<AppHeaderView title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.register).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).not.toHaveBeenCalled();
   });
 
   it('claims the inline slot for DiscoverAppHeader', () => {
@@ -267,11 +267,11 @@ describe('AppHeader adapter', () => {
       chrome
     );
 
-    expect(chrome.next.inlineAppHeader.register).toHaveBeenCalledWith('Discover');
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith('Discover');
     expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.register).toHaveBeenCalledTimes(1);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledTimes(1);
   });
 });

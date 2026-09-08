@@ -28,13 +28,13 @@ describe('AppHeaderLoading', () => {
   it('claims the inline app-header slot without a title and releases it on unmount', () => {
     const chrome = chromeServiceMock.createStartContract();
     const emissions: Array<{ title?: unknown } | undefined> = [];
-    const subscription = chrome.next.inlineAppHeader
+    const subscription = chrome.inlineAppHeader
       .get$()
       .subscribe((value) => emissions.push(value));
 
     const { unmount } = renderLoading(<AppHeaderLoading />, chrome);
 
-    expect(chrome.next.inlineAppHeader.register).toHaveBeenCalledWith(undefined);
+    expect(chrome.inlineAppHeader.register).toHaveBeenCalledWith(undefined);
 
     unmount();
 
@@ -46,6 +46,6 @@ describe('AppHeaderLoading', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderLoading(<AppHeaderLoadingView />, chrome);
 
-    expect(chrome.next.inlineAppHeader.register).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.register).not.toHaveBeenCalled();
   });
 });

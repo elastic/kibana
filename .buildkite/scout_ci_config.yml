@@ -32,7 +32,6 @@ plugins:
     - dev_tools
     - discover
     - discoverCustomizationExamples
-    - discover_enhanced
     - discoveries
     - embeddable_alerts_table
     - entity_store
