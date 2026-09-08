@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { attachmentTools } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
@@ -43,7 +44,9 @@ describe('getResearchAgentPrompt', () => {
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
-      toolManager: {} as any,
+      toolManager: {
+        getExecutable: jest.fn().mockReturnValue(undefined),
+      } as any,
       resultTransformer: jest.fn(),
       renderers: [],
       ...overrides,
@@ -217,7 +220,7 @@ describe('getResearchAgentPrompt', () => {
     expect(system).toContain('`ai-index-idx-custom` — Support tickets');
   });
 
-  it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
+  it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content when tools are granted', async () => {
     const params = {
       conversationTimestamp: now,
       processedConversation: {
@@ -243,14 +246,18 @@ describe('getResearchAgentPrompt', () => {
       actions: [],
       cycleLimit: 1,
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
-      toolManager: {} as any,
+      toolManager: {
+        getExecutable: jest.fn((id: string) =>
+          id === attachmentTools.read ? ({ id } as any) : undefined
+        ),
+      } as any,
       resultTransformer: jest.fn(),
     } as any;
 
     const messages = await getResearchAgentPrompt(params);
     const systemMessage = (messages[0] as ['system', string])[1];
 
-    // Static guidance stays in the system prompt.
+    // Static guidance stays in the system prompt when attachment tools are selected.
     expect(systemMessage).toContain('MUST use the attachment tools');
     expect(systemMessage).toContain('attachment_read');
     expect(systemMessage).toContain('INLINE ATTACHMENT RENDERING');
@@ -260,5 +267,15 @@ describe('getResearchAgentPrompt', () => {
     expect(systemMessage).not.toContain('## ATTACHMENT TYPES');
     expect(systemMessage).not.toContain('## Conversation Attachments');
     expect(systemMessage).not.toMatch(/attachment_id="/);
+  });
+
+  it('omits attachment tools guidance when no attachments.* tools are selected', async () => {
+    const messages = await getResearchAgentPrompt(makeParams());
+    const systemMessage = (messages[0] as ['system', string])[1];
+
+    expect(systemMessage).not.toContain('MUST use the attachment tools');
+    expect(systemMessage).not.toContain('attachment_read');
+    // Inline rendering docs remain available for user-provided attachments.
+    expect(systemMessage).toContain('INLINE ATTACHMENT RENDERING');
   });
 });

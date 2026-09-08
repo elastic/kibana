@@ -6,8 +6,12 @@
  */
 
 import {
+  attachmentTools,
+} from '@kbn/agent-builder-common';
+import {
   attachmentToolsInstructions,
   attachmentTypeInstructions,
+  hasSelectedAttachmentTools,
   renderAttachmentPrompt,
 } from './attachments';
 
@@ -26,6 +30,36 @@ describe('attachmentToolsInstructions', () => {
 
   it('produces byte-identical output across calls (no hidden per-call state)', () => {
     expect(attachmentToolsInstructions()).toBe(attachmentToolsInstructions());
+  });
+
+  it('returns an empty string when attachment tools are not enabled', () => {
+    expect(attachmentToolsInstructions({ enabled: false })).toBe('');
+  });
+
+  it('returns instructions when enabled is true (default)', () => {
+    expect(attachmentToolsInstructions({ enabled: true })).toContain('MUST use the attachment tools');
+    expect(attachmentToolsInstructions()).toContain('MUST use the attachment tools');
+  });
+});
+
+describe('hasSelectedAttachmentTools', () => {
+  it('is true when any attachments.* tool is executable in the tool manager', () => {
+    const toolManager = {
+      getExecutable: jest.fn((id: string) =>
+        id === attachmentTools.read ? ({ id } as any) : undefined
+      ),
+    } as any;
+
+    expect(hasSelectedAttachmentTools(toolManager)).toBe(true);
+    expect(toolManager.getExecutable).toHaveBeenCalled();
+  });
+
+  it('is false when no attachments.* tools are available', () => {
+    const toolManager = {
+      getExecutable: jest.fn().mockReturnValue(undefined),
+    } as any;
+
+    expect(hasSelectedAttachmentTools(toolManager)).toBe(false);
   });
 });
 

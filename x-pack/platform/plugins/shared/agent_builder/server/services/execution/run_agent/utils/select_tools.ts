@@ -6,8 +6,13 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
+import {
+  attachmentTools,
+  defaultAgentToolIds,
+  ToolOrigin,
+  ToolType,
+  filterToolsBySelection,
+} from '@kbn/agent-builder-common';
 import type {
   ToolProvider,
   ExecutableTool,
@@ -75,6 +80,14 @@ export const selectTools = async ({
     runner,
   });
 
+  // Attachment built-ins honor the same allowlist / caps grant as registry tools.
+  // They are only included when enable_elastic_capabilities is on, the operator
+  // explicitly grants attachment tool ids, or the selection includes `*`.
+  const selectedAttachmentTools = filterToolsBySelection(
+    versionedAttachmentTools,
+    getAttachmentBuiltinSelection(agentConfiguration)
+  );
+
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
     selection: [
@@ -90,7 +103,7 @@ export const selectTools = async ({
 
   const staticTools = [
     ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
-    ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
+    ...withOrigin(selectedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
   ];
 
@@ -125,6 +138,22 @@ export const selectTools = async ({
       ...withOrigin(dynamicInlineTools, ToolOrigin.inline),
     ],
   };
+};
+
+
+/**
+ * Effective tool selection for built-in `attachments.*` tools.
+ * Caps-on grants the full attachment toolset; otherwise only explicit allowlist
+ * entries (including `*`) may include them.
+ */
+export const getAttachmentBuiltinSelection = (
+  agentConfiguration: Pick<AgentConfiguration, 'tools' | 'enable_elastic_capabilities'>
+): ToolSelection[] => {
+  const selection: ToolSelection[] = [...(agentConfiguration.tools ?? [])];
+  if (agentConfiguration.enable_elastic_capabilities) {
+    selection.push({ tool_ids: Object.values(attachmentTools) });
+  }
+  return selection;
 };
 
 const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableToolWithOrigin[] =>

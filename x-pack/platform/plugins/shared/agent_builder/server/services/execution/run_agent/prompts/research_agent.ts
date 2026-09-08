@@ -15,7 +15,11 @@ import {
   createRelevantSkillsNoticeMessage,
 } from './utils/skills';
 import { convertPreviousRounds } from '../utils/to_langchain_messages';
-import { attachmentToolsInstructions, renderAttachmentPrompt } from './utils/attachments';
+import {
+  attachmentToolsInstructions,
+  hasSelectedAttachmentTools,
+  renderAttachmentPrompt,
+} from './utils/attachments';
 import { structuredOutputDescription } from './utils/custom_instructions';
 import { formatResearcherActionHistory } from './utils/actions';
 import { getFileSystemInstructions } from './utils/filestore';
@@ -120,6 +124,7 @@ const getAgentSystemMessage = async ({
   renderers,
   processedConversation,
   conversationTemplates,
+  toolManager,
 }: ResearchAgentPromptParams): Promise<string> => {
   const conversationTemplateId = processedConversation.template_id;
   const conversationMetadata = processedConversation.metadata as
@@ -210,7 +215,7 @@ ${customInstructions}
 
 ${structuredOutputDescription(outputSchema)}
 
-${attachmentToolsInstructions()}
+${attachmentToolsInstructions({ enabled: hasSelectedAttachmentTools(toolManager) })}
 
 ## SML @ REFERENCES
 When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
