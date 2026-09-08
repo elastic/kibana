@@ -315,7 +315,8 @@ describe('cloud connector integration helpers', () => {
       expect(result).toEqual(policy);
     });
 
-    it('is a no-op for non-AWS providers (TODO: extend later)', () => {
+    // TODO: extend later for other providers
+    it('is a no-op for non-AWS providers', () => {
       const azureVars = {
         tenant_id: { type: 'password' as const, value: { id: 'secret-1', isSecretRef: true } },
       } as any;

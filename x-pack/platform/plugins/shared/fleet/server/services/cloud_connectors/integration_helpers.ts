@@ -237,7 +237,7 @@ export function injectConnectorVarsIntoPolicy(
       for (const key of roleArnKeys) {
         if (key in updatedVars && !updatedVars[key]?.value) {
           updatedVars[key] = awsVars.role_arn;
-          break;
+          break; // inject into whichever alias the policy uses, not both
         }
       }
     }
