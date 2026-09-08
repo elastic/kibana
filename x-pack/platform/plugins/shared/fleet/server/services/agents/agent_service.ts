@@ -15,6 +15,8 @@ import type {
 
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import type { estypes } from '@elastic/elasticsearch';
+
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import type { AgentStatus, ListWithKuery } from '../../types';
