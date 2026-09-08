@@ -94,6 +94,8 @@ AI agents rely on descriptions to choose the right action and construct valid in
 
 ### `isTool`, `scope`, and action descriptions
 
+**The ingest-vs-tool contract (enforced).** Every action must declare `isTool` explicitly. Set `isTool: true` only for actions an AI agent may call directly. Actions that page through large datasets — catalog listings, bulk history pulls, org-wide enumeration, anything that returns unbounded result sets — are **workflow/ingest-only** and MUST set `isTool: false`: they are never exposed to Agent Builder / MCP, because handing a paginating ingest action to an LLM floods its context and burns tokens. A contract test in `connector_spec_contract.test.ts` requires every action to declare `isTool` explicitly, so omitting the flag fails CI; classify deliberately, don't rely on the `false` default.
+
 Actions should set `isTool: true` to be discoverable by AI agents in Agent Builder. This is the default for most actions. Use `isTool: false` only for actions that should not be invoked autonomously (e.g. destructive or admin-only operations).
 
 Every `isTool: true` action **must** also have an explicit `scope` field — never omit it. Classify each action:
@@ -165,6 +167,7 @@ docs say the vendor expects — not just that the handler resolves without throw
 Before treating the connector as done, re-read the whole diff once, end to end, specifically hunting for:
 
 - Any `isTool: true` action missing a `scope` field — every tool action must have one
+- Any action missing an explicit `isTool` flag — ingest/pagination actions must be `isTool: false` (workflow-only); the contract test fails CI on undeclared actions
 - A `scope` that looks wrong: a "get"/"list"/"search" action marked `write` or `destroy`, or an update/delete/patch action marked `read`
 - Handlers still typed with implicit `any` (missing the `input: XInput` annotation)
 - `test.enabled` missing or set to `false`
