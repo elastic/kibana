@@ -54,7 +54,7 @@ steps:
     type: ai.agent
     agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-scope-alignment
     connector-id: REPLACE_WITH_AI_CONNECTOR_ID
-    create-conversation: true
+    create-conversation: false
     with:
       message: |
         Run SDLC development scope alignment analysis.

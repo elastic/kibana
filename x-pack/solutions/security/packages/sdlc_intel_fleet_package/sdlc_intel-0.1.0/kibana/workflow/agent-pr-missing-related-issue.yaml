@@ -227,7 +227,7 @@ steps:
     type: ai.agent
     agent-id: REPLACE_WITH_FLEET_AGENT_sdlc-pr-missing-related-issue
     connector-id: REPLACE_WITH_AI_CONNECTOR_ID
-    create-conversation: true
+    create-conversation: false
     with:
       message: |
         Summarize SDLC pull requests missing a related GitHub issue link.

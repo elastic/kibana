@@ -107,6 +107,7 @@ steps:
           duration: 60s
 
       - name: upsert_enriched_pull_request
+        if: "{{ steps.fetch_pull_request_graph.output.data.repository.pullRequest.createdAt }}"
         type: elasticsearch.index
         with:
           index: '{{ consts.pullRequestsIndex }}'
