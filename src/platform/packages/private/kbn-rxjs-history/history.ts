@@ -9,9 +9,9 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 import { cloneDeep } from 'lodash';
+import { BehaviorSubject, combineLatest, filter, pairwise, type Observable } from 'rxjs';
 
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, filter, pairwise } from 'rxjs';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 export function startTrackingHistory<T extends object = {}>({
   onStateChange$,
@@ -22,7 +22,7 @@ export function startTrackingHistory<T extends object = {}>({
   onStateChange$: Observable<T | undefined>;
   setState: (state: T) => Promise<void>;
   maxSize: number;
-  pause$?: BehaviorSubject<boolean>;
+  pause$?: PublishingSubject<boolean>;
 }) {
   pause$ = pause$ ?? new BehaviorSubject(false);
   const history: jsondiffpatch.Delta[] = [];
