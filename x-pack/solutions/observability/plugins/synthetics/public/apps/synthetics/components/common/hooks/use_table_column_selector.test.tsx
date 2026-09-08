@@ -7,6 +7,7 @@
 
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
+import type { SelectableTableColumn } from './use_table_column_selector';
 import { useTableColumnSelector } from './use_table_column_selector';
 
 jest.mock('../../../../../hooks/use_kibana_space', () => ({
@@ -16,12 +17,18 @@ jest.mock('../../../../../hooks/use_kibana_space', () => ({
 const STORAGE_KEY_PREFIX = 'synthetics.test.columns.v1.';
 const STORAGE_KEY = `${STORAGE_KEY_PREFIX}default`;
 
-const allColumns = [
-  { name: 'Always' },
+interface TestRow {
+  type: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const allColumns: Array<SelectableTableColumn<TestRow>> = [
+  { name: 'Always', render: () => null },
   { id: 'type', field: 'type', name: 'Type' },
   { id: 'created_at', field: 'created_at', name: 'Created' },
   { id: 'updated_at', field: 'updated_at', name: 'Last modified' },
-  { name: 'Actions' },
+  { name: 'Actions', render: () => null },
 ];
 
 const defaultVisibleColumnIds = ['type', 'updated_at'];
@@ -78,7 +85,7 @@ describe('useTableColumnSelector', () => {
   });
 
   it('does not loop when the parent passes a new columns array each render', () => {
-    const makeColumns = () => allColumns.map((col) => ({ ...col }));
+    const makeColumns = (): Array<SelectableTableColumn<TestRow>> => [...allColumns];
     const { result, rerender } = renderHook(
       ({ columns }) =>
         useTableColumnSelector({
