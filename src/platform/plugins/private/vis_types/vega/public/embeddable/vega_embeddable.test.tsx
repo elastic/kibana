@@ -16,22 +16,45 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { apiPublishesESQLQuery, type ViewMode } from '@kbn/presentation-publishing';
+import {
+  apiHasLibraryTransforms,
+  apiPublishesESQLQuery,
+  type ViewMode,
+} from '@kbn/presentation-publishing';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaParser } from '../data_model/vega_parser';
 import type { VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
+import {
+  VEGA_API_ENABLED_FLAG,
+  VEGA_EMBEDDABLE_TYPE,
+  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+} from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { reportVegaRender } from '../lib/vega_render_telemetry';
-import type { VegaByValueState } from '../../server';
+import type {
+  VegaByReferenceState,
+  VegaByValueState,
+  VegaEmbeddableState,
+} from '../../server/embeddable/schema';
+import { vegaClient } from '../vega_client/vega_client';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
 jest.mock('../lib/vega_render_telemetry', () => ({ reportVegaRender: jest.fn() }));
 jest.mock('../lib/extract_index_pattern', () => ({
   extractIndexPatternsFromSpec: jest.fn(async (): Promise<never[]> => []),
+}));
+jest.mock('../vega_client/vega_client', () => ({
+  vegaClient: {
+    create: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+  },
+}));
+jest.mock('../vega_client/has_library_item_with_title', () => ({
+  hasLibraryItemWithTitle: jest.fn(),
 }));
 
 interface MockVegaVisComponentProps {
@@ -115,23 +138,42 @@ describe('vegaEmbeddableFactory', () => {
   } as unknown as VegaVisualizationDependencies;
 
   const visData = { isVegaLite: false, useMap: false } as unknown as VegaParser;
+  const libraryResponse = (
+    spec: VegaByValueState['spec'],
+    title = 'Library title',
+    description = 'Description'
+  ) => ({ id: 'vega-1', data: { title, description, spec }, meta: {} });
 
   const buildEmbeddable = async ({
     standaloneEmbeddableEnabled = false,
-  }: { standaloneEmbeddableEnabled?: boolean } = {}) => {
+    apiEnabled = false,
+    afterFactoryCreated,
+    initialState = {
+      spec: { format: 'hjson', value: '{ mark: point }' },
+      title: 'Initial title',
+    } as VegaEmbeddableState,
+  }: {
+    standaloneEmbeddableEnabled?: boolean;
+    apiEnabled?: boolean;
+    afterFactoryCreated?: (coreStart: ReturnType<typeof coreMock.createStart>) => void;
+    initialState?: VegaEmbeddableState;
+  } = {}) => {
     const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) =>
-      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback
-    );
+    coreStart.featureFlags.getBooleanValue.mockImplementation((key, fallback) => {
+      if (key === VEGA_STANDALONE_EMBEDDABLE_FLAG) return standaloneEmbeddableEnabled;
+      if (key === VEGA_API_ENABLED_FLAG) return apiEnabled;
+      return fallback;
+    });
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
       visualizationDependencies,
     });
+    afterFactoryCreated?.(coreStart);
     const uuid = 'vega-panel';
 
-    return factory.buildEmbeddable({
+    const embeddable = await factory.buildEmbeddable({
       initializeDrilldownsManager,
-      initialState: { spec: { format: 'hjson', value: '{ mark: point }' }, title: 'Initial title' },
+      initialState,
       finalizeApi: (api) => ({
         ...api,
         uuid,
@@ -142,6 +184,7 @@ describe('vegaEmbeddableFactory', () => {
       parentApi,
       uuid,
     });
+    return { ...embeddable, coreStart };
   };
 
   /** The abort signal handed to the nth request handler created by the embeddable. */
@@ -158,6 +201,9 @@ describe('vegaEmbeddableFactory', () => {
     mockVegaRequestHandler.mockReset();
     mockVegaRequestHandler.mockResolvedValue(visData);
     mockVegaVisComponentProps = undefined;
+    jest.mocked(vegaClient.create).mockReset();
+    jest.mocked(vegaClient.get).mockReset();
+    jest.mocked(vegaClient.update).mockReset();
   });
 
   it('serializes and applies its state', async () => {
@@ -196,6 +242,18 @@ describe('vegaEmbeddableFactory', () => {
       expect(api.supportsJsonExport).toBe(supportsJsonExport);
     }
   );
+
+  it('uses the feature flag values captured when the embeddable definition is created', async () => {
+    const { api } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      afterFactoryCreated: (coreStart) =>
+        coreStart.featureFlags.getBooleanValue.mockReturnValue(false),
+    });
+
+    expect(api.supportsJsonExport).toBe(true);
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+  });
 
   it('renders the Vega component from the resolved parser', async () => {
     const { api, Component: PanelComponent } = await buildEmbeddable();
@@ -238,7 +296,6 @@ describe('vegaEmbeddableFactory', () => {
 
   it.each([
     ['edit', true],
-    ['view', false],
     ['print', false],
   ] as const)('shows warnings in %s view mode: %s', async (viewMode, expected) => {
     viewMode$.next(viewMode);
@@ -379,9 +436,15 @@ describe('vegaEmbeddableFactory', () => {
     }>;
 
     content.props.onPreview({ format: 'hjson', value: '{ mark: bar }' });
-    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
+    expect((api.serializeState() as VegaByValueState).spec).toEqual({
+      format: 'hjson',
+      value: '{ mark: bar }',
+    });
     content.props.onRevert();
-    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: point }' });
+    expect((api.serializeState() as VegaByValueState).spec).toEqual({
+      format: 'hjson',
+      value: '{ mark: point }',
+    });
     expect(jest.mocked(parentApi.removePanel)).not.toHaveBeenCalled();
   });
 
@@ -414,7 +477,148 @@ describe('vegaEmbeddableFactory', () => {
 
     content.props.onSave({ format: 'hjson', value: '{ mark: bar }' });
 
-    expect(api.serializeState().spec).toEqual({ format: 'hjson', value: '{ mark: bar }' });
+    expect((api.serializeState() as VegaByValueState).spec).toEqual({
+      format: 'hjson',
+      value: '{ mark: bar }',
+    });
+  });
+
+  it('loads and publishes a referenced library item', async () => {
+    const librarySpec = { format: 'hjson' as const, value: '{ mark: bar }' };
+    jest
+      .mocked(vegaClient.get)
+      .mockResolvedValue(libraryResponse(librarySpec, 'Library title', 'Library description'));
+
+    const { api } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      initialState: {
+        ref_id: 'vega-1',
+        title: 'Panel title',
+        time_range: { from: 'now-1h', to: 'now', mode: 'relative' },
+      },
+    });
+
+    expect(vegaClient.get).toHaveBeenCalledWith('vega-1');
+    expect(api.defaultTitle$.getValue()).toBe('Library title');
+    expect(api.defaultDescription$.getValue()).toBe('Library description');
+    expect(api.serializeState()).toEqual(
+      expect.objectContaining({
+        ref_id: 'vega-1',
+        title: 'Panel title',
+        time_range: { from: 'now-1h', to: 'now', mode: 'relative' },
+      })
+    );
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+    if (!apiHasLibraryTransforms(api)) throw new Error('Expected Vega library transforms');
+    expect(api.getSerializedStateByValue()).toEqual(
+      expect.objectContaining({ spec: librarySpec, title: 'Panel title' })
+    );
+  });
+
+  it('links a panel without losing panel-owned state', async () => {
+    jest.mocked(vegaClient.create).mockResolvedValue(
+      libraryResponse({
+        format: 'hjson',
+        value: '{ mark: point }',
+      })
+    );
+    const { api } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      initialState: {
+        spec: { format: 'hjson', value: '{ mark: point }' },
+        title: 'Panel title',
+        time_range: { from: 'now-1h', to: 'now', mode: 'relative' },
+      },
+    });
+
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+    if (!apiHasLibraryTransforms(api)) throw new Error('Expected Vega library transforms');
+    await expect(api.saveToLibrary('Library title')).resolves.toBe('vega-1');
+    expect(vegaClient.create).toHaveBeenCalledWith({
+      title: 'Library title',
+      description: undefined,
+      spec: { format: 'hjson', value: '{ mark: point }' },
+    });
+    expect(api.getSerializedStateByReference('vega-1')).toEqual(
+      expect.objectContaining({
+        ref_id: 'vega-1',
+        title: 'Panel title',
+        time_range: { from: 'now-1h', to: 'now', mode: 'relative' },
+      })
+    );
+  });
+
+  it('updates the shared spec while retaining the latest library metadata', async () => {
+    const originalSpec = { format: 'hjson' as const, value: '{ mark: point }' };
+    const updatedSpec = { format: 'hjson' as const, value: '{ mark: bar }' };
+    jest
+      .mocked(vegaClient.get)
+      .mockResolvedValueOnce(libraryResponse(originalSpec))
+      .mockResolvedValueOnce(libraryResponse(originalSpec, 'Latest title', 'Latest description'));
+    jest.mocked(vegaClient.update).mockResolvedValue(libraryResponse(updatedSpec));
+    const { api } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      initialState: { ref_id: 'vega-1', title: 'Panel title' },
+    });
+
+    api.onEdit();
+    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
+    const content = (await flyout.loadContent({
+      ariaLabelledBy: 'vega-flyout-title',
+      closeFlyout: jest.fn(),
+    })) as React.ReactElement<{
+      onSave: (spec: VegaByValueState['spec']) => Promise<void>;
+    }>;
+    await content.props.onSave(updatedSpec);
+
+    expect(vegaClient.update).toHaveBeenCalledWith('vega-1', {
+      title: 'Latest title',
+      description: 'Latest description',
+      spec: updatedSpec,
+    });
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+    if (!apiHasLibraryTransforms(api)) throw new Error('Expected Vega library transforms');
+    expect(api.getSerializedStateByValue()).toEqual(
+      expect.objectContaining({ spec: updatedSpec, title: 'Panel title' })
+    );
+    expect(api.serializeState()).toEqual(
+      expect.objectContaining({ ref_id: 'vega-1', title: 'Panel title' })
+    );
+  });
+
+  it('retains the referenced draft and reports an error when a shared update fails', async () => {
+    const originalSpec = { format: 'hjson' as const, value: '{ mark: point }' };
+    const draftSpec = { format: 'hjson' as const, value: '{ mark: bar }' };
+    jest.mocked(vegaClient.get).mockResolvedValue(libraryResponse(originalSpec));
+    const error = new Error('update failed');
+    jest.mocked(vegaClient.update).mockRejectedValue(error);
+    const { api, coreStart } = await buildEmbeddable({
+      standaloneEmbeddableEnabled: true,
+      apiEnabled: true,
+      initialState: { ref_id: 'vega-1' } as VegaByReferenceState,
+    });
+
+    api.onEdit();
+    const flyout = mockOpenLazyFlyout.mock.calls[0][0];
+    const content = (await flyout.loadContent({
+      ariaLabelledBy: 'vega-flyout-title',
+      closeFlyout: jest.fn(),
+    })) as React.ReactElement<{
+      onPreview: (spec: VegaByValueState['spec']) => void;
+      onSave: (spec: VegaByValueState['spec']) => Promise<void>;
+    }>;
+    content.props.onPreview(draftSpec);
+
+    await expect(content.props.onSave(draftSpec)).rejects.toBe(error);
+    expect(coreStart.notifications.toasts.addError).toHaveBeenCalledWith(error, {
+      title: 'Unable to update Vega library item',
+    });
+    expect(apiHasLibraryTransforms(api)).toBe(true);
+    if (!apiHasLibraryTransforms(api)) throw new Error('Expected Vega library transforms');
+    expect(api.getSerializedStateByValue()).toEqual(expect.objectContaining({ spec: draftSpec }));
   });
 
   it('forwards parent esqlVariables into the request handler and refetches on change', async () => {
