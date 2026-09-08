@@ -1275,10 +1275,10 @@ paths:
                   $ref: '#/components/examples/response_409'
   /api/cases/field_definitions/{field_definition_id}:
     put:
-      summary: Update a reusable field definition
+      summary: Update editable attributes of a reusable field definition
       operationId: updateCaseFieldDefinitionDefaultSpace
       description: |
-        Fully replaces a reusable field definition. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Requires the Cases feature to be enabled in the space.
+        Updates editable attributes of a reusable field definition. Server-managed attributes (`displayOrder`, `legacyKey`) are preserved. You must have the "Manage templates" sub-privilege for the Cases feature of the owning solution. A field's `name` and YAML `type` are immutable after creation — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified. Requires the Cases feature to be enabled in the space.
       x-state: Technical preview
       tags:
         - cases
