@@ -21,11 +21,6 @@ export function useFetchStreams(
   } = {}
 ) {
   const {
-    core: {
-      application: {
-        capabilities: { streams },
-      },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -33,7 +28,6 @@ export function useFetchStreams(
     },
   } = useKibana();
   const showFetchErrorToast = useFetchErrorToast();
-  const canReadStreams = streams?.show === true;
 
   const fetchStreams = async ({ signal }: QueryFunctionContext): Promise<StreamsFetchResult> => {
     return streamsRepositoryClient.fetch('GET /internal/streams', { signal: signal ?? null });
@@ -42,8 +36,6 @@ export function useFetchStreams(
   return useQuery<StreamsFetchResult, Error>({
     queryKey: ['streamList'],
     queryFn: fetchStreams,
-    // Streams `read_stream`, not a Nightshift engine privilege.
-    enabled: canReadStreams,
     onError: showFetchErrorToast,
     select: options?.select,
   });
