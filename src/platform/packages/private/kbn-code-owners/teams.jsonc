@@ -380,13 +380,13 @@
     },
     "responsibilities": [
       "Dashboards app",
-      "Visualizations (Lens, Timelion, TSVB, Vega, Maps, Graph)"
+      "Visualizations (Lens, Timelion, TSVB, Vega, Maps, Graph)",
       "Markdown embeddable",
       "Links embeddable",
       "Embeddable framework",
       "Unified Search",
       "Input Controls",
-      "Canvas application",
+      "Canvas application"
     ]
   },
   {
