@@ -12,6 +12,29 @@ import type {
   AttackDiscoveryAgentBuilderTaskOutput,
 } from '../types';
 
+/**
+ * The seven rubric requirements, one per criterion.
+ *
+ * Exported because the matrix rejudge harness grades recorded AD runs through
+ * its own jury and previously restated this list verbatim. Two copies drift:
+ * the first per-item version of this rubric shipped while the harness copy
+ * still collapsed all seven into a single "5 of 7 -> Y or N" question, so a
+ * rejudge silently scored a different thing under the same column name.
+ */
+export const ATTACK_DISCOVERY_RUBRIC_ITEMS = [
+  'Is the submission non-empty and well-formed JSON with an array of attackDiscoveries?',
+  'Do the detailsMarkdown values capture the overall essence of the reference, allowing slight differences in wording but not omitting or misrepresenting key incidents?',
+  'Does the submission mention at least half of the same entities (host or user) as the reference?',
+  'Are the summaryMarkdown values at least partially similar and summarizing the same incidents?',
+  'Are the title values at least partially similar and mentioning the same incidents?',
+  'Do more than half of the alertIds in the submission overlap with the alertIds in the reference?',
+  'Are the MITRE tactics consistent with the reference?',
+] as const;
+
+/** Appends the serialized reference to each item so criteria stay self-contained. */
+export const buildAttackDiscoveryRubricCriteria = (reference: string): string[] =>
+  ATTACK_DISCOVERY_RUBRIC_ITEMS.map((item) => `${item} Reference: ${reference}`);
+
 const truncateInsightsForRubric = (
   insights: AttackDiscovery[] | null | undefined
 ): Array<{
@@ -71,16 +94,7 @@ export const createAttackDiscoveryRubricEvaluator = ({
       // that misses two items scores identically to a perfect one. Measured on
       // 295 regraded cells that produced 95.6% perfect scores (sd 0.205,
       // effectively binary) and left the column unable to rank.
-      const referenceSuffix = ` Reference: ${reference}`;
-      const rubricCriteria = [
-        'Is the submission non-empty and well-formed JSON with an array of attackDiscoveries?',
-        'Do the detailsMarkdown values capture the overall essence of the reference, allowing slight differences in wording but not omitting or misrepresenting key incidents?',
-        'Does the submission mention at least half of the same entities (host or user) as the reference?',
-        'Are the summaryMarkdown values at least partially similar and summarizing the same incidents?',
-        'Are the title values at least partially similar and mentioning the same incidents?',
-        'Do more than half of the alertIds in the submission overlap with the alertIds in the reference?',
-        'Are the MITRE tactics consistent with the reference?',
-      ].map((item) => `${item}${referenceSuffix}`);
+      const rubricCriteria = buildAttackDiscoveryRubricCriteria(reference);
 
       try {
         return await evaluators.criteria(rubricCriteria).evaluate({

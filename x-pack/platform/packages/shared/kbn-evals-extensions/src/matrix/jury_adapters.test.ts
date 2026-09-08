@@ -108,17 +108,38 @@ describe('attackDiscoveryJury.criteriaFor', () => {
     expect(specs.find((s) => s.name === 'Criteria')!.criteria).toEqual(['c1', 'c2']);
   });
 
-  it('states all 7 rubric items and the 5-of-7 pass rule', () => {
-    // The rubric is mirrored from the suite. If it drifts, the replay silently
-    // grades against a different bar than the original run did.
-    const rubric = attackDiscoveryJury.criteriaFor!(args).find((s) => s.name === 'Rubric')!
-      .criteria[0];
-    for (const item of ['1.', '2.', '3.', '4.', '5.', '6.', '7.']) {
-      expect(rubric).toContain(item);
-    }
-    expect(rubric).toContain('at least 5 of the 7');
-    expect(rubric).toContain('alertIds');
-    expect(rubric).toContain('MITRE');
+  it('passes each of the 7 rubric items as its own criterion', () => {
+    // One criterion per requirement is what lets the shared criteria judge
+    // return partial credit. Collapsing them into a single "5 of 7 -> Y or N"
+    // question, as this adapter used to, scored 95.6% of cells at exactly 1.0
+    // and left the AD column unable to rank any model against another.
+    const rubric = attackDiscoveryJury.criteriaFor!(args).find(
+      (s) => s.name === 'Rubric'
+    )!.criteria;
+
+    expect(rubric).toHaveLength(7);
+    expect(rubric.some((c) => c.includes('alertIds'))).toBe(true);
+    expect(rubric.some((c) => c.includes('MITRE'))).toBe(true);
+    // The threshold must not come back: a pass rule on top of per-item scores
+    // re-collapses them to binary.
+    expect(rubric.some((c) => c.includes('at least 5 of the 7'))).toBe(false);
+    // Every criterion carries the reference so it can be judged standalone.
+    expect(rubric.every((c) => c.includes('Reference:'))).toBe(true);
+  });
+
+  it('prefers rubric items injected by the caller over its own copy', () => {
+    // The suite owns the rubric; this adapter keeps a fallback. When the CLI
+    // supplies the suite's list, a rubric change in the suite must reach the
+    // replay rather than being shadowed by the stale local copy.
+    const specs = attackDiscoveryJury.criteriaFor!({
+      ...args,
+      metadata: { ...args.metadata, rubricCriteria: ['only item A', 'only item B'] },
+    } as typeof args);
+    const rubric = specs.find((s) => s.name === 'Rubric')!.criteria;
+
+    expect(rubric).toHaveLength(2);
+    expect(rubric[0]).toContain('only item A');
+    expect(rubric.every((c) => c.includes('Reference:'))).toBe(true);
   });
 
   it('omits the Rubric invocation when there is no reference discovery', () => {

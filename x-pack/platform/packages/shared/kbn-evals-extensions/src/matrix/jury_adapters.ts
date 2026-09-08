@@ -149,11 +149,14 @@ export const attackDiscoveryJury: JuryAdapter = {
    * Mirrors the suite's Criteria and Rubric evaluators.
    *
    * Both serialise the graded artefact to JSON and hand it to the shared
-   * criteria judge as a single message -- Criteria against the annotated
-   * `criteria[]`, Rubric against a 7-item comparison with the reference
-   * discoveries. The rubric text is copied verbatim from the suite: a
-   * reworded rubric would score a different thing while carrying the same
-   * column name.
+   * criteria judge -- Criteria against the annotated `criteria[]`, Rubric
+   * against the 7 requirements compared with the reference discoveries.
+   *
+   * Each rubric requirement is passed as its own criterion, matching the
+   * suite's evaluator. The previous form collapsed all 7 into one string
+   * ending "5 of 7 -> Y or N", which scored 95.6% of cells at exactly 1.0
+   * and could not rank. Prefer `metadata.rubricCriteria` when the caller
+   * supplies the suite's own list, so the two definitions cannot drift.
    */
   criteriaFor: (args) => {
     const specs: Array<{ name: string; criteria: string[]; args: JuryArgs }> = [];
@@ -205,22 +208,40 @@ export const attackDiscoveryJury: JuryAdapter = {
         2
       );
 
-      const rubric = [
-        'Evaluate the submission against the reference using these 7 rubric items:',
-        '1. Is the submission non-empty and well-formed JSON with an array of attackDiscoveries?',
-        '2. Do the detailsMarkdown values capture the overall essence of the reference, allowing slight differences in wording but not omitting or misrepresenting key incidents?',
-        '3. Does the submission mention at least half of the same entities (host or user) as the reference?',
-        '4. Are the summaryMarkdown values at least partially similar and summarizing the same incidents?',
-        '5. Are the title values at least partially similar and mentioning the same incidents?',
-        '6. Do more than half of the alertIds in the submission overlap with the alertIds in the reference?',
-        '7. Are the MITRE tactics consistent with the reference?',
-        `Reference: ${reference}`,
-        'Score the submission as passing if at least 5 of the 7 rubric items are correct. Explain your reasoning briefly and end with a single character: Y or N.',
-      ].join('\n');
+      // The rubric items come from the suite module when the CLI could load
+      // them (`--dataset` resolves the suite's own evaluator), so a rubric
+      // change in the suite reaches a rejudge instead of being silently
+      // shadowed by a stale copy here. The inline list below is the fallback
+      // for callers that supply no rubric, and is deliberately the SAME
+      // per-item form -- not the old collapsed Y/N question.
+      const injected = (args.metadata as { rubricCriteria?: unknown } | undefined)?.rubricCriteria;
+      if (Array.isArray(injected) && injected.length > 0) {
+        specs.push({
+          name: 'Rubric',
+          criteria: (injected as string[]).map((item) => `${item} Reference: ${reference}`),
+          args: {
+            input: args.input,
+            expected: { expected: reference },
+            output: { messages: [{ message: submission }], steps: [], errors },
+            metadata: args.metadata,
+          },
+        });
+        return specs;
+      }
+
+      const rubricItems = [
+        'Is the submission non-empty and well-formed JSON with an array of attackDiscoveries?',
+        'Do the detailsMarkdown values capture the overall essence of the reference, allowing slight differences in wording but not omitting or misrepresenting key incidents?',
+        'Does the submission mention at least half of the same entities (host or user) as the reference?',
+        'Are the summaryMarkdown values at least partially similar and summarizing the same incidents?',
+        'Are the title values at least partially similar and mentioning the same incidents?',
+        'Do more than half of the alertIds in the submission overlap with the alertIds in the reference?',
+        'Are the MITRE tactics consistent with the reference?',
+      ];
 
       specs.push({
         name: 'Rubric',
-        criteria: [rubric],
+        criteria: rubricItems.map((item) => `${item} Reference: ${reference}`),
         args: {
           input: args.input,
           expected: { expected: reference },

@@ -48,6 +48,57 @@ const DEFAULT_OUT_DIR = 'target/llm_matrix_rejudge';
  * replay without it grades every answer against an empty reference and
  * manufactures uniform inaccuracy verdicts.
  */
+/**
+ * Load the AD rubric items from the suite package at runtime.
+ *
+ * A platform package must not statically import the private solutions-side
+ * suite, so the jury keeps a fallback copy of the rubric. Two copies drift:
+ * the suite moved to per-item scoring while the jury still collapsed all seven
+ * items into one "5 of 7 -> Y or N" question, so a rejudge silently graded a
+ * different thing under the same column name.
+ *
+ * Resolving the suite's own export keeps one definition authoritative. Returns
+ * undefined when the module cannot be resolved -- the jury's fallback then
+ * applies, and it is the same per-item form, so a miss degrades to a stale
+ * wording rather than to the collapsed rubric.
+ */
+export async function loadSuiteRubricItems(
+  datasetPath: string,
+  log?: { info: (msg: string) => void }
+): Promise<string[] | undefined> {
+  const datasetDir = Path.dirname(Path.resolve(process.cwd(), datasetPath));
+  // The evaluator sits under `src/evaluators` in the suite package; walk up
+  // from the dataset module rather than hardcoding a repo-relative path.
+  const candidates = [
+    Path.resolve(datasetDir, '../evaluators/attack_discovery_rubric_evaluator.ts'),
+    Path.resolve(datasetDir, '../../evaluators/attack_discovery_rubric_evaluator.ts'),
+    Path.resolve(datasetDir, 'evaluators/attack_discovery_rubric_evaluator.ts'),
+  ];
+
+  for (const candidate of candidates) {
+    if (!Fs.existsSync(candidate)) {
+      continue;
+    }
+    try {
+      const mod = (await import(candidate)) as Record<string, unknown>;
+      const items = mod.ATTACK_DISCOVERY_RUBRIC_ITEMS;
+      if (Array.isArray(items) && items.length > 0 && items.every((i) => typeof i === 'string')) {
+        log?.info(`Loaded ${items.length} rubric item(s) from ${candidate}`);
+        return items as string[];
+      }
+    } catch (error) {
+      // Fall through to the jury's copy rather than failing the whole replay.
+      log?.info(
+        `Could not load rubric items from ${candidate}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  return undefined;
+}
+
 async function loadReferences(
   datasetPath: string,
   log?: { info: (msg: string) => void }
@@ -354,12 +405,17 @@ export const rejudgeCmd: Command<any> = {
       apiKey: judgeApiKey,
     });
 
+    // Prefer the suite's own rubric over the jury's fallback copy, so a rubric
+    // change in the suite reaches this replay.
+    const rubricItems = datasetPath ? await loadSuiteRubricItems(datasetPath, log) : undefined;
+
     const judge: CellJudge = createInferenceJudge({
       kbnUrl: judgeKbnUrl,
       authHeader,
       connectorId,
       jury,
       log,
+      rubricItems,
     });
 
     const { results, failures } = await runRejudge({
@@ -450,12 +506,15 @@ function createInferenceJudge({
   connectorId,
   jury,
   log,
+  rubricItems,
 }: {
   kbnUrl: string;
   authHeader?: string;
   connectorId: string;
   jury: JuryAdapter;
   log: ToolingLog;
+  /** Suite-owned rubric items, when the CLI could resolve them. */
+  rubricItems?: string[];
 }): CellJudge {
   const fetchImpl = (async (path: string, options: any = {}) => {
     const response = await fetch(`${kbnUrl.replace(/\/$/, '')}${path}`, {
@@ -491,7 +550,7 @@ function createInferenceJudge({
   // Each jury builds the evaluators its suite's column is actually made of.
   // The persona pair is no longer assumed: running it against a suite that
   // grades something else produces confident verdicts about the wrong artefact.
-  const evaluate = buildJuryEvaluator({ jury, inferenceClient, log });
+  const evaluate = buildJuryEvaluator({ jury, inferenceClient, log, rubricItems });
 
   return async (cell) => {
     const args = jury.toArgs(cell);
@@ -522,20 +581,30 @@ function buildJuryEvaluator({
   jury,
   inferenceClient,
   log,
+  rubricItems,
 }: {
   jury: JuryAdapter;
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
+  /** Suite-owned rubric items, when the CLI could resolve them. */
+  rubricItems?: string[];
 }): (args: JuryArgs) => Promise<{ scores: RejudgeScore[]; analyses?: Record<string, unknown> }> {
   if (jury.name === 'attack-discovery') {
     // AD's Criteria and Rubric evaluators live in a private, solutions-side
     // functional-tests package that a platform package must not import. Both
     // are thin wrappers over the shared criteria judge, so the jury rebuilds
     // them from the same primitive rather than inverting the dependency.
-    // The rubric is mirrored from the suite; see jury_adapters.ts.
+    // The rubric ITEMS, however, are loaded from the suite at runtime when
+    // available (see `loadSuiteRubricItems`), so a rubric change in the suite
+    // reaches a replay instead of being shadowed by a stale mirrored copy.
     return async (args) => {
       const scores: RejudgeScore[] = [];
-      for (const spec of jury.criteriaFor?.(args) ?? []) {
+      // Hand the suite's own rubric to the jury when we have it, so the
+      // adapter's fallback copy cannot silently grade a different bar.
+      const juryArgs = rubricItems?.length
+        ? ({ ...args, metadata: { ...args.metadata, rubricCriteria: rubricItems } } as JuryArgs)
+        : args;
+      for (const spec of jury.criteriaFor?.(juryArgs) ?? []) {
         const evaluator = createCriteriaEvaluator({
           inferenceClient,
           criteria: spec.criteria as EvaluationCriterion[],
