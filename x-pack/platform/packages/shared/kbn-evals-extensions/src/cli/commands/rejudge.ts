@@ -428,6 +428,12 @@ function createInferenceJudge({
       headers: {
         'Content-Type': 'application/json',
         'kbn-xsrf': 'evals-rejudge',
+        // /internal/inference/* rejects callers that do not declare an internal
+        // origin, and the rejection is a 400 reading "exists but is not
+        // available with the current configuration" -- which describes a
+        // disabled route, not a missing header. Without this the whole rejudge
+        // fails in a way that points at stack config instead of the request.
+        'x-elastic-internal-origin': 'kibana',
         ...(apiKey ? { Authorization: `ApiKey ${apiKey}` } : {}),
         ...(options.headers ?? {}),
       },
