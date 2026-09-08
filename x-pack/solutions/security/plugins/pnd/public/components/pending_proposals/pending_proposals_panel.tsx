@@ -19,7 +19,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
   DismissReason,
   ProposalWithMetadata,
-} from '@kbn/conversation-proposals-plugin/common';
+} from '@kbn/agentic-investigations-plugin/common';
 import {
   useApproveProposal,
   useDismissProposal,

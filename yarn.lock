@@ -4294,6 +4294,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agentic-investigations-plugin@link:x-pack/platform/plugins/shared/agentic_investigations":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-common@link:x-pack/platform/packages/shared/ai-assistant/common":
   version "0.0.0"
   uid ""
@@ -5031,10 +5035,6 @@
   uid ""
 
 "@kbn/controls-schemas@link:src/platform/packages/shared/controls/controls-schemas":
-  version "0.0.0"
-  uid ""
-
-"@kbn/conversation-proposals-plugin@link:x-pack/platform/plugins/shared/conversation_proposals":
   version "0.0.0"
   uid ""
 

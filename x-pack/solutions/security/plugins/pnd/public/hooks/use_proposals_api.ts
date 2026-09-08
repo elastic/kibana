@@ -8,16 +8,16 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
-  PROPOSALS_API_VERSION,
+  AGENTIC_INVESTIGATIONS_API_VERSION,
   PROPOSALS_INTERNAL_URL,
-} from '@kbn/conversation-proposals-plugin/common';
+} from '@kbn/agentic-investigations-plugin/common';
 import type {
   ApproveProposalRequest,
   DismissProposalRequest,
   ListProposalsResponse,
   Proposal,
   ProposalWithMetadata,
-} from '@kbn/conversation-proposals-plugin/common';
+} from '@kbn/agentic-investigations-plugin/common';
 import { queryKeys } from '../query_keys';
 import { retryOnTransientError } from './use_watches_api';
 
@@ -32,7 +32,7 @@ export const usePendingProposals = (conversationId?: string) => {
     queryKey: queryKeys.proposals.list(conversationId),
     queryFn: async (): Promise<ListProposalsResponse> =>
       services.http!.get<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
-        version: PROPOSALS_API_VERSION,
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
         query: { status: 'pending', ...(conversationId ? { conversationId } : {}) },
       }),
     keepPreviousData: true,
@@ -50,7 +50,7 @@ export const useProposal = (id: string | undefined) => {
         throw new Error('proposal id is required');
       }
       return services.http!.get<ProposalWithMetadata>(`${PROPOSALS_INTERNAL_URL}/${id}`, {
-        version: PROPOSALS_API_VERSION,
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
       });
     },
     enabled: Boolean(id),
@@ -69,7 +69,7 @@ export const useApproveProposal = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: ApproveProposalRequest }): Promise<Proposal> =>
       services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/approve`, {
-        version: PROPOSALS_API_VERSION,
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
     onSuccess: (proposal) => {
@@ -88,7 +88,7 @@ export const useDismissProposal = () => {
   return useMutation({
     mutationFn: ({ id, body }: { id: string; body: DismissProposalRequest }): Promise<Proposal> =>
       services.http!.post<Proposal>(`${PROPOSALS_INTERNAL_URL}/${id}/dismiss`, {
-        version: PROPOSALS_API_VERSION,
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
         body: JSON.stringify(body),
       }),
     onSuccess: (proposal) => {

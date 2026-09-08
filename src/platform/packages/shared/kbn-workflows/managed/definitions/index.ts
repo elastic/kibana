@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW } from './agentic_investigations';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
-import { CREATE_CONVERSATION_PROPOSAL_WORKFLOW } from './conversation_proposals';
 import {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
@@ -96,7 +96,7 @@ export {
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './significant_events';
 export { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from './nightshift_investigations/investigation';
-export { CREATE_CONVERSATION_PROPOSAL_WORKFLOW_ID } from './conversation_proposals';
+export { CREATE_INVESTIGATION_PROPOSAL_WORKFLOW_ID } from './agentic_investigations';
 export {
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW_ID,
   ALERT_ZERO_ACTION_WORKFLOW_IDS,
@@ -162,8 +162,8 @@ export const managedWorkflowDefinitions = [
   PND_RULE_PREVIEW_WORKFLOW,
   PND_RULE_TUNING_WORKFLOW,
   PND_RULE_CREATION_WORKFLOW,
-  // Generic proposal gate, owned by the conversationProposals plugin.
-  CREATE_CONVERSATION_PROPOSAL_WORKFLOW,
+  // Generic proposal gate, owned by the agenticInvestigations plugin.
+  CREATE_INVESTIGATION_PROPOSAL_WORKFLOW,
   // AlertZero action catalog.
   ALERT_ZERO_ACTION_CREATE_RULE_WORKFLOW,
   // Threat intel supply workflows are FF-off safe: registry membership only

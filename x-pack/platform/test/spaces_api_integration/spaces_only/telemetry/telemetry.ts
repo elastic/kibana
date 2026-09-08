@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         agentBuilder: 0,
         agentBuilderSml: 0,
         contextEngine: 0,
-        conversationProposals: 0,
+        agenticInvestigations: 0,
         automatic_import: 0,
         uptime: 0,
         slo: 0,

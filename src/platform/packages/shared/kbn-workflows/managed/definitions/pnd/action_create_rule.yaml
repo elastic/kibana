@@ -2,7 +2,7 @@ version: "1"
 name: Create detection rule
 description: >
   AlertZero action: creates a custom query detection rule. Executed by the
-  conversation proposal gate once an analyst approves, so the rule is
+  investigation proposal gate once an analyst approves, so the rule is
   attributed to the approver.
 enabled: true
 tags:

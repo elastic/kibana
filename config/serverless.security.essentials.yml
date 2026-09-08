@@ -12,6 +12,6 @@ workflowsManagement.available: false
 xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   workflowsManagement.hidden: true
-  ### Conversation proposals sits on the workflows platform, which is unavailable above, so no
+  ### Agentic investigations sits on the workflows platform, which is unavailable above, so no
   ### proposal can be created in this tier. Hiding keeps its privileges out of Role management.
-  conversationProposals.hidden: true
+  agenticInvestigations.hidden: true

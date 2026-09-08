@@ -207,7 +207,7 @@ export const ConversationsPage: React.FC = () => {
           />
         </EuiFlexItem>
 
-        {/* Durable proposals from the conversation proposals API. Hidden when
+        {/* Durable proposals from the investigation proposals API. Hidden when
             empty so the queue below is unaffected when nothing is pending. */}
         <EuiFlexItem grow={false}>
           <PendingProposalsPanel hideWhenEmpty />

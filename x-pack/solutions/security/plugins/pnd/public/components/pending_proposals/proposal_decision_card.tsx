@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ProposalWithMetadata } from '@kbn/conversation-proposals-plugin/common';
+import type { ProposalWithMetadata } from '@kbn/agentic-investigations-plugin/common';
 import * as i18n from './translations';
 
 const IMPACT_COLORS: Record<string, string> = {
