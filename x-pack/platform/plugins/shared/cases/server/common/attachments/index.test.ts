@@ -363,8 +363,9 @@ describe('toLegacyCaseResponse', () => {
 });
 
 describe('legacy <-> unified round trip', () => {
-  // 9.5 safety net: `attachments.enabled` defaults to `false`, so anything persisted
-  // as v1 must come back through the public API byte-identical to before this branch.
+  // Safety net for historically persisted v1 rows: regardless of `attachments.enabled`
+  // (defaults to `true`), anything stored as v1 must round-trip through the public API
+  // byte-identical to before this branch.
   it('round-trips a persisted v1 user comment through unified storage and back', () => {
     const persistedV1 = {
       type: AttachmentType.user,

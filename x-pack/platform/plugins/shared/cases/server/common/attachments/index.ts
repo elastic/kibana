@@ -73,7 +73,7 @@ export function getAttachmentTypeTransformers(
   const normalizedType = toUnifiedAttachmentType(type, owner);
   const normalizedPersistableType = toUnifiedPersistableStateAttachmentType(type);
 
-  if (normalizedType === COMMENT_ATTACHMENT_TYPE || normalizedType === 'comment') {
+  if (normalizedType === COMMENT_ATTACHMENT_TYPE) {
     return commentAttachmentTransformer;
   }
   if (PERSISTABLE_ATTACHMENT_TYPES.has(normalizedPersistableType)) {
