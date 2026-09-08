@@ -27,12 +27,7 @@ import { isMac } from '@kbn/shared-ux-utility';
 
 const COMMAND_KEY = isMac ? '⌘' : 'CTRL';
 
-interface Shortcut {
-  keys: readonly string[];
-  label: string;
-}
-
-const shortcuts: Shortcut[] = [
+const shortcuts: Array<{ keys: readonly string[]; label: string }> = [
   {
     keys: [COMMAND_KEY, 'Enter'],
     label: i18n.translate('esqlEditor.query.runKeyboardShortcutsLabel', {
