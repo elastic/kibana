@@ -144,6 +144,17 @@ export const ImportDashboardJsonFlyout = ({
 
         <EuiSpacer size="m" />
 
+        {serverError && (
+          <>
+            <KbnDangerCallout
+              announceOnMount
+              title={serverError}
+              data-test-subj="importDashboardJsonServerError"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <EuiForm fullWidth>
           <EuiFormRow
             fullWidth
@@ -161,17 +172,6 @@ export const ImportDashboardJsonFlyout = ({
             />
           </EuiFormRow>
         </EuiForm>
-
-        {serverError && (
-          <>
-            <EuiSpacer size="m" />
-            <KbnDangerCallout
-              announceOnMount
-              title={serverError}
-              data-test-subj="importDashboardJsonServerError"
-            />
-          </>
-        )}
 
         {warnings.length > 0 && (
           <>
