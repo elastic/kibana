@@ -23,6 +23,20 @@ interface OpenLazyModalParams {
   onClose?: () => void;
 }
 
+/**
+ * Opens a modal with lazily loaded content.
+ *
+ * This helper handles:
+ * - Mounting a modal with async content.
+ * - Showing a loading skeleton while content is being loaded.
+ * - Closing the modal automatically if content resolves to `null` or `undefined`.
+ *
+ * @param params - Configuration object.
+ * @param params.core - The `CoreStart` contract, used for overlays.
+ * @param params.loadContent - Async function that loads the modal content. Must return a valid React element.
+ *                             If it resolves to `null` or `undefined`, the modal will close automatically.
+ * @param params.onClose - Optional callback invoked when the modal is closed.
+ */
 export const openLazyModal = ({
   core,
   loadContent,
