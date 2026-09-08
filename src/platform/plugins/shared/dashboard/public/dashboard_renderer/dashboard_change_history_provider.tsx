@@ -46,6 +46,7 @@ export const DashboardChangeHistoryProvider = ({
       http: coreServices.http as ChangeHistoryHttpClient,
       listPath: `/internal/dashboard/change_history/{objectId}`,
       detailPath: `/internal/dashboard/change_history/{objectId}/{eventId}`,
+      restorePath: `/internal/dashboard/change_history/{objectId}/{eventId}/restore`, // TODO
     });
   }, []);
 
@@ -58,28 +59,14 @@ export const DashboardChangeHistoryProvider = ({
       objectId={dashboardId}
       adapter={adapter}
       renderPreview={(props) => <DashboardPreview {...props} />}
-      // renderPreview={({ change, compareSpec, diffTelemetry }) => {
-      //   console.log({ change, compareSpec, diffTelemetry });
-      //   return (
-      //     <CodeEditor
-      //       dataTestSubj={'consoleMonacoEditor'}
-      //       languageId={'json'}
-      //       value={JSON.stringify(change.snapshot, null, 2)}
-      //       fullWidth={true}
-      //       links={true}
-      //       enableFindAction={true}
-      //       enableCustomContextMenu={true}
-      //     />
-      //   );
-      // }}
       labels={{
         previewBackLabel: i18n.translate('workflows.changeHistory.backToWorkflow', {
           defaultMessage: 'Back to dashboard',
         }),
         previewTitle: dashboardId,
       }}
-      // features={{ restore: true, unsavedChanges: true }}
-      // permissions={{ canRestore }}
+      features={{ compare: false, restore: true }}
+      permissions={{ canRestore: true }}
       scope={scope}
       analytics={analytics}
     >

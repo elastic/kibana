@@ -64,6 +64,7 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
     const hasCompare = supports.compare && Boolean(modalSelection.requestCompareToVersion);
     const hasRestore = Boolean(modalSelection.requestRestoreVersion);
 
+    console.log({ hasCompare, hasRestore, supports });
     if (!hasCompare && !hasRestore) {
       return null;
     }
