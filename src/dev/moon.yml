@@ -53,6 +53,7 @@ dependsOn:
   - '@kbn/swc-register'
   - '@kbn/rspack-optimizer'
   - '@kbn/dev-validation-runner'
+  - '@kbn/some-dev-log'
 tags:
   - tooling
   - package
