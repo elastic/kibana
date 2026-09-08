@@ -77,5 +77,9 @@ export const InlineScriptString = z
 /** Matches `@kbn/securitysolution-io-ts-types` `NonEmptyString`, which trims. */
 export const NonEmptyString = z.string().refine((input) => input.trim() !== '');
 
-/** Matches `@kbn/securitysolution-io-ts-types` `NonEmptyArray`. */
-export const nonEmptyArray = <T extends z.ZodTypeAny>(schema: T) => z.array(schema).min(1);
+/**
+ * Matches `@kbn/securitysolution-io-ts-types` `NonEmptyArray`, which fails an
+ * empty array and otherwise delegates to `t.array(codec)` — so non-array input
+ * and each element are validated exactly as the element codec dictates.
+ */
+export const nonEmptyArray = <T extends z.ZodType>(schema: T) => z.array(schema).min(1);

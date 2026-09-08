@@ -19,9 +19,9 @@
  *     the combined corpus, which catches differences the explicit lists miss
  */
 
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
-import type { z } from '@kbn/zod';
-import type * as t from 'io-ts';
+import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+import { z } from '@kbn/zod';
+import * as t from 'io-ts';
 import { decode, type DecodeOutcome } from './test_helpers/codec_agnostic';
 import { expectSameOutcome } from './test_helpers/parity';
 import {
@@ -46,6 +46,13 @@ const zodCodec = <S extends z.ZodType>(schema: S): CodecUnderTest<z.output<S>> =
   flavor: 'zod',
   decode: (input) => decode(schema, input),
 });
+
+/**
+ * Wraps each input in an args tuple. `it.each` treats a bare array case as the
+ * argument list itself, so an array input would otherwise be spread — and `[]`
+ * would silently run the test with no arguments at all.
+ */
+const asCases = (inputs: unknown[]) => inputs.map((input) => [input]);
 
 const namespaceCorpus = {
   valid: ['default', 'testnamespace'],
@@ -142,6 +149,52 @@ describe.each([ioTsCodec(NonEmptyString), zodCodec(zodCommon.NonEmptyString)])(
   }
 );
 
+const nonEmptyArrayCorpus = {
+  valid: [['a'], ['a', 'b']],
+  invalid: [
+    [], // the whole point of the codec
+    'not an array',
+    null,
+    undefined,
+    {},
+    [1], // element type is enforced by the element codec
+    [null],
+    ['a', 2],
+  ],
+};
+
+describe.each([ioTsCodec(NonEmptyArray(t.string)), zodCodec(zodCommon.nonEmptyArray(z.string()))])(
+  'nonEmptyArray ($flavor)',
+  (codec) => {
+    it.each(asCases(nonEmptyArrayCorpus.valid))('accepts %p', (input) => {
+      expect(codec.decode(input).success).toBe(true);
+    });
+
+    it.each(asCases(nonEmptyArrayCorpus.invalid))('rejects %p', (input) => {
+      expect(codec.decode(input).success).toBe(false);
+    });
+  }
+);
+
+/** Element validation is delegated, so a refining element codec must still apply. */
+const nonEmptyArrayOfNonEmptyStringCorpus = {
+  valid: [['a'], ['a', 'b']],
+  invalid: [[], ['   '], ['a', ''], [42]],
+};
+
+describe.each([
+  ioTsCodec(NonEmptyArray(NonEmptyString)),
+  zodCodec(zodCommon.nonEmptyArray(zodCommon.NonEmptyString)),
+])('nonEmptyArray of NonEmptyString ($flavor)', (codec) => {
+  it.each(asCases(nonEmptyArrayOfNonEmptyStringCorpus.valid))('accepts %p', (input) => {
+    expect(codec.decode(input).success).toBe(true);
+  });
+
+  it.each(asCases(nonEmptyArrayOfNonEmptyStringCorpus.invalid))('rejects %p', (input) => {
+    expect(codec.decode(input).success).toBe(false);
+  });
+});
+
 describe.each([
   {
     label: 'NameSpaceString',
@@ -173,8 +226,20 @@ describe.each([
     zod: zodCommon.NonEmptyString,
     corpus: nonEmptyStringCorpus,
   },
+  {
+    label: 'nonEmptyArray',
+    ioTs: NonEmptyArray(t.string),
+    zod: zodCommon.nonEmptyArray(z.string()),
+    corpus: nonEmptyArrayCorpus,
+  },
+  {
+    label: 'nonEmptyArray of NonEmptyString',
+    ioTs: NonEmptyArray(NonEmptyString),
+    zod: zodCommon.nonEmptyArray(zodCommon.NonEmptyString),
+    corpus: nonEmptyArrayOfNonEmptyStringCorpus,
+  },
 ])('$label io-ts/zod parity', ({ ioTs, zod, corpus }) => {
-  it.each([...corpus.valid, ...corpus.invalid])('agrees on %p', (input) => {
+  it.each(asCases([...corpus.valid, ...corpus.invalid]))('agrees on %p', (input) => {
     expectSameOutcome(ioTs, zod, input);
   });
 });

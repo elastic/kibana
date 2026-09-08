@@ -63,6 +63,13 @@ const zodCodec = <S extends z.ZodType>(schema: S): CodecUnderTest<z.output<S>> =
 /** Values no enum should ever accept, exercised against every codec. */
 const universallyInvalid: unknown[] = ['', 'definitely-not-a-member', 42, null, undefined, {}, []];
 
+/**
+ * Wraps each input in an args tuple. `it.each` treats a bare array case as the
+ * argument list itself, so the `[]` entry above would otherwise run the test
+ * with no arguments and silently assert against `undefined`.
+ */
+const asCases = (inputs: unknown[]) => inputs.map((input) => [input]);
+
 interface EnumCase {
   label: string;
   ioTs: t.Mixed;
@@ -143,7 +150,7 @@ describe.each(enumCases)('$label', ({ ioTs, zod, values }) => {
       }
     });
 
-    it.each(universallyInvalid)('rejects %p', (input) => {
+    it.each(asCases(universallyInvalid))('rejects %p', (input) => {
       expect(codec.decode(input).success).toBe(false);
     });
 
@@ -156,7 +163,7 @@ describe.each(enumCases)('$label', ({ ioTs, zod, values }) => {
     });
   });
 
-  it.each([...values, ...universallyInvalid])('io-ts and zod agree on %p', (input) => {
+  it.each(asCases([...values, ...universallyInvalid]))('io-ts and zod agree on %p', (input) => {
     expectSameOutcome(ioTs, zod, input);
   });
 });
@@ -200,7 +207,7 @@ describe.each<ObjectCodecCase>([
     ],
   },
 ])('$label io-ts/zod parity', ({ ioTs, zod, corpus }) => {
-  it.each(corpus)('agrees on %p', (input) => {
+  it.each(asCases(corpus))('agrees on %p', (input) => {
     expectSameOutcome(ioTs, zod, input);
   });
 });
