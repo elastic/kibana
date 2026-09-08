@@ -22,7 +22,7 @@ const GRID_COLUMNS = 3;
 export const AiIndexCardGrid = () => {
   const { createContextEngineUrl } = useNavigation();
   const phase = useContentListPhase();
-  const { items, totalItems, hasNoResults } = useContentListItems();
+  const { items, totalItems, hasNoResults, refetch } = useContentListItems();
   const { setQueryFromText } = useContentListSearch();
   const [aiIndexToDelete, setAiIndexToDelete] = useState<AiIndexHttpItem | null>(null);
 
@@ -99,6 +99,7 @@ export const AiIndexCardGrid = () => {
         <AiIndexDeleteConfirmModal
           aiIndex={aiIndexToDelete}
           onClose={() => setAiIndexToDelete(null)}
+          onSuccess={refetch}
         />
       )}
     </>

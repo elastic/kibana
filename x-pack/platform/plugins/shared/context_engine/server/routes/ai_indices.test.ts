@@ -27,6 +27,7 @@ import { IMPROVEMENT_ACTIONS } from '../../common/http_api/improvement_actions';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
+  AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
   KiNotFoundError,
@@ -736,7 +737,20 @@ describe('ai indices routes', () => {
       });
 
       expect(aiIndexService.delete).toHaveBeenCalledWith('customer_support');
-      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+    });
+
+    it('returns 409 when the AI index is managed', async () => {
+      aiIndexService.get.mockResolvedValue({ ...aiIndexItem, managed: true });
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(aiIndexService.delete).not.toHaveBeenCalled();
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining('managed') },
+      });
     });
 
     it('clears the improvements for the AI index, so they cannot resurface under a reused id', async () => {
@@ -762,7 +776,7 @@ describe('ai indices routes', () => {
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({ event: expect.objectContaining({ outcome: 'success' }) })
       );
-      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true } });
+      expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security_exception'));
     });
 
@@ -791,6 +805,189 @@ describe('ai indices routes', () => {
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
+      });
+    });
+
+    describe('delete_knowledge_indicators=true', () => {
+      it('deletes the backing data stream and returns no errors on success', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esDeleteDataStream).toHaveBeenCalledWith({ name: aiIndexItem.dest.value });
+        expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('deletes the backing index when dest type is index', async () => {
+        aiIndexService.get.mockResolvedValue({
+          ...aiIndexItem,
+          dest: { type: 'index', value: 'my-index' },
+        });
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(esDeleteIndex).toHaveBeenCalledWith({ index: 'my-index' });
+        expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('returns a partial-failure error when the backing store deletion fails', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+        esDeleteDataStream.mockRejectedValue(new Error('cluster_block_exception'));
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: true },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('cluster_block_exception')],
+          },
+        });
+      });
+
+      it('does not call deleteDataStream when delete_knowledge_indicators is false', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_knowledge_indicators: false },
+        });
+
+        expect(esDeleteDataStream).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('delete_automations=true', () => {
+      it('deletes workflow automations and returns no errors on success', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_automations: true },
+        });
+
+        expect(workflowsManagementApi.deleteWorkflows).toHaveBeenCalledWith(
+          ['nightly-refresh'],
+          'default',
+          expect.anything(),
+          { force: true }
+        );
+        expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('returns partial-failure errors for each failed workflow deletion', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+        workflowsManagementApi.deleteWorkflows.mockResolvedValue({
+          total: 1,
+          deleted: 0,
+          failures: [{ id: 'nightly-refresh', error: 'not_found' }],
+        });
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_automations: true },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('nightly-refresh')],
+          },
+        });
+      });
+
+      it('returns a partial-failure error when workflowsManagementApi is unavailable', async () => {
+        registerAiIndexRoutes({
+          router: {
+            versioned: {
+              get: jest.fn(() => ({ addVersion: jest.fn() })),
+              post: jest.fn(() => ({ addVersion: jest.fn() })),
+              put: jest.fn(() => ({ addVersion: jest.fn() })),
+              delete: jest.fn((config) => ({
+                addVersion: (versionConfig: RegisteredRoute['validate'], handler: RequestHandler) => {
+                  routes[`DELETE:${config.path}`] = { config, handler, validate: versionConfig };
+                },
+              })),
+            },
+          } as unknown as IRouter,
+          logger,
+          getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+          getImprovementsService: () => improvementsService as unknown as ImprovementsServiceApi,
+          getActions: async () => actions,
+          getWorkflowsManagementApi: () => undefined,
+          getSpaces: async () => undefined,
+        });
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_automations: true },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({
+          body: {
+            acknowledged: true,
+            errors: [expect.stringContaining('unavailable')],
+          },
+        });
+      });
+
+      it('skips workflow deletion when the AI index has no automations', async () => {
+        aiIndexService.get.mockResolvedValue({ ...aiIndexItem, automations: [] });
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_automations: true },
+        });
+
+        expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({ body: { acknowledged: true, errors: [] } });
+      });
+
+      it('does not call deleteWorkflows when delete_automations is false', async () => {
+        aiIndexService.delete.mockResolvedValue(undefined);
+
+        await callRoute('DELETE', aiIndexByIdPath, {
+          params: { aiIndexId: 'customer_support' },
+          query: { delete_automations: false },
+        });
+
+        expect(workflowsManagementApi.deleteWorkflows).not.toHaveBeenCalled();
+      });
+    });
+
+    it('collects errors from both backing store and automations when both flags are true', async () => {
+      aiIndexService.delete.mockResolvedValue(undefined);
+      esDeleteDataStream.mockRejectedValue(new Error('es_error'));
+      workflowsManagementApi.deleteWorkflows.mockResolvedValue({
+        total: 1,
+        deleted: 0,
+        failures: [{ id: 'nightly-refresh', error: 'wf_error' }],
+      });
+
+      await callRoute('DELETE', aiIndexByIdPath, {
+        params: { aiIndexId: 'customer_support' },
+        query: { delete_knowledge_indicators: true, delete_automations: true },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          acknowledged: true,
+          errors: [
+            expect.stringContaining('es_error'),
+            expect.stringContaining('nightly-refresh'),
+          ],
+        },
       });
     });
   });

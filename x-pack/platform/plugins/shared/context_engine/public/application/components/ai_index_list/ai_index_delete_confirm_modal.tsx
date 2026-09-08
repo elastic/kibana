@@ -24,9 +24,14 @@ import { useKibana } from '../../hooks/use_kibana';
 interface AiIndexDeleteConfirmModalProps {
   aiIndex: AiIndexHttpItem;
   onClose: () => void;
+  onSuccess: () => Promise<void>;
 }
 
-export const AiIndexDeleteConfirmModal = ({ aiIndex, onClose }: AiIndexDeleteConfirmModalProps) => {
+export const AiIndexDeleteConfirmModal = ({
+  aiIndex,
+  onClose,
+  onSuccess,
+}: AiIndexDeleteConfirmModalProps) => {
   const {
     services: { notifications },
   } = useKibana();
@@ -37,6 +42,8 @@ export const AiIndexDeleteConfirmModal = ({ aiIndex, onClose }: AiIndexDeleteCon
   const [deleteAutomations, setDeleteAutomations] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const modalTitleId = useGeneratedHtmlId();
+  const kiCheckboxId = useGeneratedHtmlId();
+  const automationsCheckboxId = useGeneratedHtmlId();
 
   const onConfirm = async () => {
     setError(null);
@@ -66,6 +73,7 @@ export const AiIndexDeleteConfirmModal = ({ aiIndex, onClose }: AiIndexDeleteCon
           })
         );
       }
+      await onSuccess();
       onClose();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -104,7 +112,7 @@ export const AiIndexDeleteConfirmModal = ({ aiIndex, onClose }: AiIndexDeleteCon
       </EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
-        id="contextAiIndexDeleteKnowledgeIndicators"
+        id={kiCheckboxId}
         data-test-subj="contextAiIndexDeleteKiCheckbox"
         checked={deleteKnowledgeIndicators}
         onChange={(event) => setDeleteKnowledgeIndicators(event.target.checked)}
@@ -122,7 +130,7 @@ export const AiIndexDeleteConfirmModal = ({ aiIndex, onClose }: AiIndexDeleteCon
       />
       <EuiSpacer size="s" />
       <EuiCheckbox
-        id="contextAiIndexDeleteAutomations"
+        id={automationsCheckboxId}
         data-test-subj="contextAiIndexDeleteAutomationsCheckbox"
         checked={deleteAutomations}
         disabled={automationsCount === 0}

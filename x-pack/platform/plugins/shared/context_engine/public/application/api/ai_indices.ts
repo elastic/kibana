@@ -116,7 +116,6 @@ interface DeleteAiIndexArgs {
   deleteAutomations?: boolean;
 }
 
-
 export const deleteAiIndex = (
   http: HttpStart,
   { aiIndexId, deleteKnowledgeIndicators = false, deleteAutomations = false }: DeleteAiIndexArgs

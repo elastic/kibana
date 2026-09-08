@@ -665,6 +665,9 @@ export const registerAiIndexRoutes = ({
         } = request.query;
         try {
           const aiIndex = await getAiIndexService().get(aiIndexId);
+          if (aiIndex.managed) {
+            throw new AiIndexManagedError(aiIndexId);
+          }
           await getAiIndexService().delete(aiIndexId);
           // Audited here rather than after the cleanup below: the deletion is done and cannot be
           // undone, so an audit record is owed for it whatever happens next.
