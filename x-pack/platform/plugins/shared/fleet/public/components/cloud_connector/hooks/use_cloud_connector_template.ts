@@ -7,16 +7,28 @@
 
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { useQuery } from '@kbn/react-query';
 
 import { useIacProvisioner, useStartServices } from '../../../hooks';
-import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provisioner';
+import {
+  sendRenderIacTemplate,
+  sendResolveIacBlueprints,
+} from '../../../hooks/use_request/iac_provisioner';
 import {
   CLOUD_CONNECTOR_RENDER_FLOW,
   IAC_PROVISIONER_FALLBACK_REASON_MISSING_CONTEXT,
+  IAC_PROVISIONER_FALLBACK_REASON_NOT_DEPLOYABLE,
   IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED,
+  IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED,
   IAC_PROVISIONER_RENDER_FALLBACK_EVENT,
 } from '../../../../common/telemetry/iac_provisioner_events';
 import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
+import {
+  IAC_FEDERATED_IDENTITY_WORKFLOW,
+  blueprintMatchesWorkflow,
+  type IacBlueprintCoverage,
+  type IacPolicyTemplateSelection,
+} from '../../../../common/types/rest_spec/iac_provisioner';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
 import { getCloudConnectorRemoteRoleTemplate } from '../utils';
@@ -29,10 +41,16 @@ export interface UseCloudConnectorTemplateParams {
   iacTemplateUrl?: string;
   packageName?: string;
   /**
-   * Policy templates the user has enabled in the policy being configured.
-   * The rendered template grants permissions for exactly these — no more.
+   * Policy templates the user has enabled in the policy being configured,
+   * each with the inputs they actually turned on. The rendered template
+   * grants permissions for exactly these — no more.
    */
-  policyTemplates?: string[];
+  policyTemplates?: IacPolicyTemplateSelection[];
+  /**
+   * Stored template digest from this connector. Omit on first render and
+   * after a static-template fallback.
+   */
+  templateSha?: string;
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -53,7 +71,15 @@ export interface UseCloudConnectorTemplateResult {
   isDisabled: boolean;
   isGeneratingTemplate: boolean;
   templateGenerationError?: string;
+  /** Shown when IaCP reports the stored templateSha still matches. */
+  templateAlreadyCurrent?: string;
 }
+
+const firstDeployableWorkflowBlueprint = (
+  blueprints: IacBlueprintCoverage[] | undefined,
+  workflow: string
+): IacBlueprintCoverage | undefined =>
+  blueprints?.find(({ deployable, id }) => deployable && blueprintMatchesWorkflow(id, workflow));
 
 export const useCloudConnectorTemplate = ({
   cloud,
@@ -61,11 +87,15 @@ export const useCloudConnectorTemplate = ({
   iacTemplateUrl,
   packageName,
   policyTemplates,
+  templateSha,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
   const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false);
   const [templateGenerationError, setTemplateGenerationError] = useState<string | undefined>(
+    undefined
+  );
+  const [templateAlreadyCurrent, setTemplateAlreadyCurrent] = useState<string | undefined>(
     undefined
   );
 
@@ -76,8 +106,31 @@ export const useCloudConnectorTemplate = ({
     ? getCloudConnectorRemoteRoleTemplate({ cloud, accountType, iacTemplateUrl })
     : undefined;
 
+  const canResolve =
+    isIacProvisionerEnabled && Boolean(packageName) && Boolean(policyTemplates?.length);
+
+  const resolveQuery = useQuery(
+    ['iac-provisioner-resolve', packageName, policyTemplates],
+    async () => {
+      if (!packageName || !policyTemplates?.length) {
+        throw new Error('Failed to resolve IaC blueprints');
+      }
+      const { data, error } = await sendResolveIacBlueprints({
+        provider: AWS_CLOUD_PROVIDER,
+        flow: CLOUD_CONNECTOR_RENDER_FLOW,
+        integrations: [{ name: packageName, policyTemplates }],
+      });
+      if (error || !data) {
+        throw error ?? new Error('Failed to resolve IaC blueprints');
+      }
+      return data;
+    },
+    { enabled: canResolve, retry: false }
+  );
+
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
+    setTemplateAlreadyCurrent(undefined);
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVISIONER_RENDER_FALLBACK_EVENT.eventType, {
@@ -125,17 +178,63 @@ export const useCloudConnectorTemplate = ({
       }
     };
 
+    const fallbackToStatic = (reason: string) => {
+      reportFallback(reason);
+      navigateTo(staticTemplateUrl);
+    };
+
     setIsGeneratingTemplate(true);
     try {
+      if (resolveQuery.isError) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED);
+        return;
+      }
+
+      let resolved = resolveQuery.data;
+      if (!resolved) {
+        const result = await resolveQuery.refetch();
+        if (result.error || !result.data) {
+          fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RESOLVE_FAILED);
+          return;
+        }
+        resolved = result.data;
+      }
+
+      const coverage = firstDeployableWorkflowBlueprint(
+        resolved.blueprints,
+        IAC_FEDERATED_IDENTITY_WORKFLOW
+      );
+      if (!coverage) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_NOT_DEPLOYABLE);
+        return;
+      }
+
       const { data, error } = await sendRenderIacTemplate({
         provider: AWS_CLOUD_PROVIDER,
+        workflow: IAC_FEDERATED_IDENTITY_WORKFLOW,
         flow: CLOUD_CONNECTOR_RENDER_FLOW,
         integrations: [{ name: packageName, policyTemplates }],
+        ...(templateSha ? { templateSha } : {}),
       });
 
       if (error || !data) {
-        reportFallback(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
-        navigateTo(staticTemplateUrl);
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
+        return;
+      }
+
+      if (data.render === false) {
+        cloudFormationTab?.close();
+        setTemplateAlreadyCurrent(
+          i18n.translate('xpack.fleet.cloudConnector.iacProvisioner.templateAlreadyCurrent', {
+            defaultMessage:
+              'The CloudFormation stack is already up to date. No template update is required.',
+          })
+        );
+        return;
+      }
+
+      if (data.render !== true || !data.artifactUrl) {
+        fallbackToStatic(IAC_PROVISIONER_FALLBACK_REASON_RENDER_FAILED);
         return;
       }
 
@@ -159,7 +258,7 @@ export const useCloudConnectorTemplate = ({
     } finally {
       setIsGeneratingTemplate(false);
     }
-  }, [analytics, packageName, policyTemplates, staticTemplateUrl]);
+  }, [analytics, packageName, policyTemplates, resolveQuery, staticTemplateUrl, templateSha]);
 
   if (!isIacProvisionerEnabled) {
     return {
@@ -174,5 +273,6 @@ export const useCloudConnectorTemplate = ({
     isDisabled: false,
     isGeneratingTemplate,
     templateGenerationError,
+    templateAlreadyCurrent,
   };
 };

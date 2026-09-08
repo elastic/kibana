@@ -7,11 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { KbnDangerCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 
 import {
   CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
   CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
@@ -40,27 +42,35 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   iacTemplateUrl,
 }) => {
   // The rendered template must cover every policy template the user enabled
-  // in this policy — not just the first enabled input's.
-  const enabledPolicyTemplates = useMemo(
-    () => [
-      ...new Set(
-        newPolicy?.inputs
-          ?.filter((input) => input.enabled)
-          .map((input) => input.policy_template)
-          .filter((policyTemplate): policyTemplate is string => Boolean(policyTemplate)) ?? []
-      ),
-    ],
-    [newPolicy?.inputs]
-  );
+  // in this policy, and only the inputs they actually turned on.
+  const enabledPolicyTemplates = useMemo(() => {
+    const byTemplate = new Map<string, string[]>();
+    for (const input of newPolicy?.inputs ?? []) {
+      if (!input.enabled || !input.policy_template || !input.type) {
+        continue;
+      }
+      const enabledInputs = byTemplate.get(input.policy_template) ?? [];
+      if (!enabledInputs.includes(input.type)) {
+        enabledInputs.push(input.type);
+      }
+      byTemplate.set(input.policy_template, enabledInputs);
+    }
+    return Array.from(byTemplate, ([name, enabledInputs]) => ({ name, enabledInputs }));
+  }, [newPolicy?.inputs]);
 
-  const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
-    useCloudConnectorTemplate({
-      cloud,
-      accountType,
-      iacTemplateUrl,
-      packageName: packageInfo?.name,
-      policyTemplates: enabledPolicyTemplates,
-    });
+  const {
+    launchButtonProps,
+    isDisabled,
+    isGeneratingTemplate,
+    templateGenerationError,
+    templateAlreadyCurrent,
+  } = useCloudConnectorTemplate({
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    packageName: packageInfo?.name,
+    policyTemplates: enabledPolicyTemplates,
+  });
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -112,12 +122,21 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       {templateGenerationError && (
         <>
           <EuiSpacer size="m" />
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
             title={templateGenerationError}
-            color="danger"
-            iconType="error"
+            size="s"
+          />
+        </>
+      )}
+      {templateAlreadyCurrent && (
+        <>
+          <EuiSpacer size="m" />
+          <KbnSuccessCallout
+            announceOnMount
+            data-test-subj={CLOUD_CONNECTOR_TEMPLATE_UP_TO_DATE_CALLOUT_TEST_SUBJ}
+            title={templateAlreadyCurrent}
             size="s"
           />
         </>
