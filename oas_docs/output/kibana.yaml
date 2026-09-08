@@ -83782,6 +83782,7 @@ paths:
                   input:
                     approved: true
                     comment: Approved by analyst
+                  stepExecutionId: step-exec-a1b2c3d4
             schema:
               additionalProperties: false
               type: object
@@ -83791,6 +83792,11 @@ paths:
                     nullable: true
                   description: Input data to resume the execution with.
                   type: object
+                stepExecutionId:
+                  description: Step execution ID of the HITL wait to claim. When omitted, the server looks up the waiting step.
+                  maxLength: 1024
+                  minLength: 1
+                  type: string
               required:
                 - input
       responses:
@@ -83820,7 +83826,8 @@ paths:
                 "input": {
                   "approved": true,
                   "comment": "Approved by analyst"
-                }
+                },
+                "stepExecutionId": "step-exec-a1b2c3d4"
               }'
         - lang: Console
           source: |
@@ -83829,7 +83836,8 @@ paths:
               "input": {
                 "approved": true,
                 "comment": "Approved by analyst"
-              }
+              },
+              "stepExecutionId": "step-exec-a1b2c3d4"
             }
       x-state: Generally available; added in 9.4.0
       x-metaTags:
@@ -97596,7 +97604,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -98080,7 +98088,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -98463,7 +98471,7 @@ components:
       type: object
       properties:
         artifacts:
-          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboardId`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
+          description: Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` is a type-specific object (for example a `runbook` may carry `content`, a `dashboard` may carry `dashboard_id`). Per-type shape is validated by the artifact-type registry when the type is registered; unregistered types pass through with envelope bounds only.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
@@ -126707,6 +126715,10 @@ components:
                 includeRetests:
                   type: boolean
                 locationsThreshold:
+                  type: number
+                pendingThreshold:
+                  maximum: 100
+                  minimum: 1
                   type: number
                 recoveryStrategy:
                   enum:

@@ -81,6 +81,7 @@ export {
 export { pkgKeyFromPackageInfo } from './services';
 export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
 export { CustomAssetsAccordion } from './components/custom_assets_accordion';
+export { AssetTitleMap } from './applications/integrations/sections/epm/constants';
 export { CardIcon, PackageIcon } from './components/package_icon';
 export { DataStreamTypeSelector } from './components/data_stream_type_selector';
 export type { DataStreamTypeSelectorProps } from './components/data_stream_type_selector';
