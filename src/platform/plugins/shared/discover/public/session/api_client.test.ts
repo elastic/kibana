@@ -127,7 +127,9 @@ describe('Discover session API client', () => {
     const client = createDiscoverSessionClient(http);
     http.get.mockRejectedValue(createBadRequestError());
 
-    await expect(client.get('session-id')).rejects.toThrow('chart_interval must be a supported value');
+    await expect(client.get('session-id')).rejects.toThrow(
+      'chart_interval must be a supported value'
+    );
   });
 
   it('preserves the original HTTP error when create fails', async () => {

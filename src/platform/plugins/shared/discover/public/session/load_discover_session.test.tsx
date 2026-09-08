@@ -115,7 +115,8 @@ describe('loadDiscoverSession', () => {
     });
     expect(core.overlays.openModal).not.toHaveBeenCalled();
 
-    const { actionProps } = core.notifications.toasts.addWarning.mock.calls[0][0] as ToastInputFields;
+    const { actionProps } = core.notifications.toasts.addWarning.mock
+      .calls[0][0] as ToastInputFields;
     renderWithI18n(<EuiToast actionProps={actionProps} />);
 
     await userEvent.click(screen.getByRole('button', { name: 'Learn more' }));
