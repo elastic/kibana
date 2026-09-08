@@ -19,11 +19,11 @@ const createMockLocator = () => ({
 });
 
 const mockLocators = {
-  rules: createMockLocator(),
-  ruleLibrary: createMockLocator(),
-  episodes: createMockLocator(),
-  actionPolicies: createMockLocator(),
-  executionHistory: createMockLocator(),
+  rulesLocators: createMockLocator(),
+  ruleLibraryLocators: createMockLocator(),
+  episodesLocators: createMockLocator(),
+  actionPolicyLocators: createMockLocator(),
+  executionHistoryLocators: createMockLocator(),
 };
 
 export const LocatorProvider = ({ children }: { locators: unknown; children: React.ReactNode }) => (

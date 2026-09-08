@@ -90,7 +90,7 @@ describe('CentralizedActionPoliciesBanner', () => {
     const createBtn = screen.getByTestId('centralizedActionPoliciesCreate');
     expect(createBtn).toHaveAttribute('href');
     fireEvent.click(createBtn);
-    expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
   });
 
   it('Learn more CTA has correct href and opens in a new tab', () => {

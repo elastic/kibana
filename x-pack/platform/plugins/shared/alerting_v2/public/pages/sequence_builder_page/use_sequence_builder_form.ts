@@ -55,7 +55,7 @@ export const useSequenceBuilderForm = () => {
 export const useSequenceBuilderState = () => {
   const rulesApi = useService(RulesApi);
   const notifications = useService(CoreStart('notifications'));
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const [seqValues, setSeqValues] = useState<SequenceFormValues>(DEFAULT_SEQUENCE_FORM_VALUES);
@@ -108,7 +108,7 @@ export const useSequenceBuilderState = () => {
           })
         );
 
-        rules.navigateSync({});
+        rulesLocators.navigateSync({});
       } catch (err) {
         notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('xpack.alertingV2.sequenceBuilder.saveError', {
@@ -119,7 +119,7 @@ export const useSequenceBuilderState = () => {
         setIsSaving(false);
       }
     },
-    [rulesApi, rules, notifications, queryClient]
+    [rulesApi, rulesLocators, notifications, queryClient]
   );
 
   return {

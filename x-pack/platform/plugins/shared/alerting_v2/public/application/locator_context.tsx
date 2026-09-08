@@ -16,11 +16,11 @@ import type {
 } from '../locators';
 
 export interface AlertingV2Locators {
-  rules: LocatorPublic<AlertingV2RulesLocatorParams>;
-  ruleLibrary: LocatorPublic<AlertingV2RuleLibraryLocatorParams>;
-  episodes: LocatorPublic<AlertingV2EpisodesLocatorParams>;
-  actionPolicies: LocatorPublic<AlertingV2ActionPoliciesLocatorParams>;
-  executionHistory: LocatorPublic<AlertingV2ExecutionHistoryLocatorParams>;
+  rulesLocators: LocatorPublic<AlertingV2RulesLocatorParams>;
+  ruleLibraryLocators: LocatorPublic<AlertingV2RuleLibraryLocatorParams>;
+  episodesLocators: LocatorPublic<AlertingV2EpisodesLocatorParams>;
+  actionPolicyLocators: LocatorPublic<AlertingV2ActionPoliciesLocatorParams>;
+  executionHistoryLocators: LocatorPublic<AlertingV2ExecutionHistoryLocatorParams>;
 }
 
 const LocatorContext = createContext<AlertingV2Locators | null>(null);

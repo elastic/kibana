@@ -59,7 +59,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   onCloneInFlyout,
 }) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();
 
   const { items: contentItems, totalItems, isLoading, hasActiveQuery } = useContentListItems();
@@ -232,7 +232,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onBulkUpdateApiKey={handleBulkUpdateApiKey}
-        onNavigateToDetails={(r) => rules.navigateSync({ ruleId: r.id })}
+        onNavigateToDetails={(r) => rulesLocators.navigateSync({ ruleId: r.id })}
         onExpand={(r) => setExpandedRuleId(r.id)}
         onQuickEdit={(r) => onEditInFlyout(r)}
         onEdit={(r) => onEditInFlyout(r)}

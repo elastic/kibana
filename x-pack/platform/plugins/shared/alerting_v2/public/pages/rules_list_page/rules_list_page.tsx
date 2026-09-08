@@ -63,10 +63,10 @@ export const RulesListPage = () => {
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
-    rules.navigateSync({ page: 'sequence_create' });
-  }, [rules]);
+    rulesLocators.navigateSync({ page: 'sequence_create' });
+  }, [rulesLocators]);
   // We always render the "Create with agent" entry points; when the skill is unavailable they
   // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
   const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);

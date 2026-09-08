@@ -171,7 +171,7 @@ export const AlertEpisodesListPage = () => (
 
 const AlertEpisodesListPageContent = () => {
   const services = useKibana<AlertEpisodesKibanaServices>().services;
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -477,11 +477,11 @@ const AlertEpisodesListPageContent = () => {
     [setVisibleColumns]
   );
 
-  const manageRulesHref = rules.useUrl({});
+  const manageRulesHref = rulesLocators.useUrl({});
 
   const getRuleDetailsHref = useCallback(
-    (ruleId: string) => rules.getRedirectUrl({ ruleId }),
-    [rules]
+    (ruleId: string) => rulesLocators.getRedirectUrl({ ruleId }),
+    [rulesLocators]
   );
 
   const externalCustomRenderers = useMemo<CustomCellRenderer>(

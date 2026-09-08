@@ -131,9 +131,9 @@ describe('AlertTimelineSection', () => {
 
     const windowStartMs = Date.parse('2026-08-13T12:00:00.000Z');
     const windowEndMs = Date.parse('2026-08-14T12:00:00.000Z');
-    const { episodes } = useAlertingLocators();
+    const { episodesLocators } = useAlertingLocators();
 
-    expect(episodes.useUrl).toHaveBeenCalledWith(
+    expect(episodesLocators.useUrl).toHaveBeenCalledWith(
       {
         filters: { ruleId: 'rule-1', status: 'all' },
         timeRange: {

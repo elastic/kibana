@@ -74,8 +74,8 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const rule = useRule();
   useBreadcrumbs('rule_details', { ruleName: rule.metadata?.name });
   const { euiTheme } = useEuiTheme();
-  const { rules } = useAlertingLocators();
-  const rulesListHref = rules.useUrl({});
+  const { rulesLocators } = useAlertingLocators();
+  const rulesListHref = rulesLocators.useUrl({});
 
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const chrome = useService(CoreStart('chrome'));

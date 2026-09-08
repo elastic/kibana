@@ -25,7 +25,7 @@ const mockOnClose = jest.fn();
 
 jest.mock('../../../application/locator_context', () => ({
   useAlertingLocators: () => ({
-    actionPolicies: { navigateSync: mockNavigateSync },
+    actionPolicyLocators: { navigateSync: mockNavigateSync },
   }),
 }));
 

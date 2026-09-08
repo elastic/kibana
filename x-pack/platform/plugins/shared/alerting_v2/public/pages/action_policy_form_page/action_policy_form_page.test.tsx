@@ -286,7 +286,9 @@ describe('ActionPolicyFormPage', () => {
         })
       );
       expect(mockCreateInlineWorkflows).toHaveBeenCalledWith([]);
-      await waitFor(() => expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled());
+      await waitFor(() =>
+        expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled()
+      );
     });
 
     it('creates inline workflows and merges them into destinations on submit', async () => {
@@ -342,7 +344,7 @@ describe('ActionPolicyFormPage', () => {
       await user.click(saveButton);
 
       await waitFor(() => expect(mockRollbackWorkflows).toHaveBeenCalledWith(['wf-new']));
-      expect(mockLocators.actionPolicies.navigateSync).not.toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
     });
 
     it('navigates to listing page on cancel', async () => {
@@ -351,7 +353,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
     });
 
     it('passes undefined to useActionPolicyAutoAttach in create mode', () => {
@@ -457,7 +459,7 @@ describe('ActionPolicyFormPage', () => {
 
       await user.click(screen.getByTestId(TEST_SUBJ.cancelButton));
 
-      expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
     });
 
     describe('Agent Builder auto-attach', () => {

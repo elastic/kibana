@@ -39,7 +39,7 @@ import { useUpdateActionPolicy } from '../../hooks/use_update_action_policy';
 
 export const ActionPolicyFormPage = () => {
   const { id: policyId } = useParams<{ id?: string }>();
-  const { actionPolicies } = useAlertingLocators();
+  const { actionPolicyLocators } = useAlertingLocators();
 
   const {
     data: existingPolicy,
@@ -53,8 +53,8 @@ export const ActionPolicyFormPage = () => {
   const isReady = !isEditMode || !!existingPolicy;
 
   const navigateToList = useCallback(() => {
-    actionPolicies.navigateSync({ page: 'list' });
-  }, [actionPolicies]);
+    actionPolicyLocators.navigateSync({ page: 'list' });
+  }, [actionPolicyLocators]);
 
   const returnButton = (
     <EuiFlexGroup justifyContent="flexStart">

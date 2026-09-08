@@ -82,7 +82,7 @@ export function EpisodeDetailsPage() {
   const [mainPanel, setMainPanel] = useState<EpisodeDetailsMainPanel>('overview');
 
   const { services } = useKibana<AlertEpisodesKibanaServices>();
-  const { episodes } = useAlertingLocators();
+  const { episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const alertsCapability = useService(UserCapabilities).canWrite('alerts')
     ? EPISODE_ACTIONS_PRIVILEGE.all
@@ -267,7 +267,7 @@ export function EpisodeDetailsPage() {
     [applicableActions, episode, invalidateEpisodeQueries]
   );
 
-  const episodesListHref = episodes.useUrl({});
+  const episodesListHref = episodesLocators.useUrl({});
 
   const isLoading = isLoadingEpisode;
   const episodeNotFound = !isLoading && episode == null;

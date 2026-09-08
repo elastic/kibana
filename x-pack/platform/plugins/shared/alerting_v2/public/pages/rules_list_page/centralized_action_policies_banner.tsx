@@ -46,8 +46,8 @@ export const CentralizedActionPoliciesBanner = () => {
   const canCreateActionPolicy = useService(UserCapabilities).canWrite('actionPolicies');
   const { tours } = useService(CoreStart('notifications'));
   const docLinks = useService(CoreStart('docLinks'));
-  const { actionPolicies } = useAlertingLocators();
-  const createUrl = actionPolicies.useUrl({ page: 'create' });
+  const { actionPolicyLocators } = useAlertingLocators();
+  const createUrl = actionPolicyLocators.useUrl({ page: 'create' });
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     CENTRALIZED_ACTION_POLICIES_BANNER_DISMISSED_STORAGE_KEY,
     false
@@ -74,7 +74,7 @@ export const CentralizedActionPoliciesBanner = () => {
             href: createUrl,
             onClick: (e: React.MouseEvent) => {
               e.preventDefault();
-              actionPolicies.navigateSync({ page: 'create' });
+              actionPolicyLocators.navigateSync({ page: 'create' });
             },
             'data-test-subj': 'centralizedActionPoliciesCreate',
           },

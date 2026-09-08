@@ -30,15 +30,17 @@ interface HostParams extends SerializableRecord {
 }
 
 export const getAlertingV2Locators = (share: SharePluginStart): AlertingV2Locators => ({
-  rules: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
-  ruleLibrary: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(
+  rulesLocators: share.url.locators.get<AlertingV2RulesLocatorParams>(ALERTING_V2_RULES_LOCATOR)!,
+  ruleLibraryLocators: share.url.locators.get<AlertingV2RuleLibraryLocatorParams>(
     ALERTING_V2_RULE_LIBRARY_LOCATOR
   )!,
-  episodes: share.url.locators.get<AlertingV2EpisodesLocatorParams>(ALERTING_V2_EPISODES_LOCATOR)!,
-  actionPolicies: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(
+  episodesLocators: share.url.locators.get<AlertingV2EpisodesLocatorParams>(
+    ALERTING_V2_EPISODES_LOCATOR
+  )!,
+  actionPolicyLocators: share.url.locators.get<AlertingV2ActionPoliciesLocatorParams>(
     ALERTING_V2_ACTION_POLICIES_LOCATOR
   )!,
-  executionHistory: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(
+  executionHistoryLocators: share.url.locators.get<AlertingV2ExecutionHistoryLocatorParams>(
     ALERTING_V2_EXECUTION_HISTORY_LOCATOR
   )!,
 });
@@ -69,9 +71,12 @@ export const bindLocatorsToHost = (
   locators: AlertingV2Locators,
   hostApp: AlertingV2HostApp
 ): AlertingV2Locators => ({
-  rules: bindLocatorToHost(locators.rules, hostApp.rules),
-  ruleLibrary: bindLocatorToHost(locators.ruleLibrary, hostApp.ruleLibrary),
-  episodes: bindLocatorToHost(locators.episodes, hostApp.episodes),
-  actionPolicies: bindLocatorToHost(locators.actionPolicies, hostApp.actionPolicies),
-  executionHistory: bindLocatorToHost(locators.executionHistory, hostApp.executionHistory),
+  rulesLocators: bindLocatorToHost(locators.rulesLocators, hostApp.rules),
+  ruleLibraryLocators: bindLocatorToHost(locators.ruleLibraryLocators, hostApp.ruleLibrary),
+  episodesLocators: bindLocatorToHost(locators.episodesLocators, hostApp.episodes),
+  actionPolicyLocators: bindLocatorToHost(locators.actionPolicyLocators, hostApp.actionPolicies),
+  executionHistoryLocators: bindLocatorToHost(
+    locators.executionHistoryLocators,
+    hostApp.executionHistory
+  ),
 });

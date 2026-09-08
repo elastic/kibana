@@ -45,7 +45,7 @@ export const AlertTimelineSection: React.FC = () => {
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const featureFlags = useService(CoreStart('featureFlags'));
-  const { episodes } = useAlertingLocators();
+  const { episodesLocators } = useAlertingLocators();
   const rule = useRule();
   const groupingFields = rule.grouping?.fields;
   const hasGroupingFields = (groupingFields?.length ?? 0) > 0;
@@ -95,7 +95,7 @@ export const AlertTimelineSection: React.FC = () => {
     [share, application.capabilities, uiSettings, windowStartMs, windowEndMs, rule.query]
   );
 
-  const viewAllHref = episodes.useUrl(
+  const viewAllHref = episodesLocators.useUrl(
     {
       filters: { ruleId: rule.id, status: 'all' },
       timeRange: {
@@ -108,15 +108,15 @@ export const AlertTimelineSection: React.FC = () => {
   );
 
   const getEpisodeHref = useCallback(
-    (episodeId: string) => episodes.getRedirectUrl({ episodeId }),
-    [episodes]
+    (episodeId: string) => episodesLocators.getRedirectUrl({ episodeId }),
+    [episodesLocators]
   );
 
   const onEpisodeClick = useCallback(
     (episodeId: string) => {
-      episodes.navigateSync({ episodeId });
+      episodesLocators.navigateSync({ episodeId });
     },
-    [episodes]
+    [episodesLocators]
   );
 
   return (

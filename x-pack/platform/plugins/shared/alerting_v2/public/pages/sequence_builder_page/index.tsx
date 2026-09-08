@@ -71,7 +71,7 @@ const useRuleFormServicesBag = (): RuleFormServices => {
 
 export const SequenceBuilderPage: React.FC = () => {
   const ruleFormServices = useRuleFormServicesBag();
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
 
   const { methods } = useSequenceBuilderForm();
   const uiState = useSequenceBuilderState();
@@ -79,10 +79,10 @@ export const SequenceBuilderPage: React.FC = () => {
   const handleToggleRuleList = useCallback(() => setIsRuleListOpen((prev) => !prev), []);
 
   const handleCancel = useCallback(() => {
-    rules.navigateSync({});
-  }, [rules]);
+    rulesLocators.navigateSync({});
+  }, [rulesLocators]);
 
-  const rulesListHref = rules.useUrl({});
+  const rulesListHref = rulesLocators.useUrl({});
 
   const handleSave = methods.handleSubmit((formValues) => uiState.save(formValues));
 

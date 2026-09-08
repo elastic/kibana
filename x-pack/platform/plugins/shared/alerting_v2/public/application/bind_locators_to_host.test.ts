@@ -90,22 +90,22 @@ describe('bindLocatorToHost', () => {
 describe('bindLocatorsToHost', () => {
   it('binds each page locator to the matching host entry', () => {
     const locators = {
-      rules: createMockLocator(),
-      ruleLibrary: createMockLocator(),
-      episodes: createMockLocator(),
-      actionPolicies: createMockLocator(),
-      executionHistory: createMockLocator(),
+      rulesLocators: createMockLocator(),
+      ruleLibraryLocators: createMockLocator(),
+      episodesLocators: createMockLocator(),
+      actionPolicyLocators: createMockLocator(),
+      executionHistoryLocators: createMockLocator(),
     } as unknown as AlertingV2Locators;
 
     const bound = bindLocatorsToHost(locators, SEARCH_HOST);
-    bound.rules.navigateSync({});
-    bound.episodes.navigateSync({});
+    bound.rulesLocators.navigateSync({});
+    bound.episodesLocators.navigateSync({});
 
-    expect(locators.rules.navigateSync).toHaveBeenCalledWith(
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith(
       { host: SEARCH_HOST.rules },
       undefined
     );
-    expect(locators.episodes.navigateSync).toHaveBeenCalledWith(
+    expect(locators.episodesLocators.navigateSync).toHaveBeenCalledWith(
       { host: SEARCH_HOST.episodes },
       undefined
     );
@@ -113,25 +113,25 @@ describe('bindLocatorsToHost', () => {
 
   it('observability and search bindings do not clobber each other', () => {
     const locators = {
-      rules: createMockLocator(),
-      ruleLibrary: createMockLocator(),
-      episodes: createMockLocator(),
-      actionPolicies: createMockLocator(),
-      executionHistory: createMockLocator(),
+      rulesLocators: createMockLocator(),
+      ruleLibraryLocators: createMockLocator(),
+      episodesLocators: createMockLocator(),
+      actionPolicyLocators: createMockLocator(),
+      executionHistoryLocators: createMockLocator(),
     } as unknown as AlertingV2Locators;
 
     const obsBound = bindLocatorsToHost(locators, OBSERVABILITY_HOST);
     const searchBound = bindLocatorsToHost(locators, SEARCH_HOST);
 
-    obsBound.rules.navigateSync({ ruleId: 'r-1' });
-    searchBound.rules.navigateSync({ ruleId: 'r-1' });
+    obsBound.rulesLocators.navigateSync({ ruleId: 'r-1' });
+    searchBound.rulesLocators.navigateSync({ ruleId: 'r-1' });
 
-    expect(locators.rules.navigateSync).toHaveBeenNthCalledWith(
+    expect(locators.rulesLocators.navigateSync).toHaveBeenNthCalledWith(
       1,
       { ruleId: 'r-1', host: OBSERVABILITY_HOST.rules },
       undefined
     );
-    expect(locators.rules.navigateSync).toHaveBeenNthCalledWith(
+    expect(locators.rulesLocators.navigateSync).toHaveBeenNthCalledWith(
       2,
       { ruleId: 'r-1', host: SEARCH_HOST.rules },
       undefined
@@ -140,16 +140,16 @@ describe('bindLocatorsToHost', () => {
 
   it('management host binding injects MANAGEMENT_HOST page paths', () => {
     const locators = {
-      rules: createMockLocator(),
-      ruleLibrary: createMockLocator(),
-      episodes: createMockLocator(),
-      actionPolicies: createMockLocator(),
-      executionHistory: createMockLocator(),
+      rulesLocators: createMockLocator(),
+      ruleLibraryLocators: createMockLocator(),
+      episodesLocators: createMockLocator(),
+      actionPolicyLocators: createMockLocator(),
+      executionHistoryLocators: createMockLocator(),
     } as unknown as AlertingV2Locators;
 
-    bindLocatorsToHost(locators, MANAGEMENT_HOST).rules.navigateSync({});
+    bindLocatorsToHost(locators, MANAGEMENT_HOST).rulesLocators.navigateSync({});
 
-    expect(locators.rules.navigateSync).toHaveBeenCalledWith(
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith(
       { host: MANAGEMENT_HOST.rules },
       undefined
     );

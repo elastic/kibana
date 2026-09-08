@@ -91,7 +91,7 @@ export const ActionPoliciesTable = () => {
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
-  const { actionPolicies } = useAlertingLocators();
+  const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
     CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
@@ -101,8 +101,8 @@ export const ActionPoliciesTable = () => {
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
 
   const navigateToCreate = useCallback(() => {
-    actionPolicies.navigateSync({ page: 'create' });
-  }, [actionPolicies]);
+    actionPolicyLocators.navigateSync({ page: 'create' });
+  }, [actionPolicyLocators]);
 
   const { mutate: createActionPolicy } = useCreateActionPolicy();
   const { mutate: deleteActionPolicy, isLoading: isDeleting } = useDeleteActionPolicy();
@@ -150,8 +150,8 @@ export const ActionPoliciesTable = () => {
   const { mutate: bulkAction, isLoading: isBulkActionInProgress } = useBulkActionActionPolicies();
 
   const navigateToEdit = useCallback(
-    (id: string) => actionPolicies.navigateSync({ page: 'edit', actionPolicyId: id }),
-    [actionPolicies]
+    (id: string) => actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id }),
+    [actionPolicyLocators]
   );
 
   const clonePolicy = useCallback(

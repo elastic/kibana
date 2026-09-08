@@ -29,11 +29,13 @@ const createMockLocator = () => ({
 });
 
 export const createMockLocators = (): AlertingV2Locators => ({
-  rules: createMockLocator() as unknown as AlertingV2Locators['rules'],
-  ruleLibrary: createMockLocator() as unknown as AlertingV2Locators['ruleLibrary'],
-  episodes: createMockLocator() as unknown as AlertingV2Locators['episodes'],
-  actionPolicies: createMockLocator() as unknown as AlertingV2Locators['actionPolicies'],
-  executionHistory: createMockLocator() as unknown as AlertingV2Locators['executionHistory'],
+  rulesLocators: createMockLocator() as unknown as AlertingV2Locators['rulesLocators'],
+  ruleLibraryLocators: createMockLocator() as unknown as AlertingV2Locators['ruleLibraryLocators'],
+  episodesLocators: createMockLocator() as unknown as AlertingV2Locators['episodesLocators'],
+  actionPolicyLocators:
+    createMockLocator() as unknown as AlertingV2Locators['actionPolicyLocators'],
+  executionHistoryLocators:
+    createMockLocator() as unknown as AlertingV2Locators['executionHistoryLocators'],
 });
 
 export const createDefaultServicesMock = (): AlertEpisodesKibanaServices => {

@@ -259,7 +259,7 @@ describe('ActionPoliciesTable', () => {
     await waitFor(() => expect(screen.getByTestId('createActionPolicyButton')).toBeInTheDocument());
     await user.click(screen.getByTestId('createActionPolicyButton'));
 
-    expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
+    expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
   });
 
   it('opens agent chat from the header create split button', async () => {
@@ -697,7 +697,7 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
       await user.click(screen.getByTestId('createActionPolicyCard'));
 
-      expect(mockLocators.actionPolicies.navigateSync).toHaveBeenCalled();
+      expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalled();
     });
 
     it('opens agent chat from the empty state create-with-agent card', async () => {

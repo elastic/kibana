@@ -31,7 +31,7 @@ interface Props {
 }
 
 export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props) => {
-  const { actionPolicies } = useAlertingLocators();
+  const { actionPolicyLocators } = useAlertingLocators();
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
 
   const [policyToDelete, setPolicyToDelete] = useState<ActionPolicyResponse | null>(null);
@@ -56,7 +56,7 @@ export const ActionPolicyDetailsFlyoutContainer = ({ policyId, onClose }: Props)
 
   const navigateToEdit = (id: string) => {
     onClose();
-    actionPolicies.navigateSync({ page: 'edit', actionPolicyId: id });
+    actionPolicyLocators.navigateSync({ page: 'edit', actionPolicyId: id });
   };
 
   const clonePolicy = (source: ActionPolicyResponse) => {

@@ -68,11 +68,11 @@ const ActionPoliciesSubsectionHeader = ({ openHref }: { openHref: string }) => (
 
 export const ActionPoliciesArtifactsSubsection: React.FC = () => {
   const rule = useRule();
-  const { actionPolicies } = useAlertingLocators();
+  const { actionPolicyLocators } = useAlertingLocators();
   const { totalCount, catchAllCount, matchingCriteriaCount, isCountTruncated, isLoading, isError } =
     useLinkedActionPolicies(rule.id);
 
-  const openNotificationPoliciesHref = actionPolicies.useUrl({ page: 'list' });
+  const openNotificationPoliciesHref = actionPolicyLocators.useUrl({ page: 'list' });
 
   const statTitle = isCountTruncated ? `${totalCount}+` : totalCount;
 

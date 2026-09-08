@@ -40,11 +40,11 @@ class DisableAfterCreateFailedError extends Error {
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const viewRuleActionProps = (ruleId: string) => {
-    const href = rules.getRedirectUrl({ ruleId });
+    const href = rulesLocators.getRedirectUrl({ ruleId });
     return {
       primary: {
         children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
@@ -53,7 +53,7 @@ export const useCreateRule = () => {
         href,
         onClick: (event: MouseEvent) => {
           event.preventDefault();
-          rules.navigateSync({ ruleId });
+          rulesLocators.navigateSync({ ruleId });
         },
         'data-test-subj': 'alertingV2ViewRuleToastLink',
       },

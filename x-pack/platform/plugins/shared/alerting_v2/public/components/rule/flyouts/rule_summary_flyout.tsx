@@ -71,13 +71,13 @@ export const RuleSummaryFlyout = ({
   ownFocus = true,
   hasAnimation = true,
 }: RuleSummaryFlyoutProps) => {
-  const { rules } = useAlertingLocators();
+  const { rulesLocators } = useAlertingLocators();
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
     | undefined;
   useRuleAutoAttach(rule, { chrome, agentBuilder });
-  const detailsHref = rules.useUrl({ ruleId: rule.id });
+  const detailsHref = rulesLocators.useUrl({ ruleId: rule.id });
 
   return (
     <RuleProvider rule={rule}>
