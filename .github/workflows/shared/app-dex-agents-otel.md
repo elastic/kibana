@@ -15,6 +15,10 @@ description: >-
 network:
   allowed:
     - agent-observability-ce9858.ingest.us-east4.gcp.elastic.cloud
+    # Claude Code makes one direct call to api.anthropic.com at startup. Since gh-aw
+    # v0.87.9 engine domains are opt-in, so without this every run reports
+    # "Firewall blocked 1 domain". Inference itself goes through the api-proxy.
+    - api.anthropic.com
 env:
   CLAUDE_CODE_ENABLE_TELEMETRY: "1"
   OTEL_METRICS_EXPORTER: otlp
