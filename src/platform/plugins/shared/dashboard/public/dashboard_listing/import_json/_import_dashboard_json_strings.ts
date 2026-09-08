@@ -44,18 +44,6 @@ export const importDashboardJsonStrings = {
       defaultMessage:
         'Some panels could not be imported as configured. They will be imported in a degraded state.',
     }),
-  getConflictTitle: () =>
-    i18n.translate('dashboard.importJson.flyout.conflictTitle', {
-      defaultMessage: 'A dashboard with the same ID already exists',
-    }),
-  getCreateNewCopyLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.createNewCopyLabel', {
-      defaultMessage: 'Create new copy',
-    }),
-  getOverwriteLabel: () =>
-    i18n.translate('dashboard.importJson.flyout.overwriteLabel', {
-      defaultMessage: 'Overwrite existing dashboard',
-    }),
   getSuccessToast: (title: string) =>
     i18n.translate('dashboard.importJson.successToast', {
       defaultMessage: 'Dashboard "{title}" imported successfully.',

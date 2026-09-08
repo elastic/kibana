@@ -11,7 +11,6 @@ import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { ImportDashboardJsonFlyout } from './import_dashboard_json_flyout';
 
@@ -21,14 +20,10 @@ jest.mock(
   () => ({ sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args) })
 );
 
-const mockDashboardClientGet = jest.fn();
 const mockDashboardClientCreate = jest.fn();
-const mockDashboardClientUpdate = jest.fn();
 jest.mock('../../dashboard_client/dashboard_client', () => ({
   dashboardClient: {
-    get: (...args: unknown[]) => mockDashboardClientGet(...args),
     create: (...args: unknown[]) => mockDashboardClientCreate(...args),
-    update: (...args: unknown[]) => mockDashboardClientUpdate(...args),
   },
 }));
 
@@ -65,9 +60,6 @@ describe('ImportDashboardJsonFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockSanitizeDashboard.mockResolvedValue({ data: VALID_STATE, warnings: [] });
-    mockDashboardClientGet.mockRejectedValue(
-      new SavedObjectNotFound({ type: 'dashboard', id: 'missing-id' })
-    );
     mockDashboardClientCreate.mockResolvedValue({ id: 'new-id', data: VALID_STATE });
   });
 
@@ -82,9 +74,20 @@ describe('ImportDashboardJsonFlyout', () => {
     const badFile = new File(['not json }{'], 'bad.json', { type: 'application/json' });
     await pickFile(badFile);
     await waitFor(() =>
-      expect(
-        screen.getByText(/does not contain valid JSON/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/does not contain valid JSON/)).toBeInTheDocument()
+    );
+  });
+
+  it('shows an error when the public API response shape { id, data, meta } is provided', async () => {
+    renderFlyout();
+    const apiResponseFile = new File(
+      [JSON.stringify({ id: 'abc', data: VALID_STATE, meta: {} })],
+      'api.json',
+      { type: 'application/json' }
+    );
+    await pickFile(apiResponseFile);
+    await waitFor(() =>
+      expect(screen.getByText(/does not appear to be a valid dashboard/)).toBeInTheDocument()
     );
   });
 
@@ -133,56 +136,5 @@ describe('ImportDashboardJsonFlyout', () => {
     await waitFor(() => expect(mockDashboardClientCreate).toHaveBeenCalledWith(VALID_STATE));
     expect(onImportSuccess).toHaveBeenCalledWith('new-id', 'My Dashboard');
     expect(closeFlyout).toHaveBeenCalled();
-  });
-
-  describe('when the imported JSON carries an id that already exists', () => {
-    const STATE_WITH_ID = { id: 'existing-id', data: VALID_STATE };
-    const fileWithId = new File([JSON.stringify(STATE_WITH_ID)], 'dashboard.json', {
-      type: 'application/json',
-    });
-
-    beforeEach(() => {
-      mockDashboardClientGet.mockResolvedValue({ id: 'existing-id', data: VALID_STATE });
-    });
-
-    it('shows the conflict callout', async () => {
-      renderFlyout();
-      await pickFile(fileWithId);
-      await waitFor(() =>
-        expect(screen.getByTestId('importDashboardJsonConflict')).toBeInTheDocument()
-      );
-    });
-
-    it('creates a new copy by default', async () => {
-      renderFlyout();
-      await pickFile(fileWithId);
-      await waitFor(() =>
-        expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled()
-      );
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('importDashboardJsonImportButton'));
-      });
-      await waitFor(() => expect(mockDashboardClientCreate).toHaveBeenCalled());
-      expect(mockDashboardClientUpdate).not.toHaveBeenCalled();
-    });
-
-    it('overwrites when the user chooses overwrite', async () => {
-      mockDashboardClientUpdate.mockResolvedValue({ id: 'existing-id', data: VALID_STATE });
-      renderFlyout();
-      await pickFile(fileWithId);
-      await waitFor(() =>
-        expect(screen.getByTestId('importDashboardJsonConflict')).toBeInTheDocument()
-      );
-      await act(async () => {
-        await userEvent.click(screen.getByRole('radio', { name: /Overwrite/i }));
-      });
-      await act(async () => {
-        await userEvent.click(screen.getByTestId('importDashboardJsonImportButton'));
-      });
-      await waitFor(() =>
-        expect(mockDashboardClientUpdate).toHaveBeenCalledWith('existing-id', VALID_STATE)
-      );
-      expect(mockDashboardClientCreate).not.toHaveBeenCalled();
-    });
   });
 });

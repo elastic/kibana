@@ -20,14 +20,12 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiRadioGroup,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import type { DashboardState } from '../../../common';
 import { dashboardClient } from '../../dashboard_client/dashboard_client';
@@ -40,31 +38,26 @@ interface ImportDashboardJsonFlyoutProps {
   onImportSuccess: (id: string, title: string) => void;
 }
 
-type ConflictChoice = 'new' | 'overwrite';
-
-/** Parsed input: the state plus an optional existing ID from the API response shape. */
-interface ParsedDashboard {
-  state: DashboardState;
-  id?: string;
-}
-
-/** Accepts both the raw DashboardState and the `{ id, data, meta }` public API shape. */
-const parseDashboardJson = (raw: unknown): ParsedDashboard => {
+/**
+ * Parses the file contents as a raw DashboardState (the format produced by Export JSON).
+ * The public API response shape `{ id, data, meta }` is intentionally rejected — only
+ * the inner `data` is importable, and users should not hand-edit API responses.
+ */
+const parseDashboardJson = (raw: unknown): DashboardState => {
   if (typeof raw !== 'object' || raw === null) {
     throw new Error('not an object');
   }
 
   const obj = raw as Record<string, unknown>;
 
-  // Public API shape: { id, data, meta }
-  if (typeof obj.data === 'object' && obj.data !== null && typeof obj.id === 'string') {
-    return { state: obj.data as DashboardState, id: obj.id };
+  // Reject the public API response shape { id, data, meta } — importing id/meta is not supported.
+  if (typeof obj.id === 'string' && typeof obj.data === 'object') {
+    throw new Error('api response shape');
   }
 
-  // Raw DashboardState (no wrapping id/data keys)
-  // Minimal heuristic: must have a `title` string (DashboardState requires it via schema)
+  // DashboardState must have a title string at minimum.
   if (typeof obj.title === 'string') {
-    return { state: obj as unknown as DashboardState };
+    return obj as unknown as DashboardState;
   }
 
   throw new Error('unrecognised format');
@@ -76,18 +69,14 @@ export const ImportDashboardJsonFlyout = ({
 }: ImportDashboardJsonFlyoutProps) => {
   const [parseError, setParseError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [parsed, setParsed] = useState<ParsedDashboard | null>(null);
-  const [conflictExists, setConflictExists] = useState(false);
-  const [conflictChoice, setConflictChoice] = useState<ConflictChoice>('new');
+  const [sanitizedState, setSanitizedState] = useState<DashboardState | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
   const resetState = useCallback(() => {
     setParseError(null);
     setWarnings([]);
-    setParsed(null);
-    setConflictExists(false);
-    setConflictChoice('new');
+    setSanitizedState(null);
   }, []);
 
   const onFileChange = useCallback(
@@ -108,32 +97,17 @@ export const ImportDashboardJsonFlyout = ({
           return;
         }
 
-        let result: ParsedDashboard;
+        let state: DashboardState;
         try {
-          result = parseDashboardJson(raw);
+          state = parseDashboardJson(raw);
         } catch {
           setParseError(importDashboardJsonStrings.getInvalidFormatError());
           return;
         }
 
-        // Sanitize to get warnings and cleaned state
-        const { data: sanitizedState, warnings: sanitizeWarnings } = await sanitizeDashboard(
-          result.state
-        );
+        const { data, warnings: sanitizeWarnings } = await sanitizeDashboard(state);
         setWarnings(sanitizeWarnings);
-        setParsed({ state: sanitizedState, id: result.id });
-
-        // Check for ID conflict if the JSON carries an id
-        if (result.id) {
-          try {
-            await dashboardClient.get(result.id);
-            setConflictExists(true);
-          } catch (e) {
-            if (!(e instanceof SavedObjectNotFound)) {
-              throw e;
-            }
-          }
-        }
+        setSanitizedState(data);
       } catch (e) {
         coreServices.notifications.toasts.addDanger({
           title: importDashboardJsonStrings.getFlyoutTitle(),
@@ -147,21 +121,13 @@ export const ImportDashboardJsonFlyout = ({
   );
 
   const onImport = useCallback(async () => {
-    if (!parsed) return;
+    if (!sanitizedState) return;
 
     setIsImporting(true);
     try {
-      let result: { id: string; data: DashboardState };
-
-      if (conflictExists && conflictChoice === 'overwrite' && parsed.id) {
-        result = await dashboardClient.update(parsed.id, parsed.state);
-      } else {
-        result = await dashboardClient.create(parsed.state);
-      }
-
-      const importedTitle = result.data.title ?? '';
+      const result = await dashboardClient.create(sanitizedState);
       closeFlyout();
-      onImportSuccess(result.id, importedTitle);
+      onImportSuccess(result.id, result.data.title ?? '');
     } catch (e) {
       coreServices.notifications.toasts.addDanger({
         title: importDashboardJsonStrings.getFlyoutTitle(),
@@ -170,20 +136,9 @@ export const ImportDashboardJsonFlyout = ({
     } finally {
       setIsImporting(false);
     }
-  }, [parsed, conflictExists, conflictChoice, closeFlyout, onImportSuccess]);
+  }, [sanitizedState, closeFlyout, onImportSuccess]);
 
-  const conflictRadios = [
-    {
-      id: 'new',
-      label: importDashboardJsonStrings.getCreateNewCopyLabel(),
-    },
-    {
-      id: 'overwrite',
-      label: importDashboardJsonStrings.getOverwriteLabel(),
-    },
-  ];
-
-  const canImport = Boolean(parsed) && !isValidating && !parseError;
+  const canImport = Boolean(sanitizedState) && !isValidating && !parseError;
 
   return (
     <>
@@ -251,27 +206,6 @@ export const ImportDashboardJsonFlyout = ({
                   <li key={i}>{w}</li>
                 ))}
               </ul>
-            </EuiCallOut>
-          </>
-        )}
-
-        {conflictExists && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut
-              announceOnMount
-              title={importDashboardJsonStrings.getConflictTitle()}
-              color="warning"
-              iconType="warning"
-              data-test-subj="importDashboardJsonConflict"
-            >
-              <EuiRadioGroup
-                name="importDashboardJsonConflictChoice"
-                options={conflictRadios}
-                idSelected={conflictChoice}
-                onChange={(id) => setConflictChoice(id as ConflictChoice)}
-                data-test-subj="importDashboardJsonConflictChoice"
-              />
             </EuiCallOut>
           </>
         )}
