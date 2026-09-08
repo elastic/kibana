@@ -100,28 +100,19 @@ const StandardProviders = ({
   );
 };
 
-export const AlertingV2RulesPage = ({
-  container,
-  setBreadcrumbs,
-}: InternalPageProps) => (
+export const AlertingV2RulesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <RulesApp />
   </StandardProviders>
 );
 
-export const AlertingV2RuleLibraryPage = ({
-  container,
-  setBreadcrumbs,
-}: InternalPageProps) => (
+export const AlertingV2RuleLibraryPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <RuleLibraryApp />
   </StandardProviders>
 );
 
-export const AlertingV2ActionPoliciesPage = ({
-  container,
-  setBreadcrumbs,
-}: InternalPageProps) => (
+export const AlertingV2ActionPoliciesPage = ({ container, setBreadcrumbs }: InternalPageProps) => (
   <StandardProviders container={container} setBreadcrumbs={setBreadcrumbs}>
     <ActionPoliciesApp />
   </StandardProviders>

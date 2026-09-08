@@ -203,11 +203,7 @@ describe('composable pages', () => {
   });
 
   describe('useRouteMatch route matching', () => {
-    const renderAtRoute = (
-      parentPath: string,
-      location: string,
-      ui: React.ReactElement
-    ) =>
+    const renderAtRoute = (parentPath: string, location: string, ui: React.ReactElement) =>
       render(
         <MemoryRouter initialEntries={[location]}>
           <Route path={parentPath}>{ui}</Route>
@@ -236,27 +232,47 @@ describe('composable pages', () => {
     });
 
     it('RulesPage renders rule detail at parent/:ruleId', () => {
-      renderAtRoute('/rules/v2', '/rules/v2/some-rule', <AlertingV2RulesPage {...defaultProps()} />);
+      renderAtRoute(
+        '/rules/v2',
+        '/rules/v2/some-rule',
+        <AlertingV2RulesPage {...defaultProps()} />
+      );
       expect(screen.getByTestId('ruleDetailsRoute')).toBeInTheDocument();
     });
 
     it('ActionPoliciesPage renders list when parent route matches', () => {
-      renderAtRoute('/action-policies', '/action-policies', <AlertingV2ActionPoliciesPage {...defaultProps()} />);
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
       expect(screen.getByTestId('listActionPoliciesPage')).toBeInTheDocument();
     });
 
     it('ActionPoliciesPage renders create at parent/create', () => {
-      renderAtRoute('/action-policies', '/action-policies/create', <AlertingV2ActionPoliciesPage {...defaultProps()} />);
+      renderAtRoute(
+        '/action-policies',
+        '/action-policies/create',
+        <AlertingV2ActionPoliciesPage {...defaultProps()} />
+      );
       expect(screen.getByTestId('actionPolicyFormPage')).toBeInTheDocument();
     });
 
     it('RuleLibraryPage renders when parent route matches', () => {
-      renderAtRoute('/rule-library', '/rule-library', <AlertingV2RuleLibraryPage {...defaultProps()} />);
+      renderAtRoute(
+        '/rule-library',
+        '/rule-library',
+        <AlertingV2RuleLibraryPage {...defaultProps()} />
+      );
       expect(screen.getByTestId('ruleLibraryPage')).toBeInTheDocument();
     });
 
     it('ExecutionHistoryPage renders when parent route matches', () => {
-      renderAtRoute('/execution-history', '/execution-history', <AlertingV2ExecutionHistoryPage {...defaultProps()} />);
+      renderAtRoute(
+        '/execution-history',
+        '/execution-history',
+        <AlertingV2ExecutionHistoryPage {...defaultProps()} />
+      );
       expect(screen.getByTestId('executionHistoryPage')).toBeInTheDocument();
     });
   });
