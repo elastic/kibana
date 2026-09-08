@@ -1768,3 +1768,263 @@ describe('resolveSharedPackagePolicyShard (deterministic shard for a shared pack
     expect(resolveSharedPackagePolicyShard(['agent-a', 'agent-b'], { 'agent-a': 40 })).toBe(100);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// V5: Pack-level execution defaults (Path A fan-out) tests — task 3.3 / 3.4
+// ─────────────────────────────────────────────────────────────────────────────
+describe('convertSOQueriesToPackConfig — V5 execution defaults fan-out', () => {
+  const FIXED_FALLBACK = '2026-01-01T00:00:00.000Z';
+
+  const makeQuery = (overrides: Record<string, unknown> = {}) => ({
+    default: {
+      id: 'q1',
+      name: 'test-query',
+      query: 'SELECT 1;',
+      interval: 3600,
+      schedule_id: 'sched-1',
+      start_date: '2024-01-01T00:00:00.000Z',
+      ...overrides,
+    },
+  });
+
+  const baseOpts = {
+    isRruleFeatureEnabled: false,
+    fallbackStartDate: FIXED_FALLBACK,
+  };
+
+  describe('disabled query filtering', () => {
+    it('omits a query with enabled: false', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ enabled: false }), baseOpts);
+      expect(Object.keys(queries)).toHaveLength(0);
+    });
+
+    it('includes a query with enabled: true', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ enabled: true }), baseOpts);
+      expect(queries.q1).toBeDefined();
+    });
+
+    it('includes a query with no enabled field (legacy default = enabled)', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), baseOpts);
+      expect(queries.q1).toBeDefined();
+    });
+
+    it('disabled query does not consume fan-out when pack has version', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ enabled: false }), {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: '5.10.0' },
+      });
+      expect(Object.keys(queries)).toHaveLength(0);
+    });
+  });
+
+  describe('min_osquery_version fan-out', () => {
+    it('fans pack-level version onto a query with no per-query version', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: '5.10.0' },
+      });
+      expect(queries.q1.version).toBe('5.10.0');
+    });
+
+    it('per-query version wins over pack-level version', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ version: '5.12.0' }), {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: '5.10.0' },
+      });
+      expect(queries.q1.version).toBe('5.12.0');
+    });
+
+    it('omits version key entirely when neither pack nor query has a value', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), baseOpts);
+      expect(queries.q1).not.toHaveProperty('version');
+    });
+
+    it('omits version key when pack default is null', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: null },
+      });
+      expect(queries.q1).not.toHaveProperty('version');
+    });
+  });
+
+  describe('result_type fan-out', () => {
+    it('snapshot result_type emits no snapshot/removed keys', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'snapshot' },
+      });
+      expect(queries.q1).not.toHaveProperty('snapshot');
+      expect(queries.q1).not.toHaveProperty('removed');
+    });
+
+    it('differential result_type emits { snapshot: false, removed: true }', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'differential' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('differential_added_only result_type emits { snapshot: false, removed: false }', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'differential_added_only' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(false);
+    });
+
+    it('per-query result_type override wins over pack default', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ result_type: 'differential' }), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'snapshot' },
+      });
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('no result_type default → falls back to legacy snapshot/removed booleans', () => {
+      const { queries } = convertSOQueriesToPackConfig(
+        makeQuery({ snapshot: false, removed: true }),
+        baseOpts
+      );
+      expect(queries.q1.snapshot).toBe(false);
+      expect(queries.q1.removed).toBe(true);
+    });
+
+    it('no result_type and no snapshot stored → no wire keys (absence-means-snapshot)', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), baseOpts);
+      expect(queries.q1).not.toHaveProperty('snapshot');
+      expect(queries.q1).not.toHaveProperty('removed');
+    });
+  });
+
+  describe('phase-1 assertion — no pack-root execution fields on wire', () => {
+    it('emitted pack-root does not include version', () => {
+      const output = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: '5.10.0' },
+      });
+      expect(output).not.toHaveProperty('version');
+      expect(output).not.toHaveProperty('default_version');
+    });
+
+    it('emitted pack-root does not include result_type', () => {
+      const output = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { result_type: 'differential' },
+      });
+      expect(output).not.toHaveProperty('result_type');
+      expect(output).not.toHaveProperty('default_result_type');
+      expect(output).not.toHaveProperty('default_snapshot');
+      expect(output).not.toHaveProperty('default_removed');
+    });
+  });
+
+  describe('combined fan-out matrix', () => {
+    it('3-query pack: inheriting, overriding version, disabled — asserts exact wire shape', () => {
+      const queries = {
+        q1: {
+          id: 'q1',
+          name: 'q1',
+          query: 'SELECT 1;',
+          interval: 3600,
+          schedule_id: 'sched-1',
+          start_date: '2024-01-01T00:00:00.000Z',
+          // q1 inherits pack version and result_type
+        },
+        q2: {
+          id: 'q2',
+          name: 'q2',
+          query: 'SELECT 2;',
+          interval: 3600,
+          schedule_id: 'sched-2',
+          start_date: '2024-01-01T00:00:00.000Z',
+          version: '5.12.0', // override
+          result_type: 'differential_added_only' as const, // override
+        },
+        q3: {
+          id: 'q3',
+          name: 'q3',
+          query: 'SELECT 3;',
+          interval: 3600,
+          schedule_id: 'sched-3',
+          start_date: '2024-01-01T00:00:00.000Z',
+          enabled: false, // filtered
+        },
+      };
+
+      const { queries: emitted } = convertSOQueriesToPackConfig(queries, {
+        ...baseOpts,
+        packExecutionDefaults: { min_osquery_version: '5.10.0', result_type: 'differential' },
+      });
+
+      // q3 is disabled — absent
+      expect(emitted).not.toHaveProperty('q3');
+      expect(Object.keys(emitted)).toHaveLength(2);
+
+      // q1 inherits pack defaults
+      expect(emitted.q1.version).toBe('5.10.0');
+      expect(emitted.q1.snapshot).toBe(false);
+      expect(emitted.q1.removed).toBe(true);
+
+      // q2 overrides both fields
+      expect(emitted.q2.version).toBe('5.12.0');
+      expect(emitted.q2.snapshot).toBe(false);
+      expect(emitted.q2.removed).toBe(false);
+    });
+  });
+
+  // Pack-level `platform` is a DEFAULT that fans out onto inheriting queries,
+  // not osquery's native `Pack.Platform` init-time gate (which would skip the
+  // entire pack). Kibana never emits that gate field.
+  describe('platform fan-out', () => {
+    it('fans the pack default onto a query with no platform of its own', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux' },
+      });
+      expect(queries.q1.platform).toBe('linux');
+    });
+
+    it('lets a per-query platform win over the pack default', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ platform: 'darwin' }), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux' },
+      });
+      expect(queries.q1.platform).toBe('darwin');
+    });
+
+    it('allows a per-query platform outside the pack default (no intersection)', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery({ platform: 'windows' }), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux,darwin' },
+      });
+      expect(queries.q1.platform).toBe('windows');
+    });
+
+    it('emits no platform when neither the pack nor the query sets one', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), baseOpts);
+      expect(queries.q1).not.toHaveProperty('platform');
+    });
+
+    it('suppresses an all-OS pack default from the wire', () => {
+      const { queries } = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux,windows,darwin' },
+      });
+      expect(queries.q1).not.toHaveProperty('platform');
+    });
+
+    it('does not emit a pack-level platform gate at the pack root', () => {
+      const output = convertSOQueriesToPackConfig(makeQuery(), {
+        ...baseOpts,
+        packExecutionDefaults: { platform: 'linux' },
+      });
+      expect(output).not.toHaveProperty('platform');
+      expect(output).not.toHaveProperty('default_platform');
+    });
+  });
+});

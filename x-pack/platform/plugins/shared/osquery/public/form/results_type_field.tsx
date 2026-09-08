@@ -6,18 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiBetaBadge,
-  EuiFormRow,
-  EuiSuperSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
 import { useController, useFormState } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import { i18n } from '@kbn/i18n';
 
 const SNAPSHOT_OPTION = {
   value: 'snapshot',
@@ -115,32 +107,18 @@ const ResultsTypeFieldComponent: React.FC<ResultsTypeFieldProps> = ({ euiFieldPr
   return (
     <EuiFormRow
       label={
-        <EuiFlexGroup gutterSize="s" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
-              defaultMessage="Result type"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('xpack.osquery.betaBadgeLabel', {
-                defaultMessage: 'Beta',
-              })}
-              size="s"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FormattedMessage
+          id="xpack.osquery.pack.queryFlyoutForm.resultTypeFieldLabel"
+          defaultMessage="Result type"
+        />
       }
       labelAppend={
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.osquery.queryFlyoutForm.fieldOptionalLabel"
-              defaultMessage="(optional)"
-            />
-          </EuiText>
-        </EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          <FormattedMessage
+            id="xpack.osquery.queryFlyoutForm.fieldOptionalLabel"
+            defaultMessage="optional"
+          />
+        </EuiText>
       }
       fullWidth
     >

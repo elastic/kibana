@@ -383,3 +383,29 @@ export type PackInterval = z.infer<typeof PackInterval>;
 
 export const PackIntervalOrUndefined = lazySchema(() => PackInterval.nullable());
 export type PackIntervalOrUndefined = z.infer<typeof PackIntervalOrUndefined>;
+
+/**
+  * Controls the result document type emitted by osquerybeat for this pack or query.
+- `snapshot`: Full table snapshot on every scheduled run (default).
+- `differential`: Rows added or removed since the previous run.
+- `differential_added_only`: Only rows added since the previous run (no removals).
+
+  */
+export const ResultType = lazySchema(() =>
+  z.enum(['snapshot', 'differential', 'differential_added_only'])
+);
+export type ResultType = z.infer<typeof ResultType>;
+export type ResultTypeEnum = typeof ResultType.enum;
+export const ResultTypeEnum = ResultType.enum;
+
+export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
+export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
+
+/**
+ * Minimum osquery agent version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+ */
+export const MinOsqueryVersion = lazySchema(() => z.string());
+export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
+
+export const MinOsqueryVersionOrUndefined = lazySchema(() => MinOsqueryVersion.nullable());
+export type MinOsqueryVersionOrUndefined = z.infer<typeof MinOsqueryVersionOrUndefined>;

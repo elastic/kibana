@@ -10,6 +10,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createPackRoute } from './create_pack_route';
+import { createPackRequestBodySchema } from '../../../common/api/packs/create_pack_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getUserInfo } from '../../lib/get_user_info';
 
@@ -353,6 +354,138 @@ describe('createPackRoute', () => {
       // Explicit override must survive convergence.
       expect(writtenQuery.interval).toBe(300);
       expect(writtenQuery.schedule_type).toBe('interval');
+    });
+  });
+
+  describe('V5: pack-level execution defaults on create', () => {
+    it('stores min_osquery_version and result_type on the SO when provided', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+          min_osquery_version: '5.10.0',
+          result_type: 'differential',
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.badRequest).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const createdAttributes = mockClient.create.mock.calls[0][1];
+      expect(createdAttributes.min_osquery_version).toBe('5.10.0');
+      expect(createdAttributes.result_type).toBe('differential');
+    });
+
+    it('omits min_osquery_version and result_type from SO when not provided (legacy shape)', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const createdAttributes = mockClient.create.mock.calls[0][1];
+      expect(createdAttributes).not.toHaveProperty('min_osquery_version');
+      expect(createdAttributes).not.toHaveProperty('result_type');
+    });
+
+    it('surfaces min_osquery_version and result_type in response data', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      setupRoute({ agentPolicies: [], packagePolicies: [], packagePolicyUpdate });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          queries: { q1: { query: 'SELECT 1', interval: 60 } },
+          min_osquery_version: '5.11.0',
+          result_type: 'differential_added_only',
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      const responseBody = mockResponse.ok.mock.calls[0][0]?.body as {
+        data: Record<string, unknown>;
+      };
+      expect(responseBody.data.min_osquery_version).toBe('5.11.0');
+      expect(responseBody.data.result_type).toBe('differential_added_only');
+    });
+
+    it('per-query enabled: false is persisted to the SO', async () => {
+      const packagePolicyUpdate = jest.fn().mockResolvedValue({});
+      const { mockClient } = setupRoute({
+        agentPolicies: [],
+        packagePolicies: [],
+        packagePolicyUpdate,
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        body: {
+          name: 'my-pack',
+          enabled: false,
+          policy_ids: [],
+          queries: {
+            q1: { query: 'SELECT 1', interval: 60, enabled: false },
+            q2: { query: 'SELECT 2', interval: 60, enabled: true },
+          },
+        },
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(buildMockContext() as any, mockRequest, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+
+      const createdAttributes = mockClient.create.mock.calls[0][1];
+      expect(createdAttributes.queries.q1.enabled).toBe(false);
+      expect(createdAttributes.queries.q2.enabled).toBe(true);
+    });
+
+    it('io-ts schema rejects an invalid result_type value', () => {
+      // Validate directly against the io-ts schema — route handler tests bypass the
+      // framework validation middleware, so schema validation is tested at the codec level.
+      const isRight = (v: unknown) => (v as any)._tag === 'Right';
+      const decode = (body: unknown) => createPackRequestBodySchema.decode(body);
+
+      expect(isRight(decode({ name: 'p', queries: {}, result_type: 'invalid-value' }))).toBe(false);
+
+      expect(isRight(decode({ name: 'p', queries: {}, result_type: 'differential' }))).toBe(true);
+
+      expect(isRight(decode({ name: 'p', queries: {}, result_type: 'snapshot' }))).toBe(true);
+
+      expect(
+        isRight(decode({ name: 'p', queries: {}, result_type: 'differential_added_only' }))
+      ).toBe(true);
     });
   });
 });

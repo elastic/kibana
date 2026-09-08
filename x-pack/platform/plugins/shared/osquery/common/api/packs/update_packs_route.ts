@@ -7,7 +7,11 @@
 
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
-import { packQueryRecordPartialRt, rruleScheduleConfigPartialRt } from './shared_schemas';
+import {
+  packQueryRecordPartialRt,
+  resultTypeRt,
+  rruleScheduleConfigPartialRt,
+} from './shared_schemas';
 
 export const updatePacksRequestBodySchema = t.partial({
   name: t.string,
@@ -19,6 +23,10 @@ export const updatePacksRequestBodySchema = t.partial({
   schedule_type: t.union([t.literal('interval'), t.literal('rrule'), t.null]),
   interval: t.union([toNumberRt, t.null]),
   rrule_schedule: t.union([rruleScheduleConfigPartialRt, t.null]),
+  // V5: pack-level execution defaults (nullable to allow explicit clear)
+  min_osquery_version: t.union([t.string, t.null]),
+  result_type: t.union([resultTypeRt, t.null]),
+  platform: t.union([t.string, t.null]),
 });
 
 export type UpdatePacksRequestBodySchema = t.OutputOf<typeof updatePacksRequestBodySchema>;

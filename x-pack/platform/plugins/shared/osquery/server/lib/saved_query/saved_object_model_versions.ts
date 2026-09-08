@@ -10,7 +10,14 @@ import type {
   SavedObjectsModelVersion,
 } from '@kbn/core-saved-objects-server';
 import { v5 as uuidv5 } from 'uuid';
-import { savedQuerySchemaV2, packSchemaV2, packSchemaV3, packSchemaV4 } from './schemas';
+import {
+  savedQuerySchemaV2,
+  packSchemaV2,
+  packSchemaV3,
+  packSchemaV4,
+  packSchemaV5,
+  packSchemaV6,
+} from './schemas';
 import {
   deriveEffectiveQueryKey,
   hasQueries,
@@ -184,6 +191,53 @@ export const packSavedObjectModelVersion4: SavedObjectsModelVersion = {
   schemas: {
     forwardCompatibility: packSchemaV4.extends({}, { unknowns: 'ignore' }),
     create: packSchemaV4.extends({}, { unknowns: 'allow' }),
+  },
+};
+
+/**
+ * V5 adds pack-level `min_osquery_version` (keyword) and `result_type` (keyword)
+ * at the pack SO root. Forward-additive: existing packs with neither field are
+ * valid; pre-V5 Kibana silently ignores the new fields on write.
+ * Per-query `enabled` lives in the `queries` map which is `dynamic: false` with
+ * `unknowns: 'allow'`, so no mappings addition is needed there.
+ */
+export const packSavedObjectModelVersion5: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        min_osquery_version: { type: 'keyword', ignore_above: 1024 },
+        result_type: { type: 'keyword', ignore_above: 1024 },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: packSchemaV5.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV5.extends({}, { unknowns: 'allow' }),
+  },
+};
+
+/**
+ * V6: pack-level `platform` default.
+ *
+ * Split from V5 rather than added to it: a cluster that already migrated to V5
+ * records `mappingVersions['osquery-pack'] = 10.5.0` in the SO index `_meta`,
+ * so extending V5 in place is silently skipped and the field never reaches the
+ * mapping — writes then fail (create) or drop the value (update). A new model
+ * version is the only change ES will actually apply.
+ */
+export const packSavedObjectModelVersion6: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        platform: { type: 'keyword', ignore_above: 1024 },
+      },
+    },
+  ],
+  schemas: {
+    forwardCompatibility: packSchemaV6.extends({}, { unknowns: 'ignore' }),
+    create: packSchemaV6.extends({}, { unknowns: 'allow' }),
   },
 };
 

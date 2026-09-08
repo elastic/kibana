@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { RRuleScheduleConfig, ScheduleType } from '../../common/schedule';
+import type { ResultType } from '../../common/result_type';
 import type { Shard } from '../../common/utils/converters';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
@@ -33,6 +34,15 @@ export interface PackSavedObject {
   interval?: number;
   /** Pack-level RRULE schedule. Only present when `schedule_type === 'rrule'`. */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Pack-level minimum osquery version default. Fans out to queries that do not override. */
+  min_osquery_version?: string;
+  /** Pack-level result type default. Fans out to queries that do not override. */
+  result_type?: ResultType;
+  /**
+   * Pack-level platform default (comma-separated osquery platform tokens).
+   * Fans out to queries that do not override. Not a pack-level gate.
+   */
+  platform?: string;
 }
 
 export type PackItem = PackSavedObject & {

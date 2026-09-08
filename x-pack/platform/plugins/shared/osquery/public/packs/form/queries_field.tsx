@@ -50,6 +50,17 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
   const { setValue } = useFormContext();
   const packName = useWatch({ name: 'name' });
   const packScheduleFormData = useWatch({ name: 'schedule' }) as ScheduleFormData | undefined;
+  const packMinOsqueryVersionArr = useWatch({ name: 'min_osquery_version' }) as
+    | string[]
+    | undefined;
+  const packResultTypeValue = useWatch({ name: 'result_type' }) as string | undefined;
+  const packPlatformValue = useWatch({ name: 'platform' }) as string | undefined;
+  // Resolve scalar values from the combobox array / super-select string.
+  const packMinOsqueryVersion = packMinOsqueryVersionArr?.length
+    ? packMinOsqueryVersionArr[0]
+    : undefined;
+  const packResultType = packResultTypeValue || undefined;
+  const packPlatform = packPlatformValue || undefined;
 
   const packSchedule = useMemo(
     () =>
@@ -130,6 +141,9 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
               draft.snapshot = updatedQuery.snapshot;
               draft.removed = updatedQuery.removed;
 
+              // Preserve enabled flag from the existing form state (flyout doesn't touch it yet)
+              draft.enabled = fieldValue?.[showEditQueryFlyout]?.enabled;
+
               if (updatedQuery.schedule_type) {
                 draft.schedule_type = updatedQuery.schedule_type;
               } else {
@@ -161,6 +175,16 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
         resolve();
       }),
     [handleHideAddFlyout, append]
+  );
+
+  const handleToggleEnabled = useCallback(
+    (query: PackQueryFormData, enabled: boolean) => {
+      const streamIndex = findIndex(fieldValue, ['id', query.id]);
+      if (streamIndex > -1) {
+        update(streamIndex, { ...fieldValue[streamIndex], enabled });
+      }
+    },
+    [fieldValue, update]
   );
 
   const handleDeleteQueries = useCallback(() => {
@@ -240,6 +264,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           isReadOnly={isReadOnly}
           onEditClick={handleEditClick}
           onDeleteClick={handleDeleteClick}
+          onToggleEnabled={handleToggleEnabled}
           selectedItems={tableSelectedItems}
           setSelectedItems={setTableSelectedItems}
           packSchedule={packSchedule}
@@ -253,6 +278,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           onSave={handleAddQuery}
           onClose={handleHideAddFlyout}
           packSchedule={packSchedule}
+          packMinOsqueryVersion={packMinOsqueryVersion}
+          // @ts-expect-error ResultType narrowing
+          packResultType={packResultType}
+          packPlatform={packPlatform}
         />
       )}
       {showEditQueryFlyout != null && showEditQueryFlyout >= 0 && (
@@ -263,6 +292,10 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
           onSave={handleEditQuery}
           onClose={handleHideEditFlyout}
           packSchedule={packSchedule}
+          packMinOsqueryVersion={packMinOsqueryVersion}
+          // @ts-expect-error ResultType narrowing
+          packResultType={packResultType}
+          packPlatform={packPlatform}
         />
       )}
     </>

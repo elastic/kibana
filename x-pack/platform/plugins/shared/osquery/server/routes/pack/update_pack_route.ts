@@ -128,6 +128,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           schedule_type: rawScheduleType,
           interval: rawInterval,
           rrule_schedule: rawRruleSchedule,
+          // V5: pack-level execution defaults (null = explicit clear)
+          min_osquery_version: rawMinOsqueryVersion,
+          result_type: rawResultType,
         } = request.body;
 
         // Request-boundary feature-flag gate. Any RRULE-shaped field on the
@@ -361,6 +364,18 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           }
         }
 
+        // V5: Only include pack-level execution defaults in the patch when present
+        // in the request body. Undefined = not in the request = preserve existing.
+        // Null = explicit clear.
+        const executionDefaultsPatch: Partial<PackSavedObject> = {};
+        if (rawMinOsqueryVersion !== undefined) {
+          executionDefaultsPatch.min_osquery_version = rawMinOsqueryVersion;
+        }
+
+        if (rawResultType !== undefined) {
+          executionDefaultsPatch.result_type = rawResultType;
+        }
+
         await spaceScopedClient.update<PackSavedObject>(
           packSavedObjectType,
           request.params.id,
@@ -374,6 +389,7 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             updated_by_profile_uid: profileUid,
             shards: convertShardsToArray(effectiveShards),
             ...scheduleSoPatch,
+            ...executionDefaultsPatch,
           },
           {
             refresh: 'wait_for',
@@ -407,6 +423,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               },
               isRruleFeatureEnabled,
               fallbackStartDate: updatedPackSO.attributes.created_at,
+              packExecutionDefaults: {
+                min_osquery_version: updatedPackSO.attributes.min_osquery_version,
+                result_type: updatedPackSO.attributes.result_type ?? undefined,
+                platform: updatedPackSO.attributes.platform ?? undefined,
+              },
             }
           );
 
@@ -458,6 +479,12 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             shards: convertShardsToObject(attrs.shards) as unknown as PackResponseData['shards'],
             saved_object_id: updatedPackSO.id,
             ...buildScheduleResponseSlice(attrs, isRruleFeatureEnabled),
+            // V5: pack-level execution defaults
+            ...(attrs.min_osquery_version != null
+              ? { min_osquery_version: attrs.min_osquery_version }
+              : {}),
+            ...(attrs.result_type != null ? { result_type: attrs.result_type } : {}),
+            ...(attrs.platform != null ? { platform: attrs.platform } : {}),
           };
         };
 

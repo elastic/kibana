@@ -27,8 +27,11 @@ export const templateConfigs = (configsData: PackagePolicy[]) =>
 export const templatePacks = (packsData: PackSavedObject[]) => {
   const nonEmptyQueryPacks = filter(packsData, (pack) => !isEmpty(pack.queries));
 
-  return nonEmptyQueryPacks.map((item) =>
-    pick(
+  return nonEmptyQueryPacks.map((item) => {
+    const queries = item.queries ?? [];
+    const disabledQueryCount = queries.filter((q) => q.enabled === false).length;
+
+    return pick(
       {
         name: item.name,
         enabled: item.enabled,
@@ -37,10 +40,23 @@ export const templatePacks = (packsData: PackSavedObject[]) => {
           ?.length,
         prebuilt:
           !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
+        // V5 telemetry counters
+        has_pack_level_version: !!item.min_osquery_version,
+        has_pack_level_result_type: !!item.result_type,
+        disabled_query_count: disabledQueryCount,
       },
-      ['name', 'queries', 'policies', 'prebuilt', 'enabled']
-    )
-  );
+      [
+        'name',
+        'queries',
+        'policies',
+        'prebuilt',
+        'enabled',
+        'has_pack_level_version',
+        'has_pack_level_result_type',
+        'disabled_query_count',
+      ]
+    );
+  });
 };
 
 /**
@@ -59,4 +75,6 @@ export const templateSavedQueries = (
     ...(!isEmpty(item.removed) ? { snapshot: item.removed } : {}),
     ...(!isEmpty(item.ecs_mapping) ? { ecs_mapping: item.ecs_mapping } : {}),
     prebuilt: prebuiltSavedQueryIds.includes(item.id),
+    // V5 telemetry: track saved queries that have a per-query version set
+    version_set: !!item.version,
   }));

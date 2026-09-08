@@ -47,11 +47,19 @@ import { DescriptionField } from './description_field';
 import type { PackQueryFormData } from '../queries/use_pack_query_form';
 import { PackTypeSelectable } from './shards/pack_type_selectable';
 import { overflowCss } from '../utils';
+import { PackVersionField } from './pack_version_field';
+import { PackResultTypeField } from './pack_result_type_field';
+import { PackPlatformField } from './pack_platform_field';
+import { PackMigrationAdvisory } from './pack_migration_advisory';
+import type { ResultType } from '../../../common/result_type';
 
-type PackFormData = Omit<PackItem, 'id' | 'queries'> & {
+type PackFormData = Omit<PackItem, 'id' | 'queries' | 'min_osquery_version' | 'result_type'> & {
   queries: PackQueryFormData[];
   pack_type: string;
   schedule?: ScheduleFormData;
+  /** V5: pack-level execution defaults. Stored as a 0-or-1 element array to match combo-box state. */
+  min_osquery_version?: string[];
+  result_type?: ResultType | '';
 };
 
 const euiAccordionCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -153,6 +161,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
       queries: convertPackQueriesToSO(payload.queries),
       shards: omit(payload.shards, '*') ?? {},
       schedule: deserializedSchedule,
+      // V5: deserialize pack-level execution defaults
+      min_osquery_version: payload.min_osquery_version ? [payload.min_osquery_version] : [],
+      result_type: payload.result_type ?? '',
+      platform: payload.platform ?? '',
     };
   };
 
@@ -160,7 +172,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
 
   const hooksForm = useHookForm<PackFormData>({
     defaultValues: defaultValue
-      ? { ...deserializer(defaultValue), pack_type: defaultPackType }
+      ? ({ ...deserializer(defaultValue), pack_type: defaultPackType } as PackFormData)
       : {
           name: '',
           description: '',
@@ -169,6 +181,14 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           queries: [],
           pack_type: 'policy',
           schedule: deserializedSchedule,
+          min_osquery_version: [],
+          // A brand-new pack defaults to Snapshot and persists it. Existing
+          // packs deliberately keep whatever they had (see `deserializer`):
+          // defaulting them to snapshot on open would silently rewrite the
+          // per-query `snapshot`/`removed` booleans of a legacy pack the first
+          // time a user saved it, converting differential queries to snapshot.
+          result_type: 'snapshot' as const,
+          platform: '',
         },
   });
 
@@ -287,6 +307,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         schedule_type: _scheduleType,
         interval: _interval,
         rrule_schedule: _rruleSchedule,
+        min_osquery_version: minOsqueryVersionArr,
+        result_type: resultTypeValue,
+        platform: platformValue,
         ...restPayload
       }: PackFormData) => {
         const mappedShards = !isEmpty(shards)
@@ -310,6 +333,15 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             ? serializeSchedule(scheduleFormState)
             : {};
 
+        // V5: emit pack-level execution defaults. Empty array / empty string = not set.
+        const minOsqueryVersion =
+          Array.isArray(minOsqueryVersionArr) && minOsqueryVersionArr.length > 0
+            ? minOsqueryVersionArr[0]
+            : undefined;
+        const resultType = resultTypeValue || undefined;
+        // Empty combo-box selection means "no pack default", not "clear to empty".
+        const platform = platformValue || undefined;
+
         return {
           ...restPayload,
           policy_ids: policies ?? [],
@@ -317,6 +349,10 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           queries: convertSOQueriesToPack(payloadQueries, { includeId: editMode }),
           shards: getShards() ?? {},
           ...scheduleFields,
+          // V5: only emit when set (undefined is cleaner than an empty string to the API)
+          ...(minOsqueryVersion !== undefined ? { min_osquery_version: minOsqueryVersion } : {}),
+          ...(resultType !== undefined ? { result_type: resultType } : {}),
+          ...(platform !== undefined ? { platform } : {}),
         };
       };
 
@@ -389,6 +425,31 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   // Pack content (name, description, queries) is immutable for both read-only
   // (readPacks-only) users and prebuilt Elastic packs.
   const isContentDisabled = isReadOnly || isPrebuilt;
+
+  // V5: show migration advisory when editing a pack that has non-uniform per-query
+  // version or result-type pairs AND no pack-level default is set yet.
+  const showMigrationAdvisory = useMemo(() => {
+    if (!editMode || !defaultValue) return false;
+    const queryList = Object.values(defaultValue.queries ?? {});
+    if (queryList.length < 2) return false;
+
+    // Non-uniform per-query version
+    const versions = new Set(queryList.map((q) => q.version?.[0] ?? ''));
+    if (versions.size > 1) return true;
+
+    // Non-uniform per-query result type (derived from snapshot/removed booleans)
+    const resultTypes = new Set(
+      queryList.map((q) => {
+        if (q.snapshot === false && q.removed === true) return 'differential';
+        if (q.snapshot === false && q.removed === false) return 'differential_added_only';
+
+        return 'snapshot';
+      })
+    );
+    if (resultTypes.size > 1) return true;
+
+    return false;
+  }, [editMode, defaultValue]);
   const euiFieldProps = useMemo(() => ({ isDisabled: isContentDisabled }), [isContentDisabled]);
   // Scheduled agent policies / shards / Type stay editable for prebuilt packs
   // (a writePacks user may re-target them) — only a fully read-only user is
@@ -423,6 +484,9 @@ const PackFormComponent: React.FC<PackFormProps> = ({
   return (
     <>
       <FormProvider {...hooksForm}>
+        {showMigrationAdvisory && defaultValue?.saved_object_id && (
+          <PackMigrationAdvisory packId={defaultValue.saved_object_id} />
+        )}
         <EuiFlexGroup>
           <EuiFlexItem>
             <NameField euiFieldProps={euiFieldProps} />
@@ -430,9 +494,33 @@ const PackFormComponent: React.FC<PackFormProps> = ({
         </EuiFlexGroup>
         <EuiSpacer size="m" />
 
+        {/* Pack-level OS default sits between Name and Description, per the
+            Definition mock. It is a default that fans out onto queries which
+            do not set their own platform — not a pack-level gate. */}
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <PackPlatformField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
         <EuiFlexGroup>
           <EuiFlexItem>
             <DescriptionField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+
+        {/* `alignItems="flexStart"` keeps both controls top-aligned: the result
+            type label carries a BETA badge, which makes its label row taller
+            than the version label's. Without this the two inputs sit at
+            different heights. */}
+        <EuiFlexGroup alignItems="flexStart">
+          <EuiFlexItem>
+            <PackVersionField euiFieldProps={euiFieldProps} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <PackResultTypeField euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />

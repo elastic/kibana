@@ -28,6 +28,7 @@ export const convertPackQueriesToSO = (queries: Record<string, Omit<PackQueryFor
           'ecs_mapping',
           'schedule_type',
           'rrule_schedule',
+          'enabled',
         ]),
       } as PackQueryFormData);
 
