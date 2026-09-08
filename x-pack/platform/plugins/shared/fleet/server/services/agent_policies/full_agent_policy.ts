@@ -17,6 +17,7 @@ import {
   isOtlpOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
+import { isManagedOtlpEndpoint } from '../utils/managed_otlp';
 
 import type {
   FullAgentPolicy,
@@ -397,12 +398,12 @@ export async function getFullAgentPolicy(
     NonNullable<FullAgentPolicy['output_permissions']>
   >((outputPermissions, outputId) => {
     const output = fullAgentPolicy.outputs[outputId];
+    const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
+
     if (
       output &&
       (output.type === outputType.Elasticsearch || output.type === outputType.RemoteElasticsearch)
     ) {
-      const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
-
       if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
@@ -442,7 +443,21 @@ export async function getFullAgentPolicy(
       }
 
       outputPermissions[outputId] = permissions;
+    } else if (
+      agentPolicy.supports_agentless &&
+      originalOutput &&
+      isOtlpOutput(originalOutput) &&
+      isManagedOtlpEndpoint(originalOutput.otlp_exporter.endpoint)
+    ) {
+      outputPermissions[outputId] = {
+        _managed_otlp_apm: {
+          applications: [
+            { application: 'apm', privileges: [PrivilegeType.EVENT], resources: ['*'] },
+          ],
+        },
+      };
     }
+
     return outputPermissions;
   }, {});
 
@@ -618,10 +633,10 @@ export function transformOutputToFullPolicyOutput(
   redactProxySecrets = false
 ): FullAgentPolicyOutput {
   if (isOtlpOutput(output)) {
-    // OTLP policy compilation is not yet implemented — tracked separately.
-    throw new Error(
-      `OTLP output "${output.id}" cannot be compiled into an agent policy output: compilation is not yet implemented`
-    );
+    // otlp_exporter config is compiled into the OTel collector block by generateOtelcolExporter;
+    // all other fields (including secrets for fleet-server secret resolution) pass through.
+    const { otlp_exporter: _, ...rest } = output;
+    return rest;
   }
 
   const {
