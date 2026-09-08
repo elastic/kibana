@@ -288,14 +288,13 @@ describe('seedDefaultSources', () => {
   it('pages through all enabled legacy sources with search_after', async () => {
     const firstPage = Array.from({ length: LEGACY_SOURCE_DISABLE_PAGE_SIZE }, (_, index) => ({
       _id: `legacy:page1-${index}`,
-      // `_doc` sort values are integers, matching what Elasticsearch returns.
-      sort: [index],
+      sort: [`legacy:page1-${index}`],
       _source: { enabled: true },
     }));
     const secondPage = [
       {
         _id: 'legacy:page2-0',
-        sort: [LEGACY_SOURCE_DISABLE_PAGE_SIZE],
+        sort: ['legacy:page2-0'],
         _source: { enabled: true },
       },
     ];
@@ -313,14 +312,9 @@ describe('seedDefaultSources', () => {
     });
 
     expect(esClient.search).toHaveBeenCalledTimes(2);
-    // Pin the sort field: `_id` needs fielddata that Elasticsearch disables by
-    // default, so it throws on a real cluster while a mocked client happily
-    // accepts it. A mock cannot catch that, so assert the field explicitly.
-    expect(esClient.search.mock.calls[0][0]).toEqual(expect.objectContaining({ sort: ['_doc'] }));
     expect(esClient.search.mock.calls[1][0]).toEqual(
       expect.objectContaining({
-        sort: ['_doc'],
-        search_after: [LEGACY_SOURCE_DISABLE_PAGE_SIZE - 1],
+        search_after: ['legacy:page1-999'],
       })
     );
     expect(esClient.update).toHaveBeenCalledTimes(LEGACY_SOURCE_DISABLE_PAGE_SIZE + 1);

@@ -348,14 +348,7 @@ const disableLegacySources = async ({
     const response = await esClient.search<{ enabled?: boolean }>({
       index: THREAT_INTEL_SOURCES_INDEX,
       size: LEGACY_SOURCE_DISABLE_PAGE_SIZE,
-      // `_doc` is the cheapest total ordering for an exhaustive scan and needs
-      // neither fielddata nor a PIT. Sorting on `_id` requires fielddata on
-      // `_id`, which Elasticsearch disallows unless
-      // `indices.id_field_data.enabled` is set, so that form threw
-      // `illegal_argument_exception` on a stock cluster and failed the whole
-      // bootstrap. Order is only a pagination tie-breaker here; every matching
-      // document is updated regardless of the sequence it arrives in.
-      sort: ['_doc'],
+      sort: [{ _id: 'asc' }],
       ...(searchAfter ? { search_after: searchAfter } : {}),
       _source: ['enabled'],
       query: {
