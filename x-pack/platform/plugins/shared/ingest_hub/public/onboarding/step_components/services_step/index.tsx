@@ -29,7 +29,6 @@ import { useServicesStep } from './use_services_step';
 import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { DataFormatSelect } from './data_format_select';
-import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -59,15 +58,8 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setDataFormat,
   } = useServicesStep({ onContinue });
 
-  const { detectAndReviewStep } = useOnboardingFlow();
   const location = useLocation();
-  const isEditMode = new URLSearchParams(location.search).has('deploymentId');
-  const isFormatDisabled =
-    isEditMode ||
-    Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
-    Object.values(detectAndReviewStep.serviceStatuses).some(
-      (s) => s !== 'error' && s !== 'timeout'
-    );
+  const isFormatDisabled = new URLSearchParams(location.search).has('deploymentId');
 
   return (
     <div data-test-subj="onboardingStep-services">
@@ -87,7 +79,6 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             dataFormat={dataFormat}
             onChange={setDataFormat}
             disabled={isFormatDisabled}
-            disabledReason={isEditMode ? 'edit_mode' : 'deployed'}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

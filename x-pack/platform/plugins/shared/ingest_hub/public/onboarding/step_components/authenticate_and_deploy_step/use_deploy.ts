@@ -7,6 +7,7 @@
 
 import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
+import { useHistory, useParams } from 'react-router-dom';
 
 import {
   sendCreateCloudOnboardingDeployment,
@@ -18,6 +19,7 @@ import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
+import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import {
   buildDeployGroups,
   buildInstanceStatuses,
@@ -44,6 +46,8 @@ export interface UseDeployResult {
 }
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
+  const history = useHistory();
+  const { integrationId } = useParams<{ integrationId: string }>();
   const {
     servicesStep,
     authenticateAndDeployStep,
@@ -199,6 +203,14 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
         onboardingDeploymentId = createResp?.item?.id;
         if (onboardingDeploymentId) {
           updateDetectAndReviewStep({ onboardingDeploymentId });
+          // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
+          // and any reload identifies this as a resumable deployment.
+          // Set the session flag first so the reload guard doesn't re-hydrate from SO.
+          sessionStorage.setItem(
+            getOnboardingSessionKey(integrationId, 'hydratedDeploymentId'),
+            onboardingDeploymentId
+          );
+          history.replace({ ...history.location, search: `?deploymentId=${onboardingDeploymentId}` });
         }
       }
 
@@ -260,6 +272,8 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       detectAndReviewStep.onboardingDeploymentId,
       selectedServiceIds,
       dataFormat,
+      history,
+      integrationId,
     ]
   );
 
