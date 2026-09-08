@@ -763,6 +763,31 @@ describe('DatasetClient', () => {
     );
   });
 
+  it('rolls back a new dataset when adding examples fails', async () => {
+    const { client, examplesStorage } = createClient();
+    (examplesStorage.client.bulk as jest.Mock).mockResolvedValueOnce({
+      items: [{ index: { status: 500 } }],
+    });
+
+    await expect(
+      client.create({
+        name: 'dataset-1',
+        description: 'A dataset',
+        examples: [baseExampleA],
+      })
+    ).rejects.toThrow('Failed to add 1 examples to dataset');
+
+    expect(await client.list()).toMatchObject({ total: 0, datasets: [] });
+    expect(await client.get(getDatasetId(DEFAULT_SPACE_ID, 'dataset-1'))).toBeUndefined();
+
+    const created = await client.create({
+      name: 'dataset-1',
+      description: 'A dataset',
+      examples: [baseExampleA],
+    });
+    expect(created.examples).toHaveLength(1);
+  });
+
   it('copies a dataset with new identifiers', async () => {
     const { client, datasetsStorage } = createClient();
     const source = await client.create({
