@@ -342,6 +342,7 @@ export const getSearchEmbeddableFactory = ({
         refreshTrigger$,
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
+        setApproximationApplied: searchEmbeddable.internalApi.setApproximationApplied,
       });
       cancelRequests = _cancelRequests;
 

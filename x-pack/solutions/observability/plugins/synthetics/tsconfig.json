@@ -138,7 +138,8 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/cps-server-utils",
-    "@kbn/observability-utils-server"
+    "@kbn/observability-utils-server",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
