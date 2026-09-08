@@ -526,6 +526,15 @@ exports[`toNavigationItems should return primary items from navigation tree 1`] 
 Array [
   Object {
     "badgeType": undefined,
+    "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home",
+    "href": "/jom/app/security/get_started",
+    "iconType": "home",
+    "id": "security_solution_home",
+    "label": "Home",
+    "sections": undefined,
+  },
+  Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-discover nav-item-deepLinkId-undefined nav-item-id-discover",
     "href": "/jom/app/discover#/?_tab=(tabId:'06892a05-71de-4ca9-ad58-0e0a970dde44')&_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=(columns:!(),dataSource:(dataViewId:'90943e30-9a47-11e8-b64d-95841ca0b247',type:dataView),filters:!(),hideChart:!t,interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))",
     "iconType": "discoverApp",

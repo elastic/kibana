@@ -75,6 +75,68 @@ steps:                             # Required - at least one step
       param: value
 ```
 
+## Space Scoping
+
+The `/s/<space>` prefix is applied based on the **shape** of `with`, not the step's type. Three
+shapes are sent verbatim and hit the **default space** regardless of which space the execution
+belongs to:
+
+| Shape | Applies to |
+| --- | --- |
+| `with.request` object | **any** `kibana.*` type, including generated connectors |
+| `with.form_data` with a top-level `path` | **any** `kibana.*` type |
+| top-level `path` | `type: kibana.request` |
+
+The request runs against the default space, so you get back whatever that space's endpoint
+returns. When it succeeds that's a `200`, and nothing looks wrong; the write just landed in the
+wrong place.
+
+```yaml
+# Wrong: writes to the default space and returns 200.
+- name: add_note
+  type: kibana.request
+  with:
+    method: PATCH
+    path: /api/note
+
+# Also wrong: `with.request` short-circuits prefixing on any kibana.* type.
+- name: set_tags
+  type: kibana.SetAlertTags
+  with:
+    request:
+      method: POST
+      path: /api/detection_engine/signals/tags
+
+# Also wrong: form_data takes its path from the top level and is never prefixed.
+- name: import_objects
+  type: kibana.request
+  with:
+    method: POST
+    path: /api/saved_objects/_import
+    form_data:
+      file:
+        content: "{{ variables.ndjson }}"
+        filename: export.ndjson
+
+# Right: `workflow.spaceId` is the executing space.
+- name: add_note
+  type: kibana.request
+  with:
+    method: PATCH
+    path: "/s/{{ workflow.spaceId }}/api/note"
+```
+
+`/s/default/...` resolves fine, so there is no need to branch on the default space.
+
+`workflow.spaceId` is correct for most workflows, but it is not the only valid expression: a workflow that takes its target space as an input or a variable (`{{ inputs.space_id }}`, `{{ variables.spaceId }}`) should prefix with that instead. The requirement is that the segment resolves to the executing space, not that it is literally `workflow.spaceId`. A cluster-level route that is not space-scoped (e.g. `/api/status`) is the deliberate exception — do not force a space prefix onto one.
+
+Prefer a registered step type over either raw shape when one exists. Step handlers call Kibana
+through a separate helper that does apply the space prefix. A generated connector step only
+prefixes when you pass its named params rather than `request`.
+
+Because `/api/x` and `/s/default/api/x` behave identically, testing in the default space cannot
+detect a missing prefix. Verify in a named non-default space.
+
 ## Common Patterns to Reference
 
 When the user asks about specific patterns, reference these examples:

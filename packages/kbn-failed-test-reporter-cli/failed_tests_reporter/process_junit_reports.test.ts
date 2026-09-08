@@ -180,3 +180,59 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
     expect(createFailureIssue).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('processJUnitReports cascading failures', () => {
+  const makeCascade = () => {
+    const rootCause = makeFailure(0);
+    const cascading = [
+      { ...makeFailure(1), cascading: true },
+      { ...makeFailure(2), cascading: true },
+    ];
+    return { rootCause, cascading, failures: [rootCause, ...cascading] };
+  };
+
+  it('reports only the failure that aborted the run to GitHub', async () => {
+    const { rootCause, failures } = makeCascade();
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(rootCause);
+  });
+
+  it('does not update tracked issues for cascading failures', async () => {
+    const { cascading, failures } = makeCascade();
+    getFailures.mockReturnValue(failures);
+    // every cascading failure is already tracked, so without the guard each would be bumped
+    const { params } = createParams(cascading.map(createExistingIssue));
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(updateFailureIssue).not.toHaveBeenCalled();
+  });
+
+  it('does not consume the new-issue slot', async () => {
+    const { cascading } = makeCascade();
+    const lateFailure = makeFailure(3);
+    getFailures.mockReturnValue([...cascading, lateFailure]);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(createFailureIssue).toHaveBeenCalledTimes(1);
+    expect(createFailureIssue.mock.calls[0][1]).toBe(lateFailure);
+  });
+
+  it('still indexes them and hands them to the file reporter', async () => {
+    const { failures } = makeCascade();
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams();
+
+    await processJUnitReports(['report.xml'], params);
+
+    expect(reportFailuresToEs.mock.calls[0][1]).toHaveLength(3);
+    expect(reportFailuresToFile.mock.calls[0][1]).toHaveLength(3);
+  });
+});

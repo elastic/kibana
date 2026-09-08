@@ -19,6 +19,7 @@ import type {
 } from '../../../common/types/api/template/v1';
 import type { CasesClientArgs } from '../types';
 import { Operations } from '../../authorization';
+import { withUsageCounter } from '../usage_counters';
 
 /**
  * API for interacting with templates.
@@ -43,6 +44,24 @@ export interface TemplatesSubClient {
   getTags(): Promise<string[]>;
   getAuthors(): Promise<string[]>;
 }
+
+/**
+ * Keep this exhaustive so every new client method requires an explicit telemetry decision.
+ * Counters measure attempts: `withUsageCounter` increments before the wrapped call, matching
+ * cases and attachments. Bulk delete has no distinct client method — the HTTP route fans out
+ * to `deleteTemplate` per id, so `delete_template` increments once per template.
+ */
+const usageCounterByMethod = {
+  getAllTemplates: null,
+  getTemplate: null,
+  createTemplate: 'create_template',
+  updateTemplate: 'update_template',
+  deleteTemplate: 'delete_template',
+  validateCreateTemplate: null,
+  validateUpdateTemplate: null,
+  getTags: null,
+  getAuthors: null,
+} as const satisfies Record<keyof TemplatesSubClient, string | null>;
 
 /**
  * Creates the interface for templates.
@@ -142,33 +161,45 @@ export const createTemplatesSubClient = (clientArgs: CasesClientArgs): Templates
       return template;
     },
 
-    createTemplate: async (input: CreateTemplateInput) => {
-      const id = uuidv4();
-      await authorization.ensureAuthorized({
-        operation: Operations.manageTemplate,
-        entities: [{ owner: input.owner, id }],
-      });
-      return templatesService.createTemplate(input, user.username ?? 'unknown', id);
-    },
-
-    updateTemplate: async (templateId: string, input: UpdateTemplateInput) => {
-      const template = await templatesService.getTemplate(templateId);
-      if (!template) {
-        throw Boom.notFound(`Template with id ${templateId} not found`);
+    createTemplate: withUsageCounter(
+      usageCounterByMethod.createTemplate,
+      clientArgs,
+      async (input: CreateTemplateInput) => {
+        const id = uuidv4();
+        await authorization.ensureAuthorized({
+          operation: Operations.manageTemplate,
+          entities: [{ owner: input.owner, id }],
+        });
+        return templatesService.createTemplate(input, user.username ?? 'unknown', id);
       }
-      await ensureCanManageOrHideExistence(template, templateId);
-      await ensureCanManageTargetOwner(template, input);
-      return templatesService.updateTemplate(templateId, input);
-    },
+    ),
 
-    deleteTemplate: async (templateId: string) => {
-      const template = await templatesService.getTemplate(templateId);
-      if (!template) {
-        throw Boom.notFound(`Template with id ${templateId} not found`);
+    updateTemplate: withUsageCounter(
+      usageCounterByMethod.updateTemplate,
+      clientArgs,
+      async (templateId: string, input: UpdateTemplateInput) => {
+        const template = await templatesService.getTemplate(templateId);
+        if (!template) {
+          throw Boom.notFound(`Template with id ${templateId} not found`);
+        }
+        await ensureCanManageOrHideExistence(template, templateId);
+        await ensureCanManageTargetOwner(template, input);
+        return templatesService.updateTemplate(templateId, input);
       }
-      await ensureCanManageOrHideExistence(template, templateId);
-      return templatesService.deleteTemplate(templateId);
-    },
+    ),
+
+    deleteTemplate: withUsageCounter(
+      usageCounterByMethod.deleteTemplate,
+      clientArgs,
+      async (templateId: string) => {
+        const template = await templatesService.getTemplate(templateId);
+        if (!template) {
+          throw Boom.notFound(`Template with id ${templateId} not found`);
+        }
+        await ensureCanManageOrHideExistence(template, templateId);
+        return templatesService.deleteTemplate(templateId);
+      }
+    ),
 
     validateCreateTemplate: async (input: CreateTemplateInput) => {
       await authorization.ensureAuthorized({

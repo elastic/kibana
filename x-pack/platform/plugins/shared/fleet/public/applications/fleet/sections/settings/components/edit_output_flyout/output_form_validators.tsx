@@ -21,6 +21,8 @@ const toSecretValidator =
     return validator(value ?? '');
   };
 
+const validKafkaTopicToken = /%\{\[[^\]]+\](?::[^}]*)?\}/g;
+
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -368,12 +370,30 @@ export function validateKafkaStaticTopic(value: string) {
 export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<string>>) {
   const res = [];
   value.forEach((val, idx) => {
-    if (!val) {
+    if (!val || !val.value) {
       res.push(
         i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicFieldRequiredMessage', {
           defaultMessage: 'Topic is required',
         })
       );
+    } else {
+      const topic = val.value;
+      const stripped = topic.replace(validKafkaTopicToken, '');
+      if (stripped.includes('%{') || (!stripped.includes('{[') && stripped.includes(']}'))) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
+            defaultMessage:
+              'The topic should have a matching number of opening and closing brackets',
+          })
+        );
+      }
+      if (/(?<!%)\{\[/.test(stripped)) {
+        res.push(
+          i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
+            defaultMessage: 'Opening brackets should be preceded by a percent sign',
+          })
+        );
+      }
     }
   });
 
@@ -384,6 +404,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       })
     );
   }
+
   if (res.length) {
     return res;
   }

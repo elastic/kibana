@@ -96,8 +96,7 @@ describe('elasticsearch clients errors', () => {
     '\\tCaused by:\\n' +
     '\\t\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\n' +
     '\\tRoot causes:\\n' +
-    '\\t\\tparsing_exception: unknown query [someInvalidQuery]\\n' +
-    '    at KibanaTransport._request (`);
+    '\\t\\tparsing_exception: unknown query [someInvalidQuery]\\n'`);
       // it contains the offending line for troubleshooting.
       expect(str).toContain('src/core/server/integration_tests/elasticsearch/errors.test.ts:80:7');
     }
