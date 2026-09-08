@@ -15,14 +15,15 @@
     "@kbn/config-schema",
     "@kbn/features-plugin",
     "@kbn/i18n",
-    "@kbn/logging",
     "@kbn/logging-mocks",
     "@kbn/spaces-plugin",
     "@kbn/storage-adapter",
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-http-server-mocks",
+    "@kbn/zod-helpers"
   ],
   "exclude": ["target/**/*"]
 }
