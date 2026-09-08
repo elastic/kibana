@@ -24,8 +24,15 @@ export const euid = {
    * Resolves the entity unique id (EUID) for one document using entity definitions (in-memory only).
    * Input: entity type (e.g. `user`) and a document body like ES `_source` (nested or flattened).
    * Output: EUID string such as `user:…` / `host:…`, or `undefined` when no id can be derived.
+   * Applies the creation gate, so it answers whether a document may create an entity.
    */
   getEuidFromObject: euidModule.getEuidFromObject,
+  /**
+   * Like {@link euid.getEuidFromObject} without the creation gate, so IdP and shared-account
+   * documents still resolve to entities that already exist. For risk scoring and enrichment;
+   * the caller checks store membership.
+   */
+  getEuidFromObjectForSearch: euidModule.getEuidFromObjectForSearch,
   /**
    * Flat map of ECS field → scalar value for the winning identity branch (same pipeline as {@link euid.getEuidFromObject}).
    * Use to seed flyouts, filters, and resolution when you need field-level context, not only the composed EUID string.
@@ -48,8 +55,16 @@ export const euid = {
     /**
      * Builds the Painless expression text that computes the same EUID as `getEuidFromObject` at search time.
      * Input: entity type. Output: a Painless snippet string to embed in scripts or runtime fields.
+     * Applies the creation gate, so it answers whether a document may create an entity.
      */
     getEuidEvaluation: euidModule.getEuidPainlessEvaluation,
+
+    /**
+     * Like {@link euid.painless.getEuidEvaluation} without the creation gate, so IdP and
+     * shared-account documents still resolve to entities that already exist. For risk scoring
+     * and enrichment; the caller checks store membership.
+     */
+    getEuidEvaluationForSearch: euidModule.getEuidPainlessEvaluationForSearch,
 
     /**
      * Elasticsearch `runtime_mappings` entry that exposes the EUID as a `keyword` runtime field (`entity_id`).

@@ -607,11 +607,12 @@ export class DatePicker {
   }
 
   async timePickerExists(): Promise<boolean> {
-    // Some views have no time picker at all (e.g. a data view without a time
-    // field), so this must resolve to `false` rather than throw. Don't delegate
-    // to `isNewDateRangePicker()`: it waits up to 10s for a picker to mount and
-    // throws when none does. Probe both variant markers directly with a short,
-    // non-throwing wait — either one present means a time picker exists.
+    // Resolves to false when no picker is mounted (for example rollup data views
+    // or consumers that still hide it). A disabled picker (no time field) still
+    // counts as present. Don't delegate to `isNewDateRangePicker()`: it waits up
+    // to 10s for a picker to mount and throws when none does. Probe both variant
+    // markers directly with a short, non-throwing wait — either one present
+    // means a time picker exists.
     return this.getTimePickerControl()
       .waitFor({ state: 'visible', timeout: 1000 })
       .then(() => true)
