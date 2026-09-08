@@ -252,6 +252,7 @@ export class AgentBuilderPlugin
         core,
         conversationsService,
         conversationTemplatesService,
+        attachmentsService,
         conversationId,
         onClose,
       });
