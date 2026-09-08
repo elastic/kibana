@@ -2547,7 +2547,7 @@
     {
       "groupName": "jsondiffpatch",
       "matchDepNames": ["jsondiffpatch"],
-      "reviewers": ["team:kibana-dashboards", "team:security-solution"],
+      "reviewers": ["team:kibana-presentation", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
