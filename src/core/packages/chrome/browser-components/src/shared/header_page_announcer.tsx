@@ -19,6 +19,7 @@ import { useChromeComponentsDeps } from '../context';
 import { useCustomBranding } from './chrome_hooks';
 import { resolveChromeNextAnnouncement } from './resolve_chrome_next_announcement';
 
+// Classic and Chrome Next both append this brand. Revisit in https://github.com/elastic/kibana/issues/289752
 const DEFAULT_BRAND = 'Elastic';
 const TITLE_SEPARATOR = ' - ';
 
