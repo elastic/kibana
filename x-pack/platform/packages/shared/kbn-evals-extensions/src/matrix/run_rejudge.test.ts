@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { runRejudge, type CellJudge } from './run_rejudge';
+import { runRejudge, describeJudgeFailure, type CellJudge } from './run_rejudge';
 import type { ReplayCell } from './replay_plan';
 
 const cell = (overrides: Partial<ReplayCell> = {}): ReplayCell => ({
@@ -108,5 +108,41 @@ describe('runRejudge', () => {
         exampleId: 'ex-a',
       })
     );
+  });
+});
+
+describe('describeJudgeFailure', () => {
+  // Regression: a whole 99-cell judge run reported one indistinguishable reason
+  // ("LLM could not complete task successfully in 4 attempts") because
+  // AggregateError.message hides the per-attempt causes that name the real
+  // problem. Without them there is nothing to act on.
+  it('unwraps the causes an AggregateError hides behind its summary', () => {
+    const error = new AggregateError(
+      [new Error('Tool call did not match schema: criteria is required'), new Error('rate limited')],
+      'LLM could not complete task successfully in 4 attempts'
+    );
+
+    const reason = describeJudgeFailure(error);
+
+    expect(reason).toContain('LLM could not complete task successfully in 4 attempts');
+    expect(reason).toContain('Tool call did not match schema: criteria is required');
+    expect(reason).toContain('rate limited');
+  });
+
+  it('collapses repeated identical causes instead of repeating them per attempt', () => {
+    const error = new AggregateError(
+      [new Error('same failure'), new Error('same failure'), new Error('same failure')],
+      'summary'
+    );
+
+    expect(describeJudgeFailure(error)).toBe('summary: same failure');
+  });
+
+  it('passes an ordinary Error message through unchanged', () => {
+    expect(describeJudgeFailure(new Error('plain failure'))).toBe('plain failure');
+  });
+
+  it('stringifies a non-Error rejection', () => {
+    expect(describeJudgeFailure('string failure')).toBe('string failure');
   });
 });

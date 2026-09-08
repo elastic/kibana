@@ -48,6 +48,25 @@ export interface RejudgeRunResult {
  * hardest examples all failed would otherwise average only its easy ones and
  * look better than it is.
  */
+/**
+ * An AggregateError's `message` is a fixed summary ("LLM could not complete task
+ * successfully in 4 attempts") that hides the per-attempt causes in `errors`.
+ * Reporting only the summary makes every cell fail with one indistinguishable
+ * string, which is what a whole judge run looked like before the real cause --
+ * schema validation rejecting the judge's tool output -- could be seen at all.
+ */
+export function describeJudgeFailure(error: unknown): string {
+  if (error instanceof AggregateError) {
+    const causes = [
+      ...new Set(
+        error.errors.map((inner) => (inner instanceof Error ? inner.message : String(inner)))
+      ),
+    ];
+    return causes.length ? `${error.message}: ${causes.join('; ')}` : error.message;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 export async function runRejudge({
   cells,
   judge,
@@ -85,7 +104,7 @@ export async function runRejudge({
           failures.push({
             executionId: cell.executionId,
             exampleId: cell.exampleId,
-            reason: error instanceof Error ? error.message : String(error),
+            reason: describeJudgeFailure(error),
           });
         }
       })
