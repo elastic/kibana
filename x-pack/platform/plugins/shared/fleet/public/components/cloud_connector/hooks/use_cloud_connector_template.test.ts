@@ -68,6 +68,8 @@ const RENDERED = {
   data: {
     artifactUrl: 'https://s3.example/rendered?sig=SECRET',
     expiresAt: '2026-07-28T12:00:00Z',
+    templateSha: 'sha256:661cb7def1c7101f',
+    render: true,
     blueprint: { id: 'federated-identity', version: 'v1' },
   },
   error: null,
@@ -175,7 +177,7 @@ describe('useCloudConnectorTemplate', () => {
       });
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        blueprintId: 'federated-identity',
+        workflow: 'federated_identity',
         flow: 'cloud_connector',
         integrations: [{ name: 'cloud_security_posture', policyTemplates: POLICY_TEMPLATES }],
       });
@@ -207,7 +209,7 @@ describe('useCloudConnectorTemplate', () => {
 
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        blueprintId: 'federated-identity',
+        workflow: 'federated_identity',
         flow: 'cloud_connector',
         integrations: [{ name: 'aws', policyTemplates }],
       });
@@ -387,6 +389,127 @@ describe('useCloudConnectorTemplate', () => {
       expect(windowOpenSpy.mock.calls[1][0]).toContain(
         `templateURL=${encodeURIComponent('https://s3.example/rendered?sig=SECRET')}`
       );
+    });
+
+    it('sends templateSha on render when the caller supplies a stored digest', async () => {
+      const { result } = renderHook(
+        () =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            templateSha: 'sha256:661cb7def1c7101f',
+          }),
+        { wrapper }
+      );
+      await waitForResolve();
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ templateSha: 'sha256:661cb7def1c7101f' })
+      );
+    });
+
+    it('omits templateSha on first render', async () => {
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      await waitForResolve();
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
+        expect.not.objectContaining({ templateSha: expect.anything() })
+      );
+    });
+
+    it('closes the pre-opened tab and reports the stack is current when render is false', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: { ...RENDERED.data, render: false },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      await waitForResolve();
+      await launch(result);
+
+      expect(cloudFormationTab.close).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toBe('');
+      expect(result.current.templateAlreadyCurrent).toBeDefined();
+      expect(result.current.templateGenerationError).toBeUndefined();
+      expect(reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the static URL when render is missing from the response', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: { ...RENDERED.data, render: undefined },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      await waitForResolve();
+      await launch(result);
+
+      expect(cloudFormationTab.location.href).toContain('static.example');
+      expect(result.current.templateAlreadyCurrent).toBeUndefined();
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
+        flow: 'cloud_connector',
+        reason: 'render_failed',
+      });
+    });
+
+    it('renders when resolve reports the namespaced federated-identity blueprint', async () => {
+      mockedSendResolveIacBlueprints.mockResolvedValue({
+        data: {
+          blueprints: [
+            {
+              id: 'aws/federated-identity',
+              resolvedVersion: '1.0.0',
+              deployable: true,
+              notCovered: [],
+            },
+          ],
+        },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      await waitForResolve();
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({ workflow: 'federated_identity' })
+      );
+    });
+
+    it('falls back when a different blueprint is deployable but federated identity is not', async () => {
+      mockedSendResolveIacBlueprints.mockResolvedValue({
+        data: {
+          blueprints: [
+            {
+              id: 'other-lineage',
+              resolvedVersion: '1.0.0',
+              deployable: true,
+              notCovered: [],
+            },
+            {
+              id: 'federated-identity',
+              resolvedVersion: null,
+              deployable: false,
+              notCovered: [
+                { integration: 'cloud_security_posture', reason: 'below_support_floor' },
+              ],
+            },
+          ],
+        },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS), { wrapper });
+      await waitForResolve();
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toContain('static.example');
+      expect(reportEvent).toHaveBeenCalledWith('iac_provisioner_render_fallback', {
+        flow: 'cloud_connector',
+        reason: 'not_deployable',
+      });
     });
   });
 });

@@ -62,15 +62,30 @@ export const RenderIacTemplateRequestSchema = {
     provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    blueprintId: schema.string({
+    workflow: schema.string({
       minLength: 1,
       maxLength: 255,
+      validate: (value) =>
+        /^[a-z][a-z0-9_]*$/.test(value)
+          ? undefined
+          : 'must be a lowercase identifier (e.g. federated_identity)',
       meta: {
-        description: 'Blueprint to render, taken from a deployable resolve result.',
+        description:
+          'Identity mechanism. Kibana name for the connector type; IaCP looks up the matching blueprint lineage.',
       },
     }),
     flow: IacProvisionerFlowSchema,
     integrations: IacIntegrationsSchema,
+    templateSha: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 255,
+        meta: {
+          description:
+            'Stored template digest from this connector. Omit on first render and after a static-template fallback.',
+        },
+      })
+    ),
     userParams: schema.maybe(
       schema.recordOf(
         schema.string({ minLength: 1, maxLength: 255 }),
@@ -89,6 +104,18 @@ export const RenderIacTemplateResponseSchema = schema.object({
   }),
   expiresAt: schema.string({
     meta: { description: 'ISO 8601 UTC timestamp when the pre-signed URL expires.' },
+  }),
+  templateSha: schema.string({
+    meta: {
+      description:
+        'Digest of the canonical CloudFormation template. Persist on the connector at confirmation.',
+    },
+  }),
+  render: schema.boolean({
+    meta: {
+      description:
+        'True when the user must apply the template. False when the stored templateSha still matches.',
+    },
   }),
   blueprint: schema.object({
     id: schema.string({

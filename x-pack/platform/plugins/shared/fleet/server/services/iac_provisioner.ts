@@ -53,14 +53,17 @@ export interface IacProvisionerRenderRequest {
   // Only AWS is supported today; typed off the shared constant so the value
   // and type can't drift and adding a provider is a one-line change.
   provider: typeof AWS_CLOUD_PROVIDER;
-  blueprintId: string;
+  workflow: string;
   integrations: IacProvisionerRenderIntegration[];
+  templateSha?: string;
   userParams?: Record<string, string>;
 }
 
 export interface IacProvisionerRenderResponse {
   artifactUrl: string;
   expiresAt: string;
+  templateSha: string;
+  render: boolean;
   blueprint: { id: string; version: string };
 }
 
@@ -113,8 +116,8 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     // The response's artifactUrl embeds signing credentials and must never be
     // logged; the request body contains only safe-to-log fields.
     logger.info(
-      `[IaC Provisioner] Rendering template for provider ${request.provider}, blueprint ${
-        request.blueprintId
+      `[IaC Provisioner] Rendering template for provider ${request.provider}, workflow ${
+        request.workflow
       }, integrations: ${JSON.stringify(request.integrations)}`
     );
 
