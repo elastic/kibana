@@ -1695,6 +1695,48 @@ describe('conversation model converters', () => {
       );
     });
 
+    it.each([{ read: true }, { pinned: true }, { title: 'renamed' }])(
+      'preserves the full resumed timeline on a metadata update: %j',
+      (metadata) => {
+        const initialRef = { attachment_id: 'attachment-a', version: 1 };
+        const resumeRef = { attachment_id: 'attachment-b', version: 1 };
+        const storedEvents: TimelineEvent[] = multiExecutionTimeline();
+        const events = storedEvents.map((event): TimelineEvent => {
+          if (event.type === TimelineEventType.userMessage) {
+            return { ...event, data: { ...event.data, attachment_refs: [initialRef] } };
+          }
+          if (event.type === TimelineEventType.promptResponse) {
+            return {
+              ...event,
+              data: {
+                ...event.data,
+                input: { message: 'resume follow-up', attachment_refs: [resumeRef] },
+              },
+            };
+          }
+          return event;
+        });
+        const conversation = updateConversation({
+          conversation: eventsNativeStored(),
+          update: { id: 'conv-multi-exec', events },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+        expect(conversation.rounds[0].input.attachment_refs).toEqual([initialRef, resumeRef]);
+        const originalEvents = structuredClone(conversation.events);
+
+        const updated = updateConversation({
+          conversation,
+          update: { id: conversation.id, ...metadata },
+          space: 'space',
+          updateDate: new Date(updateDate),
+        });
+
+        expect(updated).toMatchObject(metadata);
+        expect(toEs(updated, 'space').events).toEqual(originalEvents);
+      }
+    );
+
     it('refreshes the preserved user_message when a rounds-path input change hits a resumed round', () => {
       const events = multiExecutionTimeline();
 
@@ -1814,7 +1856,7 @@ describe('conversation model converters', () => {
 
       const updated = updateConversation({
         conversation,
-        update: { id: conversation.id, title: 'renamed' },
+        update: { id: conversation.id, rounds: conversation.rounds },
         space: 'space',
         updateDate: new Date(updateDate),
       });
@@ -1905,7 +1947,7 @@ describe('conversation model converters', () => {
 
       const updated = updateConversation({
         conversation,
-        update: { id: conversation.id, title: 'unchanged' },
+        update: { id: conversation.id, rounds: conversation.rounds },
         space: 'space',
         updateDate: new Date(updateDate),
       });

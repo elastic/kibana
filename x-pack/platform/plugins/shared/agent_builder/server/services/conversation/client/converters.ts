@@ -526,7 +526,7 @@ export const updateConversation = ({
     };
   }
 
-  if (!isEventsNativeVersion(merged.schema_version)) {
+  if (!isEventsNativeVersion(merged.schema_version) || safeUpdate.rounds === undefined) {
     return merged;
   }
 
