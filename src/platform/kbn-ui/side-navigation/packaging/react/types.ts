@@ -76,7 +76,7 @@ export interface MenuItem {
   badgeType?: BadgeType;
   /** Optional array of secondary menu sections for nested navigation. */
   sections?: SecondaryMenuSection[];
-  /** Hover popover only. Does not open the expanded side panel. */
+  /** Hover popover only. Does not open the expanded side panel. Not shown in More. */
   popoverSections?: SecondaryMenuSection[];
 }
 

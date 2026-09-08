@@ -16,11 +16,13 @@ export const getPopoverSections = (item: MenuItem): SecondaryMenuSection[] | und
   item.popoverSections ?? item.sections;
 
 /**
- * Utility function for checking whether the menu item has a submenu.
- *
- * @param item - the menu item to check.
- * @returns `true` if the menu item has a submenu, `false` otherwise.
+ * Whether the hover popover has content. `popoverSections` wins; otherwise `sections`.
  */
 export const getHasSubmenu = (item: MenuItem): boolean => {
   return (getPopoverSections(item)?.length ?? 0) > 0;
 };
+
+/**
+ * Nested submenu in More. Tree `sections` only — hover `popoverSections` stay out.
+ */
+export const getHasMoreSubmenu = (item: MenuItem): boolean => (item.sections?.length ?? 0) > 0;

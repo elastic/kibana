@@ -101,7 +101,7 @@ export interface MenuItem {
   sections?: SecondaryMenuSection[];
   /**
    * (optional) Secondary menu sections shown in the hover popover only.
-   * Does not open the expanded side panel.
+   * Does not open the expanded side panel. Not shown in More.
    */
   popoverSections?: SecondaryMenuSection[];
 }
