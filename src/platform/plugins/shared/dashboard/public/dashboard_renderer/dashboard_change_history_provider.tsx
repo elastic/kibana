@@ -12,14 +12,12 @@ import {
   ChangeHistoryModal,
   ChangeHistoryPreviewRenderFn,
   ChangeHistoryProvider,
-  ChangeHistoryTrigger,
   createChangeHistoryHttpAdapter,
 } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { coreServices } from '../services/kibana_services';
-import { CodeEditor } from '@kbn/code-editor';
 import { DashboardApi, DashboardInitializationState, DashboardRenderer } from '..';
+import { coreServices } from '../services/kibana_services';
 
 export interface DashboardChangeHistoryProviderProps {
   dashboardId: string;
@@ -71,7 +69,6 @@ export const DashboardChangeHistoryProvider = ({
       analytics={analytics}
     >
       {children}
-      <ChangeHistoryTrigger />
       <ChangeHistoryModal />
     </ChangeHistoryProvider>
   );
