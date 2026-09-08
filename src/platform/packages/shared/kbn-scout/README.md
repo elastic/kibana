@@ -855,7 +855,6 @@ node scripts/scout discover-flaky-tests --summaryLimit 25
 
 The command is read-only and needs `SCOUT_REPORTER_ES_URL` and `SCOUT_REPORTER_ES_API_KEY` (or the matching `--esURL` / `--esAPIKey` flags). Run `node scripts/scout discover-flaky-tests --help` for the full list of thresholds and filters.
 
-
 ### AI prompts to help you migrate from FTR
 
 The `@kbn/scout-info` package contains [AI prompts](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/kbn-scout-info/llms) to help you migrate FTR test files.
