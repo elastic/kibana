@@ -92,7 +92,7 @@ describe('AiIndexDataReadService', () => {
 
       const result = await service.describe('support');
 
-      expect(result).toEqual({ status: 'ok', response: contextBlock });
+      expect(result).toEqual({ response: contextBlock });
       expect(aiIndexService.get).toHaveBeenCalledWith('support');
       expect(describeAiIndexMock).toHaveBeenCalledWith({ esClient, aiIndex });
       expect(auditLogger.log).toHaveBeenCalledWith(
@@ -104,12 +104,11 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
-    it('returns not_found for an unknown id and audit-logs the failure', async () => {
+    it('audit-logs the failure and rethrows for an unknown id', async () => {
       aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
-      const result = await service.describe('missing');
+      await expect(service.describe('missing')).rejects.toThrow(AiIndexNotFoundError);
 
-      expect(result).toEqual({ status: 'not_found', id: 'missing' });
       expect(describeAiIndexMock).not.toHaveBeenCalled();
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({

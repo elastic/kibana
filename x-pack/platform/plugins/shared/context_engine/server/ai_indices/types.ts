@@ -17,8 +17,3 @@ export interface AiIndexTagCount {
   tag: string;
   count: number;
 }
-
-/** Result, not thrown error: cross-plugin consumers need no `instanceof`. */
-export type DescribeAiIndexResult =
-  | { status: 'ok'; response: string }
-  | { status: 'not_found'; id: string };

@@ -51,7 +51,6 @@ import {
 import type {
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
-  DescribeAiIndexResponse,
   GetAiIndexResponse,
   ListAiIndexResponse,
   PutAiIndexFeedbackAnalysisResponse,
@@ -605,15 +604,7 @@ export const registerAiIndexRoutes = ({
         const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
         const { aiIndexId } = request.params;
         try {
-          const described = await getAiIndexDataReadService({ esClient, request }).describe(
-            aiIndexId
-          );
-          if (described.status === 'not_found') {
-            return response.notFound({
-              body: { message: new AiIndexNotFoundError(described.id).message },
-            });
-          }
-          const body: DescribeAiIndexResponse = { response: described.response };
+          const body = await getAiIndexDataReadService({ esClient, request }).describe(aiIndexId);
           return response.ok({ body });
         } catch (error) {
           return handleReadError(error, response);

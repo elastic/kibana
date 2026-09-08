@@ -636,7 +636,7 @@ describe('ai indices routes', () => {
     const description = { response: contextBlock } satisfies DescribeAiIndexResponse;
 
     it('builds the read service from the current user client and request, then describes', async () => {
-      readService.describe.mockResolvedValue({ status: 'ok', response: contextBlock });
+      readService.describe.mockResolvedValue(description);
 
       const request = httpServerMock.createKibanaRequest({ params: { aiIndexId: 'a' } });
       await getRoute('GET', aiIndexDescribePath).handler(createContext(), request, response);
@@ -649,7 +649,7 @@ describe('ai indices routes', () => {
     });
 
     it('returns 404 when the AI index does not exist', async () => {
-      readService.describe.mockResolvedValue({ status: 'not_found', id: 'missing' });
+      readService.describe.mockRejectedValue(new AiIndexNotFoundError('missing'));
 
       await callRoute('GET', aiIndexDescribePath, { params: { aiIndexId: 'missing' } });
 

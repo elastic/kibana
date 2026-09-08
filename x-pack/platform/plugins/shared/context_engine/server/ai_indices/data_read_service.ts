@@ -8,20 +8,20 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/core-security-server';
 import type {
+  DescribeAiIndexResponse,
   QueryAiIndicesRequest,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
 import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
 import { describeAiIndex } from './describe';
-import { AiIndexNotFoundError } from './errors';
 import { queryAiIndices } from './query';
 import type { AiIndexService } from './service';
-import type { DescribeAiIndexResult } from './types';
 
 /** Caller-scoped AI-index reads. One instance per request; shared by HTTP routes and agent tools. */
 export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
-  describe(id: string): Promise<DescribeAiIndexResult>;
+  /** Throws `AiIndexNotFoundError` for an unknown id. */
+  describe(id: string): Promise<DescribeAiIndexResponse>;
 }
 
 export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
@@ -46,18 +46,15 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     }
   }
 
-  async describe(id: string): Promise<DescribeAiIndexResult> {
+  async describe(id: string): Promise<DescribeAiIndexResponse> {
     const { esClient, auditLogger, aiIndexService } = this.deps;
     try {
       const aiIndex = await aiIndexService.get(id);
-      const described = await describeAiIndex({ esClient, aiIndex });
+      const response = await describeAiIndex({ esClient, aiIndex });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
-      return { status: 'ok', response: described };
+      return { response };
     } catch (error) {
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id, error }));
-      if (error instanceof AiIndexNotFoundError) {
-        return { status: 'not_found', id };
-      }
       throw error;
     }
   }
