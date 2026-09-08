@@ -26,12 +26,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
-import { ExperimentalFeaturesService } from '../../../../services';
-
 import {
   AgentPolicyDebugger,
   AgentlessResourcesToggle,
-  CloudOnboardingDeploymentDebugger,
   IntegrationDebugger,
   PreconfigurationDebugger,
   FleetIndexDebugger,
@@ -106,13 +103,6 @@ export const DebugPage: React.FunctionComponent<{
       }),
       id: 'agentlessResourcesToggle',
       component: <AgentlessResourcesToggle />,
-    },
-    {
-      title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
-        defaultMessage: 'Cloud Onboarding Deployment Debugger',
-      }),
-      id: 'cloudOnboardingDeploymentDebugger',
-      component: <CloudOnboardingDeploymentDebugger />,
     },
   ];
 
