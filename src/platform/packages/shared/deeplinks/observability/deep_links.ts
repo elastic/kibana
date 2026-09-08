@@ -27,6 +27,7 @@ import type {
   INGEST_HUB_APP_ID,
   ONBOARDING_APP_ID,
   NIGHTSHIFT_APP_ID,
+  OBSERVABILITY_ALERTING_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
@@ -48,6 +49,7 @@ type SignificantEventsApp = typeof SIGNIFICANT_EVENTS_APP_ID;
 type IngestHubApp = typeof INGEST_HUB_APP_ID;
 type OnboardingApp = typeof ONBOARDING_APP_ID;
 type NightshiftApp = typeof NIGHTSHIFT_APP_ID;
+type ObservabilityAlertingApp = typeof OBSERVABILITY_ALERTING_APP_ID;
 
 export type AppId =
   | LogsApp
@@ -68,7 +70,8 @@ export type AppId =
   | SignificantEventsApp
   | IngestHubApp
   | OnboardingApp
-  | NightshiftApp;
+  | NightshiftApp
+  | ObservabilityAlertingApp;
 
 export type LogsLinkId = 'log-categories' | 'settings' | 'anomalies' | 'stream';
 
@@ -107,6 +110,13 @@ export type StreamsLinkId = 'overview';
 
 export type SignificantEventsLinkId = 'knowledge_indicators' | 'events' | 'rules';
 
+export type ObservabilityAlertingLinkId =
+  | 'inbox'
+  | 'rules-v2'
+  | 'rule-library'
+  | 'action-policies'
+  | 'execution-history';
+
 export type LinkId =
   | LogsLinkId
   | ObservabilityOverviewLinkId
@@ -128,4 +138,5 @@ export type DeepLinkId =
   | `${ObltProfilingApp}:${ProfilingLinkId}`
   | `${InventoryApp}:${InventoryLinkId}`
   | `${StreamsApp}:${StreamsLinkId}`
-  | `${SignificantEventsApp}:${SignificantEventsLinkId}`;
+  | `${SignificantEventsApp}:${SignificantEventsLinkId}`
+  | `${ObservabilityAlertingApp}:${ObservabilityAlertingLinkId}`;

@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "public/**/*.ts",
+    "public/**/*.tsx"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n",
+    "@kbn/shared-ux-router",
+    "@kbn/alerting-v2-plugin",
+    "@kbn/alerting-v2-constants",
+    "@kbn/deeplinks-observability",
+    "@kbn/kibana-react-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}
