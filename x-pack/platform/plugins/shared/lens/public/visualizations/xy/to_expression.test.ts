@@ -1151,14 +1151,21 @@ describe('#toExpression', () => {
     ) as Ast;
 
     const layers = expression.chain[0].arguments.layers as Ast[];
-    const pointsLayerAst = layers.find((l) => l.chain[0].function === 'pointsLayer');
+    // The points layer is a pipeline: kibana | esql | pointsLayer
+    const pointsLayerAst = layers.find((l) => l.chain.at(-1)?.function === 'pointsLayer');
 
     expect(pointsLayerAst).toBeDefined();
-    expect(pointsLayerAst!.chain[0].arguments).toEqual({
-      layerId: ['points-layer'],
-      query: ['FROM metrics.exemplars-* | LIMIT 100'],
-      yAccessor: ['system.cpu.total.norm.pct'],
-    });
+    expect(pointsLayerAst!.chain[0].function).toBe('kibana');
+    expect(pointsLayerAst!.chain[1].function).toBe('esql');
+    expect(pointsLayerAst!.chain[1].arguments.query).toEqual([
+      'FROM metrics.exemplars-* | LIMIT 100',
+    ]);
+    expect(pointsLayerAst!.chain[1].arguments.timeField).toEqual(['@timestamp']);
+
+    const args = pointsLayerAst!.chain[2].arguments;
+    expect(args.layerId).toEqual(['points-layer']);
+    expect(args.query).toEqual(['FROM metrics.exemplars-* | LIMIT 100']);
+    expect(args.yAccessor).toEqual(['system.cpu.total.norm.pct']);
   });
 
   it('should exclude a points layer with missing query or yAccessor', () => {
@@ -1190,7 +1197,7 @@ describe('#toExpression', () => {
     ) as Ast;
 
     const layers = expression.chain[0].arguments.layers as Ast[];
-    const pointsLayerAst = layers.find((l) => l.chain[0].function === 'pointsLayer');
+    const pointsLayerAst = layers.find((l) => l.chain.at(-1)?.function === 'pointsLayer');
 
     expect(pointsLayerAst).toBeUndefined();
   });

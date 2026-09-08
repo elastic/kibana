@@ -120,7 +120,13 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
+import {
+  AxisExtentModes,
+  LayerTypes,
+  SeriesTypes,
+  ValueLabelModes,
+  XScaleTypes,
+} from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
@@ -129,7 +135,8 @@ import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './leg
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
 import { getComputedColumnWarning } from './tooltip/computed_column_warning';
 import { GlobalXYChartStyles } from './xy_chart.styles';
-import type { PointData } from '../helpers/points';
+import { mapPointsFromDatatable } from '../helpers/metric_points';
+import type { PointsLayerConfigResult } from '../../common/types';
 
 declare global {
   interface Window {
@@ -167,7 +174,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   timeFormat: string;
   setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
   shouldShowLegendAction?: (actionId: string) => boolean;
-  pointsData?: Record<string, PointData[]>;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -231,7 +237,6 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
-  pointsData,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -1148,30 +1153,40 @@ export function XYChart({
                 }
               />
             ) : null}
-            {pointsData &&
-              Object.entries(pointsData).map(
-                ([layerId, layerPoints]) =>
-                  layerPoints.length > 0 && (
-                    <BubbleSeries
-                      key={layerId}
-                      id={`xy-points-overlay-${layerId}`}
-                      xAccessor="x"
-                      yAccessors={['y']}
-                      data={layerPoints}
-                      color={darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark}
-                      bubbleSeriesStyle={{
-                        point: {
-                          shape: PointShape.Diamond,
-                          strokeWidth: 1,
-                          stroke: darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight,
-                          radius: 6,
-                        },
-                      }}
-                      xScaleType="time"
-                      yScaleType="linear"
-                    />
-                  )
-              )}
+            {layers
+              .filter(
+                (layer): layer is PointsLayerConfigResult =>
+                  layer.layerType === LayerTypes.POINTS && layer.table != null
+              )
+              .flatMap((layer) => {
+                const pointFill = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
+                const pointStroke = darkMode
+                  ? euiTheme.colors.plainDark
+                  : euiTheme.colors.plainLight;
+                const points = mapPointsFromDatatable(layer.table!, layer.yAccessor);
+                return points.length > 0
+                  ? [
+                      <BubbleSeries
+                        key={layer.layerId}
+                        id={`xy-points-overlay-${layer.layerId}`}
+                        xAccessor="x"
+                        yAccessors={['y']}
+                        data={points}
+                        color={pointFill}
+                        bubbleSeriesStyle={{
+                          point: {
+                            shape: PointShape.Diamond,
+                            strokeWidth: 1,
+                            stroke: pointStroke,
+                            radius: 6,
+                          },
+                        }}
+                        xScaleType="time"
+                        yScaleType="linear"
+                      />,
+                    ]
+                  : [];
+              })}
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
       </div>

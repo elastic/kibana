@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { PointData } from './points';
 
 const TIMESTAMP_FIELD = '@timestamp';
@@ -64,6 +65,55 @@ export function mapPointsResponse(raw: EsqlRawResponse, yAccessor: string): Poin
         .map(({ name, idx }) => ({
           field: name,
           value: row[idx] != null ? String(row[idx]) : '',
+        }))
+        .filter((d) => d.value !== '');
+
+      return { x, y, details };
+    })
+    .filter((p): p is PointData => p !== null);
+}
+
+/**
+ * Maps a Kibana `Datatable` (produced by the `esql` expression function) into
+ * the `PointData` shape expected by the XY chart renderer.
+ *
+ * Expected columns:
+ *   @timestamp  - ISO string or epoch ms (X axis)
+ *   yAccessor   - numeric metric value (Y axis)
+ *   (any other columns become `details` key-value pairs)
+ */
+export function mapPointsFromDatatable(table: Datatable, yAccessor: string): PointData[] {
+  const tsCol = table.columns.findIndex((c) => c.id === TIMESTAMP_FIELD);
+  const valueCol = table.columns.findIndex((c) => c.id === yAccessor);
+
+  if (tsCol === -1 || valueCol === -1) {
+    return [];
+  }
+
+  const detailCols = table.columns
+    .map((col, idx) => ({ id: col.id, idx }))
+    .filter(({ id }) => id !== TIMESTAMP_FIELD && id !== yAccessor);
+
+  return table.rows
+    .map((row) => {
+      const rawTs = row[TIMESTAMP_FIELD];
+      const rawY = row[yAccessor];
+
+      if (rawTs == null || rawY == null) {
+        return null;
+      }
+
+      const x = typeof rawTs === 'number' ? rawTs : new Date(rawTs as string).getTime();
+      const y = typeof rawY === 'number' ? rawY : Number(rawY);
+
+      if (isNaN(x) || isNaN(y)) {
+        return null;
+      }
+
+      const details = detailCols
+        .map(({ id }) => ({
+          field: id,
+          value: row[id] != null ? String(row[id]) : '',
         }))
         .filter((d) => d.value !== '');
 

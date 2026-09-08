@@ -431,12 +431,17 @@ const yAxisConfigsToExpression = (yAxisConfigs: AxisConfig[]): Ast[] => {
 };
 
 const pointsLayerToExpression = (layer: XYPointsLayerConfig): Ast => {
+  const kibanaFn = buildExpressionFunction('kibana', {});
+  const esqlFn = buildExpressionFunction('esql', {
+    query: layer.query,
+    timeField: '@timestamp',
+  });
   const pointsLayerFn = buildExpressionFunction<PointsLayerFn>('pointsLayer', {
     layerId: layer.layerId,
     query: layer.query,
     yAccessor: layer.yAccessor,
   });
-  return buildExpression([pointsLayerFn]).toAst();
+  return buildExpression([kibanaFn, esqlFn, pointsLayerFn]).toAst();
 };
 
 const referenceLineLayerToExpression = (

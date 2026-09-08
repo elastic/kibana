@@ -7,25 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { PointsLayerArgs, PointsLayerConfigResult } from '../types';
 import { pointsLayerFunction } from './points_layer';
 
-describe('pointsLayer', () => {
-  test('produces the correct result', () => {
-    const args: PointsLayerArgs = {
-      layerId: 'layer-1',
-      query: 'FROM metrics.exemplars-* | SORT @timestamp ASC | LIMIT 100',
-      yAccessor: 'system.cpu.total.norm.pct',
-    };
+const ARGS: PointsLayerArgs = {
+  layerId: 'layer-1',
+  query: 'FROM metrics.exemplars-* | SORT @timestamp DESC | LIMIT 100',
+  yAccessor: 'system.cpu.total.norm.pct',
+};
 
-    const result = pointsLayerFunction.fn(null as any, args, {} as any);
+describe('pointsLayer', () => {
+  it('produces the correct result when input is null', () => {
+    const result = pointsLayerFunction.fn(null, ARGS, {} as any);
 
     const expected: PointsLayerConfigResult = {
       type: 'pointsLayer',
       layerType: 'points',
-      ...args,
+      ...ARGS,
+      table: undefined,
     };
 
     expect(result).toEqual(expected);
+  });
+
+  it('passes the pipeline input Datatable through as table on the result', () => {
+    const resolvedTable: Datatable = {
+      type: 'datatable',
+      columns: [
+        { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+        { id: ARGS.yAccessor, name: ARGS.yAccessor, meta: { type: 'number' } },
+      ],
+      rows: [{ '@timestamp': '2024-01-01T00:00:00.000Z', [ARGS.yAccessor]: 0.42 }],
+    };
+
+    const result = pointsLayerFunction.fn(resolvedTable, ARGS, {} as any);
+
+    expect(result.table).toBe(resolvedTable);
   });
 });

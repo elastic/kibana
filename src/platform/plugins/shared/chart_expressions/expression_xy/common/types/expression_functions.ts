@@ -379,7 +379,7 @@ export interface ReferenceLineLayerArgs {
 }
 
 export interface PointsLayerArgs {
-  layerId?: string;
+  layerId: string;
   query: string;
   yAccessor: string;
 }
@@ -387,13 +387,14 @@ export interface PointsLayerArgs {
 export type PointsLayerConfigResult = PointsLayerArgs & {
   type: typeof POINTS_LAYER;
   layerType: typeof LayerTypes.POINTS;
+  table?: Datatable;
 };
 
 export type PointsLayerConfig = PointsLayerConfigResult & WithLayerId;
 
 export type PointsLayerFn = ExpressionFunctionDefinition<
   typeof POINTS_LAYER,
-  Datatable,
+  Datatable | null,
   PointsLayerArgs,
   PointsLayerConfigResult
 >;

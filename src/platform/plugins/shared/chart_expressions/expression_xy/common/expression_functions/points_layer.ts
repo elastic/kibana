@@ -19,10 +19,11 @@ export const pointsLayerFunction: PointsLayerFn = {
     defaultMessage:
       'Configures a points overlay layer on an XY chart. The query must return @timestamp and the column named by yAccessor.',
   }),
-  inputTypes: ['datatable'],
+  inputTypes: ['datatable', 'null'],
   args: {
     layerId: {
       types: ['string'],
+      required: true,
       help: i18n.translate('expressionXY.pointsLayer.layerId.help', {
         defaultMessage: 'Unique identifier for the layer',
       }),
@@ -44,6 +45,11 @@ export const pointsLayerFunction: PointsLayerFn = {
     },
   },
   fn(input, args) {
-    return { type: POINTS_LAYER, ...args, layerType: LayerTypes.POINTS };
+    return {
+      type: POINTS_LAYER,
+      ...args,
+      layerType: LayerTypes.POINTS,
+      table: input ?? undefined,
+    };
   },
 };
