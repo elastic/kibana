@@ -67,24 +67,32 @@ describe('ki_feature_similarity_search tool', () => {
     expect(
       tool.schema.safeParse({
         stream_name: 'logs.test',
-        candidate_id: 'okta-sdk',
-        title: 'Okta SDK',
-        description: 'Okta client technology',
-        type: 'technology',
+        candidates: [
+          {
+            candidate_id: 'okta-sdk',
+            title: 'Okta SDK',
+            description: 'Okta client',
+            type: 'technology',
+          },
+        ],
       }).success
     ).toBe(true);
     expect(
       tool.schema.safeParse({
         stream_name: 'logs.test',
-        candidate_id: 'okta-sdk',
-        title: 'Okta SDK',
-        description: 'Okta client technology',
-        type: 'computed',
+        candidates: [
+          {
+            candidate_id: 'okta-sdk',
+            title: 'Okta SDK',
+            description: 'Okta client',
+            type: 'computed',
+          },
+        ],
       }).success
     ).toBe(false);
   });
 
-  it('returns semantic hits in the Agent Builder result envelope', async () => {
+  it('searches every candidate and groups hits by candidate_id', async () => {
     const findFeatures = jest.fn().mockResolvedValue({
       hits: [
         {
@@ -102,10 +110,20 @@ describe('ki_feature_similarity_search tool', () => {
       tool,
       {
         stream_name: 'logs.test',
-        candidate_id: 'tech-x',
-        title: 'Tech X',
-        description: 'some technology',
-        type: 'technology',
+        candidates: [
+          {
+            candidate_id: 'tech-x',
+            title: 'Tech X',
+            description: 'some technology',
+            type: 'technology',
+          },
+          {
+            candidate_id: 'tech-y',
+            title: 'Tech Y',
+            description: 'other technology',
+            type: 'technology',
+          },
+        ],
       },
       createMockToolContext()
     );
@@ -113,7 +131,8 @@ describe('ki_feature_similarity_search tool', () => {
       throw new Error('Expected a standard tool result');
     }
 
-    expect(findFeatures).toHaveBeenCalledWith('logs.test', 'Tech X some technology', {
+    expect(findFeatures).toHaveBeenCalledTimes(2);
+    expect(findFeatures).toHaveBeenCalledWith('logs.test', 'tech-x Tech X some technology', {
       searchMode: 'semantic',
       limit: 20,
     });
@@ -121,31 +140,39 @@ describe('ki_feature_similarity_search tool', () => {
       {
         type: 'other',
         data: {
+          candidate_id: 'tech-x',
           features: [
-            {
-              id: 'tech-0',
-              title: 'Tech 0',
-              description: 'Technology 0',
-              confidence: 90,
-            },
+            { id: 'tech-0', title: 'Tech 0', description: 'Technology 0', confidence: 90 },
           ],
-          count: 1,
+        },
+      },
+      {
+        type: 'other',
+        data: {
+          candidate_id: 'tech-y',
+          features: [
+            { id: 'tech-0', title: 'Tech 0', description: 'Technology 0', confidence: 90 },
+          ],
         },
       },
     ]);
   });
 
-  it('returns an Agent Builder error result when semantic search fails', async () => {
+  it('isolates a per-candidate search failure without failing the call', async () => {
     const { tool } = createTool(jest.fn().mockRejectedValue(new Error('semantic unavailable')));
 
     const result = await invokeHandler(
       tool,
       {
         stream_name: 'logs.test',
-        candidate_id: 'okta',
-        title: 'Okta',
-        description: 'Identity provider',
-        type: 'technology',
+        candidates: [
+          {
+            candidate_id: 'okta',
+            title: 'Okta',
+            description: 'Identity provider',
+            type: 'technology',
+          },
+        ],
       },
       createMockToolContext()
     );
@@ -155,8 +182,8 @@ describe('ki_feature_similarity_search tool', () => {
 
     expect(result.results).toEqual([
       {
-        type: 'error',
-        data: { message: 'semantic unavailable' },
+        type: 'other',
+        data: { candidate_id: 'okta', features: [], error: 'semantic unavailable' },
       },
     ]);
   });

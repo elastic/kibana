@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
@@ -41,14 +42,14 @@ export const useConversationStream = () => {
   const { navigateToAgentBuilderUrl } = useNavigation();
 
   const resetToNewConversation = useCallback(
-    (message: string) => {
+    (message: string, restoredAttachments?: ConversationAttachment[]) => {
       if (isEmbeddedContext || !agentId) {
         return;
       }
       navigateToAgentBuilderUrl(
         appPaths.agent.conversations.new({ agentId }),
         {},
-        { initialMessage: message, autoSendInitialMessage: false }
+        { initialMessage: message, autoSendInitialMessage: false, attachments: restoredAttachments }
       );
     },
     [isEmbeddedContext, agentId, navigateToAgentBuilderUrl]
