@@ -224,7 +224,8 @@ export class ProjectMonitorFormatter {
             type: normalizedMonitor[ConfigKey.MONITOR_TYPE],
           },
           publicLocations,
-          privateLocations
+          privateLocations,
+          this.server.config.enableApiJourneyPublicLocations
         ),
         monitorId: monitor.id,
       });
@@ -235,7 +236,11 @@ export class ProjectMonitorFormatter {
 
       /* Validates that the normalized monitor is a valid monitor saved object type */
       const { valid: isNormalizedMonitorValid, decodedMonitor } = this.validateMonitor({
-        validationResult: validateMonitor(normalizedMonitor as MonitorFields, this.spaceId),
+        validationResult: validateMonitor(
+          normalizedMonitor as MonitorFields,
+          this.spaceId,
+          this.server.config.enableApiJourneyPublicLocations
+        ),
         monitorId: monitor.id,
       });
 

@@ -113,6 +113,7 @@ const createMockRouteContext = () => {
       response: { forbidden: jest.fn((opts: any) => opts) } as any,
       spaceId: 'default',
       server: {
+        config: { enableApiJourneyPublicLocations: false },
         logger: { error: jest.fn() },
         coreStart: { savedObjects: { createInternalRepository } },
       } as any,
@@ -307,7 +308,8 @@ describe('UpdateMonitorAPI', () => {
       expect(result.survivors).toHaveLength(1);
       expect(validateMonitor).toHaveBeenCalledWith(
         expect.objectContaining({ [ConfigKey.URLS]: 'https://new.example.com' }),
-        'default'
+        'default',
+        false
       );
       const persisted = result.survivors[0].monitorWithRevision as Record<string, unknown>;
       expect(persisted[ConfigKey.URLS]).toBe('https://new.example.com');

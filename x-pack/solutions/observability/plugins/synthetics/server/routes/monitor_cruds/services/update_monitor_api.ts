@@ -213,7 +213,11 @@ export class UpdateMonitorAPI {
       return;
     }
 
-    const validation = validateMonitor(normalizedMonitor, this.routeContext.spaceId);
+    const validation = validateMonitor(
+      normalizedMonitor,
+      this.routeContext.spaceId,
+      this.routeContext.server.config.enableApiJourneyPublicLocations
+    );
     if (!validation.valid || !validation.decodedMonitor) {
       this.result.perIdErrors[monitorId] = {
         code: 'validation_failed',

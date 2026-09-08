@@ -20,6 +20,7 @@ class KibanaService {
   public isDev!: boolean;
   public isServerless!: boolean;
   public isCCSEnabled!: boolean;
+  public enableApiJourneyPublicLocations = false;
   public appMountParameters!: AppMountParameters;
   public startPlugins!: ClientPluginsStart;
 
@@ -30,6 +31,7 @@ class KibanaService {
     isDev,
     isServerless,
     isCCSEnabled,
+    enableApiJourneyPublicLocations,
   }: {
     coreSetup: CoreSetup;
     coreStart: CoreStart;
@@ -37,6 +39,7 @@ class KibanaService {
     isDev: boolean;
     isServerless: boolean;
     isCCSEnabled: boolean;
+    enableApiJourneyPublicLocations: boolean;
   }) {
     this.coreSetup = coreSetup;
     this.coreStart = coreStart;
@@ -46,6 +49,7 @@ class KibanaService {
     this.isDev = isDev;
     this.isServerless = isServerless;
     this.isCCSEnabled = isCCSEnabled;
+    this.enableApiJourneyPublicLocations = enableApiJourneyPublicLocations;
   }
 
   public get toasts() {

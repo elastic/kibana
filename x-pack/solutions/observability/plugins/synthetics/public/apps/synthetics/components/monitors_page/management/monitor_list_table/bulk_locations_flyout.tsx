@@ -27,6 +27,7 @@ import {
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { formatLocation } from '../../../../../../../common/utils/location_formatter';
+import { monitorTypeRequiresPrivateLocations } from '../../../../../../../common/utils/monitor_location_support';
 import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorServiceLocation,
@@ -123,6 +124,15 @@ export const BulkLocationsFlyout = ({
         next = current.filter((loc) => !selectedIds.has(loc.id));
       } else {
         next = formattedSelected;
+      }
+
+      if (
+        monitorTypeRequiresPrivateLocations(
+          monitor[ConfigKey.MONITOR_TYPE],
+          kibanaService.enableApiJourneyPublicLocations
+        )
+      ) {
+        next = next.filter((loc) => !loc.isServiceManaged);
       }
 
       if (sameIdSet(current, next)) {

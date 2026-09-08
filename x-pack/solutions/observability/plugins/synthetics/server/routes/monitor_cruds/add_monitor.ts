@@ -114,7 +114,11 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
         maintenanceWindows
       );
 
-      const validationResult = validateMonitor(monitorWithDefaults, spaceId);
+      const validationResult = validateMonitor(
+        monitorWithDefaults,
+        spaceId,
+        server.config.enableApiJourneyPublicLocations
+      );
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details } = validationResult;
