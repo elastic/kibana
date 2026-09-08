@@ -170,6 +170,10 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
 import { agentPolicyService, getAgentPolicySavedObjectType } from './agent_policy';
 import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from './epm/packages';
+import {
+  hasPackagePolicyVarsChanged,
+  reapplyPackageWorkflowAssetsOnVarChange,
+} from './epm/packages/reapply_assets_on_var_change';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import {
   compileTemplate,
@@ -1907,6 +1911,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       .catch(catchAndSetErrorStackTrace.withMessage(`update of package policy [${id}] failed`));
 
     const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
+
+    // FLEET-004: when a package policy's vars change (e.g. a rotated connector id), re-apply
+    // workflow/agent placeholder substitution so the already-installed assets update in place
+    // without a full reinstall. Failures are logged and never break the package policy update.
+    if (
+      oldPackagePolicy.package &&
+      hasPackagePolicyVarsChanged(oldPackagePolicy.vars, restOfPackagePolicy.vars)
+    ) {
+      await reapplyPackageWorkflowAssetsOnVarChange({
+        pkgName: oldPackagePolicy.package.name,
+        savedObjectsClient: soClient,
+        logger,
+      }).catch((error) => {
+        logger.warn(
+          `FLEET-004: failed to re-apply workflow/agent assets for ${oldPackagePolicy.package?.name} after package policy ${id} vars change: ${error?.message}`
+        );
+      });
+    }
 
     // if we have moved to an input package we need to create the index templates
     // for the package policy as input packages create index templates per package policy
