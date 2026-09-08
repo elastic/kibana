@@ -23,7 +23,7 @@ export const sendCreateCloudOnboardingDeployment = (
     path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
     method: 'post',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify(body),
+    body,
   });
 };
 
@@ -43,6 +43,6 @@ export const sendUpdateCloudOnboardingDeployment = (
     path: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/${id}`,
     method: 'put',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify(body),
+    body,
   });
 };
