@@ -70,10 +70,11 @@ errors (bad ES|QL, missing index privilege) are returned with their status.
 privileges. Callers also need `read` on every backing index they query
 (`ai-index-*`), or Elasticsearch returns 403.
 
-The space filter is the only document-level check. Knowledge indicators that
-describe Kibana objects (dashboards, rules, connectors) are returned to anyone
-with `read` on the backing index, whether or not they could open those objects
-in Kibana. This is deliberate: an AI index is queried like any other index.
+Kibana adds only the space filter. For the built-in SML index
+(`ai-index-idx-sml-data`), Elasticsearch additionally applies implicit
+document-level security mirroring Kibana object privileges, so callers only see
+knowledge indicators for dashboards, rules or connectors they could open. Custom
+AI indices get the space filter alone; they are queried like any other index.
 
 ## Feedback analysis configuration
 

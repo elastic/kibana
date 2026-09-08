@@ -132,7 +132,8 @@ export const validateAiIndexQueryLimit = (value: number): string | undefined =>
 
 /**
  * Returns an error message for an out-of-bounds AI-index query request, or `undefined` when valid.
- * The HTTP schema enforces the same bounds; this guards the service for callers that bypass it.
+ * The HTTP schema enforces the same bounds; this guards the service for callers that bypass it,
+ * such as agent tools calling the service directly.
  */
 export const validateQueryAiIndicesRequest = ({
   query,

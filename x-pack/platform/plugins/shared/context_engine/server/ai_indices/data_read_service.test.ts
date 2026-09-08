@@ -22,7 +22,7 @@ describe('AiIndexDataReadService', () => {
   });
 
   describe('query', () => {
-    it('runs the query in the service space and audits success', async () => {
+    it('runs the query in the service space and audit-logs success', async () => {
       esqlQuery.mockResolvedValue({ columns: [], values: [] });
 
       const result = await service.query({ query: 'FROM ai-index-idx-a', limit: 10 });
@@ -43,7 +43,7 @@ describe('AiIndexDataReadService', () => {
       );
     });
 
-    it('audits failure and rethrows', async () => {
+    it('audit-logs failure and rethrows', async () => {
       esqlQuery.mockRejectedValue(new Error('boom'));
 
       await expect(service.query({ query: 'FROM ai-index-idx-a' })).rejects.toThrow('boom');
