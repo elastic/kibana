@@ -12,8 +12,11 @@ export const getManagedOtlpEndpoint = (): string | undefined => {
 };
 
 const normalizeEndpoint = (endpoint: string): string => {
+  const withScheme = endpoint.includes('://') ? endpoint : `https://${endpoint}`;
   try {
-    return new URL(endpoint).host;
+    const url = new URL(withScheme);
+    const path = url.pathname === '/' ? '' : url.pathname;
+    return `${url.hostname}${path}`;
   } catch {
     return endpoint.toLowerCase();
   }
