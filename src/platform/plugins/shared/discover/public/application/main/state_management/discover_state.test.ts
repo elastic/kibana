@@ -627,6 +627,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });
@@ -655,6 +656,7 @@ describe('Discover state', () => {
               }),
               services,
               currentDataView: undefined,
+              tabType: undefined,
             }),
           ],
         });

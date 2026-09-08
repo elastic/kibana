@@ -6,7 +6,7 @@
       "path": "/api/alerting/rule/{id}",
       "method": "post",
       "reason": "Intentional: require exactly two criterion groups for log threshold ratio criteria so API validation matches executor validation and rejects malformed criteria (e.g. a single nested array) that previously saved but broke rule execution and the edit UI.",
-      "approvedBy": "@elastic/actionable-obs-team",
+      "approvedBy": "@elastic/nightshift-sre-agent-team",
       "oasdiffId": "request-property-min-items-increased",
       "prUrl": "https://github.com/elastic/kibana/pull/283965"
     },
@@ -228,6 +228,14 @@
       "approvedBy": "@elastic/workchat-eng",
       "oasdiffId": "request-property-removed",
       "prUrl": "https://github.com/elastic/kibana/pull/287255"
+    },
+    {
+      "path": "/api/agent_builder/conversations",
+      "method": "post",
+      "reason": "agent_id maxLength validation added to route, it was already done in the request.",
+      "approvedBy": "@elastic/workchat-eng",
+      "oasdiffId": "request-property-max-length-decreased",
+      "prUrl": "https://github.com/elastic/kibana/pull/286654"
     }
   ]
 }
