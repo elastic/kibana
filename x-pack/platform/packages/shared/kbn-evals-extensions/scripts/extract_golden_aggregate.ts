@@ -94,6 +94,7 @@ async function main() {
           'experiment_name',
           '@timestamp',
           'example.id',
+          'example.dataset.id',
           'example.dataset.name',
           'task.model.id',
           'task.model.family',
@@ -146,10 +147,21 @@ async function main() {
       );
       const selected = docs.filter((d) => d.experiment_id === newestExperiment.experiment_id);
 
-      // Group by example id: each example is a matrix column.
+      // The two suite shapes key their columns differently, and neither field
+      // alone works for both:
+      //   - persona matrix: `example.id` IS the column key ('alert-analysis-a'),
+      //     while `example.dataset.id` is one UUID shared by every column.
+      //   - attack-discovery / automatic-migrations: `example.id` is a bare
+      //     ordinal ('0') that collapses all columns into one bucket, while
+      //     `example.dataset.id` is per-scenario.
+      // So prefer a semantic example id and fall back to the dataset id when it
+      // is a bare ordinal. `datasetName` is carried through either way, since it
+      // is the only human-readable key for the UUID-addressed suites.
       const byDataset = new Map<string, ScoreDoc[]>();
       for (const doc of selected) {
-        const datasetId = doc.example?.id ?? 'unknown';
+        const exampleId = doc.example?.id;
+        const semanticExampleId = exampleId && !/^\d+$/.test(exampleId) ? exampleId : undefined;
+        const datasetId = semanticExampleId ?? doc.example?.dataset?.id ?? exampleId ?? 'unknown';
         if (!byDataset.has(datasetId)) byDataset.set(datasetId, []);
         byDataset.get(datasetId)!.push(doc);
       }
