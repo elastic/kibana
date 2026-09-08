@@ -73,6 +73,7 @@ const renderDashboardSaveModal = (
       timeRestore={false}
       projectRoutingRestore={false}
       showCopyOnSave={false}
+      modalTitleId="test-modal-title"
       {...props}
     />
   );

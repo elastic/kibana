@@ -22,6 +22,7 @@ interface OpenLazyModalParams {
   core: CoreStart;
   loadContent: (args: LoadContentArgs) => Promise<React.JSX.Element | null | void>;
   onClose?: () => void;
+  ariaLabelledBy: string;
 }
 
 /**
@@ -37,11 +38,15 @@ interface OpenLazyModalParams {
  * @param params.loadContent - Async function that loads the modal content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the modal will close automatically.
  * @param params.onClose - Optional callback invoked when the modal is closed.
+ * @param params.ariaLabelledBy - The `id` of the element that labels the modal, forwarded to `EuiModal`'s
+ *                                `aria-labelledby` prop. Should reference the modal's visible title element
+ *                                so screen readers can announce the modal name correctly.
  */
 export const openLazyModal = ({
   core,
   loadContent,
   onClose: onCloseCallback,
+  ariaLabelledBy,
 }: OpenLazyModalParams): void => {
   const closeModal = () => {
     unmount?.();
@@ -49,7 +54,7 @@ export const openLazyModal = ({
   };
 
   const mount = toMountPoint(
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} aria-labelledby={ariaLabelledBy}>
       <LazyModal loadContent={loadContent} closeModal={closeModal} />
     </EuiModal>,
     core

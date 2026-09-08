@@ -56,6 +56,7 @@ interface DashboardSaveModalProps {
   customModalTitle?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   showAccessContainer?: boolean;
+  modalTitleId: string;
 }
 
 export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
@@ -73,6 +74,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
   projectRoutingRestore,
   accessControl,
   showAccessContainer,
+  modalTitleId,
 }) => {
   const [selectedTags, setSelectedTags] = React.useState<string[]>(tags ?? []);
   const [persistSelectedTimeInterval, setPersistSelectedTimeInterval] = React.useState(timeRestore);
@@ -223,6 +225,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       })}
       customModalTitle={customModalTitle}
       options={renderDashboardSaveOptions()}
+      modalTitleId={modalTitleId}
     />
   );
 };

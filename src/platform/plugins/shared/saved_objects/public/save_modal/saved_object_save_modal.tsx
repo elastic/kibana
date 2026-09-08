@@ -77,6 +77,13 @@ interface Props<T = void> {
   theme: WithEuiThemeProps['theme'];
   /** When true, renders content without wrapping in EuiModal */
   disableModal?: boolean;
+  /**
+   * The `id` to set on `EuiModalHeaderTitle`. When `disableModal` is true, the caller owns the
+   * `EuiModal` shell and must pass this id so it can set `aria-labelledby` pointing to this title,
+   * satisfying EUI's accessibility requirement. When `disableModal` is false, the id is generated
+   * internally and applied to both the title and the modal.
+   */
+  modalTitleId?: string;
 }
 
 export interface SaveModalState {
@@ -117,7 +124,7 @@ class SavedObjectSaveModalComponent<T = void> extends React.Component<
     const { theme } = this.props;
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title, hasAttemptedSubmit } = this.state;
     const duplicateWarningId = generateId();
-    const modalTitleId = generateId('saveModal');
+    const modalTitleId = this.props.modalTitleId ?? generateId('saveModal');
     const hasColumns = !!this.props.rightOptions;
 
     const titleInputValid =

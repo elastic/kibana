@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { openLazyModal } from '@kbn/presentation-util';
@@ -66,9 +67,12 @@ export function openSaveModal({
     return;
   }
 
+  const modalTitleId = htmlIdGenerator()();
+
   openLazyModal({
     core: coreServices,
     onClose,
+    ariaLabelledBy: modalTitleId,
     loadContent: async ({ closeModal }) => {
       try {
         /**
@@ -150,6 +154,7 @@ export function openSaveModal({
             accessControl={accessControl}
             customModalTitle={getCustomModalTitle(viewMode, lastSavedId)}
             showAccessContainer={shouldAddAccessControl}
+            modalTitleId={modalTitleId}
           />
         );
       } catch (error) {
