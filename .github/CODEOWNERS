@@ -1053,6 +1053,7 @@ x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks @elastic/sear
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/search-ml-ux
 x-pack/platform/packages/shared/alerting-rule-utils @elastic/actionable-obs-team
 x-pack/platform/packages/shared/custom-content/custom-content-common @elastic/kibana-presentation
+x-pack/platform/packages/shared/custom-content/custom-content-renderer @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/custom-content/custom-content-server @elastic/kibana-visualizations @elastic/kibana-presentation
 x-pack/platform/packages/shared/file-upload @elastic/search-ml-ux
 x-pack/platform/packages/shared/file-upload-common @elastic/search-ml-ux
@@ -2173,8 +2174,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/search_ai_lake/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
-/x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
+/src/platform/plugins/shared/discover/test/scout/core/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
 /x-pack/platform/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
@@ -2651,13 +2651,16 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_monitori
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_cloud_storage/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_docs/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/google_drive/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/google_threat_intelligence/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/graphql/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/greynoise/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/hubspot/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/inbound_webhook/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jenkins/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/jina/** @elastic/jinastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/kubernetes/** @elastic/nightshift-context-and-research-team
 src/platform/packages/shared/kbn-connector-specs/src/specs/microsoft_teams/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/misp/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/monday_com/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/notion/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/okta/** @elastic/workflows-eng
@@ -3376,12 +3379,15 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/enable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/disable_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_rule_step @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/patch_rule_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/server/workflows/utils/bulk_rule_action* @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_rule_exception_step @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_exception_list_item_step @elastic/security-detection-engineering
