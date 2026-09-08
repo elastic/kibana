@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-security'
   sourceRoot: x-pack/platform/plugins/shared/spaces
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/features-plugin'
   - '@kbn/licensing-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -64,6 +65,7 @@ dependsOn:
   - '@kbn/core-application-browser-mocks'
   - '@kbn/ui-theme'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-hooks'
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/core-spaces-common'
   - '@kbn/css-utils'

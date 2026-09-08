@@ -12,6 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { executionFlowLoop } from './execution_flow_loop';
 import { flushState, persistenceLoop } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
+import { emitHitlLifecycle } from '../step/wait_for_input_step/hitl_lifecycle_auditor';
 import { isWorkflowTaskManagerAbortSignal } from '../workflow_task_shutdown';
 
 const TASK_MANAGER_ABORT_CANCELLATION_REASON = 'Cancelled because Task Manager aborted the task';
@@ -44,6 +45,8 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   const persistenceAbortController = new AbortController();
 
   const onTaskAbort = () => {
+    const wasWaitingForInput =
+      workflowRuntime.getWorkflowExecution().status === ExecutionStatus.WAITING_FOR_INPUT;
     if (isWorkflowTaskManagerAbortSignal(params.signal)) {
       params.workflowExecutionState.updateWorkflowExecution({
         cancelRequested: true,
@@ -52,6 +55,12 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
         cancellationReason: TASK_MANAGER_ABORT_CANCELLATION_REASON,
         cancelledBy: 'system',
       });
+      if (wasWaitingForInput) {
+        emitHitlLifecycle({
+          type: 'canceled',
+          executionId: workflowRuntime.getWorkflowExecution().id,
+        });
+      }
       persistenceAbortController.abort();
       return;
     }
@@ -62,6 +71,12 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       cancellationReason: 'Task aborted',
       status: ExecutionStatus.CANCELLED,
     });
+    if (wasWaitingForInput) {
+      emitHitlLifecycle({
+        type: 'canceled',
+        executionId: workflowRuntime.getWorkflowExecution().id,
+      });
+    }
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
     workflowExecutionCursor.stop();
