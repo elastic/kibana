@@ -27,6 +27,7 @@ import {
   fileMetadata,
   postCommentAlertMultipleIdsReq,
   postCommentActionsReq,
+  userActionSourceApi,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -165,6 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
             owner: 'securitySolutionFixture',
+            source: userActionSourceApi,
           });
         });
       });
