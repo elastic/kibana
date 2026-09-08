@@ -11,7 +11,7 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
 import type { PnpmLock } from './pnpm_lock';
-import { snapshotKeyToNameVersion, toSnapshotKey } from './pnpm_lock';
+import { peerNamesFromKey, snapshotKeyToNameVersion, toSnapshotKey } from './pnpm_lock';
 
 /**
  * Get the set of all production dependencies for Kibana by starting with the
@@ -26,30 +26,31 @@ export function findProductionDependencies(
   ignoreOptional = false
 ) {
   const resolved = new Map<string, { name: string; version: string }>();
+  const visitedSnapshots = new Set<string>();
 
-  // seed the queue with the resolved snapshot keys of the root's production deps
   const queue: string[] = [];
   for (const [name, version] of Object.entries(kibanaPackageJson.dependencies)) {
-    // ignore workspace deps to our own packages
     if (version.startsWith('workspace:') || version.startsWith('link:')) {
       continue;
     }
     const resolvedVersion = pnpmLock.rootDependencies[name]?.version;
-    if (resolvedVersion) {
-      // importer records the resolved version, which for `npm:` aliases is itself
-      // a `name@version` snapshot key; compose it the same way as child deps.
-      queue.push(toSnapshotKey(name, resolvedVersion));
+    if (!resolvedVersion) {
+      log.warning(
+        `pnpm-lock.yaml file is out of date (missing root dependency "${name}"), please re-run \`node scripts/kbn bootstrap\``
+      );
+      process.exit(1);
     }
+    // importer records the resolved version, which for `npm:` aliases is itself
+    // a `name@version` snapshot key; compose it the same way as child deps.
+    queue.push(toSnapshotKey(name, resolvedVersion));
   }
 
   while (queue.length) {
     const snapshotKey = queue.shift()!;
-    const { name, version } = snapshotKeyToNameVersion(snapshotKey);
-    const key = `${name}@${version}`;
-
-    if (resolved.has(key)) {
+    if (visitedSnapshots.has(snapshotKey)) {
       continue;
     }
+    visitedSnapshots.add(snapshotKey);
 
     const snapshot = pnpmLock.snapshots[snapshotKey];
     if (!snapshot) {
@@ -59,13 +60,20 @@ export function findProductionDependencies(
       process.exit(1);
     }
 
-    resolved.set(key, { name, version });
+    const { name, version } = snapshotKeyToNameVersion(snapshotKey);
+    resolved.set(`${name}@${version}`, { name, version });
 
+    // pnpm lists resolved peers under `dependencies`; skip them so the
+    // production set matches yarn's declared-deps-only walk.
+    const peerNames = new Set(peerNamesFromKey(snapshotKey));
     const children = { ...snapshot.dependencies };
     if (!ignoreOptional) {
       Object.assign(children, snapshot.optionalDependencies);
     }
     for (const [childName, childValue] of Object.entries(children)) {
+      if (peerNames.has(childName)) {
+        continue;
+      }
       queue.push(toSnapshotKey(childName, childValue));
     }
   }
