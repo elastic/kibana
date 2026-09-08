@@ -21,7 +21,6 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { createDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import type { ProductFeaturesService } from './lib/product_features_service';
