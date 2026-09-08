@@ -198,8 +198,9 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
     // Wait for the app to mount (any step element is enough).
     await page.waitForLoadState('networkidle');
 
-    // ?deploymentId should have been stripped — reload won't re-hydrate.
-    expect(page.url()).not.toContain('deploymentId');
+    // ?deploymentId stays in the URL as an edit-mode indicator.
+    // Re-hydration on reload is blocked by the hydratedDeploymentId session flag.
+    expect(page.url()).toContain('deploymentId=dep-e2e-resume');
 
     // Session storage should be populated from the SO.
     const sessionState = await page.evaluate(

@@ -41,6 +41,9 @@ function RootRedirect() {
  * - The navigation carried `state.newSession === true` (set by the tile entry point).
  * - No `?deploymentId=<id>` query param is present; when it is, the hydration path in
  *   elastic/ingest-dev#8099 is responsible for clearing-then-hydrating atomically.
+ *
+ * Note: `?deploymentId=` is intentionally kept in the URL after hydration as an edit-mode
+ * indicator. Re-hydration on reload is prevented by a session flag (hydratedDeploymentId).
  */
 export function shouldClearSession(location: {
   pathname: string;
@@ -122,11 +125,13 @@ export async function renderOnboardingApp(
 
   if (deploymentId) {
     const integrationId = pathname.split('/').filter(Boolean)[0] || 'aws';
-    await hydrateOnboardingSession(integrationId, deploymentId);
-    // Strip the param so a reload does not re-hydrate and discard any edits made after resume.
-    urlParams.delete('deploymentId');
-    const newSearch = urlParams.toString();
-    params.history.replace({ pathname, search: newSearch ? `?${newSearch}` : '', hash }, undefined);
+    // Guard: only hydrate once per deploymentId. Re-hydrating on every reload would discard
+    // edits made after resume. The param stays in the URL as an edit-mode indicator.
+    const hydratedKey = getOnboardingSessionKey(integrationId, 'hydratedDeploymentId');
+    if (sessionStorage.getItem(hydratedKey) !== deploymentId) {
+      await hydrateOnboardingSession(integrationId, deploymentId);
+      sessionStorage.setItem(hydratedKey, deploymentId);
+    }
   } else {
     const integrationId = shouldClearSession({ pathname, search, state });
     if (integrationId) {
