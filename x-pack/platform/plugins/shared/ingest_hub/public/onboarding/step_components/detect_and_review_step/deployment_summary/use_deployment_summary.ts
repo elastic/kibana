@@ -12,6 +12,7 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from '../../service_settings_step/use_service_settings';
+import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
 import { getManagedIntegrationSummaryFields } from './managed_integration_summary';
 import { getAgentBasedSummaryFields } from './agent_based_summary';
 import type { SummaryField } from './managed_integration_summary';
@@ -21,20 +22,33 @@ const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   serviceVars: {},
 };
 
+interface PersistedAuthStep {
+  connectorName?: string;
+}
+
 export function useDeploymentSummary(deploymentMethod: DeploymentMethod): SummaryField[] {
   const [serviceSettings] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     DEFAULT_SERVICE_SETTINGS
   );
+  const [authStep] = useSessionStorage<PersistedAuthStep>(
+    getOnboardingSessionKey('aws', 'authenticateAndDeployStep'),
+    {}
+  );
   const globalRegion = serviceSettings?.globalRegion || undefined;
+  const connectorName = authStep?.connectorName || undefined;
 
   return useMemo(() => {
     const fields =
       deploymentMethod === 'agent_based'
         ? getAgentBasedSummaryFields()
-        : getManagedIntegrationSummaryFields({ globalRegion, cfnStackName: undefined });
+        : getManagedIntegrationSummaryFields({
+            globalRegion,
+            cfnStackName: undefined,
+            connectorName,
+          });
 
     // Filter out fields with null value — a null value means the data source isn't available yet.
     return fields.filter((f) => f.value != null);
-  }, [deploymentMethod, globalRegion]);
+  }, [deploymentMethod, globalRegion, connectorName]);
 }
