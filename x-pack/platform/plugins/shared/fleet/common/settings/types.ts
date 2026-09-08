@@ -24,4 +24,5 @@ export interface SettingsConfig {
     text: string;
   }>;
   example_value?: string | number | boolean;
+  type?: 'yaml';
 }

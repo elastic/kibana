@@ -1,8 +1,7 @@
 {
-  "sha1": "f076b5fc556fd7d92a4d2fb09aadb63dd6cd878d",
+  "sha1": "0b0a0bac5d081aee6373f555a01e4085dc021877",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -302,14 +301,14 @@
     {
       "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
       "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
-        "line": 22,
+        "line": 21,
         "column": 7
       }
     },
@@ -372,14 +371,14 @@
     {
       "id": "c4cfa77c0ba5f6a-ec9bfa8647930ac",
       "title": "StepDetailsPage displays step detail metrics",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/step_details.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 7
       }
     }

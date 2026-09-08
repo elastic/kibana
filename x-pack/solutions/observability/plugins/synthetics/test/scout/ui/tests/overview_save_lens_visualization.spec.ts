@@ -9,8 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
-// Failing: See https://github.com/elastic/kibana/issues/264879
-test.describe.skip('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
+test.describe('OverviewSaveLensVisualization', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });
@@ -40,8 +39,13 @@ test.describe.skip('OverviewSaveLensVisualization', { tag: tags.stateful.classic
 
     await test.step('open save lens visualization', async () => {
       const sparklines = page.testSubj.locator('overviewErrorsSparklines');
-      await sparklines.locator('[data-test-subj="embeddablePanelHoverActions-"]').hover();
-      await sparklines.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]').click();
+      const menuIcon = sparklines.locator('[data-test-subj="embeddablePanelToggleMenuIcon"]');
+      // Hover the stable panel wrapper (not the transient hover-actions row) and wait for the
+      // toggle to be visible before clicking, so the reveal animation can't leave a spacer
+      // intercepting the pointer.
+      await sparklines.hover();
+      await menuIcon.waitFor({ state: 'visible' });
+      await menuIcon.click();
       await page.testSubj.click('embeddablePanelAction-expViewSave');
     });
 

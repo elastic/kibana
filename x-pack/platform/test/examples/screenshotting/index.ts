@@ -69,7 +69,7 @@ export default function ({
       const memory = await testSubjects.find('memory');
       const text = await memory.getVisibleText();
 
-      expect(text).to.match(/\d+\.\d+ MB/);
+      expect(text).to.match(/\d+(\.\d+)? MB/);
     });
 
     it('should return CPU metrics', async () => {

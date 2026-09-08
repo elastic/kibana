@@ -17,7 +17,7 @@ export interface InPaginateProps {
   children: (props: PaginateChildProps) => React.ReactNode;
 }
 
-export const Paginate: React.FunctionComponent<InPaginateProps> = ({
+export const Paginate: CanvasFunctionComponent<InPaginateProps> = ({
   perPage = 10,
   startPage = 0,
   rows,
@@ -79,7 +79,6 @@ export const Paginate: React.FunctionComponent<InPaginateProps> = ({
 
 Paginate.propTypes = {
   rows: PropTypes.array.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
   perPage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   startPage: PropTypes.number,
 };

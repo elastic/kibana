@@ -21,6 +21,7 @@ const THIS_PATH =
 
 const IGNORED_PATHS = [
   THIS_PATH,
+  '.buildkite/pipeline-utils/ci-stats/get_tests_from_config.ts',
   'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
   'src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js',
 ];

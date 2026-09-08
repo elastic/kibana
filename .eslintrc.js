@@ -352,7 +352,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
   'x-pack/platform/test/fleet_cypress/fleet_server.ts',
   'x-pack/platform/test/serverless/api_integration/test_suites/telemetry/telemetry_config.ts',
-  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/apm/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/apm/server/test_helpers/**/*.{js,mjs,ts,tsx}',
@@ -365,10 +364,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/test/profiling_cypress/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/search/test/functional_enterprise_search/artifact_manager.ts',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/osquery_cypress/utils.ts',
@@ -2500,9 +2495,9 @@ module.exports = {
     {
       // Platform & Solutions API Tests
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
@@ -2549,10 +2544,12 @@ module.exports = {
       // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution and workflows_management blocks). The trade-off: the
-      // allowlisted files that overlap with those blocks lose their `*legacy*`
-      // pattern check; verified that none of them currently import any path
-      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // security_solution block). The trade-off: the allowlisted files that
+      // overlap with that block lose their `*legacy*` pattern check; verified
+      // that none of them currently import any path matching `*legacy*`. The
+      // workflows_management overlap is gone, and this comment can be dropped
+      // entirely once the remaining security_solution consumers migrate. The
+      // js-yaml freeze is handled separately via
       // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
       // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
