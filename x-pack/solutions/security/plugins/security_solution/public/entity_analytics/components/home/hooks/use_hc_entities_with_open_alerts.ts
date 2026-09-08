@@ -21,7 +21,7 @@ import { buildEntitiesWithAlertsCountQuery } from '../queries/hc_open_alerts_loo
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
   query: string,
-  signal: AbortSignal
+  signal: AbortSignal | undefined
 ): Promise<ESQLSearchResponse> => {
   const result = await lastValueFrom(
     searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
@@ -53,7 +53,7 @@ export const useEntitiesWithAlertsCount = ({
   const query = useMemo(() => {
     if (!euidApi || !resolvedIndex?.indexName) return null;
     return buildEntitiesWithAlertsCountQuery(euidApi.euid, resolvedIndex.indexName, spaceId);
-  }, [euidApi, resolvedIndex?.indexName]);
+  }, [euidApi, resolvedIndex?.indexName, spaceId]);
 
   const {
     data: queryResult,

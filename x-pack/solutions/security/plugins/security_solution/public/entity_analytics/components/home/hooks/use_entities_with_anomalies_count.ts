@@ -21,7 +21,7 @@ import { buildEntitiesWithAnomaliesCountQuery } from '../queries/tile_anomaly_co
 const esqlSearch = async (
   searchService: ReturnType<typeof useKibana>['services']['data']['search'],
   query: string,
-  signal: AbortSignal
+  signal: AbortSignal | undefined
 ): Promise<ESQLSearchResponse> => {
   const result = await lastValueFrom(
     searchService.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })

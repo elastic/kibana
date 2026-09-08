@@ -255,6 +255,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         outline: none;
         overflow: hidden;
         position: relative;
+        /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local card stacking, no semantic token applies */
         z-index: ${selected || emphasized ? 2 : 1};
         transition: border-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
           background-color ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
@@ -423,6 +424,7 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
                 margin-inline-start: ${col > 0 ? '-1px' : '0'};
                 margin-block-start: ${row > 0 ? '-1px' : '0'};
                 position: relative;
+                /* eslint-disable-next-line @elastic/eui/no-static-z-index -- local grid cell stacking, no semantic token applies */
                 z-index: ${selected ? 2 : 1};
 
                 &:hover,
