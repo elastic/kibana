@@ -78,6 +78,11 @@ import {
   resumeWorkflowExecutionExternallyWithInput,
 } from './external_resume/external_resume_service';
 import type { StepExecutionListResult } from './lib/search_step_executions';
+import {
+  getTriggerTypesFromDefinition,
+  getTriggerTypesFromYaml,
+  workflowYamlDeclaresEnabled,
+} from './lib/workflow_prepare';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
 import { preprocessAlertInputs } from './routes/executions/utils/preprocess_alert_inputs';
@@ -341,6 +346,63 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsExecutionEngine();
   }
 
+  /**
+   * Enforces trigger-declared exclusivity before a workflow becomes enabled.
+   *
+   * A trigger definition may declare `exclusivity: 'per-space'`, meaning at most
+   * one *enabled* workflow per space may subscribe to it. The rule is entirely
+   * registration-driven: this method never names a specific trigger, and a
+   * trigger that does not declare exclusivity costs nothing (no search is issued).
+   *
+   * Best-effort: two concurrent enables can interleave between the search and the
+   * write. There is no unique key in the workflow index to make this atomic; the
+   * guard exists to return a clear 409 rather than silently nondeterministic dispatch.
+   *
+   * @param triggerTypes Trigger ids the workflow will subscribe to once written.
+   * @param spaceId      Space the workflow is being written into.
+   * @param excludeWorkflowId The workflow being updated, skipped as its own conflict.
+   *   Omitted on create, where there is no self to skip yet.
+   */
+  private async assertExclusiveTriggersAvailable({
+    triggerTypes,
+    spaceId,
+    excludeWorkflowId,
+  }: {
+    triggerTypes: string[];
+    spaceId: string;
+    excludeWorkflowId?: string;
+  }): Promise<void> {
+    if (triggerTypes.length === 0) {
+      return;
+    }
+
+    const workflowsExtensions = await this.workflowsService.getWorkflowsExtensions();
+
+    // Dedupe: a workflow may declare the same trigger twice (different conditions),
+    // so one exclusive trigger costs at most one search. Sequential by design —
+    // the common case is zero exclusive triggers and issues no search at all.
+    for (const triggerId of new Set(triggerTypes)) {
+      if (workflowsExtensions.getTriggerDefinition(triggerId)?.exclusivity === 'per-space') {
+        // Already filtered to enabled: true and includes global (spaceId: '*') subscribers.
+        const enabledSubscribers = await this.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
+        const conflict = enabledSubscribers.find((w) => w.id !== excludeWorkflowId);
+        if (conflict) {
+          throw new WorkflowConflictError(
+            i18n.translate('workflowsManagement.exclusiveTriggerConflictError', {
+              defaultMessage:
+                'Cannot enable: workflow "{conflictingWorkflowName}" is already enabled for the {triggerId} trigger. Disable it first.',
+              values: {
+                conflictingWorkflowName: conflict.name ?? conflict.id,
+                triggerId,
+              },
+            }),
+            conflict.id
+          );
+        }
+      }
+    }
+  }
+
   public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
     this.smlIndexAttachment = fn;
     this.smlLogger = logger;
@@ -459,6 +521,15 @@ export class WorkflowsManagementApi {
     request: KibanaRequest,
     options?: { originManagedWorkflowId?: string }
   ): Promise<WorkflowDetailDto> {
+    // A workflow can be created already enabled when the YAML declares `enabled: true`,
+    // so the exclusivity guard must run here, not only on the enable transition.
+    if (workflowYamlDeclaresEnabled(workflow.yaml)) {
+      await this.assertExclusiveTriggersAvailable({
+        triggerTypes: getTriggerTypesFromYaml(workflow.yaml),
+        spaceId,
+      });
+    }
+
     const result = await this.workflowsService.createWorkflow(workflow, spaceId, request, options);
     this.notifySml(result.id, 'create', request);
     return result;
@@ -495,6 +566,15 @@ export class WorkflowsManagementApi {
     })}`;
     const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
 
+    // A clone inherits the source's `enabled` state from the YAML. If the source is
+    // enabled for an exclusive trigger, a second enabled subscriber would form — block it.
+    if (workflowYamlDeclaresEnabled(clonedYaml)) {
+      await this.assertExclusiveTriggersAvailable({
+        triggerTypes: getTriggerTypesFromYaml(clonedYaml),
+        spaceId,
+      });
+    }
+
     // `updateWorkflowYamlFields` cannot inject a `name` key when the YAML root is not a
     // mapping (a scalar or sequence), so it returns the YAML unchanged in that case. Pass
     // `cloneName` as an explicit fallback so the clone is still named "<name> Copy" instead
@@ -529,25 +609,33 @@ export class WorkflowsManagementApi {
       throw new ManagedWorkflowUpdateForbiddenError();
     }
 
-    if (workflow.enabled === true) {
-      const hasAroundCompletionTrigger = originalWorkflow.definition?.triggers?.some(
-        (t) => String(t.type) === 'inference.aroundCompletion'
-      );
-      if (hasAroundCompletionTrigger) {
-        const alreadyEnabled = await this.getWorkflowsSubscribedToTrigger(
-          'inference.aroundCompletion',
-          spaceId
-        );
-        const conflict = alreadyEnabled.find((w) => w.id !== id);
-        if (conflict) {
-          throw new WorkflowConflictError(
-            `Cannot enable: workflow "${
-              conflict.name ?? conflict.id
-            }" is already enabled for the inference.aroundCompletion trigger. Disable it first.`,
-            conflict.id
-          );
-        }
+    // Enforce trigger-declared exclusivity before any path that results in this
+    // workflow becoming enabled. The condition covers three routes to enablement:
+    //
+    //   1. Field-only enable (`workflow.enabled === true`): trigger types unchanged,
+    //      so use the existing definition.
+    //   2. YAML update that declares top-level `enabled: true`: the YAML value wins
+    //      over the `enabled` field (see workflow_crud_service.ts for the precedence
+    //      rule), so check the NEW trigger types from the incoming YAML.
+    //   3. YAML update that adds an exclusive trigger to an already-enabled workflow
+    //      (`workflow.enabled` absent but new triggers in YAML): same as case 2.
+    //
+    // Known gap: restoreWorkflowVersion — the restored snapshot YAML is fetched
+    // inside the crud service and is unavailable here. Track as a follow-up.
+    if (workflow.yaml) {
+      if (workflowYamlDeclaresEnabled(workflow.yaml) || workflow.enabled === true) {
+        await this.assertExclusiveTriggersAvailable({
+          triggerTypes: getTriggerTypesFromYaml(workflow.yaml),
+          spaceId,
+          excludeWorkflowId: id,
+        });
       }
+    } else if (workflow.enabled === true) {
+      await this.assertExclusiveTriggersAvailable({
+        triggerTypes: getTriggerTypesFromDefinition(originalWorkflow.definition),
+        spaceId,
+        excludeWorkflowId: id,
+      });
     }
 
     const result = await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
