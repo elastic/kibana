@@ -9,18 +9,24 @@ import { isMetricsHeaderPortalExcluded } from './is_metrics_header_portal_exclud
 import { METRICS_INVENTORY_PATH, METRICS_DETAIL_PATH } from './metrics_header_paths';
 
 describe('isMetricsHeaderPortalExcluded', () => {
-  it('excludes Inventory once that route consumes AppHeader', () => {
+  it('excludes Inventory and Explorer once those routes consume AppHeader', () => {
     expect(isMetricsHeaderPortalExcluded('/inventory')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/inventory/extra')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/explorer')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/explorer/extra')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/settings')).toBe(false);
     expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
     expect(isMetricsHeaderPortalExcluded('/detail/host/web-01')).toBe(false);
   });
 
-  it('excludes Inventory redirect aliases so the portal does not flash', () => {
+  it('excludes Inventory and Explorer redirect aliases so the portal does not flash', () => {
     expect(isMetricsHeaderPortalExcluded('/')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/snapshot')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/snapshot/x')).toBe(true);
     expect(isMetricsHeaderPortalExcluded('/snapshot-other')).toBe(false);
+    expect(isMetricsHeaderPortalExcluded('/metrics-explorer')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/metrics-explorer/x')).toBe(true);
+    expect(isMetricsHeaderPortalExcluded('/metrics-explorer-other')).toBe(false);
     expect(isMetricsHeaderPortalExcluded('/hosts')).toBe(false);
   });
 
