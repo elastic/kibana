@@ -53,16 +53,23 @@ describe('VerifyKiInputSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('accepts custom verifier workflows', () => {
+  it('accepts built-in and custom verifier entries', () => {
     const result = VerifyKiInputSchema.safeParse({
       ki: { type: 'runbook' },
       verifiers: [
+        { id: 'esql-valid-syntax' },
         { workflow_id: 'no-pii' },
         { workflow_id: 'has-owner', timeout_sec: 30, applies_to: { types: ['runbook'] } },
       ],
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('rejects a verifier entry with neither id nor workflow_id', () => {
+    const result = VerifyKiInputSchema.safeParse({ ki: {}, verifiers: [{ timeout_sec: 5 }] });
+
+    expect(result.success).toBe(false);
   });
 
   it('rejects too many verifiers', () => {

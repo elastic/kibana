@@ -224,7 +224,7 @@ describe('verify_ki workflow step', () => {
   describe('custom verifier workflows', () => {
     const validEsql = 'FROM logs-* | WHERE event.outcome == "failure" | LIMIT 10';
 
-    it('aggregates workflow verifiers after the built-ins', async () => {
+    it('runs the listed built-in and workflow verifiers in declaration order', async () => {
       setContextEngineEnabled(true);
       workflowsManagement.executeWorkflow
         .mockResolvedValueOnce(completedWith({ passed: true }) as never)
@@ -232,15 +232,41 @@ describe('verify_ki workflow step', () => {
 
       const output = await runHandler({ attributes: { esql: validEsql } }, [
         { workflow_id: 'esql-returns-rows' },
+        { id: ESQL_VALID_SYNTAX_VERIFIER_ID },
         { workflow_id: 'no-pii' },
       ]);
 
       expect(output.passed).toBe(false);
       expect(output.results).toEqual([
-        { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
         { verifier: 'workflow:esql-returns-rows', passed: true },
+        { verifier: ESQL_VALID_SYNTAX_VERIFIER_ID, passed: true },
         { verifier: 'workflow:no-pii', passed: false, reason: 'has PII' },
       ]);
+    });
+
+    it('runs only the listed verifiers', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.executeWorkflow.mockResolvedValue(
+        completedWith({ passed: true }) as never
+      );
+
+      const output = await runHandler(
+        { attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } },
+        [{ workflow_id: 'no-pii' }]
+      );
+
+      expect(output).toEqual({
+        passed: true,
+        results: [{ verifier: 'workflow:no-pii', passed: true }],
+      });
+    });
+
+    it('throws for an unknown built-in verifier id', async () => {
+      setContextEngineEnabled(true);
+
+      await expect(runHandler({ title: 'x' }, [{ id: 'nope' }])).rejects.toThrow(
+        `Unknown built-in KI verifier 'nope'. Known verifiers: ${ESQL_VALID_SYNTAX_VERIFIER_ID}`
+      );
     });
 
     it('runs the workflow in the executing space with the step request', async () => {
@@ -292,6 +318,7 @@ describe('verify_ki workflow step', () => {
       );
 
       await runHandler({ attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } }, [
+        { id: ESQL_VALID_SYNTAX_VERIFIER_ID },
         { workflow_id: 'no-pii' },
       ]);
 

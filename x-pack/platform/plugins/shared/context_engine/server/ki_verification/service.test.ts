@@ -161,16 +161,19 @@ describe('KiVerificationService', () => {
     expect(summary).toEqual({ passed: true, results: [] });
   });
 
-  it('runs extra verifiers after the registered ones', async () => {
-    registry.register(makeVerifier('builtin', { passed: true }));
-    const extra = makeVerifier('workflow:custom', { passed: false, reason: 'nope' });
+  it('runs only the given verifiers, in order, instead of the registry', async () => {
+    const registered = makeVerifier('registered', { passed: true });
+    registry.register(registered);
+    const custom = makeVerifier('workflow:custom', { passed: false, reason: 'nope' });
+    const builtIn = makeVerifier('builtin', { passed: true });
 
-    const summary = await service.verifyKi({}, context, [extra]);
+    const summary = await service.verifyKi({}, context, [custom, builtIn]);
 
+    expect(registered.verify).not.toHaveBeenCalled();
     expect(summary.passed).toBe(false);
     expect(summary.results).toEqual([
-      { verifier: 'builtin', passed: true },
       { verifier: 'workflow:custom', passed: false, reason: 'nope' },
+      { verifier: 'builtin', passed: true },
     ]);
   });
 

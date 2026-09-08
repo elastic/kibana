@@ -23,13 +23,13 @@ export class KiVerificationService {
    * Runs all applicable verifiers and aggregates their results, stamping each
    * result with its verifier id. A verifier that throws from `applies` or
    * `verify` is recorded as a failure and does not abort the run; cancellation
-   * errors rethrow. No-op when the feature flag is off. `extraVerifiers` run
-   * after the registered ones.
+   * errors rethrow. No-op when the feature flag is off. Runs `verifiers` in
+   * order when given, otherwise every registered verifier.
    */
   async verifyKi(
     ki: KnowledgeIndicator,
     { isEnabled, ...verifierContext }: KiVerificationContext,
-    extraVerifiers: KiVerifier[] = []
+    verifiers?: KiVerifier[]
   ): Promise<KiVerificationSummary> {
     if (!isEnabled) {
       return { passed: true, results: [] };
@@ -37,7 +37,7 @@ export class KiVerificationService {
 
     const results: KiVerifierResult[] = [];
 
-    for (const verifier of [...this.registry.getAll(), ...extraVerifiers]) {
+    for (const verifier of verifiers ?? this.registry.getAll()) {
       let applies: boolean;
       try {
         applies = verifier.applies(ki);

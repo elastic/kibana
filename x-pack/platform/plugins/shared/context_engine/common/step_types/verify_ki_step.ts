@@ -54,13 +54,28 @@ export const kiVerifierWorkflowSchema = z.object({
 
 export type KiVerifierWorkflow = z.infer<typeof kiVerifierWorkflowSchema>;
 
+/** A built-in verifier selected by id (for example `esql-valid-syntax`). */
+export const kiBuiltInVerifierSchema = z.object({
+  id: z
+    .string()
+    .min(1)
+    .max(MAX_KI_VERIFIER_WORKFLOW_ID_LENGTH)
+    .describe('The id of a built-in verifier to run'),
+});
+
+export const kiVerifierEntrySchema = z.union([kiBuiltInVerifierSchema, kiVerifierWorkflowSchema]);
+
+export type KiVerifierEntry = z.infer<typeof kiVerifierEntrySchema>;
+
 export const VerifyKiInputSchema = z.object({
   ki: kiPartialFieldsSchema,
   verifiers: z
-    .array(kiVerifierWorkflowSchema)
+    .array(kiVerifierEntrySchema)
     .max(MAX_KI_VERIFIER_WORKFLOWS)
     .optional()
-    .describe('Custom verifier workflows to run alongside the built-in verifiers'),
+    .describe(
+      'The verifiers to run, in order: built-ins by `id` and custom workflows by `workflow_id`. When omitted, every built-in verifier runs.'
+    ),
 });
 
 export const VerifyKiOutputSchema = z.object({
@@ -94,7 +109,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. If no verifier applies (for example, no ES|QL in `attributes.esql`), the step passes with empty results. Custom verifiers are workflows listed under `verifiers`: each receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
+        'The {stepTypeId} step runs Context Engine verifiers against a knowledge indicator and returns a per-verifier pass/fail summary. Without `verifiers`, every built-in verifier runs. With `verifiers`, exactly the listed ones run in order: built-ins by `id` (for example `esql-valid-syntax`) and custom workflows by `workflow_id`. A verifier only runs when it applies to the KI (for example, the ES|QL verifier needs `attributes.esql`); if none apply, the step passes with empty results. A custom verifier workflow receives the KI as `inputs.ki` and must emit `passed` (boolean) and `reason` (string) through a `workflow.output` step. A custom verifier that fails, times out, or returns malformed output fails the KI. Requires the Context Engine advanced setting.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID },
     }),
     examples: [
@@ -109,13 +124,14 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
       attributes:
         esql: 'FROM logs-* | WHERE event.outcome == "failure" | STATS c = COUNT(*) BY user.name'
 \`\`\``,
-      `## Run custom verifier workflows alongside the built-in verifiers
+      `## Pick the verifiers to run: a built-in plus custom verifier workflows
 \`\`\`yaml
 - name: verify_ki
   type: ${VERIFY_KI_STEP_TYPE_ID}
   with:
     ki: "{{ steps.build_ki.output }}"
     verifiers:
+      - id: esql-valid-syntax
       - workflow_id: no-pii-in-content
       - workflow_id: esql-returns-rows
         timeout_sec: 60

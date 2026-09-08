@@ -15,7 +15,7 @@ import {
   createWorkflowVerifier,
   KiVerificationService,
 } from '../ki_verification';
-import type { KiVerifierWorkflowRunner } from '../ki_verification';
+import type { KiVerifier, KiVerifierWorkflowRunner } from '../ki_verification';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiVerificationTelemetry } from './helpers';
 
@@ -25,7 +25,22 @@ export const createVerifyKiStepDefinition = (
   analyticsService: ContextEngineAnalyticsService,
   workflowsManagement?: KiVerifierWorkflowRunner
 ) => {
-  const service = new KiVerificationService(createKiVerifierRegistry());
+  const registry = createKiVerifierRegistry();
+  const service = new KiVerificationService(registry);
+
+  const resolveBuiltIn = (id: string): KiVerifier => {
+    const verifier = registry.get(id);
+    if (!verifier) {
+      throw new ExecutionError({
+        type: 'ValidationError',
+        message: `Unknown built-in KI verifier '${id}'. Known verifiers: ${registry
+          .getAll()
+          .map((v) => v.id)
+          .join(', ')}`,
+      });
+    }
+    return verifier;
+  };
 
   return createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
@@ -42,24 +57,24 @@ export const createVerifyKiStepDefinition = (
         });
       }
 
-      const verifierWorkflows = context.input.verifiers ?? [];
-      if (verifierWorkflows.length > 0 && !workflowsManagement) {
-        throw new ExecutionError({
-          type: 'FeatureDisabledError',
-          message:
-            'Custom KI verifiers require the workflowsManagement plugin, which is not available.',
-        });
-      }
       const { spaceId } = context.contextManager.getContext().workflow;
-      const workflowVerifiers = workflowsManagement
-        ? verifierWorkflows.map((definition) =>
-            createWorkflowVerifier(definition, {
-              workflowsManagement,
-              request: fakeRequest,
-              spaceId,
-            })
-          )
-        : [];
+      const verifiers = context.input.verifiers?.map((entry) => {
+        if (!('workflow_id' in entry)) {
+          return resolveBuiltIn(entry.id);
+        }
+        if (!workflowsManagement) {
+          throw new ExecutionError({
+            type: 'FeatureDisabledError',
+            message:
+              'Custom KI verifiers require the workflowsManagement plugin, which is not available.',
+          });
+        }
+        return createWorkflowVerifier(entry, {
+          workflowsManagement,
+          request: fakeRequest,
+          spaceId,
+        });
+      });
 
       const summary = await withKiVerificationTelemetry({
         analyticsService,
@@ -73,7 +88,7 @@ export const createVerifyKiStepDefinition = (
               logger,
               abortSignal: context.abortSignal,
             },
-            workflowVerifiers
+            verifiers
           ),
       });
 
