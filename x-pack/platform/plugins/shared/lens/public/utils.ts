@@ -139,6 +139,13 @@ export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasource
   if (datasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
     return LENS_DATASOURCE_ID.FORM_BASED;
   }
+  // a non-empty state under an unknown datasource id means the panel's actual
+  // configuration is unreadable (corrupted doc or forward-incompatible export);
+  // resolving to an empty known datasource would silently drop that config, so
+  // surface it as "no datasource" instead
+  if (datasourceIds.length > 0) {
+    return null;
+  }
   // all states are empty (e.g. a brand-new panel): fall back to the plain key
   // check, preferring formBased since an empty text-based state carries no query
   const allDatasourceIds = Object.keys(doc.state.datasourceStates);
