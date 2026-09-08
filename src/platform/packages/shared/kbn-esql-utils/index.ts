@@ -83,6 +83,7 @@ export {
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
+  formatEsqlEntityPredicate,
   isComputedColumn,
   getQuerySummary,
   getColumnsWithHighlights,

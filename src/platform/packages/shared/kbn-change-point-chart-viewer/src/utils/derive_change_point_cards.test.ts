@@ -585,7 +585,7 @@ describe('derive_change_point_cards', () => {
       expect(apiCard).not.toBe(webCard);
     });
 
-    it('handles null entity column values without throwing', () => {
+    it('matches null entity values and filters the line query to that entity', () => {
       const cards = buildChangePointCards({
         table: makeTable(COLUMNS_WITH_HOST, [
           {
@@ -599,6 +599,7 @@ describe('derive_change_point_cards', () => {
         esql: ESQL_WITH_HOST_BY,
       })!;
       expect(cards).toHaveLength(1);
+      expect(cards[0].lineEsql).toContain('| WHERE host IS NULL');
 
       // Row with null host matches the card whose entity label also serializes null
       expect(
@@ -646,6 +647,40 @@ describe('derive_change_point_cards', () => {
       expect(
         getCardForRow(cards, {
           host: 'web-1',
+          bucket: '2023-11-15T00:00:00.000Z',
+          type: 'mean_shift',
+          pvalue: 0.001,
+        })
+      ).toBe(cards[0]);
+    });
+
+    it('matches when every BY column is absent from the result table', () => {
+      // dropNullColumns can remove a BY column that is null for every doc. Cards then
+      // have empty entityValues and id cp-card-all; lookup must use the same id.
+      const columnsNoHost = [
+        { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+        { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+        { id: 'type', name: 'type', meta: { type: 'string' as const } },
+        { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
+      ];
+      const cards = buildChangePointCards({
+        table: makeTable(columnsNoHost, [
+          {
+            bucket: '2023-11-15T00:00:00.000Z',
+            avg_bytes: 14,
+            type: 'mean_shift',
+            pvalue: 0.001,
+          },
+        ]),
+        esql: ESQL_WITH_HOST_BY,
+      })!;
+      expect(cards).toHaveLength(1);
+      expect(cards[0].id).toBe('cp-card-all');
+      expect(cards[0].entityValues).toEqual({});
+      expect(cards[0].byColumns).toEqual(['host']);
+
+      expect(
+        getCardForRow(cards, {
           bucket: '2023-11-15T00:00:00.000Z',
           type: 'mean_shift',
           pvalue: 0.001,

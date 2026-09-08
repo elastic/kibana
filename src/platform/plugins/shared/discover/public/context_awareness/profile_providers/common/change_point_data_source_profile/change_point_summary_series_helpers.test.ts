@@ -179,6 +179,16 @@ describe('change_point_summary_series_helpers', () => {
       ).toBe(`${line} | WHERE (host == "a" AND service == "orders")`);
     });
 
+    it('includes IS NULL predicates for null entity values', () => {
+      expect(
+        appendDistinctEntityWhereToLineEsql(
+          line,
+          [{ host: null }, { host: 'a' }, { host: null }],
+          ['host']
+        )
+      ).toBe(`${line} | WHERE host IS NULL OR host == "a"`);
+    });
+
     it('returns the original query when the distinct set exceeds the cap', () => {
       const rows = Array.from({ length: ENTITY_WHERE_PREDICATE_CAP + 1 }, (_, i) => ({
         host: `h${i}`,

@@ -42,6 +42,7 @@ export {
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
+  formatEsqlEntityPredicate,
 } from './utils/change_point_helpers';
 export {
   getIndexPatternFromESQLQuery,

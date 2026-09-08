@@ -12,7 +12,7 @@ import {
   getEntityKey,
   type ChangePointCardModel,
 } from '@kbn/change-point-chart-viewer';
-import { formatEsqlIdentifier, formatEsqlLiteral, getChangePointByColumns } from '@kbn/esql-utils';
+import { formatEsqlEntityPredicate, getChangePointByColumns } from '@kbn/esql-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 
@@ -144,18 +144,7 @@ export const appendDistinctEntityWhereToLineEsql = (
   const groups: string[] = [];
 
   for (const row of rows) {
-    const predicates: string[] = [];
-    let skip = false;
-    for (const col of entityColumnIds) {
-      const lit = formatEsqlLiteral(row[col]);
-      if (lit === undefined) {
-        skip = true;
-        break;
-      }
-      predicates.push(`${formatEsqlIdentifier(col)} == ${lit}`);
-    }
-    if (skip) continue;
-
+    const predicates = entityColumnIds.map((col) => formatEsqlEntityPredicate(col, row[col]));
     const key = predicates.join(' AND ');
     if (seen.has(key)) continue;
     if (seen.size >= cap) {

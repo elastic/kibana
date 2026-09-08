@@ -13,6 +13,7 @@ import {
   getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
+  formatEsqlEntityPredicate,
   formatEsqlIdentifier,
   formatEsqlLiteral,
 } from './change_point_helpers';
@@ -211,6 +212,17 @@ describe('formatEsqlLiteral', () => {
   });
 });
 
+describe('formatEsqlEntityPredicate', () => {
+  it('uses equality for values with literals', () => {
+    expect(formatEsqlEntityPredicate('host', 'web-1')).toBe('host == "web-1"');
+  });
+
+  it('uses IS NULL for null and undefined', () => {
+    expect(formatEsqlEntityPredicate('host', null)).toBe('host IS NULL');
+    expect(formatEsqlEntityPredicate('host', undefined)).toBe('host IS NULL');
+  });
+});
+
 describe('appendEntityFiltersToChangePointLineEsql', () => {
   it('returns the query unchanged when there are no entity columns', () => {
     const q = 'FROM idx | STATS m = AVG(x) BY t';
@@ -231,11 +243,11 @@ describe('appendEntityFiltersToChangePointLineEsql', () => {
     );
   });
 
-  it('skips columns with no literal (null / undefined)', () => {
+  it('uses IS NULL for missing entity values', () => {
     const q = 'FROM idx | STATS m = AVG(x) BY host, t';
     expect(
       appendEntityFiltersToChangePointLineEsql(q, { host: null, other: 'ok' }, ['host', 'other'])
-    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE other == "ok"');
+    ).toBe('FROM idx | STATS m = AVG(x) BY host, t | WHERE host IS NULL AND other == "ok"');
   });
 
   it('appends WHERE for entity columns with empty string values', () => {

@@ -65,7 +65,7 @@ const serializeCell = (value: unknown): string => {
 
 /**
  * Stable map key for which time series a row belongs to.
- * Matches card grouping / `cp-card-${key}` ids (`col=value` joined by `, `). Empty when there is no BY.
+ * Matches card grouping (`col=value` joined by `, `). Empty when there are no entity columns.
  */
 export const getEntityKey = (
   row: Readonly<Record<string, unknown>>,
@@ -74,6 +74,8 @@ export const getEntityKey = (
   if (entityColumnIds.length === 0) return '';
   return entityColumnIds.map((id) => `${id}=${serializeCell(row[id])}`).join(', ');
 };
+
+const getChangePointCardId = (entityLabel: string): string => `cp-card-${entityLabel || 'all'}`;
 
 const pickTimestampCell = (
   row: Readonly<Record<string, unknown>>,
@@ -350,7 +352,7 @@ export const buildChangePointCards = (params: {
 
     cards.push({
       // Use entity label as the stable card ID so React remounts when the entity changes.
-      id: `cp-card-${entityLabel || 'all'}`,
+      id: getChangePointCardId(entityLabel),
       title,
       lineEsql,
       byColumns: byColumns ? [...byColumns] : undefined,
@@ -391,9 +393,10 @@ export const getCardForRow = (
     return firstCard;
   }
 
+  // Same columns used when the card was built (BY cols present on the table). Empty when
+  // every BY column was dropped (e.g. dropNullColumns) — that still maps to `cp-card-all`.
   const entityCols = Object.keys(firstCard.entityValues);
-  const entityLabel = getEntityKey(row, entityCols);
-  const card = cards.find((c) => c.id === `cp-card-${entityLabel}`);
+  const card = cards.find((c) => c.id === getChangePointCardId(getEntityKey(row, entityCols)));
   if (!card) return undefined;
 
   // Typed cards come from result sets where type/pvalue are present in the schema. Verify
