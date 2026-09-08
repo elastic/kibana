@@ -102,6 +102,9 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
+  [KibanaAssetType.workflow]: KibanaSavedObjectType.workflow,
+  [KibanaAssetType.agent]: KibanaSavedObjectType.agent,
+  [KibanaAssetType.skill]: KibanaSavedObjectType.skill,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -553,9 +556,18 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
         return;
       }
 
-      const asset = JSON.parse(entry.buffer.toString('utf8'));
-
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
+      // Non-JSON asset types (markdown-backed) are installed by their own steps and must
+      // never reach JSON.parse below.
+      if (
+        assetType === KibanaAssetType.workflow ||
+        assetType === KibanaAssetType.agent ||
+        assetType === KibanaAssetType.skill
+      ) {
+        return;
+      }
+
+      const asset = JSON.parse(entry.buffer.toString('utf8'));
       const soType = KibanaSavedObjectTypeMapping[assetType];
       if (!validKibanaAssetTypes.has(assetType)) {
         return;

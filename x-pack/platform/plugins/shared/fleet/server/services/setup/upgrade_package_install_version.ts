@@ -9,6 +9,8 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import pMap from 'p-map';
 import type { Logger } from '@kbn/logging';
 
+import type { KibanaRequest } from '@kbn/core/server';
+
 import {
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -30,10 +32,12 @@ export async function upgradePackageInstallVersion({
   soClient,
   esClient,
   logger,
+  request,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   logger: Logger;
+  request?: KibanaRequest;
 }) {
   const currentKibanaVersion = appContextService.getKibanaVersion();
   const outdatedInstallations = await findOutdatedInstallations(soClient, currentKibanaVersion);

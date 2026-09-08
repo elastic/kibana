@@ -44,6 +44,7 @@ import { awaitIfPending } from './setup_utils';
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './setup/managed_package_policies';
 import { setupUpgradeManagedPackagePolicies } from './setup/managed_package_policies';
+import { createFleetInternalRequest } from './security';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -260,7 +261,12 @@ async function createSetupSideEffects(
       type: 'upgradePackageInstallVersion',
     });
   } else {
-    await upgradePackageInstallVersion({ soClient, esClient, logger });
+    await upgradePackageInstallVersion({
+      soClient,
+      esClient,
+      logger,
+      request: createFleetInternalRequest(),
+    });
   }
   stepSpan?.end();
 

@@ -20,7 +20,6 @@ import {
   updatePackagePolicyWithCloudConnectorSecrets,
   getCloudConnectorNameFromPackagePolicy,
   extractAccountType,
-  injectConnectorVarsIntoPolicy,
 } from './integration_helpers';
 
 /**
@@ -148,15 +147,6 @@ export async function createAndIntegrateCloudConnector(params: {
       }
 
       logger.info(`Successfully reused cloud connector: ${existingCloudConnectorId}`);
-
-      // Backfill credential vars from the connector into the policy for onboarding flows
-      // that reuse a connector by ID without supplying credentials in the request.
-      updatedPackagePolicy = injectConnectorVarsIntoPolicy(
-        updatedPackagePolicy,
-        existingConnector.vars,
-        cloudProvider,
-        packageInfo
-      );
 
       return {
         packagePolicy: updatedPackagePolicy,

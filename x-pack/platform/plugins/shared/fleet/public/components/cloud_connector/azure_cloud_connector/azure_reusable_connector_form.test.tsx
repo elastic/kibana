@@ -175,7 +175,6 @@ describe('AzureReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        name: 'Azure Connector 1',
         tenantId: 'tenant-123',
         clientId: 'client-456',
         azure_credentials_cloud_connector_id: 'azure-cc-789',
@@ -198,7 +197,6 @@ describe('AzureReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        name: 'Azure Connector 2',
         tenantId: 'tenant-abc',
         clientId: 'client-def',
         azure_credentials_cloud_connector_id: 'azure-cc-ghi',

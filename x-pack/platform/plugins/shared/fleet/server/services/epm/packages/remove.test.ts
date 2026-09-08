@@ -7,6 +7,7 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../common';
+import { KibanaSavedObjectType } from '../../../types';
 
 import { packagePolicyService, appContextService } from '../..';
 import { auditLoggingService } from '../../audit_logging';
@@ -16,6 +17,7 @@ import {
   removeInstallation,
   cleanupAssets,
   cleanupDependenciesStep,
+  deleteKibanaAssets,
 } from './remove';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
 import { getInstallation } from './get';
@@ -504,5 +506,87 @@ describe('cleanupAssets', () => {
         'udp.test': 'logs-udp.test-*',
       },
     });
+  });
+});
+
+describe('deleteKibanaAssets: package workflow/agent/skill uninstall', () => {
+  const logger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as any;
+  const soClient = {
+    find: jest.fn().mockResolvedValue({ saved_objects: [] }),
+    bulkResolve: jest.fn().mockResolvedValue({ resolved_objects: [] }),
+    delete: jest.fn(),
+  } as any;
+  const deleteWorkflows = jest.fn().mockResolvedValue(undefined);
+  const deletePackageManagedAgent = jest.fn().mockResolvedValue(undefined);
+  const deletePackageManagedSkill = jest.fn().mockResolvedValue(undefined);
+
+  beforeEach(() => {
+    deleteWorkflows.mockClear();
+    deletePackageManagedAgent.mockClear();
+    deletePackageManagedSkill.mockClear();
+    (appContextService as any).getSavedObjects = jest.fn().mockReturnValue({
+      getUnsafeInternalClient: jest.fn().mockReturnValue(soClient),
+    });
+    (appContextService as any).getWorkflowsManagementSetup = jest.fn().mockReturnValue({
+      management: { deleteWorkflows },
+    });
+    (appContextService as any).getAgentBuilderSetup = jest.fn().mockReturnValue({
+      management: { deletePackageManagedAgent, deletePackageManagedSkill },
+    });
+  });
+
+  it('deletes all workflow assets via workflowsManagement with force', async () => {
+    await deleteKibanaAssets({
+      installedObjects: [
+        { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+        { id: 'wf-2', type: KibanaSavedObjectType.workflow },
+      ],
+      logger,
+      spaceId: 'default',
+    });
+    expect(deleteWorkflows).toHaveBeenCalledTimes(1);
+    expect(deleteWorkflows).toHaveBeenCalledWith(
+      ['wf-1', 'wf-2'],
+      'default',
+      expect.anything(),
+      { force: true }
+    );
+  });
+
+  it('deletes agent and skill assets via agentBuilder per asset', async () => {
+    await deleteKibanaAssets({
+      installedObjects: [
+        { id: 'agent-1', type: KibanaSavedObjectType.agent },
+        { id: 'skill-1', type: KibanaSavedObjectType.skill },
+      ],
+      logger,
+      spaceId: 'default',
+    });
+    expect(deletePackageManagedAgent).toHaveBeenCalledTimes(1);
+    expect(deletePackageManagedAgent).toHaveBeenCalledWith('agent-1', 'default');
+    expect(deletePackageManagedSkill).toHaveBeenCalledTimes(1);
+    expect(deletePackageManagedSkill).toHaveBeenCalledWith('skill-1', 'default');
+  });
+
+  it('skips gracefully without throwing when management APIs are unavailable', async () => {
+    (appContextService as any).getWorkflowsManagementSetup = jest.fn().mockReturnValue(undefined);
+    (appContextService as any).getAgentBuilderSetup = jest.fn().mockReturnValue(undefined);
+    await expect(
+      deleteKibanaAssets({
+        installedObjects: [
+          { id: 'wf-1', type: KibanaSavedObjectType.workflow },
+          { id: 'agent-1', type: KibanaSavedObjectType.agent },
+        ],
+        logger,
+        spaceId: 'default',
+      })
+    ).resolves.toBeUndefined();
+    expect(deleteWorkflows).not.toHaveBeenCalled();
+    expect(deletePackageManagedAgent).not.toHaveBeenCalled();
   });
 });

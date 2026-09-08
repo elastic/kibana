@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core/server';
 import pMap from 'p-map';
 
 import { appContextService } from '../../services';
@@ -22,6 +23,7 @@ import { reinstallPackageForInstallation } from '../../services/epm/packages';
 interface RunUpgradePackageInstallVersionParams {
   signal: AbortSignal;
   logger: Logger;
+  request: KibanaRequest;
 }
 
 /**
@@ -30,6 +32,7 @@ interface RunUpgradePackageInstallVersionParams {
 export async function runUpgradePackageInstallVersion({
   signal,
   logger,
+  request,
 }: RunUpgradePackageInstallVersionParams): Promise<void> {
   const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const esClient = appContextService.getInternalUserESClient();
@@ -82,6 +85,7 @@ export async function runUpgradePackageInstallVersion({
             soClient,
             esClient,
             installation,
+            request,
           });
           logger.debug(`Successfully upgraded package install version for ${installation.name}`);
         } catch (err: any) {

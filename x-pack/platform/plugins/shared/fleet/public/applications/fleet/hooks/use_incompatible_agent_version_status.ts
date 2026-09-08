@@ -8,7 +8,6 @@
 import { useMemo } from 'react';
 
 import satisfies from 'semver/functions/satisfies';
-import coerce from 'semver/functions/coerce';
 
 import type { AgentPolicy } from '../types';
 import type { PackageInfo } from '../../../../common/types';
@@ -40,12 +39,12 @@ export const getIncompatibleAgentVersionStatus = (
     if (!agentPerVersion) {
       return acc;
     }
-    const isIncompatible = (version: string) => {
-      const coerced = coerce(version);
-      return !satisfies(coerced ? coerced.version : version, versionCondition);
-    };
-    const hasAllIncompatible = agentPerVersion.every((entry) => isIncompatible(entry.version));
-    const hasSomeIncompatible = agentPerVersion.some((entry) => isIncompatible(entry.version));
+    const hasAllIncompatible = agentPerVersion.every(
+      (entry) => !satisfies(entry.version, versionCondition)
+    );
+    const hasSomeIncompatible = agentPerVersion.some(
+      (entry) => !satisfies(entry.version, versionCondition)
+    );
     return hasAllIncompatible ? 'ALL' : hasSomeIncompatible ? 'SOME' : acc;
   }, 'NONE');
 

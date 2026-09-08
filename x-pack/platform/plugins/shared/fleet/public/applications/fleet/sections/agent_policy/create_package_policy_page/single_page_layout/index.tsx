@@ -38,6 +38,8 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  isKibanaOnlyIntegration,
+  getConnectorChecklist,
   checkIntegrationFipsLooseCompatibility,
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
@@ -108,6 +110,7 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 import { useAgentless } from './hooks/setup_technology';
+import { ConnectorSetupChecklist } from './connector_setup_checklist';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -713,6 +716,21 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     ]
   );
 
+  // FLEET-013: connector prerequisites for Kibana-only integrations.
+  const connectorChecklist = useMemo(
+    () =>
+      getConnectorChecklist(
+        packageInfo,
+        Object.fromEntries(
+          Object.entries(packagePolicy.vars ?? {}).map(([key, entry]) => [
+            key,
+            (entry as { value?: unknown })?.value,
+          ])
+        )
+      ),
+    [packageInfo, packagePolicy.vars]
+  );
+
   const steps: EuiStepProps[] = [
     ...(addIntegrationFlyoutProps?.selectIntegrationStep
       ? [addIntegrationFlyoutProps?.selectIntegrationStep]
@@ -747,12 +765,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             />
           )}
           {replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy}
+          {/* FLEET-013: Kibana-only integrations show a connector checklist
+              instead of the Elastic Agent policy step. */}
+          {isKibanaOnlyIntegration(packageInfo, integration) ? (
+            <>
+              <EuiSpacer size="m" />
+              <ConnectorSetupChecklist items={connectorChecklist} />
+            </>
+          ) : null}
         </>
       ),
       headingElement: 'h2',
       status: !pkgName ? 'disabled' : undefined,
     },
-    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS && !addIntegrationFlyoutProps
+    // FLEET-013: Hide agent policy step for Kibana-only integrations (inputs: []).
+    // Uses the shared helper so the UI and the manifest contract cannot drift.
+    ...(!addIntegrationFlyoutProps &&
+    selectedSetupTechnology !== SetupTechnology.AGENTLESS &&
+    !isKibanaOnlyIntegration(packageInfo, integration)
       ? [
           {
             title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {

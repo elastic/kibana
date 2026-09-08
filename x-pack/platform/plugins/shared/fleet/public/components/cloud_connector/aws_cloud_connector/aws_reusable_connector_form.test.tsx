@@ -169,7 +169,6 @@ describe('AWSReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        name: 'AWS Connector 1',
         roleArn: 'arn:aws:iam::123456789012:role/Role1',
         externalId: 'external-id-123',
         cloudConnectorId: 'connector-1',
@@ -191,7 +190,6 @@ describe('AWSReusableConnectorForm', () => {
 
       // Verify setCredentials was called with correct values
       expect(mockSetCredentials).toHaveBeenCalledWith({
-        name: 'AWS Connector 2',
         roleArn: 'arn:aws:iam::123456789012:role/Role2',
         externalId: 'external-id-456',
         cloudConnectorId: 'connector-2',
