@@ -60,6 +60,7 @@ export class NightshiftInvestigationsPlugin
   private spaces?: NightshiftInvestigationsStartDeps['spaces'];
   private agentBuilder?: NightshiftInvestigationsStartDeps['agentBuilder'];
   private searchInferenceEndpoints?: NightshiftInvestigationsStartDeps['searchInferenceEndpoints'];
+  private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private savedObjects?: CoreStart['savedObjects'];
 
   constructor(ctx: PluginInitializerContext) {
@@ -119,6 +120,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
+          getAlertsClient: (request: KibanaRequest) =>
+            this.ruleRegistry?.getRacClientWithRequest(request),
         },
         core,
         logger: this.logger,
@@ -139,6 +142,7 @@ export class NightshiftInvestigationsPlugin
     this.workflowsExtensionsStart = plugins.workflowsExtensions;
     this.agentBuilder = plugins.agentBuilder;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
+    this.ruleRegistry = plugins.ruleRegistry;
     this.savedObjects = coreStart.savedObjects;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the

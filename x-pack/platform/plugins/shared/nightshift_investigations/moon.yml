@@ -40,6 +40,8 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/search-inference-endpoints'
   - '@kbn/task-manager-plugin'
+  - '@kbn/rule-data-utils'
+  - '@kbn/rule-registry-plugin'
 tags:
   - plugin
   - prod
