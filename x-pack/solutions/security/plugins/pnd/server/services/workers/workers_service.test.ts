@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_IDS,
 } from '@kbn/pnd-common';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -17,6 +18,7 @@ import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_
 import { WorkersService } from './workers_service';
 
 const TRIAGE = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+const ATTACK_DISCOVERY = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const SPACE = 'default';
 const request = {} as KibanaRequest;
 
@@ -101,14 +103,20 @@ const createPersistentHarness = () => {
     listInstalledWorkflowStates: jest.fn(async () => []),
   } as unknown as PluginScopedManagedWorkflowsApi;
 
-  const scheduledTasks = new Map<string, { apiKeyId: string }>();
+  const scheduledTasks = new Map<string, { apiKeyId: string; interval: string | null }>();
   const updateWorkflow = jest.fn(
     async (id: string, { enabled }: { enabled: boolean }, _spaceId: string) => {
       const document = documents.get(id);
       if (!document) throw new Error('not found');
       document.enabled = enabled;
       document.version += 1;
-      scheduledTasks.set(id, { apiKeyId: `key-${scheduledTasks.size + 1}` });
+      // Stands in for syncSchedulerAfterSave: the real scheduler re-reads the persisted document
+      // and re-registers the task from its scheduled trigger, so read the interval off the YAML
+      // rather than off the request.
+      scheduledTasks.set(id, {
+        apiKeyId: `key-${scheduledTasks.size + 1}`,
+        interval: /every:\s*"([^"]+)"/.exec(document.yaml)?.[1] ?? null,
+      });
       return {} as never;
     }
   );
@@ -249,6 +257,64 @@ describe('WorkersService', () => {
       request
     );
     expect(harness.scheduledTasks.get(`${TRIAGE}-${SPACE}`)?.apiKeyId).toEqual(expect.any(String));
+  });
+
+  it('re-registers the schedule at the new interval after a schedule-only save', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+    const workflowId = `${ATTACK_DISCOVERY}-${SPACE}`;
+
+    expect(enabled.response.worker.settings.scheduleInterval).toBe('24h');
+    expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('24h');
+    harness.updateWorkflow.mockClear();
+
+    const result = await service.update(
+      ATTACK_DISCOVERY,
+      {
+        scheduleInterval: '15m',
+        settingsRevision: enabled.response.worker.settingsRevision,
+      },
+      SPACE,
+      request
+    );
+
+    expect(result.outcome).toBe('updated');
+    if (result.outcome !== 'updated') throw new Error('Expected schedule save to succeed');
+    expect(result.response.worker.settings.scheduleInterval).toBe('15m');
+    // The install rewrites the YAML but never touches Task Manager; this resync is the only thing
+    // that re-registers the task, so without it the Worker would keep firing every 24h.
+    expect(harness.updateWorkflow).toHaveBeenCalledWith(
+      workflowId,
+      { enabled: true },
+      SPACE,
+      request
+    );
+    expect(harness.documents.get(workflowId)?.yaml).toContain('every: "15m"');
+    expect(harness.scheduledTasks.get(workflowId)?.interval).toBe('15m');
+  });
+
+  it('treats a schedule-only patch as a settings write that needs its revision', async () => {
+    const harness = createPersistentHarness();
+    const service = harness.createService();
+    const enabled = await service.update(ATTACK_DISCOVERY, { enabled: true }, SPACE, request);
+    if (enabled.outcome !== 'updated') throw new Error('Expected enable to succeed');
+
+    await expect(
+      service.update(ATTACK_DISCOVERY, { scheduleInterval: '15m' }, SPACE, request)
+    ).resolves.toEqual({
+      outcome: 'rejected',
+      what: 'a settings update without its revision',
+    });
+    await expect(
+      service.update(
+        ATTACK_DISCOVERY,
+        { scheduleInterval: '15m', settingsRevision: 999 },
+        SPACE,
+        request
+      )
+    ).resolves.toEqual({ outcome: 'conflict' });
   });
 
   it('installs defaults when disabling a Worker that has no document yet', async () => {
