@@ -19,7 +19,9 @@ export interface MetricsHeaderMenuVisibility {
 }
 
 /**
- * Path-gated Metrics header actions shared by the Chrome portal and later AppHeader menus.
+ * Path-gated Metrics header actions.
+ * Chrome portal reads anomaly detection and hosts onboarding.
+ * AppHeader also reads showSettings; Chrome always shows its Settings link.
  */
 export function getMetricsHeaderMenuVisibility(pathname: string): MetricsHeaderMenuVisibility {
   return {
