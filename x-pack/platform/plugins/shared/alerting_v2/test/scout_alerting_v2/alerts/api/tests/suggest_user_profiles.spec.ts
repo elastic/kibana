@@ -61,6 +61,13 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     });
   });
 
+  apiTest.afterAll(async ({ esClient }) => {
+    await esClient.security.updateUserProfileData({
+      uid: adminUserBody.profile_uid,
+      data: { kibana: { avatar: null } },
+    });
+  });
+
   apiTest('returns suggested profiles', async ({ apiClient }) => {
     const response = await suggest(apiClient, adminHeaders, { name: sharedNameToken });
 
