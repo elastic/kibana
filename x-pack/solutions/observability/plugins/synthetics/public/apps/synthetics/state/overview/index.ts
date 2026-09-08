@@ -9,6 +9,7 @@ import { createReducer } from 'redux-toolkit-v1';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
 import { OVERVIEW_PAGINATION_DEFAULTS } from '../../../../../common/constants/monitor_management';
 import type { MonitorOverviewState } from './models';
+import type { OverviewView } from './models';
 import { overviewViews } from './models';
 import { isPageStateSlotEqual } from '../utils/page_state_equality';
 import { getInitialShowFromAllSpaces } from '../utils/get_initial_show_from_all_spaces';
@@ -27,11 +28,18 @@ import {
 
 export const DEFAULT_OVERVIEW_VIEW = overviewViews[0];
 export const DEFAULT_OVERVIEW_PER_PAGE = OVERVIEW_PAGINATION_DEFAULTS.perPage;
+// Compact table rows are far shorter than cards, but a page of 20 still runs
+// well past the fold on common viewport heights — 10 keeps a page scannable
+// without scrolling.
+export const DEFAULT_COMPACT_VIEW_PER_PAGE = 10;
+
+const getDefaultPerPageForView = (view: OverviewView): number =>
+  view === 'compactView' ? DEFAULT_COMPACT_VIEW_PER_PAGE : DEFAULT_OVERVIEW_PER_PAGE;
 
 const initialState: MonitorOverviewState = {
   pageState: {
     page: OVERVIEW_PAGINATION_DEFAULTS.page,
-    perPage: DEFAULT_OVERVIEW_PER_PAGE,
+    perPage: getDefaultPerPageForView(DEFAULT_OVERVIEW_VIEW),
     sortOrder: OVERVIEW_PAGINATION_DEFAULTS.sortOrder,
     sortField: OVERVIEW_PAGINATION_DEFAULTS.sortField,
     showFromAllSpaces: getInitialShowFromAllSpaces(),
@@ -141,7 +149,7 @@ export const monitorOverviewReducer = createReducer(initialState, (builder) => {
         state.pageState = {
           ...state.pageState,
           page: 1,
-          perPage: DEFAULT_OVERVIEW_PER_PAGE,
+          perPage: getDefaultPerPageForView(action.payload),
         };
       }
       state.view = action.payload;
