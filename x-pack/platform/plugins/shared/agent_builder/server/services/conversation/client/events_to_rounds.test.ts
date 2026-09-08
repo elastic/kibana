@@ -110,6 +110,28 @@ const executionEvents = ({
 };
 
 describe('eventsToRounds — multi-execution HITL fold', () => {
+  it('ignores an orphan resume without its initial execution', () => {
+    const events: TimelineEvent[] = [
+      {
+        id: 'r1::prompt_response::1',
+        type: TimelineEventType.promptResponse,
+        created_at: '2024-01-01T00:00:00.000Z',
+        actor: userActor,
+        data: { prompt_requested_event_id: 'r1::execution_terminated', responses: {} },
+      },
+      ...executionEvents({
+        roundId: 'r1',
+        executionId: 'r1::execution::1',
+        triggerEventId: 'r1::prompt_response::1',
+        triggerType: TimelineTriggerType.promptResponse,
+        steps: [],
+        outcome: { type: 'responded', response: { message: 'done' } },
+        createdAt: '2024-01-01T00:00:00.000Z',
+      }),
+    ];
+    expect(eventsToRounds(events)).toEqual([]);
+  });
+
   it('folds an ask_user_question pause + resume into one round with the answer applied', () => {
     const events: TimelineEvent[] = [
       {

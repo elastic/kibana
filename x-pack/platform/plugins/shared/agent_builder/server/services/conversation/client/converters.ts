@@ -61,7 +61,12 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
-import { isRoundDerivedEventId, roundToEvents, roundsToEvents } from './rounds_to_events';
+import {
+  isRoundDerivedEventId,
+  parseExecutionId,
+  roundToEvents,
+  roundsToEvents,
+} from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
 
 export type Document = Omit<
@@ -84,15 +89,15 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
 
 /** True when a round's stored timeline spans more than one execution (a HITL resume). */
 const hasResumeExecution = (roundId: string, storedEvents: TimelineEvent[]): boolean =>
-  storedEvents.some((event) => event.id.startsWith(`${roundId}::execution::`));
+  storedEvents.some((event) => {
+    const execution = event.execution_id ? parseExecutionId(event.execution_id) : undefined;
+    return execution?.roundId === roundId && execution.index > 0;
+  });
 
 /**
- * Rebuilds the stored timeline on a rounds-path write. Each round's round-derived events are
- * regenerated from the round, EXCEPT a round that has already been resumed (a multi-execution HITL
- * round): its stored events are the source of truth and are preserved verbatim, because
- * `roundsToEvents` can only emit a single execution and would collapse the pause history. Additive
- * events (like errors) keep their timestamp slot. This runs only when the write did not itself carry
- * events, so `merged.events` are the currently stored events.
+ * Rebuilds round-derived events on a rounds-path write, preserving resumed executions and additive
+ * events. Only attachment refs are refreshed: the folded message belongs to the resume, not the
+ * original user message. Undefined refs mean no update; an empty array explicitly clears them.
  */
 const reconcileEvents = (merged: Conversation): TimelineEvent[] => {
   const stored = merged.events ?? [];

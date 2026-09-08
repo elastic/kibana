@@ -75,7 +75,7 @@ export interface ConversationToLangchainOptions {
 }
 
 /**
- * Builds the LangChain message history from the (events-derived) processed conversation. When
+ * Builds the LangChain message history from the processed conversation. When
  * `resultTransformer` is provided, previous rounds' tool results are passed through it.
  */
 export const prepareMessages = async ({

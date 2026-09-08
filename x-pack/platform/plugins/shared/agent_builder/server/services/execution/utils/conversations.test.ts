@@ -827,7 +827,7 @@ describe('conversations utils', () => {
       ).rejects.toThrow(/requires a resume_execution payload/);
     });
 
-    it('throws (fails loud) when no prior execution is stored for the round', async () => {
+    it('throws when no prior execution is stored for the round', async () => {
       const conversationClient = createConversationClientMock();
       const conversation: ConversationWithOperation = {
         ...withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE'),

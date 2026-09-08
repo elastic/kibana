@@ -10,8 +10,7 @@ import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 
 /**
  * Returns the last round when it is paused awaiting a human prompt (HITL), else undefined.
- * Takes the reconstructed context rounds (derived from the event timeline), so pause detection
- * uses the same source as message building and cannot diverge from it.
+ * Takes reconstructed context rounds so pause detection and message building read the same rounds.
  */
 export const getPendingRound = (rounds: ConversationRound[]): ConversationRound | undefined => {
   const lastRound = rounds[rounds.length - 1];

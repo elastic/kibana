@@ -28,7 +28,7 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 
-import { mergeAttachmentRefs } from './add_round_complete_event';
+import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { formatAttachmentsMetadata } from './attachment_presentation';
 
 export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {

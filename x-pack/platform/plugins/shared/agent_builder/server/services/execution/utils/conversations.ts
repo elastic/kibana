@@ -34,6 +34,7 @@ import {
   promptResponseEvent,
   resumeExecutionToEvents,
   executionTerminatedEventId,
+  parseExecutionId,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -285,12 +286,8 @@ export const appendRoundTerminated$ = ({
   );
 };
 
-/** True when an execution id belongs to the given round (its initial run or any resume). */
-const executionBelongsToRound = (executionId: string, roundId: string): boolean =>
-  executionId === `${roundId}::execution` || executionId.startsWith(`${roundId}::execution::`);
-
 /**
- * Append-only resume write. A resumed round is a NEW execution (`exec_k`) on the same round: this
+ * Append-only resume write. A resumed round is a new execution (`exec_k`) on the same round: this
  * appends a `prompt_response` event (the human's answer) plus the resume execution's events, and
  * never rewrites the pause (`exec_0`). `eventsToRounds` folds the executions back into one round on
  * read.
@@ -334,19 +331,21 @@ export const appendResumeExecution$ = ({
           const roundExecutionIds = new Set(
             storedEvents
               .map((event) => event.execution_id)
-              .filter((id): id is string => Boolean(id) && executionBelongsToRound(id!, round.id))
+              .filter(
+                (id): id is string => id !== undefined && parseExecutionId(id)?.roundId === round.id
+              )
           );
-          const executionIndex = roundExecutionIds.size; // exec_0 present -> 1 for the first resume
-          if (executionIndex < 1) {
+          const resumeIndex = roundExecutionIds.size;
+          if (resumeIndex < 1) {
             throw new Error(
               `appendResumeExecution$: no prior execution stored for round ${round.id}; cannot resume`
             );
           }
-          const promptRequestedEventId = executionTerminatedEventId(round.id, executionIndex - 1);
+          const promptRequestedEventId = executionTerminatedEventId(round.id, resumeIndex - 1);
 
           const promptResponse = promptResponseEvent({
             roundId: round.id,
-            executionIndex,
+            executionIndex: resumeIndex,
             promptRequestedEventId,
             responses: input.prompts ?? {},
             input: followUpRound.input,
@@ -358,7 +357,7 @@ export const appendResumeExecution$ = ({
           const executionEvents = resumeExecutionToEvents({
             followUpRound,
             roundId: round.id,
-            executionIndex,
+            executionIndex: resumeIndex,
             triggerEventId: promptResponse.id,
             conversation,
           });

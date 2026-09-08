@@ -15,21 +15,7 @@ import { isToolCallStep, isAskUserQuestionStep } from '@kbn/agent-builder-common
 import type { AskUserQuestionAnswer } from '@kbn/agent-builder-common/agents/prompts';
 import { mergeAttachmentRefs } from './migrate_attachments';
 
-/**
- * Merges a resumed round's follow-up execution into the round it resumes.
- *
- * The result keeps the *pending* round's identity — its `id`, `started_at`, `origin`, `author`,
- * and its leading `steps` — while taking the follow-up's terminal fields (`status`,
- * `pending_prompts`, `response`, `configuration_overrides`). Counters (`time_to_*`, `model_usage`)
- * are summed and `trace_id`s concatenated, so a round that paused and resumed reads as one round.
- *
- * `state` is intentionally left `undefined`: the runtime recomputes it from the follow-up
- * execution via `buildRoundState`; the read-time stitch sets it from the terminal execution's
- * `ExecutionRunSummary.state`. Callers must set it after the merge.
- *
- * This primitive is shared by the execution runtime (`add_round_complete_event`) and the read-time
- * timeline fold (`events_to_rounds`) so both produce byte-identical merged rounds.
- */
+/** Merges execution fields while preserving round identity; callers must restore terminal state. */
 export const mergeRounds = (
   previous: ConversationRound,
   next: ConversationRound
@@ -50,7 +36,7 @@ export const mergeRounds = (
     id: previous.id,
     status: next.status,
     pending_prompts: next.pending_prompts,
-    state: undefined, // state is recomputed/carried after the merge
+    state: undefined,
     input: mergeRoundInput(previous.input, next.input),
     steps: [...previous.steps, ...next.steps],
     trace_id: traceId,
@@ -94,21 +80,7 @@ export const mergeModelUsage = (
 };
 
 /**
- * Resolves a paused round's pending steps against its follow-up execution, then merges the two into
- * one round. This is the single primitive both the execution runtime and the read-time timeline
- * fold use to reconstruct a resumed (HITL) round, so both produce byte-identical output.
- *
- * - Pending `ask_user_question` steps are answered from `answers` (keyed by `prompt_id`).
- * - Pending tool calls (empty `results`) are resolved from the matching tool-call step in `next`
- *   (matched by `tool_call_id`): the follow-up execution re-runs the paused call, so its resolved
- *   result lives in `next`. The resolved copy is filled into the paused round's original step
- *   position and dropped from `next` to avoid duplication.
- * - Everything else is combined by {@link mergeRounds}.
- *
- * Callers build `answers` and the resolved tool-call steps in `next` from their own source (the
- * runtime from the graph event stream; the fold from the stored `prompt_response` + `exec_k`
- * events), but the resolution and merge logic here is shared, so a stored `exec_0 + prompt_response
- * + exec_k` timeline folds to the same round the runtime produced.
+ * Resolves pending steps and merges executions, keeping runtime and timeline reconstruction identical.
  */
 export const applyResumeResolution = (
   previous: ConversationRound,
@@ -138,7 +110,9 @@ export const applyResumeResolution = (
         return {
           ...step,
           results: resolved.results,
-          ...(resolved.progression !== undefined ? { progression: resolved.progression } : {}),
+          ...(resolved.progression !== undefined
+            ? { progression: [...(step.progression ?? []), ...resolved.progression] }
+            : {}),
         };
       }
     }

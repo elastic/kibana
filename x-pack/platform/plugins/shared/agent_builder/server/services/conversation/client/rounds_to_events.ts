@@ -47,12 +47,7 @@ const STEP_EVENT_ID_PATTERN = /::step::\d+$/;
 // (regenerated/preserved with its round), so it must not be treated as an additive event.
 const PROMPT_RESPONSE_EVENT_ID_PATTERN = /::prompt_response::\d+$/;
 
-/**
- * True when `id` was produced by {@link roundToEvents} or the resume append path. Resume executions
- * carry ids `${roundId}::execution::${k}::execution_started|::execution_terminated|::step::N`, which
- * already end with a recognized suffix / step pattern, plus the `${roundId}::prompt_response::${k}`
- * link event.
- */
+/** True when `id` was produced by {@link roundToEvents} or the resume append path. */
 export const isRoundDerivedEventId = (id: string): boolean =>
   ROUND_DERIVED_EVENT_ID_SUFFIX_VALUES.some((suffix) => id.endsWith(suffix)) ||
   STEP_EVENT_ID_PATTERN.test(id) ||
@@ -215,15 +210,18 @@ export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventA
   id: conversation.agent_id,
 });
 
-// --- Resume (HITL) append path --------------------------------------------------------------
-// A round's initial run is `exec_0` (`${roundId}::execution`, ids `${roundId}::user_message` etc,
-// built above). A k-th resume (k >= 1) is a new execution appended append-only: it never rewrites
-// the pause, and carries execution-scoped ids so `eventsToRounds` can fold the executions back into
-// one round.
-
-/** Execution id for the k-th resume of a round (k >= 1). */
+/** Builds an execution id for a resume appended to a round without rewriting its initial run. */
 export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
+
+/** Parses initial and resume execution ids, returning undefined for unrelated ids. */
+export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
+  const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
+  if (!match) {
+    return undefined;
+  }
+  return { roundId: match[1], index: Number(match[2] ?? 0) };
+};
 
 /** The `execution_terminated` event id for an execution index (0 = the initial run). */
 export const executionTerminatedEventId = (roundId: string, executionIndex: number): string =>

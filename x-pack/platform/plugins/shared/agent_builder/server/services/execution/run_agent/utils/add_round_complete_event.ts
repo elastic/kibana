@@ -75,9 +75,6 @@ import {
 import { applyResumeResolution } from '../../../conversation/client/merge_rounds';
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 
-// Re-exported so `prepare_conversation` keeps its existing import site.
-export { mergeAttachmentRefs };
-
 type SourceEvents = ConvertedEvents;
 
 type StepEvents =
@@ -208,6 +205,12 @@ export const addRoundCompleteEvent = ({
             );
             if (attachmentContext) {
               round.input = { ...round.input, attachment_context: attachmentContext };
+              if (resumeExecution) {
+                resumeExecution.follow_up_round.input = {
+                  ...resumeExecution.follow_up_round.input,
+                  attachment_context: attachmentContext,
+                };
+              }
             }
           }
 
@@ -270,7 +273,7 @@ const resumeRound = ({
       return {
         ...step,
         results: toolResults.flatMap(({ data }) => data.results),
-        progression: [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)],
+        progression: toolProgressions.map(({ data }) => data),
       };
     });
 

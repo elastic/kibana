@@ -1592,9 +1592,7 @@ describe('conversation model converters', () => {
       expect(updated.events?.map((event) => event.id)).toEqual(originalEventIds);
     });
 
-    it('preserves a multi-execution (resumed HITL) timeline on a rounds-path update', () => {
-      // A round that paused (exec_0, prompt_requested) and resumed (prompt_response + exec_1). A
-      // rounds-path write (e.g. markRead / rename) must NOT collapse it back to a single execution.
+    const multiExecutionTimeline = () => {
       const actor = { type: 'user', id: 'u1' } as never;
       const agent = { type: 'agent', id: 'a1' } as never;
       const summary = {
@@ -1602,7 +1600,7 @@ describe('conversation model converters', () => {
         time_to_first_token: 1,
         time_to_last_token: 2,
       };
-      const events = [
+      return [
         {
           id: 'mr::user_message',
           type: TimelineEventType.userMessage,
@@ -1665,6 +1663,12 @@ describe('conversation model converters', () => {
           data: { ...summary, outcome: { type: 'responded', response: { message: 'done' } } },
         },
       ] as never[];
+    };
+
+    it('preserves a multi-execution (resumed HITL) timeline on a rounds-path update', () => {
+      // A round that paused (exec_0, prompt_requested) and resumed (prompt_response + exec_1). A
+      // rounds-path write (e.g. markRead / rename) must NOT collapse it back to a single execution.
+      const events = multiExecutionTimeline();
 
       const base = eventsNativeStored();
       const conversation: Conversation = {
@@ -1692,76 +1696,7 @@ describe('conversation model converters', () => {
     });
 
     it('refreshes the preserved user_message when a rounds-path input change hits a resumed round', () => {
-      const actor = { type: 'user', id: 'u1' } as never;
-      const agent = { type: 'agent', id: 'a1' } as never;
-      const summary = {
-        model_usage: { connector_id: 'c1', llm_calls: 1, input_tokens: 1, output_tokens: 1 },
-        time_to_first_token: 1,
-        time_to_last_token: 2,
-      };
-      const events = [
-        {
-          id: 'mr::user_message',
-          type: TimelineEventType.userMessage,
-          created_at: '2025-08-04T07:00:00.000Z',
-          actor,
-          data: { message: 'do it' },
-        },
-        {
-          id: 'mr::execution_started',
-          type: TimelineEventType.executionStarted,
-          created_at: '2025-08-04T07:00:00.000Z',
-          actor: agent,
-          execution_id: 'mr::execution',
-          trigger_event_id: 'mr::user_message',
-          data: { trigger_type: 'user_message' },
-        },
-        {
-          id: 'mr::execution_terminated',
-          type: TimelineEventType.executionTerminated,
-          created_at: '2025-08-04T07:00:01.000Z',
-          actor: agent,
-          execution_id: 'mr::execution',
-          trigger_event_id: 'mr::user_message',
-          data: {
-            ...summary,
-            outcome: {
-              type: 'prompt_requested',
-              prompts: [{ type: AgentPromptType.confirmation, id: 'p1' }],
-            },
-          },
-        },
-        {
-          id: 'mr::prompt_response::1',
-          type: TimelineEventType.promptResponse,
-          created_at: '2025-08-04T07:05:00.000Z',
-          actor,
-          data: {
-            prompt_requested_event_id: 'mr::execution_terminated',
-            responses: { p1: { allow: true } },
-            // the resume carried its own message; the folded round.input.message becomes this
-            input: { message: 'resume follow-up' },
-          },
-        },
-        {
-          id: 'mr::execution::1::execution_started',
-          type: TimelineEventType.executionStarted,
-          created_at: '2025-08-04T07:05:00.000Z',
-          actor: agent,
-          execution_id: 'mr::execution::1',
-          trigger_event_id: 'mr::prompt_response::1',
-          data: { trigger_type: 'prompt_response' },
-        },
-        {
-          id: 'mr::execution::1::execution_terminated',
-          type: TimelineEventType.executionTerminated,
-          created_at: '2025-08-04T07:05:01.000Z',
-          actor: agent,
-          execution_id: 'mr::execution::1',
-          trigger_event_id: 'mr::prompt_response::1',
-          data: { ...summary, outcome: { type: 'responded', response: { message: 'done' } } },
-        },
-      ] as never[];
+      const events = multiExecutionTimeline();
 
       const rounds = eventsToRounds(events);
       const conversation: Conversation = {
@@ -1785,16 +1720,14 @@ describe('conversation model converters', () => {
         updateDate: new Date(updateDate),
       });
 
-      // The multi-execution timeline still survives...
       expect(updated.events?.map((e) => e.id)).toEqual(
         expect.arrayContaining(['mr::execution::1::execution_terminated'])
       );
-      // ...and the preserved user_message now reflects the new attachment_refs (reaches events)...
       const userMessage = updated.events?.find((e) => e.id === 'mr::user_message');
       expect((userMessage?.data as { attachment_refs?: unknown }).attachment_refs).toEqual([
         { attachment_id: 'att-1', version: 1 },
       ]);
-      // ...while the user's ORIGINAL message is preserved (not overwritten by the resume message).
+      // Keep the original user message, not the resume message.
       expect((userMessage?.data as { message: string }).message).toBe('do it');
     });
 
