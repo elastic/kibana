@@ -85,6 +85,30 @@ describe('createBaseHandlerContext', () => {
     expect(context.contextManager.getContext()).not.toHaveProperty('capabilities');
   });
 
+  it('capabilities self-destruct on JSON serialization — the ES persistence path cannot capture real payload', () => {
+    const mocks = createHandlerTestMocks();
+    const secretFn = jest.fn();
+    (
+      mocks.stepExecutionRuntime.contextManager.getExecutionCapabilities as jest.Mock
+    ).mockReturnValue([{ id: 'proceed', value: { invoke: secretFn } }]);
+
+    const context = createBaseHandlerContext(
+      {},
+      {},
+      {},
+      defaultTestNode,
+      mocks.stepExecutionRuntime,
+      mocks.workflowLogger
+    );
+
+    // Handler can access the real value in-process ...
+    expect((context.capabilities![0].value as { invoke: jest.Mock }).invoke).toBe(secretFn);
+    // ... but a JSON round-trip (the path to step output / ES) loses it.
+    const persisted = JSON.parse(JSON.stringify(context.capabilities));
+    expect(persisted).toEqual([{ id: 'proceed', value: {} }]);
+    expect(persisted[0].value).not.toHaveProperty('invoke');
+  });
+
   it('forwards callKibanaApi to the execution runtime with abort signal', async () => {
     const mocks = createHandlerTestMocks();
     mocks.stepExecutionRuntime.contextManager.callKibanaApi.mockResolvedValue({

@@ -395,9 +395,26 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
   stepType: string;
 
   /**
-   * Trusted, request-local capabilities supplied by the execution caller.
-   * They are passed directly to handlers and are never added to workflow
-   * context, template variables, step input/output, or persisted state.
+   * Request-local privileged capabilities supplied by the execution caller.
+   *
+   * **Injection scope:** injected unconditionally into every step handler context
+   * regardless of step type. Only step handlers that know the exact `id` and pass
+   * the value sentinel check (via `getCapabilityValue`) can read a capability;
+   * all other handlers see `undefined` from that helper.
+   *
+   * **Threat model:** capability `value` objects are intentionally designed to be
+   * non-serializable. Implementations must store their real payload behind a
+   * non-enumerable Symbol key in a WeakMap and freeze the container.
+   * `JSON.stringify` strips Symbol keys, so the ES-persistence path sees `[{}]`,
+   * not the underlying function references. A handler that attempts to include
+   * capabilities in its step output or log them loses the real payload on the
+   * round-trip — this is a deliberate self-destruct guarantee.
+   *
+   * **Do not** add capabilities whose `value` holds plain JSON-serializable data.
+   * That bypasses the self-destruct guarantee and exposes the value to every handler.
+   *
+   * These must never be added to workflow context, template variables, or step
+   * input/output directly.
    */
   capabilities?: WorkflowExecutionCapabilities;
 }
