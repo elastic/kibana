@@ -533,8 +533,7 @@ export const isAttachmentPermanentDeleteBlockedError = (
   err: unknown
 ): err is AgentBuilderAttachmentPermanentDeleteBlockedError => {
   return (
-    isAgentBuilderError(err) &&
-    err.code === AgentBuilderErrorCode.attachmentPermanentDeleteBlocked
+    isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.attachmentPermanentDeleteBlocked
   );
 };
 
@@ -551,12 +550,16 @@ export const createAttachmentPermanentDeleteBlockedError = ({
     client_id: `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`,
     referenced_in_rounds: `Cannot permanently delete attachment '${attachmentId}' because it is referenced in conversation rounds`,
   };
-  return new AgentBuilderError(AgentBuilderErrorCode.attachmentPermanentDeleteBlocked, messageByReason[reason], {
-    ...meta,
-    attachmentId,
-    reason,
-    statusCode: 409,
-  });
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.attachmentPermanentDeleteBlocked,
+    messageByReason[reason],
+    {
+      ...meta,
+      attachmentId,
+      reason,
+      statusCode: 409,
+    }
+  );
 };
 
 /**
