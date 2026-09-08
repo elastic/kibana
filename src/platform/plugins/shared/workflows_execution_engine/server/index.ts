@@ -33,10 +33,7 @@ export type {
 } from './types';
 
 export { getStepExecutionsByWorkflowExecution } from './repositories/data_access_layer/lib/get_step_executions_by_workflow_execution';
-export {
-  classifyWorkflowTriggerMatch,
-  type WorkflowTriggerMatchOutcome,
-} from './trigger_events/filter_workflows_by_trigger_condition';
+export { classifyWorkflowTriggerMatch } from './trigger_events/filter_workflows_by_trigger_condition';
 
 export {
   registerHitlLifecycleAuditor,
