@@ -8,8 +8,19 @@
  */
 
 import { expectType } from 'tsd';
-import * as helpers from '..';
-import { z } from '..';
+import {
+  z,
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  unboundedString,
+} from '..';
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
 
 jest.mock('@kbn/schema-string-helpers', () => ({
@@ -20,18 +31,16 @@ jest.mock('@kbn/schema-string-helpers', () => ({
 beforeEach(() => jest.clearAllMocks());
 
 describe.each([
-  ['savedObjectId', 1, 512],
-  ['savedObjectType', 0, 256],
-  ['savedObjectVersion', 0, 256],
-  ['spaceId', 1, 512],
-  ['displayName', 1, 1024],
-  ['description', 0, 10000],
-  ['searchFilter', 0, 10000],
-  ['aggregation', 0, 100000],
-  ['querySortField', 0, 256],
-] as const)('%s', (name, minLength, maxLength) => {
-  const helper = helpers[name];
-
+  ['savedObjectId', savedObjectId, 1, 512],
+  ['savedObjectType', savedObjectType, 0, 256],
+  ['savedObjectVersion', savedObjectVersion, 0, 256],
+  ['spaceId', spaceId, 1, 512],
+  ['displayName', displayName, 1, 1024],
+  ['description', description, 0, 10000],
+  ['searchFilter', searchFilter, 0, 10000],
+  ['aggregation', aggregation, 0, 100000],
+  ['querySortField', querySortField, 0, 256],
+] as const)('%s', (name, helper, minLength, maxLength) => {
   test('enforces the default boundaries and string type', () => {
     const strict = helper();
     expect(strict.parse('x'.repeat(maxLength))).toHaveLength(maxLength);
@@ -86,11 +95,11 @@ describe.each([
 
 describe('unboundedString', () => {
   test.each(['', '  ', '\n\t'])('rejects an empty reason %j at definition time', (reason) => {
-    expect(() => helpers.unboundedString({ reason })).toThrow('requires a non-empty reason');
+    expect(() => unboundedString({ reason })).toThrow('requires a non-empty reason');
   });
 
   test('accepts large strings, preserves minimum length and validates the input type', () => {
-    const unbounded = helpers.unboundedString({
+    const unbounded = unboundedString({
       reason: 'Size is enforced upstream',
       minLength: 1,
     });
@@ -103,8 +112,8 @@ describe('unboundedString', () => {
 
 test('supports composition, inference and refinement after warn()', () => {
   const requestSchema = z.object({
-    id: helpers.savedObjectId.warn().regex(/^a+$/).optional(),
-    description: helpers.description().nullable(),
+    id: savedObjectId.warn().regex(/^a+$/).optional(),
+    description: description().nullable(),
   });
   type Request = z.infer<typeof requestSchema>;
   const input: Request = { id: 'a'.repeat(600), description: null };
@@ -114,27 +123,25 @@ test('supports composition, inference and refinement after warn()', () => {
 });
 
 test('preserves custom Zod error options', () => {
-  expect(() => helpers.savedObjectId({ error: 'Expected an ID' }).parse(42)).toThrow(
-    'Expected an ID'
-  );
+  expect(() => savedObjectId({ error: 'Expected an ID' }).parse(42)).toThrow('Expected an ID');
   expect(() =>
-    helpers.unboundedString({ reason: 'Trusted input', error: 'Expected text' }).parse(42)
+    unboundedString({ reason: 'Trusted input', error: 'Expected text' }).parse(42)
   ).toThrow('Expected text');
 });
 
 test('exports accurate JSON Schema limits in both modes', () => {
-  expect(z.toJSONSchema(helpers.savedObjectId())).toMatchObject({
+  expect(z.toJSONSchema(savedObjectId())).toMatchObject({
     type: 'string',
     minLength: 1,
     maxLength: 512,
   });
-  const reporting = z.toJSONSchema(helpers.savedObjectId.warn());
+  const reporting = z.toJSONSchema(savedObjectId.warn());
   expect(reporting).toMatchObject({ type: 'string', minLength: 1 });
   expect(reporting).not.toHaveProperty('maxLength');
 });
 
 test('returns ordinary Zod schemas for composition after selecting the mode', () => {
-  const modified = helpers.savedObjectId().min(3);
+  const modified = savedObjectId().min(3);
   expectType<'warn' extends keyof typeof modified ? true : false>(false);
   expect(modified).not.toHaveProperty('warn');
   expect(() => modified.parse('ab')).toThrow();
