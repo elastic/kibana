@@ -62,6 +62,7 @@
     "@kbn/chart-icons",
     "@kbn/tinymath",
     "@kbn/ui-theme",
+    "@kbn/ui-callout",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/monaco",
     "@kbn/language-documentation",
