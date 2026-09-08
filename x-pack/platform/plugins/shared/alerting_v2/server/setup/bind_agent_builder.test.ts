@@ -20,7 +20,6 @@ import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_st
 import { LoggerServiceToken } from '../lib/services/logger_service/logger_service';
 import { createLoggerService } from '../lib/services/logger_service/logger_service.mock';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type { AlertingServerSetupDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
@@ -76,7 +75,6 @@ describe('bindAgentBuilder', () => {
   let container: Container;
   let agentBuilder: ReturnType<typeof agentBuilderMocks.createSetup>;
   let agentBuilderSml: { registerType: jest.Mock };
-  let savedObjects: { createInternalRepository: jest.Mock };
   let settings: { get: jest.Mock };
   let workflowsManagementApi: { getWorkflow: jest.Mock; getAvailableConnectors: jest.Mock };
   let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
@@ -93,7 +91,6 @@ describe('bindAgentBuilder', () => {
     container = new Container();
     agentBuilder = agentBuilderMocks.createSetup();
     agentBuilderSml = { registerType: jest.fn() };
-    savedObjects = { createInternalRepository: jest.fn(() => ({})) };
     settings = { get: jest.fn().mockResolvedValue(true) };
     workflowsManagementApi = {
       getWorkflow: jest.fn(),
@@ -117,7 +114,6 @@ describe('bindAgentBuilder', () => {
     );
 
     container.bind(CoreStart('injection')).toConstantValue({} as never);
-    container.bind(CoreStart('savedObjects')).toConstantValue(savedObjects as never);
     container.bind(LoggerServiceToken).toConstantValue(loggerService);
     container.bind(SettingsServiceToken).toConstantValue(settings as never);
     container.bind(WorkflowsManagementApiToken).toConstantValue(workflowsManagementApi as never);
@@ -180,21 +176,6 @@ describe('bindAgentBuilder', () => {
 
       await expect(getIsAlertingV2Enabled()).resolves.toBe(true);
       expect(settings.get).toHaveBeenCalledWith(ALERTING_V2_ENABLED_SETTING_ID);
-    });
-
-    it('creates internal repositories scoped to the rule and action-policy saved object types', () => {
-      bindAgentBuilderPlugin();
-      bindAgentBuilderSmlPlugin();
-
-      runOnSetup();
-
-      createRuleSmlTypeMock.mock.calls[0][0].getInternalRepository();
-      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([RULE_SAVED_OBJECT_TYPE]);
-
-      createActionPolicySmlTypeMock.mock.calls[0][0].getInternalRepository();
-      expect(savedObjects.createInternalRepository).toHaveBeenCalledWith([
-        ACTION_POLICY_SAVED_OBJECT_TYPE,
-      ]);
     });
   });
 
