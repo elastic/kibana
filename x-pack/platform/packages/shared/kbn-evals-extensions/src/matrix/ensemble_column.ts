@@ -64,7 +64,20 @@ export interface EnsembleColumn {
    */
   separablePairs: number;
   totalPairs: number;
+  /**
+   * Pairs whose CI edge lands within `BORDERLINE_MARGIN` of zero. These flip
+   * verdict on a different RNG seed, so a bare "N separate" hides a coin flip:
+   * swapping one seeded generator for another moved this board's count by one.
+   * Reported so a borderline pair is never quoted as a clean separation.
+   */
+  borderlinePairs: number;
 }
+
+/**
+ * A CI edge this close to zero is not a decision, it is noise. Chosen as ~5% of
+ * the observed model spread on this board rather than an absolute epsilon.
+ */
+const BORDERLINE_MARGIN = 0.005;
 
 /**
  * Deterministic paired bootstrap over the shared cells.
@@ -80,20 +93,21 @@ export interface EnsembleColumn {
 function countSeparablePairs(
   perModelCells: Map<string, Map<string, number>>,
   iterations = 2000
-): { separablePairs: number; totalPairs: number } {
+): { separablePairs: number; totalPairs: number; borderlinePairs: number } {
   const ids = [...perModelCells.keys()].sort();
-  // Mulberry32: small, seeded, and dependency-free.
-  let seed = 0x9e3779b9;
+  // Seeded LCG (Numerical Recipes constants), in plain modular arithmetic so it
+  // reads as arithmetic rather than bit-twiddling. Quality is ample here: the
+  // bootstrap only needs uniform indices, not cryptographic randomness.
+  const MODULUS = 4294967296;
+  let seed = 2463534242;
   const rnd = () => {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    seed = (1664525 * seed + 1013904223) % MODULUS;
+    return seed / MODULUS;
   };
 
   let separablePairs = 0;
   let totalPairs = 0;
+  let borderlinePairs = 0;
 
   for (let a = 0; a < ids.length; a++) {
     for (let b = a + 1; b < ids.length; b++) {
@@ -124,10 +138,11 @@ function countSeparablePairs(
       const lo = diffs[Math.floor(0.025 * iterations)];
       const hi = diffs[Math.floor(0.975 * iterations)];
       if (lo > 0 || hi < 0) separablePairs++;
+      if (Math.min(Math.abs(lo), Math.abs(hi)) < BORDERLINE_MARGIN) borderlinePairs++;
     }
   }
 
-  return { separablePairs, totalPairs };
+  return { separablePairs, totalPairs, borderlinePairs };
 }
 
 const mean = (xs: number[]): number => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -199,7 +214,7 @@ export function buildEnsembleColumn(cells: EnsembleCellInput[]): EnsembleColumn 
       new Map(ks.map((k) => [k.split(SEP)[1], mean(judges.map((j) => byJudge.get(j)!.get(k)!))])),
     ])
   );
-  const { separablePairs, totalPairs } = countSeparablePairs(perModelCells);
+  const { separablePairs, totalPairs, borderlinePairs } = countSeparablePairs(perModelCells);
 
   return {
     models: models.sort((a, b) => b.ensemble - a.ensemble),
@@ -208,5 +223,6 @@ export function buildEnsembleColumn(cells: EnsembleCellInput[]): EnsembleColumn 
     noiseReductionFactor: Math.sqrt(judges.length),
     separablePairs,
     totalPairs,
+    borderlinePairs,
   };
 }

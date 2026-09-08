@@ -86,15 +86,18 @@ export function analyzeSaturation({
   const verdict =
     limitingFactor === 'saturation'
       ? `${saturatedModels}/${byModel.size} models sit within ${tolerance} of the ${ceiling} ceiling ` +
-        `while judges disagree by only ${judgeSpread.toFixed(3)} per cell. The rubric, not the judge, ` +
+        `while judges disagree by only ${judgeSpread.toFixed(
+          3
+        )} per cell. The rubric, not the judge, ` +
         `is the binding constraint -- rejudging cannot separate these models, and a harder or ` +
         `finer-grained rubric is the only thing that would.`
       : limitingFactor === 'judge-noise'
       ? `Judges disagree by ${judgeSpread.toFixed(3)} per cell against a model spread of ` +
         `${modelSpread.toFixed(3)}. Judge noise dominates the differences being measured, so ` +
         `harmonising or ensembling judges is what would make this column rankable.`
-      : `Judge spread ${judgeSpread.toFixed(3)} is below the model spread ${modelSpread.toFixed(3)} ` +
-        `and only ${saturatedModels}/${byModel.size} models are near the ceiling.`;
+      : `Judge spread ${judgeSpread.toFixed(3)} is below the model spread ${modelSpread.toFixed(
+          3
+        )} ` + `and only ${saturatedModels}/${byModel.size} models are near the ceiling.`;
 
   return {
     cellCount: cells.length,

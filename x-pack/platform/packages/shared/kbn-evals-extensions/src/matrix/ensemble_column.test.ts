@@ -132,6 +132,21 @@ describe('buildEnsembleColumn', () => {
     expect(out.separablePairs).toBe(1);
   });
 
+  it('flags a pair whose CI edge sits on zero, because that verdict is seed-dependent', () => {
+    // A tiny constant edge over noisy cells: the CI lands against zero, so
+    // whether it "separates" is decided by the generator, not the data.
+    const cells = [];
+    for (let i = 0; i < 40; i++) {
+      const noise = ((i * 7) % 10) / 100;
+      for (const judgeId of ['j1', 'j2']) {
+        cells.push(cell(judgeId, 'a', `e${i}`, 0.5 + noise + 0.002));
+        cells.push(cell(judgeId, 'b', `e${i}`, 0.5 + noise));
+      }
+    }
+
+    expect(buildEnsembleColumn(cells).borderlinePairs).toBe(1);
+  });
+
   it('is deterministic across runs, so a published pair count does not drift', () => {
     const cells = [];
     for (let i = 0; i < 25; i++) {

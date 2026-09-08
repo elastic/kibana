@@ -102,9 +102,15 @@ const provenance = {
             } of ${e.totalPairs} model pairs ` +
               `separate by a paired bootstrap over shared examples (95% CI excluding zero) -- against exactly ` +
               `1 judge-independent rank under any single judge. The ensemble buys real discrimination, but ` +
-              `${
-                e.totalPairs - e.separablePairs
-              } of ${e.totalPairs} pairs remain statistically tied and must not be read as ordered.`,
+              `${e.totalPairs - e.separablePairs} of ${
+                e.totalPairs
+              } pairs remain statistically tied and must not be read as ordered.`,
+            `Of those ${e.separablePairs} separations, ${e.borderlinePairs} sit within 0.005 of the CI boundary ` +
+              `and flip verdict on a different random seed -- swapping one seeded generator for another moved ` +
+              `this count by one. Only ${
+                e.separablePairs - e.borderlinePairs
+              } pairs separate robustly; the borderline ones are ` +
+              `reported rather than rounded into the headline, because a coin flip that landed heads is not a result.`,
             `Per-model judge spread is published next to every ensemble score. ${widest.modelId} has the widest ` +
               `at ${widest.judgeSpread.toFixed(
                 3

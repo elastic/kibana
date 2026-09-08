@@ -118,7 +118,10 @@ describe('describeJudgeFailure', () => {
   // problem. Without them there is nothing to act on.
   it('unwraps the causes an AggregateError hides behind its summary', () => {
     const error = new AggregateError(
-      [new Error('Tool call did not match schema: criteria is required'), new Error('rate limited')],
+      [
+        new Error('Tool call did not match schema: criteria is required'),
+        new Error('rate limited'),
+      ],
       'LLM could not complete task successfully in 4 attempts'
     );
 
