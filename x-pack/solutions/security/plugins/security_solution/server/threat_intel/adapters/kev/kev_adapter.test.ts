@@ -68,11 +68,11 @@ const makeContext = (body: string, status = 200): AdapterRunContext => {
   };
 };
 
-const makeSource = (): SourceHit => ({
+const makeSource = (name = 'CISA Known Exploited Vulnerabilities'): SourceHit => ({
   _id: 'kev:cisa-known-exploited-vulnerabilities',
   _source: {
     adapter_type: 'kev',
-    name: 'CISA Known Exploited Vulnerabilities',
+    name,
     space_id: '*',
   },
 });
@@ -290,14 +290,36 @@ describe('kevAdapter', () => {
       kevAdapter.run(makeSource(), makeContext(JSON.stringify({ catalogVersion: '2024.01.01' })))
     ).rejects.toThrow(/^(?!.*not valid JSON).*vulnerabilities array/s);
   });
-});
 
-describe('kev enrich isolation', () => {
-  it('extraction_method=kev is excluded by the term:pending filter used in enrich_threat_report', () => {
-    // The enrich_threat_report workflow uses `term: { lineage.extraction_method: pending }`.
-    // This test verifies that a kev report would NOT match that filter — confirming Haiku is never
-    // invoked for KEV docs regardless of which source type is used.
-    const kevExtractionMethod = 'kev';
-    expect(kevExtractionMethod).not.toBe('pending');
+  it('carries the configured source name, not a hardcoded one', async () => {
+    const [report] = await kevAdapter.run(
+      makeSource('CISA KEV (corrected)'),
+      makeContext(makeEnvelope([VULN_1]))
+    );
+    expect(report.source.name).toBe('CISA KEV (corrected)');
+  });
+
+  // `notes` and `knownRansomwareCampaignUse` are optional and reach
+  // `buildFingerprint`, whose `.trim()` throws on a non-string. That throw sat
+  // outside the per-entry guard, so one bad row failed the whole feed. They are
+  // now dropped to `undefined`, keeping the rest of the entry.
+  it.each([
+    ['notes', { notes: 42 }],
+    ['knownRansomwareCampaignUse', { knownRansomwareCampaignUse: false }],
+  ])('drops a non-string %s instead of failing the feed', async (_, patch) => {
+    const reports = await kevAdapter.run(
+      makeSource(),
+      makeContext(makeEnvelope([{ ...VULN_1, ...patch }, VULN_2]))
+    );
+    expect(reports).toHaveLength(2);
+    expect(reports[0].extracted?.vulnerability?.cve_id).toBe(VULN_1.cveID);
+  });
+
+  it('keeps an entry whose optional notes are null', async () => {
+    const reports = await kevAdapter.run(
+      makeSource(),
+      makeContext(makeEnvelope([{ ...VULN_1, notes: null }]))
+    );
+    expect(reports).toHaveLength(1);
   });
 });

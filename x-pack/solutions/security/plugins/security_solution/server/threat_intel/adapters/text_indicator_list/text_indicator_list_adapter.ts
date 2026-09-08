@@ -11,7 +11,7 @@ import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../../services/severity';
 import { buildReportContent } from '../../services/report_content';
 import { normalizeProvenanceUrl } from '../../services/provenance_url';
-import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
+import type { AdapterRunContext, FetchAdapter, IocEntry, NormalizedReport, SourceHit } from '../types';
 import { parseIndicatorList } from './parse_indicator_list';
 import type { IndicatorBlock } from './parse_indicator_list';
 
@@ -35,8 +35,6 @@ const trailLabelFromUrl = (url: string): string => {
     return 'unknown';
   }
 };
-
-type IocEntry = NonNullable<NonNullable<NormalizedReport['extracted']>['iocs']>[number];
 
 /**
  * Keep reference blocks together when possible while bounding nested IOCs per report.

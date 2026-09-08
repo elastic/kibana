@@ -85,8 +85,15 @@ const parseKevVulnerability = (value: unknown): KevVulnerability | undefined => 
     shortDescription: value.shortDescription,
     requiredAction: value.requiredAction,
     dueDate: value.dueDate,
-    knownRansomwareCampaignUse: value.knownRansomwareCampaignUse,
-    notes: value.notes,
+    // Optional, and read by `buildKevReport`. A non-string here (a custom or
+    // temporarily malformed feed sending `"notes": 42`) reaches
+    // `buildFingerprint`, whose `.trim()` throws outside the per-entry guard and
+    // fails the whole feed instead of skipping one row.
+    knownRansomwareCampaignUse:
+      typeof value.knownRansomwareCampaignUse === 'string'
+        ? value.knownRansomwareCampaignUse
+        : undefined,
+    notes: typeof value.notes === 'string' ? value.notes : undefined,
     cwes,
   };
   if (
@@ -114,7 +121,8 @@ const buildKevReport = (
   provenanceUrl: string | undefined,
   ingestedAt: string,
   spaceId: string,
-  sourceId: string
+  sourceId: string,
+  sourceName: string
 ): NormalizedReport => {
   const bodyText = `${vuln.shortDescription}\n\nRequired Action: ${vuln.requiredAction}`;
 
@@ -137,7 +145,10 @@ const buildKevReport = (
     space_id: spaceId,
     source: {
       type: 'kev',
-      name: 'CISA Known Exploited Vulnerabilities',
+      // The configured source name from the approved catalog entry, matching the
+      // other adapters. Hardcoding it misattributes reports if the catalog name
+      // is corrected or a second KEV-format feed is seeded.
+      name: sourceName,
       ...(provenanceUrl ? { url: provenanceUrl } : {}),
       // Identifies the *source*, not the item, matching every other adapter
       // (`<type>:<source doc id>`). list_sources aggregates report activity on
@@ -217,7 +228,16 @@ export const kevAdapter: FetchAdapter = {
     for (const rawEntry of vulnerabilities) {
       const vuln = parseKevVulnerability(rawEntry);
       if (vuln && isCompleteKevEntry(vuln)) {
-        reports.push(buildKevReport(vuln, provenanceUrl, ingestedAt, spaceId, source._id));
+        reports.push(
+          buildKevReport(
+            vuln,
+            provenanceUrl,
+            ingestedAt,
+            spaceId,
+            source._id,
+            source._source.name
+          )
+        );
       } else {
         log.warn(
           `kev-adapter: skipping malformed entry (missing required fields): ${JSON.stringify(
