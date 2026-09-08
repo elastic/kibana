@@ -59,6 +59,14 @@ describe('ProjectPickerContainer', () => {
       hasLinkedProjects: jest.fn(() => true),
       updateDefaultProjectRouting: jest.fn(),
       registerAppAccess: jest.fn(),
+      getConfigurationLinks: jest.fn(() => ({
+        currentSpace: {
+          icon: 'controls',
+          label: 'Adjust space defaults',
+          testSubj: 'adjustSpaceDefaultsMenuItem',
+          href: 'https://example.com',
+        },
+      })),
       ...props.cpsManager,
     };
     return await act(async () => {

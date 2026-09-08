@@ -9,10 +9,9 @@ export const queryKeys = {
   watches: {
     all: ['pnd', 'watches'] as const,
     list: () => [...queryKeys.watches.all, 'list'] as const,
-    /** Also carries the watch's settings — they come back on the same request. */
     detail: (watchId: string | undefined) => [...queryKeys.watches.all, 'detail', watchId] as const,
   },
-  /** Global worker catalog. Kept separate from skills — they are different things. */
+  /** Live registered Workers, including settings and revision. */
   workers: {
     all: ['pnd', 'workers'] as const,
     list: () => [...queryKeys.workers.all, 'list'] as const,

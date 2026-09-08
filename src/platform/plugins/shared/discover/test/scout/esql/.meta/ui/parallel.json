@@ -1,21 +1,9 @@
 {
-  "sha1": "ce396b3f0d1b880d67901bd6757cd919441d7b72",
+  "sha1": "01ec7a642876d3003dcbf82659f0ee3a1434235c",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
-    {
-      "id": "6b65b70854fa803-48161d5725dd982",
-      "title": "Teardown ES|QL tests data",
-      "expectedStatus": "passed",
-      "tags": [],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
-        "line": 7,
-        "column": 1
-      }
-    },
     {
       "id": "105be4110b5c303-214247a23f937d6",
       "title": "Setup ES|QL tests data",
@@ -132,6 +120,84 @@
       }
     },
     {
+      "id": "522783e286abcbe-e798696b29f45a8",
+      "title": "Discover ES|QL controls - open dashboard panel in Discover should retain the controls and their state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_open_in_discover.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "181750706845da0-84b55b65f081f90",
+      "title": "Discover ES|QL controls - by-value panel editing should retain the control when unlinking a library panel from the library",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_panel_edit.spec.ts",
+        "line": 46,
+        "column": 35
+      }
+    },
+    {
+      "id": "181750706845da0-bff4e1b0a9fe0ac",
+      "title": "Discover ES|QL controls - by-value panel editing should persist updated control selections after saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_panel_edit.spec.ts",
+        "line": 119,
+        "column": 68
+      }
+    },
+    {
+      "id": "181750706845da0-59f4cfa2eb436bd",
+      "title": "Discover ES|QL controls - by-value panel editing should discard control selection changes after cancelling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_panel_edit.spec.ts",
+        "line": 145,
+        "column": 31
+      }
+    },
+    {
+      "id": "c9f80285597a240-1d87d741142b407",
+      "title": "Discover ES|QL controls - saving to a dashboard should create a dashboard with the Discover table and the selected control state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "c9f80285597a240-f98fd55c1b218e6",
+      "title": "Discover ES|QL controls - saving to a dashboard should update the existing dashboard control instead of creating a duplicate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/esql_controls_save_to_dashboard.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
       "id": "15e7076675cd148-5c9d907f4056918",
       "title": "Discover ES|QL results formatting with columnsMeta formats ES|QL columns using columnsMeta when the type differs from the data-view field",
       "expectedStatus": "passed",
@@ -207,6 +273,17 @@
         "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/lookup_index_editor_save_without_close.spec.ts",
         "line": 35,
         "column": 42
+      }
+    },
+    {
+      "id": "6b65b70854fa803-48161d5725dd982",
+      "title": "Teardown ES|QL tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/esql/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
       }
     }
   ]

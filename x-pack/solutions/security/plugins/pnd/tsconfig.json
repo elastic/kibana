@@ -24,10 +24,15 @@
     "@kbn/deeplinks-security",
     "@kbn/spaces-plugin",
     "@kbn/workflows",
+    "@kbn/workflows-yaml",
     "@kbn/workflows-extensions",
     "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/logging-mocks"
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-plugin",
+    "@kbn/core-spaces-common",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server-mocks",
   ]
 }

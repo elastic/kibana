@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { configSchema } from './config';
+import { configSchema, getQueryRowLimit, NON_STREAMING_MAX_ROWS } from './config';
 
 describe('alerting_v2 config schema', () => {
   describe('enabled', () => {
@@ -94,6 +94,80 @@ describe('alerting_v2 config schema', () => {
     });
   });
 
+  describe('rules.run.maxGroupsPerExecution', () => {
+    it('defaults to 10000', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.maxGroupsPerExecution).toBe(10000);
+    });
+
+    it('accepts a smaller configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 500 } } }).rules.run
+          .maxGroupsPerExecution
+      ).toBe(500);
+    });
+
+    it('rejects values below 1', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 0 } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { maxGroupsPerExecution: 10001 } } })
+      ).toThrow();
+    });
+  });
+
+  describe('getQueryRowLimit', () => {
+    it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
+      const config = configSchema.validate({ esql: { responseFormat: 'json' } });
+      expect(getQueryRowLimit(config)).toBe(NON_STREAMING_MAX_ROWS);
+    });
+
+    it('uses alerts.max for the arrow response format', () => {
+      const config = configSchema.validate({ esql: { responseFormat: 'arrow' } });
+      expect(getQueryRowLimit(config)).toBe(10000);
+    });
+
+    it('honors a lower alerts.max on the json response format', () => {
+      const config = configSchema.validate({
+        esql: { responseFormat: 'json' },
+        rules: { run: { alerts: { max: 500 } } },
+      });
+      expect(getQueryRowLimit(config)).toBe(500);
+    });
+
+    it('honors a lower alerts.max on the arrow response format', () => {
+      const config = configSchema.validate({
+        esql: { responseFormat: 'arrow' },
+        rules: { run: { alerts: { max: 500 } } },
+      });
+      expect(getQueryRowLimit(config)).toBe(500);
+    });
+  });
+
+  describe('rules.run.query.maxResponseSize', () => {
+    it('defaults to 50 MB', () => {
+      const config = configSchema.validate({});
+      expect(config.rules.run.query.maxResponseSize).toBe(50 * 1024 * 1024);
+    });
+
+    it('accepts a configured value', () => {
+      expect(
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1024 } } } }).rules.run
+          .query.maxResponseSize
+      ).toBe(1024);
+    });
+
+    it('rejects values below 1024 bytes', () => {
+      expect(() =>
+        configSchema.validate({ rules: { run: { query: { maxResponseSize: 1023 } } } })
+      ).toThrow();
+    });
+  });
+
   describe('rules.run.timeout', () => {
     it('defaults to undefined', () => {
       const config = configSchema.validate({});
@@ -110,6 +184,23 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ rules: { run: { timeout: 'nonsense' } } })).toThrow(
         /Invalid duration/
       );
+    });
+  });
+
+  describe('esql.responseFormat', () => {
+    it('defaults to json', () => {
+      const config = configSchema.validate({});
+      expect(config.esql.responseFormat).toBe('json');
+    });
+
+    it('accepts arrow', () => {
+      expect(configSchema.validate({ esql: { responseFormat: 'arrow' } }).esql.responseFormat).toBe(
+        'arrow'
+      );
+    });
+
+    it('rejects an unknown format', () => {
+      expect(() => configSchema.validate({ esql: { responseFormat: 'csv' } })).toThrow();
     });
   });
 });

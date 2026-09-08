@@ -12,6 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { isRuleExecutionCancellationError } from '../../execution_context';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 
@@ -25,7 +26,11 @@ import { isEsqlUserError } from '../../errors/esql_user_error';
 export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'error_handling';
 
-  constructor(@inject(LoggerServiceToken) private readonly logger: LoggerServiceContract) {}
+  private readonly logger: LoggerServiceContract;
+
+  constructor(@inject(LoggerServiceToken) loggerService: LoggerServiceContract) {
+    this.logger = loggerService.forSubsystem('ruleExecutor');
+  }
 
   public execute(
     ctx: RuleExecutionMiddlewareContext,
@@ -44,16 +49,13 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           yield result;
         }
       } catch (error) {
-        const logger = (latestState?.logger ?? fallbackLogger).withLabels({
-          step: ctx.step.name,
-        });
-
-        logger.error({
-          message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
-          error,
-          code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
-          labels: { step: ctx.step.name },
-        });
+        if (!isRuleExecutionCancellationError(error)) {
+          (latestState?.logger ?? fallbackLogger).withLabels({ step: ctx.step.name }).error({
+            message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
+            error,
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          });
+        }
 
         throw error;
       }

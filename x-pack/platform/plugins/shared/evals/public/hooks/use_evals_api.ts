@@ -587,15 +587,20 @@ export const useExperimentDatasetExamples = (
   });
 };
 
-export const useExampleScores = (exampleId: string) => {
+export const useExampleScores = (exampleId: string, datasetId?: string) => {
   const { services } = useKibana();
 
   return useQuery({
-    queryKey: queryKeys.examples.scores(exampleId),
+    queryKey: queryKeys.examples.scores(exampleId, datasetId),
     queryFn: async (): Promise<GetExampleScoresResponse> => {
       const url = EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId));
+      const query: Record<string, string> = {};
+      if (datasetId) {
+        query.dataset_id = datasetId;
+      }
       return services.http!.get<GetExampleScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
+        query,
       });
     },
     enabled: exampleId.length > 0,

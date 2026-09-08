@@ -15,6 +15,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -59,6 +60,7 @@ export interface PluginSetupDependencies {
 
 export interface PluginStartDependencies {
   features: FeaturesPluginStart;
+  cps?: CPSPluginStart;
   dataViews?: DataViewsPublicPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;

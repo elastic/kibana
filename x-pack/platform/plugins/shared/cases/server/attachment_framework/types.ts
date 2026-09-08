@@ -47,5 +47,5 @@ export interface UnifiedAttachmentTypeSetup
 }
 
 export interface AttachmentFramework {
-  registerUnified: (unifiedAttachmentType: UnifiedAttachmentTypeSetup) => void;
+  registerAttachment: (attachmentType: UnifiedAttachmentTypeSetup) => void;
 }

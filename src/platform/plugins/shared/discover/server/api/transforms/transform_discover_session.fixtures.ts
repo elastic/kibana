@@ -58,6 +58,12 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         breakdownField: 'transaction.id',
         chartInterval: 'h',
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: {
+          hideNulls: true,
+          wrapLines: false,
+          defaultRenderedNodes: 10,
+        },
         controlGroupJson: '{}',
       },
     },
@@ -94,6 +100,12 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
         breakdownField: 'transaction.id',
         chartInterval: 'h',
         density: DataGridDensity.COMPACT,
+        documentsDisplayMode: 'json',
+        jsonModeSettings: {
+          hideNulls: true,
+          wrapLines: false,
+          defaultRenderedNodes: 10,
+        },
         visContext: {
           suggestionType: 'histogramForESQL',
           requestData: {
@@ -164,9 +176,6 @@ export const discoverSessionAttributes: DiscoverSessionAttributes = {
                 },
               },
               filters: [],
-              query: {
-                esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-              },
               visualization: {
                 legend: {
                   isVisible: true,
@@ -282,6 +291,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
+      documents_display_mode: 'json',
+      json_mode_settings: {
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 10,
+      },
       query: {
         expression: '',
         language: 'kql',
@@ -300,7 +315,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -325,6 +339,12 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       rows_per_page: 25,
       header_row_height: 1,
       density: DataGridDensity.COMPACT,
+      documents_display_mode: 'json',
+      json_mode_settings: {
+        hide_nulls: true,
+        wrap_lines: false,
+        default_rendered_nodes: 10,
+      },
       data_source: {
         type: 'esql',
         query: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value',
@@ -334,7 +354,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
       hide_aggregated_preview: false,
       breakdown_field: 'transaction.id',
       chart_interval: 'h',
-      time_restore: true,
       time_range: {
         from: 'now/d',
         to: 'now/d',
@@ -408,9 +427,6 @@ export const discoverSessionApiData: DiscoverSessionApiData = {
               },
             },
             filters: [],
-            query: {
-              esql: 'FROM logs*,-logstash*,filebeat-* | WHERE ??field_name == ?field_value\n| STATS results = COUNT(*) BY `transaction.id`, timestamp = BUCKET(@timestamp, 30 minute) | sort `transaction.id` asc',
-            },
             visualization: {
               legend: {
                 isVisible: true,
