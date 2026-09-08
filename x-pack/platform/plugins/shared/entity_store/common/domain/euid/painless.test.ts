@@ -9,6 +9,7 @@ import { EntityType } from '../definitions/entity_schema';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   getEuidPainlessEvaluation,
+  getEuidPainlessEvaluationForSearch,
   getEuidPainlessRuntimeMapping,
   streamlangConditionToPainlessDoc,
 } from './painless';
@@ -277,14 +278,14 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
     expect(script).toContain(postAggOnlyMarker);
   });
 
-  it('omits the postAggFilter gate when applyPostAggFilter is false', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+  it('omits the postAggFilter gate in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
 
     expect(script).not.toContain(postAggOnlyMarker);
   });
 
-  it('keeps the documentsFilter gate when applyPostAggFilter is false', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+  it('keeps the documentsFilter gate in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
 
     // documentsFilter requires event.outcome != failure and at least one user identifier.
     expect(script).toContain(`doc.containsKey('event.outcome')`);
@@ -302,8 +303,8 @@ describe('getEuidPainlessEvaluation postAggFilter gate', () => {
     expect(markerAt).toBeLessThan(postAggAt);
   });
 
-  it('omits the alert waiver when applyPostAggFilter is false', () => {
-    const script = getEuidPainlessEvaluation(EntityType.enum.user, { applyPostAggFilter: false });
+  it('omits the alert waiver in the search variant', () => {
+    const script = getEuidPainlessEvaluationForSearch(EntityType.enum.user);
 
     expect(script).not.toContain(`doc.containsKey('kibana.alert.rule.uuid')`);
   });

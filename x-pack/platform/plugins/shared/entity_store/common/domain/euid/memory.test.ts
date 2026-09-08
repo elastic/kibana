@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+import {
+  getEuidFromObject,
+  getEuidFromObjectForSearch,
+  getEntityIdentifiersFromDocument,
+} from './memory';
 
 describe('getEntityIdentifiersFromDocument', () => {
   it('returns undefined when doc is null or undefined', () => {
@@ -310,10 +314,8 @@ describe('getEuidFromObject', () => {
       ).toBeUndefined();
     });
 
-    it('resolves without the gate when applyPostAggFilter is false', () => {
-      expect(getEuidFromObject('user', oktaUser, { applyPostAggFilter: false })).toBe(
-        'user:alice@example.com@okta'
-      );
+    it('resolves without the gate in the search variant', () => {
+      expect(getEuidFromObjectForSearch('user', oktaUser)).toBe('user:alice@example.com@okta');
     });
   });
 });

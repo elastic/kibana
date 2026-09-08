@@ -491,7 +491,7 @@ export const buildEuidRuntimeMappingWithStoredFieldFastPath = (
   entityType: EntityType
 ): { type: 'keyword'; script: { source: string } } => {
   // Store membership is enforced separately, by `inStoreScores` in the maintainer's score_base_entities step.
-  const evalScript = euid.painless.getEuidEvaluation(entityType, { applyPostAggFilter: false });
+  const evalScript = euid.painless.getEuidEvaluationForSearch(entityType);
   const typePrefix = `${entityType}:`;
 
   const source = [

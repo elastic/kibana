@@ -93,6 +93,9 @@ export function getEuidPainlessRuntimeMapping(
 /**
  * Constructs a Painless evaluation for the provided entity type to generate the entity id.
  *
+ * Applies the creation gate: a document that may not put an entity in the store yields `null`.
+ * For entities that already exist, use {@link getEuidPainlessEvaluationForSearch}.
+ *
  * Example usage:
  * ```ts
  * import { getEuidPainlessEvaluation } from './painless';
@@ -209,6 +212,20 @@ export function getEuidPainlessEvaluation(
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
   return preamble + filterPreamble + branchLogic + trailingReturn;
+}
+
+/**
+ * Like {@link getEuidPainlessEvaluation} without the creation gate, so IdP and shared-account
+ * documents still resolve to an entity that already exists.
+ *
+ * For risk scoring and enrichment. The caller checks store membership; this only answers which
+ * entity a document refers to.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @returns A Painless evaluation string that computes the entity id.
+ */
+export function getEuidPainlessEvaluationForSearch(entityType: EntityType): string {
+  return getEuidPainlessEvaluation(entityType, { applyPostAggFilter: false });
 }
 
 function painlessFieldNonEmpty(field: string): string {

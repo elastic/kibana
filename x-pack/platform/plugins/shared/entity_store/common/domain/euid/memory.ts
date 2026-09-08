@@ -72,6 +72,9 @@ export function buildEvaluatedDoc(entityType: EntityType, doc: any): any {
  * // 'host:server1.example.com'
  * ```
  *
+ * Applies the creation gate: a document that may not put an entity in the store yields `undefined`.
+ * For entities that already exist, use {@link getEuidFromObjectForSearch}.
+ *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
  * @param doc - The document to derive entity id from. May be a flattened or nested shape.
  * @param options - See {@link EuidGateOptions}.
@@ -114,6 +117,21 @@ export function getEuidFromObject(entityType: EntityType, doc: any, options?: Eu
     return rawId;
   }
   return `${entityType}:${rawId}`;
+}
+
+/**
+ * Like {@link getEuidFromObject} without the creation gate, so IdP and shared-account documents
+ * still resolve to an entity that already exists.
+ *
+ * For risk scoring and enrichment. The caller checks store membership; this only answers which
+ * entity a document refers to.
+ *
+ * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param doc - The document to derive entity id from. May be a flattened or nested shape.
+ * @returns An entity id string, or undefined if the document does not contain enough identifying information.
+ */
+export function getEuidFromObjectForSearch(entityType: EntityType, doc: any) {
+  return getEuidFromObject(entityType, doc, { applyPostAggFilter: false });
 }
 
 /**
