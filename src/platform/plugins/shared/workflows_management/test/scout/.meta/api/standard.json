@@ -1,5 +1,5 @@
 {
-  "sha1": "81135e66d616883b60a982bcd807326a04715a9b",
+  "sha1": "0e20897affa4f9c475a52469be8b4f04f0fc65b6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -375,7 +375,7 @@
     {
       "id": "576bc4d6b87274d-18b2bd5c7982ed9",
       "title": "Scheduled workflow execution enabling a scheduled workflow triggers executions automatically",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -388,14 +388,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 56,
-        "column": 20
+        "line": 54,
+        "column": 27
       }
     },
     {
       "id": "576bc4d6b87274d-289b622e62f8bf0",
       "title": "Scheduled workflow execution disabling a scheduled workflow stops new executions from firing",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -408,14 +408,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 91,
+        "line": 88,
         "column": 5
       }
     },
     {
       "id": "576bc4d6b87274d-2ebbbceb81e94d9",
       "title": "Scheduled workflow execution scheduled executions do not overlap",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -428,8 +428,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/scheduled_workflow.spec.ts",
-        "line": 117,
-        "column": 16
+        "line": 114,
+        "column": 21
       }
     },
     {
