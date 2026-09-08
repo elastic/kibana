@@ -15,7 +15,8 @@ export type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T exte
 
 export type Expect<T extends true> = T;
 
-export type ExpectAllTrue<T extends Record<string, true>> = T;
+/** Requires every property of `T` to be `true` without needing a string index signature. */
+export type ExpectAllTrue<T extends { [K in keyof T]: true }> = T;
 
 export type MutuallyAssignable<X, Y> = [X] extends [Y] ? ([Y] extends [X] ? true : false) : false;
 
