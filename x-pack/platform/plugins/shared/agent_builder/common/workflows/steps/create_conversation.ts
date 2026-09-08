@@ -33,7 +33,10 @@ const AccessControlSchema = z
       ConversationAccessControlMode.Private,
       ConversationAccessControlMode.Public,
     ]),
-    entries: z.array(AccessControlEntrySchema).max(CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES).optional(),
+    entries: z
+      .array(AccessControlEntrySchema)
+      .max(CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES)
+      .optional(),
   })
   .refine(
     (val) =>
@@ -65,15 +68,10 @@ const InputSchema = z
       description:
         'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',
     }),
-    conversation_id: z
-      .string()
-      .uuid()
-      .max(CONVERSATION_ID_MAX_LENGTH)
-      .optional()
-      .meta({
-        description:
-          'Optional client-supplied UUID for the conversation. Server-generated if omitted.',
-      }),
+    conversation_id: z.string().uuid().max(CONVERSATION_ID_MAX_LENGTH).optional().meta({
+      description:
+        'Optional client-supplied UUID for the conversation. Server-generated if omitted.',
+    }),
     title: z.string().min(1).max(CONVERSATION_TITLE_MAX_LENGTH).optional().meta({
       description: 'Title for the conversation. Defaults to "New conversation".',
     }),
@@ -90,7 +88,8 @@ const InputSchema = z
     }),
   })
   .refine((val) => !val.metadata || !!val.template_id, {
-    message: '`metadata` requires `template_id`: metadata values are validated against the referenced template',
+    message:
+      '`metadata` requires `template_id`: metadata values are validated against the referenced template',
   });
 
 const OutputSchema = z.object({
