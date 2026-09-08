@@ -21,35 +21,38 @@ import {
   ENDPOINT_ACTIONS_DS,
 } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
-import {
-  type ActionDetails,
-  type ActionResponseOutput,
-  ActivityLogItemTypes,
-  type EndpointActionDataParameterTypes,
-  type EndpointActionResponseDataOutput,
-  type EndpointActivityLogAction,
-  type EndpointActivityLogActionResponse,
-  type EndpointPendingActions,
-  type GetProcessesActionOutputContent,
-  type LogsEndpointAction,
-  type LogsEndpointActionResponse,
-  type ProcessesEntry,
-  type ResponseActionExecuteOutputContent,
-  type ResponseActionGetFileOutputContent,
-  type ResponseActionGetFileParameters,
-  type ResponseActionScanOutputContent,
-  type ResponseActionsExecuteParameters,
-  type ResponseActionScanParameters,
-  type ResponseActionUploadOutputContent,
-  type ResponseActionUploadParameters,
-  type WithAllKeys,
-  type KilledProcessDescendant,
+import type {
+  ResponseActionParametersWithPid,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithProcessData,
+  ActionDetails,
+  ActionResponseOutput,
+  EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
+  EndpointActivityLogAction,
+  EndpointActivityLogActionResponse,
+  EndpointPendingActions,
+  GetProcessesActionOutputContent,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
+  ProcessesEntry,
+  ResponseActionExecuteOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ResponseActionScanOutputContent,
+  ResponseActionsExecuteParameters,
+  ResponseActionScanParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+  WithAllKeys,
+  KilledProcessDescendant,
 } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
 } from '../service/response_actions/constants';
 import { getFileDownloadId } from '../service/response_actions/get_file_download_id';
+import { ActivityLogItemTypes } from '../types';
 
 export class EndpointActionGenerator extends BaseDataGenerator {
   /** Generate a random endpoint Action request (isolate or unisolate) */
@@ -225,71 +228,10 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     }
 
     if (command === 'kill-process' && !output) {
-      output = {
-        type: 'json',
-        content: {
-          code: overrides.error
-            ? 'ra_kill-process_error_not-found'
-            : 'ra_kill-process_success_done',
-          ...(!overrides.error
-            ? {
-                command: 'some_command.exe',
-                pid: 234,
-                descendants: [
-                  {
-                    pid: 456,
-                    parent_pid: 234,
-                    entity_id: 'ksuqwn8364fnbks.456',
-                    parent_entity_id: 'ksuqwn8364fnbks.234',
-                    command: '456_command.exe',
-                    was_killed: true,
-                  },
-                  {
-                    pid: 567,
-                    parent_pid: 456,
-                    entity_id: 'ksuqwn8364fnbks.567',
-                    parent_entity_id: 'ksuqwn8364fnbks.456',
-                    command: '567_command.exe',
-                    was_killed: true,
-                  },
-                  {
-                    pid: 5671,
-                    parent_pid: 567,
-                    entity_id: 'ksuqwn8364fnbks.5671',
-                    parent_entity_id: 'ksuqwn8364fnbks.567',
-                    command: '5671_command.exe',
-                    was_killed: true,
-                  },
-                  {
-                    pid: 56711,
-                    parent_pid: 5671,
-                    entity_id: 'ksuqwn8364fnbks.56711',
-                    parent_entity_id: 'ksuqwn8364fnbks.5671',
-                    command: '56711_command.exe',
-                    was_killed: true,
-                  },
-                  {
-                    pid: 56712,
-                    parent_pid: 5671,
-                    entity_id: 'ksuqwn8364fnbks.56712',
-                    parent_entity_id: 'ksuqwn8364fnbks.5671',
-                    command: '56712_command.exe',
-                    was_killed: true,
-                  },
-                  {
-                    pid: 654,
-                    parent_pid: 234,
-                    entity_id: 'ksuqwn8364fnbks.654',
-                    parent_entity_id: 'ksuqwn8364fnbks.234',
-                    command: '654_command.exe',
-                    was_killed: false,
-                    error: 'process is protected',
-                  },
-                ],
-              }
-            : {}),
-        },
-      } as typeof output;
+      output = this.generateKillProcessOutputResponse(
+        {},
+        { atError: Boolean(overrides.error) }
+      ) as typeof output;
     }
 
     if (command === 'suspend-process' && !output) {
@@ -747,6 +689,90 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     return super.randomN(max);
   }
 
+  generateKillProcessOutputResponse(
+    overrides: DeepPartial<ActionResponseOutput<KillProcessActionOutputContent>> = {},
+    {
+      parameters = { pid: 234 },
+      atError = false,
+    }: DeepPartial<{
+      parameters: ResponseActionParametersWithProcessData;
+      atError: boolean;
+    }> = {}
+  ): ActionResponseOutput<KillProcessActionOutputContent> {
+    return merge(
+      {
+        type: 'json',
+        content: {
+          code: atError ? 'ra_kill-process_error_not-found' : 'ra_kill-process_success_done',
+          ...(!atError
+            ? {
+                command: this.randomFileSystemPath(),
+                pid: parameters.pid || 234,
+                ...(parameters?.entity_id ? { entity_id: parameters.entity_id } : {}),
+                ...(parameters?.process_name ? { process_name: parameters.process_name } : {}),
+                ...((parameters as ResponseActionParametersWithPid).kill_descendants
+                  ? {
+                      descendants: [
+                        {
+                          pid: 456,
+                          parent_pid: 234,
+                          entity_id: 'ksuqwn8364fnbks.456',
+                          parent_entity_id: 'ksuqwn8364fnbks.234',
+                          command: '456_command.exe',
+                          was_killed: true,
+                        },
+                        {
+                          pid: 567,
+                          parent_pid: 456,
+                          entity_id: 'ksuqwn8364fnbks.567',
+                          parent_entity_id: 'ksuqwn8364fnbks.456',
+                          command: '567_command.exe',
+                          was_killed: true,
+                        },
+                        {
+                          pid: 5671,
+                          parent_pid: 567,
+                          entity_id: 'ksuqwn8364fnbks.5671',
+                          parent_entity_id: 'ksuqwn8364fnbks.567',
+                          command: '5671_command.exe',
+                          was_killed: true,
+                        },
+                        {
+                          pid: 56711,
+                          parent_pid: 5671,
+                          entity_id: 'ksuqwn8364fnbks.56711',
+                          parent_entity_id: 'ksuqwn8364fnbks.5671',
+                          command: '56711_command.exe',
+                          was_killed: true,
+                        },
+                        {
+                          pid: 56712,
+                          parent_pid: 5671,
+                          entity_id: 'ksuqwn8364fnbks.56712',
+                          parent_entity_id: 'ksuqwn8364fnbks.5671',
+                          command: '56712_command.exe',
+                          was_killed: true,
+                        },
+                        {
+                          pid: 654,
+                          parent_pid: 234,
+                          entity_id: 'ksuqwn8364fnbks.654',
+                          parent_entity_id: 'ksuqwn8364fnbks.234',
+                          command: '654_command.exe',
+                          was_killed: false,
+                          error: 'process is protected',
+                        },
+                      ],
+                    }
+                  : {}),
+              }
+            : {}),
+        },
+      },
+      overrides
+    );
+  }
+
   /**
    * Generate a random list of processes descendants
    * @param initialParentPid
@@ -771,13 +797,15 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       parentEntityId: string = this.randomString(50)
     ): KilledProcessDescendant => {
       const wasKilled = this.randomChoice([true, false]);
+      const command = this.randomFileSystemPath(this.randomN(80));
 
       return {
         pid: Number(this.randomN(5000).toString().concat(String(pidSuffix++))),
         parent_pid: parentPid,
         entity_id: this.randomString(50),
         parent_entity_id: parentEntityId,
-        command: this.randomFileSystemPath(this.randomN(80)),
+        process_name: command.split('/').pop(),
+        command,
         was_killed: wasKilled,
         error: wasKilled ? undefined : this.randomChoice(possibleErrors),
       };

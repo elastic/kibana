@@ -51,6 +51,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
     openWorldHint: false,
   },
   tags: ['custom_content'],
+  excludeFromMcp: true,
   description: `Update the custom content panel from a natural-language prompt and/or a new ES|QL query.
 
 - Provide \`prompt\` to describe what to create or change. The server generates the HTML template.

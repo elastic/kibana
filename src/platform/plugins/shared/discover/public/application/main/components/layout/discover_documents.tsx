@@ -26,6 +26,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
+  JsonModeSettings,
+  DocumentsDisplayMode,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -129,6 +131,8 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
+    documentsDisplayMode,
+    jsonModeSettings,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -141,6 +145,8 @@ function DiscoverDocumentsComponent({
       state.columns,
       state.sampleSize,
       state.density,
+      state.documentsDisplayMode,
+      state.jsonModeSettings,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
@@ -148,6 +154,15 @@ function DiscoverDocumentsComponent({
   const isEsqlMode = useIsEsqlMode();
   const dataStateContainer = useCurrentTabDataStateContainer();
   const documentState = useDataState(dataStateContainer.data$.documents$);
+  const isWarningCalloutDismissed = useCurrentTabSelector(
+    (state) => state.isWarningCalloutDismissed
+  );
+  const setIsWarningCalloutDismissed = useCurrentTabAction(
+    internalStateActions.setIsWarningCalloutDismissed
+  );
+  const dismissWarningCallout = useCallback(() => {
+    dispatch(setIsWarningCalloutDismissed({ isWarningCalloutDismissed: true }));
+  }, [dispatch, setIsWarningCalloutDismissed]);
   const isDataLoading =
     documentState.fetchStatus === FetchStatus.LOADING ||
     documentState.fetchStatus === FetchStatus.PARTIAL;
@@ -285,6 +300,20 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
+  const onUpdateDocumentsDisplayMode = useCallback(
+    (newDocumentsDisplayMode: DocumentsDisplayMode) => {
+      dispatch(updateAppState({ appState: { documentsDisplayMode: newDocumentsDisplayMode } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  const onUpdateJsonModeSettings = useCallback(
+    (newJsonModeSettings: JsonModeSettings) => {
+      dispatch(updateAppState({ appState: { jsonModeSettings: newJsonModeSettings } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings, query }),
@@ -325,12 +354,6 @@ function DiscoverDocumentsComponent({
     [dispatch, setDataGridUiState]
   );
 
-  // This is temporary, sourceDisplayMode should be get from the app state.
-  const sourceDisplayMode = useMemo(
-    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
-    [discoverFeatureFlags]
-  );
-
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
   const cellRendererDensity = useMemo(
     () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
@@ -361,8 +384,14 @@ function DiscoverDocumentsComponent({
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
-    () => <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />,
-    [documentState.interceptedWarnings]
+    () => (
+      <SearchResponseWarningsCallout
+        warnings={documentState.interceptedWarnings ?? []}
+        isDismissed={isWarningCalloutDismissed}
+        onDismiss={dismissWarningCallout}
+      />
+    ),
+    [dismissWarningCallout, documentState.interceptedWarnings, isWarningCalloutDismissed]
   );
 
   const loadingIndicator = useMemo(
@@ -489,6 +518,11 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
+  const isDataTableJsonViewEnabled = useMemo(
+    () => discoverFeatureFlags.getDataTableJsonViewEnabled(),
+    [discoverFeatureFlags]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -573,7 +607,16 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayMode={sourceDisplayMode}
+            documentsDisplayModeState={
+              isDataTableJsonViewEnabled ? documentsDisplayMode : undefined
+            }
+            onUpdateDocumentsDisplayMode={
+              isDataTableJsonViewEnabled ? onUpdateDocumentsDisplayMode : undefined
+            }
+            jsonModeSettingsState={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
+            onUpdateJsonModeSettings={
+              isDataTableJsonViewEnabled ? onUpdateJsonModeSettings : undefined
+            }
           />
         </CellActionsProvider>
       </div>

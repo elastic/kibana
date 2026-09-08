@@ -106,7 +106,15 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      cy.intercept('GET', '/internal/data_views/fields?pattern=endgame-*').as('indexLoaded');
+      // The data views fields request differs by offering: ESS issues a GET to
+      // `/internal/data_views/fields`, while serverless with CPS enabled attaches
+      // project routing and issues a POST to `/internal/data_views/_fields_for_wildcard`.
+      // Match either so the wait below works in both environments.
+      cy.intercept({
+        method: /GET|POST/,
+        pathname: /\/internal\/data_views\/(fields|_fields_for_wildcard)/,
+        query: { pattern: 'endgame-*' },
+      }).as('indexLoaded');
 
       getRuleIndexInput().type('endgame-*{enter}');
 

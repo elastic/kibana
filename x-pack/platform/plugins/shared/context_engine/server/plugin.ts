@@ -29,11 +29,14 @@ import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
+import { ImprovementsService } from './improvements/service';
+import { installImprovementsIndexTemplate } from './improvements/storage';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
 import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 import { registerStepDefinitions } from './step_types';
+import { ContextEngineAnalyticsService } from './telemetry';
 
 export class ContextEnginePlugin
   implements
@@ -47,9 +50,11 @@ export class ContextEnginePlugin
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;
+  private createImprovementsService?: (esClient: ElasticsearchClient) => ImprovementsService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private analyticsService?: ContextEngineAnalyticsService;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -61,8 +66,15 @@ export class ContextEnginePlugin
   ): ContextEnginePluginSetup {
     registerFeatures({ features: setupDeps.features });
 
+    this.analyticsService = new ContextEngineAnalyticsService(
+      coreSetup.analytics,
+      this.logger.get('telemetry')
+    );
+    this.analyticsService.registerContextEngineEventTypes();
+    const analyticsService = this.analyticsService;
+
     setupDeps.workflowsExtensions.registerStepDefinition(
-      createVerifyKiStepDefinition(coreSetup, this.logger.get('ki_verification'))
+      createVerifyKiStepDefinition(coreSetup, this.logger.get('context_steps'), analyticsService)
     );
 
     coreSetup.uiSettings.registerGlobal({
@@ -103,11 +115,18 @@ export class ContextEnginePlugin
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
+      logger: this.logger.get('routes'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');
         }
         return this.aiIndexService;
+      },
+      getImprovementsService: (esClient) => {
+        if (!this.createImprovementsService) {
+          throw new Error('Improvements service not available — plugin has not started');
+        }
+        return this.createImprovementsService(esClient);
       },
       getActions: async () => {
         const [, startDeps] = await coreSetup.getStartServices();
@@ -117,6 +136,8 @@ export class ContextEnginePlugin
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
+      analyticsService,
+      logger: this.logger.get('context_steps'),
       getAiIndexService: () => {
         if (!this.aiIndexService) {
           throw new Error('AI index service not available — plugin has not started');
@@ -177,6 +198,24 @@ export class ContextEnginePlugin
     });
     const signalsService = this.signalsService;
 
+    const improvementsLogger = this.logger.get('improvements');
+    this.createImprovementsService = (esClient: ElasticsearchClient) =>
+      new ImprovementsService({ esClient, logger: improvementsLogger });
+    const createImprovementsService = this.createImprovementsService;
+
+    // Installed as Kibana, with the cluster privilege it already holds. The index is left for the
+    // first user write to create from it, so the store needs no grant on the internal user.
+    installImprovementsIndexTemplate({
+      esClient: this.esClient,
+      logger: improvementsLogger,
+    }).catch((err) => {
+      improvementsLogger.warn(
+        `Failed to install the improvements index template: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    });
+
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
 
@@ -219,6 +258,7 @@ export class ContextEnginePlugin
         return this.aiIndexService;
       },
       getSignalsService: () => signalsService,
+      getImprovementsService: (esClient) => createImprovementsService(esClient),
     };
   }
 

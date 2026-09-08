@@ -7,7 +7,13 @@
 
 import React from 'react';
 
-import { EuiFlexGrid, EuiFlexItem, useCurrentEuiBreakpoint } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  useCurrentEuiBreakpoint,
+  useEuiTheme,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { useContentListItems } from '@kbn/content-list-provider';
 import { getItemModelId, toGroupedModel } from '../../utils/eis_content_list_utils';
 import { EisNoModelsPrompt } from './eis_no_models_prompt';
@@ -17,9 +23,14 @@ interface EisCardGridProps {
   onViewModelDetails: (modelId: string) => void;
 }
 
+const cardGridStyles = ({ euiTheme }: UseEuiTheme) => ({
+  paddingTop: euiTheme.size.s,
+});
+
 export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
   const { items } = useContentListItems();
   const breakpoint = useCurrentEuiBreakpoint();
+  const euiThemeContext = useEuiTheme();
 
   // ContentList owns the initially-empty state, while filtered zero-result
   // queries remain in the ready phase and render this child.
@@ -28,7 +39,12 @@ export const EisCardGrid = ({ onViewModelDetails }: EisCardGridProps) => {
   }
 
   return (
-    <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
+    <EuiFlexGrid
+      columns={breakpoint === 'xl' ? 4 : 3}
+      data-test-subj="eisModelCards"
+      gutterSize="m"
+      css={cardGridStyles(euiThemeContext)}
+    >
       {items.map((item) => {
         const modelId = getItemModelId(item);
         return (

@@ -10,9 +10,11 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { OverlayStart } from '@kbn/core/public';
 import { CoreScopedHistory, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,7 +33,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
 });
 
 const space: Space = {
-  id: 'my-space',
+  id: asSpaceId('my-space'),
   name: 'My Space',
   disabledFeatures: [],
 };
@@ -39,7 +41,7 @@ const space: Space = {
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
@@ -50,7 +52,12 @@ featuresStart.getFeatures.mockResolvedValue([
 const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
 describe('ManageSpacePage', () => {
   beforeAll(() => {
@@ -61,6 +68,7 @@ describe('ManageSpacePage', () => {
   });
 
   const history = scopedHistoryMock.create();
+  history.createHref.mockImplementation(({ pathname } = { pathname: '/' }) => pathname ?? '/');
   const coreStart = coreMock.createStart();
   const navigationServices = {
     http: coreStart.http,

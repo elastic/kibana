@@ -115,6 +115,14 @@ export class AuditService {
     const enabled = !!(config.enabled && config.appender);
     const includeSavedObjectNames = config.include_saved_object_names;
 
+    // Serverless OTel delivery expects the authentication realm in user.domain. This one field is
+    // resolved on the way in rather than in the OTel transform because no event except user_login
+    // carries the realm in the record — it is only reachable from the authenticated user here. The
+    // regular (ECS) audit log is deliberately left unchanged.
+    // We are excluding this from non-OTel appenders because we want to use the actual ES Security domain for this value,
+    // but it is not yet available to us in the authenticate response.
+    const includeUserDomain = isServerless && config.appender?.type === 'otel';
+
     if (enabled) {
       license.features$.subscribe((features) => {
         clearInterval(this.usageIntervalId!);
@@ -159,6 +167,10 @@ export class AuditService {
               id: user.profile_uid,
               name: user.username,
               ...(user.email ? { email: user.email } : {}),
+              ...(user.full_name ? { full_name: user.full_name } : {}),
+              ...(includeUserDomain && user.authentication_realm?.name
+                ? { domain: user.authentication_realm.name }
+                : {}),
               roles: user.roles as string[],
             }) ||
             event.user,
