@@ -145,6 +145,7 @@ describe('stepStepSelectAgentPolicy', () => {
           /None of the agents using the selected agent policies are compatible/
         )
       ).not.toBeInTheDocument();
+      expect(mockSetHasAgentPolicyError).toHaveBeenCalledWith(false);
     });
 
     test('should select agent policy by default if one exists', async () => {
