@@ -12,12 +12,14 @@ import type { Monitor } from '../monitor';
 export interface PerformanceInfo {
   fps: number;
   jankPercentage: number;
+  baselineFps: number;
   history: number[];
   maxFps: number;
   minFps: number;
 }
 
 export class PerformanceMonitor implements Monitor<PerformanceInfo> {
+  private static readonly WARMUP_SAMPLE_COUNT = 3;
   private frameHistory: number[] = [];
   private callbacks: Array<(info: PerformanceInfo) => void> = [];
 
@@ -28,6 +30,7 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
 
   // baseline (target) FPS;
   private baselineFps = 60;
+  private warmupSamples = 0;
 
   // Bookkeeping for per-second FPS aggregation.
   private bucketStart = 0;
@@ -84,6 +87,8 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
 
   private initializeHistory() {
     this.frameHistory = [];
+    this.baselineFps = 60;
+    this.warmupSamples = 0;
     const now = performance.now();
     this.bucketStart = now;
     this.bucketFrames = 0;
@@ -105,7 +110,16 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
         const measuredFps = Math.max(0, fps);
 
         this.pushFps(measuredFps);
-        this.emitSnapshot(measuredFps);
+        if (this.warmupSamples < PerformanceMonitor.WARMUP_SAMPLE_COUNT) {
+          this.warmupSamples++;
+          if (this.warmupSamples === PerformanceMonitor.WARMUP_SAMPLE_COUNT) {
+            this.frameHistory = [];
+          }
+        } else {
+          this.emitSnapshot(measuredFps);
+          // Slowly adapt baseline upward/downward to follow device refresh changes (e.g., ProMotion).
+          this.updateBaselineFromRecentHistory();
+        }
 
         // Prepare next bucket. Carry over any spillover time to reduce drift.
         // If more than 1s elapsed (extreme throttling), just reset cleanly.
@@ -115,9 +129,6 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
           this.bucketStart += 1000;
         }
         this.bucketFrames = 0;
-
-        // Slowly adapt baseline upward/downward to follow device refresh changes (e.g., ProMotion).
-        this.updateBaselineFromRecentHistory();
       }
 
       this.animationId = requestAnimationFrame(tick);
@@ -159,6 +170,7 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
     this.emit({
       fps: currentFps,
       jankPercentage,
+      baselineFps: this.baselineFps,
       history: [...history],
       maxFps,
       minFps,
@@ -178,13 +190,16 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
     return Math.round((janky / history.length) * 100);
   }
 
+  private getBaselineTarget(): number {
+    const sorted = [...this.frameHistory].sort((a, b) => a - b);
+    const p75 = sorted[Math.floor(sorted.length * 0.75)];
+    return Math.max(30, Math.min(240, p75));
+  }
+
   private updateBaselineFromRecentHistory() {
     if (this.frameHistory.length < 3) return;
 
-    // Use the 75th percentile as a “healthy” indicator, then gently ease baseline.
-    const sorted = [...this.frameHistory].sort((a, b) => a - b);
-    const p75 = sorted[Math.floor(sorted.length * 0.75)];
-    const target = Math.max(30, Math.min(240, p75));
+    const target = this.getBaselineTarget();
 
     // Exponential smoothing toward target (fast up, slower down to avoid flip-flop).
     const upAlpha = 0.35;

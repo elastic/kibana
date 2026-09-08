@@ -24,11 +24,10 @@ export interface MemoryInfo {
 
 interface PerformanceMemory {
   usedJSHeapSize: number;
-  totalJSHeapSize: number;
   jsHeapSizeLimit: number;
 }
 
-type Callback = (info: MemoryInfo) => void;
+type Callback = (info: MemoryInfo | null) => void;
 
 interface Config {
   intervalMs?: number; // sampling period
@@ -42,19 +41,37 @@ interface Config {
   pauseWhenHidden?: boolean; // don't sample on hidden tabs
 }
 
-export class MemoryMonitor implements Monitor<MemoryInfo> {
-  static readonly isSupported = (): boolean =>
-    typeof performance !== 'undefined' &&
-    'memory' in performance &&
-    typeof (performance as any).memory?.usedJSHeapSize === 'number';
+export class MemoryMonitor implements Monitor<MemoryInfo | null> {
+  private static readPerfMemory(): PerformanceMemory | null {
+    try {
+      if (typeof performance === 'undefined') return null;
+      const perf: Performance & { memory?: Partial<PerformanceMemory> } = performance;
+      const { usedJSHeapSize, jsHeapSizeLimit } = perf.memory ?? {};
+      if (
+        typeof usedJSHeapSize !== 'number' ||
+        !Number.isFinite(usedJSHeapSize) ||
+        usedJSHeapSize < 0 ||
+        typeof jsHeapSizeLimit !== 'number' ||
+        !Number.isFinite(jsHeapSizeLimit) ||
+        jsHeapSizeLimit <= 0
+      ) {
+        return null;
+      }
+      return { usedJSHeapSize, jsHeapSizeLimit };
+    } catch {
+      return null;
+    }
+  }
+
+  static readonly isSupported = (): boolean => MemoryMonitor.readPerfMemory() !== null;
 
   private history: number[] = [];
   private sampleTimes: number[] = [];
   private callbacks = new Set<Callback>();
-  private timer?: number;
+  private timer?: ReturnType<typeof setTimeout>;
   private startedAt = 0;
   private isMonitoring = false;
-
+  private lastInfo: MemoryInfo | null | undefined;
   private readonly cfg: Required<Config>;
 
   constructor(config: Config = {}) {
@@ -76,10 +93,10 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
   }
 
   startMonitoring(): void {
-    if (!this.isSupported()) return;
     this.stopMonitoring(); // ensure clean start
     this.history.length = 0; // reset
     this.sampleTimes.length = 0;
+    this.lastInfo = undefined;
     this.startedAt = performance.now();
     this.isMonitoring = true;
     if (this.cfg.pauseWhenHidden && typeof document !== 'undefined') {
@@ -105,13 +122,12 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     this.history.length = 0;
     this.callbacks.clear();
     this.sampleTimes.length = 0;
+    this.lastInfo = undefined;
   }
 
   subscribe(cb: Callback): () => void {
     this.callbacks.add(cb);
-    // Optionally emit last value immediately
-    const last = this.history[this.history.length - 1];
-    if (last != null) cb(this.buildInfo(last));
+    if (this.lastInfo !== undefined) cb(this.lastInfo);
     return () => this.callbacks.delete(cb);
   }
 
@@ -127,7 +143,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
       }
       this.sampleOnce();
       if (this.isMonitoring) this.scheduleNext();
-    }, this.cfg.intervalMs) as unknown as number;
+    }, this.cfg.intervalMs);
   }
 
   private onVisibility = () => {
@@ -136,26 +152,16 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     if (!document.hidden) this.sampleOnce();
   };
 
-  private readPerfMemory(): PerformanceMemory | null {
-    try {
-      const mem = (performance as any).memory as PerformanceMemory | undefined;
-      if (!mem) return null;
-      if (typeof mem.usedJSHeapSize !== 'number' || typeof mem.jsHeapSizeLimit !== 'number')
-        return null;
-      return mem;
-    } catch {
-      return null;
-    }
-  }
-
   private sampleOnce() {
     if (!this.isMonitoring) return;
-    const mem = this.readPerfMemory();
-    if (!mem) return;
+    const mem = MemoryMonitor.readPerfMemory();
+    if (!mem) {
+      this.lastInfo = null;
+      this.callbacks.forEach((cb) => cb(null));
+      return;
+    }
 
     const usedMB = mem.usedJSHeapSize / (1024 * 1024);
-    if (!Number.isFinite(usedMB)) return;
-
     const sampleTime = performance.now();
     this.history.push(usedMB);
     this.sampleTimes.push(sampleTime);
@@ -165,15 +171,13 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     }
 
     const info = this.buildInfo(usedMB, mem);
-    // Notify subscribers
+    this.lastInfo = info;
     this.callbacks.forEach((cb) => cb(info));
   }
 
-  private buildInfo(current: number, mem?: PerformanceMemory): MemoryInfo {
+  private buildInfo(current: number, mem: PerformanceMemory): MemoryInfo {
     const leak = this.detectLeak(mem);
-    const heapUsageRatio = mem
-      ? mem.usedJSHeapSize / (mem.jsHeapSizeLimit || mem.totalJSHeapSize || 1)
-      : undefined;
+    const heapUsageRatio = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
 
     const { baseline, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
       this.computeLeakMetrics();
@@ -230,7 +234,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     };
   }
 
-  private detectLeak(mem?: PerformanceMemory): boolean {
+  private detectLeak(mem: PerformanceMemory): boolean {
     if (this.history.length < 10) return false;
 
     const { warmedUp, absoluteIncrease, shortTrendPerMin, longTrendPerMin } =
@@ -243,9 +247,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
       longTrendPerMin > this.cfg.longTrendMbPerMin;
 
     const significantIncrease = absoluteIncrease > this.cfg.absoluteIncreaseMb;
-
-    const ratioDen = mem?.jsHeapSizeLimit || mem?.totalJSHeapSize || Number.POSITIVE_INFINITY;
-    const heapUsageRatio = mem && Number.isFinite(ratioDen) ? mem.usedJSHeapSize / ratioDen : 0;
+    const heapUsageRatio = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
 
     const highMemoryPressure = heapUsageRatio > this.cfg.highPressureRatio;
 

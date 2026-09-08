@@ -11,6 +11,8 @@ import type { Monitor } from '../monitor';
 
 export interface LongTaskInfo {
   duration: number; // last task duration (ms)
+  worstTaskDuration: number; // largest retained task duration (ms)
+  worstTaskStartTime: number | null; // start time of the worst retained task
   totalBlockingTime: number; // sum over window of max(0, duration - 50)
   tasksInLast30Seconds: number; // number of long tasks in the window
 }
@@ -36,6 +38,9 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
 
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
   private lastTaskDuration = 0;
+
+  private worstTaskDuration = 0;
+  private worstTaskStartTime: number | null = null;
 
   constructor() {
     this.supportedFlag = this.checkLongTaskSupport();
@@ -101,6 +106,21 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       undefined
     );
     this.lastTaskDuration = latestTask?.duration ?? 0;
+
+    let worstTaskDuration = 0;
+    let worstTaskStartTime: number | null = null;
+    for (const { duration, startTime } of this.taskHistory) {
+      if (
+        duration > worstTaskDuration ||
+        (duration === worstTaskDuration &&
+          (worstTaskStartTime === null || startTime >= worstTaskStartTime))
+      ) {
+        worstTaskDuration = duration;
+        worstTaskStartTime = startTime;
+      }
+    }
+    this.worstTaskDuration = worstTaskDuration;
+    this.worstTaskStartTime = worstTaskStartTime;
   }
 
   private calculateTotalBlockingTime(): number {
@@ -116,12 +136,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
 
   private publishCurrentStats() {
     if (!this.isMonitoring) return;
-    this.cleanupHistory();
-    const info: LongTaskInfo = {
-      duration: this.lastTaskDuration,
-      totalBlockingTime: this.calculateTotalBlockingTime(),
-      tasksInLast30Seconds: this.taskHistory.length,
-    };
+    const info = this.getCurrentStats();
     for (const cb of this.callbacks) cb(info);
     this.scheduleExpiry();
   }
@@ -142,6 +157,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   }
 
   private handleLongTask(entry: PerformanceLongTaskTiming) {
+    if (!this.isMonitoring) return;
     const { duration, startTime } = entry;
     if (duration < LongTaskMonitor.SEVERE_THRESHOLD) return;
 
@@ -171,6 +187,8 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     this.callbacks = [];
     this.taskHistory = [];
     this.lastTaskDuration = 0;
+    this.worstTaskDuration = 0;
+    this.worstTaskStartTime = null;
   }
 
   subscribe(callback: (info: LongTaskInfo) => void) {
@@ -186,6 +204,8 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     return {
       duration: this.lastTaskDuration,
       totalBlockingTime: this.calculateTotalBlockingTime(),
+      worstTaskDuration: this.worstTaskDuration,
+      worstTaskStartTime: this.worstTaskStartTime,
       tasksInLast30Seconds: this.taskHistory.length,
     };
   }

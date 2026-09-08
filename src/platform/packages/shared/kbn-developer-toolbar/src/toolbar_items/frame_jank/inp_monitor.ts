@@ -13,6 +13,7 @@ export interface INPInfo {
   currentINP: number; // p75 of retained ≥100ms interactions in the 30-second window, not standard INP
   slowInteractionsCount: number; // count of *unique* interactions in the window
   worstInteractionDelay: number; // max latency in the window
+  worstInteractionStartTime: number | null; // start time of the worst retained interaction
   lastInteractionDelay: number; // latency of the most recent interaction recorded
 }
 
@@ -49,6 +50,7 @@ export class INPMonitor implements Monitor<INPInfo> {
 
   private lastInteractionDelay = 0;
   private worstInteractionDelay = 0;
+  private worstInteractionStartTime: number | null = null;
 
   constructor() {
     this.supportedFlag = this.checkINPSupport();
@@ -119,12 +121,13 @@ export class INPMonitor implements Monitor<INPInfo> {
     if (!INPMonitor.isUserInteractionName(name)) return;
     if (duration < INPMonitor.SLOW_INTERACTION_THRESHOLD) return;
 
-    // Prefer the browser-provided interactionId for deduplication.
-    // If missing, fall back to a coarse key based on startTime+name (rare, but possible).
+    // Positive interaction IDs are the only browser-provided identities. Some browsers emit
+    // companion events with ID 0 for the same interaction, which must not become extra records.
+    if (interactionId !== undefined && (!Number.isInteger(interactionId) || interactionId <= 0)) {
+      return;
+    }
     const key: number | string =
-      typeof interactionId === 'number'
-        ? interactionId
-        : `${name ?? 'unknown'}@${Math.round(startTime)}`;
+      interactionId === undefined ? `${name ?? 'unknown'}@${Math.round(startTime)}` : interactionId;
 
     const prev = this.interactionMap.get(key);
     const type = name ?? 'unknown';
@@ -159,16 +162,24 @@ export class INPMonitor implements Monitor<INPInfo> {
 
     // Recompute delays from retained interactions only.
     let worst = 0;
+    let worstStartTime: number | null = null;
     let last = 0;
     let latestStartTime = -Infinity;
     for (const { duration, startTime } of this.interactionMap.values()) {
-      if (duration > worst) worst = duration;
+      if (
+        duration > worst ||
+        (duration === worst && (worstStartTime === null || startTime >= worstStartTime))
+      ) {
+        worst = duration;
+        worstStartTime = startTime;
+      }
       if (startTime >= latestStartTime) {
         latestStartTime = startTime;
         last = duration;
       }
     }
     this.worstInteractionDelay = worst;
+    this.worstInteractionStartTime = worstStartTime;
     this.lastInteractionDelay = last;
   }
 
@@ -230,6 +241,7 @@ export class INPMonitor implements Monitor<INPInfo> {
     this.interactionMap.clear();
     this.lastInteractionDelay = 0;
     this.worstInteractionDelay = 0;
+    this.worstInteractionStartTime = null;
   }
 
   subscribe(callback: (info: INPInfo) => void) {
@@ -247,6 +259,7 @@ export class INPMonitor implements Monitor<INPInfo> {
       slowInteractionsCount: this.interactionMap.size,
       worstInteractionDelay: this.worstInteractionDelay,
       lastInteractionDelay: this.lastInteractionDelay,
+      worstInteractionStartTime: this.worstInteractionStartTime,
     };
   }
 }

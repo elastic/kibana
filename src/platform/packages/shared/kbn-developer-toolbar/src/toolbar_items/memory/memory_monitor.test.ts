@@ -10,28 +10,38 @@
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 
 const MIB = 1024 * 1024;
+type Snapshot = MemoryInfo | null;
+type MemoryReading = { usedJSHeapSize: number; jsHeapSizeLimit: number } | undefined;
 
-const shortTrend = (snapshots: MemoryInfo[]) => snapshots.at(-1)?.details?.shortTrendPerMin;
-const longTrend = (snapshots: MemoryInfo[]) => snapshots.at(-1)?.details?.longTrendPerMin;
+const lastMeasured = (snapshots: Snapshot[]): MemoryInfo | undefined => {
+  const last = snapshots.at(-1);
+  return last ?? undefined;
+};
+const shortTrend = (snapshots: Snapshot[]) => lastMeasured(snapshots)?.details?.shortTrendPerMin;
+const longTrend = (snapshots: Snapshot[]) => lastMeasured(snapshots)?.details?.longTrendPerMin;
 
 describe('MemoryMonitor', () => {
   const originalMemory = Object.getOwnPropertyDescriptor(performance, 'memory');
   let monitor: MemoryMonitor;
-  let snapshots: MemoryInfo[];
+  let snapshots: Snapshot[];
   let usedMiB: number;
+  let limitMiB: number;
   let hidden: boolean;
-  const readMemory = jest.fn(() => ({
-    usedJSHeapSize: usedMiB * MIB,
-    totalJSHeapSize: usedMiB * MIB * 1.1,
-    jsHeapSizeLimit: 4096 * MIB,
-  }));
+  let memoryReading: MemoryReading;
+  const readMemory = jest.fn(() => memoryReading);
 
   beforeEach(() => {
     jest.useFakeTimers();
     usedMiB = 100;
+    limitMiB = 4096;
     hidden = false;
     snapshots = [];
+    memoryReading = { usedJSHeapSize: usedMiB * MIB, jsHeapSizeLimit: limitMiB * MIB };
     readMemory.mockClear();
+    readMemory.mockImplementation(() => ({
+      usedJSHeapSize: usedMiB * MIB,
+      jsHeapSizeLimit: limitMiB * MIB,
+    }));
     Object.defineProperty(performance, 'memory', { configurable: true, get: readMemory });
     jest.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
     monitor = new MemoryMonitor();
@@ -58,35 +68,38 @@ describe('MemoryMonitor', () => {
   it('does no work after stop and starts a fresh session when restarted', () => {
     monitor.startMonitoring();
     expect(snapshots).toHaveLength(1);
-    expect(readMemory).toHaveBeenCalledTimes(2);
 
     monitor.stopMonitoring();
+    const readsAtStop = readMemory.mock.calls.length;
+    const publicationsAtStop = snapshots.length;
     sampleAfter(60_000, 200);
-    expect(snapshots).toHaveLength(1);
-    expect(readMemory).toHaveBeenCalledTimes(2);
+    expect(readMemory).toHaveBeenCalledTimes(readsAtStop);
+    expect(snapshots).toHaveLength(publicationsAtStop);
 
     monitor.startMonitoring();
-    expect(snapshots).toHaveLength(2);
-    expect(snapshots.at(-1)?.history).toEqual([200]);
+    expect(lastMeasured(snapshots)?.history).toEqual([200]);
     monitor.stopMonitoring();
+    const readsAfterRestartStop = readMemory.mock.calls.length;
+    const publicationsAfterRestartStop = snapshots.length;
     jest.advanceTimersByTime(60_000);
-    expect(snapshots).toHaveLength(2);
+    expect(readMemory).toHaveBeenCalledTimes(readsAfterRestartStop);
+    expect(snapshots).toHaveLength(publicationsAfterRestartStop);
   });
 
   it('does no visibility-driven work after destroy', () => {
     monitor.startMonitoring();
     monitor.destroy();
+    const readsAtDestroy = readMemory.mock.calls.length;
+    const publicationsAtDestroy = snapshots.length;
     sampleAfter(60_000, 200);
 
-    expect(snapshots).toHaveLength(1);
-    expect(readMemory).toHaveBeenCalledTimes(2);
+    expect(readMemory).toHaveBeenCalledTimes(readsAtDestroy);
+    expect(snapshots).toHaveLength(publicationsAtDestroy);
   });
 
   it('uses elapsed time for one-minute visibility gaps', () => {
     monitor.startMonitoring();
-    for (let sample = 1; sample <= 10; sample++) {
-      sampleAfter(60_000, 100 + sample * 20);
-    }
+    for (let sample = 1; sample <= 10; sample++) sampleAfter(60_000, 100 + sample * 20);
 
     expect(shortTrend(snapshots)).toBeCloseTo(20);
     expect(longTrend(snapshots)).toBeCloseTo(20);
@@ -138,5 +151,94 @@ describe('MemoryMonitor', () => {
     expect(Number.isFinite(longTrend(snapshots) ?? Number.NaN)).toBe(true);
     expect(shortTrend(snapshots)).toBe(0);
     expect(longTrend(snapshots)).toBe(0);
+  });
+
+  it('publishes unavailable for a partial API and keeps retrying', () => {
+    Object.defineProperty(performance, 'memory', {
+      configurable: true,
+      value: { usedJSHeapSize: 100 * MIB },
+    });
+
+    expect(monitor.isSupported()).toBe(false);
+    monitor.startMonitoring();
+    expect(snapshots).toEqual([null]);
+    jest.advanceTimersByTime(20_000);
+    expect(snapshots).toEqual([null, null]);
+  });
+
+  it('handles throwing memory getters and continues its retry lifecycle', () => {
+    readMemory.mockImplementation(() => {
+      throw new Error('memory unavailable');
+    });
+
+    expect(MemoryMonitor.isSupported()).toBe(false);
+    monitor.startMonitoring();
+    expect(snapshots).toEqual([null]);
+    jest.advanceTimersByTime(20_000);
+    expect(snapshots).toEqual([null, null]);
+  });
+
+  it.each([
+    ['negative usage', -1, 100],
+    ['NaN usage', Number.NaN, 100],
+    ['infinite usage', Number.POSITIVE_INFINITY, 100],
+    ['zero limit', 1, 0],
+    ['negative limit', 1, -1],
+    ['NaN limit', 1, Number.NaN],
+    ['infinite limit', 1, Number.POSITIVE_INFINITY],
+  ])('rejects %s without fabricating a sample', (_label, used, limit) => {
+    readMemory.mockReturnValue({ usedJSHeapSize: used, jsHeapSizeLimit: limit });
+
+    expect(monitor.isSupported()).toBe(false);
+    monitor.startMonitoring();
+    expect(snapshots).toEqual([null]);
+  });
+
+  it('retains history through valid to unavailable to valid cadence samples', () => {
+    monitor.startMonitoring();
+    expect(lastMeasured(snapshots)?.history).toEqual([100]);
+
+    readMemory.mockReturnValue(undefined);
+    jest.advanceTimersByTime(20_000);
+    expect(snapshots.at(-1)).toBeNull();
+
+    readMemory.mockImplementation(() => ({
+      usedJSHeapSize: 200 * MIB,
+      jsHeapSizeLimit: 4096 * MIB,
+    }));
+    jest.advanceTimersByTime(20_000);
+    expect(lastMeasured(snapshots)?.history).toEqual([100, 200]);
+  });
+
+  it('replays the actual measured ratio and leak snapshot to late subscribers', () => {
+    limitMiB = 320;
+    monitor.startMonitoring();
+    for (let sample = 1; sample <= 10; sample++) {
+      usedMiB = 100 + sample * 20;
+      jest.advanceTimersByTime(20_000);
+    }
+    const measured = lastMeasured(snapshots);
+    expect(measured?.leak).toBe(true);
+    expect(measured?.heapUsageRatio).toBeCloseTo(300 / 320);
+
+    const replayed: Snapshot[] = [];
+    monitor.subscribe((info) => replayed.push(info));
+    expect(replayed).toEqual([measured]);
+  });
+
+  it('replays null after a failed sample instead of a stale measurement', () => {
+    monitor.startMonitoring();
+    readMemory.mockReturnValue(undefined);
+    jest.advanceTimersByTime(20_000);
+
+    const replayed: Snapshot[] = [];
+    monitor.subscribe((info) => replayed.push(info));
+    expect(replayed).toEqual([null]);
+  });
+
+  it('allows ratios above one without clamping', () => {
+    readMemory.mockReturnValue({ usedJSHeapSize: 200 * MIB, jsHeapSizeLimit: 100 * MIB });
+    monitor.startMonitoring();
+    expect(lastMeasured(snapshots)?.heapUsageRatio).toBe(2);
   });
 });

@@ -56,7 +56,7 @@ const timingEntry = (duration: number, startTime = performance.now()): Performan
 
 const eventEntry = (
   duration: number,
-  interactionId: number,
+  interactionId: number | undefined,
   startTime = performance.now(),
   name = 'click'
 ): PerformanceEventTiming => ({
@@ -64,7 +64,7 @@ const eventEntry = (
   entryType: 'event',
   duration,
   startTime,
-  interactionId,
+  ...(interactionId === undefined ? {} : { interactionId }),
   processingStart: startTime,
   processingEnd: startTime + duration,
   toJSON: () => ({ name, duration, startTime, interactionId }),
@@ -115,6 +115,8 @@ describe('LongTaskMonitor', () => {
       duration: 300,
       totalBlockingTime: 250,
       tasksInLast30Seconds: 1,
+      worstTaskDuration: 300,
+      worstTaskStartTime: 0,
     });
 
     jest.advanceTimersByTime(10_000);
@@ -125,6 +127,8 @@ describe('LongTaskMonitor', () => {
       duration: 100,
       totalBlockingTime: 50,
       tasksInLast30Seconds: 1,
+      worstTaskDuration: 100,
+      worstTaskStartTime: 10_000,
     });
 
     jest.advanceTimersByTime(10_000);
@@ -132,6 +136,8 @@ describe('LongTaskMonitor', () => {
       duration: 0,
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
+      worstTaskDuration: 0,
+      worstTaskStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
   });
@@ -149,8 +155,49 @@ describe('LongTaskMonitor', () => {
       duration: 0,
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
+      worstTaskDuration: 0,
+      worstTaskStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('selects worst task metadata deterministically and falls back as tasks expire', () => {
+    deliver([timingEntry(400, 0), timingEntry(400, 1_000), timingEntry(300, 2_000)]);
+    expect(snapshots.at(-1)).toMatchObject({
+      duration: 300,
+      worstTaskDuration: 400,
+      worstTaskStartTime: 1_000,
+    });
+
+    jest.advanceTimersByTime(31_000);
+    expect(snapshots.at(-1)).toMatchObject({
+      worstTaskDuration: 300,
+      worstTaskStartTime: 2_000,
+    });
+
+    jest.advanceTimersByTime(1_000);
+    expect(snapshots.at(-1)).toMatchObject({
+      worstTaskDuration: 0,
+      worstTaskStartTime: null,
+    });
+  });
+
+  it('cancels expiry on destroy and after a subscriber stops publication', () => {
+    deliver([timingEntry(300)]);
+    const publicationsBeforeDestroy = snapshots.length;
+    monitor.destroy();
+    jest.advanceTimersByTime(31_000);
+    expect(snapshots).toHaveLength(publicationsBeforeDestroy);
+    expect(jest.getTimerCount()).toBe(0);
+
+    const stoppingMonitor = new LongTaskMonitor();
+    stoppingMonitor.subscribe((info) => {
+      if (info.tasksInLast30Seconds > 0) stoppingMonitor.stopMonitoring();
+    });
+    stoppingMonitor.startMonitoring();
+    deliver([timingEntry(150)]);
+    expect(jest.getTimerCount()).toBe(0);
+    stoppingMonitor.destroy();
   });
 });
 
@@ -193,6 +240,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 1,
       worstInteractionDelay: 100,
       lastInteractionDelay: 100,
+      worstInteractionStartTime: 10_000,
     });
 
     jest.advanceTimersByTime(10_000);
@@ -201,6 +249,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
       lastInteractionDelay: 0,
+      worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
   });
@@ -219,6 +268,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
       lastInteractionDelay: 0,
+      worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
 
@@ -256,6 +306,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 4,
       worstInteractionDelay: 300,
       lastInteractionDelay: 180,
+      worstInteractionStartTime: 1_000,
     });
 
     jest.advanceTimersByTime(29_000);
@@ -264,6 +315,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 2,
       worstInteractionDelay: 180,
       lastInteractionDelay: 180,
+      worstInteractionStartTime: 2_000,
     });
 
     jest.advanceTimersByTime(1_000);
@@ -272,6 +324,7 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
       lastInteractionDelay: 0,
+      worstInteractionStartTime: null,
     });
   });
 
@@ -289,6 +342,57 @@ describe('INPMonitor', () => {
       slowInteractionsCount: 4,
       worstInteractionDelay: 400,
       lastInteractionDelay: 400,
+      worstInteractionStartTime: 0,
+    });
+  });
+
+  it('uses only positive integer interaction IDs and preserves the absent-ID fallback', () => {
+    deliverEvents([
+      eventEntry(300, 7, 0, 'pointerdown'),
+      eventEntry(250, 7, 1, 'click'),
+      eventEntry(200, 0, 2, 'mousedown'),
+      eventEntry(200, 0, 3, 'mouseup'),
+    ]);
+    expect(snapshots.at(-1)).toMatchObject({
+      slowInteractionsCount: 1,
+      worstInteractionDelay: 300,
+      worstInteractionStartTime: 0,
+    });
+
+    deliverEvents([eventEntry(175, 8, 9)]);
+    expect(snapshots.at(-1)?.slowInteractionsCount).toBe(2);
+
+    deliverEvents([
+      eventEntry(200, -1, 4),
+      eventEntry(200, Number.NaN, 5),
+      eventEntry(200, Number.POSITIVE_INFINITY, 6),
+      eventEntry(200, 1.5, 7),
+      eventEntry(150, undefined, 8),
+    ]);
+    expect(snapshots.at(-1)).toMatchObject({
+      slowInteractionsCount: 3,
+      worstInteractionDelay: 300,
+      worstInteractionStartTime: 0,
+    });
+  });
+
+  it('orders worst interaction metadata and falls back as interactions expire', () => {
+    deliverEvents([eventEntry(400, 1, 0), eventEntry(400, 2, 1_000), eventEntry(300, 3, 2_000)]);
+    expect(snapshots.at(-1)).toMatchObject({
+      worstInteractionDelay: 400,
+      worstInteractionStartTime: 1_000,
+    });
+
+    jest.advanceTimersByTime(31_000);
+    expect(snapshots.at(-1)).toMatchObject({
+      worstInteractionDelay: 300,
+      worstInteractionStartTime: 2_000,
+    });
+
+    jest.advanceTimersByTime(1_000);
+    expect(snapshots.at(-1)).toMatchObject({
+      worstInteractionDelay: 0,
+      worstInteractionStartTime: null,
     });
   });
 });
