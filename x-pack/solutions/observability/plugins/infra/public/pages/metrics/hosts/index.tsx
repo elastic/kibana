@@ -24,11 +24,14 @@ export const HostsPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
 
-  useMetricsBreadcrumbs([
-    {
-      text: hostsTitle,
-    },
-  ]);
+  useMetricsBreadcrumbs(
+    [
+      {
+        text: hostsTitle,
+      },
+    ],
+    { parent: 'app' }
+  );
 
   return (
     <div className={APP_WRAPPER_CLASS}>

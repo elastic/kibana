@@ -670,7 +670,7 @@ fcTest.prop([nonObjectToJsonReturnArb])(
         level: 'DEBUG',
         logger: 'bar',
       },
-      error: String(toJsonValue),
+      error: { message: String(toJsonValue) },
       process: {
         pid: 3,
         uptime: 10,

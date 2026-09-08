@@ -11,7 +11,7 @@ import type { StructuredTool } from '@langchain/core/tools';
 import { tool as toTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/agent-builder-common';
+import type { ChatAgentEvent, ToolResult } from '@kbn/agent-builder-common';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type {
   AgentBuilderToolEvent,
@@ -99,18 +99,28 @@ export const createToolIdMappings = <T extends { id: string }>(tools: T[]): Tool
   return mapping;
 };
 
+export interface BuildToolContentParams {
+  results: ToolResult[];
+  toolId: string;
+  toolCallId: string;
+}
+
+export type BuildToolContentFn = (params: BuildToolContentParams) => string;
+
 export const toolToLangchain = async ({
   tool,
   toolId,
   logger,
   sendEvent,
   addReasoningParam = false,
+  buildContent = ({ results }) => JSON.stringify({ results }),
 }: {
   tool: ExecutableTool;
   toolId?: string;
   logger: Logger;
   sendEvent?: AgentEventEmitterFn;
   addReasoningParam?: boolean;
+  buildContent?: BuildToolContentFn;
 }): Promise<StructuredTool> => {
   const description = tool.getLlmDescription
     ? await tool.getLlmDescription({ description: tool.description, config: tool.configuration })
@@ -140,7 +150,11 @@ export const toolToLangchain = async ({
           toolCallId,
           source: 'agent',
         });
-        const content = JSON.stringify({ results: toolReturn.results });
+        const content = buildContent({
+          results: toolReturn.results ?? [],
+          toolId: tool.id,
+          toolCallId,
+        });
         return [content, toolReturn];
       } catch (e) {
         logger.warn(`error calling tool ${tool.id}: ${e}`);

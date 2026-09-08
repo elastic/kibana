@@ -9,15 +9,21 @@
 
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
+  CoreStart,
   ElasticsearchClient,
   KibanaRequest,
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
+import type {
+  IWorkflowEventLoggerService,
+  StepExecutionsDataClient,
+  WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
+import type { IWorkflowChangeHistoryService } from './workflow_change_history_types';
 import type { WorkflowExecutionQueryService } from './workflow_execution_query_service';
 import type { WorkflowValidationService } from './workflow_validation_service';
 import type { WorkflowStorage } from '../storage/workflow_storage';
@@ -31,23 +37,29 @@ export interface WorkflowStorageDeps {
 
 /** Deps for WorkflowCrudService (CRUD + deletion + disable-all). */
 export interface WorkflowCrudDeps extends WorkflowStorageDeps {
-  esClient: ElasticsearchClient;
   getSecurity: () => SecurityServiceStart | undefined;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getTaskScheduler: () => WorkflowTaskScheduler | null;
   executionQueryService: WorkflowExecutionQueryService;
   validationService: WorkflowValidationService;
+  getCoreStart: () => CoreStart;
+  changeHistoryService: IWorkflowChangeHistoryService;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
 }
 
 /** Deps for WorkflowSearchService. */
 export interface WorkflowSearchDeps extends WorkflowStorageDeps {
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
 }
 
 /** Deps for WorkflowExecutionQueryService. */
 export interface WorkflowExecutionQueryDeps {
   logger: Logger;
   esClient: ElasticsearchClient;
+  workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+  stepExecutionsDataClient: StepExecutionsDataClient;
   workflowEventLoggerService: IWorkflowEventLoggerService;
 }
 

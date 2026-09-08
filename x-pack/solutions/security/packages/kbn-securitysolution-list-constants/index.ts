@@ -93,6 +93,11 @@ export const ENDPOINT_ARTIFACT_LISTS = deepFreeze({
     name: 'Endpoint Security Blocklists List',
     description: 'Endpoint Security Blocklists List',
   },
+  customYaraSignatures: {
+    id: 'endpoint_custom_yara_signatures',
+    name: 'Endpoint Security Custom YARA Signatures List',
+    description: 'Endpoint Security Custom YARA Signatures List',
+  },
 } as const);
 
 /**

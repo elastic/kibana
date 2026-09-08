@@ -18,14 +18,39 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
 import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
+import { useEffectiveSpaceDefaultAgent } from '../../hooks/use_space_default_agent';
+import { RedirectLoading } from '../../components/redirects/redirect_loading';
 
 const noopOnAppLeave = () => {};
+
+/**
+ * Pins restricted (non-`manageAgents`) users to their space's default agent.
+ */
+export const PinnedConversationProvider: React.FC<
+  React.PropsWithChildren<{ baseValue: NonNullable<React.ContextType<typeof ConversationContext>> }>
+> = ({ baseValue, children }) => {
+  const { effectiveDefaultAgentId, isRestricted, isReady } = useEffectiveSpaceDefaultAgent();
+  const value = useMemo(
+    () =>
+      isRestricted && effectiveDefaultAgentId
+        ? { ...baseValue, agentId: effectiveDefaultAgentId }
+        : baseValue,
+    [baseValue, isRestricted, effectiveDefaultAgentId]
+  );
+  return (
+    <ConversationContext.Provider value={value}>
+      <ConversationChangeNotifier />
+      {isReady ? children : <RedirectLoading />}
+    </ConversationContext.Provider>
+  );
+};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
 }
@@ -51,6 +76,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           setCurrentProps((prevProps) => ({
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
+          })),
+        removeAttachmentById: (attachmentId) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            attachments: prevProps.attachments
+              ? removeAttachmentById(prevProps.attachments, attachmentId)
+              : prevProps.attachments,
           })),
       });
     }
@@ -112,15 +144,17 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
 
   const setConversationId = useCallback(
     (id?: string) => {
-      if (currentProps.newConversation && id) {
-        // reset new conversation flag when there is a valid id
-        setCurrentProps({ ...currentProps, newConversation: undefined });
-      }
       if (id !== persistedConversationId) {
         updatePersistedConversationId(id);
       }
+      // Functional updater prevents stale closure capture of currentProps.
+      setCurrentProps((prevProps) => ({
+        ...prevProps,
+        // reset new conversation flag when a valid id is assigned
+        ...(prevProps.newConversation && id ? { newConversation: undefined } : {}),
+      }));
     },
-    [currentProps, persistedConversationId, updatePersistedConversationId]
+    [persistedConversationId, updatePersistedConversationId]
   );
 
   const validateAndSetConversationId = useCallback(
@@ -219,12 +253,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
-      shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
       agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
+      greetingMessage: currentProps.greetingMessage,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
@@ -241,6 +275,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       currentProps.agentId,
       currentProps.initialMessage,
       currentProps.autoSendInitialMessage,
+      currentProps.greetingMessage,
       currentProps.browserApiTools,
       currentProps.attachments,
       upsertAttachments,
@@ -260,10 +295,9 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
               <StreamingProvider>
-                <ConversationContext.Provider value={conversationContextValue}>
-                  <ConversationChangeNotifier />
+                <PinnedConversationProvider baseValue={conversationContextValue}>
                   {children}
-                </ConversationContext.Provider>
+                </PinnedConversationProvider>
               </StreamingProvider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type {
+  ActionConfig,
   ContextSwitcherEnvironmentConfig,
   LinksListItem,
 } from '@kbn/context-switcher-components';
@@ -92,6 +93,24 @@ export const useEnvironmentContext = ({
       });
     }
 
-    return { environmentType, name, submenuItems };
+    const isProject = environmentType === 'project';
+    const createUrl = isProject ? cloud.createProjectUrl : cloud.createDeploymentUrl;
+    const createLabel = isProject
+      ? i18n.translate('xpack.spaces.contextSwitcher.createProjectLabel', {
+          defaultMessage: 'Create project',
+        })
+      : i18n.translate('xpack.spaces.contextSwitcher.createDeploymentLabel', {
+          defaultMessage: 'Create deployment',
+        });
+
+    const submenuFooterAction: ActionConfig | undefined = createUrl
+      ? {
+          id: isProject ? 'createProject' : 'createDeployment',
+          label: createLabel,
+          href: createUrl,
+        }
+      : undefined;
+
+    return { environmentType, name, submenuItems, submenuFooterAction };
   }, [cloud, environmentName, isCloud, isServerless]);
 };

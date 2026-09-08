@@ -15,8 +15,8 @@ const InlineFilterPopoverSpy = jest.spyOn(inlineFilterPopoverModule, 'InlineFilt
 
 describe('StatusFilter', () => {
   const defaultProps = {
-    selectedStatus: null,
-    onStatusChange: jest.fn(),
+    selectedStatuses: null,
+    onStatusesChange: jest.fn(),
     'data-test-subj': 'test-status-filter',
   };
 
@@ -50,21 +50,23 @@ describe('StatusFilter', () => {
     });
 
     it('does not show hasActiveFilters when no status is selected', () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus={null} />);
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={null} />);
       const button = screen.getByTestId('test-status-filter-button');
       expect(button).not.toHaveClass('euiFilterButton-hasActiveFilters');
     });
 
     it('shows hasActiveFilters when a status is selected', () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus="active" />);
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={['active']} />);
       const button = screen.getByTestId('test-status-filter-button');
       expect(button).toHaveClass('euiFilterButton-hasActiveFilters');
     });
 
-    it('shows numActiveFilters of 1 when a status is selected', () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus="active" />);
+    it('shows numActiveFilters matching the number of selected statuses', () => {
+      render(
+        <AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={['active', 'pending']} />
+      );
       const button = screen.getByTestId('test-status-filter-button');
-      expect(button.querySelector('.euiNotificationBadge')).toHaveTextContent('1');
+      expect(button.querySelector('.euiNotificationBadge')).toHaveTextContent('2');
     });
   });
 
@@ -77,18 +79,18 @@ describe('StatusFilter', () => {
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           options: [
-            { label: 'Active', value: 'active' },
-            { label: 'Recovering', value: 'recovering' },
-            { label: 'Pending', value: 'pending' },
-            { label: 'Inactive', value: 'inactive' },
+            { label: 'Active', value: 'active', prepend: expect.anything() },
+            { label: 'Recovering', value: 'recovering', prepend: expect.anything() },
+            { label: 'Pending', value: 'pending', prepend: expect.anything() },
+            { label: 'Inactive', value: 'inactive', prepend: expect.anything() },
           ],
         }),
         {}
       );
     });
 
-    it('passes selectedStatus as selectedValues array', async () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus="recovering" />);
+    it('passes selectedStatuses as selectedValues array', async () => {
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={['recovering']} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -99,7 +101,7 @@ describe('StatusFilter', () => {
     });
 
     it('passes empty array as selectedValues when no status is selected', async () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus={null} />);
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={null} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -109,12 +111,12 @@ describe('StatusFilter', () => {
       );
     });
 
-    it('configures as single select', async () => {
+    it('configures as multi-select', async () => {
       render(<AlertEpisodesStatusFilter {...defaultProps} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          singleSelect: true,
+          singleSelect: false,
         }),
         {}
       );
@@ -144,45 +146,34 @@ describe('StatusFilter', () => {
   });
 
   describe('selection callback', () => {
-    it('calls onStatusChange with status value when single value is provided', async () => {
-      const onStatusChange = jest.fn();
-      render(<AlertEpisodesStatusFilter {...defaultProps} onStatusChange={onStatusChange} />);
+    it('calls onStatusesChange with the full array when values are provided', async () => {
+      const onStatusesChange = jest.fn();
+      render(<AlertEpisodesStatusFilter {...defaultProps} onStatusesChange={onStatusesChange} />);
       await openPopover();
 
       const props = InlineFilterPopoverSpy.mock.calls[0][0];
       act(() => {
-        props.onSelectionChange(['recovering']);
+        props.onSelectionChange(['active', 'recovering']);
       });
 
-      expect(onStatusChange).toHaveBeenCalledWith('recovering');
+      expect(onStatusesChange).toHaveBeenCalledWith(['active', 'recovering']);
     });
 
-    it('calls onStatusChange with undefined when empty array is provided', async () => {
-      const onStatusChange = jest.fn();
-      render(<AlertEpisodesStatusFilter {...defaultProps} onStatusChange={onStatusChange} />);
+    it('calls onStatusesChange with undefined when empty array is provided', async () => {
+      const onStatusesChange = jest.fn();
+      render(<AlertEpisodesStatusFilter {...defaultProps} onStatusesChange={onStatusesChange} />);
       await openPopover();
 
       const props = InlineFilterPopoverSpy.mock.calls[0][0];
       props.onSelectionChange([]);
 
-      expect(onStatusChange).toHaveBeenCalledWith(undefined);
-    });
-
-    it('calls onStatusChange with first value when multiple values are provided', async () => {
-      const onStatusChange = jest.fn();
-      render(<AlertEpisodesStatusFilter {...defaultProps} onStatusChange={onStatusChange} />);
-      await openPopover();
-
-      const props = InlineFilterPopoverSpy.mock.calls[0][0];
-      props.onSelectionChange(['active', 'recovering']);
-
-      expect(onStatusChange).toHaveBeenCalledWith('active');
+      expect(onStatusesChange).toHaveBeenCalledWith(undefined);
     });
   });
 
   describe('edge cases', () => {
-    it('handles undefined selectedStatus', async () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus={undefined} />);
+    it('handles undefined selectedStatuses', async () => {
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={undefined} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -192,8 +183,8 @@ describe('StatusFilter', () => {
       );
     });
 
-    it('handles null selectedStatus', async () => {
-      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatus={null} />);
+    it('handles null selectedStatuses', async () => {
+      render(<AlertEpisodesStatusFilter {...defaultProps} selectedStatuses={null} />);
       await openPopover();
       expect(InlineFilterPopoverSpy).toHaveBeenCalledWith(
         expect.objectContaining({

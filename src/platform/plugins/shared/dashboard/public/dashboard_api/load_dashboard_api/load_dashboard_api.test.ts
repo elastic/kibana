@@ -8,16 +8,16 @@
  */
 
 import { Subject } from 'rxjs';
-
-import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
+import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
+import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
+import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import { loadDashboardApi } from './load_dashboard_api';
+
 jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
     startTrackingDashboardLoadTelemetry: jest.fn(),
   };
 });
-import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
-import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_start_mark';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -30,7 +30,7 @@ jest.mock('@kbn/content-management-content-insights-public', () => {
 
 jest.mock('../../dashboard_client', () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../default_dashboard_state');
+  const defaultState = require('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: jest.fn().mockResolvedValue({
@@ -150,7 +150,7 @@ describe('loadDashboardApi', () => {
           useSessionStorageIntegration: false,
         }),
       });
-      expect(nextSpy).toBeCalledTimes(0);
+      expect(nextSpy).toHaveBeenCalledTimes(0);
     });
 
     test('should track view on load of saved object', async () => {
@@ -161,8 +161,8 @@ describe('loadDashboardApi', () => {
         }),
         savedObjectId: '12345',
       });
-      expect(nextSpy).toBeCalledTimes(1);
-      expect(nextSpy).toBeCalledWith(expect.objectContaining({ type: 'view' }));
+      expect(nextSpy).toHaveBeenCalledTimes(1);
+      expect(nextSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'view' }));
     });
   });
 });

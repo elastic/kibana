@@ -45,7 +45,7 @@ jest.mock('../../../hooks/use_telemetry', () => ({
 
 // Mock export_workflows module
 const mockExportWorkflows = jest.fn();
-const mockExportSingleWorkflow = jest.fn();
+const mockExportSingleWorkflow = jest.fn().mockResolvedValue(undefined);
 const mockFindMissingReferencedIds = jest.fn();
 const mockResolveAllReferences = jest.fn();
 
@@ -90,17 +90,18 @@ describe('useExportWithReferences', () => {
   });
 
   describe('startExport', () => {
-    it('exports a single workflow as YAML without showing a modal', () => {
+    it('exports a single workflow as YAML without showing a modal', async () => {
       mockFindMissingReferencedIds.mockReturnValue([]);
 
       const workflow = createMockWorkflow();
       const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => {
+      await act(async () => {
         result.current.startExport([workflow]);
       });
 
-      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(workflow);
+      // exportSingleWorkflow is now called with (workflow, api)
+      expect(mockExportSingleWorkflow).toHaveBeenCalledWith(workflow, mockApi);
       expect(mockNotifications.toasts.addSuccess).toHaveBeenCalled();
       expect(mockReportWorkflowExported).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -110,6 +111,29 @@ describe('useExportWithReferences', () => {
         })
       );
       expect(onComplete).toHaveBeenCalled();
+    });
+
+    it('shows error toast and skips telemetry + onComplete when export rejects', async () => {
+      mockFindMissingReferencedIds.mockReturnValue([]);
+      const exportError = new Error('Network failure');
+      mockExportSingleWorkflow.mockRejectedValueOnce(exportError);
+
+      const workflow = createMockWorkflow();
+      const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
+
+      await act(async () => {
+        result.current.startExport([workflow]);
+      });
+
+      expect(mockNotifications.toasts.addError).toHaveBeenCalledWith(
+        exportError,
+        expect.objectContaining({ title: expect.any(String) })
+      );
+      expect(mockNotifications.toasts.addSuccess).not.toHaveBeenCalled();
+      expect(mockReportWorkflowExported).toHaveBeenCalledWith(
+        expect.objectContaining({ error: exportError })
+      );
+      expect(onComplete).not.toHaveBeenCalled();
     });
 
     it('exports multiple workflows as ZIP when no references are missing', async () => {
@@ -154,14 +178,14 @@ describe('useExportWithReferences', () => {
       expect(result.current.exportModalState?.pendingExport).toEqual([mainWorkflow]);
     });
 
-    it('exports without modal when missing IDs are not found in allWorkflowsMap', () => {
+    it('exports without modal when missing IDs are not found in allWorkflowsMap', async () => {
       mockFindMissingReferencedIds.mockReturnValue(['wf-unknown']);
       // allWorkflowsMap does NOT have 'wf-unknown'
 
       const workflow = createMockWorkflow();
       const { result } = renderHook(() => useExportWithReferences({ allWorkflowsMap, onComplete }));
 
-      act(() => {
+      await act(async () => {
         result.current.startExport([workflow]);
       });
 

@@ -46,6 +46,7 @@ export const FlyoutBody: React.FunctionComponent<{
   isFirstLoading: boolean;
   currentActions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
+  abortUnenroll: (action: ActionStatus) => Promise<void>;
   onClickViewAgents: (action: ActionStatus) => Promise<void>;
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 
@@ -57,6 +58,7 @@ export const FlyoutBody: React.FunctionComponent<{
   isFirstLoading,
   currentActions,
   abortUpgrade,
+  abortUnenroll,
   onClickViewAgents,
   onClickManageAutoUpgradeAgents,
   areActionsFullyLoaded,
@@ -166,6 +168,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 }
                 actions={inProgressActions}
                 abortUpgrade={abortUpgrade}
+                abortUnenroll={abortUnenroll}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
@@ -180,6 +183,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 }
                 actions={todayActions}
                 abortUpgrade={abortUpgrade}
+                abortUnenroll={abortUnenroll}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />
@@ -190,6 +194,7 @@ export const FlyoutBody: React.FunctionComponent<{
                 title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
                 actions={otherDays[day]}
                 abortUpgrade={abortUpgrade}
+                abortUnenroll={abortUnenroll}
                 onClickViewAgents={onClickViewAgents}
                 onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
               />

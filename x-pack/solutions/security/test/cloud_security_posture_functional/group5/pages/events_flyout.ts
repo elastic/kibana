@@ -35,8 +35,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const expandedFlyoutGraph = pageObjects.expandedFlyoutGraph;
   const timelinePage = pageObjects.timeline;
 
-  // Failing: See https://github.com/elastic/kibana/issues/272092
-  describe.skip('Security Network Page - Graph visualization', function () {
+  describe('Security Network Page - Graph visualization', function () {
     this.tags(['cloud_security_posture_graph_viz']);
 
     before(async () => {
@@ -63,10 +62,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings
+      // Enable asset inventory and entity store v2 settings.
+      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
+      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
+        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -90,6 +92,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -366,6 +369,17 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
 
+          // The event's user.email / user.id / user.name are all multi-value, so MV_EXPAND
+          // produces a Cartesian product of rows for only 2 real actors. The node counter and the
+          // grouped-entities flyout must both report 2 — the flyout previously listed one item per
+          // Cartesian row (8) instead of one per entity id.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(actorNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(actorNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          // Both actors are enriched, so their titles render as links to the entity flyout.
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
+
           const storageBucketNodeId =
             '1abcf2b7cb329695e152ab9f1838188e0f61f5796fd20518c73488748e05b935';
           await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
@@ -373,6 +387,14 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             storageBucketNodeId,
             'GCP Storage Bucket'
           );
+
+          // The two buckets come from a single multi-value field (entity.target.id), so there is no
+          // cross-product to collapse — but the counter and flyout must still agree.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(storageBucketNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(storageBucketNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
 
           const serviceNodeId = 'service:TargetMultiService1';
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
@@ -462,8 +484,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             es,
             logger,
             retry,
-            entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            entitiesIndex: '.entities.v2.latest.*',
+            expectedCount: 46,
           });
         });
 

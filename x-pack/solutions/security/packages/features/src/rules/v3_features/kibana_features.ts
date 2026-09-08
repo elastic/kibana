@@ -74,7 +74,7 @@ export const getRulesV3BaseKibanaFeature = (
   catalogue: [APP_ID],
   alerting: alertingFeatures,
   management: {
-    insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+    insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
   },
   privileges: {
     all: {
@@ -109,7 +109,7 @@ export const getRulesV3BaseKibanaFeature = (
         },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ, RULES_UI_EDIT, EXCEPTIONS_UI_READ],
       api: [
@@ -144,7 +144,7 @@ export const getRulesV3BaseKibanaFeature = (
         rule: { read: alertingFeatures },
       },
       management: {
-        insightsAndAlerting: ['triggersActions'], // Access to the stack rules management UI
+        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'], // Access to the stack rules management UI
       },
       ui: [RULES_UI_READ, EXCEPTIONS_UI_READ],
       api: [

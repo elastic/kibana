@@ -15,6 +15,10 @@ import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
 import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
+import {
+  evaluateTotalFieldsLimit,
+  getTotalFieldsLimitSettings,
+} from './total_fields_limit_settings';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -57,14 +61,28 @@ const updateTotalFieldLimitSetting = async ({
 }: UpdateTotalFieldLimitSettingOpts) => {
   const { index, alias } = concreteIndexInfo;
   try {
+    // `index` may be a data stream name, which resolves to its backing indices.
+    const currentSettings = await retryTransientEsErrors(
+      () => esClient.indices.getSettings({ index, flat_settings: true }),
+      { logger }
+    );
+    const { isSatisfied, effectiveLimit } = evaluateTotalFieldsLimit(
+      Object.values(currentSettings ?? {}).map((indexState) => indexState.settings),
+      totalFieldsLimit
+    );
+
+    if (isSatisfied) {
+      logger.debug(
+        `Skipping update of index.mapping.total_fields.limit for ${alias}: the current limit already satisfies ${totalFieldsLimit}`
+      );
+      return;
+    }
+
     await retryTransientEsErrors(
       () =>
         esClient.indices.putSettings({
           index,
-          settings: {
-            'index.mapping.total_fields.limit': totalFieldsLimit,
-            'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
-          },
+          settings: getTotalFieldsLimitSettings(effectiveLimit),
         }),
       { logger }
     );

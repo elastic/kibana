@@ -20,6 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
   const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
 
+  /**
+   * Purpose: Image embeddable smoke test
+   *
+   * Migration: replace with unit image embeddable unit tests
+   */
   describe('image embeddable', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -43,9 +48,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.setFileInputPath(require.resolve('./elastic_logo.png'));
       await testSubjects.clickWhenNotDisabled(`imageEmbeddableEditorSave`);
 
-      await dashboard.waitForRenderComplete();
-      // check that it is added on the dashboard
-      expect(await dashboard.getSharedItemsCount()).to.be('1');
+      // wait until the new panel registers before asserting, otherwise the count can be read one tick too early
+      await retry.try(async () => {
+        await dashboard.waitForRenderComplete();
+        expect(await dashboard.getSharedItemsCount()).to.be('1');
+      });
       const panel = (await dashboard.getDashboardPanels())[0];
       const img = await panel.findByCssSelector('img.euiImage');
       const imgSrc = await img.getAttribute('src');

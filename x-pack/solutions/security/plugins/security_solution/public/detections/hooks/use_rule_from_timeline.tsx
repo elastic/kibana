@@ -7,7 +7,6 @@
 
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import type { EqlOptions } from '@kbn/timelines-plugin/common';
 import { PageScope } from '../../data_view_manager/constants';
@@ -17,7 +16,6 @@ import { convertKueryToElasticSearchQuery } from '../../common/lib/kuery';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { TimelineModel } from '../..';
 import type { FieldValueQueryBar } from '../../detection_engine/rule_creation_ui/components/query_bar_field';
-import { sourcererActions } from '../../sourcerer/store';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
 import { useGetInitialUrlParamValue } from '../../common/utils/global_query_string/helpers';
 import { buildGlobalQuery } from '../../timelines/components/timeline/helpers';
@@ -44,7 +42,6 @@ export type SetRuleQuery = ({
 }) => void;
 
 export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimeline => {
-  const dispatch = useDispatch();
   const { addError } = useAppToasts();
 
   const getInitialUrlParamValue = useGetInitialUrlParamValue<string>(RULE_FROM_TIMELINE_URL_PARAM);
@@ -55,9 +52,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const queryTimelineById = useQueryTimelineById();
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const selectDataView = useSelectDataView();
 
   const dataViewId = dataView?.id ?? '';
@@ -86,16 +83,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
       setSelectedTimeline(timeline);
 
       if (timeline.dataViewId !== dataViewId && !isEmpty(timeline.indexNames)) {
-        // let sourcerer manage the selected browser fields by setting timeline scope to the selected timeline data view
-        // sourcerer handles the logic of if the fields have been fetched or need to be fetched
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: PageScope.timeline,
-            selectedDataViewId: timeline.dataViewId,
-            selectedPatterns: timeline.indexNames,
-          })
-        );
-
+        // let the data view manager handle the selected browser fields by setting timeline scope to the selected timeline data view
         selectDataView({
           scope: PageScope.timeline,
           id: timeline.dataViewId,
@@ -103,7 +91,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
         });
       }
     },
-    [dataViewId, dispatch, selectDataView]
+    [dataViewId, selectDataView]
   );
 
   const getTimelineById = useCallback(
@@ -181,14 +169,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     isEql.current = false;
     // reset timeline data view once complete
     if (originalDataView.dataViewId !== dataViewId) {
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: PageScope.timeline,
-          selectedDataViewId: originalDataView.dataViewId,
-          selectedPatterns: originalDataView.selectedPatterns,
-        })
-      );
-
       selectDataView({
         scope: PageScope.timeline,
         id: originalDataView.dataViewId,
@@ -198,7 +178,6 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   }, [
     addError,
     dataViewId,
-    dispatch,
     originalDataView.dataViewId,
     originalDataView.selectedPatterns,
     selectDataView,

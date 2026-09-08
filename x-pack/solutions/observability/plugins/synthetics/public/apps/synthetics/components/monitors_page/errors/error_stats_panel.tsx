@@ -128,7 +128,7 @@ const LocationBadges = ({
       {visible.map((loc) => (
         <EuiFlexItem key={loc.location} grow={false}>
           <EuiToolTip content={`${loc.count} ${ERRORS_IN_LABEL} ${loc.location}`}>
-            <EuiBadge color={loc.count === 0 ? 'success' : 'danger'}>
+            <EuiBadge tabIndex={0} color={loc.count === 0 ? 'success' : 'danger'}>
               {loc.location}: {loc.count}
             </EuiBadge>
           </EuiToolTip>
@@ -137,7 +137,7 @@ const LocationBadges = ({
       {overflow.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={overflow.map((loc) => `${loc.location}: ${loc.count}`).join(', ')}>
-            <EuiBadge color="hollow">
+            <EuiBadge tabIndex={0} color="hollow">
               +{overflow.length}{' '}
               {i18n.translate('xpack.synthetics.locationBadges.moreBadgeLabel', {
                 defaultMessage: 'more',

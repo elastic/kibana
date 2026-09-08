@@ -5,36 +5,51 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
-import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
-import { useRuleFormMeta } from '../contexts';
+import { useRuleFormMeta, useRuleFormServices } from '../contexts';
+import { useFetchRuleTags } from '../hooks/use_fetch_rule_tags';
+
+export const validateTags = (value?: string[]): true | string => {
+  if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
+    return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
+      defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
+      values: { maxLength: MAX_TAG_LENGTH },
+    });
+  }
+  if (value && value.length > MAX_TAGS) {
+    return i18n.translate('xpack.alertingV2.ruleForm.tooManyTagsError', {
+      defaultMessage: 'You can add up to {maxTags} tags.',
+      values: { maxTags: MAX_TAGS },
+    });
+  }
+  return true;
+};
 
 export const TagsField = () => {
   const { control } = useFormContext<FormValues>();
   const { layout } = useRuleFormMeta();
+  const { http } = useRuleFormServices();
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(searchQuery, 200);
+  const { data: existingTags, isLoading } = useFetchRuleTags({
+    http,
+    search: debouncedQuery,
+  });
+  const tagOptions = (existingTags ?? []).map((tag: string) => ({ label: tag }));
 
   return (
     <Controller
       name="metadata.tags"
       control={control}
-      rules={{
-        validate: (value) => {
-          if (value?.some((tag) => tag.length > MAX_TAG_LENGTH)) {
-            return i18n.translate('xpack.alertingV2.ruleForm.tagTooLongError', {
-              defaultMessage: 'Each tag must be no longer than {maxLength} characters.',
-              values: { maxLength: MAX_TAG_LENGTH },
-            });
-          }
-          return true;
-        },
-      }}
+      rules={{ validate: validateTags }}
       render={({ field, fieldState: { error } }) => {
         const selectedOptions = (field.value ?? []).map((val) => ({ label: val }));
-        const options = selectedOptions;
 
         return (
           <EuiFormRow
@@ -49,11 +64,25 @@ export const TagsField = () => {
             fullWidth
           >
             <EuiComboBox
-              options={options}
+              aria-label={i18n.translate('xpack.alertingV2.ruleForm.tagsAriaLabel', {
+                defaultMessage: 'Tags',
+              })}
+              placeholder={i18n.translate('xpack.alertingV2.ruleForm.tagsPlaceholder', {
+                defaultMessage: 'Add tags to organize and filter rules',
+              })}
+              data-test-subj="ruleTagsInput"
+              async
+              isLoading={isLoading}
+              options={tagOptions}
               selectedOptions={selectedOptions}
+              onSearchChange={setSearchQuery}
+              onBlur={field.onBlur}
               onChange={(selected) => field.onChange(selected.map(({ label }) => label))}
               onCreateOption={(searchValue) => {
-                field.onChange([...(field.value ?? []), searchValue]);
+                const trimmed = searchValue.trim();
+                if (trimmed.length > 0 && !(field.value ?? []).includes(trimmed)) {
+                  field.onChange([...(field.value ?? []), trimmed]);
+                }
               }}
               isClearable={true}
               isInvalid={!!error}

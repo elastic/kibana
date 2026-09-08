@@ -6,8 +6,9 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiIcon, EuiLoadingSpinner, isColorDark, useEuiTheme } from '@elastic/eui';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
 interface Props {
@@ -21,9 +22,12 @@ export const Loading: FC<Props> = ({
   text = '',
   backgroundColor = '#000000',
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const loadingStyles = useMemo(() => css({ color: euiTheme.colors.lightShade }), [euiTheme]);
+
   if (animated) {
     return (
-      <div className="canvasLoading">
+      <div className="canvasLoading" css={loadingStyles}>
         {text && (
           <span>
             {text}
@@ -43,7 +47,7 @@ export const Loading: FC<Props> = ({
   }
 
   return (
-    <div className="canvasLoading">
+    <div className="canvasLoading" css={loadingStyles}>
       {text && (
         <span>
           {text}

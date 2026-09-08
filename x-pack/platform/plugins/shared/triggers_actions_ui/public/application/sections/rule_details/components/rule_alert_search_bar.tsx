@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import type { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared/src/alert_filter_controls/types';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import {
   RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
@@ -21,10 +22,19 @@ import {
 
 interface RuleAlertSearchBarProps {
   ruleTypeId: string;
+  filterControls?: Filter[];
+  onFilterControlsChange: (filterControls: Filter[]) => void;
+  onControlApiAvailable: (controlGroupHandler: FilterGroupHandler | undefined) => void;
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
 }
 
-export const RuleAlertSearchBar = ({ ruleTypeId, onEsQueryChange }: RuleAlertSearchBarProps) => {
+export const RuleAlertSearchBar = ({
+  ruleTypeId,
+  filterControls,
+  onFilterControlsChange,
+  onControlApiAvailable,
+  onEsQueryChange,
+}: RuleAlertSearchBarProps) => {
   return (
     <Provider value={alertSearchBarStateContainer}>
       <EuiFlexGroup
@@ -42,6 +52,9 @@ export const RuleAlertSearchBar = ({ ruleTypeId, onEsQueryChange }: RuleAlertSea
             showSubmitButton
             urlStorageKey={RULE_DETAILS_ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY}
             filterControlsStorageKey={RULE_DETAILS_FILTER_CONTROLS_STORAGE_KEY}
+            filterControls={filterControls}
+            onFilterControlsChange={onFilterControlsChange}
+            onControlApiAvailable={onControlApiAvailable}
             onEsQueryChange={onEsQueryChange}
             defaultFilterControls={RULE_DETAILS_FILTER_CONTROLS}
           />

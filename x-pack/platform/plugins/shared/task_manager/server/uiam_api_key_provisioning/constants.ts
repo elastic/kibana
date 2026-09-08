@@ -20,7 +20,7 @@ export const TASK_TIMEOUT = '5m';
  * Lower bound for `task.runAt` in the UIAM provisioning fetch query (Elasticsearch date math).
  * Keeps eligible tasks from being claimed for execution imminently; evaluated as `now` on the cluster.
  */
-export const UIAM_PROVISIONING_FETCH_RUN_AT_GT = 'now+30s';
+export const UIAM_PROVISIONING_FETCH_RUN_AT_GT = 'now+20s';
 /** When there are more tasks to convert, run again after this many ms (10m) to process the next batch. */
 export const RUN_AT_INTERVAL_MS = 600_000;
 

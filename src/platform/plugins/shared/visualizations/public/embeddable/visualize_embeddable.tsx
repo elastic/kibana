@@ -11,10 +11,10 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings, initializeStateApi } from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
@@ -29,13 +29,12 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
-  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
   type ProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { BehaviorSubject, map, merge, skip, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -98,6 +97,23 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       initialProjectRoutingOverrides
     );
 
+    const usesEsql$ = new BehaviorSubject<boolean>(
+      initialVisInstance.type.usesEsql?.(initialVisInstance.params) ?? false
+    );
+    const query$ = new BehaviorSubject<AggregateQuery | undefined>(
+      initialVisInstance.type.getEsqlQuery?.(initialVisInstance.params)
+    );
+
+    const getUsedDataViews = async (visInstance: Vis) => {
+      if (visInstance.type.getUsedIndexPattern) {
+        return visInstance.type.getUsedIndexPattern(visInstance.params);
+      }
+      return visInstance.data.indexPattern ? [visInstance.data.indexPattern] : [];
+    };
+    const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
+      await getUsedDataViews(initialVisInstance)
+    );
+
     // Track UI state
     const onUiStateChange = () => serializedVis$.next(vis$.getValue().serialize());
 
@@ -117,6 +133,27 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             if (!isEqual(projectRoutingOverrides$.getValue(), newOverrides)) {
               projectRoutingOverrides$.next(newOverrides);
             }
+          }
+
+          const usesEsql = vis.type.usesEsql?.(vis.params) ?? false;
+          if (usesEsql$.getValue() !== usesEsql) {
+            usesEsql$.next(usesEsql);
+          }
+
+          const nextQuery = vis.type.getEsqlQuery?.(vis.params);
+          if (!isEqual(query$.getValue(), nextQuery)) {
+            query$.next(nextQuery);
+          }
+
+          try {
+            const nextDataViews = await getUsedDataViews(vis);
+            const currentDataViewIds = (dataViews$.getValue() ?? []).map(({ id }) => id);
+            const nextDataViewIds = nextDataViews.map(({ id }) => id);
+            if (!isEqual(currentDataViewIds, nextDataViewIds)) {
+              dataViews$.next(nextDataViews);
+            }
+          } catch {
+            // keep the previously resolved data views if resolution fails
           }
 
           const { params, abortController } = await getExpressionParams();
@@ -158,16 +195,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       : undefined;
 
     const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
-
-    // Track data views
-    let initialDataViews: DataView[] | undefined = [];
-    if (initialVisInstance.data.indexPattern)
-      initialDataViews = [initialVisInstance.data.indexPattern];
-    if (initialVisInstance.type.getUsedIndexPattern) {
-      initialDataViews = await initialVisInstance.type.getUsedIndexPattern(
-        initialVisInstance.params
-      );
-    }
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
@@ -254,9 +281,13 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       ...stateApi,
       defaultTitle$,
       dataLoading$,
-      dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      dataViews$,
       projectRoutingOverrides$,
+      usesEsql$,
+      // `undefined` until the vis type reports an ES|QL query; `apiPublishesESQLQuery` is the runtime check.
+      query$: query$ as VisualizeApi['query$'],
       rendered$: hasRendered$,
+      renderCount$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
         ACTION_CONVERT_TO_LENS,
@@ -302,6 +333,12 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           titleManager.api.setTitle(visUpdates.title);
         }
       },
+      cancelRequests: () => {
+        const abortController = expressionAbortController$.getValue();
+        if (abortController) {
+          abortController.abort();
+        }
+      },
       openInspector: () => {
         const adapters = inspectorAdapters$.getValue();
         if (!adapters) return;
@@ -344,6 +381,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           const projectRouting = apiPublishesProjectRouting(parentApi)
             ? data.projectRouting
             : undefined;
+          const isApproximate = data.isApproximate;
           const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
           searchSessionId$.next(searchSessionId);
           const settings = apiPublishesSettings(parentApi)
@@ -380,6 +418,8 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             return await getExpressionRendererProps({
               unifiedSearch,
               projectRouting,
+              isApproximate,
+              esqlVariables: data.esqlVariables,
               vis: vis$.getValue(),
               settings,
               disableTriggers,
@@ -470,21 +510,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
-        const renderCount = useStateFromPublishingSubject(renderCount$);
-        const hasRendered = useStateFromPublishingSubject(hasRendered$);
-        const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
-          api.hideTitle$,
-          api.title$,
-          api.defaultTitle$
-        );
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
         const errorTextStyle = useErrorTextStyle();
-
-        const dataTitle = useMemo(() => {
-          if (hideTitle) return '';
-          return title ?? defaultTitle ?? '';
-        }, [hideTitle, title, defaultTitle]);
 
         useEffect(() => {
           return () => {
@@ -494,22 +522,11 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
           };
         }, []);
 
-        useEffect(() => {
-          if (hasRendered && domNode.current) {
-            dispatchRenderComplete(domNode.current);
-          }
-        }, [hasRendered]);
-
         return (
           <div
             css={{ width: '100%', height: '100%' }}
             ref={domNode}
             data-test-subj="visualizationLoader"
-            data-rendering-count={renderCount /* Used for functional tests */}
-            data-render-complete={hasRendered}
-            data-title={dataTitle}
-            data-description={api.description$?.getValue() ?? ''}
-            data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">

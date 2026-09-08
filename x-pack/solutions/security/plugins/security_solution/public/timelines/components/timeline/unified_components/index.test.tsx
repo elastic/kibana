@@ -12,7 +12,10 @@ import { UnifiedTimeline } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { useTimelineEvents } from '../../../containers';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
+import {
+  mockBrowserFieldsWithId,
+  mockDataViewSpec,
+} from '../../../../data_view_manager/mocks/timeline_data_view';
 import {
   createSecuritySolutionStorageMock,
   mockTimelineData,
@@ -23,7 +26,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { StartServices } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { timelineActions } from '../../../store';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
@@ -43,10 +46,6 @@ jest.mock('../../../containers/details');
 
 jest.mock('../../fields_browser', () => ({
   useFieldBrowserOptions: jest.fn(),
-}));
-
-jest.mock('../../../../sourcerer/containers/use_signal_helpers', () => ({
-  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
 jest.mock('../../../../common/lib/kuery');
@@ -85,7 +84,7 @@ const SPECIAL_TEST_TIMEOUT = 90000;
 const localMockedTimelineData = structuredClone(mockTimelineData);
 
 const mockDataView = new DataView({
-  spec: mockSourcererScope.sourcererDataView,
+  spec: mockDataViewSpec,
   fieldFormats: fieldFormatsMock,
 });
 
@@ -94,7 +93,7 @@ const TestComponent = (
 ) => {
   const { show, ...restProps } = props;
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
-    columns: getColumnHeaders(columnsToDisplay, mockSourcererScope.browserFields),
+    columns: getColumnHeaders(columnsToDisplay, mockBrowserFieldsWithId),
     activeTab: TimelineTabs.query,
     dataView: mockDataView,
     rowRenderers: [],

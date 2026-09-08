@@ -8,11 +8,14 @@
 import { useCallback, useMemo } from 'react';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentId, useConversation } from './use_conversation';
 import { useConnectorSelection } from './chat/use_connector_selection';
 import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
+import { useNavigation } from './use_navigation';
+import { appPaths } from '../utils/app_paths';
 
 /**
  * Per-conversation scoped slice of the streaming state machine.
@@ -33,8 +36,24 @@ export const useConversationStream = () => {
   const conversationId = useConversationId();
   const agentId = useAgentId();
   const { conversation } = useConversation();
-  const { attachments, resetAttachments, browserApiTools } = useConversationContext();
+  const { attachments, resetAttachments, browserApiTools, isEmbeddedContext } =
+    useConversationContext();
   const { selectedConnector: connectorId } = useConnectorSelection();
+  const { navigateToAgentBuilderUrl } = useNavigation();
+
+  const resetToNewConversation = useCallback(
+    (message: string, restoredAttachments?: ConversationAttachment[]) => {
+      if (isEmbeddedContext || !agentId) {
+        return;
+      }
+      navigateToAgentBuilderUrl(
+        appPaths.agent.conversations.new({ agentId }),
+        {},
+        { initialMessage: message, autoSendInitialMessage: false, attachments: restoredAttachments }
+      );
+    },
+    [isEmbeddedContext, agentId, navigateToAgentBuilderUrl]
+  );
 
   const {
     activeStreams,
@@ -77,6 +96,8 @@ export const useConversationStream = () => {
         conversationAttachments: conversation?.attachments,
         resetAttachments,
         browserApiTools,
+        onResetToNewConversation:
+          !isEmbeddedContext && agentId ? resetToNewConversation : undefined,
       });
     },
     [
@@ -87,6 +108,8 @@ export const useConversationStream = () => {
       conversation?.attachments,
       resetAttachments,
       browserApiTools,
+      isEmbeddedContext,
+      resetToNewConversation,
     ]
   );
 

@@ -36,8 +36,22 @@ export const expectedCompleteUnitedIndexQuery = {
               },
             },
             {
-              terms: {
-                'united.agent.policy_id': ['test-endpoint-policy-id'],
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  {
+                    terms: {
+                      'united.agent.policy_id': ['test-endpoint-policy-id'],
+                    },
+                  },
+                  {
+                    wildcard: {
+                      'united.agent.policy_id': {
+                        value: 'test-endpoint-policy-id#*',
+                      },
+                    },
+                  },
+                ],
               },
             },
           ],

@@ -23,7 +23,7 @@ export const ChatHeader = () => {
           <EuiFlexItem>
             <EuiTitle size="l">
               <h1>
-                {i18n.translate('xpack.search.gettingStarted.chatPage.title', {
+                {i18n.translate('xpack.searchGettingStarted.chatPage.title', {
                   defaultMessage: 'Bring your data and start building your next search experience.',
                 })}
               </h1>

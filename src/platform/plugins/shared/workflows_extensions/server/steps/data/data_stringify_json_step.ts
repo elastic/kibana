@@ -14,7 +14,7 @@ export const dataStringifyJsonStepDefinition = createServerStepDefinition({
   ...dataStringifyJsonStepCommonDefinition,
   handler: async (context) => {
     try {
-      const source = context.contextManager.renderInputTemplate(context.config.source);
+      const source = context.config.source;
       const { pretty = false } = context.input;
 
       const jsonString = pretty ? JSON.stringify(source, null, 2) : JSON.stringify(source);

@@ -7,13 +7,15 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
+import type { FilesStart } from '@kbn/files-plugin/server';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
-import { createVisualizationAttachmentType } from './visualization';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
+import { createConnectorSetupAttachmentType } from './connector_setup';
 import { createSkillAttachmentType } from './skill';
+import { createImageAttachmentType } from './image';
 import type {
   AgentBuilderPlatformPluginStart,
   PluginSetupDependencies,
@@ -29,14 +31,20 @@ export const registerAttachmentTypes = ({
 }) => {
   const { agentBuilder } = setupDeps;
 
+  const getFilesPlugin = async (): Promise<FilesStart> => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.files;
+  };
+
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
-    createVisualizationAttachmentType(),
     createGraphAttachmentType(),
     createConnectorAttachmentType(),
+    createConnectorSetupAttachmentType(),
     createSkillAttachmentType(),
+    createImageAttachmentType({ getFilesPlugin }),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

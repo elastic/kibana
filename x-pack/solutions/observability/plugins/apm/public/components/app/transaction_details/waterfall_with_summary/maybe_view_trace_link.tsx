@@ -9,13 +9,13 @@ import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
-import { getTraceParentChildrenMap } from '../../../shared/trace_waterfall/use_trace_waterfall';
 import {
   TRACE_WATERFALL_EBT_CLICK_ACTIONS,
   TRACE_WATERFALL_EBT_ELEMENTS,
-} from '../../../shared/trace_waterfall/ebt_constants';
+  getTraceParentChildrenMap,
+} from '@kbn/apm-ui-shared';
+import type { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { TraceItem } from '../../../../../common/waterfall/unified_trace_item';
 
 function FullTraceButton({
   isLoading,

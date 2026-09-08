@@ -116,6 +116,56 @@ export const runFieldsAndVariablesValidationSuite = (setup: Setup) => {
     });
   });
 
+  describe('nested quoted expressions', () => {
+    const NESTING_LEVELS = 4;
+    const NESTED_DEPTHS = Array(NESTING_LEVELS)
+      .fill(0)
+      .map((_, i) => i + 1);
+
+    function getTicks(amount: number) {
+      return Array(amount).fill('`').join('');
+    }
+
+    /**
+     * Given an initial quoted expression, build a new quoted expression
+     * that appends as many +1 to the previous one based on the nesting level
+     * i.e. given the expression `round(...) + 1` returns
+     * ```round(...) + 1`` + 1` (for nesting 1)
+     * ```````round(...) + 1```` + 1`` + 1` (for nesting 2)
+     *  etc...
+     * Note how backticks double for each level + wrapping quotes
+     * The general rule follows an exponential curve given a nesting N:
+     * (`){ (2^N)-1 } ticks expression (`){ 2^N-1 } +1 (`){ 2^N-2 } +1 ... +1
+     *
+     * Mind that nesting arg here is equivalent to N-1
+     */
+    function buildNestedExpression(expr: string, nesting: number) {
+      const openingTicks = getTicks(Math.pow(2, nesting + 1) - 1);
+      const firstClosingBatch = getTicks(Math.pow(2, nesting));
+      const additionalPlusOnesWithTicks = Array(nesting)
+        .fill(' + 1')
+        .reduce((acc: string, plusOneAppended: string, i: number) => {
+          // workout how many ticks to add: 2^N-i
+          const ticks = getTicks(Math.pow(2, nesting - 1 - i));
+          return `${acc}${plusOneAppended}${ticks}`;
+        }, '');
+      return `${openingTicks}${expr}${firstClosingBatch}${additionalPlusOnesWithTicks}`;
+    }
+
+    it.each(NESTED_DEPTHS)('handles nesting level %i without errors', async (nesting) => {
+      const { expectErrors } = await setup();
+      // start with a quotable expression
+      const expr = 'round(doubleField) + 1';
+      const startingQuery = `from a_index | eval ${expr}`;
+      // now pipe for each nesting level a new eval command that appends a +1 to the previous quoted expression
+      const finalQuery = `${startingQuery} | ${Array(nesting)
+        .fill('')
+        .map((_, i) => `eval ${buildNestedExpression(expr, i)} + 1`)
+        .join(' | ')} | keep ${buildNestedExpression(expr, nesting)}`;
+      await expectErrors(finalQuery, []);
+    });
+  });
+
   describe('user-defined column support', () => {
     describe('user-defined column data type detection', () => {
       beforeAll(() => {

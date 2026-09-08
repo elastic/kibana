@@ -133,13 +133,17 @@ EOF
     echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
     KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
-    # Validate config shape (safe; does not print secrets)
-    node x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
+    #don't fetch the validator; eval steps run on a full checkout.
+    kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"
+    if [[ -f "$kbn_evals_validator" ]]; then
+      node "$kbn_evals_validator" --stdin <<<"$KBN_EVALS_CONFIG_JSON" >/dev/null
+    fi
 
     # Eval suites require this for the LLM-as-a-judge connector selection
-    export EVALUATION_CONNECTOR_ID="${EVALUATION_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
+    export EVAL_CONNECTOR_ID="${EVAL_CONNECTOR_ID:-"$(jq -r '.evaluationConnectorId // empty' <<<"$KBN_EVALS_CONFIG_JSON")"}"
 
-    # Export the vault config so eval-owned scripts can extract LiteLLM / connector
+    # Export the vault config so eval-owned scripts can extract OpenRouter / connector
     # settings without needing vault access themselves.
     # Connector generation happens in .buildkite/scripts/steps/evals/setup_connectors.sh.
     export KBN_EVALS_CONFIG_B64
@@ -156,10 +160,10 @@ EOF
     fi
 
     # Optional: Remote Kibana for managed dataset operations (golden cluster)
-    EVALUATIONS_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
-    if [[ -n "$EVALUATIONS_KBN_URL" ]]; then
-      export EVALUATIONS_KBN_URL
-      export EVALUATIONS_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    EVAL_KBN_URL="$(jq -r '.evaluationsKbn.url // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
+    if [[ -n "$EVAL_KBN_URL" ]]; then
+      export EVAL_KBN_URL
+      export EVAL_KBN_API_KEY="$(jq -r '.evaluationsKbn.apiKey // empty' <<<"$KBN_EVALS_CONFIG_JSON")"
     fi
 
     # Optional: GCS service account credentials for snapshot restoration (e.g. AI Insights)

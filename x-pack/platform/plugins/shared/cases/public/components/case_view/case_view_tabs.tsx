@@ -26,7 +26,6 @@ import { useAttachmentsTabClickedEBT } from '../../analytics/use_attachments_tab
 export interface CaseViewTabsProps {
   caseData: CaseUI;
   activeTab: CASE_VIEW_PAGE_TABS;
-  searchTerm?: string;
 }
 
 interface Tab {
@@ -35,9 +34,9 @@ interface Tab {
   badge?: ReactNode;
 }
 
-export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab, searchTerm }) => {
+export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab }) => {
   const { navigateToCaseView } = useCaseViewNavigation();
-  const totalAttachments = useCaseAttachmentsTotal({ caseData, searchTerm });
+  const totalAttachments = useCaseAttachmentsTotal({ caseData });
 
   const { euiTheme } = useEuiTheme();
 

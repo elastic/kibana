@@ -10,8 +10,7 @@
 import '@kbn/code-editor-mock/jest_helper';
 import JsonCodeEditor from './json_code_editor';
 import React from 'react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 describe('JsonCodeEditor', () => {
   it('returns the `JsonCodeEditor` component', () => {
@@ -22,11 +21,11 @@ describe('JsonCodeEditor', () => {
       _score: 1,
       _source: { test: 123 },
     };
+    render(<JsonCodeEditor json={value} />);
 
-    renderWithI18n(<JsonCodeEditor json={value} />);
+    const editor = screen.getByLabelText('Read only JSON view of an elasticsearch document');
 
-    const editor = screen.getByTestId('mockedCodeEditor');
-    expect(editor).toBeVisible();
-    expect(editor).toHaveAttribute('data-currentvalue', JSON.stringify(value, null, 2));
+    expect(editor).toHaveValue(JSON.stringify(value, null, 2));
+    expect(screen.queryByText('Copy to clipboard')).not.toBeInTheDocument();
   });
 });

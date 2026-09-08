@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type KeyboardEvent, type ChangeEvent, useRef, useEffect, useCallback } from 'react';
+import React, {
+  type KeyboardEvent,
+  type ChangeEvent,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 
 import { css } from '@emotion/react';
 import {
@@ -33,6 +40,7 @@ import { useSelectTextPartsWithArrowKeys } from './hooks/use_select_text_parts_w
 import { useInputHintText } from './hooks/use_input_hint_text';
 import { inputControlTexts } from './translations';
 import { DateRangeValueDisplay } from './date_range_value_display';
+import { applyPartModification } from './parse/modify_range_parts';
 import type { RangePart } from './parse/parse_range_parts';
 import { parseDisplayParts, parseInputParts } from './parse/parse_range_parts';
 
@@ -51,6 +59,7 @@ export function DateRangePickerControl() {
     compressed,
     collapsed,
     displayText,
+    isRounded,
     displayFullFormattedText,
     displayShortDuration,
     inputRef,
@@ -61,16 +70,22 @@ export function DateRangePickerControl() {
     onInputChange,
     width,
     disabled,
+    readOnly,
     isLoading,
     settings,
     hasAutoRefresh,
     autoRefreshSecondsRemaining,
     toggleAutoRefresh,
     timeRange,
+    transformOptions,
   } = useDateRangePickerContext();
+  const { locale } = transformOptions;
   const { euiTheme } = useEuiTheme();
   const hintText = useInputHintText(text);
   const hintTextPrefix = inputControlTexts.hintTextPrefix;
+  // Kept out of `displayText` so it neither becomes a clickable part nor a saved preset label
+  const roundedSuffix = isRounded ? inputControlTexts.roundedSuffix : null;
+  const accessibleDisplayText = roundedSuffix ? `${displayText} ${roundedSuffix}` : displayText;
 
   const controlRef = useRef<HTMLDivElement>(null);
   const wasEditingRef = useRef(false);
@@ -90,16 +105,11 @@ export function DateRangePickerControl() {
     inputRef,
     isActive: isEditing && !wasClearedRef.current,
     initialSelection: 'none',
-    // TODO this is simply increasing/decreasing integers,
-    // ideally we could make this "smart" so it knows what's being modified e.g. day of the month
-    onModifyPart: ({ text: currentText, part, action }) => {
-      const value = parseInt(part.text, 10);
-      if (isNaN(value)) return undefined;
-      const nextValue = action === 'increase' ? value + 1 : value - 1;
-      // Values below 1 not useful, so return
-      if (nextValue < 1) return undefined;
-      const newText =
-        currentText.substring(0, part.start) + String(nextValue) + currentText.substring(part.end);
+    rangeType: timeRange.type,
+    locale,
+    onModifyPart: ({ text: currentText, part, parts, action }) => {
+      const newText = applyPartModification(currentText, part, action, parts, locale);
+      if (newText === undefined) return undefined;
       setText(newText);
       onInputChange?.(newText);
       return newText;
@@ -115,7 +125,7 @@ export function DateRangePickerControl() {
   };
 
   /** Handle selecting specific parts when focusing the input */
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isEditing || !inputRef.current) return;
 
     const clickedPart = clickedDisplayPartRef.current;
@@ -123,8 +133,10 @@ export function DateRangePickerControl() {
 
     if (!clickedPart) return;
 
-    const inputParts = parseInputParts(text).filter((part) => part.navigable);
-    const displayParts = parseDisplayParts(displayText);
+    const inputParts = parseInputParts(text, timeRange.type, locale).filter(
+      (part) => part.navigable
+    );
+    const displayParts = parseDisplayParts(displayText, locale);
     const target = findCorrespondingInputPart(inputParts, clickedPart, displayParts);
 
     if (target) {
@@ -137,7 +149,7 @@ export function DateRangePickerControl() {
       });
       return () => cancelAnimationFrame(requestId);
     }
-  }, [displayText, inputRef, isEditing, text]);
+  }, [displayText, inputRef, isEditing, text, timeRange.type, locale]);
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value;
@@ -202,11 +214,18 @@ export function DateRangePickerControl() {
   const wrapperRestrictedStyles = css`
     inline-size: var(--kbnDateRangePickerWidthRestricted, 21.25rem);
   `;
+  // `29rem` might seem too large, but it fits a
+  // string like "Jun 15, 2026, 00:00:00 to Jun 17, 2026, 23:59:59"
   const wrapperAutoInputStyles = css`
-    inline-size: var(--kbnDateRangePickerInputWidthAuto, 24rem);
+    inline-size: var(--kbnDateRangePickerInputWidthAuto, 29rem);
   `;
   const tooltipStyles = css`
     max-inline-size: min(58ch, 90vw);
+  `;
+  const roundedSuffixStyles = css`
+    color: ${euiTheme.colors.textSubdued};
+    white-space: nowrap;
+    margin-inline-end: auto;
   `;
   const inputStyles = css`
     &::selection {
@@ -214,18 +233,25 @@ export function DateRangePickerControl() {
       background-color: ${euiTheme.colors.backgroundLightPrimary};
     }
   `;
+  // Temporary until a fix lands in EUI
+  const disabledIconOverrideStyles = css`
+    .euiFormControlLayoutIcons {
+      color: ${euiTheme.colors.textDisabled};
+    }
+  `;
 
   return (
     <div
       ref={controlRef}
       onKeyDown={onControlKeyDown}
-      css={
+      css={[
         width === 'restricted'
           ? wrapperRestrictedStyles
           : width === 'auto' && isEditing
           ? wrapperAutoInputStyles
-          : undefined
-      }
+          : undefined,
+        disabled && disabledIconOverrideStyles,
+      ]}
       data-test-subj="dateRangePickerControlWrapper"
     >
       <EuiFormControlLayout
@@ -233,6 +259,7 @@ export function DateRangePickerControl() {
         compressed={compressed}
         isInvalid={isInvalid}
         isDisabled={disabled}
+        readOnly={readOnly}
         isLoading={isLoading}
         fullWidth={width !== 'auto'}
         clear={isEditing && text !== '' ? { onClick: onInputClear } : undefined}
@@ -260,7 +287,7 @@ export function DateRangePickerControl() {
             controlOnly
             value={text}
             isInvalid={isInvalid}
-            disabled={disabled}
+            disabled={disabled || readOnly}
             fullWidth={width !== 'auto'}
             onChange={handleInputChange}
             onKeyDown={onInputKeyDown}
@@ -288,25 +315,34 @@ export function DateRangePickerControl() {
                   flex-grow: 1;
                   align-items: center;
                   justify-content: space-between;
-                  gap: ${euiTheme.size.s};
+                  gap: ${euiTheme.size.xs};
                   max-inline-size: 100%;
                 }
               `}
               data-test-subj="dateRangePickerControlButton"
               data-date-range={`${timeRange.start} to ${timeRange.end}`}
               buttonRef={buttonRef}
-              aria-label={collapsed ? displayText : undefined}
+              aria-label={collapsed ? accessibleDisplayText : undefined}
               onClick={onButtonClick}
               isInvalid={isInvalid}
-              disabled={disabled}
+              disabled={disabled || readOnly}
               compressed={compressed}
             >
               {!collapsed && (
                 <DateRangeValueDisplay
                   displayText={displayText}
                   onPartClick={handleDisplayPartClick}
-                  disabled={disabled}
+                  disabled={disabled || readOnly}
+                  locale={locale}
                 />
+              )}
+              {!collapsed && roundedSuffix && (
+                <>
+                  {' '}
+                  <span css={roundedSuffixStyles} data-test-subj="dateRangePickerRoundedSuffix">
+                    {roundedSuffix}
+                  </span>
+                </>
               )}
               {!hideBadge && (
                 <EuiBadge data-test-subj="dateRangePickerDurationBadge">

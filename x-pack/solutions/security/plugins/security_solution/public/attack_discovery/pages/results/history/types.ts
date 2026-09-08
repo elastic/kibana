@@ -16,4 +16,5 @@ export interface SettingsOverrideOptions {
   overrideFilter?: Record<string, unknown>;
   overrideSize?: number;
   overrideStart?: string;
+  trigger?: 'manual' | 'save_and_run';
 }

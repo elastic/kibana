@@ -7,7 +7,7 @@
 
 import deepEqual from 'fast-deep-equal';
 import { escapeQuotes } from '@kbn/es-query';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import {

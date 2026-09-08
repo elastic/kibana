@@ -6,39 +6,41 @@
  */
 
 import type {
+  BuilderState,
   ComposeDiscoverMode,
   RuleFormServices,
-  BuilderState,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  SingleStepWorkflowForm,
-  type SingleStepWorkflowFormValue,
-} from '../components/single_step_workflow_form';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { RuleApiResponse } from '../services/rules_api';
+import { useBuilderToEsqlTransition } from './use_builder_to_esql_transition';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
 import { useUpdateRule } from './use_update_rule';
 
-const tryParseBuilderState = (
-  type: string,
-  query: string,
-  recoveryQuery?: string
-): BuilderState | null => {
-  const definition = RULE_BUILDER_REGISTRY[type];
-  if (definition?.parseState) {
-    return definition.parseState(query, recoveryQuery);
-  }
-  return null;
-};
+const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
+  ...template.rule,
+  id: '',
+  enabled: false,
+  created_by: null,
+  created_at: new Date().toISOString(),
+  updated_by: null,
+  updated_at: new Date().toISOString(),
+  metadata: {
+    ...template.rule.metadata,
+    version: 1,
+  },
+});
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
@@ -50,10 +52,18 @@ export const useComposeDiscoverFlyout = ({
   const http = useService(CoreStart('http'));
   const notifications = useService(CoreStart('notifications'));
   const application = useService(CoreStart('application'));
+  const uiSettings = useService(CoreStart('uiSettings'));
+  const featureFlags = useService(CoreStart('featureFlags'));
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
   const uiActions = useService(PluginStart('uiActions')) as UiActionsStart;
+  // `dashboard` is an optional plugin dependency; resolve it leniently so the
+  // flyout still mounts in environments where the dashboard plugin is disabled.
+  const dashboard = useService(PluginStart('dashboard'), { optional: true }) as
+    | DashboardStart
+    | undefined;
+  const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
@@ -61,28 +71,56 @@ export const useComposeDiscoverFlyout = ({
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+
+  const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+    setTargetRule(rule);
+    setFlyoutMode(mode);
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+    setFlyoutOpen(true);
+  }, []);
+
+  const handleConfirmSwitch = useCallback(() => {
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
+  }, []);
+
+  const { resolveBuilderMode, requestEsqlFallback, requestSwitchToEsql, confirmationModal } =
+    useBuilderToEsqlTransition({
+      onConfirmEsqlFallback: openInEsql,
+      onConfirmSwitch: handleConfirmSwitch,
+    });
+
   const createRuleMutation = useCreateRule();
   const setupNotificationsMutation = useSetupRuleNotifications();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo<RuleFormServices<SingleStepWorkflowFormValue>>(
+  const ruleFormServices = useMemo<RuleFormServices>(
     () => ({
       http,
       data,
       dataViews,
       notifications,
       application,
+      uiSettings,
+      featureFlags,
       lens,
-      workflowForm: {
-        Component: SingleStepWorkflowForm,
-        defaultValue: () => ({ mode: 'existing', workflowId: null }),
-        isValid: (value: SingleStepWorkflowFormValue) => {
-          if (value.mode === 'existing') return Boolean(value.workflowId);
-          return Boolean(value.typeId) && value.connectorId !== null && value.params.trim() !== '';
-        },
-      },
       uiActions,
+      dashboard,
+      cps,
     }),
-    [http, data, dataViews, notifications, application, lens, uiActions]
+    [
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      uiSettings,
+      featureFlags,
+      lens,
+      uiActions,
+      dashboard,
+      cps,
+    ]
   );
 
   const closeFlyout = useCallback(() => {
@@ -135,39 +173,20 @@ export const useComposeDiscoverFlyout = ({
 
   const openRuleFlyout = useCallback(
     (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
-      setTargetRule(rule);
-      setFlyoutMode(mode);
-
-      if (rule.metadata.builder_type) {
-        const query = rule.evaluation?.query?.base;
-        const recoveryQuery =
-          rule.recovery_policy?.type === 'query' ? rule.recovery_policy.query?.base : undefined;
-        const state = query
-          ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
-          : null;
-        if (state && typeof state === 'object') {
-          const stateWithTimeField = { ...state, timeField: rule.time_field ?? '@timestamp' };
-          setBuilderType(rule.metadata.builder_type);
-          setInitialBuilderState(stateWithTimeField);
-          setFlyoutOpen(true);
-          return;
-        }
-        notifications.toasts.addInfo({
-          title: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.esqlFallbackTitle', {
-            defaultMessage: 'Rule opened in ES|QL mode',
-          }),
-          text: i18n.translate('xpack.alertingV2.useComposeDiscoverFlyout.esqlFallbackText', {
-            defaultMessage:
-              'This rule was created with a builder but its query has been modified. It can only be edited as ES|QL.',
-          }),
-        });
+      const result = resolveBuilderMode(rule);
+      if (result === 'esql') {
+        openInEsql(rule, mode);
+      } else if (result === 'esql-fallback') {
+        requestEsqlFallback(rule, mode);
+      } else {
+        setTargetRule(rule);
+        setFlyoutMode(mode);
+        setBuilderType(result.builderType);
+        setInitialBuilderState(result.initialBuilderState);
+        setFlyoutOpen(true);
       }
-
-      setBuilderType(null);
-      setInitialBuilderState(undefined);
-      setFlyoutOpen(true);
     },
-    [notifications.toasts]
+    [resolveBuilderMode, openInEsql, requestEsqlFallback]
   );
 
   const openEditFlyout = useCallback(
@@ -180,8 +199,25 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
+  const openCreateFromTemplateFlyout = useCallback(
+    (template: RuleTemplateResponse) => {
+      const syntheticRule = templateToSyntheticRule(template);
+      const result = resolveBuilderMode(syntheticRule);
+      if (result !== 'esql' && result !== 'esql-fallback') {
+        setTargetRule(syntheticRule);
+        setFlyoutMode('create');
+        setBuilderType(result.builderType);
+        setInitialBuilderState(result.initialBuilderState);
+        setFlyoutOpen(true);
+      } else {
+        openInEsql(syntheticRule, 'create');
+      }
+    },
+    [resolveBuilderMode, openInEsql]
+  );
+
   const flyout = flyoutOpen ? (
-    <ComposeDiscoverFlyout<SingleStepWorkflowFormValue>
+    <ComposeDiscoverFlyout
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
@@ -190,25 +226,38 @@ export const useComposeDiscoverFlyout = ({
       services={ruleFormServices}
       builderType={builderType ?? undefined}
       initialBuilderState={initialBuilderState}
+      onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload, ruleNotifications) =>
-        createRuleMutation.mutate(payload, {
-          onSuccess: (rule) => {
-            if (ruleNotifications) {
-              setupNotificationsMutation.mutate(
-                { rule, workflow: ruleNotifications.workflow },
-                { onSuccess: closeAndRedirect, onError: closeAndRedirect }
-              );
-            } else {
-              closeAndRedirect();
-            }
-          },
-        })
+        createRuleMutation.mutate(
+          { payload },
+          {
+            onSuccess: (rule) => {
+              const actions = ruleNotifications?.workflows ?? [];
+              if (actions.length > 0) {
+                setupNotificationsMutation.mutate(
+                  { rule, actions },
+                  { onSuccess: closeAndRedirect, onError: closeAndRedirect }
+                );
+              } else {
+                closeAndRedirect();
+              }
+            },
+          }
+        )
       }
-      onUpdateRule={(id, payload) =>
+      onUpdateRule={(id, payload, ruleNotifications) =>
         updateRuleMutation.mutate(
           { id, payload },
           {
-            onSuccess: closeFlyout,
+            onSuccess: (rule) => {
+              const actions = ruleNotifications?.workflows ?? [];
+              if (actions.length === 0) {
+                closeFlyout();
+                return;
+              }
+              // Only close the flyout once notification setup also succeeds
+              setupNotificationsMutation.mutate({ rule, actions }, { onSuccess: closeFlyout });
+            },
           }
         )
       }
@@ -222,8 +271,10 @@ export const useComposeDiscoverFlyout = ({
 
   return {
     flyout,
+    confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
   };

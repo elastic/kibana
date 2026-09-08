@@ -92,6 +92,18 @@ export function appendToESQLQuery(baseESQLQuery: string, appendedText: string): 
 }
 
 /**
+ * Maps each field to a clause and joins them with the given separator.
+ * Returns '' when there are no fields so callers can guard with a simple truthy check.
+ */
+export function buildJoinedFilter(
+  fields: string[] | undefined,
+  buildClause: (field: string) => string,
+  separator: 'AND' | 'OR' = 'AND'
+): string {
+  return fields?.map(buildClause).join(` ${separator} `) ?? '';
+}
+
+/**
  * Extracts field name and value from a MATCH function AST node
  */
 export function extractMatchFunctionDetails(matchFunction: ESQLFunction): {

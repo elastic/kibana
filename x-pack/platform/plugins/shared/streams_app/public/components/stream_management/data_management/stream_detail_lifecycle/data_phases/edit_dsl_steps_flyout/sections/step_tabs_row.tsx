@@ -98,18 +98,25 @@ export const StepTabsRow = ({
   }, [dataTestSubj, items, selectedStepIndex, setSelectedStepIndex, tabHasErrors]);
 
   const addButton = (
-    <EuiButtonIcon
-      display="empty"
-      iconType="plus"
-      aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.addStepAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.streams.editDslStepsFlyout.addStepAriaLabel', {
         defaultMessage: 'Add downsampling step',
       })}
-      size="xs"
-      color="text"
-      data-test-subj={`${dataTestSubj}AddTabButton`}
-      onClick={onAddStep}
-      disabled={isAddDisabled}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        display="empty"
+        iconType="plus"
+        aria-label={i18n.translate('xpack.streams.editDslStepsFlyout.addStepAriaLabel', {
+          defaultMessage: 'Add downsampling step',
+        })}
+        size="xs"
+        color="text"
+        data-test-subj={`${dataTestSubj}AddTabButton`}
+        onClick={onAddStep}
+        disabled={isAddDisabled}
+      />
+    </EuiToolTip>
   );
 
   const renderAddButton = () => {

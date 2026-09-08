@@ -15,11 +15,11 @@ import {
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { WorkflowApi } from '@kbn/workflows-ui';
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
 import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
-import { attachmentDataToActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -64,7 +64,7 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const linkedRuleId = data.ruleId ?? extractRuleIdFromMatcher(data.matcher);
+    const linkedRuleId = extractRuleIdFromMatcher(data.matcher);
     if (linkedRuleId) {
       checks.push(
         rulesApi
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowApi, rulesApi, data.destinations, data.ruleId, data.matcher]);
+  }, [workflowApi, rulesApi, data.destinations, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -184,7 +184,7 @@ export const ActionPolicyCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
           defaultMessage: 'View in Policies',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
           application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));

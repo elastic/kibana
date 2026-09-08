@@ -6,7 +6,7 @@
  */
 
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
-import type { ToolRegistry } from '@kbn/agent-builder-server';
+import type { ToolRegistry, AvailabilityContext } from '@kbn/agent-builder-server';
 import {
   type PersistedSkillCreateRequest,
   type PersistedSkillUpdateRequest,
@@ -17,6 +17,21 @@ import {
 } from '@kbn/agent-builder-common';
 import type { SkillRegistryListOptions } from '@kbn/agent-builder-server/runner';
 import type { ReadonlySkillProvider, WritableSkillProvider } from './skill_provider';
+
+const isUiSettingRequirementMet = (
+  uiSettingRequired: string | { key: string; value: unknown },
+  uiSettingValues: ReadonlyMap<string, unknown>
+): boolean => {
+  if (typeof uiSettingRequired === 'string') {
+    return uiSettingValues.get(uiSettingRequired) === true;
+  }
+
+  if (typeof uiSettingRequired === 'object') {
+    return uiSettingValues.get(uiSettingRequired.key) === uiSettingRequired.value;
+  }
+
+  return false;
+};
 
 /**
  * Validates that all provided tool IDs exist in the tool registry
@@ -61,24 +76,56 @@ export const createSkillRegistry = ({
   persistedProvider,
   toolRegistry,
   experimentalFeaturesEnabled,
+  uiSettingValues = new Map(),
+  availabilityContext,
 }: {
   builtinProvider: ReadonlySkillProvider;
   persistedProvider: WritableSkillProvider;
   toolRegistry: ToolRegistry;
   experimentalFeaturesEnabled: boolean;
+  uiSettingValues?: ReadonlyMap<string, unknown>;
+  availabilityContext?: AvailabilityContext;
 }): SkillRegistry => {
-  const isVisible = (skill: InternalSkillDefinition): boolean =>
-    !skill.experimental || experimentalFeaturesEnabled;
+  const isVisible = (skill: InternalSkillDefinition): boolean => {
+    if (skill.experimental && !experimentalFeaturesEnabled) {
+      return false;
+    }
+    if (
+      skill.uiSettingRequired &&
+      !isUiSettingRequirementMet(skill.uiSettingRequired, uiSettingValues)
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  const isAvailable = async (skill: InternalSkillDefinition): Promise<boolean> => {
+    if (!isVisible(skill)) {
+      return false;
+    }
+    if (skill.isAvailable && availabilityContext) {
+      const result = await skill.isAvailable(availabilityContext);
+      return result.status === 'available';
+    }
+    return true;
+  };
+
+  const filterAvailable = async (
+    skills: InternalSkillDefinition[]
+  ): Promise<InternalSkillDefinition[]> => {
+    const checks = await Promise.all(skills.map(isAvailable));
+    return skills.filter((_, i) => checks[i]);
+  };
 
   return {
     async has(skillId) {
       const builtinSkill = await builtinProvider.get(skillId);
       if (builtinSkill) {
-        return isVisible(builtinSkill);
+        return isAvailable(builtinSkill);
       }
       const persistedSkill = await persistedProvider.get(skillId);
       if (persistedSkill) {
-        return isVisible(persistedSkill);
+        return isAvailable(persistedSkill);
       }
       return false;
     },
@@ -86,20 +133,19 @@ export const createSkillRegistry = ({
     async get(skillId) {
       const builtin = await builtinProvider.get(skillId);
       if (builtin) {
-        return isVisible(builtin) ? builtin : undefined;
+        return (await isAvailable(builtin)) ? builtin : undefined;
       }
       const persisted = await persistedProvider.get(skillId);
       if (persisted) {
-        return isVisible(persisted) ? persisted : undefined;
+        return (await isAvailable(persisted)) ? persisted : undefined;
       }
       return undefined;
     },
 
     async bulkGet(ids) {
       const builtinResult = await builtinProvider.bulkGet(ids);
-      // Filter out experimental skills from builtin results
       for (const [id, skill] of builtinResult) {
-        if (!isVisible(skill)) {
+        if (!(await isAvailable(skill))) {
           builtinResult.delete(id);
         }
       }
@@ -109,7 +155,7 @@ export const createSkillRegistry = ({
       }
       const persistedResult = await persistedProvider.bulkGet(remainingIds);
       for (const [id, skill] of persistedResult) {
-        if (isVisible(skill)) {
+        if (await isAvailable(skill)) {
           builtinResult.set(id, skill);
         }
       }
@@ -133,7 +179,7 @@ export const createSkillRegistry = ({
       if (!includePlugins) {
         results = results.filter((skill) => !skill.plugin_id);
       }
-      return results.filter(isVisible);
+      return filterAvailable(results);
     },
 
     async create(params) {

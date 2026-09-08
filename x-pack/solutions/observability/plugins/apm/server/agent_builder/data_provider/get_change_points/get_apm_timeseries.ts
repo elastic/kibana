@@ -7,7 +7,7 @@
 
 import datemath from '@elastic/datemath';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import type { ChangePointType } from '@kbn/es-types/src';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
@@ -33,68 +33,54 @@ export enum ApmTimeseriesType {
   errorEventRate = 'error_event_rate',
 }
 
-export const getApmTimeseriesRt = t.type({
-  stats: t.array(
-    t.intersection([
-      t.type({
-        'service.name': t.string,
-        title: t.string,
-        timeseries: t.union([
-          t.intersection([
-            t.type({
-              name: t.union([
-                t.literal(ApmTimeseriesType.transactionThroughput),
-                t.literal(ApmTimeseriesType.transactionFailureRate),
-              ]),
-            }),
-            t.partial({
-              'transaction.type': t.string,
-              'transaction.name': t.string,
-            }),
-          ]),
-          t.intersection([
-            t.type({
-              name: t.union([
-                t.literal(ApmTimeseriesType.exitSpanThroughput),
-                t.literal(ApmTimeseriesType.exitSpanFailureRate),
-                t.literal(ApmTimeseriesType.exitSpanLatency),
-              ]),
-            }),
-            t.partial({
-              'span.destination.service.resource': t.string,
-            }),
-          ]),
-          t.intersection([
-            t.type({
-              name: t.literal(ApmTimeseriesType.transactionLatency),
-              function: t.union([
-                t.literal(LatencyAggregationType.avg),
-                t.literal(LatencyAggregationType.p95),
-                t.literal(LatencyAggregationType.p99),
-              ]),
-            }),
-            t.partial({
-              'transaction.type': t.string,
-              'transaction.name': t.string,
-            }),
-          ]),
-          t.type({
-            name: t.literal(ApmTimeseriesType.errorEventRate),
-          }),
-        ]),
-      }),
-      t.partial({
-        filter: t.string,
-        offset: t.string,
-        'service.environment': t.string,
-      }),
-    ])
+const timeseriesSchema = z.union([
+  z.object({
+    name: z.union([
+      z.literal(ApmTimeseriesType.transactionThroughput),
+      z.literal(ApmTimeseriesType.transactionFailureRate),
+    ]),
+    'transaction.type': z.string().optional(),
+    'transaction.name': z.string().optional(),
+  }),
+  z.object({
+    name: z.union([
+      z.literal(ApmTimeseriesType.exitSpanThroughput),
+      z.literal(ApmTimeseriesType.exitSpanFailureRate),
+      z.literal(ApmTimeseriesType.exitSpanLatency),
+    ]),
+    'span.destination.service.resource': z.string().optional(),
+  }),
+  z.object({
+    name: z.literal(ApmTimeseriesType.transactionLatency),
+    function: z.union([
+      z.literal(LatencyAggregationType.avg),
+      z.literal(LatencyAggregationType.p95),
+      z.literal(LatencyAggregationType.p99),
+    ]),
+    'transaction.type': z.string().optional(),
+    'transaction.name': z.string().optional(),
+  }),
+  z.object({
+    name: z.literal(ApmTimeseriesType.errorEventRate),
+  }),
+]);
+
+export const getApmTimeseriesRt = z.object({
+  stats: z.array(
+    z.object({
+      'service.name': z.string(),
+      title: z.string(),
+      timeseries: timeseriesSchema,
+      filter: z.string().optional(),
+      offset: z.string().optional(),
+      'service.environment': z.string().optional(),
+    })
   ),
-  start: t.string,
-  end: t.string,
+  start: z.string(),
+  end: z.string(),
 });
 
-type ApmTimeseriesArgs = t.TypeOf<typeof getApmTimeseriesRt>;
+type ApmTimeseriesArgs = z.infer<typeof getApmTimeseriesRt>;
 
 export interface TimeseriesChangePoint {
   change_point?: number | undefined;
@@ -121,7 +107,7 @@ export async function getApmTimeseries({
   arguments: args,
   apmEventClient,
 }: {
-  arguments: t.TypeOf<typeof getApmTimeseriesRt>;
+  arguments: z.infer<typeof getApmTimeseriesRt>;
   apmEventClient: APMEventClient;
 }): Promise<ApmTimeseries[]> {
   const start = datemath.parse(args.start)!.valueOf();

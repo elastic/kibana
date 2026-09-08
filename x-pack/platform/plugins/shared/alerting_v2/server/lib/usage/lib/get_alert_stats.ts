@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { TERMS_SIZE, bucketsToRecord, bucketsToArray } from './constants';
 import type { AlertStatsAggregations, AlertStatsResults } from './types';
 

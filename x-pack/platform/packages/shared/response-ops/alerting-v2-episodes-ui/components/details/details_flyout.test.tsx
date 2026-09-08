@@ -8,12 +8,16 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { RuleStateStatus } from '../../types/rule_state';
 import {
   createMockServices,
   createTestQueryClient,
   createQueryClientWrapper,
 } from '../../hooks/test_utils';
 import { AlertEpisodeDetailsFlyout } from './details_flyout';
+
+jest.mock('../../hooks/use_fetch_rule');
 
 jest.mock('./details_header_section', () => ({
   AlertEpisodeDetailsHeaderSection: () => <div data-test-subj="headerSectionStub" />,
@@ -31,9 +35,17 @@ jest.mock('./runbook_section', () => ({
   AlertEpisodeRunbookSection: () => <div data-test-subj="runbookSectionStub" />,
 }));
 
+const mockUseFetchRule = jest.mocked(useFetchRule);
+
 const mockHttp = httpServiceMock.createStartContract();
 const mockServices = createMockServices({ http: mockHttp });
 const Wrapper = createQueryClientWrapper(createTestQueryClient());
+
+const loadedRuleState = {
+  status: RuleStateStatus.loaded,
+  ruleId: 'rule-1',
+  rule: { id: 'rule-1', metadata: { name: 'Rule A' } },
+} as const;
 
 const baseProps = {
   episodeId: 'ep-1',
@@ -43,11 +55,28 @@ const baseProps = {
 };
 
 describe('AlertEpisodeDetailsFlyout', () => {
-  it('renders header, overview tab body by default, and footer button with the right href', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseFetchRule.mockReturnValue({
+      ruleState: loadedRuleState,
+    } as ReturnType<typeof useFetchRule>);
+  });
+
+  it('renders header and the overview tab body by default', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     expect(screen.getByTestId('headerSectionStub')).toBeInTheDocument();
     expect(screen.getByTestId('overviewSectionStub')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingV2EpisodeFlyoutViewDetailsButton')).toHaveAttribute(
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutCloseIcon')).toBeInTheDocument();
+  });
+
+  it('exposes view details behind the footer take action menu', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.queryByTestId('alertingV2EpisodeTakeAction-viewDetails')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toHaveAttribute(
       'href',
       mockHttp.basePath.prepend('/app/management/alertingV2/episodes/ep-1')
     );
@@ -59,16 +88,27 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
   });
 
-  it('switches to metadata tab', () => {
+  it('switches to metadata tab when the rule is loaded', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabMetadata'));
     expect(screen.getByTestId('metadataSectionStub')).toBeInTheDocument();
   });
 
-  it('switches to runbook tab', () => {
+  it('switches to runbook tab when the rule is loaded', () => {
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
     fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTabRunbook'));
     expect(screen.getByTestId('runbookSectionStub')).toBeInTheDocument();
+  });
+
+  it('hides metadata and runbook tabs when the rule is not loaded', () => {
+    mockUseFetchRule.mockReturnValue({
+      ruleState: { status: RuleStateStatus.not_found, ruleId: 'rule-1' },
+    } as ReturnType<typeof useFetchRule>);
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabMetadata')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingV2EpisodeFlyoutTabRunbook')).not.toBeInTheDocument();
   });
 
   it('calls onClose when the footer close button is clicked', () => {
@@ -78,10 +118,10 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('calls onClose when the top-bar icon button is clicked', () => {
+  it('calls onClose when the header close icon is clicked', () => {
     const onClose = jest.fn();
     render(<AlertEpisodeDetailsFlyout {...baseProps} onClose={onClose} />, { wrapper: Wrapper });
-    fireEvent.click(screen.getByLabelText('Close'));
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutCloseIcon'));
     expect(onClose).toHaveBeenCalled();
   });
 });

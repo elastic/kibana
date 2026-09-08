@@ -210,6 +210,18 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'user_agent') {
+      const targetField = step.to || 'user_agent';
+      return i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.userAgentProcessorDescription',
+        {
+          defaultMessage: 'Extracts user agent info from "{from}" to "{to}"',
+          values: {
+            from: step.from,
+            to: targetField,
+          },
+        }
+      );
     } else if (step.action === 'uri_parts') {
       return i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.uriPartsProcessorDescription',

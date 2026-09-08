@@ -8,27 +8,25 @@
  */
 
 import { formatFailure } from './format_failure';
-import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult } from '../terraform/check_terraform_impact';
+import type { ImpactReportEntry } from './write_impact_report';
 
-const pathRemovedBreaking = (path: string, reason = 'Endpoint removed'): BreakingChange => ({
-  type: 'path_removed',
+const stableEntry = (path: string, reason = 'Endpoint removed'): ImpactReportEntry => ({
   path,
   reason,
+  tier: 'stable',
 });
 
-const methodRemovedBreaking = (
+const techPreviewEntry = (
   path: string,
   method: string,
   reason = 'HTTP method removed'
-): BreakingChange => ({ type: 'method_removed', path, method, reason });
+): ImpactReportEntry => ({ path, method, reason, tier: 'tech_preview' });
 
-const operationBreaking = (
-  path: string,
-  method: string,
-  reason: string,
-  details?: unknown
-): BreakingChange => ({ type: 'operation_breaking', path, method, reason, details });
+const experimentalEntry = (path: string, reason = 'Endpoint removed'): ImpactReportEntry => ({
+  path,
+  reason,
+  tier: 'experimental',
+});
 
 const expectOutputContains = (output: string, ...substrings: string[]) => {
   substrings.forEach((substring) => {
@@ -36,132 +34,64 @@ const expectOutputContains = (output: string, ...substrings: string[]) => {
   });
 };
 
-const expectOutputNotContains = (output: string, ...substrings: string[]) => {
-  substrings.forEach((substring) => {
-    expect(output).not.toContain(substring);
-  });
-};
-
 describe('formatFailure', () => {
-  it('formats a single breaking change', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
-    const output = formatFailure(changes);
+  it('formats a single detected change with its tier', () => {
+    const output = formatFailure([stableEntry('/api/test')]);
 
     expectOutputContains(
       output,
       'API CONTRACT BREAKING CHANGES DETECTED',
-      'Found 1 breaking change(s)',
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
       '1. Endpoint removed',
       'Path: /api/test',
+      'Tier: Stable (GA)',
       'What to do next:'
     );
   });
 
-  it('formats multiple breaking changes', () => {
-    const changes = [
-      pathRemovedBreaking('/api/old'),
-      methodRemovedBreaking('/api/test', 'delete'),
-      operationBreaking('/api/test', 'post', 'requestBody modified', { content: {} }),
-    ];
-    const output = formatFailure(changes);
+  it('orders stable before tech_preview and reports per-tier counts', () => {
+    const output = formatFailure([
+      techPreviewEntry('/api/preview', 'delete'),
+      stableEntry('/api/old'),
+    ]);
 
     expectOutputContains(
       output,
-      'Found 3 breaking change(s)',
-      '1. Endpoint removed',
-      '2. HTTP method removed',
-      '3. requestBody modified',
-      'Method: DELETE',
-      'Method: POST'
+      'Detected 2 breaking change(s) in stable/tech_preview APIs (1 stable, 1 tech_preview)',
+      'Tier: Stable (GA)',
+      'Tier: Technical Preview',
+      'Method: DELETE'
+    );
+    // stable ordered first regardless of input order
+    expect(output.indexOf('/api/old')).toBeLessThan(output.indexOf('/api/preview'));
+  });
+
+  it('lists experimental changes in a non-blocking section and excludes them from the count', () => {
+    const output = formatFailure([stableEntry('/api/old'), experimentalEntry('/api/exp')]);
+
+    expectOutputContains(
+      output,
+      // count reflects only the gating (stable/tech_preview) change
+      'Detected 1 breaking change(s) in stable/tech_preview APIs (1 stable, 0 tech_preview)',
+      'Informational — not blocking merge',
+      'Tier: Experimental',
+      '/api/exp'
     );
   });
 
-  it('includes details when present', () => {
-    const changes = [
-      operationBreaking('/api/test', 'get', 'responses modified', {
-        '200': { description: 'Success' },
-      }),
-    ];
-    const output = formatFailure(changes);
+  it('omits the informational section when there are no experimental changes', () => {
+    const output = formatFailure([stableEntry('/api/old')]);
 
-    expectOutputContains(output, 'Details:', '"200"', '"description": "Success"');
+    expect(output).not.toContain('Informational — not blocking merge');
   });
 
-  it('produces deterministic output for same input', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
+  it('produces deterministic output for the same input', () => {
+    const entries = [stableEntry('/api/test')];
 
-    const output1 = formatFailure(changes);
-    const output2 = formatFailure(changes);
-
-    expect(output1).toEqual(output2);
+    expect(formatFailure(entries)).toEqual(formatFailure(entries));
   });
 
-  it('includes help links', () => {
-    const changes = [pathRemovedBreaking('/api/test')];
-    const output = formatFailure(changes);
-
-    expectOutputContains(output, 'Need help?');
-  });
-
-  describe('terraform impact', () => {
-    it('does not show terraform section when no impact', () => {
-      const changes = [pathRemovedBreaking('/api/test')];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: false,
-        impactedChanges: [],
-      };
-      const output = formatFailure(changes, terraformImpact);
-
-      expectOutputNotContains(output, 'TERRAFORM PROVIDER IMPACT');
-    });
-
-    it('shows terraform section when there is impact', () => {
-      const changes = [pathRemovedBreaking('/api/spaces/space')];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: true,
-        impactedChanges: [
-          {
-            change: changes[0],
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
-          },
-        ],
-      };
-      const output = formatFailure(changes, terraformImpact);
-
-      expectOutputContains(
-        output,
-        'TERRAFORM PROVIDER IMPACT',
-        'elasticstack_kibana_space',
-        '/api/spaces/space',
-        'Owners: @elastic/kibana-security',
-        'Coordinate with @elastic/terraform-provider'
-      );
-    });
-
-    it('shows multiple terraform impacts', () => {
-      const changes = [
-        pathRemovedBreaking('/api/spaces/space'),
-        methodRemovedBreaking('/api/fleet/agent_policies', 'POST'),
-      ];
-      const terraformImpact: TerraformImpactResult = {
-        hasImpact: true,
-        impactedChanges: [
-          {
-            change: changes[0],
-            terraformResource: 'elasticstack_kibana_space',
-            owners: ['@elastic/kibana-security'],
-          },
-          {
-            change: changes[1],
-            terraformResource: 'elasticstack_fleet_agent_policy',
-            owners: ['@elastic/fleet'],
-          },
-        ],
-      };
-      const output = formatFailure(changes, terraformImpact);
-
-      expectOutputContains(output, 'elasticstack_kibana_space', 'elasticstack_fleet_agent_policy');
-    });
+  it('includes the help link', () => {
+    expectOutputContains(formatFailure([stableEntry('/api/test')]), 'Need help?');
   });
 });

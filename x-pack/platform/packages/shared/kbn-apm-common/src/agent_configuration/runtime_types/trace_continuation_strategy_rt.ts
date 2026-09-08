@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 
-export const traceContinuationStrategyRt = t.union([
-  t.literal('continue'),
-  t.literal('restart'),
-  t.literal('restart_external'),
-]);
+export const traceContinuationStrategySchema = z.enum(['continue', 'restart', 'restart_external']);

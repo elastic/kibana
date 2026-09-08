@@ -8,7 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { ComponentTemplateDeserialized, CommonWizardSteps } from '../../shared_imports';
 import {
@@ -18,7 +19,11 @@ import {
   StepMappingsContainer,
   StepAliasesContainer,
 } from '../../shared_imports';
-import { serializeAsESLifecycle, deserializeESLifecycle } from '../../../../../../common/lib';
+import {
+  serializeAsESLifecycle,
+  deserializeESLifecycle,
+  resolveLogisticsLifecycle,
+} from '../../../../../../common/lib';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { StepLogisticsContainer, StepReviewContainer } from './steps';
 
@@ -153,7 +158,7 @@ export const ComponentTemplateForm = ({
 
   const apiError = saveError ? (
     <>
-      <EuiCallOut
+      <KbnDangerCallout
         announceOnMount
         title={
           <FormattedMessage
@@ -161,12 +166,9 @@ export const ComponentTemplateForm = ({
             defaultMessage="Unable to create component template"
           />
         }
-        color="danger"
-        iconType="warning"
         data-test-subj="saveComponentTemplateError"
-      >
-        <div>{saveError.message || saveError.statusText}</div>
-      </EuiCallOut>
+        text={saveError.message || saveError.statusText}
+      />
       <EuiSpacer size="m" />
     </>
   ) : null;
@@ -210,9 +212,11 @@ export const ComponentTemplateForm = ({
             settings: wizardData.settings,
             mappings: wizardData.mappings,
             aliases: wizardData.aliases,
-            lifecycle: wizardData.logistics.lifecycle
-              ? serializeAsESLifecycle(wizardData.logistics.lifecycle)
-              : undefined,
+            lifecycle: serializeAsESLifecycle(
+              resolveLogisticsLifecycle(wizardData.logistics.lifecycle, {
+                isDataStreamTemplate: true,
+              })
+            ),
           },
         };
         return cleanupComponentTemplateObject(

@@ -17,14 +17,29 @@ export type {
   AppHeaderBadge,
   AppHeaderBadgeItem,
   AppHeaderConfig,
+  ChromeAppHeaderConfig,
+  AppHeaderDescription,
+  AppHeaderEditableTitle,
+  AppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus,
+  AppHeaderShareAction,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
   AppHeaderMetadataItem,
   AppHeaderMetadataItems,
   AppHeaderMetadataTextItem,
+  AppHeaderSpacing,
   AppHeaderTab,
-  ChromeNext,
-} from './chrome_next';
+  AppHeaderTabAction,
+  AppHeaderTabActions,
+  AppHeaderTabBadge,
+  AppHeaderTabIconBadge,
+  AppHeaderTitle,
+  AppHeaderTitleSaveResult,
+} from './app_header';
+export type { ChromeNext } from './chrome_next';
+export type { ChromeAiButton, ChromeControls, GlobalSearchConfig } from './controls';
+export type { ChromeHelp, ChromeNewsfeedHandler } from './help';
 export type { ChromeSetup, ChromeStart } from './contracts';
 export type { ChromeDocTitle } from './doc_title';
 export type {
@@ -34,8 +49,8 @@ export type {
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeGlobalHelpExtensionMenuLink,
+  ChromeHelpMenuLink,
 } from './help_extension';
-export type { ChromeNavControls, ChromeNavControl, ChromeHelpMenuLink } from './nav_controls';
 export type { ChromeNavLinks, ChromeNavLink } from './nav_links';
 export type {
   ChromeRecentlyAccessed,
@@ -45,6 +60,10 @@ export type { ChromeBadge, ChromeBreadcrumbsBadge, ChromeUserBanner, ChromeStyle
 
 export type {
   ChromeProjectNavigationNode,
+  RootNodePanelOpenerDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+  RootNodeDefinition,
   AppDeepLinkId,
   AppId,
   SolutionId,
@@ -60,6 +79,8 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
@@ -71,5 +92,3 @@ export type {
   SidebarSetup,
   SidebarStart,
 } from './sidebar';
-
-export type { GlobalSearchConfig } from './chrome_next/global_search';

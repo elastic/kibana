@@ -45,7 +45,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                 <EuiText size="s" color="subdued">
                   <p>
                     {i18n.translate(
-                      'xpack.search.gettingStarted.searchGettingStartedPage.description',
+                      'xpack.searchGettingStarted.searchGettingStartedPage.description',
                       { defaultMessage: 'Start with some sample data:' }
                     )}
                   </p>
@@ -66,7 +66,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       }}
                     >
                       {i18n.translate(
-                        'xpack.search.gettingStarted.searchGettingStartedPage.uploadFilesBtn',
+                        'xpack.searchGettingStarted.searchGettingStartedPage.uploadFilesBtn',
                         { defaultMessage: 'Upload files' }
                       )}
                     </EuiButtonEmpty>
@@ -86,7 +86,7 @@ export const SearchGettingStartedPage: React.FC = () => {
                       }}
                     >
                       {i18n.translate(
-                        'xpack.search.gettingStarted.searchGettingStartedPage.viewSampleDataButton',
+                        'xpack.searchGettingStarted.searchGettingStartedPage.viewSampleDataButton',
                         { defaultMessage: 'View sample data' }
                       )}
                     </EuiButtonEmpty>

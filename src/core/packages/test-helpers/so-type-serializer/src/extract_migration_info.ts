@@ -21,6 +21,7 @@ import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-i
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { createHash } from 'crypto';
 import { type Type, isConfigSchema } from '@kbn/config-schema';
+import { flattenMappings } from './flatten_mappings';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -95,7 +96,10 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     convertToMultiNamespaceTypeVersion: soType.convertToMultiNamespaceTypeVersion,
     migrationVersions,
     schemaVersions,
-    mappings: getFlattenedObject(soType.mappings ?? {}),
+    // Preserve empty objects (e.g. `properties: {}`) so the flatten/unflatten
+    // round-trip used by the Saved Objects check is lossless. `getFlattenedObject`
+    // would drop them, producing invalid mappings that break the migrator.
+    mappings: flattenMappings(soType.mappings ?? {}),
     hasExcludeOnUpgrade: !!soType.excludeOnUpgrade,
     modelVersions,
   };

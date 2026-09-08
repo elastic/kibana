@@ -7,63 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiProgress, EuiButtonIcon } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldTopValuesProps } from './field_top_values';
-import { FieldTopValues } from './field_top_values';
-import type { ReactWrapper } from '@kbn/test-jest-helpers/src/testbed/types';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EMPTY_LABEL } from '@kbn/field-formats-common';
+import { FieldTopValues } from './field_top_values';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
-// Similar to wrapper.text() but filtered by a selector
-const getChildrenTextBySelector = (wrapper: ReactWrapper, selector: string) => {
-  let text = '';
-  const children = wrapper.find(selector);
-
-  children.forEach((element) => {
-    text += element.text();
-  });
-
-  return text;
+const expectTopValueProgress = (label: string, percentage: string) => {
+  expect(screen.getByRole('progressbar', { name: label })).toHaveAttribute(
+    'aria-valuetext',
+    percentage
+  );
 };
 
 describe('UnifiedFieldList <FieldTopValues />', () => {
   let defaultProps: FieldTopValuesProps;
-  let dataView: DataView;
 
   beforeEach(() => {
-    dataView = {
-      id: '1',
-      title: 'my-fake-index-pattern',
-      timeFieldName: 'timestamp',
-      fields: [
-        {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-          filterable: true,
-        },
-      ],
-      getFormatterForField: jest.fn(() => ({
-        convertToText: jest.fn((s: unknown) =>
-          fieldFormatsServiceMock
-            .createStartContract()
-            .getDefaultInstance(KBN_FIELD_TYPES.STRING, [ES_FIELD_TYPES.STRING])
-            .convertToText(s)
-        ),
-      })),
-    } as unknown as DataView;
-
     defaultProps = {
       areExamples: false,
-      dataView,
-      field: dataView.fields.find((f) => f.name === 'source')!,
-      sampledValuesCount: 5000,
       buckets: [
         {
           count: 500,
@@ -76,34 +41,42 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
       ],
       color: '#000',
       'data-test-subj': 'testing',
+      dataView: dataViewMock,
+      field: dataViewMock.getFieldByName('extension')!,
+      sampledValuesCount: 5000,
     };
   });
 
-  it('should render correctly without filter actions', async () => {
-    const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} />);
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
+  it('should render correctly without filter actions', () => {
+    renderWithI18n(<FieldTopValues {...defaultProps} />);
 
-    expect(text).toBe('sourceA10.0%sourceB0.0%Other90.0%');
-    expect(wrapper.find(EuiProgress)).toHaveLength(3);
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
+    expectTopValueProgress('sourceA', '10.0%');
+    expectTopValueProgress('sourceB', '0.0%');
+    expectTopValueProgress('Other', '90.0%');
+
+    expect(screen.getAllByRole('progressbar')).toHaveLength(3);
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
   });
 
   it('should render correctly with filter actions', async () => {
     const mockAddFilter = jest.fn();
-    const wrapper = mountWithIntl(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(text).toBe('sourceA10.0%sourceB0.0%Other90.0%');
-    expect(wrapper.find(EuiProgress)).toHaveLength(3);
-    expect(wrapper.find(EuiButtonIcon)).toHaveLength(4);
+    renderWithI18n(<FieldTopValues {...defaultProps} onAddFilter={mockAddFilter} />);
 
-    wrapper.find(EuiButtonIcon).first().simulate('click');
+    expectTopValueProgress('sourceA', '10.0%');
+    expectTopValueProgress('sourceB', '0.0%');
+    expectTopValueProgress('Other', '90.0%');
+
+    expect(screen.getAllByRole('progressbar')).toHaveLength(3);
+    expect(screen.getAllByRole('button')).toHaveLength(4);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Filter for extension: "sourceA"' }));
 
     expect(mockAddFilter).toHaveBeenCalledWith(defaultProps.field, 'sourceA', '+');
   });
 
-  it('should render correctly without Other section', async () => {
-    const wrapper = mountWithIntl(
+  it('should render correctly without Other section', () => {
+    renderWithI18n(
       <FieldTopValues
         {...defaultProps}
         buckets={[
@@ -122,13 +95,16 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(text).toBe('sourceA60.0%sourceB30.0%sourceC10.0%');
+    expectTopValueProgress('sourceA', '60.0%');
+    expectTopValueProgress('sourceB', '30.0%');
+    expectTopValueProgress('sourceC', '10.0%');
+
+    expect(screen.queryByText('Other')).not.toBeInTheDocument();
   });
 
-  it('should render correctly with empty strings', async () => {
-    const wrapper = mountWithIntl(
+  it('should render correctly with empty strings', () => {
+    renderWithI18n(
       <FieldTopValues
         {...defaultProps}
         buckets={[
@@ -147,13 +123,15 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(text).toBe(`${EMPTY_LABEL}60.0%sourceA30.0%sourceB0.4%Other9.6%`);
+    expectTopValueProgress(EMPTY_LABEL, '60.0%');
+    expectTopValueProgress('sourceA', '30.0%');
+    expectTopValueProgress('sourceB', '0.4%');
+    expectTopValueProgress('Other', '9.6%');
   });
 
-  it('should render correctly without floating point', async () => {
-    const wrapper = mountWithIntl(
+  it('should render correctly without floating point', () => {
+    renderWithI18n(
       <FieldTopValues
         {...defaultProps}
         buckets={[
@@ -164,8 +142,7 @@ describe('UnifiedFieldList <FieldTopValues />', () => {
         ]}
       />
     );
-    const text = getChildrenTextBySelector(wrapper, 'div.euiProgress__data');
 
-    expect(text).toBe('sourceA100%');
+    expectTopValueProgress('sourceA', '100%');
   });
 });

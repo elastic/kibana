@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import type { CertFacetCount } from '../../../../../common/runtime_types';
 import { MonitorTypeEnum } from '../../../../../common/runtime_types';
 import { setCertificatesTotalAction } from '../../state/certificates/certificates';
+import { selectOverviewPageState } from '../../state';
+import { ShowAllSpaces } from '../monitors_page/common/show_all_spaces';
 import { CertificateSearch } from './cert_search';
 import { CertStats } from './cert_stats';
 import { CertQuickFilter } from './cert_quick_filter';
@@ -71,22 +73,29 @@ export const CertificatesPage: React.FC = () => {
     search,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
+    remoteNames,
     expiringWithin,
     setSearch,
     setMonitorTypes,
     setBrowserResourceTypes,
-    setParty,
+    setCertOrigin,
     setTags,
     setIssuers,
     setExpiringWithin,
   } = useCertFilters();
 
   const dispatch = useDispatch();
+  const { showFromAllSpaces } = useSelector(selectOverviewPageState);
 
-  const facets = useCertFacets();
+  useEffect(() => {
+    setPage((prev) => (prev.index === 0 ? prev : { ...prev, index: 0 }));
+  }, [showFromAllSpaces]);
+
+  // URL-driven cluster selection — see #273622 for the planned quick filter.
+  const facets = useCertFacets(remoteNames, showFromAllSpaces);
 
   const monitorTypeOptions = useMemo(
     () => withCounts(MONITOR_TYPE_FILTER_OPTIONS, facets?.monitorTypes),
@@ -97,8 +106,8 @@ export const CertificatesPage: React.FC = () => {
     [facets?.resourceTypes]
   );
   const partyOptions = useMemo(
-    () => withCounts(PARTY_FILTER_OPTIONS, facets?.party),
-    [facets?.party]
+    () => withCounts(PARTY_FILTER_OPTIONS, facets?.certOrigin),
+    [facets?.certOrigin]
   );
   // The tag list itself is derived from the cert facets, so only tags that actually
   // appear on certificate-bearing documents are offered (each with its cert count).
@@ -128,10 +137,12 @@ export const CertificatesPage: React.FC = () => {
     direction: sort.direction,
     monitorTypes,
     browserResourceTypes: isBrowserIncluded ? browserResourceTypes : undefined,
-    party: isBrowserIncluded ? party : undefined,
+    certOrigin: isBrowserIncluded ? certOrigin : undefined,
     tags,
     issuers,
     notValidAfter: expiringWithin,
+    remoteNames,
+    showFromAllSpaces,
   });
 
   useEffect(() => {
@@ -203,15 +214,18 @@ export const CertificatesPage: React.FC = () => {
               label={labels.PARTY_FILTER}
               dataTestSubj="certPartyFilterButton"
               options={partyOptions}
-              selectedValues={party}
+              selectedValues={certOrigin}
               isDisabled={!isBrowserIncluded}
               disabledTooltip={labels.BROWSER_FILTER_DISABLED_TOOLTIP}
               onChange={(values) => {
-                setParty(values);
+                setCertOrigin(values);
                 resetToFirstPage();
               }}
             />
           </EuiFilterGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ShowAllSpaces />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

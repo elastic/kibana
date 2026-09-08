@@ -9,7 +9,11 @@
 
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
 import { isSavedObjectsCheckError } from '../../findings';
-import { validateNoIndexOrEnabledFalse } from './common_utils';
+import {
+  getMappingFieldPaths,
+  validateNoIndexOrEnabledFalse,
+  validateNoIndexOrEnabledFalseInAllMappings,
+} from './common_utils';
 
 describe('validateNoIndexOrEnabledFalse', () => {
   const modelVersionWithFlattenedNewMappings: ModelVersionSummary = {
@@ -50,5 +54,38 @@ describe('validateNoIndexOrEnabledFalse', () => {
         "The SO type 'my-type' has new mapping fields with 'index: false': category."
       );
     }
+  });
+});
+
+describe('empty-object field handling (preserved `properties: {}` leaves)', () => {
+  // Snapshots now preserve empty object fields as an explicit `properties.<field>.properties: {}`
+  // flattened leaf. These tests lock in that the flattened-mapping consumers tolerate that key.
+  const mappingsWithEmptyObjectField: Record<string, unknown> = {
+    dynamic: false,
+    'properties.title.type': 'text',
+    'properties.pending_upgrade_review.dynamic': false,
+    'properties.pending_upgrade_review.properties': {},
+  };
+
+  it('does not derive a spurious field path from an empty-object `properties` leaf', () => {
+    // The empty-object leaf collapses to the same parent path as its sibling `dynamic` key,
+    // so the field set is exactly { title, pending_upgrade_review } with no `…properties` entry.
+    expect(getMappingFieldPaths(mappingsWithEmptyObjectField)).toEqual([
+      'pending_upgrade_review',
+      'title',
+    ]);
+  });
+
+  it('does not flag an empty-object field as an index/enabled violation', () => {
+    const to: MigrationInfoRecord = {
+      name: 'my-type',
+      hash: 'hash',
+      migrationVersions: [],
+      schemaVersions: [],
+      modelVersions: [],
+      mappings: mappingsWithEmptyObjectField,
+    };
+
+    expect(() => validateNoIndexOrEnabledFalseInAllMappings('my-type', to)).not.toThrow();
   });
 });

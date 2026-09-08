@@ -9,7 +9,12 @@ import type { Subject, Subscription } from 'rxjs';
 import { combineLatestWith, debounceTime } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
 import type { SecurityPageName } from '@kbn/deeplinks-security';
-import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinition,
+  NodeDefinition,
+  PanelOpenerChildDefinition,
+  StandardNodeDefinition,
+} from '@kbn/core-chrome-browser';
 import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
 import type { SecurityGroupName } from '@kbn/security-solution-navigation';
 import type { AppLinkItems, LinkItem, NormalizedLinks } from '../../common/links/types';
@@ -62,8 +67,10 @@ export const solutionFormatter = (
   return solutionNodesFormatter(nodes, normalizedLinks);
 };
 
+type SolutionNavNode = NodeDefinition | PanelOpenerChildDefinition | StandardNodeDefinition;
+
 const solutionNodesFormatter = (
-  navigationNodes: NodeDefinition[],
+  navigationNodes: SolutionNavNode[],
   normalizedLinks: NormalizedLinks
 ): AppDeepLink[] => {
   const deepLinks: AppDeepLink[] = [];
@@ -94,7 +101,12 @@ const solutionNodesFormatter = (
     if (appLink && !appLink.unauthorized) {
       const deepLink = formatDeepLink(appLink);
       if (appLink.unavailable) {
-        deepLink.visibleIn = ['projectSideNav']; // Links marked as unavailable have an upselling page to display, show only in projectSideNav
+        // Links marked as unavailable have an upselling page to display, so they are shown
+        // only in projectSideNav. But when a link is also explicitly disabled from the side
+        // nav (e.g. the legacy Attack Discovery link kept only for route authorization and
+        // redirect handling once the new Attacks page is enabled), it must stay hidden even
+        // when unavailable, otherwise it would resurface in the side nav on upsell tiers.
+        deepLink.visibleIn = appLink.sideNavDisabled ? [] : ['projectSideNav'];
       }
       if (node.children) {
         const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);

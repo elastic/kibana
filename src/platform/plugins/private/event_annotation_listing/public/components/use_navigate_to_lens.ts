@@ -9,22 +9,45 @@
 
 import { useCallback } from 'react';
 import { firstValueFrom } from 'rxjs';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableEditorBreadcrumb, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ANNOTATION_GROUPS_TAB_TITLE } from '../constants';
 
 export interface UseNavigateToLensParams {
   core: CoreStart;
   embeddable: EmbeddableStart;
 }
 
-/**
- * Title of the Annotation Groups tab inside the Visualize landing page.
- */
-export const ANNOTATION_GROUPS_TAB_TITLE = i18n.translate(
-  'eventAnnotationListing.listingViewTitle',
-  { defaultMessage: 'Annotation groups' }
-);
+export const navigateToLensForAnnotationGroup = async ({
+  core,
+  embeddable,
+}: UseNavigateToLensParams) => {
+  const currentApp = await firstValueFrom(core.application.currentAppId$);
+  if (!currentApp) {
+    return;
+  }
+  const stateTransfer = embeddable.getStateTransfer();
+  const breadcrumbs: EmbeddableEditorBreadcrumb[] = [
+    {
+      text: stateTransfer.getAppNameFromId(currentApp) ?? currentApp,
+      href: core.application.getUrlForApp(currentApp),
+    },
+    {
+      text: ANNOTATION_GROUPS_TAB_TITLE,
+      href: core.application.getUrlForApp(currentApp, {
+        path: window.location.hash,
+      }),
+    },
+  ];
+  await stateTransfer.navigateToEditor('lens', {
+    path: '',
+    state: {
+      originatingApp: currentApp,
+      originatingPath: window.location.hash,
+      breadcrumbs,
+    },
+  });
+};
 
 /**
  * Returns an async callback that hands off to the Lens editor via the
@@ -36,30 +59,6 @@ export const ANNOTATION_GROUPS_TAB_TITLE = i18n.translate(
  */
 export const useNavigateToLens = ({ core, embeddable }: UseNavigateToLensParams) => {
   return useCallback(async () => {
-    const currentApp = await firstValueFrom(core.application.currentAppId$);
-    if (!currentApp) {
-      return;
-    }
-    const stateTransfer = embeddable.getStateTransfer();
-    const breadcrumbs: EmbeddableEditorBreadcrumb[] = [
-      {
-        text: stateTransfer.getAppNameFromId(currentApp) ?? currentApp,
-        href: core.application.getUrlForApp(currentApp),
-      },
-      {
-        text: ANNOTATION_GROUPS_TAB_TITLE,
-        href: core.application.getUrlForApp(currentApp, {
-          path: window.location.hash,
-        }),
-      },
-    ];
-    await stateTransfer.navigateToEditor('lens', {
-      path: '',
-      state: {
-        originatingApp: currentApp,
-        originatingPath: window.location.hash,
-        breadcrumbs,
-      },
-    });
+    await navigateToLensForAnnotationGroup({ core, embeddable });
   }, [core, embeddable]);
 };

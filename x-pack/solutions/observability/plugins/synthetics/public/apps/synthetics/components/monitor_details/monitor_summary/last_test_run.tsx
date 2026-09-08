@@ -7,9 +7,7 @@
 
 import React from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSkeletonText,
@@ -21,6 +19,7 @@ import {
   useEuiTheme,
   EuiProgress,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 
 import { useParams } from 'react-router-dom';
@@ -50,10 +49,12 @@ export const LastTestRun = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
   const { lastRefresh } = useSyntheticsRefreshContext();
 
-  const { data: stepsData, loading: stepsLoading } = useJourneySteps(
-    latestPing?.monitor?.check_group,
-    lastRefresh
-  );
+  const { data: stepsData, loading: stepsLoading } = useJourneySteps({
+    checkGroup: latestPing?.monitor?.check_group,
+    lastRefresh,
+    timestamp: latestPing?.['@timestamp'],
+    stepsOnly: true, // this panel only renders steps, never journey details
+  });
 
   const loading = stepsLoading || pingsLoading;
 
@@ -94,7 +95,7 @@ export const LastTestRunComponent = ({
       {loading && <EuiProgress size="xs" color="accent" />}
       <PanelHeader monitor={monitor} latestPing={latestPing} loading={loading} />
       {!(loading && !latestPing) && latestPing?.error ? (
-        <EuiCallOut
+        <KbnDangerCallout
           announceOnMount
           data-test-subj="monitorTestRunErrorCallout"
           style={{
@@ -104,28 +105,30 @@ export const LastTestRunComponent = ({
           }}
           title={latestPing?.error.message}
           size="s"
-          color="danger"
-          iconType="warning"
-        >
-          {isErrorDetails || !selectedLocation || !monitor?.[ConfigKey.CONFIG_ID] ? null : (
-            <EuiButton
-              data-test-subj="monitorTestRunViewErrorDetails"
-              color="danger"
-              href={getErrorDetailsUrl({
-                basePath,
-                configId: monitor[ConfigKey.CONFIG_ID],
-                locationId: selectedLocation.id,
-                stateId: latestPing.state?.id ?? '',
-                spaceId,
-                remoteName,
-              })}
-            >
-              {i18n.translate('xpack.synthetics.monitorDetails.summary.viewErrorDetails', {
-                defaultMessage: 'View error details',
-              })}
-            </EuiButton>
-          )}
-        </EuiCallOut>
+          actionProps={
+            !isErrorDetails && selectedLocation && monitor?.[ConfigKey.CONFIG_ID]
+              ? {
+                  primary: {
+                    'data-test-subj': 'monitorTestRunViewErrorDetails',
+                    href: getErrorDetailsUrl({
+                      basePath,
+                      configId: monitor[ConfigKey.CONFIG_ID],
+                      locationId: selectedLocation.id,
+                      stateId: latestPing.state?.id ?? '',
+                      spaceId,
+                      remoteName,
+                    }),
+                    children: i18n.translate(
+                      'xpack.synthetics.monitorDetails.summary.viewErrorDetails',
+                      {
+                        defaultMessage: 'View error details',
+                      }
+                    ),
+                  },
+                }
+              : undefined
+          }
+        />
       ) : null}
 
       <EuiSpacer size="m" />

@@ -26,6 +26,7 @@ describe('useMatchedActionPolicies', () => {
     const http = httpServiceMock.createStartContract();
     const fakeResponse = {
       items: [{ actionPolicy: { id: 'ap-1', name: 'Policy 1' }, category: 'global' }],
+      total: 42,
     };
     http.fetch.mockResolvedValueOnce(fakeResponse as any);
 
@@ -39,6 +40,7 @@ describe('useMatchedActionPolicies', () => {
 
     expect(result.current.error).toBeNull();
     expect(result.current.items).toEqual(fakeResponse.items);
+    expect(result.current.total).toBe(42);
     expect(http.fetch).toHaveBeenCalledWith(
       '/api/alerting/v2/action_policies/_match_for_rule',
       expect.objectContaining({
@@ -61,6 +63,7 @@ describe('useMatchedActionPolicies', () => {
     expect(result.current.error).toBeInstanceOf(Error);
     expect(result.current.error?.message).toBe('Network error');
     expect(result.current.items).toEqual([]);
+    expect(result.current.total).toBe(0);
   });
 
   it('re-fetches when ruleId changes', async () => {

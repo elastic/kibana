@@ -10,46 +10,155 @@ import {
   EuiBasicTable,
   EuiBadge,
   EuiButton,
+  EuiButtonIcon,
   EuiEmptyPrompt,
   EuiLink,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
   EuiPageSection,
+  EuiPopover,
   EuiSelect,
   EuiSpacer,
   EuiToolTip,
+  copyToClipboard,
   useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationExperiments } from '../../hooks/use_evals_api';
+import { NewExperimentFlyout } from '../../components/new_experiment_flyout/new_experiment_flyout';
+import { EvaluatorModelsBadge } from '../../components/evaluator_models_badge';
 import { resolvePrUrl } from '../../utils/pr_url';
+import { CopyableDetail } from './copyable_detail';
+import { LinkDetail } from './link_detail';
 import * as i18n from './translations';
+
+const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({ item }) => {
+  const { services } = useKibana();
+  const toasts = services.notifications?.toasts;
+  const [isOpen, setIsOpen] = useState(false);
+
+  // experiment_id === execution_id (the grouping key). Multi-experiment rows are
+  // labeled "Execution ID" (an experiment id would mislead); single rows are one.
+  const runId = item.execution_id ?? item.experiment_id;
+  const isMultiExperiment = (item.experiment_count ?? 1) > 1;
+  const idLabel = isMultiExperiment ? i18n.DETAIL_EXECUTION_ID : i18n.DETAIL_EXPERIMENT_ID;
+
+  const branch = item.git_branch ?? undefined;
+  const prRaw = item.ci?.pull_request?.trim();
+  const prUrl = prRaw ? resolvePrUrl(prRaw) : null;
+  const prText = prRaw && /^\d+$/.test(prRaw) ? `#${prRaw}` : i18n.DETAIL_VIEW_LINK;
+  const buildUrl = item.ci?.build_url ?? undefined;
+
+  const copy = (value: string) => {
+    copyToClipboard(value);
+    toasts?.addSuccess(i18n.COPIED_TO_CLIPBOARD);
+  };
+
+  return (
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+      anchorPosition="leftCenter"
+      aria-label={i18n.ROW_DETAILS_ARIA}
+      button={
+        <EuiToolTip content={i18n.ROW_DETAILS_ARIA} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="ellipsis"
+            color="text"
+            aria-label={i18n.ROW_DETAILS_ARIA}
+            onClick={(event: React.MouseEvent) => {
+              // The row itself navigates on click; don't let the toggle bubble.
+              event.stopPropagation();
+              setIsOpen((open) => !open);
+            }}
+            data-test-subj="evalsRowActionsButton"
+          />
+        </EuiToolTip>
+      }
+    >
+      <div
+        css={{ width: 300 }}
+        role="presentation"
+        onClick={(event: React.MouseEvent) => event.stopPropagation()}
+        onKeyDown={(event: React.KeyboardEvent) => event.stopPropagation()}
+        data-test-subj="evalsRowDetailsPanel"
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <CopyableDetail
+              label={idLabel}
+              value={runId}
+              onCopy={copy}
+              dataTestSubj="evalsRowCopyRunId"
+            />
+          </EuiFlexItem>
+          {branch && (
+            <EuiFlexItem grow={false}>
+              <CopyableDetail
+                label={i18n.DETAIL_BRANCH}
+                value={branch}
+                onCopy={copy}
+                dataTestSubj="evalsRowCopyBranch"
+              />
+            </EuiFlexItem>
+          )}
+          {prUrl && (
+            <EuiFlexItem grow={false}>
+              <LinkDetail
+                label={i18n.DETAIL_PULL_REQUEST}
+                href={prUrl}
+                text={prText}
+                dataTestSubj="evalsRowViewPr"
+              />
+            </EuiFlexItem>
+          )}
+          {buildUrl && (
+            <EuiFlexItem grow={false}>
+              <LinkDetail
+                label={i18n.DETAIL_CI_BUILD}
+                href={buildUrl}
+                text={i18n.DETAIL_VIEW_LINK}
+                dataTestSubj="evalsRowViewBuild"
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </div>
+    </EuiPopover>
+  );
+};
 
 export const ExperimentsListPage: React.FC = () => {
   const history = useHistory();
+  const { services } = useKibana();
   const { euiTheme } = useEuiTheme();
+  const savedWorkflowsHref = services.http?.basePath.prepend(
+    '/app/workflows?tags=evals-experiment'
+  );
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
   const [selectedExperiments, setSelectedExperiments] = useState<EvaluationExperimentSummary[]>([]);
+  const [isNewExperimentOpen, setIsNewExperimentOpen] = useState(false);
 
   const { data, isLoading, error, refetch } = useEvaluationExperiments({
     page: pageIndex + 1,
     perPage: pageSize,
-    branch: searchText || undefined,
+    search: searchText || undefined,
     suiteId: suiteIdFilter || undefined,
   });
 
   const { data: suiteFilterData } = useEvaluationExperiments({
     page: 1,
     perPage: 100,
-    branch: searchText || undefined,
+    search: searchText || undefined,
   });
 
   const suiteOptions = useMemo(() => {
@@ -86,55 +195,68 @@ export const ExperimentsListPage: React.FC = () => {
         name: i18n.COLUMN_NAME,
         sortable: true,
         truncateText: true,
-        width: '200px',
+        width: '28%',
         render: (_name: string | null | undefined, item: EvaluationExperimentSummary) => {
           const isSuiteRun = !!item.suite_id;
           const displayName = isSuiteRun
             ? item.suite_id ?? item.experiment_name ?? item.experiment_id.slice(0, 12)
             : item.experiment_name ?? item.experiment_id.slice(0, 12);
           const tooltipId = item.execution_id ?? item.experiment_id;
-          const link = <EuiLink onClick={() => navigateToDetail(item)}>{displayName}</EuiLink>;
+          const detailHref = history.createHref({
+            pathname: `/experiments/${encodeURIComponent(item.experiment_id)}`,
+            search: `?execution_id=${encodeURIComponent(tooltipId)}`,
+          });
+          const link = (
+            <EuiLink
+              href={detailHref}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) {
+                  return;
+                }
+                event.preventDefault();
+                navigateToDetail(item);
+              }}
+            >
+              {displayName}
+            </EuiLink>
+          );
           return <EuiToolTip content={tooltipId}>{link}</EuiToolTip>;
         },
       },
       {
         field: 'experiment_count',
         name: i18n.COLUMN_EXPERIMENTS,
-        width: '150px',
-        render: (count: number | undefined, item: EvaluationExperimentSummary) => {
+        width: '11%',
+        render: (count: number | undefined) => {
           const c = count ?? 1;
-          if (c > 1 || !!item.suite_id) {
-            return (
-              <EuiBadge color="hollow">
-                {c} {i18n.getExperimentsBadge(c)}
-              </EuiBadge>
-            );
-          }
-          return '-';
+          return (
+            <EuiBadge color="hollow">
+              {c} {i18n.getExperimentsBadge(c)}
+            </EuiBadge>
+          );
         },
       },
       {
         field: 'timestamp',
         name: i18n.COLUMN_TIMESTAMP,
         sortable: true,
+        width: '15%',
         render: (timestamp: string) => (timestamp ? new Date(timestamp).toLocaleString() : '-'),
       },
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
+        width: '19%',
         render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
-        field: 'evaluator_model',
+        field: 'evaluator_models',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
-          model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
-      },
-      {
-        field: 'git_branch',
-        name: i18n.COLUMN_BRANCH,
-        render: (branch: string | null) => branch ?? '-',
+        width: '19%',
+        render: (models: EvaluationExperimentSummary['evaluator_models']) => (
+          <EvaluatorModelsBadge models={models} />
+        ),
       },
       {
         field: 'total_repetitions',
@@ -142,46 +264,13 @@ export const ExperimentsListPage: React.FC = () => {
         width: '60px',
       },
       {
-        field: 'ci',
-        name: i18n.COLUMN_CI,
-        render: (ci: EvaluationExperimentSummary['ci']) =>
-          ci?.build_url ? (
-            <span
-              onClick={(event) => event.stopPropagation()}
-              onKeyDown={(event) => event.stopPropagation()}
-              role="presentation"
-            >
-              <EuiLink href={ci.build_url} target="_blank" external>
-                {i18n.CI_BUILD_LINK}
-              </EuiLink>
-            </span>
-          ) : (
-            '-'
-          ),
-      },
-      {
-        field: 'ci',
-        name: i18n.COLUMN_PULL_REQUEST,
-        render: (ci: EvaluationExperimentSummary['ci']) => {
-          const prRaw = ci?.pull_request;
-          if (!prRaw) return '-';
-          const prUrl = resolvePrUrl(prRaw);
-          if (!prUrl) return '-';
-          return (
-            <span
-              onClick={(event) => event.stopPropagation()}
-              onKeyDown={(event) => event.stopPropagation()}
-              role="presentation"
-            >
-              <EuiLink href={prUrl} target="_blank" external>
-                {i18n.PR_LINK}
-              </EuiLink>
-            </span>
-          );
-        },
+        name: '',
+        width: '48px',
+        align: 'right',
+        render: (item: EvaluationExperimentSummary) => <ExperimentRowDetails item={item} />,
       },
     ],
-    [navigateToDetail]
+    [navigateToDetail, history]
   );
 
   const pagination = {
@@ -234,11 +323,15 @@ export const ExperimentsListPage: React.FC = () => {
   const handleCompare = useCallback(() => {
     if (!canCompare) return;
     const [a, b] = selectedExperiments;
-    const isSuiteRun = !!a.suite_id || !!b.suite_id;
-    const type = isSuiteRun ? 'execution' : 'experiment';
-    const baselineId = isSuiteRun ? a.execution_id ?? a.experiment_id : a.experiment_id;
-    const targetId = isSuiteRun ? b.execution_id ?? b.experiment_id : b.experiment_id;
-    const params = new URLSearchParams({ type, baseline: baselineId, target: targetId });
+    // Rows are aggregated by execution id, so always compare execution-vs-execution;
+    // the row's `experiment_id` isn't on the score docs and would filter to a 404.
+    const baselineId = a.execution_id ?? a.experiment_id;
+    const targetId = b.execution_id ?? b.experiment_id;
+    const params = new URLSearchParams({
+      type: 'execution',
+      baseline: baselineId,
+      target: targetId,
+    });
 
     history.push(`/compare?${params.toString()}`);
   }, [canCompare, selectedExperiments, history]);
@@ -276,12 +369,40 @@ export const ExperimentsListPage: React.FC = () => {
               content={canCompare ? undefined : i18n.COMPARE_SELECTION_HINT}
               position="top"
             >
-              <EuiButton iconType="diff" onClick={handleCompare} isDisabled={!canCompare} size="m">
+              <EuiButton
+                iconType="compare"
+                onClick={handleCompare}
+                isDisabled={!canCompare}
+                size="m"
+              >
                 {i18n.COMPARE_SELECTED_BUTTON}
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
         )}
+        {savedWorkflowsHref && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="external"
+              size="m"
+              href={savedWorkflowsHref}
+              data-test-subj="evalsViewExperimentWorkflowsButton"
+            >
+              {i18n.VIEW_EXPERIMENT_WORKFLOWS_BUTTON}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusCircle"
+            size="m"
+            onClick={() => setIsNewExperimentOpen(true)}
+            data-test-subj="evalsNewExperimentButton"
+          >
+            {i18n.NEW_EXPERIMENT_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {error ? (
@@ -300,7 +421,7 @@ export const ExperimentsListPage: React.FC = () => {
         <EuiBasicTable<EvaluationExperimentSummary>
           tableCaption={i18n.TABLE_CAPTION}
           items={data?.experiments ?? []}
-          itemId="execution_id"
+          itemId={(item) => item.execution_id ?? item.experiment_id}
           columns={columns}
           loading={isLoading}
           pagination={pagination}
@@ -316,6 +437,7 @@ export const ExperimentsListPage: React.FC = () => {
           })}
         />
       )}
+      {isNewExperimentOpen && <NewExperimentFlyout onClose={() => setIsNewExperimentOpen(false)} />}
     </EuiPageSection>
   );
 };

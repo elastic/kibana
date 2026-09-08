@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
   AttachmentVersion,
@@ -33,6 +33,14 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   screenContext?: ScreenContextAttachmentData;
   /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
   openSidebarConversation?: () => void;
+}
+
+/** Props passed to attachment renderers in the conversation details flyout. */
+export interface ConversationDetailsRenderProps<
+  TAttachment extends UnknownAttachment = UnknownAttachment
+> {
+  /** The attachment to render, with version data selected by the consumer. */
+  attachment: TAttachment;
 }
 
 /**
@@ -76,6 +84,8 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   updateOrigin: (origin: string) => Promise<UpdateOriginResponse | undefined>;
   /** Callback to open the attachment in canvas mode (expanded flyout view). Undefined when already in canvas mode. */
   openCanvas?: () => void;
+  /** Callback to dismiss the canvas. Undefined when not in canvas mode. */
+  closeCanvas?: () => void;
   /** Callback to open the agent builder sidebar with the current conversation loaded. */
   openSidebarConversation?: () => void;
   /**
@@ -95,6 +105,8 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Optional EUI button color override (defaults to 'text') */
+  color?: EuiButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
   /** Optional explanation shown when a disabled action remains visible */
@@ -174,6 +186,11 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    */
   getIcon?: () => IconType;
   /**
+   * Returns a URL (or data URL) to use as a thumbnail image for the attachment.
+   * When provided, renders an <img> instead of an EuiIcon in the pill icon slot.
+   */
+  getThumbnail?: (attachment: TAttachment) => string | undefined;
+  /**
    * Returns header metadata (icon, subtitle, badges) for the attachment header
    * (inline / canvas). Omitted fields fall back to their defaults (no icon, no
    * subtitle, no badges).
@@ -195,6 +212,10 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   renderInlineContent?: (
     props: AttachmentRenderProps<TAttachment>,
     callbacks?: InlineRenderCallbacks
+  ) => ReactNode;
+  /** Render attachment content in the conversation details flyout. */
+  renderConversationDetailsContent?: (
+    props: ConversationDetailsRenderProps<TAttachment>
   ) => ReactNode;
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.

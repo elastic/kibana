@@ -8,7 +8,7 @@
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { ALL_VALUE, type CreateCompositeSLOResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, type CompositeSLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -27,13 +27,13 @@ export function useCreateCompositeSlo() {
   const queryClient = useQueryClient();
 
   return useMutation<
-    CreateCompositeSLOResponse,
+    CompositeSLODefinitionResponse,
     ServerError,
     { compositeSlo: CreateCompositeSLOForm }
   >(
     ['createCompositeSlo'],
     ({ compositeSlo }) => {
-      return http.post<CreateCompositeSLOResponse>('/api/observability/slo_composites', {
+      return http.post<CompositeSLODefinitionResponse>('/api/observability/slo_composites', {
         body: JSON.stringify(toApiPayload(compositeSlo)),
       });
     },

@@ -57,7 +57,17 @@ export const GroupWrapper = <T,>({
   groupSelectorComponent,
   testSubjects = DEFAULT_TEST_SUBJECTS,
 }: GroupWrapperProps<T>) => {
-  if (!data || isFetching) {
+  // `data` is `{}` (truthy) until the very first response arrives, so `groupsCount` is the
+  // reliable signal that at least one fetch has completed. Once that's true we keep rendering
+  // the real grouping tree (with isLoading passed through) on subsequent fetches instead of
+  // swapping back to the placeholder, so it isn't torn down and remounted - which would lose
+  // in-progress UI state such as expanded groups and revealed pagination pages. The one
+  // exception is switching the grouped-by field itself: `data` may still be the previous
+  // field's (keepPreviousData) results, so we fall back to the placeholder until fresh data
+  // for the new field arrives, which also remounts Grouping and resets its per-field state.
+  const hasLoadedData = Boolean(data?.groupsCount);
+
+  if (!hasLoadedData) {
     return (
       <GroupWrapperLoading grouping={grouping} pageSize={pageSize} testSubjects={testSubjects} />
     );

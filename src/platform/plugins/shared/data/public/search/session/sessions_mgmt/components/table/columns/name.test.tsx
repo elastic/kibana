@@ -13,20 +13,21 @@ import { nameColumn } from './name';
 import { render, screen } from '@testing-library/react';
 import { getUiSessionMock } from '../../../__mocks__';
 import { SearchSessionStatus } from '../../../../../../../common';
-import type { UISession } from '../../../types';
+import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
 import userEvent from '@testing-library/user-event';
 
 const setup = ({
   kibanaVersion = '9.0.0',
   uiSession = getUiSessionMock(),
+  onBackgroundSearchOpened,
 }: {
   kibanaVersion?: string;
   uiSession?: UISession;
+  onBackgroundSearchOpened?: jest.Mock;
 } = {}) => {
   const user = userEvent.setup();
   const core = coreMock.createStart();
   const searchUsageCollector = createSearchUsageCollectorMock();
-  const onBackgroundSearchOpened = jest.fn();
 
   const column = nameColumn({
     core,
@@ -39,7 +40,13 @@ const setup = ({
 
   render(column.render(uiSession.name, uiSession));
 
-  return { core, searchUsageCollector, kibanaVersion, onBackgroundSearchOpened, user };
+  return {
+    searchUsageCollector,
+    kibanaVersion,
+    navigateToUrl: core.application.navigateToUrl,
+    onBackgroundSearchOpened,
+    user,
+  };
 };
 
 describe('name column', () => {
@@ -59,20 +66,49 @@ describe('name column', () => {
 
   describe('when the session is NOT in progress', () => {
     describe('when the session name is clicked', () => {
-      it('should call onBackgroundSearchOpened', async () => {
+      it('should navigate in app', async () => {
         // Given
         const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
 
         // When
-        const { user, onBackgroundSearchOpened } = setup({ uiSession: mockSession });
+        const { user, navigateToUrl } = setup({ uiSession: mockSession });
         await user.click(screen.getByText(mockSession.name));
 
         // Then
         expect(screen.getByTestId('sessionManagementNameLink')).toBeVisible();
+        expect(navigateToUrl).toHaveBeenCalledWith(mockSession.restoreUrl);
+      });
+
+      it('should call onBackgroundSearchOpened', async () => {
+        // Given
+        const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
+        const onBackgroundSearchOpened = jest.fn();
+
+        // When
+        const { user } = setup({ uiSession: mockSession, onBackgroundSearchOpened });
+        await user.click(screen.getByText(mockSession.name));
+
+        // Then
         expect(onBackgroundSearchOpened).toHaveBeenCalledWith({
           event: expect.any(Object),
           session: mockSession,
         });
+      });
+
+      it('should NOT navigate in app when onBackgroundSearchOpened prevents the default behavior', async () => {
+        // Given
+        const mockSession = getUiSessionMock({ status: SearchSessionStatus.COMPLETE });
+        const onBackgroundSearchOpened = jest.fn<void, Parameters<BackgroundSearchOpenedHandler>>(
+          ({ event }) => event.preventDefault()
+        );
+
+        // When
+        const { user, navigateToUrl } = setup({ uiSession: mockSession, onBackgroundSearchOpened });
+        await user.click(screen.getByText(mockSession.name));
+
+        // Then
+        expect(onBackgroundSearchOpened).toHaveBeenCalled();
+        expect(navigateToUrl).not.toHaveBeenCalled();
       });
     });
   });

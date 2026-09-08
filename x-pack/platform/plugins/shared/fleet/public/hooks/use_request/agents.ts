@@ -32,7 +32,6 @@ import type {
   PostBulkAgentRollbackResponse,
   PostGenerateAgentsReportRequest,
   PostGenerateAgentsReportResponse,
-  GetCollectorGroupsResponse,
 } from '../../../common/types';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -511,36 +510,4 @@ export function sendPostGenerateAgentsReport(body: PostGenerateAgentsReportReque
     version: API_VERSIONS.internal.v1,
     body,
   });
-}
-
-export function useGetCollectorGroupsQuery(
-  query: {
-    groupBy?: string;
-    kuery?: string;
-    perPage?: number;
-    afterKey?: string;
-    showInactive?: boolean;
-  },
-  options: Partial<{
-    enabled: boolean;
-    refetchInterval: number | false;
-    keepPreviousData: boolean;
-  }> = {}
-) {
-  return useQuery(
-    ['collector-groups', query],
-    () =>
-      sendRequestForRq<GetCollectorGroupsResponse>({
-        path: agentRouteService.getCollectorGroupsPath(),
-        method: 'get',
-        version: API_VERSIONS.public.v1,
-        query,
-      }),
-    {
-      enabled: options.enabled,
-      refetchInterval: options.refetchInterval,
-      refetchIntervalInBackground: false,
-      keepPreviousData: options.keepPreviousData,
-    }
-  );
 }

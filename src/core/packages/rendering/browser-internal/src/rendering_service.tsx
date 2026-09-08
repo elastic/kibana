@@ -20,9 +20,9 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
@@ -40,6 +40,7 @@ export interface RenderingServiceContextDeps {
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
+  authc: CoreAuthenticationService;
   chrome: InternalChromeStart;
   coreEnv: CoreEnv;
 }
@@ -48,7 +49,6 @@ export interface RenderingServiceRenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
-  featureFlags: FeatureFlagsStart;
   http: InternalHttpStart;
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;
@@ -133,6 +133,7 @@ export class RenderingService implements IRenderingService {
         i18n={deps.i18n}
         theme={deps.theme}
         userProfile={deps.userProfile}
+        authc={deps.authc}
         coreEnv={deps.coreEnv}
         chrome={deps.chrome}
       >

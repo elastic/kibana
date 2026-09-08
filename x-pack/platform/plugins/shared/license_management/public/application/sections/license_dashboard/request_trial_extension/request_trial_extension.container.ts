@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { connect } from 'react-redux';
+import { connect } from 'react-redux-v7';
 
 import { RequestTrialExtension as PresentationComponent } from './request_trial_extension';
 import { shouldShowRequestTrialExtension } from '../../../store/reducers/license_management';
