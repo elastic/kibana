@@ -56,4 +56,9 @@ export const RenderIacTemplateResponseSchema = schema.object({
   expiresAt: schema.string({
     meta: { description: 'ISO 8601 UTC timestamp when the pre-signed URL expires.' },
   }),
+  key: schema.maybe(
+    schema.string({
+      meta: { description: 'Opaque IaC template key; store on the cloud connector.' },
+    })
+  ),
 });

@@ -57,6 +57,13 @@ export interface IacProvisionerRenderRequest {
 export interface IacProvisionerRenderResponse {
   artifactUrl: string;
   expiresAt: string;
+  /** Opaque template key (SHA of the canonicalised rendered template). Absent until IaCP ships it. */
+  key?: string;
+}
+
+/** Response of `POST /api/v1/render?render=false`: the key only, no artifact is produced. */
+export interface IacProvisionerKeyResponse {
+  key: string;
 }
 
 interface IacProvisionerErrorBody {
@@ -67,7 +74,10 @@ interface IacProvisionerErrorBody {
 
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  renderKey(request: IacProvisionerRenderRequest): Promise<IacProvisionerKeyResponse>;
 }
+
+type IacProvisionerOperation = 'Render' | 'Key';
 
 /**
  * Extracts the provider's error codes/messages, tolerating both the single
@@ -91,9 +101,38 @@ export const parseIacProvisionerErrors = (
 };
 
 class IacProvisionerServiceImpl implements IacProvisionerService {
-  public async renderTemplate(
+  public renderTemplate(
     request: IacProvisionerRenderRequest
   ): Promise<IacProvisionerRenderResponse> {
+    return this.post<IacProvisionerRenderResponse>(request, { render: true });
+  }
+
+  /**
+   * Same pipeline as renderTemplate — resolve, consolidate, canonicalise, hash — but the
+   * provider skips artifact generation. Same code path, so the key cannot drift between
+   * "check" and "deploy".
+   */
+  public async renderKey(request: IacProvisionerRenderRequest): Promise<IacProvisionerKeyResponse> {
+    const response = await this.post<Partial<IacProvisionerKeyResponse>>(request, {
+      render: false,
+    });
+    if (typeof response.key !== 'string' || response.key.length === 0) {
+      // An older provider ignores `render=false`, renders anyway and returns no key.
+      // Callers are expected to treat Unavailable as "fail open" — the right
+      // outcome until IaCP ships render=false.
+      // https://github.com/elastic/ingest-dev/issues/9415
+      throw new IacProvisionerUnavailableError(
+        'provider returned no key for render=false (unsupported by this provider version)'
+      );
+    }
+    return { key: response.key };
+  }
+
+  private async post<T extends Partial<IacProvisionerRenderResponse>>(
+    request: IacProvisionerRenderRequest,
+    { render }: { render: boolean }
+  ): Promise<T> {
+    const operation: IacProvisionerOperation = render ? 'Render' : 'Key';
     const logger = appContextService.getLogger().get('IacProvisionerService');
     const traceId = apm.currentTransaction?.traceparent;
     const iacProvisionerConfig = appContextService.getConfig()?.iacProvisioner;
@@ -110,7 +149,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     // The response's artifactUrl embeds signing credentials and must never be
     // logged; the request body contains only safe-to-log fields.
     logger.info(
-      `[IaC Provisioner] Rendering template for provider ${
+      `[IaC Provisioner] ${operation} requested for provider ${
         request.provider
       }, integrations: ${JSON.stringify(request.integrations)}`
     );
@@ -122,14 +161,14 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       throw new IacProvisionerConfigError(`invalid TLS configuration: ${error.message}`);
     }
 
-    const url = `${iacProvisionerConfig.api.url}${RENDER_ENDPOINT}`;
+    const url = `${iacProvisionerConfig.api.url}${RENDER_ENDPOINT}${render ? '' : '?render=false'}`;
     const headers = {
       'Content-type': 'application/json',
       ...(traceId ? { 'X-Request-ID': traceId } : {}),
       'x-elastic-internal-origin': 'Kibana',
     };
     logger.debug(
-      `[IaC Provisioner] Render request config ${this.createRequestConfigDebug(
+      `[IaC Provisioner] ${operation} request config ${this.createRequestConfigDebug(
         url,
         headers,
         request,
@@ -154,18 +193,30 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
 
       const latencyMs = Date.now() - startTime;
       if (!response.ok) {
-        throw await this.responseToError(response, logger, latencyMs, traceId);
+        throw await this.responseToError(operation, response, logger, latencyMs, traceId);
       }
 
-      const rendered = (await response.json()) as IacProvisionerRenderResponse;
-      logger.info(
-        `[IaC Provisioner] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
-      );
-      // artifactUrl embeds signing credentials — only the expiry is loggable.
-      logger.debug(
-        `[IaC Provisioner] Render response: status ${response.status}, artifact expires at ${rendered.expiresAt} [Request Id: ${traceId}]`
-      );
-      return rendered;
+      const body = (await response.json()) as T;
+      if (render || Boolean(body.key)) {
+        logger.info(
+          `[IaC Provisioner] ${operation} succeeded for provider ${request.provider} in ${latencyMs}ms`
+        );
+      } else {
+        logger.warn(
+          `[IaC Provisioner] Key response from provider contained no key (render=false unsupported?) [Request Id: ${traceId}]`
+        );
+      }
+      if (render) {
+        // artifactUrl embeds signing credentials — only the expiry is loggable.
+        logger.debug(
+          `[IaC Provisioner] Render response: status ${response.status}, artifact expires at ${body.expiresAt} [Request Id: ${traceId}]`
+        );
+      } else {
+        logger.debug(
+          `[IaC Provisioner] Key response: status ${response.status}, key ${body.key} [Request Id: ${traceId}]`
+        );
+      }
+      return body;
     } catch (error) {
       if (
         error instanceof IacProvisionerRenderError ||
@@ -188,6 +239,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
   }
 
   private async responseToError(
+    operation: IacProvisionerOperation,
     response: { status: number; json: () => Promise<unknown> },
     logger: Logger,
     latencyMs: number,
@@ -198,7 +250,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     const codes = providerErrors.map(({ code }) => code);
     const details = providerErrors.map(({ code, message }) => `${code}: ${message}`).join('; ');
     logger.error(
-      `[IaC Provisioner] Render failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
+      `[IaC Provisioner] ${operation} failed with status ${status} after ${latencyMs}ms, errors: [${details}] [Request Id: ${traceId}]`
     );
     if (status >= 500) {
       return new IacProvisionerUnavailableError(

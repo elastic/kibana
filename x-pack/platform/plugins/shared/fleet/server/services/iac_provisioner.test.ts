@@ -392,6 +392,91 @@ describe('IacProvisionerService', () => {
       }),
     });
   });
+
+  describe('renderKey', () => {
+    beforeEach(() => {
+      mockConfig();
+      mockLogger();
+    });
+
+    it('POSTs to /api/v1/render?render=false and returns the key', async () => {
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, { key: 'sha256:abc' }));
+
+      const result = await iacProvisionerService.renderKey(RENDER_REQUEST);
+
+      expect(result).toEqual({ key: 'sha256:abc' });
+      expect(mockedFetch).toHaveBeenCalledWith(
+        'https://iac-provisioner.example/api/v1/render?render=false',
+        expect.objectContaining({ method: 'POST', body: JSON.stringify(RENDER_REQUEST) })
+      );
+    });
+
+    it('treats a 2xx without a key as unavailable (provider predates render=false)', async () => {
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(200, {
+          artifactUrl: 'https://s3.example/x',
+          expiresAt: '2026-01-01T00:00:00Z',
+        })
+      );
+
+      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
+        IacProvisionerUnavailableError
+      );
+    });
+
+    it('maps 5xx to IacProvisionerUnavailableError', async () => {
+      mockedFetch.mockResolvedValueOnce(jsonResponse(503, { message: 'down' }));
+
+      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
+        IacProvisionerUnavailableError
+      );
+    });
+
+    it('maps a 422 response to IacProvisionerRenderError with the provider error codes', async () => {
+      mockedFetch.mockResolvedValueOnce(jsonResponse(422, { code: 'unsupported', message: 'x' }));
+
+      const promise = iacProvisionerService.renderKey(RENDER_REQUEST);
+      await expect(promise).rejects.toThrow(IacProvisionerRenderError);
+      await promise.catch((error: IacProvisionerRenderError) => {
+        expect(error.statusCode).toBe(422);
+        expect(error.errorCodes).toEqual(['unsupported']);
+      });
+    });
+
+    it('logs warn when the provider returns no key', async () => {
+      const logger = mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(200, {
+          artifactUrl: 'https://s3.example/x',
+          expiresAt: '2026-01-01T00:00:00Z',
+        })
+      );
+
+      await expect(iacProvisionerService.renderKey(RENDER_REQUEST)).rejects.toBeInstanceOf(
+        IacProvisionerUnavailableError
+      );
+
+      const warnLogged = logger.warn.mock.calls.flat().map(String).join(' ');
+      expect(warnLogged).toContain('contained no key');
+    });
+  });
+
+  describe('renderTemplate key passthrough', () => {
+    it('returns key when the provider includes it', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(200, {
+          artifactUrl: ARTIFACT_URL,
+          expiresAt: '2026-01-01T00:00:00Z',
+          key: 'sha256:abc',
+        })
+      );
+
+      const result = await iacProvisionerService.renderTemplate(RENDER_REQUEST);
+      expect(result.key).toBe('sha256:abc');
+    });
+  });
 });
 
 describe('parseIacProvisionerErrors', () => {

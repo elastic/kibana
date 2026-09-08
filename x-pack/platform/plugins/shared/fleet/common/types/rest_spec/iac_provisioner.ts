@@ -35,4 +35,6 @@ export interface RenderIacTemplateResponse {
   artifactUrl: string;
   /** ISO 8601 UTC timestamp when the pre-signed URL expires. */
   expiresAt: string;
+  /** Opaque IaC template key (SHA of the canonicalised rendered template); absent until IaCP ships it. */
+  key?: string;
 }
