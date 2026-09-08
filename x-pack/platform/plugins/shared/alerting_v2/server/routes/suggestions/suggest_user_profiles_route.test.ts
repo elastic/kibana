@@ -21,6 +21,7 @@ describe('SuggestUserProfilesRoute', () => {
     securityStart.userProfiles.suggest.mockResolvedValue([
       {
         uid: 'u-1',
+        user: { username: 'john', full_name: 'John Doe', email: 'random@email.com' },
         data: { avatar: { initials: 'TU', color: '#472554', imageUrl: 'random-url' } },
       } as UserProfile,
     ]);
@@ -35,7 +36,13 @@ describe('SuggestUserProfilesRoute', () => {
       dataPath: 'avatar',
     });
     expect(ctx.response.ok).toHaveBeenCalledWith({
-      body: [{ uid: 'u-1', avatar: { initials: 'TU', color: '#472554', image_url: 'random-url' } }],
+      body: [
+        {
+          uid: 'u-1',
+          user: { username: 'john', full_name: 'John Doe', email: 'random@email.com' },
+          avatar: { initials: 'TU', color: '#472554', image_url: 'random-url' },
+        },
+      ],
     });
   });
 

@@ -107,7 +107,11 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
     const body = profiles.map(({ uid, user, data }) => {
       return {
         uid,
-        user,
+        user: {
+          username: user.username,
+          full_name: user.full_name,
+          email: user.email,
+        },
         ...(data?.avatar && {
           avatar: {
             initials: data.avatar.initials,
