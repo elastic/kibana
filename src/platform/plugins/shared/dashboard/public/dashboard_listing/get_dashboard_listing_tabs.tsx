@@ -34,6 +34,7 @@ import type {
   DashboardSavedObjectUserContent,
 } from './types';
 import { PlaylistListing } from './playlist_listing';
+import { playlistStrings } from './_playlist_strings';
 
 type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
@@ -134,9 +135,9 @@ export const getDashboardListingTabs = ({
     },
   };
   const playlistsTab: DashboardListingTab = {
-    title: 'Playlists',
+    title: playlistStrings.tabTitle,
     id: 'playlists',
-    deepLink: { title: 'Playlists' },
+    deepLink: { title: playlistStrings.tabTitle },
     getTableList: () => <PlaylistListing />,
   };
 

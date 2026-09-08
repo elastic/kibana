@@ -29,6 +29,7 @@ import {
   type PlaylistPlaybackState,
 } from '../dashboard_client';
 import { findService } from '../dashboard_client';
+import { playlistRunnerStrings } from './_playlist_runner_strings';
 
 export const PlaylistRunner = () => {
   const { euiTheme } = useEuiTheme();
@@ -100,7 +101,9 @@ export const PlaylistRunner = () => {
       })
       .catch((error) => {
         if (canceled) return;
-        setLoadError(error instanceof Error ? error.message : 'Unable to load playlist.');
+        setLoadError(
+          error instanceof Error ? error.message : playlistRunnerStrings.unableToLoadErrorMessage
+        );
       });
     return () => {
       canceled = true;
@@ -123,12 +126,12 @@ export const PlaylistRunner = () => {
           zIndex: euiTheme.levels.toast,
         }}
       >
-        <KbnDangerCallout announceOnMount title="Playlist unavailable">
+        <KbnDangerCallout announceOnMount title={playlistRunnerStrings.unavailableTitle}>
           {loadError}
         </KbnDangerCallout>
         <EuiSpacer size="s" />
         <EuiButton iconType="logOut" onClick={() => history.push('/list/playlists')}>
-          Exit
+          {playlistRunnerStrings.exitButtonLabel}
         </EuiButton>
       </EuiPanel>
     );
@@ -150,16 +153,16 @@ export const PlaylistRunner = () => {
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         {playback.error && (
           <EuiFlexItem grow={false}>
-            <KbnDangerCallout announceOnMount title="Playback stopped">
+            <KbnDangerCallout announceOnMount title={playlistRunnerStrings.playbackStoppedTitle}>
               {playback.error}
             </KbnDangerCallout>
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiToolTip content="Previous dashboard" disableScreenReaderOutput>
+          <EuiToolTip content={playlistRunnerStrings.previousTooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="sortLeft"
-              aria-label="Previous dashboard"
+              aria-label={playlistRunnerStrings.previousAriaLabel}
               onClick={() => void controller.current?.previous()}
             />
           </EuiToolTip>
@@ -172,21 +175,23 @@ export const PlaylistRunner = () => {
               playback.isPlaying ? controller.current?.pause() : void controller.current?.resume()
             }
           >
-            {playback.isPlaying ? 'Pause' : 'Resume'}
+            {playback.isPlaying
+              ? playlistRunnerStrings.pauseButtonLabel
+              : playlistRunnerStrings.resumeButtonLabel}
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content="Next dashboard" disableScreenReaderOutput>
+          <EuiToolTip content={playlistRunnerStrings.nextTooltip} disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="sortRight"
-              aria-label="Next dashboard"
+              aria-label={playlistRunnerStrings.nextAriaLabel}
               onClick={() => void controller.current?.next()}
             />
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            {current} / {playlist.dashboardIds.length}
+            {playlistRunnerStrings.positionLabel(current, playlist.dashboardIds.length)}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -194,7 +199,7 @@ export const PlaylistRunner = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="logOut" onClick={() => history.push('/list/playlists')}>
-            Exit
+            {playlistRunnerStrings.exitButtonLabel}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

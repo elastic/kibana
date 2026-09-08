@@ -34,6 +34,7 @@ import { dashboardClient } from '../dashboard_client';
 import { findService } from '../dashboard_client';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { playlistStrings } from './_playlist_strings';
 
 const emptyRequest: DashboardPlaylistRequest = {
   name: '',
@@ -59,7 +60,9 @@ export const PlaylistListing = () => {
     try {
       setPlaylists(await playlistClient.find());
     } catch (refreshError) {
-      setError(refreshError instanceof Error ? refreshError.message : 'Unable to load playlists.');
+      setError(
+        refreshError instanceof Error ? refreshError.message : playlistStrings.loadErrorMessage
+      );
     }
   }, []);
   useEffect(() => {
@@ -81,7 +84,7 @@ export const PlaylistListing = () => {
     } catch (searchError) {
       if (requestId === searchRequestId.current) {
         setError(
-          searchError instanceof Error ? searchError.message : 'Unable to search dashboards.'
+          searchError instanceof Error ? searchError.message : playlistStrings.searchErrorMessage
         );
       }
     } finally {
@@ -108,7 +111,7 @@ export const PlaylistListing = () => {
       setEditing(undefined);
       await refresh();
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : 'Unable to save playlist.');
+      setError(saveError instanceof Error ? saveError.message : playlistStrings.saveErrorMessage);
     } finally {
       setIsSaving(false);
     }
@@ -132,13 +135,13 @@ export const PlaylistListing = () => {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiTitle size="m">
-              <h2>Playlists</h2>
+              <h2>{playlistStrings.pageTitle}</h2>
             </EuiTitle>
           </EuiFlexItem>
           {showWriteControls && (
             <EuiFlexItem grow={false}>
               <EuiButton iconType="plusCircle" onClick={() => setEditing(emptyRequest)}>
-                Create playlist
+                {playlistStrings.createButtonLabel}
               </EuiButton>
             </EuiFlexItem>
           )}
@@ -146,7 +149,7 @@ export const PlaylistListing = () => {
       </EuiFlexItem>
       {error && (
         <EuiFlexItem>
-          <KbnDangerCallout announceOnMount title="Playlist error">
+          <KbnDangerCallout announceOnMount title={playlistStrings.errorTitle}>
             {error}
           </KbnDangerCallout>
         </EuiFlexItem>
@@ -155,7 +158,7 @@ export const PlaylistListing = () => {
         <EuiFlexItem>
           <EuiPanel hasBorder>
             <EuiTitle size="s">
-              <h3>{editing.id ? 'Edit playlist' : 'Create playlist'}</h3>
+              <h3>{playlistStrings.editTitle(Boolean(editing.id))}</h3>
             </EuiTitle>
             <EuiSpacer size="m" />
             <EuiForm
@@ -172,8 +175,8 @@ export const PlaylistListing = () => {
                 />
               </EuiFormRow>
               <EuiFormRow
-                label="Rotation duration (seconds)"
-                helpText="Must be greater than zero."
+                label={playlistStrings.durationLabel}
+                helpText={playlistStrings.durationHelpText}
                 fullWidth
               >
                 <EuiFieldNumber
@@ -185,16 +188,16 @@ export const PlaylistListing = () => {
                 />
               </EuiFormRow>
               <EuiFormRow
-                label="Find dashboards"
-                helpText="Select dashboards, then arrange their playback order below."
+                label={playlistStrings.findDashboardsLabel}
+                helpText={playlistStrings.findDashboardsHelpText}
                 fullWidth
               >
                 <EuiComboBox<string>
-                  aria-label="Find dashboards"
+                  aria-label={playlistStrings.findDashboardsLabel}
                   fullWidth
                   isClearable
                   isLoading={isDashboardSearchLoading}
-                  placeholder="Search dashboards"
+                  placeholder={playlistStrings.findDashboardsPlaceholder}
                   options={dashboardOptions.filter(
                     (option) => !editing.dashboardIds.includes(option.value ?? '')
                   )}
@@ -219,8 +222,8 @@ export const PlaylistListing = () => {
                 />
               </EuiFormRow>
               <EuiFormRow
-                label="Playlist order"
-                helpText="Dashboards play from top to bottom."
+                label={playlistStrings.orderLabel}
+                helpText={playlistStrings.orderHelpText}
                 fullWidth
               >
                 <EuiPanel color="subdued" paddingSize="s">
@@ -230,10 +233,13 @@ export const PlaylistListing = () => {
                         {editing.dashboardIds.map((id, index) => (
                           <li key={id}>
                             {dashboardTitles[id] ?? id}{' '}
-                            <EuiToolTip content="Move dashboard up" disableScreenReaderOutput>
+                            <EuiToolTip
+                              content={playlistStrings.moveUpTooltip}
+                              disableScreenReaderOutput
+                            >
                               <EuiButtonIcon
                                 iconType="sortUp"
-                                aria-label="Move dashboard up"
+                                aria-label={playlistStrings.moveUpAriaLabel}
                                 disabled={index === 0}
                                 onClick={() =>
                                   setEditing({
@@ -243,10 +249,13 @@ export const PlaylistListing = () => {
                                 }
                               />
                             </EuiToolTip>
-                            <EuiToolTip content="Move dashboard down" disableScreenReaderOutput>
+                            <EuiToolTip
+                              content={playlistStrings.moveDownTooltip}
+                              disableScreenReaderOutput
+                            >
                               <EuiButtonIcon
                                 iconType="sortDown"
-                                aria-label="Move dashboard down"
+                                aria-label={playlistStrings.moveDownAriaLabel}
                                 disabled={index === editing.dashboardIds.length - 1}
                                 onClick={() =>
                                   setEditing({
@@ -256,10 +265,13 @@ export const PlaylistListing = () => {
                                 }
                               />
                             </EuiToolTip>
-                            <EuiToolTip content="Remove dashboard" disableScreenReaderOutput>
+                            <EuiToolTip
+                              content={playlistStrings.removeTooltip}
+                              disableScreenReaderOutput
+                            >
                               <EuiButtonIcon
                                 iconType="cross"
-                                aria-label="Remove dashboard"
+                                aria-label={playlistStrings.removeAriaLabel}
                                 onClick={() =>
                                   setEditing({
                                     ...editing,
@@ -276,7 +288,7 @@ export const PlaylistListing = () => {
                     </EuiText>
                   ) : (
                     <EuiText color="subdued" size="s">
-                      Select dashboards above to build the playlist order.
+                      {playlistStrings.emptyOrderDescription}
                     </EuiText>
                   )}
                 </EuiPanel>
@@ -294,21 +306,24 @@ export const PlaylistListing = () => {
                   editing.duration <= 0
                 }
               >
-                Save
+                {playlistStrings.saveButtonLabel}
               </EuiButton>{' '}
-              <EuiButton onClick={() => setEditing(undefined)}>Cancel</EuiButton>
+              <EuiButton onClick={() => setEditing(undefined)}>
+                {playlistStrings.cancelButtonLabel}
+              </EuiButton>
             </EuiForm>
           </EuiPanel>
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        {playlists.length === 0 && !editing && <EuiText>No playlists yet.</EuiText>}
+        {playlists.length === 0 && !editing && <EuiText>{playlistStrings.emptyState}</EuiText>}
         {playlists.map((playlist) => (
           <React.Fragment key={playlist.id}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem>
                 <EuiText>
-                  <strong>{playlist.name}</strong> ({playlist.dashboardIds.length} dashboards)
+                  <strong>{playlist.name}</strong>{' '}
+                  {playlistStrings.dashboardCount(playlist.dashboardIds.length)}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -320,15 +335,18 @@ export const PlaylistListing = () => {
                     })
                   }
                 >
-                  Start
+                  {playlistStrings.startButtonLabel}
                 </EuiButton>
               </EuiFlexItem>
               {showWriteControls && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={`Edit ${playlist.name}`} disableScreenReaderOutput>
+                  <EuiToolTip
+                    content={playlistStrings.editAriaLabel(playlist.name)}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="pencil"
-                      aria-label={`Edit ${playlist.name}`}
+                      aria-label={playlistStrings.editAriaLabel(playlist.name)}
                       onClick={() => void editPlaylist(playlist)}
                     />
                   </EuiToolTip>
@@ -336,10 +354,13 @@ export const PlaylistListing = () => {
               )}
               {showWriteControls && (
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={`Delete ${playlist.name}`} disableScreenReaderOutput>
+                  <EuiToolTip
+                    content={playlistStrings.deleteAriaLabel(playlist.name)}
+                    disableScreenReaderOutput
+                  >
                     <EuiButtonIcon
                       iconType="trash"
-                      aria-label={`Delete ${playlist.name}`}
+                      aria-label={playlistStrings.deleteAriaLabel(playlist.name)}
                       color="danger"
                       onClick={() =>
                         void playlistClient
@@ -349,7 +370,7 @@ export const PlaylistListing = () => {
                             setError(
                               deleteError instanceof Error
                                 ? deleteError.message
-                                : 'Unable to delete playlist.'
+                                : playlistStrings.deleteErrorMessage
                             );
                           })
                       }
