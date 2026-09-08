@@ -16,7 +16,7 @@ import { columnFromDataViewField } from '../to_column';
 /**
  * `DataSource` implementation backed by a {@link DataView}.
  *
- * Used for DSL / aggregation-based queries. A thin wrapper — every property
+ * Used for DSL queries. A thin wrapper — every property
  * and method delegates directly to the underlying `DataView`, so DSL consumers
  * see no behavioral change from using a `DataView` directly.
  *

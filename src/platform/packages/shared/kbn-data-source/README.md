@@ -15,7 +15,7 @@ Consumers ──→ DataSource ──┬──→ DataViewSource ──→ DataV
 
 `DataSource` is the contract every consumer depends on. Two implementations:
 
-- **`DataViewSource`** — thin wrapper around an existing `DataView`. Used for DSL / aggregation queries. Every property delegates directly to the underlying DataView; consumers that need DSL-specific features (runtime fields, scripted fields, `searchSource`) call `getDataView()`.
+- **`DataViewSource`** — thin wrapper around an existing `DataView`. Used for DSL. Every property delegates directly to the underlying DataView; consumers that need DSL-specific features (runtime fields, scripted fields, `searchSource`) call `getDataView()`.
 - **`EsqlSource`** — built directly from `(query, resultColumns)`. No DataView underneath, no `_field_caps` call. Identity is derived from a SHA-256 hash of the FROM target + time field + project routing, matching the scheme used by the existing adhoc DataView cache for filter backward compatibility.
 
 Both implementations satisfy `DataViewBase` from `@kbn/es-query`, so filter utilities (`buildEsQuery`, `getDisplayValueFromFilter`, `filter_matches_index`) accept a `DataSource` directly.
