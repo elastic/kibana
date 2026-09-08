@@ -46,16 +46,16 @@ export const createAttachmentPublicClient = ({
   };
 
   return {
-    async list(conversationId, options): Promise<ListAttachmentsResult> {
+    async list({ conversationId, includeDeleted }): Promise<ListAttachmentsResult> {
       const { stateManager } = await loadState(conversationId);
-      const results = options?.includeDeleted ? stateManager.getAll() : stateManager.getActive();
+      const results = includeDeleted ? stateManager.getAll() : stateManager.getActive();
       return {
         results,
         total_token_estimate: stateManager.getTotalTokenEstimate(),
       };
     },
 
-    async get(conversationId, attachmentId) {
+    async get({ conversationId, attachmentId }) {
       const { stateManager } = await loadState(conversationId);
       const record = stateManager.getAttachmentRecord(attachmentId);
       if (!record) {
@@ -63,11 +63,12 @@ export const createAttachmentPublicClient = ({
       }
       return record;
     },
-    async create(conversationId, input) {
+
+    async create({ conversationId, id, type, data, origin, description, hidden }) {
       const { conversationClient, stateManager } = await loadState(conversationId);
 
-      if (input.id && stateManager.getAttachmentRecord(input.id)) {
-        throw new AttachmentConflictError(`Attachment with ID '${input.id}' already exists`);
+      if (id && stateManager.getAttachmentRecord(id)) {
+        throw new AttachmentConflictError(`Attachment with ID '${id}' already exists`);
       }
 
       const spaceId = spaces?.spacesService.getSpaceId(request) ?? 'default';
@@ -80,7 +81,7 @@ export const createAttachmentPublicClient = ({
       let attachment;
       try {
         attachment = await stateManager.add(
-          input as AttachmentInput,
+          { id, type, data, origin, description, hidden } as AttachmentInput,
           ATTACHMENT_REF_ACTOR.user,
           resolveContext
         );
@@ -95,7 +96,8 @@ export const createAttachmentPublicClient = ({
 
       return attachment;
     },
-    async update(conversationId, attachmentId, input) {
+
+    async update({ conversationId, attachmentId, data, description }) {
       const { conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -110,7 +112,11 @@ export const createAttachmentPublicClient = ({
 
       let updated;
       try {
-        updated = await stateManager.update(attachmentId, input, ATTACHMENT_REF_ACTOR.user);
+        updated = await stateManager.update(
+          attachmentId,
+          { data, description },
+          ATTACHMENT_REF_ACTOR.user
+        );
       } catch (e) {
         throw new AttachmentValidationError((e as Error).message);
       }
@@ -126,7 +132,8 @@ export const createAttachmentPublicClient = ({
 
       return updated;
     },
-    async delete(conversationId, attachmentId, options) {
+
+    async delete({ conversationId, attachmentId, permanent }) {
       const { conversation, conversationClient, stateManager } = await loadState(conversationId);
       const existing = stateManager.getAttachmentRecord(attachmentId);
 
@@ -137,7 +144,7 @@ export const createAttachmentPublicClient = ({
         throw new AttachmentValidationError('Screen context attachments cannot be deleted');
       }
 
-      if (options?.permanent) {
+      if (permanent) {
         if (hasClientId(existing)) {
           throw new AttachmentConflictError(
             `Cannot permanently delete attachment '${attachmentId}' because it was created from flyout configuration`

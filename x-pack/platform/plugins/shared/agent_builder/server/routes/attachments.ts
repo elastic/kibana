@@ -98,7 +98,7 @@ export function registerAttachmentRoutes({
           spaces: startDeps.spaces,
         });
 
-        const result = await client.list(conversationId, { includeDeleted });
+        const result = await client.list({ conversationId, includeDeleted });
         return response.ok<ListAttachmentsResponse>({ body: result });
       })
     );
@@ -153,7 +153,7 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          const attachment = await client.get(conversationId, attachmentId);
+          const attachment = await client.get({ conversationId, attachmentId });
           return response.ok<GetAttachmentResponse>({ body: { attachment } });
         } catch (e) {
           if (e instanceof AttachmentNotFoundError) {
@@ -325,7 +325,7 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          const attachment = await client.create(conversationId, request.body);
+          const attachment = await client.create({ conversationId, ...request.body });
           return response.ok<CreateAttachmentResponse>({ body: { attachment } });
         } catch (e) {
           if (e instanceof AttachmentConflictError) {
@@ -401,7 +401,11 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          const updated = await client.update(conversationId, attachmentId, request.body);
+          const updated = await client.update({
+            conversationId,
+            attachmentId,
+            ...request.body,
+          });
           return response.ok<UpdateAttachmentResponse>({
             body: { attachment: updated, new_version: updated.current_version },
           });
@@ -481,7 +485,7 @@ export function registerAttachmentRoutes({
         });
 
         try {
-          await client.delete(conversationId, attachmentId, { permanent });
+          await client.delete({ conversationId, attachmentId, permanent });
           return response.ok<DeleteAttachmentResponse>({
             body: { success: true, permanent: permanent ?? false },
           });

@@ -235,28 +235,6 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
 }
 
 /**
- * Input for creating a new attachment via the browser client.
- * Mirrors the `POST /conversations/{id}/attachments` route body.
- */
-export interface CreateAttachmentInput {
-  id?: string;
-  type: string;
-  data?: unknown;
-  origin?: string;
-  description?: string;
-  hidden?: boolean;
-}
-
-/**
- * Input for updating an attachment via the browser client.
- * Mirrors the `PUT /conversations/{id}/attachments/{aid}` route body.
- */
-export interface UpdateAttachmentInput {
-  data?: unknown;
-  description?: string;
-}
-
-/**
  * Result of a `list` call on the browser client.
  */
 export interface ListAttachmentsResult {
@@ -269,22 +247,35 @@ export interface ListAttachmentsResult {
  * Obtain via {@link AttachmentServiceStartContract.getClient}.
  */
 export interface AttachmentBrowserClient {
-  create(conversationId: string, input: CreateAttachmentInput): Promise<VersionedAttachment>;
-  get(conversationId: string, attachmentId: string): Promise<VersionedAttachment>;
-  update(
-    conversationId: string,
-    attachmentId: string,
-    input: UpdateAttachmentInput
-  ): Promise<VersionedAttachment>;
-  delete(
-    conversationId: string,
-    attachmentId: string,
-    options?: { permanent?: boolean }
-  ): Promise<void>;
-  list(
-    conversationId: string,
-    options?: { includeDeleted?: boolean }
-  ): Promise<ListAttachmentsResult>;
+  create(args: {
+    conversationId: string;
+    id?: string;
+    type: string;
+    data?: unknown;
+    origin?: string;
+    description?: string;
+    hidden?: boolean;
+  }): Promise<VersionedAttachment>;
+
+  get(args: { conversationId: string; attachmentId: string }): Promise<VersionedAttachment>;
+
+  update(args: {
+    conversationId: string;
+    attachmentId: string;
+    data?: unknown;
+    description?: string;
+  }): Promise<VersionedAttachment>;
+
+  delete(args: {
+    conversationId: string;
+    attachmentId: string;
+    permanent?: boolean;
+  }): Promise<void>;
+
+  list(args: {
+    conversationId: string;
+    includeDeleted?: boolean;
+  }): Promise<ListAttachmentsResult>;
 }
 
 /**

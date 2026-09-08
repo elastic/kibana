@@ -18,7 +18,7 @@ describe('AttachmentsService HTTP methods', () => {
   it('list GETs the collection endpoint', async () => {
     const { http, service } = setup();
     http.get.mockResolvedValue({ results: [], total_token_estimate: 0 });
-    const res = await service.list('c1');
+    const res = await service.list({ conversationId: 'c1' });
     expect(http.get).toHaveBeenCalledWith(
       expect.stringContaining('/conversations/c1/attachments'),
       expect.objectContaining({ query: { include_deleted: undefined } })
@@ -29,7 +29,7 @@ describe('AttachmentsService HTTP methods', () => {
   it('get GETs the single-attachment endpoint and unwraps `attachment`', async () => {
     const { http, service } = setup();
     http.get.mockResolvedValue({ attachment: { id: 'a1' } });
-    const res = await service.get('c1', 'a1');
+    const res = await service.get({ conversationId: 'c1', attachmentId: 'a1' });
     expect(http.get).toHaveBeenCalledWith(
       expect.stringContaining('/conversations/c1/attachments/a1')
     );
@@ -39,7 +39,11 @@ describe('AttachmentsService HTTP methods', () => {
   it('create POSTs the body and unwraps `attachment`', async () => {
     const { http, service } = setup();
     http.post.mockResolvedValue({ attachment: { id: 'a1' } });
-    const res = await service.create('c1', { type: 'text', data: { text: 'hi' } });
+    const res = await service.create({
+      conversationId: 'c1',
+      type: 'text',
+      data: { text: 'hi' },
+    });
     expect(http.post).toHaveBeenCalledWith(
       expect.stringContaining('/conversations/c1/attachments'),
       expect.objectContaining({
@@ -52,7 +56,11 @@ describe('AttachmentsService HTTP methods', () => {
   it('update PUTs the body and unwraps `attachment`', async () => {
     const { http, service } = setup();
     http.put.mockResolvedValue({ attachment: { id: 'a1' }, new_version: 2 });
-    const res = await service.update('c1', 'a1', { data: { text: 'x' } });
+    const res = await service.update({
+      conversationId: 'c1',
+      attachmentId: 'a1',
+      data: { text: 'x' },
+    });
     expect(http.put).toHaveBeenCalledWith(
       expect.stringContaining('/conversations/c1/attachments/a1'),
       expect.objectContaining({ body: JSON.stringify({ data: { text: 'x' } }) })
@@ -63,7 +71,7 @@ describe('AttachmentsService HTTP methods', () => {
   it('delete DELETEs with the permanent query flag', async () => {
     const { http, service } = setup();
     http.delete.mockResolvedValue({ success: true, permanent: true });
-    await service.delete('c1', 'a1', { permanent: true });
+    await service.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true });
     expect(http.delete).toHaveBeenCalledWith(
       expect.stringContaining('/conversations/c1/attachments/a1'),
       expect.objectContaining({ query: { permanent: true } })

@@ -19,8 +19,6 @@ export type {
   AttachmentPreviewState,
   AttachmentLifecycleParams,
   AttachmentBrowserClient,
-  CreateAttachmentInput,
-  UpdateAttachmentInput,
   ListAttachmentsResult,
 } from './contract';
 export { ActionButtonType } from './contract';

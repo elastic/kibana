@@ -86,7 +86,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      const result = await client.list('c1');
+      const result = await client.list({ conversationId: 'c1' });
 
       expect(deps.conversationsService.getScopedClient).toHaveBeenCalledWith({
         request: deps.request,
@@ -104,7 +104,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      const result = await client.list('c1', { includeDeleted: true });
+      const result = await client.list({ conversationId: 'c1', includeDeleted: true });
 
       expect(result.results.map((r) => r.id).sort()).toEqual(['a1', 'a2']);
     });
@@ -121,7 +121,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      const result = await client.get('c1', 'a1');
+      const result = await client.get({ conversationId: 'c1', attachmentId: 'a1' });
 
       expect(result.id).toBe('a1');
     });
@@ -136,7 +136,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.get('c1', 'missing')).rejects.toMatchObject({
+      await expect(
+        client.get({ conversationId: 'c1', attachmentId: 'missing' })
+      ).rejects.toMatchObject({
         name: 'AttachmentNotFoundError',
       });
     });
@@ -152,7 +154,8 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      const created = await client.create('c1', {
+      const created = await client.create({
+        conversationId: 'c1',
         type: 'text',
         data: { text: 'hello' },
       });
@@ -175,7 +178,7 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.create('c1', { id: 'a1', type: 'text', data: { text: 'x' } })
+        client.create({ conversationId: 'c1', id: 'a1', type: 'text', data: { text: 'x' } })
       ).rejects.toMatchObject({ name: 'AttachmentConflictError' });
     });
 
@@ -195,7 +198,7 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build();
 
       await expect(
-        client.create('c1', { type: 'text', data: { wrong: true } })
+        client.create({ conversationId: 'c1', type: 'text', data: { wrong: true } })
       ).rejects.toMatchObject({ name: 'AttachmentValidationError' });
     });
   });
@@ -210,7 +213,11 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      const updated = await client.update('c1', 'a1', { data: { text: 'new' } });
+      const updated = await client.update({
+        conversationId: 'c1',
+        attachmentId: 'a1',
+        data: { text: 'new' },
+      });
 
       expect(updated.id).toBe('a1');
       expect(deps.conversationClient.update).toHaveBeenCalledWith(
@@ -228,9 +235,13 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.update('c1', 'missing', { data: { text: 'x' } })).rejects.toMatchObject({
-        name: 'AttachmentNotFoundError',
-      });
+      await expect(
+        client.update({
+          conversationId: 'c1',
+          attachmentId: 'missing',
+          data: { text: 'x' },
+        })
+      ).rejects.toMatchObject({ name: 'AttachmentNotFoundError' });
     });
 
     it('throws AttachmentValidationError when the attachment is deleted', async () => {
@@ -243,9 +254,13 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.update('c1', 'a1', { data: { text: 'x' } })).rejects.toMatchObject({
-        name: 'AttachmentValidationError',
-      });
+      await expect(
+        client.update({
+          conversationId: 'c1',
+          attachmentId: 'a1',
+          data: { text: 'x' },
+        })
+      ).rejects.toMatchObject({ name: 'AttachmentValidationError' });
     });
   });
 
@@ -259,7 +274,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      await client.delete('c1', 'a1');
+      await client.delete({ conversationId: 'c1', attachmentId: 'a1' });
 
       expect(deps.conversationClient.update).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'c1' })
@@ -276,7 +291,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.delete('c1', 'missing')).rejects.toMatchObject({
+      await expect(
+        client.delete({ conversationId: 'c1', attachmentId: 'missing' })
+      ).rejects.toMatchObject({
         name: 'AttachmentNotFoundError',
       });
     });
@@ -291,7 +308,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.delete('c1', 'sc')).rejects.toMatchObject({
+      await expect(
+        client.delete({ conversationId: 'c1', attachmentId: 'sc' })
+      ).rejects.toMatchObject({
         name: 'AttachmentValidationError',
       });
     });
@@ -305,7 +324,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const client = deps.build();
-      await client.delete('c1', 'a1', { permanent: true });
+      await client.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true });
 
       expect(deps.conversationClient.update).toHaveBeenCalled();
     });
@@ -320,9 +339,9 @@ describe('createAttachmentPublicClient', () => {
 
       const client = deps.build();
 
-      await expect(client.delete('c1', 'a1', { permanent: true })).rejects.toMatchObject({
-        name: 'AttachmentConflictError',
-      });
+      await expect(
+        client.delete({ conversationId: 'c1', attachmentId: 'a1', permanent: true })
+      ).rejects.toMatchObject({ name: 'AttachmentConflictError' });
     });
   });
 });

@@ -161,12 +161,7 @@ export type {
   ConversationTemplatesStart,
   AttachmentsStart,
 } from './plugin_contract';
-export type {
-  AttachmentPublicClient,
-  CreateAttachmentInput,
-  UpdateAttachmentInput,
-  ListAttachmentsResult,
-} from './attachments';
+export type { AttachmentPublicClient, ListAttachmentsResult } from './attachments';
 export {
   AttachmentNotFoundError,
   AttachmentConflictError,

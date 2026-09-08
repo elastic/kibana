@@ -19,8 +19,6 @@ export type {
   AttachmentUIDefinition,
   AttachmentServiceStartContract,
   AttachmentBrowserClient,
-  CreateAttachmentInput,
-  UpdateAttachmentInput,
   ListAttachmentsResult,
 } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';

@@ -9,14 +9,8 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
   UnknownAttachment,
   UpdateOriginResponse,
-  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import type {
-  AttachmentUIDefinition,
-  CreateAttachmentInput,
-  UpdateAttachmentInput,
-  ListAttachmentsResult,
-} from '@kbn/agent-builder-browser';
+import type { AttachmentUIDefinition, AttachmentBrowserClient } from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
 import type {
   CheckStaleAttachmentsResponse,
@@ -109,51 +103,48 @@ export class AttachmentsService {
     );
   }
 
-  async list(
-    conversationId: string,
-    options?: { includeDeleted?: boolean }
-  ): Promise<ListAttachmentsResult> {
+  list: AttachmentBrowserClient['list'] = async ({ conversationId, includeDeleted }) => {
     return await this.http.get<ListAttachmentsResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments`,
-      { query: { include_deleted: options?.includeDeleted } }
+      { query: { include_deleted: includeDeleted } }
     );
-  }
+  };
 
-  async get(conversationId: string, attachmentId: string): Promise<VersionedAttachment> {
+  get: AttachmentBrowserClient['get'] = async ({ conversationId, attachmentId }) => {
     const { attachment } = await this.http.get<GetAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`
     );
     return attachment;
-  }
+  };
 
-  async create(conversationId: string, input: CreateAttachmentInput): Promise<VersionedAttachment> {
+  create: AttachmentBrowserClient['create'] = async ({ conversationId, ...body }) => {
     const { attachment } = await this.http.post<CreateAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments`,
-      { body: JSON.stringify(input) }
+      { body: JSON.stringify(body) }
     );
     return attachment;
-  }
+  };
 
-  async update(
-    conversationId: string,
-    attachmentId: string,
-    input: UpdateAttachmentInput
-  ): Promise<VersionedAttachment> {
+  update: AttachmentBrowserClient['update'] = async ({
+    conversationId,
+    attachmentId,
+    ...body
+  }) => {
     const { attachment } = await this.http.put<UpdateAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
-      { body: JSON.stringify(input) }
+      { body: JSON.stringify(body) }
     );
     return attachment;
-  }
+  };
 
-  async delete(
-    conversationId: string,
-    attachmentId: string,
-    options?: { permanent?: boolean }
-  ): Promise<void> {
+  delete: AttachmentBrowserClient['delete'] = async ({
+    conversationId,
+    attachmentId,
+    permanent,
+  }) => {
     await this.http.delete<DeleteAttachmentResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
-      { query: { permanent: options?.permanent } }
+      { query: { permanent } }
     );
-  }
+  };
 }
