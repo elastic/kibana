@@ -487,6 +487,27 @@ export const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
 };
 ```
 
+#### Conversation details flyout
+
+Register `renderConversationDetailsContent` to render your attachment in a conversation details tab:
+
+```tsx
+const myAttachmentDefinition: AttachmentUIDefinition<MyAttachment> = {
+  getLabel: (attachment) => attachment.description ?? 'My attachment',
+  renderConversationDetailsContent: ({ attachment }) => (
+    <MyAttachmentDetails attachment={attachment} />
+  ),
+};
+
+agentBuilder.attachments.addAttachmentType('my.attachment', myAttachmentDefinition);
+```
+
+The renderer receives `ConversationDetailsRenderProps<TAttachment>`, containing `attachment`.
+The consuming tab selects which attachment version data to pass to the renderer; the registry
+neither selects versions nor filters attachments. Consumers may render the current version or a historical version. This renderer is optional and independent of
+inline and canvas rendering. Capture any plugin services your component needs at registration
+and mount its providers explicitly, since the flyout can open outside the Agent Builder application.
+
 #### Viewport
 
 The `getActionButtons` params include flags to customize behavior per viewport:
@@ -901,7 +922,7 @@ class MyPlugin {
 }
 ```
 
-Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its own built-in `attachments` and `timeline` tabs through this same API (from the `agentBuilderPlatform` plugin).
+Tabs and templates register separately, so the same tab can be reused across templates. Agent Builder registers its built-in `timeline` tab through this same API (from the `agentBuilderPlatform` plugin).
 
 ### Complete example
 
@@ -918,10 +939,10 @@ const createOverviewTab = (core: CoreStart): ConversationTemplateTabDefinition =
   label: i18n.translate('xpack.securitySolution.conversationTabs.overviewLabel', {
     defaultMessage: 'Overview',
   }),
-  // A React component receiving the full conversation. It may use hooks.
-  content: ({ conversation }) => (
+  // A React component receiving the conversation and public attachments service.
+  content: ({ conversation, attachmentsService }) => (
     <SecurityProviders core={core}>
-      <OverviewView templateId={conversation.template_id} metadata={conversation.metadata} />
+      <OverviewView conversation={conversation} attachmentsService={attachmentsService} />
     </SecurityProviders>
   ),
 });
@@ -938,6 +959,31 @@ class SecurityPlugin {
     }));
   }
 }
+```
+
+The `content` component receives `conversation` and `attachmentsService` as props in both the
+live chat flyout and the snapshot opened with `agentBuilder.openConversationDetails({ conversationId })`. The snapshot loads the conversation
+when opened; the live flyout follows conversation updates.
+
+Inside your tab, select the attachments and versions to display, then look up their renderer.
+This example uses `getLatestVersion` from `@kbn/agent-builder-common/attachments` to render the
+current version; use `getVersion` when displaying a specific historical version:
+
+```tsx
+const latestVersion = getLatestVersion(versionedAttachment);
+const definition = attachmentsService.getAttachmentUiDefinition(versionedAttachment.type);
+
+return latestVersion && definition?.renderConversationDetailsContent
+  ? definition.renderConversationDetailsContent({
+      attachment: {
+        id: versionedAttachment.id,
+        type: versionedAttachment.type,
+        description: versionedAttachment.description,
+        origin: versionedAttachment.origin,
+        data: latestVersion.data,
+      },
+    })
+  : null;
 ```
 
 ### Brief cards
@@ -988,7 +1034,7 @@ The registry does not fetch card data or provide a default card when none is reg
 ### Rules
 
 - **Display name and icon**: `name` is the template's localized display name, shown in the conversation UI (title badge, conversation lists). `icon` is optional; the UI falls back to a default icon without it, and to the raw template id when no UI definition is registered at all.
-- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `attachments` and `timeline` are reserved for Agent Builder's built-in tabs.
+- **Naming**: Tab ids are a global keyspace. Always prefix them with your plugin name (`security.overview`). `timeline` is reserved for Agent Builder's built-in tab.
 - **Duplicates**: Registering a duplicate tab id or template id throws.
 - **Resolution**: Tab ids resolve when the flyout opens, so registration order across plugins does not matter. Ids with no registered tab are skipped. Templates with no registered UI definition fall back to the built-in tabs.
 - **Ordering**: Template tabs render in array order. The built-in tabs always render after them.
