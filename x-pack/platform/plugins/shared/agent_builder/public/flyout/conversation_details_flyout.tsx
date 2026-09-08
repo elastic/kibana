@@ -24,6 +24,7 @@ import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
+import { createPublicAttachmentContract, type AttachmentsService } from '../services/attachments';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
@@ -91,6 +92,7 @@ const FlyoutFrame = ({ titleId, tabs, children }: FlyoutFrameProps) => {
 export interface ConversationDetailsFlyoutContentProps {
   conversation: Conversation;
   conversationTemplatesService: ConversationTemplatesService;
+  attachmentsService: AttachmentsService;
   titleId: string;
 }
 
@@ -98,6 +100,7 @@ export interface ConversationDetailsFlyoutContentProps {
 export const ConversationDetailsFlyoutContent = ({
   conversation,
   conversationTemplatesService,
+  attachmentsService,
   titleId,
 }: ConversationDetailsFlyoutContentProps) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
@@ -112,6 +115,10 @@ export const ConversationDetailsFlyoutContent = ({
   );
   const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
   const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
+  const publicAttachmentsService = useMemo(
+    () => createPublicAttachmentContract({ attachmentsService }),
+    [attachmentsService]
+  );
   // Render as a component so registered tabs can use hooks.
   const SelectedTabContent = selectedTab?.content;
 
@@ -128,8 +135,12 @@ export const ConversationDetailsFlyoutContent = ({
         </EuiTab>
       ))}
     >
-      {SelectedTabContent && (
-        <SelectedTabContent key={selectedTab.id} conversation={conversation} />
+      {selectedTab && SelectedTabContent && (
+        <SelectedTabContent
+          key={selectedTab.id}
+          conversation={conversation}
+          attachmentsService={publicAttachmentsService}
+        />
       )}
     </FlyoutFrame>
   );
@@ -139,6 +150,7 @@ export interface ConversationDetailsFlyoutSnapshotProps {
   conversationId: string;
   conversationsService: ConversationsService;
   conversationTemplatesService: ConversationTemplatesService;
+  attachmentsService: AttachmentsService;
   titleId: string;
 }
 
@@ -147,6 +159,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
   conversationId,
   conversationsService,
   conversationTemplatesService,
+  attachmentsService,
   titleId,
 }: ConversationDetailsFlyoutSnapshotProps) => {
   const {
@@ -180,6 +193,7 @@ export const ConversationDetailsFlyoutSnapshot = ({
     <ConversationDetailsFlyoutContent
       conversation={conversation}
       conversationTemplatesService={conversationTemplatesService}
+      attachmentsService={attachmentsService}
       titleId={titleId}
     />
   );
@@ -195,7 +209,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
     prefix: 'agentBuilderConversationDetailsFlyoutTitle',
   });
   const { conversation, isLoading } = useConversation();
-  const { conversationTemplatesService } = useAgentBuilderServices();
+  const { conversationTemplatesService, attachmentsService } = useAgentBuilderServices();
 
   return (
     <EuiFlyout
@@ -211,6 +225,7 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
         <ConversationDetailsFlyoutContent
           conversation={conversation}
           conversationTemplatesService={conversationTemplatesService}
+          attachmentsService={attachmentsService}
           titleId={titleId}
         />
       ) : (
