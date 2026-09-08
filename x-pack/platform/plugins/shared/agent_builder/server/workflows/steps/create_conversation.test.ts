@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  createAgentNotFoundError,
-  createBadRequestError,
-  createConversationAlreadyExistsError,
-} from '@kbn/agent-builder-common';
+import { createAgentNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
 import { createConversationStepDefinition } from './create_conversation';
 import {
   createStepHandlerContext,
@@ -130,8 +126,10 @@ describe('createConversationStepDefinition', () => {
   });
 
   it('returns an error when the conversation id already exists', async () => {
+    const create = jest.fn();
     const { definition } = buildDefinition({
       exists: jest.fn().mockResolvedValue(true),
+      create,
     });
 
     const result = await definition.handler(
@@ -140,18 +138,12 @@ describe('createConversationStepDefinition', () => {
       })
     );
 
-    // The public client wrapper throws when a supplied id is already present.
     expect(result).toEqual({
       error: expect.objectContaining({
         message: expect.stringMatching(/already exists/i),
       }),
     });
-    // sanity: the underlying create is not called on conflict
-    expect(
-      createConversationAlreadyExistsError({
-        conversationId: '550e8400-e29b-41d4-a716-446655440000',
-      }).message
-    ).toMatch(/already exists/i);
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('propagates template validation errors from the underlying client', async () => {

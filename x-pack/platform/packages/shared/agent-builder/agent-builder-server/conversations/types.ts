@@ -26,14 +26,11 @@ export interface ConversationCreatePublicRequest {
   /** Defaults to `{ access_mode: 'private', entries: [] }`. */
   accessControl?: ConversationAccessControlInput;
   /**
-   * Optional conversation template to apply. Seeds the conversation's `metadata`
-   * with template defaults; caller-supplied `metadata` is merged on top and
-   * validated against the template field definitions.
+   * Optional conversation template to apply.
    */
   templateId?: string;
   /**
-   * Initial metadata values. Requires `templateId`: every key must be declared
-   * by the template and every value is validated against its field definition.
+   * Initial metadata values. Requires `templateId`.
    */
   metadata?: Record<string, MetadataFieldValue>;
 }

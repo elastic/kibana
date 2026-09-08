@@ -344,6 +344,7 @@ export function registerConversationRoutes({
               {
                 agent_id: schema.maybe(
                   schema.string({
+                    minLength: 1,
                     maxLength: agentIdMaxLength,
                     meta: {
                       description:
@@ -386,6 +387,7 @@ export function registerConversationRoutes({
                 ),
                 template_id: schema.maybe(
                   schema.string({
+                    minLength: 1,
                     maxLength: CONVERSATION_TEMPLATE_ID_MAX_LENGTH,
                     meta: {
                       description:
