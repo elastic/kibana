@@ -22,6 +22,7 @@ import { OsqueryAppRoutes } from '../routes';
 import { useOsqueryIntegrationStatus } from '../common/hooks';
 import { OsqueryAppEmptyState } from './empty_state';
 import { MainNavigation } from './main_navigation';
+import { OsqueryPageHeaderProvider } from './osquery_page_header_context';
 
 const OsqueryAppComponent = () => {
   const { customBranding } = useKibana().services;
@@ -50,8 +51,10 @@ const OsqueryAppComponent = () => {
   return (
     <div css={containerCss} id="osquery-app">
       <div css={wrapperCss}>
-        <MainNavigation />
-        <OsqueryAppRoutes />
+        <OsqueryPageHeaderProvider>
+          <MainNavigation />
+          <OsqueryAppRoutes />
+        </OsqueryPageHeaderProvider>
       </div>
     </div>
   );

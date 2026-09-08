@@ -31,5 +31,6 @@
     "@kbn/peggy",
     "@kbn/test-docker-servers",
     "@kbn/app-header",
+    "@kbn/utils",
   ]
 }
