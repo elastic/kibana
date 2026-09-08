@@ -9,7 +9,7 @@ import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH } from '@kbn/alerting-v2-constants';
 import { suggestUserProfilesResponseSchema } from '@kbn/alerting-v2-schemas';
-import { apiTest, testData } from '../fixtures';
+import { ALERTING_V2_ALERTS_READ_ROLE, apiTest, NO_ACCESS_ROLE, testData } from '../fixtures';
 
 const USER_PROFILES_PATH = ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PATH;
 // Used to resolve the username / uid of the authenticated user so assertions
@@ -53,6 +53,9 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     viewerUserBody = viewerUser.body;
     sharedNameToken = adminUserBody.full_name.split(' ')[0]; // Both admin and viewer have 'test' in their full_name, so this token should match both.
 
+    // The Kibana route POST /internal/security/user_profile/_data rejects avatar updates for
+    // SAML users in cloud deployments (elastic_cloud_user=true), which is the case for all
+    // Scout interactive users. Seed avatar data directly via the ES API instead.
     await esClient.security.updateUserProfileData({
       uid: adminUserBody.profile_uid,
       data: {
@@ -141,6 +144,39 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
 
       expect(response).toHaveStatusCode(400);
       expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
+
+  apiTest(
+    'authorization: returns 200 for a user with read-only privileges',
+    async ({ apiClient, requestAuth }) => {
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
+
+      const response = await suggest(
+        apiClient,
+        { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+        { name: 'test' }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toHaveLength(2);
+    }
+  );
+
+  apiTest(
+    'authorization: returns 403 for a user without alerting_v2 privileges',
+    async ({ apiClient, requestAuth }) => {
+      const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+
+      const response = await suggest(
+        apiClient,
+        { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+        { name: 'test' }
+      );
+
+      expect(response).toHaveStatusCode(403);
     }
   );
 });
