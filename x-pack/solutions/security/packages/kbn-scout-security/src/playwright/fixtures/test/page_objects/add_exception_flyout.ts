@@ -53,6 +53,19 @@ export class AddExceptionFlyoutPage {
     await this.addExceptionButtons[buttonType].click();
   }
 
+  /**
+   * Reads the currently selected field option(s) for the condition entry at the
+   * given index. Useful for asserting that the field combobox was populated
+   * (its options come from the rule's index patterns / data view) rather than
+   * left empty by a premature `waitForVisible()`.
+   */
+  async getSelectedConditionField(entryIndex: number): Promise<string[]> {
+    const entrySelector = `${subj('exceptionItemEntryContainer')} >> nth=${entryIndex}`;
+    const entryScope = this.page.locator(entrySelector);
+    const fieldCombo = this.page.components.comboBox('fieldAutocompleteComboBox', entryScope);
+    return fieldCombo.getSelectedOptions();
+  }
+
   async fillConditionEntry({
     entryIndex,
     field,
