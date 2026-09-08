@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { getFleetPackageAgentId, parseFleetAgentYaml } from './step_install_agent_assets';
+import {
+  getFleetPackageAgentId,
+  parseFleetAgentYaml,
+  stepInstallAgentAssets,
+} from './step_install_agent_assets';
 import {
   substituteFleetAgentIds,
   substituteFleetAgentIdsWithUnresolved,
 } from './step_install_workflow_assets';
+import { savedObjectsClientMock, loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { appContextService } from '../../../../app_context';
+import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
+import { saveKibanaAssetsRefs } from '../../install';
+
+jest.mock('../../install', () => ({
+  saveKibanaAssetsRefs: jest.fn(),
+}));
 
 describe('parseFleetAgentYaml', () => {
   it('parses a valid fleet agent definition', () => {
@@ -211,5 +224,62 @@ steps:
 
     const id = result.split('agent-id: ')[1].trim();
     expect(id.startsWith('fleet-')).toBe(true);
+  });
+});
+
+
+describe('stepInstallAgentAssets (FLEET-007 headless install)', () => {
+  const pkgName = 'test-package';
+  const pkgVersion = '1.2.3';
+  const spaceId = DEFAULT_SPACE_ID;
+  const agentFileName = 'my-agent.yaml';
+  const agentId = 'fleet-default-test-package-my-agent';
+  const agentYaml = [
+    'name: SDLC Coverage Analysis',
+    'description: Planning coverage analyst',
+    'configuration:',
+    '  tools:',
+    '    - tool_ids:',
+    '        - platform.core.execute_esql',
+  ].join('\n');
+
+  let createOrUpdateAgent: jest.Mock;
+  beforeEach(() => {
+    createOrUpdateAgent = jest.fn().mockResolvedValue(undefined);
+    jest.spyOn(appContextService, 'getAgentBuilderSetup').mockReturnValue({
+      management: { createOrUpdateAgent },
+    } as never);
+    jest.mocked(saveKibanaAssetsRefs).mockReset();
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const createContext = (request: unknown = httpServerMock.createKibanaRequest()) => ({
+    logger: loggingSystemMock.createLogger(),
+    savedObjectsClient: savedObjectsClientMock.create(),
+    spaceId,
+    request,
+    packageInstallContext: {
+      packageInfo: { name: pkgName, version: pkgVersion },
+      archiveIterator: createArchiveIteratorFromMap(
+        new Map([
+          [
+            `${pkgName}-${pkgVersion}/kibana/agent/${agentFileName}`,
+            Buffer.from(agentYaml),
+          ],
+        ])
+      ),
+    },
+  });
+
+  it('creates agent assets when request context is missing (headless install)', async () => {
+    const context = { ...createContext(), request: undefined };
+    await stepInstallAgentAssets(context as never);
+    expect(createOrUpdateAgent).toHaveBeenCalledTimes(1);
+    expect(createOrUpdateAgent).toHaveBeenCalledWith(
+      expect.objectContaining({ id: agentId }),
+      expect.objectContaining({ isFakeRequest: true, isSystemRequest: true })
+    );
   });
 });

@@ -19,6 +19,7 @@ import { getPathParts } from '../../../archive';
 import { appContextService } from '../../../../app_context';
 import { saveKibanaAssetsRefs } from '../../install';
 import { withPackageSpan } from '../../utils';
+import { createFleetInternalRequest } from '../../../../security/fake_request';
 import type { InstallContext } from '../_state_machine_package_install';
 import {
   getFleetPackageWorkflowId,
@@ -113,9 +114,11 @@ export async function stepInstallAgentAssets(
     return;
   }
 
+  const request = context.request ?? createFleetInternalRequest();
   if (!context.request) {
-    logger.debug(`Skipping agent asset installation for ${pkgName}: missing install request context`);
-    return;
+    logger.debug(
+      `Installing agent assets for ${pkgName} using Fleet internal request (no install request context)`
+    );
   }
 
   await withPackageSpan(`Install package agents for ${pkgName}`, async () => {
@@ -156,7 +159,7 @@ export async function stepInstallAgentAssets(
         const agentYaml = substituteWorkflowConnectorIds(yaml, connectorVars);
         const definition = parseFleetAgentYaml(agentYaml, agentId, { pkgName });
 
-        await agentBuilderApi.createOrUpdateAgent(definition, context.request!);
+        await agentBuilderApi.createOrUpdateAgent(definition, request);
 
         assetRefs.push({
           id: agentId,
