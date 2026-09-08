@@ -122,11 +122,6 @@ steps:
               excepting individually. Only valid for rule type "query". Populate
               proposed_query with the full narrowed KQL in the same language.
 
-            suppression  — The same entity is generating repeated duplicate alerts.
-              Populate suppression_group_by with 1–3 field names to group by. Prefer
-              this over exception only when the entity itself is legitimately active
-              but the alert volume is the problem (e.g. a known scanner host).
-
             risk_score  — The rule has real detection value but the alerts are
               low-priority noise. Populate proposed_risk_score (0–100) and
               proposed_severity (low / medium / high / critical).
@@ -141,7 +136,7 @@ steps:
             properties:
               change_type:
                 type: string
-                enum: [exception, query, suppression, risk_score, disable, manual]
+                enum: [exception, query, risk_score, disable, manual]
               summary:
                 type: string
               exception_entries:
@@ -164,12 +159,6 @@ steps:
                   required: [field, operator]
               proposed_query:
                 type: string
-              suppression_group_by:
-                type: array
-                items:
-                  type: string
-                minItems: 1
-                maxItems: 3
               proposed_risk_score:
                 type: integer
                 minimum: 0
@@ -270,14 +259,6 @@ steps:
             {% endif %}
             Approving replaces the rule query. It can be edited back in the Detection Rules UI.
             {% endif %}
-            {% if steps.diagnose_rule.output.structured_output.change_type == "suppression" %}
-            Proposed alert suppression, grouped by:
-            {% for field in steps.diagnose_rule.output.structured_output.suppression_group_by %}
-            - {{ field }}
-            {% endfor %}
-            Approving enables alert suppression on the rule. Suppression cannot be removed
-            automatically; undo it manually in the Detection Rules UI.
-            {% endif %}
             {% if steps.diagnose_rule.output.structured_output.change_type == "risk_score" %}
             Proposed risk score: {{ steps.diagnose_rule.output.structured_output.proposed_risk_score }}
             Proposed severity: {{ steps.diagnose_rule.output.structured_output.proposed_severity }}
@@ -311,9 +292,6 @@ steps:
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.diagnose_rule.output.structured_output.exception_entries != null
               and steps.diagnose_rule.output.structured_output.exception_entries.size > 0 }}
-          can_apply_suppression: >-
-            ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
-              and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
           can_apply_risk_score: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'risk_score'
               and steps.diagnose_rule.output.structured_output.proposed_risk_score != null
@@ -348,24 +326,6 @@ steps:
           description: "Added by the rule tuning workflow."
           entries: "${{ steps.diagnose_rule.output.structured_output.exception_entries }}"
 
-      - name: apply_suppression_tuning
-        type: kibana.request
-        if: >-
-          ${{ steps.review_tuning.output.response.approved == true
-            and steps.classify_proposal.output.can_apply_suppression == true }}
-        on-failure:
-          continue: true
-        with:
-          method: PATCH
-          path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules"
-          headers:
-            kbn-xsrf: string
-            elastic-api-version: "2023-10-31"
-            Content-Type: application/json
-          body:
-            id: "{{ foreach.item.0 }}"
-            alert_suppression:
-              group_by: "${{ steps.diagnose_rule.output.structured_output.suppression_group_by }}"
 
       - name: apply_risk_score_tuning
         type: kibana.request
@@ -402,7 +362,6 @@ steps:
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_proposal.output.can_apply_query == false
             and steps.classify_proposal.output.can_apply_exception == false
-            and steps.classify_proposal.output.can_apply_suppression == false
             and steps.classify_proposal.output.can_apply_risk_score == false
             and steps.classify_proposal.output.can_apply_disable == false }}
         with:
@@ -423,10 +382,6 @@ steps:
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_exception == true
               and steps.apply_exception_tuning.error != null }}
-          suppression_failed: >-
-            ${{ steps.review_tuning.output.response.approved == true
-              and steps.classify_proposal.output.can_apply_suppression == true
-              and steps.apply_suppression_tuning.error != null }}
           risk_score_failed: >-
             ${{ steps.review_tuning.output.response.approved == true
               and steps.classify_proposal.output.can_apply_risk_score == true
@@ -442,7 +397,6 @@ steps:
         if: >-
           ${{ steps.classify_apply_failures.output.query_failed == true
             or steps.classify_apply_failures.output.exception_failed == true
-            or steps.classify_apply_failures.output.suppression_failed == true
             or steps.classify_apply_failures.output.risk_score_failed == true
             or steps.classify_apply_failures.output.disable_failed == true }}
         with:
@@ -471,7 +425,6 @@ steps:
           ${{ steps.review_tuning.output.response.approved == true
             and steps.classify_apply_failures.output.query_failed != true
             and steps.classify_apply_failures.output.exception_failed != true
-            and steps.classify_apply_failures.output.suppression_failed != true
             and steps.classify_apply_failures.output.risk_score_failed != true
             and steps.classify_apply_failures.output.disable_failed != true }}
         with:
