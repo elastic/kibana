@@ -229,9 +229,7 @@ export async function setupDependencies({
   const enhancedDependencies: ContextDependencies = {
     ...dependencies,
     workflowRepository,
-    workflowExecutionRepository: workflowExecutionRepositoryOverride as
-      | WorkflowExecutionRepository
-      | undefined,
+    workflowExecutionRepository: workflowExecutionRepositoryOverride,
     stepExecutionRepository: stepExecutionRepositoryOverride as StepExecutionRepository | undefined,
     workflowsExecutionEngine,
     spaceId,
