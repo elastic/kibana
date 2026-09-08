@@ -26,8 +26,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import type { AiIndexType } from '../../../common/http_api/ai_indices';
-import { SourcePicker } from '../components/source_picker';
-import type { SelectedSource } from '../components/source_picker';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useNavigation } from '../hooks/use_navigation';
 import { ContextEngineSubPageHeader } from '../layout/context_engine_page_header';
@@ -44,7 +42,7 @@ const cancelLabel = i18n.translate('xpack.contextEngine.createAiIndex.cancel', {
 
 const createPageDescription = i18n.translate('xpack.contextEngine.createAiIndex.description', {
   defaultMessage:
-    'Start by picking a source to build context from — or skip and add sources later.',
+    "Name your AI index and choose how it stores context. You'll add sources and automations next.",
 });
 
 const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title', {
@@ -87,7 +85,6 @@ const STORAGE_TYPES: Array<{
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
-  const [selectedSources, setSelectedSources] = useState<SelectedSource[]>([]);
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
   const [storageType, setStorageType] = useState<AiIndexType>('index');
@@ -102,7 +99,7 @@ export const CreateAiIndexPage = () => {
       id,
       description,
       storageType,
-      sources: selectedSources,
+      sources: [],
     });
     if (created) {
       navigateToContextEngine(getAiIndexDetailPath(created.id));
@@ -204,20 +201,6 @@ export const CreateAiIndexPage = () => {
               )}
             />
           </EuiFormRow>
-        </EuiPanel>
-
-        <EuiSpacer size="l" />
-
-        <EuiPanel hasBorder paddingSize="l">
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.contextEngine.createAiIndex.addSource.title', {
-                defaultMessage: 'Sources',
-              })}
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />
         </EuiPanel>
 
         <EuiSpacer size="l" />

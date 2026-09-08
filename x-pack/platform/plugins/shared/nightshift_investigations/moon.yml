@@ -39,6 +39,8 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/es-query'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/rule-data-utils'
+  - '@kbn/rule-registry-plugin'
 tags:
   - plugin
   - prod
