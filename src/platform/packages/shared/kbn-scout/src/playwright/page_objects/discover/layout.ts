@@ -148,7 +148,7 @@ export abstract class LayoutMixin extends SaveMixin {
       );
 
       await expect(this.getSelectedDataView()).toHaveText(title, { timeout: 20_000 });
-    }).toPass({ timeout: 90_000, intervals: [0] });
+    }).toPass({ timeout: 45_000, intervals: [0] });
 
     await this.waitUntilTabIsLoaded();
   }
