@@ -24,7 +24,11 @@ import { getDocViewTabEbtProps } from './get_doc_view_tab_ebt_props';
 import { DocViewerTab } from './doc_viewer_tab';
 import type { DocView, DocViewRenderProps, DocViewerShareableState } from '../../types';
 import { useDocViewerTabViewedEvent } from '../../analytics';
-import { useRestorableState, withRestorableState } from './restorable_state';
+import {
+  useRestorableState,
+  useRestorableStateValue,
+  withRestorableState,
+} from './restorable_state';
 import { capShareableState, projectShareableTabsState } from './shareable_state';
 
 export const INITIAL_TAB = 'unifiedDocViewer:initialTab';
@@ -110,7 +114,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
 
     // Emit the URL-shareable projection of the doc viewer state whenever the selected tab or a tab's
     // shareable slice changes.
-    const [docViewerTabsState] = useRestorableState('docViewerTabsState', undefined);
+    const docViewerTabsState = useRestorableStateValue('docViewerTabsState');
     const lastEmittedShareableStateRef = useRef<string>();
     const selectedOriginalTabId = selectedTab ? getOriginalTabId(selectedTab.id) : undefined;
 
@@ -119,12 +123,12 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
         return;
       }
 
-      const shareableState = {
+      const shareableState = capShareableState({
         selectedTabId: selectedOriginalTabId,
         tabsState: projectShareableTabsState(docViews, docViewerTabsState),
-      };
+      });
 
-      const serialized = JSON.stringify(capShareableState(shareableState));
+      const serialized = JSON.stringify(shareableState);
 
       if (serialized === lastEmittedShareableStateRef.current) {
         return;

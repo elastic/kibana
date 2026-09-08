@@ -116,10 +116,10 @@ export interface DocView<TState extends object = object> {
    */
   ebt?: EbtClickAttrs;
   /**
-   * Optional schema describing the URL-shareable subset of this tab's restorable `TState`. When set,
-   * the doc viewer projects the tab's state through it and validates restored values
-   * against it. Keep the schema bounded (e.g. `.max()` on strings/arrays) and evolve it additively so
-   * that older shared links degrade gracefully rather than breaking.
+   * Optional schema describing the URL-shareable subset of this tab's state. When set, the doc viewer
+   * projects the tab's reported state through it for deep links and validates restored values against
+   * it. Keep the schema bounded (e.g. `.max()` on strings/arrays) and evolve it additively so that
+   * older shared links degrade gracefully rather than breaking.
    */
   shareableStateSchema?: ZodTypeAny;
   render: DocViewRenderFunction<TState>;

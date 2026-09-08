@@ -167,7 +167,11 @@ type DocViewerShareableStatePayload = TabActionPayload<{
   docViewerState: DocViewerShareableState | undefined;
 }>;
 
-/** Synchronizes the shareable doc viewer state to the URL, only while a linkable document is expanded. */
+/**
+ * Synchronizes the shareable doc viewer state to the URL, only while a linkable document is expanded.
+ * Replaces URL history rather than pushing, so frequent in-flyout changes (tab or nested navigation)
+ * do not flood the browser back stack.
+ */
 export const setDocViewerShareableState: InternalStateThunkActionCreator<
   [DocViewerShareableStatePayload]
 > = (payload) =>
@@ -182,7 +186,9 @@ export const setDocViewerShareableState: InternalStateThunkActionCreator<
       return;
     }
 
-    dispatch(updateAppState({ tabId, appState: { docViewerState: nextDocViewerState } }));
+    dispatch(
+      updateAppStateAndReplaceUrl({ tabId, appState: { docViewerState: nextDocViewerState } })
+    );
   };
 
 /**
