@@ -240,6 +240,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
+      // Threat intelligence supply routes are gated behind an experimental feature flag.
+      `--xpack.securitySolution.enableExperimental=${JSON.stringify(['threatIntelSupplyEnabled'])}`,
     ],
   },
 };
