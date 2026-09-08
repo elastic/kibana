@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
-import type { ProcessId } from '../../common';
+import type { ExtractionMode } from '../../common';
 import { AssetManagerClient } from '../domain/asset_manager';
 import { LogsExtractionClient } from '../domain/logs_extraction';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from '../domain/saved_objects';
@@ -30,14 +30,14 @@ export async function createLogsExtractionClient({
   logger,
   namespace,
   isServerless,
-  processId,
+  extractionMode,
 }: {
   core: EntityStoreCoreSetup;
   logger: Logger;
   namespace: string;
   fakeRequest: KibanaRequest;
   isServerless: boolean;
-  processId?: ProcessId;
+  extractionMode?: ExtractionMode;
 }): Promise<LogsExtractionClientFactoryResult> {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -62,7 +62,7 @@ export async function createLogsExtractionClient({
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
     globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
-    processId,
+    extractionMode,
   });
 
   return { logsExtractionClient };

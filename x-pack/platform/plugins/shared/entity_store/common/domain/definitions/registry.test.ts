@@ -6,7 +6,7 @@
  */
 
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
-import { getEntityDefinitionWithoutId, hasPriorityVariant, resolveProcessId } from './registry';
+import { getEntityDefinitionWithoutId, hasPriorityVariant, resolveExtractionMode } from './registry';
 
 /**
  * Tests that all entity definitions parse against the entitySchema (does not throw errors)
@@ -25,15 +25,15 @@ describe('hasPriorityVariant', () => {
   });
 });
 
-describe('resolveProcessId', () => {
+describe('resolveExtractionMode', () => {
   it.each(ALL_ENTITY_TYPES)('%s: returns single when flag is off', (type) => {
-    expect(resolveProcessId(false, type)).toBe('single');
+    expect(resolveExtractionMode(false, type)).toBe('single');
   });
 
   it.each(ALL_ENTITY_TYPES)(
     '%s: returns single when flag is on and no priority variant is registered',
     (type) => {
-      expect(resolveProcessId(true, type)).toBe('single');
+      expect(resolveExtractionMode(true, type)).toBe('single');
     }
   );
 });

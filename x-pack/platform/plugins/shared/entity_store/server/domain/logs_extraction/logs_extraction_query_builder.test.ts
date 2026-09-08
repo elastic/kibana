@@ -79,9 +79,9 @@ describe('buildLogsExtractionEsqlQuery', () => {
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 
-  describe('processId guard: query output must not change across flag states until priority logic is added', () => {
+  describe('extractionMode guard: query output must not change across flag states until priority logic is added', () => {
     it.each(Object.values(EntityType.enum))(
-      '%s: processId=single output is byte-identical to default',
+      '%s: extractionMode=single output is byte-identical to default',
       (type) => {
         const baseParams = {
           indexPatterns: ['test-index-*'],
@@ -91,14 +91,14 @@ describe('buildLogsExtractionEsqlQuery', () => {
           fromDateISO: '2022-01-01T00:00:00.000Z',
           toDateISO: '2022-01-01T23:59:59.999Z',
         };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, processId: 'single' })).toBe(
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })).toBe(
           buildLogsExtractionEsqlQuery(baseParams)
         );
       }
     );
 
     it.each(Object.values(EntityType.enum))(
-      '%s: processId=priority output is byte-identical to single (no priority query logic yet)',
+      '%s: extractionMode=priority output is byte-identical to single (no priority query logic yet)',
       (type) => {
         const baseParams = {
           indexPatterns: ['test-index-*'],
@@ -108,8 +108,8 @@ describe('buildLogsExtractionEsqlQuery', () => {
           fromDateISO: '2022-01-01T00:00:00.000Z',
           toDateISO: '2022-01-01T23:59:59.999Z',
         };
-        expect(buildLogsExtractionEsqlQuery({ ...baseParams, processId: 'priority' })).toBe(
-          buildLogsExtractionEsqlQuery({ ...baseParams, processId: 'single' })
+        expect(buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'priority' })).toBe(
+          buildLogsExtractionEsqlQuery({ ...baseParams, extractionMode: 'single' })
         );
       }
     );

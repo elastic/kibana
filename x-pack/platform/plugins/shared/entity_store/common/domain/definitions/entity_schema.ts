@@ -14,8 +14,8 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 /** Which extraction process a task is running as. */
-export type ProcessId = z.infer<typeof ProcessId>;
-export const ProcessId = z.enum(['single', 'priority', 'nonPriority']);
+export type ExtractionMode = z.infer<typeof ExtractionMode>;
+export const ExtractionMode = z.enum(['single', 'priority', 'nonPriority']);
 
 const mappingSchema = z.any();
 

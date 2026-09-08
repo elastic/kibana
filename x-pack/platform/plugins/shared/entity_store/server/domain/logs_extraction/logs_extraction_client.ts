@@ -14,7 +14,7 @@ import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
   ManagedEntityDefinition,
-  ProcessId,
+  ExtractionMode,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEntityDefinition } from '../../../common/domain/definitions/registry';
 import { type LogSlicePaginationParams, type PaginationParams } from './query_builder_commons';
@@ -100,7 +100,7 @@ export interface LogsExtractionClientDependencies {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  processId?: ProcessId;
+  extractionMode?: ExtractionMode;
 }
 
 export class LogsExtractionClient {
@@ -110,7 +110,7 @@ export class LogsExtractionClient {
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
-  processId: ProcessId;
+  extractionMode: ExtractionMode;
   constructor({
     logger,
     namespace,
@@ -118,7 +118,7 @@ export class LogsExtractionClient {
     dataViewsService,
     engineDescriptorClient,
     globalStateClient,
-    processId,
+    extractionMode,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
     this.namespace = namespace;
@@ -126,7 +126,7 @@ export class LogsExtractionClient {
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
     this.globalStateClient = globalStateClient;
-    this.processId = processId ?? 'single';
+    this.extractionMode = extractionMode ?? 'single';
   }
 
   private async getLogExtractionConfigAndState(
@@ -769,7 +769,7 @@ export class LogsExtractionClient {
         pagination,
         logsPageCursorStart,
         logsPageCursorEnd,
-        processId: this.processId,
+        extractionMode: this.extractionMode,
       });
 
       this.logger.debug(

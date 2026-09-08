@@ -24,7 +24,7 @@ import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { isDualProcessEnabled } from '../infra/feature_flags';
-import { resolveProcessId } from '../../common/domain/definitions/registry';
+import { resolveExtractionMode } from '../../common/domain/definitions/registry';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -74,7 +74,7 @@ async function runTask({
 
   const [coreStart] = await core.getStartServices();
   const dualProcessEnabled = await isDualProcessEnabled(coreStart.featureFlags);
-  const processId = resolveProcessId(dualProcessEnabled, entityType);
+  const extractionMode = resolveExtractionMode(dualProcessEnabled, entityType);
 
   if (
     await shouldDeleteOrphanedEntityStoreTask({
@@ -107,7 +107,7 @@ async function runTask({
       logger,
       namespace,
       isServerless,
-      processId,
+      extractionMode,
     });
 
     const extractionStart = Date.now();

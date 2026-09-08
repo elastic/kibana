@@ -7,7 +7,7 @@
 
 import assert from 'assert';
 
-import type { EntityType, ProcessId } from './entity_schema';
+import type { EntityType, ExtractionMode } from './entity_schema';
 import { type EntityDefinitionWithoutId, type ManagedEntityDefinition } from './entity_schema';
 import { hostEntityDefinition } from './host';
 import { userEntityDefinition } from './user';
@@ -25,10 +25,10 @@ const entitiesDefinitionRegistry = {
 export const hasPriorityVariant = (_type: EntityType): boolean => false;
 
 /** 'nonPriority' is excluded: the non-priority task hardcodes its own identity directly. */
-export const resolveProcessId = (
+export const resolveExtractionMode = (
   isDualProcessEnabled: boolean,
   entityType: EntityType
-): Extract<ProcessId, 'priority' | 'single'> => {
+): Extract<ExtractionMode, 'priority' | 'single'> => {
   if (isDualProcessEnabled && hasPriorityVariant(entityType)) return 'priority';
   return 'single';
 };
