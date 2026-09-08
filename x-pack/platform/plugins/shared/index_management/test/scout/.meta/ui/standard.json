@@ -1,5 +1,5 @@
 {
-  "sha1": "ca255e3922ffb80d3f5bf4464b2804b9f18e244a",
+  "sha1": "9b593f482bde0ac49637d3475db8e8a5ecfc83ce",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -704,6 +704,24 @@
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
         "line": 31,
         "column": 98
+      }
+    },
+    {
+      "id": "8b2302c844751d9-57ef077c07b8c42",
+      "title": "Index details page Stats tab has no a11y violations for a fresh index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_details_page.spec.ts",
+        "line": 89,
+        "column": 13
       }
     },
     {

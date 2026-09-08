@@ -105,11 +105,29 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
+  });
 
-    await test.step('stats tab has no a11y violations', async () => {
-      await indexManagement.indexDetailsPage.changeTab('stats');
-      const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
-      expect(violations).toStrictEqual([]);
-    });
+  test('Stats tab has no a11y violations for a fresh index', async ({
+    pageObjects,
+    esClient,
+    page,
+    config,
+  }) => {
+    // The stats tab is gated behind `enableIndexStats`, which is off on
+    // serverless, so it only renders (and can be scanned) on stateful.
+    test.skip(config.serverless, 'The stats tab is disabled on serverless');
+
+    const { indexManagement } = pageObjects;
+
+    await esClient.indices.create({ index: testIndexName });
+    await indexManagement.navigateToIndexManagementTab('indices');
+    await expect(indexManagement.indexLink(testIndexName)).toBeVisible({ timeout: 30000 });
+
+    await indexManagement.indexLink(testIndexName).click();
+    await expect(page.testSubj.locator('indexDetailsContent')).toBeVisible();
+
+    await indexManagement.indexDetailsPage.changeTab('stats');
+    const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
+    expect(violations).toStrictEqual([]);
   });
 });

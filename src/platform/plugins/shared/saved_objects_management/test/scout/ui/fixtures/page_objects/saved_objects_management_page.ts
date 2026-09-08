@@ -8,7 +8,6 @@
  */
 
 import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
-import { escapeRegExp } from 'lodash';
 import type { Locator, ScoutPage, KibanaUrl } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -249,12 +248,14 @@ export class SavedObjectsManagementPage {
    * can await it — the table refreshes asynchronously after an import.
    */
   rowByTitle(title: string): Locator {
-    // Anchor on the exact title: a plain `hasText` substring match would also
-    // match a row whose title is a superstring (e.g. "logstash" vs "logstash-*"),
-    // which then trips Playwright strict mode.
+    // Match the exact title on the link/text inside the cell, not the cell
+    // itself: EuiBasicTable appends a screen-reader-only clipboard marker glyph
+    // inside every `<td>`, so an anchored `hasText` on `savedObjectsTableRowTitle`
+    // never equals the title alone. `getByText(exact)` also avoids matching a
+    // superstring row (e.g. "logstash" vs "logstash-*") that trips strict mode.
     const titleLocator = this.page.testSubj
       .locator('savedObjectsTableRowTitle')
-      .filter({ hasText: new RegExp(`^${escapeRegExp(title)}$`) });
+      .getByText(title, { exact: true });
     return this.page
       .locator('[data-test-subj~="savedObjectsTableRow"]')
       .filter({ has: titleLocator });
