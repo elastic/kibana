@@ -9,12 +9,12 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
-import { EMPTY_TOKENS } from '@kbn/streams-ai';
-import type {
-  InferenceDocument,
-  ExcludedFeatureSummary,
-  PreviouslyIdentifiedFeature,
-} from '@kbn/streams-ai';
+import {
+  EMPTY_TOKENS,
+  type InferenceDocument,
+  type ExcludedFeatureSummary,
+  type PreviouslyIdentifiedFeature,
+} from '@kbn/nightshift-ai';
 import { createAgentBuilderClient } from '@kbn/evals';
 import {
   buildFeatureIdentificationUserMessage,

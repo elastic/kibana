@@ -8,7 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import { featuresPrompt } from '@kbn/streams-ai';
+import { featuresPrompt } from '@kbn/nightshift-ai';
 import { FEATURE_IDENTIFICATION_SKILL_ID } from '../../skills/feature_identification';
 import groundingInstructions from './instructions.md.text';
 

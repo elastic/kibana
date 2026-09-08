@@ -13,9 +13,10 @@ import {
   toPreviouslyIdentifiedFeature,
   type InferenceDocument,
   type SearchSimilarFeaturesArguments,
+  type AnalysisTarget,
   type SimilarFeatureHit,
-} from '@kbn/streams-ai';
-import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
+  featuresPrompt,
+} from '@kbn/nightshift-ai';
 import { tags } from '@kbn/scout';
 import {
   createChatCallsEvaluator,
@@ -470,7 +471,12 @@ evaluate.describe(
               };
 
               const { features } = await identifyFeatures({
-                streamName: MANAGED_STREAM_NAME,
+                target: {
+                  id: MANAGED_STREAM_NAME,
+                  name: MANAGED_STREAM_NAME,
+                  sources: [MANAGED_STREAM_NAME, `${MANAGED_STREAM_NAME}.*`],
+                  samplingSource: MANAGED_STREAM_NAME,
+                } satisfies AnalysisTarget,
                 sampleDocuments: input.sampleDocuments,
                 systemPrompt: featuresPrompt,
                 inferenceClient,

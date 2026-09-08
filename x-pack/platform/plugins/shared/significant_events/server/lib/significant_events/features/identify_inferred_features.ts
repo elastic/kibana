@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { StreamType } from '@kbn/streams-schema';
+import type { StreamType, Streams } from '@kbn/streams-schema';
 import {
   type Feature,
   type FeatureUpsert,
@@ -23,7 +23,7 @@ import {
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
-} from '@kbn/streams-ai';
+} from '@kbn/nightshift-ai';
 import {
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   type SignificantEventsTuningConfig,
@@ -410,6 +410,7 @@ export interface IdentifyInferredFeaturesOptions {
   signal: AbortSignal;
   streamName: string;
   streamType: StreamType;
+  definition: Streams.all.Definition;
   runId: string;
   documents: InferenceDocument[];
   totalFilters: number;

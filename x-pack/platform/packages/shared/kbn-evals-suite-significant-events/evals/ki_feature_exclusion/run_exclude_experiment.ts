@@ -6,7 +6,7 @@
  */
 
 import { isDuplicateFeature } from '@kbn/significant-events-schema';
-import { type ExcludedFeatureSummary, sumTokens } from '@kbn/streams-ai';
+import { type ExcludedFeatureSummary, sumTokens } from '@kbn/nightshift-ai';
 import { sortBy } from 'lodash';
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';

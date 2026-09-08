@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatRawDocument, sumTokens, type InferenceDocument } from '@kbn/streams-ai';
+import { formatRawDocument, sumTokens, type InferenceDocument } from '@kbn/nightshift-ai';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import {
