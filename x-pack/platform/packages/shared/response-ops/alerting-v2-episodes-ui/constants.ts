@@ -12,8 +12,6 @@ import {
   ALERTING_V2_EPISODES_BASE_PATH,
 } from '@kbn/alerting-v2-constants';
 
-export { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_EPISODES_BASE_PATH };
-
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;

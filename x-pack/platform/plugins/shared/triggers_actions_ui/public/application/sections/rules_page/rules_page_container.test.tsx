@@ -98,6 +98,15 @@ describe('rulesPage', () => {
     expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
   });
 
+  it('serves the rules list at /rules, the path linked from outside this plugin', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/rules'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId('rulesListComponents')).toBeInTheDocument();
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(history.location.pathname).toBe('/');
+  });
+
   it('shows the correct number of tabs', async () => {
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);

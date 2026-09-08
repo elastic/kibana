@@ -12,10 +12,9 @@ import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { useContentListPhase } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
-import { triggersActionsRoute } from '@kbn/rule-data-utils';
+import { canAccessTriggersActionsRules, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { experimentalBadge } from '../../components/experimental_badge';
 import { paths } from '../../constants';
-import { canReadV1Rules } from '../../utils/can_read_v1_rules';
 
 const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTitle', {
   defaultMessage: 'Rules',
@@ -142,7 +141,7 @@ export const RulesListHeader = ({
     ];
 
     // Keeps the tab from pointing at a privileges wall.
-    if (canReadV1Rules(application.capabilities)) {
+    if (canAccessTriggersActionsRules(application.capabilities)) {
       headerTabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.alertingV2.rulesList.v1RulesTabTitle', {

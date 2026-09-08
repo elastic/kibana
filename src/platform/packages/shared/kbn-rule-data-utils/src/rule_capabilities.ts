@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Capabilities } from '@kbn/core-capabilities-common';
+
 /**
  * UI capability key under `capabilities.management.insightsAndAlerting` granting access to the
  * Stack Management Rules page served by `triggers_actions_ui` at `triggersActionsRoute`.
  */
 export const TRIGGERS_ACTIONS_RULES_CAPABILITY_ID = 'triggersActionsRules' as const;
+
+/**
+ * Returns whether the current user can reach the Stack Management Rules page. Takes `Capabilities`
+ * rather than `CoreStart` so that callers resolving core services individually through dependency
+ * injection can use it.
+ */
+export const canAccessTriggersActionsRules = (capabilities: Capabilities): boolean =>
+  Boolean(capabilities.management?.insightsAndAlerting?.[TRIGGERS_ACTIONS_RULES_CAPABILITY_ID]);
