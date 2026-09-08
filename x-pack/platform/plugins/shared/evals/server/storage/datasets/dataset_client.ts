@@ -761,7 +761,11 @@ export class DatasetClient {
   async addExamples(
     datasetId: string,
     examples: DatasetExampleInput[],
-    options: { touchDataset?: boolean; rejectDuplicates?: boolean } = {}
+    options: {
+      touchDataset?: boolean;
+      rejectDuplicates?: boolean;
+      source?: 'import';
+    } = {}
   ): Promise<{ added: number }> {
     if (examples.length === 0) {
       return { added: 0 };
@@ -773,7 +777,7 @@ export class DatasetClient {
       examples.map((example) => {
         const normalizedExample = normalizeExample(example);
         return {
-          index: {
+          create: {
             _id: DatasetClient.getExampleId({
               datasetId,
               example: normalizedExample,
@@ -781,6 +785,7 @@ export class DatasetClient {
             document: {
               dataset_id: datasetId,
               ...normalizedExample,
+              ...(options.source ? { source: options.source } : {}),
               created_at: now,
               updated_at: now,
             },
@@ -855,6 +860,7 @@ export class DatasetClient {
       document: {
         dataset_id: existing.dataset_id,
         ...updatedExample,
+        ...(existing.source ? { source: existing.source } : {}),
         created_at: existing.created_at,
         updated_at: updatedAt,
       },
@@ -1404,7 +1410,11 @@ const normalizeExample = (example: DatasetExampleInput): NormalizedExample => {
 };
 
 const summarizeBulkResult = (
-  items: Array<{ index?: { status: number }; delete?: { status: number } }>
+  items: Array<{
+    index?: { status: number };
+    create?: { status: number };
+    delete?: { status: number };
+  }>
 ): {
   conflicts: number;
   failed: number;
@@ -1413,7 +1423,7 @@ const summarizeBulkResult = (
   let failed = 0;
 
   for (const item of items) {
-    const status = item.index?.status ?? item.delete?.status;
+    const status = item.index?.status ?? item.create?.status ?? item.delete?.status;
     if (!status) {
       continue;
     }

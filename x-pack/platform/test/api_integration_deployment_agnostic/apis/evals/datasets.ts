@@ -11,6 +11,7 @@ import {
   EVALS_DATASET_URL,
   EVALS_DATASET_EXAMPLES_URL,
   EVALS_DATASET_EXAMPLE_URL,
+  EVALS_DATASET_IMPORT_URL,
   EVALS_DATASET_RESOLVE_URL,
   EVALS_DATASET_UPSERT_URL,
   type AddEvaluationDatasetExamplesResponse,
@@ -19,6 +20,7 @@ import {
   type DeleteEvaluationDatasetResponse,
   type GetEvaluationDatasetResponse,
   type GetEvaluationDatasetsResponse,
+  type ImportEvaluationDatasetExamplesResponse,
   type ResolveEvaluationDatasetResponse,
   type UpdateEvaluationDatasetExampleResponse,
   type UpdateEvaluationDatasetResponse,
@@ -43,6 +45,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplesPath = (datasetId: string) =>
     EVALS_DATASET_EXAMPLES_URL.replace('{datasetId}', encodeURIComponent(datasetId));
+  const importExamplesPath = (datasetId: string) =>
+    EVALS_DATASET_IMPORT_URL.replace('{datasetId}', encodeURIComponent(datasetId));
   const examplePath = (datasetId: string, exampleId: string) =>
     EVALS_DATASET_EXAMPLE_URL.replace('{datasetId}', encodeURIComponent(datasetId)).replace(
       '{exampleId}',
@@ -240,6 +244,71 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .get(datasetPath(exampleDatasetId))
           .expect(200);
         expect((datasetBody as GetEvaluationDatasetResponse).examples.length).to.eql(1);
+      });
+    });
+
+    describe('example import', () => {
+      const importDatasetName = `FTR Import Dataset ${suffix}`;
+      const importPayload = [
+        { input: { question: 'import-a' }, output: { answer: '1' } },
+        { input: { question: 'import-b' }, output: { answer: '2' } },
+      ];
+      let importDatasetId = '';
+
+      before(async () => {
+        const { body } = await adminClient
+          .post(EVALS_DATASETS_URL)
+          .send({ name: importDatasetName, description: 'import fixture' })
+          .expect(200);
+        importDatasetId = (body as CreateEvaluationDatasetResponse).dataset_id;
+      });
+
+      after(async () => {
+        if (importDatasetId) {
+          await adminClient.delete(datasetPath(importDatasetId)).catch(() => {
+            // best-effort cleanup
+          });
+        }
+      });
+
+      it('imports examples with their source and skips them when re-imported', async () => {
+        const { body: importBody } = await adminClient
+          .post(importExamplesPath(importDatasetId))
+          .send({ examples: importPayload })
+          .expect(200);
+
+        expect(importBody as ImportEvaluationDatasetExamplesResponse).to.eql({
+          added: importPayload.length,
+          skipped_duplicates: 0,
+        });
+
+        const { body: firstDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const firstDataset = firstDatasetBody as GetEvaluationDatasetResponse;
+        const importedExamples = firstDataset.examples as Array<
+          GetEvaluationDatasetResponse['examples'][number] & { source?: string }
+        >;
+
+        expect(importedExamples.length).to.eql(importPayload.length);
+        expect(importedExamples.every(({ source }) => source === 'import')).to.be(true);
+
+        const firstExampleIds = importedExamples.map(({ id }) => id).sort();
+        const { body: reimportBody } = await adminClient
+          .post(importExamplesPath(importDatasetId))
+          .send({ examples: importPayload })
+          .expect(200);
+
+        expect(reimportBody as ImportEvaluationDatasetExamplesResponse).to.eql({
+          added: 0,
+          skipped_duplicates: importPayload.length,
+        });
+
+        const { body: reimportedDatasetBody } = await adminClient
+          .get(datasetPath(importDatasetId))
+          .expect(200);
+        const reimportedDataset = reimportedDatasetBody as GetEvaluationDatasetResponse;
+        expect(reimportedDataset.examples.map(({ id }) => id).sort()).to.eql(firstExampleIds);
       });
     });
 
