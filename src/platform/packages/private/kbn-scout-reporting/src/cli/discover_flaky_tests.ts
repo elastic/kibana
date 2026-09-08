@@ -32,14 +32,14 @@ const ES_REQUEST_TIMEOUT_MS = 300_000;
 
 const defaults = DEFAULT_FLAKY_TEST_REPORT_OPTIONS;
 
-// Short names for the help text so its lines stay readable
-const DEF_DAYS = defaults.lookbackDays;
-const DEF_PIPELINES = defaults.pipelines.join(',');
+// Flag defaults, shared by the help text and the flag definitions
+const DEFAULT_LOOKBACK_DAYS = defaults.lookbackDays;
+const DEFAULT_PIPELINES = defaults.pipelines.join(',');
 const ALL_FRAMEWORKS = TEST_FRAMEWORKS.join(',');
-const DEF_MIN_BUILDS = defaults.thresholds.minBuilds;
-const DEF_MIN_FAILED = defaults.thresholds.minFailedBuilds;
-const DEF_MAX_TESTS = defaults.thresholds.maxTests;
-const DEF_SAMPLES = defaults.samplesPerTest;
+const DEFAULT_MIN_BUILDS = defaults.thresholds.minBuilds;
+const DEFAULT_MIN_FAILED_BUILDS = defaults.thresholds.minFailedBuilds;
+const DEFAULT_MAX_TESTS = defaults.thresholds.maxTests;
+const DEFAULT_SAMPLES_PER_TEST = defaults.samplesPerTest;
 
 /** Reads a flag that may be repeated or comma-separated into a de-duplicated list. */
 const readList = (flagsReader: FlagsReader, key: string): string[] => [
@@ -74,7 +74,7 @@ export const discoverFlakyTests: Command<void> = {
   flaky test report and store it locally under ${SCOUT_FLAKY_TESTS_PATH}. Read-only.
 
   Examples:
-    # Last ${DEF_DAYS} days of ${DEF_PIPELINES}, all frameworks
+    # Last ${DEFAULT_LOOKBACK_DAYS} days of ${DEFAULT_PIPELINES}, all frameworks
     node scripts/scout discover-flaky-tests
 
     # Include PR builds and widen the window
@@ -104,12 +104,12 @@ export const discoverFlakyTests: Command<void> = {
       esAPIKey: SCOUT_REPORTER_ES_API_KEY,
       esMaxRetries: '1',
       verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
-      lookbackDays: String(defaults.lookbackDays),
-      pipelines: defaults.pipelines.join(','),
-      minBuilds: String(defaults.thresholds.minBuilds),
-      minFailedBuilds: String(defaults.thresholds.minFailedBuilds),
-      maxTests: String(defaults.thresholds.maxTests),
-      samplesPerTest: String(defaults.samplesPerTest),
+      lookbackDays: String(DEFAULT_LOOKBACK_DAYS),
+      pipelines: DEFAULT_PIPELINES,
+      minBuilds: String(DEFAULT_MIN_BUILDS),
+      minFailedBuilds: String(DEFAULT_MIN_FAILED_BUILDS),
+      maxTests: String(DEFAULT_MAX_TESTS),
+      samplesPerTest: String(DEFAULT_SAMPLES_PER_TEST),
       outputPath: SCOUT_FLAKY_TESTS_PATH,
     },
     help: `
@@ -117,14 +117,14 @@ export const discoverFlakyTests: Command<void> = {
     --esAPIKey         (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
     --esMaxRetries     (optional)  How many times should Elasticsearch API requests be retried [default: 1]
     --verifyTLSCerts   (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
-    --lookbackDays     (optional)  How many days to look back when aggregating [default: ${DEF_DAYS}]
-    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEF_PIPELINES}]
+    --lookbackDays     (optional)  How many days to look back when aggregating [default: ${DEFAULT_LOOKBACK_DAYS}]
+    --pipelines        (optional)  Comma-separated Buildkite pipeline slugs [default: ${DEFAULT_PIPELINES}]
     --branches         (optional)  Comma-separated branches; no filter when omitted
     --frameworks       (optional)  Comma-separated subset of ${ALL_FRAMEWORKS} [default: all]
-    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEF_MIN_BUILDS}]
-    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEF_MIN_FAILED}]
-    --maxTests         (optional)  Maximum tests per list in the report [default: ${DEF_MAX_TESTS}]
-    --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEF_SAMPLES}]
+    --minBuilds        (optional)  Ignore tests seen in fewer builds [default: ${DEFAULT_MIN_BUILDS}]
+    --minFailedBuilds  (optional)  Ignore tests that failed in fewer builds [default: ${DEFAULT_MIN_FAILED_BUILDS}]
+    --maxTests         (optional)  Maximum tests per list in the report [default: ${DEFAULT_MAX_TESTS}]
+    --samplesPerTest   (optional)  Recent failure messages per test [default: ${DEFAULT_SAMPLES_PER_TEST}]
     --outputPath       (optional)  Where to write the flaky test report [default: ${SCOUT_FLAKY_TESTS_PATH}]
     `,
   },
