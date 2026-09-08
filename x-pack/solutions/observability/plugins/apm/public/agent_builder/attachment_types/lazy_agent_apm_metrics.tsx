@@ -7,10 +7,10 @@
 
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export type { AgentServiceMapProps } from './agent_service_map';
+export type { AgentApmMetricsProps } from './agent_apm_metrics';
 
-export const LazyAgentServiceMap = dynamic(() =>
-  import('./agent_service_map').then((mod) => ({
-    default: mod.AgentServiceMap,
+export const LazyAgentApmMetrics = dynamic(() =>
+  import('./agent_apm_metrics').then((mod) => ({
+    default: mod.AgentApmMetrics,
   }))
 );

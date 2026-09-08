@@ -7,6 +7,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
 import {
+  AGENT_NAME,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
@@ -61,7 +62,10 @@ export async function getImmediateDownstreamDependencies({
 
 function toTarget(entry: ApmConnectionStatsEntry) {
   if (entry.type === 'service') {
-    return { [SERVICE_NAME]: entry.serviceName };
+    return {
+      [SERVICE_NAME]: entry.serviceName,
+      ...(entry.agentName ? { [AGENT_NAME]: entry.agentName } : {}),
+    };
   }
 
   return {

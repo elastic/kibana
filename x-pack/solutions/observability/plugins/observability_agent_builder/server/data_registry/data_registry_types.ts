@@ -159,7 +159,7 @@ export interface TraceMetrics {
 }
 
 export type ApmConnectionStatsEntry =
-  | { type: 'service'; serviceName: string; metrics: TraceMetrics }
+  | { type: 'service'; serviceName: string; agentName?: string; metrics: TraceMetrics }
   | {
       type: 'dependency';
       dependencyName: string;
@@ -184,6 +184,45 @@ export interface SyntheticsMonitorDetailsResponse {
   tags?: string[];
   [key: string]: unknown;
 }
+
+// APM agent-builder attachment data shapes. Units are aligned with the
+// `observability.apm-timeseries` / `observability.apm-metrics` attachment schemas:
+// latency in ms, failedTransactionRate as percentage (0–100), throughput in rpm.
+export type ApmAttachmentMetric = 'latency' | 'failedTransactionRate' | 'throughput';
+export type ApmLatencyType = 'avg' | 'p95' | 'p99';
+
+interface ApmMetricSnapshot {
+  latencyMs?: number;
+  errorRate?: number;
+  throughputRpm?: number;
+}
+
+export interface ApmTimeseriesResult {
+  serviceName: string;
+  metric: ApmAttachmentMetric;
+  unit: 'ms' | '%' | 'rpm';
+  dataPoints: Array<{ timestamp: number; value: number | null }>;
+}
+
+export interface ApmMetricsResult {
+  serviceName: string;
+  environment?: string;
+  current: ApmMetricSnapshot;
+  baseline?: ApmMetricSnapshot;
+}
+
+/** Per-service alert/SLO/anomaly badge data, keyed by `service.name`. */
+export type ServiceNodeMetadataMap = Record<
+  string,
+  {
+    alertsCount?: number;
+    sloStatus?: string;
+    sloCount?: number;
+    /** Max ML anomaly severity for the service (`warning` | `minor` | `major` | `critical`). */
+    anomalySeverity?: string;
+    anomalyScore?: number;
+  }
+>;
 
 export interface ObservabilityAgentBuilderDataRegistryTypes {
   apmErrorDetails: (params: {
@@ -290,4 +329,56 @@ export interface ObservabilityAgentBuilderDataRegistryTypes {
     request: KibanaRequest;
     configId: string;
   }) => Promise<SyntheticsMonitorDetailsResponse>;
+
+  apmTimeseries: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    environment?: string;
+    kqlFilter?: string;
+    metric: ApmAttachmentMetric;
+    latencyType?: ApmLatencyType;
+    start: string;
+    end: string;
+  }) => Promise<ApmTimeseriesResult>;
+
+  apmMetrics: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    environment?: string;
+    kqlFilter?: string;
+    latencyType?: ApmLatencyType;
+    currentStart: string;
+    currentEnd: string;
+    baselineStart?: string;
+    baselineEnd?: string;
+  }) => Promise<ApmMetricsResult>;
+
+  servicesAlertsAndSlo: (params: {
+    request: KibanaRequest;
+    serviceNames: string[];
+    environment?: string;
+    kuery?: string;
+    start: string;
+    end: string;
+  }) => Promise<ServiceNodeMetadataMap>;
+
+  relatedAlerts: (params: {
+    request: KibanaRequest;
+    serviceName: string;
+    environment?: string;
+    start: string;
+    end: string;
+  }) => Promise<
+    Array<{
+      id: string;
+      ruleName: string;
+      ruleTypeId: string;
+      status: 'active' | 'recovered';
+      reason?: string;
+      serviceName?: string;
+      start: number;
+      duration?: number;
+      severity?: string;
+    }>
+  >;
 }
