@@ -52,14 +52,8 @@ export const describeArtifactListPage = (
 
       spaceTest(
         `NONE user sees no privileges on the list page`,
-        async ({ browserAuth, pageObjects, config }) => {
-          if (config.serverless) {
-            await browserAuth.loginAsT1Analyst();
-          } else {
-            await browserAuth.loginWithCustomRole(
-              getArtifactRole(artifact.privilegePrefix, 'none')
-            );
-          }
+        async ({ browserAuth, pageObjects }) => {
+          await browserAuth.loginAsT1Analyst();
 
           await pageObjects.artifactListPage.goto(artifact.urlPath);
           await pageObjects.artifactListPage.waitForNoPrivileges();
