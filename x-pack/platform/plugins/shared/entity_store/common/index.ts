@@ -116,6 +116,8 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
+export { ProcessId } from './domain/definitions/entity_schema';
+
 export type {
   Entity,
   HostEntity,

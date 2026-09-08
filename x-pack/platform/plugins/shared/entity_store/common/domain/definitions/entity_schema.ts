@@ -13,6 +13,10 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
+/** Which extraction process a task is running as. */
+export type ProcessId = z.infer<typeof ProcessId>;
+export const ProcessId = z.enum(['single', 'priority', 'nonPriority']);
+
 const mappingSchema = z.any();
 
 const retentionOperationSchema = z.discriminatedUnion('operation', [
