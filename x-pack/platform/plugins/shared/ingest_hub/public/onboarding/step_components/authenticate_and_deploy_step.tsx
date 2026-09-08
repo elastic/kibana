@@ -21,10 +21,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
-import {
-  DeploymentMethodCard,
-  type DeploymentMethod,
-} from './authenticate_and_deploy_step/deployment_method_card';
+import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { useDeploy } from './authenticate_and_deploy_step/use_deploy';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
@@ -48,8 +45,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { servicesStep, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
 
-  const [deploymentMethod, setDeploymentMethod] =
-    useState<DeploymentMethod>('managed_integrations');
+  const { deploymentMethod, setDeploymentMethod } = useOnboardingFlow();
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.

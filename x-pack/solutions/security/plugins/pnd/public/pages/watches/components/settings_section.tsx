@@ -12,6 +12,8 @@ interface SettingsSectionProps {
   title: string;
   /** Lower-case fragment shown beside the title, e.g. "applies to this watch only". */
   subtitle?: string;
+  /** Optional action rendered flush-right in the header row. */
+  rightAction?: React.ReactNode;
   children: React.ReactNode;
   'data-test-subj'?: string;
 }
@@ -25,6 +27,7 @@ interface SettingsSectionProps {
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
   title,
   subtitle,
+  rightAction,
   children,
   'data-test-subj': dataTestSubj,
 }) => (
@@ -33,15 +36,21 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
       <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
-            <h3>{title}</h3>
+            <h2>{title}</h2>
           </EuiTitle>
         </EuiFlexItem>
         {subtitle ? (
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
+            <EuiText size="s" color="subdued">
               {subtitle}
             </EuiText>
           </EuiFlexItem>
+        ) : null}
+        {rightAction ? (
+          <>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>{rightAction}</EuiFlexItem>
+          </>
         ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>

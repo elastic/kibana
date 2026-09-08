@@ -16,6 +16,7 @@ project:
   sourceRoot: src/platform/test
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/content-list-common'
   - '@kbn/expressions-plugin'
   - '@kbn/saved-objects-management-plugin'
@@ -61,7 +62,6 @@ dependsOn:
   - '@kbn/core-deprecations-common'
   - '@kbn/data-grid-in-table-search'
   - '@kbn/scout-info'
-  - '@kbn/synthtrace-client'
   - '@kbn/synthtrace'
   - '@kbn/controls-constants'
   - '@kbn/controls-schemas'
@@ -72,7 +72,6 @@ dependsOn:
   - '@kbn/session-notifications-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/deeplinks-analytics'
-  - '@kbn/unified-tabs'
 tags:
   - test-helper
   - package
