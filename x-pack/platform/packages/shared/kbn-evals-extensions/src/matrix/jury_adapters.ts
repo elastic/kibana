@@ -262,7 +262,10 @@ export function checkJuryCoverage(
   jury: JuryAdapter,
   scores: RejudgeScore[]
 ): { ok: boolean; unexpected: string[]; missing: string[] } {
-  const produced = new Set(scores.map((s) => s.name));
+  // A named evaluator carrying no score has not graded anything: the judge
+  // answered but its verdict could not be parsed into a number. Counting the
+  // name alone as coverage would let an ungraded column read as refreshed.
+  const produced = new Set(scores.filter((s) => s.score !== null).map((s) => s.name));
   const expected = new Set(jury.evaluatorNames);
   return {
     ok: [...produced].some((name) => expected.has(name)),

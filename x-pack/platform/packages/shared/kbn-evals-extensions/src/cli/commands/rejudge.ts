@@ -341,7 +341,19 @@ export const rejudgeCmd: Command<any> = {
       jury,
       results.flatMap((r) => r.scores)
     );
-    if (!coverage.ok && results.length > 0) {
+    // Assert on the evaluator names actually present, not on the exit status:
+    // a jury that resolves without throwing produces zero failures and exit 0
+    // while grading nothing. `planned > 0 && judged === 0` is that failure, and
+    // it must not be excused just because there are no scores to inspect.
+    if (plan.cells.length > 0 && results.length === 0) {
+      throw createFailError(
+        `Rejudge planned ${plan.cells.length} cell(s) but graded none, so no ` +
+          `"${jury.name}" evaluator (${jury.evaluatorNames.join(', ')}) was produced. ` +
+          `The jury resolved without grading rather than erroring. Refusing to write ` +
+          `an artifact that would read as a refreshed column.`
+      );
+    }
+    if (!coverage.ok) {
       throw createFailError(
         `Rejudge produced no "${jury.name}" evaluators ` +
           `(expected any of ${jury.evaluatorNames.join(', ')}; got ${

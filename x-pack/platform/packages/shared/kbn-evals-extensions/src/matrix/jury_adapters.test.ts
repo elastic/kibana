@@ -155,6 +155,27 @@ describe('checkJuryCoverage', () => {
     expect(result.ok).toBe(true);
     expect(result.missing).toEqual(['Rubric']);
   });
+
+  it('does not accept a run that produced no verdicts at all', () => {
+    // Failure mode 2: the jury resolves without throwing but grades nothing.
+    // The run exits 0 with no failures, so only an assertion on the evaluator
+    // names present distinguishes it from a successful rejudge.
+    const result = checkJuryCoverage(attackDiscoveryJury, []);
+    expect(result.ok).toBe(false);
+    expect(result.missing).toEqual(['Criteria', 'Rubric']);
+  });
+
+  it('does not accept verdicts whose scores are all null', () => {
+    // A judge that answers but cannot parse its own output yields named
+    // evaluators carrying no score. Counting the name as coverage would let an
+    // ungraded column read as refreshed.
+    const result = checkJuryCoverage(attackDiscoveryJury, [
+      { name: 'Criteria', score: null },
+      { name: 'Rubric', score: null },
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.missing).toEqual(['Criteria', 'Rubric']);
+  });
 });
 
 describe('JURY_ADAPTERS registry', () => {
