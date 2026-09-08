@@ -20,7 +20,7 @@ import {
  * surface can grow without ambiguity.
  */
 export const PublicFieldDefinitionWriteBodySchema = z.strictObject({
-  name: z.string().max(MAX_FIELD_DEFINITION_NAME_LENGTH),
+  name: z.string().min(1).max(MAX_FIELD_DEFINITION_NAME_LENGTH),
   owner: FieldDefinitionSchema.shape.owner,
   definition: z.string().max(MAX_FIELD_DEFINITION_DEFINITION_LENGTH),
   description: z.string().max(MAX_FIELD_DEFINITION_DESCRIPTION_LENGTH).optional(),
