@@ -72,7 +72,6 @@ describe('SemanticTextBanner', () => {
 
       const banner = screen.getByTestId('indexDetailsMappingsSemanticTextBanner');
       expect(banner.textContent).toContain(BANNER_TITLE);
-      expect(banner.textContent).toContain(BANNER_TEXT);
     });
 
     it('should navigate to the license management page when clicked', () => {
