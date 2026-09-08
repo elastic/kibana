@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import stripAnsi from 'strip-ansi';
 import { ToolingLog } from '@kbn/tooling-log';
 import type {
   FlakyTestBranchStats,
@@ -25,6 +26,9 @@ import {
 } from './flaky_tests_summary';
 
 const now = new Date('2026-09-07T12:00:00.000Z');
+
+// CI runs with colours enabled, which wraps borders and highlighted cells in ANSI codes
+const render = (table: { toString(): string }): string => stripAnsi(table.toString());
 
 const branch = (
   overrides: Partial<FlakyTestBranchStats> & { branch: string }
@@ -172,7 +176,7 @@ describe('buildTopFailingTable', () => {
   it('renders one row per test with a shared file cell and the flakiest branch', () => {
     const first = flaky({ testId: 't1', title: 'first test' });
     const second = flaky({ testId: 't2', title: 'second test' });
-    const rendered = buildTopFailingTable([first, second], [first, second], 10, now).toString();
+    const rendered = render(buildTopFailingTable([first, second], [first, second], 10, now));
 
     expect(rendered).toContain('first test');
     expect(rendered).toContain('second test');
@@ -188,21 +192,23 @@ describe('buildTopFailingTable', () => {
   it('mentions qualifying tests of the same file that did not make the top list', () => {
     const shown = flaky({ testId: 't1' });
     const hidden = [flaky({ testId: 't2' }), broken({ testId: 't3' })];
-    const rendered = buildTopFailingTable([shown], [shown, ...hidden], 10, now).toString();
+    const rendered = render(buildTopFailingTable([shown], [shown, ...hidden], 10, now));
 
     expect(rendered).toContain('(+2 more in this file)');
   });
 
   it('renders consistently failing tests alongside flaky ones', () => {
-    const rendered = buildTopFailingTable(
-      [
-        broken({ testId: 'c1', title: 'always broken' }),
-        flaky({ testId: 'f1', title: 'sometimes' }),
-      ],
-      [],
-      10,
-      now
-    ).toString();
+    const rendered = render(
+      buildTopFailingTable(
+        [
+          broken({ testId: 'c1', title: 'always broken' }),
+          flaky({ testId: 'f1', title: 'sometimes' }),
+        ],
+        [],
+        10,
+        now
+      )
+    );
 
     expect(rendered).toContain('always broken');
     expect(rendered).toContain('10/10');
@@ -211,32 +217,34 @@ describe('buildTopFailingTable', () => {
   });
 
   it('uses the latest run of the flakiest branch rather than the overall latest run', () => {
-    const rendered = buildTopFailingTable(
-      [
-        flaky({
-          byBranch: [
-            branch({
+    const rendered = render(
+      buildTopFailingTable(
+        [
+          flaky({
+            byBranch: [
+              branch({
+                branch: 'main',
+                buildFailRate: 0.1,
+                latestRun: { status: 'passed', timestamp: new Date('2026-09-07T11:00:00.000Z') },
+              }),
+              branch({
+                branch: '9.2',
+                buildFailRate: 0.5,
+                latestRun: { status: 'failed', timestamp: new Date('2026-09-06T12:00:00.000Z') },
+              }),
+            ],
+            latestRun: {
+              status: 'passed',
+              timestamp: new Date('2026-09-07T11:00:00.000Z'),
               branch: 'main',
-              buildFailRate: 0.1,
-              latestRun: { status: 'passed', timestamp: new Date('2026-09-07T11:00:00.000Z') },
-            }),
-            branch({
-              branch: '9.2',
-              buildFailRate: 0.5,
-              latestRun: { status: 'failed', timestamp: new Date('2026-09-06T12:00:00.000Z') },
-            }),
-          ],
-          latestRun: {
-            status: 'passed',
-            timestamp: new Date('2026-09-07T11:00:00.000Z'),
-            branch: 'main',
-          },
-        }),
-      ],
-      [],
-      10,
-      now
-    ).toString();
+            },
+          }),
+        ],
+        [],
+        10,
+        now
+      )
+    );
 
     expect(rendered).toContain('9.2 (50.0%)');
     expect(rendered).toContain('failed');
@@ -244,12 +252,9 @@ describe('buildTopFailingTable', () => {
   });
 
   it('shows placeholders when owners and branch stats are missing', () => {
-    const rendered = buildTopFailingTable(
-      [flaky({ owners: [], byBranch: [], latestRun: undefined })],
-      [],
-      10,
-      now
-    ).toString();
+    const rendered = render(
+      buildTopFailingTable([flaky({ owners: [], byBranch: [], latestRun: undefined })], [], 10, now)
+    );
 
     // owners, flakiest branch and latest run all fall back to a dash; adjacent cells share a
     // border, so match with a lookahead instead of consuming it
@@ -281,18 +286,18 @@ describe('displaySummary', () => {
     buildFailRate: 1,
   });
 
-  const render = (input: FlakyTestReport, limit: number): string => {
+  const renderSummary = (input: FlakyTestReport, limit: number): string => {
     const writes: string[] = [];
     const log = new ToolingLog();
     log.write = jest.fn((...args: unknown[]) => {
       writes.push(String(args[0]));
     }) as unknown as ToolingLog['write'];
     displaySummary(input, limit, log);
-    return writes.join('');
+    return stripAnsi(writes.join(''));
   };
 
   it('prints window, scope, totals and the capped top list', () => {
-    const output = render(report, 1);
+    const output = renderSummary(report, 1);
 
     expect(output).toContain('Flaky tests summary');
     expect(output).toContain('Lookback : 7d');
@@ -311,7 +316,7 @@ describe('displaySummary', () => {
   });
 
   it('includes consistently failing tests in the top list', () => {
-    const output = render(
+    const output = renderSummary(
       {
         ...report,
         summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
@@ -327,7 +332,7 @@ describe('displaySummary', () => {
   });
 
   it('omits the top list when nothing qualifies', () => {
-    const output = render(
+    const output = renderSummary(
       {
         ...report,
         summary: { totalFlaky: 0, totalConsistentlyFailing: 0, flakyByFramework: {} },
