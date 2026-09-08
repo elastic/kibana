@@ -71,14 +71,15 @@ describe('bindLocatorToHost', () => {
     const bound = bindLocatorToHost(locator, SEARCH_HOST.rules);
     const params = { ruleId: 'r-1' };
 
-    bound.useUrl(params);
+    const deps = ['r-1', 1, 2];
+    bound.useUrl(params, undefined, deps);
     await bound.getLocation(params);
     await bound.getUrl(params);
     bound.getRedirectUrl(params);
     await bound.navigate(params);
 
     const withHost = { ruleId: 'r-1', host: SEARCH_HOST.rules };
-    expect(locator.useUrl).toHaveBeenCalledWith(withHost, undefined, undefined);
+    expect(locator.useUrl).toHaveBeenCalledWith(withHost, undefined, deps);
     expect(locator.getLocation).toHaveBeenCalledWith(withHost);
     expect(locator.getUrl).toHaveBeenCalledWith(withHost, undefined);
     expect(locator.getRedirectUrl).toHaveBeenCalledWith(withHost, undefined);

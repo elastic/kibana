@@ -8,6 +8,7 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useAlertingLocators } from '../../../../application/locator_context';
 import { AlertTimelineSection } from './alert_timeline_section';
 
 const mockUseFetchRuleEvents = jest.fn();
@@ -121,6 +122,29 @@ describe('AlertTimelineSection', () => {
     });
 
     expect(successResult.refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes time-window deps to episodes.useUrl so the href tracks the selected range', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-08-14T12:00:00.000Z'));
+    renderSection();
+
+    const windowStartMs = Date.parse('2026-08-13T12:00:00.000Z');
+    const windowEndMs = Date.parse('2026-08-14T12:00:00.000Z');
+    const { episodes } = useAlertingLocators();
+
+    expect(episodes.useUrl).toHaveBeenCalledWith(
+      {
+        filters: { ruleId: 'rule-1', status: 'all' },
+        timeRange: {
+          from: new Date(windowStartMs).toISOString(),
+          to: new Date(windowEndMs).toISOString(),
+        },
+      },
+      undefined,
+      ['rule-1', windowStartMs, windowEndMs]
+    );
+    jest.useRealTimers();
   });
 
   it('slides a relative window forward on refresh without calling refetch', () => {

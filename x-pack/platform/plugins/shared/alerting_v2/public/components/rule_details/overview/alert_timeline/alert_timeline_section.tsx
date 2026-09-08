@@ -95,13 +95,17 @@ export const AlertTimelineSection: React.FC = () => {
     [share, application.capabilities, uiSettings, windowStartMs, windowEndMs, rule.query]
   );
 
-  const viewAllHref = episodes.useUrl({
-    filters: { ruleId: rule.id, status: 'all' },
-    timeRange: {
-      from: new Date(windowStartMs).toISOString(),
-      to: new Date(windowEndMs).toISOString(),
+  const viewAllHref = episodes.useUrl(
+    {
+      filters: { ruleId: rule.id, status: 'all' },
+      timeRange: {
+        from: new Date(windowStartMs).toISOString(),
+        to: new Date(windowEndMs).toISOString(),
+      },
     },
-  });
+    undefined,
+    [rule.id, windowStartMs, windowEndMs]
+  );
 
   const getEpisodeHref = useCallback(
     (episodeId: string) => episodes.getRedirectUrl({ episodeId }),
