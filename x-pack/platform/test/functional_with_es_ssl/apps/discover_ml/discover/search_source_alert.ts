@@ -14,7 +14,7 @@
  * Migration notes:
  * - Tests are deeply sequential: each `it` leaves side effects the next one depends on
  *   (sourceDataViewId set in test 1, rule created in test 3, data view mutated in test 8, deleted
- *   in test 11, rule deleted in test 14). Port as a single `test()` with `test.step`, or fully
+ *   in test 12, rule deleted in test 14). Port as a single `test()` with `test.step`, or fully
  *   decouple each case with its own setup/teardown so Playwright can retry them independently.
  * - The suite requires an `.index` connector (writable ES output index). The Scout server config
  *   needs the equivalent server args from functional_with_es_ssl (email/action transport settings).
