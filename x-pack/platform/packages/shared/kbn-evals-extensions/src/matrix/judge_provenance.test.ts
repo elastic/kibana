@@ -233,6 +233,33 @@ describe('deriveJudgeProvenance', () => {
     expect(result.judgeModelId).toContain('google-gemini-3.1-pro 25.0%');
   });
 
+  // Regression: attack-discovery runs each slice as its own experiment, so a
+  // suite can carry several judges. Counting only the single-judge field made
+  // those runs vanish from the breakdown -- the mixed column disappeared from
+  // the figure whose whole job is to expose it.
+  it('counts every judge on a suite whose columns ran as separate experiments', () => {
+    const mixed: AggregatedModelScores[] = [
+      {
+        modelId: 'a',
+        suites: [
+          {
+            suiteId: 'attack-discovery-agent-builder',
+            judgeModelIds: ['anthropic-claude-4.6-sonnet', 'google-gemini-3.1-pro'],
+            datasets: [],
+          },
+        ],
+      } as unknown as AggregatedModelScores,
+    ];
+
+    const result = deriveJudgeProvenance(mixed);
+
+    expect(result.judgeBreakdown.map((j) => j.judgeModelId).sort()).toEqual([
+      'anthropic-claude-4.6-sonnet',
+      'google-gemini-3.1-pro',
+    ]);
+    expect(result.judgeModelId).toMatch(/^mixed: /);
+  });
+
   it('orders the breakdown by how much of the board each judge graded', () => {
     const result = deriveJudgeProvenance([
       model('a', ['gemini', 'haiku', 'haiku']),

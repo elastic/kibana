@@ -270,8 +270,17 @@ export function deriveJudgeProvenance(aggregated: AggregatedModelScores[]): Deri
   const counts = new Map<string, number>();
   for (const model of aggregated) {
     for (const suite of model.suites ?? []) {
-      if (suite.judgeModelId) {
-        counts.set(suite.judgeModelId, (counts.get(suite.judgeModelId) ?? 0) + 1);
+      // A suite whose columns ran as separate experiments carries every judge
+      // that graded it. Counting only the single-judge `judgeModelId` would
+      // drop those runs from the breakdown entirely, so a mixed column would
+      // disappear from the very figure meant to expose it.
+      const judges = suite.judgeModelIds?.length
+        ? suite.judgeModelIds
+        : suite.judgeModelId
+        ? [suite.judgeModelId]
+        : [];
+      for (const judge of judges) {
+        counts.set(judge, (counts.get(judge) ?? 0) + 1);
       }
     }
   }

@@ -135,8 +135,15 @@ export interface AggregatedSuiteScores {
    * self-judged score can be disclosed per row rather than per column.
    */
   selfJudged?: boolean;
-  /** Judge that graded this suite's run, for cross-row comparability checks. */
+  /**
+   * Judge that graded this suite's run, for cross-row comparability checks.
+   * Left undefined when the run carries more than one judge -- see
+   * `judgeModelIds`, which is the honest form for suites whose columns ran as
+   * separate experiments.
+   */
   judgeModelId?: string;
+  /** Every judge that graded this suite's admitted runs. */
+  judgeModelIds?: string[];
   /**
    * Number of experiments withheld because the grader was the graded model.
    * Set only when the withholding emptied the suite, so a cell can say

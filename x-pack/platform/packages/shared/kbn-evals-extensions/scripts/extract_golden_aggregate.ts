@@ -72,6 +72,22 @@ const search = async (body: unknown): Promise<{ hits: { hits: Array<{ _source: S
 
 const mean = (values: number[]) => values.reduce((a, b) => a + b, 0) / values.length;
 
+/**
+ * The two suite shapes key their columns differently, and neither field alone
+ * works for both:
+ *   - persona matrix: `example.id` IS the column key ('alert-analysis-a'), while
+ *     `example.dataset.id` is one UUID shared by every column.
+ *   - attack-discovery / automatic-migrations: `example.id` is a bare ordinal
+ *     ('0') that collapses all columns into one bucket, while
+ *     `example.dataset.id` is per-scenario.
+ * So prefer a semantic example id and fall back to the dataset id.
+ */
+function columnKey(doc: ScoreDoc): string {
+  const exampleId = doc.example?.id;
+  const semantic = exampleId && !/^\d+$/.test(exampleId) ? exampleId : undefined;
+  return semantic ?? doc.example?.dataset?.id ?? exampleId ?? 'unknown';
+}
+
 async function main() {
   // modelId -> suiteId -> docs
   const byModel = new Map<string, Map<string, ScoreDoc[]>>();
@@ -141,11 +157,24 @@ async function main() {
 
   const aggregated = [...byModel.entries()].map(([modelId, suiteDocs]) => {
     const suites = [...suiteDocs.entries()].map(([suiteId, docs]) => {
-      // Newest experiment wins, matching the CLI's newest-execution selection.
+      // Newest experiment wins, but PER COLUMN, not per suite. Persona runs all
+      // of its columns inside one experiment, so a suite-wide filter is
+      // harmless there. Attack-discovery runs each of its nine slices as its
+      // own experiment, so a suite-wide filter keeps one slice and silently
+      // discards the other eight -- which is what made AD read as a
+      // single-dataset, one-observation column.
       const newestExperiment = docs.reduce((latest, d) =>
         d['@timestamp'] > latest['@timestamp'] ? d : latest
       );
-      const selected = docs.filter((d) => d.experiment_id === newestExperiment.experiment_id);
+      const newestByColumn = new Map<string, ScoreDoc>();
+      for (const doc of docs) {
+        const key = columnKey(doc);
+        const seen = newestByColumn.get(key);
+        if (!seen || doc['@timestamp'] > seen['@timestamp']) newestByColumn.set(key, doc);
+      }
+      const selected = docs.filter(
+        (d) => d.experiment_id === newestByColumn.get(columnKey(d))?.experiment_id
+      );
 
       // The two suite shapes key their columns differently, and neither field
       // alone works for both:
@@ -159,9 +188,7 @@ async function main() {
       // is the only human-readable key for the UUID-addressed suites.
       const byDataset = new Map<string, ScoreDoc[]>();
       for (const doc of selected) {
-        const exampleId = doc.example?.id;
-        const semanticExampleId = exampleId && !/^\d+$/.test(exampleId) ? exampleId : undefined;
-        const datasetId = semanticExampleId ?? doc.example?.dataset?.id ?? exampleId ?? 'unknown';
+        const datasetId = columnKey(doc);
         if (!byDataset.has(datasetId)) byDataset.set(datasetId, []);
         byDataset.get(datasetId)!.push(doc);
       }
@@ -188,16 +215,24 @@ async function main() {
         };
       });
 
-      // The judge that actually graded the selected run — carried so the
-      // artifact's provenance can be derived instead of asserted.
-      const judgeModelId = selected.find((d) => d.evaluator?.model?.id)?.evaluator?.model?.id;
+      // The judge that actually graded the selected run -- carried so the
+      // artifact's provenance can be derived instead of asserted. A suite whose
+      // columns ran as separate experiments can carry more than one judge, so
+      // the full set is reported rather than whichever document sorted first:
+      // silently publishing one of several judges is how a mixed column reads
+      // as a unified one.
+      const judgeModelIds = [
+        ...new Set(selected.map((d) => d.evaluator?.model?.id).filter(Boolean)),
+      ] as string[];
+      const judgeModelId = judgeModelIds.length === 1 ? judgeModelIds[0] : undefined;
 
       return {
         suiteId,
         experimentId: newestExperiment.experiment_id,
         timestamp: newestExperiment['@timestamp'],
         judgeModelId,
-        selfJudged: judgeModelId === modelId,
+        judgeModelIds,
+        selfJudged: judgeModelIds.includes(modelId),
         datasets,
       };
     });
