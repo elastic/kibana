@@ -16,7 +16,7 @@ import {
   EuiSkeletonTitle,
 } from '@elastic/eui';
 
-export function LoadingModal({ onClose }: { onClose: () => void }) {
+export function LoadingModal() {
   return (
     <EuiDelayRender delay={300}>
       <EuiModalHeader>

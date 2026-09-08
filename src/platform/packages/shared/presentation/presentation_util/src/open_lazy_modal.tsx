@@ -58,5 +58,5 @@ function LazyModal({
     }
   }, []);
 
-  return LoadedModal ?? <LoadingModal onClose={closeModal} />;
+  return LoadedModal ?? <LoadingModal />;
 }
