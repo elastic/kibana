@@ -12,11 +12,10 @@ import qs from 'query-string';
 import { isArray } from 'lodash';
 import { fullWidthFormContentCss } from '../../../components/layouts';
 import { pagePathGetters } from '../../../common/page_paths';
-import type { LocationStateWithFromHistory } from '../../../common/use_go_back';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
-interface LocationState extends LocationStateWithFromHistory {
+interface LocationState {
   form: Record<string, unknown>;
 }
 

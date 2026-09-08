@@ -166,7 +166,8 @@
     "@kbn/core-chrome-app-menu-components",
     "@kbn/global-search-plugin",
     "@kbn/nightshift-investigations-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
