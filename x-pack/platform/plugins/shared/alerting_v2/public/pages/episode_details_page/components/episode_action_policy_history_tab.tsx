@@ -9,8 +9,6 @@ import React, { useCallback, useState } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
-  logicalCSS,
-  useEuiMaxBreakpoint,
   useEuiMinBreakpoint,
   type CriteriaWithPagination,
 } from '@elastic/eui';
@@ -93,14 +91,9 @@ export const EpisodeActionPolicyHistoryTab = ({ episodeId, episodeStart }: Props
       hasShadow={false}
       paddingSize="l"
       css={css`
-        ${useEuiMaxBreakpoint('s')} {
-          ${logicalCSS('padding-horizontal', '0')}
-        }
-
         ${useEuiMinBreakpoint('m')} {
           height: 100%;
           overflow-y: auto;
-          ${logicalCSS('padding-left', '0')}
         }
       `}
       data-test-subj="episodeActionPolicyHistoryTab"

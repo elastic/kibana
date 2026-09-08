@@ -49,13 +49,25 @@ describe('getEcfServiceConfigs()', () => {
   it('reads bucket_arn and log_group_arn from serviceVars keyed by instanceId', () => {
     const serviceVars: Record<string, ServiceVars> = {
       vpcflow: {
-        enabledInputs: ['aws-s3'],
-        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket', region: 'us-east-1' } },
+        enabledDataStreams: ['vpcflow'],
+        varsByDataStream: {
+          vpcflow: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket', region: 'us-east-1' },
+            },
+          },
+        },
       },
       waf: {
-        enabledInputs: ['aws-cloudwatch'],
-        varsByInput: {
-          'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+        enabledDataStreams: ['waf'],
+        varsByDataStream: {
+          waf: {
+            enabledInputs: ['aws-cloudwatch'],
+            varsByInput: {
+              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:waf' },
+            },
+          },
         },
       },
     };
@@ -74,12 +86,22 @@ describe('getEcfServiceConfigs()', () => {
     // User duplicated cloudtrail to collect from two S3 buckets.
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        enabledInputs: ['aws-s3'],
-        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a' } },
+        enabledDataStreams: ['cloudtrail'],
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a' } },
+          },
+        },
       },
       'cloudtrail__dup-1': {
-        enabledInputs: ['aws-s3'],
-        varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-b' } },
+        enabledDataStreams: ['cloudtrail'],
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-b' } },
+          },
+        },
       },
     };
     const instances = [inst('cloudtrail'), inst('cloudtrail', 'cloudtrail__dup-1')];
@@ -96,10 +118,15 @@ describe('getEcfServiceConfigs()', () => {
     // Only the log_group_arn (matching the active trigger) should appear in the config.
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        enabledInputs: ['aws-cloudwatch'],
-        varsByInput: {
-          'aws-s3': { bucket_arn: 'arn:aws:s3:::stale-bucket' },
-          'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct' },
+        enabledDataStreams: ['cloudtrail'],
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-cloudwatch'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::stale-bucket' },
+              'aws-cloudwatch': { log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct' },
+            },
+          },
         },
       },
     };
@@ -111,8 +138,16 @@ describe('getEcfServiceConfigs()', () => {
   it('trims whitespace from ARN values and treats blank as empty', () => {
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        enabledInputs: ['aws-s3'],
-        varsByInput: { 'aws-s3': { bucket_arn: '  ' }, 'aws-cloudwatch': { log_group_arn: '' } },
+        enabledDataStreams: ['cloudtrail'],
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-s3'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: '  ' },
+              'aws-cloudwatch': { log_group_arn: '' },
+            },
+          },
+        },
       },
     };
     const [config] = getEcfServiceConfigs([inst('cloudtrail')], serviceVars);
@@ -123,12 +158,17 @@ describe('getEcfServiceConfigs()', () => {
   it('splits comma-joined multi-value ARNs into individual entries', () => {
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: {
-        enabledInputs: ['aws-s3', 'aws-cloudwatch'],
-        varsByInput: {
-          'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a, arn:aws:s3:::bucket-b' },
-          'aws-cloudwatch': {
-            log_group_arn:
-              'arn:aws:logs:us-east-1:123:log-group:ct-1, arn:aws:logs:us-east-1:123:log-group:ct-2',
+        enabledDataStreams: ['cloudtrail'],
+        varsByDataStream: {
+          cloudtrail: {
+            enabledInputs: ['aws-s3', 'aws-cloudwatch'],
+            varsByInput: {
+              'aws-s3': { bucket_arn: 'arn:aws:s3:::bucket-a, arn:aws:s3:::bucket-b' },
+              'aws-cloudwatch': {
+                log_group_arn:
+                  'arn:aws:logs:us-east-1:123:log-group:ct-1, arn:aws:logs:us-east-1:123:log-group:ct-2',
+              },
+            },
           },
         },
       },

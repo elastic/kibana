@@ -16,6 +16,10 @@ const hasBasePathPrefix = (href: string, basePath: string): boolean => {
   return href === basePath || href.startsWith(`${basePath}/`);
 };
 
+/**
+ * Normalizes `back` to targets with a prepended base path.
+ * The array form is fallback-only and is deprecated for explicit use.
+ */
 export function useBackNavTargets(
   back: AppHeaderBack | AppHeaderBack[] | undefined
 ): AppHeaderBackTarget[] | undefined {
@@ -29,8 +33,7 @@ export function useBackNavTargets(
     const base = basePath.get();
     const explicit: AppHeaderBackTarget[] = [];
     const seenHrefs = new Set<string>();
-    for (const b of backItems) {
-      const target = typeof b === 'string' ? { href: b } : b;
+    for (const target of backItems) {
       const targetHref = target.href?.trim();
       if (!targetHref) {
         continue;

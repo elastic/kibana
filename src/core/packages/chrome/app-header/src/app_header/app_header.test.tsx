@@ -39,7 +39,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base-other/app" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base-other/app', label: 'Other app' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
@@ -52,7 +55,10 @@ describe('AppHeader adapter', () => {
     chrome.componentDeps.basePath.get.mockReturnValue('/base');
     chrome.componentDeps.basePath.prepend.mockImplementation((path: string) => `/base${path}`);
 
-    renderAppHeader(<AppHeaderView back="/base/app/dashboards" />, chrome);
+    renderAppHeader(
+      <AppHeaderView back={{ href: '/base/app/dashboards', label: 'Dashboards' }} />,
+      chrome
+    );
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toHaveAttribute(
       'href',
@@ -223,18 +229,18 @@ describe('AppHeader adapter', () => {
     const chrome = chromeServiceMock.createStartContract();
     const { unmount } = renderAppHeader(<AppHeader title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(true);
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 
   it('does not claim the slot when only the view is rendered', () => {
     const chrome = chromeServiceMock.createStartContract();
     renderAppHeader(<AppHeaderView title="Dashboard" />, chrome);
 
-    expect(chrome.next.inlineAppHeader.set).not.toHaveBeenCalled();
+    expect(chrome.inlineAppHeader.set).not.toHaveBeenCalled();
   });
 
   it('claims the inline slot for DiscoverAppHeader', () => {
@@ -244,11 +250,11 @@ describe('AppHeader adapter', () => {
       chrome
     );
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(true);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(true);
     expect(screen.getByTestId('tabsBar')).toBeInTheDocument();
 
     unmount();
 
-    expect(chrome.next.inlineAppHeader.set).toHaveBeenCalledWith(false);
+    expect(chrome.inlineAppHeader.set).toHaveBeenCalledWith(false);
   });
 });

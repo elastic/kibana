@@ -92,6 +92,8 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
     />
   );
 
+  // Multi-target popover serves the breadcrumb-derived fallback. Explicit
+  // registrations pass one target.
   if (targets.length > 1) {
     return (
       <EuiPopover

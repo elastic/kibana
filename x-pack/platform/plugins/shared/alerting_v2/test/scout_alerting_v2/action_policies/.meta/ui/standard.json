@@ -1,8 +1,7 @@
 {
-  "sha1": "c9b098fb171d291f8cdb397f97bff73282495a9e",
+  "sha1": "642eb3b26f9449be6678474d34ac019342dab9f5",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -55,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 47,
-        "column": 11
+        "line": 46,
+        "column": 47
       }
     },
     {
@@ -68,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/action_policies/ui/tests/action_policies_privileges.spec.ts",
-        "line": 65,
-        "column": 13
+        "line": 64,
+        "column": 11
       }
     }
   ]
