@@ -42,10 +42,7 @@ export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   agentPolicyId: schema.maybe(schema.string()),
   apiKeyId: schema.maybe(schema.string()),
-});
-
-/** V2 adds the optional `ecfStacks` array — one entry per ECF CloudFormation stack launched. */
-export const CloudOnboardingDeploymentSchemaV2 = CloudOnboardingDeploymentSchemaV1.extends({
+  /** ECF CloudFormation stacks launched for this deployment, one entry per template family. */
   ecfStacks: schema.maybe(
     schema.arrayOf(
       schema.object({
