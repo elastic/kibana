@@ -76,20 +76,31 @@ const transferFns: Record<string, CommandTransfer> = {
   keep: keepTransfer,
 };
 
-/**
- * Walks a tracked column through pipeline commands, applying per-command
- * transfer functions, and returns its final scope state.
- *
- * With `ensureKept`, KEEP commands are mutated so the column survives the
- * whole pipeline segment.
- */
-export const walkTrackedColumn = (
+const walkColumn = (
   commands: ESQLCommand[],
   columnName: string,
-  { ensureKept = false }: { ensureKept?: boolean } = {}
+  ensureKept: boolean
 ): TrackedColumnState =>
   commands.reduce<TrackedColumnState>(
     (state, command) =>
       (transferFns[command.name] ?? identityTransfer)(command, state, { ensureKept }),
     { name: columnName }
   );
+
+/**
+ * Resolves the final name of a column after walking pipeline commands.
+ * Read-only: never mutates the AST.
+ */
+export const resolveTrackedColumn = (
+  commands: ESQLCommand[],
+  columnName: string
+): TrackedColumnState => walkColumn(commands, columnName, false);
+
+/**
+ * Resolves the final name of a column and mutates KEEP commands along the way
+ * so the column survives the whole pipeline segment.
+ */
+export const trackColumnAndEnsureKept = (
+  commands: ESQLCommand[],
+  columnName: string
+): TrackedColumnState => walkColumn(commands, columnName, true);

@@ -19,7 +19,7 @@ import {
   getBucketResultColumnForField,
 } from './bucket';
 import { commandsHaveStats, flattenForkCommands } from './fork';
-import { walkTrackedColumn } from './scope_walker';
+import { resolveTrackedColumn, trackColumnAndEnsureKept } from './scope_walker';
 
 export { buildTrendlineBucketExpression } from './bucket';
 
@@ -47,7 +47,7 @@ const resolveAfterCommand = (
   command: ESQLCommand,
   resultColumn: string
 ): string =>
-  walkTrackedColumn(root.commands.slice(root.commands.indexOf(command) + 1), resultColumn).name;
+  resolveTrackedColumn(root.commands.slice(root.commands.indexOf(command) + 1), resultColumn).name;
 
 /**
  * Applies the trendline time-bucketing rewrite to a parsed query AST in place
@@ -136,13 +136,11 @@ const rewriteTrendlineAst = (
     // KEEP commands after STATS only see the BUCKET result column.
     const statsIndex = root.commands.indexOf(statsCmd);
     const timeResultColumn = getBucketResultColumnForField(statsCmd, timeField) ?? bucketExpr;
-    walkTrackedColumn(root.commands.slice(0, statsIndex), timeField, { ensureKept: true });
-    return walkTrackedColumn(root.commands.slice(statsIndex + 1), timeResultColumn, {
-      ensureKept: true,
-    }).name;
+    trackColumnAndEnsureKept(root.commands.slice(0, statsIndex), timeField);
+    return trackColumnAndEnsureKept(root.commands.slice(statsIndex + 1), timeResultColumn).name;
   }
 
-  walkTrackedColumn(root.commands, timeField, { ensureKept: true });
+  trackColumnAndEnsureKept(root.commands, timeField);
   // No STATS → append full STATS <agg> BY BUCKET(...) command.
   // Use AVG(<field>) for each provided metric field, or COUNT(*) as fallback.
   const statsExprs =
