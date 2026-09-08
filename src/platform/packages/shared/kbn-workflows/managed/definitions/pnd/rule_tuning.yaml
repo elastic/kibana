@@ -309,7 +309,8 @@ steps:
               and steps.preview_proposed_query.output.is_aborted == false }}
           can_apply_exception: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'exception'
-              and steps.diagnose_rule.output.structured_output.exception_entries != null }}
+              and steps.diagnose_rule.output.structured_output.exception_entries != null
+              and steps.diagnose_rule.output.structured_output.exception_entries.size > 0 }}
           can_apply_suppression: >-
             ${{ steps.diagnose_rule.output.structured_output.change_type == 'suppression'
               and steps.diagnose_rule.output.structured_output.suppression_group_by != null }}
