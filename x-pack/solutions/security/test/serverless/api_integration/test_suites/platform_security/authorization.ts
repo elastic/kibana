@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -49,23 +50,10 @@ if (sourceFilePath === 'authorization.ts') {
           .set(adminCredentials)
           .expect(200);
 
-        // The following features are composed of other features in a way that is
-        // specific to the security solution.
-        // The deprecated features are listed here because
-        // they are not explicitly hidden, and we can check them to confirm legacy
-        // roles will still function correctly
-        const compositeFeatureIds = [
-          'dashboard',
-          'dashboard_v2',
-          'discover',
-          'discover_v2',
-          'reporting',
-          'siem',
-          'siemV2',
-          'siemV3',
-          'siemV4',
-          'siemV5',
-        ];
+        // Security-specific composition. Standalone Dashboard/Discover privileges
+        // are asserted in the following tests so this snapshot stays focused on
+        // Security feature action sets.
+        const compositeFeatureIds = ['reporting', 'siem', 'siemV2', 'siemV3', 'siemV4', 'siemV5'];
 
         const features = Object.fromEntries(
           Object.entries(body.features).filter(([key]) => compositeFeatureIds.includes(key))
@@ -15603,6 +15591,50 @@ if (sourceFilePath === 'authorization.ts') {
             },
           }
         `);
+      });
+
+      it('registers standalone Dashboard and Discover privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges?includeActions=true')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        expect(body.features.dashboard).not.to.be(undefined);
+        expect(body.features.dashboard_v2).not.to.be(undefined);
+        expect(body.features.discover).not.to.be(undefined);
+        expect(body.features.discover_v2).not.to.be(undefined);
+        expect(body.features.visualize_v2).to.be(undefined);
+        expect(body.features.maps_v2).to.be(undefined);
+
+        expect(body.features.dashboard_v2.read).to.contain('app:dashboards');
+        expect(body.features.dashboard_v2.read).to.contain('ui:navLinks/dashboards');
+        expect(body.features.dashboard_v2.read).to.contain('saved_object:dashboard/bulk_get');
+        expect(body.features.discover_v2.read).to.contain('app:discover');
+        expect(body.features.discover_v2.read).to.contain('ui:navLinks/discover');
+      });
+
+      it('categorizes Dashboard and Discover under Security for role management', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/features')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const features = body as Array<{ id: string; hidden?: boolean; category?: { id: string } }>;
+        const dashboardV2 = features.find((feature) => feature.id === 'dashboard_v2');
+        const discoverV2 = features.find((feature) => feature.id === 'discover_v2');
+        const dashboardV1 = features.find((feature) => feature.id === 'dashboard');
+        const visualizeV2 = features.find((feature) => feature.id === 'visualize_v2');
+
+        expect(dashboardV2).not.to.be(undefined);
+        expect(discoverV2).not.to.be(undefined);
+        expect(dashboardV2?.hidden).not.to.be(true);
+        expect(discoverV2?.hidden).not.to.be(true);
+        expect(dashboardV2?.category?.id).to.be('securitySolution');
+        expect(discoverV2?.category?.id).to.be('securitySolution');
+        expect(dashboardV1).to.be(undefined);
+        expect(visualizeV2?.hidden).to.be(true);
       });
     });
   });

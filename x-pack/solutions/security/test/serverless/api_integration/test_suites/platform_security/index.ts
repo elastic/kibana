@@ -10,5 +10,6 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Platform security APIs', function () {
     loadTestFile(require.resolve('./authorization'));
+    loadTestFile(require.resolve('./dashboard_viewer_role'));
   });
 }
