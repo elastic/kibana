@@ -153,7 +153,10 @@ test.describe('Onboarding SO persistence', { tag: tags.stateful.classic }, () =>
 
     // Verify SO PUT fired with status and the managed integration policy id after allSettled.
     const soUpdateReq = await soUpdatePromise;
-    const soUpdateBody = soUpdateReq.postDataJSON() as { status: string; packagePolicyIds: string[] };
+    const soUpdateBody = soUpdateReq.postDataJSON() as {
+      status: string;
+      packagePolicyIds: string[];
+    };
     expect(soUpdateBody.status).toMatch(/succeeded|failed/);
     expect(soUpdateBody.packagePolicyIds).toContain('p-e2e-001');
   });

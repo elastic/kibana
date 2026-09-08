@@ -120,7 +120,12 @@ export const getEcfServiceConfigs = (
     // after SO resume) into individual ARNs for per-ARN normalisation.
     const splitArns = (raw: string | string[] | undefined): string[] => {
       if (Array.isArray(raw)) return raw.map((s) => s.trim()).filter(Boolean);
-      return raw ? raw.split(',').map((s) => s.trim()).filter(Boolean) : [];
+      return raw
+        ? raw
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
     };
 
     const bucketArns = enabledInputs.includes('aws-s3')

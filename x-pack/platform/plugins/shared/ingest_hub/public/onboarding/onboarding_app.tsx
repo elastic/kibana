@@ -93,7 +93,10 @@ async function hydrateOnboardingSession(
     );
     // Mark all steps except the last as complete so the shell defaults to detect-and-review.
     const stepState = Object.fromEntries(
-      ONBOARDING_STEPS.map((s, i) => [s.id, i < ONBOARDING_STEPS.length - 1 ? 'complete' : 'incomplete'])
+      ONBOARDING_STEPS.map((s, i) => [
+        s.id,
+        i < ONBOARDING_STEPS.length - 1 ? 'complete' : 'incomplete',
+      ])
     );
     sessionStorage.setItem(
       getOnboardingSessionKey(integrationId, 'stepState'),
