@@ -9,10 +9,23 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
   UnknownAttachment,
   UpdateOriginResponse,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentUIDefinition } from '@kbn/agent-builder-browser';
+import type {
+  AttachmentUIDefinition,
+  CreateAttachmentInput,
+  UpdateAttachmentInput,
+  ListAttachmentsResult,
+} from '@kbn/agent-builder-browser';
 import { publicApiPath } from '../../../common/constants';
-import type { CheckStaleAttachmentsResponse } from '../../../common/http_api/attachments';
+import type {
+  CheckStaleAttachmentsResponse,
+  CreateAttachmentResponse,
+  DeleteAttachmentResponse,
+  GetAttachmentResponse,
+  ListAttachmentsResponse,
+  UpdateAttachmentResponse,
+} from '../../../common/http_api/attachments';
 
 /**
  * Internal service for managing attachment UI definitions and API operations.
@@ -93,6 +106,57 @@ export class AttachmentsService {
   async checkStale(conversationId: string): Promise<CheckStaleAttachmentsResponse> {
     return await this.http.get<CheckStaleAttachmentsResponse>(
       `${publicApiPath}/conversations/${conversationId}/attachments/stale`
+    );
+  }
+
+  async list(
+    conversationId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<ListAttachmentsResult> {
+    return await this.http.get<ListAttachmentsResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments`,
+      { query: { include_deleted: options?.includeDeleted } }
+    );
+  }
+
+  async get(conversationId: string, attachmentId: string): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.get<GetAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`
+    );
+    return attachment;
+  }
+
+  async create(
+    conversationId: string,
+    input: CreateAttachmentInput
+  ): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.post<CreateAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments`,
+      { body: JSON.stringify(input) }
+    );
+    return attachment;
+  }
+
+  async update(
+    conversationId: string,
+    attachmentId: string,
+    input: UpdateAttachmentInput
+  ): Promise<VersionedAttachment> {
+    const { attachment } = await this.http.put<UpdateAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      { body: JSON.stringify(input) }
+    );
+    return attachment;
+  }
+
+  async delete(
+    conversationId: string,
+    attachmentId: string,
+    options?: { permanent?: boolean }
+  ): Promise<void> {
+    await this.http.delete<DeleteAttachmentResponse>(
+      `${publicApiPath}/conversations/${conversationId}/attachments/${attachmentId}`,
+      { query: { permanent: options?.permanent } }
     );
   }
 }

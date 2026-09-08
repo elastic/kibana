@@ -12,6 +12,7 @@ import type {
   AttachmentVersion,
   UpdateOriginResponse,
   ScreenContextAttachmentData,
+  VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 
 export enum ActionButtonType {
@@ -234,6 +235,59 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
 }
 
 /**
+ * Input for creating a new attachment via the browser client.
+ * Mirrors the `POST /conversations/{id}/attachments` route body.
+ */
+export interface CreateAttachmentInput {
+  id?: string;
+  type: string;
+  data?: unknown;
+  origin?: string;
+  description?: string;
+  hidden?: boolean;
+}
+
+/**
+ * Input for updating an attachment via the browser client.
+ * Mirrors the `PUT /conversations/{id}/attachments/{aid}` route body.
+ */
+export interface UpdateAttachmentInput {
+  data?: unknown;
+  description?: string;
+}
+
+/**
+ * Result of a `list` call on the browser client.
+ */
+export interface ListAttachmentsResult {
+  results: VersionedAttachment[];
+  total_token_estimate: number;
+}
+
+/**
+ * A client for the AgentBuilder attachment HTTP APIs.
+ * Obtain via {@link AttachmentServiceStartContract.getClient}.
+ */
+export interface AttachmentBrowserClient {
+  create(conversationId: string, input: CreateAttachmentInput): Promise<VersionedAttachment>;
+  get(conversationId: string, attachmentId: string): Promise<VersionedAttachment>;
+  update(
+    conversationId: string,
+    attachmentId: string,
+    input: UpdateAttachmentInput
+  ): Promise<VersionedAttachment>;
+  delete(
+    conversationId: string,
+    attachmentId: string,
+    options?: { permanent?: boolean }
+  ): Promise<void>;
+  list(
+    conversationId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<ListAttachmentsResult>;
+}
+
+/**
  * Public-facing contract for the attachment service.
  */
 export interface AttachmentServiceStartContract {
@@ -257,4 +311,9 @@ export interface AttachmentServiceStartContract {
   getAttachmentUiDefinition: <TAttachment extends UnknownAttachment = UnknownAttachment>(
     attachmentType: string
   ) => AttachmentUIDefinition<TAttachment> | undefined;
+
+  /**
+   * Returns a client for interacting with attachment HTTP APIs.
+   */
+  getClient(): AttachmentBrowserClient;
 }

@@ -159,7 +159,19 @@ export type {
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
+  AttachmentsStart,
 } from './plugin_contract';
+export type {
+  AttachmentPublicClient,
+  CreateAttachmentInput,
+  UpdateAttachmentInput,
+  ListAttachmentsResult,
+} from './attachments';
+export {
+  AttachmentNotFoundError,
+  AttachmentConflictError,
+  AttachmentValidationError,
+} from './attachments';
 export type { ConversationPublicClient, ConversationCreatePublicRequest } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

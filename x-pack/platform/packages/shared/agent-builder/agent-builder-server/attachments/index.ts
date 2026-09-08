@@ -29,3 +29,14 @@ export type {
   ResolvedAttachmentRef,
 } from './attachment_state_manager';
 export { createAttachmentStateManager } from './attachment_state_manager';
+export type {
+  AttachmentPublicClient,
+  CreateAttachmentInput,
+  UpdateAttachmentInput,
+  ListAttachmentsResult,
+} from './public_client';
+export {
+  AttachmentNotFoundError,
+  AttachmentConflictError,
+  AttachmentValidationError,
+} from './errors';
