@@ -232,13 +232,6 @@ export async function getAgentsByKuery(
     pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
     /**
-     * Optional ES `_source` filtering, passed through verbatim.
-     * WARNING: when set, `searchHitToAgent` can only populate the requested fields, so every
-     * other `Agent` property is `undefined` despite its non-optional type. Only use this when
-     * you know exactly which fields the caller reads.
-     */
-    _source?: estypes.SearchRequest['_source'];
-    /**
      * When false, skip the agent-status runtime field and the inactivity-timeout SO scan it
      * requires. Defaults to true. Forced on when `getStatusSummary` is true.
      */
@@ -269,7 +262,6 @@ export async function getAgentsByKuery(
     pitKeepAlive = '1m',
     aggregations,
     spaceId,
-    _source,
     includeStatusRuntimeField = true,
   } = options;
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
@@ -389,7 +381,6 @@ export async function getAgentsByKuery(
           },
         };
       })(),
-      ...(_source !== undefined ? { _source } : {}),
       ...(currentPitId
         ? {
             pit: {
