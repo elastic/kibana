@@ -40,8 +40,7 @@ import { expectDocumentsMigratedToHighestVersion } from '../kibana_migrator_test
 const logFilePath = join(__dirname, 'v2_migration.log');
 const docVersion = getDocVersion();
 
-// Failing: See https://github.com/elastic/kibana/issues/223766
-describe.skip('v2 migration', () => {
+describe('v2 migration', () => {
   let esServer: TestElasticsearchUtils;
 
   beforeAll(async () => {
@@ -185,6 +184,12 @@ describe.skip('v2 migration', () => {
           const lines = error.message
             .split('\n')
             .filter((line: string) => line.includes(`'complex'`))
+            .map((line: string) =>
+              line.replace(
+                /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+                '<uuid>'
+              )
+            )
             .join('\n');
           expect(lines).toMatchSnapshot();
         }
