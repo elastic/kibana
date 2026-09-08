@@ -12,12 +12,17 @@ import { parseDurationToMs } from '../../../infra/time';
 import {
   LOG_EXTRACTION_DELAY_DEFAULT,
   LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT,
+  LogExtractionTypeOverride,
 } from '../../../domain/saved_objects';
+import { EntityType } from '../../../../common/domain/definitions/entity_schema';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
 
-function validateFrequencyParam(data: LogExtractionInstallParams, ctx: z.RefinementCtx): void {
-  if (data.frequency === undefined) {
+/** Params of either config layer. Fields are only checked when a value is supplied: `undefined` and `null` both mean "nothing to check". */
+type LogExtractionParams = LogExtractionInstallParams | LogExtractionTypeOverride;
+
+function validateFrequencyParam(data: LogExtractionParams, ctx: z.RefinementCtx): void {
+  if (data.frequency == null) {
     return;
   }
   if (!isValidFrequency(data.frequency)) {
@@ -38,11 +43,11 @@ function isValidFrequency(frequency: string): boolean {
 }
 
 function validateIndexPatternList(
-  patterns: string[] | undefined,
+  patterns: string[] | null | undefined,
   fieldName: 'additionalIndexPatterns' | 'excludedIndexPatterns',
   ctx: z.RefinementCtx
 ): void {
-  if (patterns === undefined) {
+  if (patterns == null) {
     return;
   }
   patterns.forEach((value, i) => {
@@ -62,12 +67,9 @@ function validateIndexPatternList(
   });
 }
 
-function validateDelayVsLookbackPeriod(
-  data: LogExtractionInstallParams,
-  ctx: z.RefinementCtx
-): void {
-  const hasDelay = data.delay !== undefined;
-  const hasLookback = data.lookbackPeriod !== undefined;
+function validateDelayVsLookbackPeriod(data: LogExtractionParams, ctx: z.RefinementCtx): void {
+  const hasDelay = data.delay != null;
+  const hasLookback = data.lookbackPeriod != null;
   if (!hasDelay && !hasLookback) {
     return;
   }
@@ -81,7 +83,7 @@ function validateDelayVsLookbackPeriod(
   }
 }
 
-function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): boolean {
+function isDelayGteLookbackPeriod(delay?: string | null, lookbackPeriod?: string | null): boolean {
   const lookbackPeriodValue = lookbackPeriod ?? LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT;
   const delayValue = delay ?? LOG_EXTRACTION_DELAY_DEFAULT;
   try {
@@ -94,7 +96,7 @@ function isDelayGteLookbackPeriod(delay?: string, lookbackPeriod?: string): bool
 }
 
 export function validateLogExtractionParams(
-  data: LogExtractionInstallParams | undefined,
+  data: LogExtractionParams | undefined,
   ctx: z.RefinementCtx
 ): void {
   if (!data) return;
@@ -112,3 +114,8 @@ export const LogExtractionInstallSchema = LogExtractionInstallParams.superRefine
 export const LogExtractionUpdadeSchema = LogExtractionInstallParams.superRefine(
   validateLogExtractionParams
 );
+
+/** Per entity-type params, with the same per-field checks applied to every entry. */
+export const LogExtractionByTypeSchema = z
+  .partialRecord(EntityType, LogExtractionTypeOverride.superRefine(validateLogExtractionParams))
+  .optional();
