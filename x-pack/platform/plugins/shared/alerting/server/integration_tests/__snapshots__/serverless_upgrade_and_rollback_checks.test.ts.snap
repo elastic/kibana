@@ -5971,15 +5971,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -5995,9 +5998,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -6197,6 +6202,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -6206,12 +6212,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -6221,6 +6230,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -6233,9 +6243,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -6266,6 +6278,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -6283,6 +6296,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -6318,6 +6332,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -6352,6 +6367,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -6740,15 +6756,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -6764,9 +6783,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -7011,6 +7032,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -7020,12 +7042,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -7035,6 +7060,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -7047,9 +7073,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -7080,6 +7108,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -7097,6 +7126,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -7132,6 +7162,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -7166,6 +7197,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -7584,15 +7616,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -7608,9 +7643,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -7810,6 +7847,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -7819,12 +7857,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -7834,6 +7875,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -7846,9 +7888,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -7879,6 +7923,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -7896,6 +7941,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -7931,6 +7977,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -7965,6 +8012,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -8335,15 +8383,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -8359,9 +8410,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -8564,6 +8617,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -8573,12 +8627,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -8588,6 +8645,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -8600,9 +8658,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -8633,6 +8693,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -8650,6 +8711,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -8685,6 +8747,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -8719,6 +8782,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -9195,15 +9259,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -9219,9 +9286,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -9441,6 +9510,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -9450,12 +9520,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -9465,6 +9538,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -9477,9 +9551,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -9510,6 +9586,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -9527,6 +9604,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -9562,6 +9640,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -9596,6 +9675,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -10021,15 +10101,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -10045,9 +10128,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -10267,6 +10352,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -10276,12 +10362,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -10291,6 +10380,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -10303,9 +10393,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -10336,6 +10428,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -10353,6 +10446,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -10388,6 +10482,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -10422,6 +10517,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
@@ -10796,15 +10892,18 @@ Object {
       "additionalProperties": Object {
         "properties": Object {
           "field": Object {
+            "maxLength": 2000,
             "type": "string",
           },
           "value": Object {
             "anyOf": Array [
               Object {
+                "maxLength": 30000,
                 "type": "string",
               },
               Object {
                 "items": Object {
+                  "maxLength": 30000,
                   "type": "string",
                 },
                 "type": "array",
@@ -10820,9 +10919,11 @@ Object {
     "__schema4": Object {
       "properties": Object {
         "scriptId": Object {
+          "maxLength": 256,
           "type": "string",
         },
         "scriptInput": Object {
+          "maxLength": 8192,
           "type": "string",
         },
         "timeout": Object {
@@ -11019,6 +11120,7 @@ Object {
                         "$ref": "#/$defs/__schema3",
                       },
                       "packId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "queries": Object {
@@ -11028,12 +11130,15 @@ Object {
                               "$ref": "#/$defs/__schema3",
                             },
                             "id": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "platform": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                             "query": Object {
+                              "maxLength": 30000,
                               "type": "string",
                             },
                             "removed": Object {
@@ -11043,6 +11148,7 @@ Object {
                               "type": "boolean",
                             },
                             "version": Object {
+                              "maxLength": 256,
                               "type": "string",
                             },
                           },
@@ -11055,9 +11161,11 @@ Object {
                         "type": "array",
                       },
                       "query": Object {
+                        "maxLength": 30000,
                         "type": "string",
                       },
                       "savedQueryId": Object {
+                        "maxLength": 256,
                         "type": "string",
                       },
                       "timeout": Object {
@@ -11088,6 +11196,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                         },
@@ -11105,6 +11214,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -11140,6 +11250,7 @@ Object {
                                 "type": "string",
                               },
                               "comment": Object {
+                                "maxLength": 30000,
                                 "type": "string",
                               },
                               "config": Object {
@@ -11174,6 +11285,7 @@ Object {
                             "type": "string",
                           },
                           "comment": Object {
+                            "maxLength": 30000,
                             "type": "string",
                           },
                           "config": Object {
