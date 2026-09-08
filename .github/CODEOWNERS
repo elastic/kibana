@@ -1145,7 +1145,7 @@ x-pack/platform/packages/shared/response-ops/alerting-v2-constants @elastic/rna-
 x-pack/platform/packages/shared/response-ops/alerting-v2-episodes-ui @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerting-v2-schemas @elastic/rna-project-team
-x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/response-ops
+x-pack/platform/packages/shared/response-ops/alerting-v2-utils @elastic/rna-project-team
 x-pack/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-delete @elastic/response-ops
 x-pack/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
@@ -1335,7 +1335,6 @@ x-pack/solutions/observability/packages/alerting-test-data @elastic/nightshift-s
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-apm-embeddable-common @elastic/obs-signals-traces-team
-x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-genai-cli @elastic/nightshift-context-and-research-team
 x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-signals-traces-team
