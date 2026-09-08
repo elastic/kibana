@@ -17,7 +17,7 @@ import {
   normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from '@kbn/significant-events-schema';
-import type { IgnoredFeature } from '@kbn/streams-ai';
+import type { IgnoredFeature } from '@kbn/nightshift-ai';
 
 export const toFeatureSummary = ({ id, title }: BaseFeature) => ({ id, title: title ?? id });
 
