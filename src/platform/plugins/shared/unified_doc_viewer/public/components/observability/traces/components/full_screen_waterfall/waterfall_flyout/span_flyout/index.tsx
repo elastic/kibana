@@ -21,9 +21,10 @@ export interface SpanFlyoutContentProps {
   hit: DataTableRecord;
   dataView: DocViewRenderProps['dataView'];
   activeSection?: TraceOverviewSections;
+  traceId?: string;
 }
 
-export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
+export function SpanFlyoutContent({ hit, dataView, activeSection, traceId }: SpanFlyoutContentProps) {
   const { indexes, profileId } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
   const actions = useDocViewerExtensionActionsContext();
@@ -44,6 +45,7 @@ export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutCo
       showWaterfall={false}
       showActions={false}
       dataView={dataView}
+      fallbackTraceId={traceId}
     />
   );
 }

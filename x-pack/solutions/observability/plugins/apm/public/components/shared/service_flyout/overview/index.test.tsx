@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import type { ServiceFlyoutService } from '..';
@@ -50,12 +50,35 @@ jest.mock('./lens_chart', () => ({
   ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
 }));
 
+jest.mock('../../transaction_detail_flyout', () => ({
+  TransactionDetailFlyout: ({
+    filters,
+    onClose,
+  }: {
+    filters: { transactionName: string };
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="transactionDetailFlyoutMock">
+      <span>{filters.transactionName}</span>
+      <button type="button" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
+}));
+
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',
   agentName: 'java',
 };
 
-function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {}) {
+function buildContextValue({
+  refreshToken = 0,
+  transactionType = 'request',
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+} = {}) {
   return {
     deps: {
       core: {
@@ -68,6 +91,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
     },
     service,
     indices: null,
+    flyoutHistoryKey: Symbol('test-service-flyout-history'),
     capabilities: {
       loading: false,
       error: undefined,
@@ -82,7 +106,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       rangeFrom: 'now-15m',
       rangeTo: 'now',
       setRange: jest.fn(),
-      transactionType: 'request',
+      transactionType,
       setTransactionType: jest.fn(),
       refreshToken,
       onRefresh: jest.fn(),
@@ -90,8 +114,14 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
   };
 }
 
-function renderOverview({ refreshToken }: { refreshToken?: number } = {}) {
-  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken }));
+function renderOverview({
+  refreshToken,
+  transactionType,
+}: {
+  refreshToken?: number;
+  transactionType?: string;
+} = {}) {
+  mockUseServiceFlyoutContext.mockReturnValue(buildContextValue({ refreshToken, transactionType }));
   return render(
     <IntlProvider locale="en">
       <ServiceFlyoutOverview />
@@ -239,6 +269,95 @@ describe('ServiceFlyoutOverview transactions section props', () => {
     renderOverview({ refreshToken: 42 });
 
     expect(transactionsSectionProps?.refreshToken).toBe(42);
+  });
+
+  it('opens TransactionDetailFlyout when a transaction name is clicked', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+    expect(transactionsSectionProps?.onTransactionClick).toEqual(expect.any(Function));
+    expect(transactionsSectionProps?.isTransactionExpanded).toEqual(expect.any(Function));
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toHaveTextContent('GET /api/orders');
+    expect(
+      transactionsSectionProps!.isTransactionExpanded!({
+        name: 'GET /api/orders',
+        transactionType: 'request',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      })
+    ).toBe(true);
+  });
+
+  it('closes TransactionDetailFlyout when the same transaction is clicked again', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview();
+
+    const item = {
+      name: 'GET /api/orders',
+      transactionType: 'request',
+      latency: { value: 1 },
+      throughput: { value: 1 },
+      errorRate: { value: 0 },
+    };
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.getByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!(item);
+    });
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('does not open TransactionDetailFlyout when transaction type is missing', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    renderOverview({ transactionType: '' });
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(screen.queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
+  });
+
+  it('closes TransactionDetailFlyout when onClose is called', () => {
+    mockUseServiceHasSystemMetrics.mockReturnValue({ hasSystemMetrics: false, isLoading: false });
+    const { getByRole, queryByTestId } = renderOverview();
+
+    act(() => {
+      transactionsSectionProps!.onTransactionClick!({
+        name: 'GET /api/orders',
+        latency: { value: 1 },
+        throughput: { value: 1 },
+        errorRate: { value: 0 },
+      });
+    });
+
+    expect(queryByTestId('transactionDetailFlyoutMock')).toBeInTheDocument();
+    act(() => {
+      getByRole('button', { name: 'close' }).click();
+    });
+    expect(queryByTestId('transactionDetailFlyoutMock')).not.toBeInTheDocument();
   });
 });
 

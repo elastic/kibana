@@ -7,7 +7,9 @@
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
+import type { FullTraceWaterfallOnErrorClick, WaterfallGetErrorMarkerHref } from '@kbn/apm-types';
+import type { CoreStart } from '@kbn/core/public';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { UnifiedDocViewerObservabilityTraceDocFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import type { UnifiedDocViewerObservabilityTracesDocumentType } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -18,7 +20,6 @@ import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 import { useLogsIndexPattern } from '../../../../../hooks/use_logs_index_pattern';
 import { useTimeRange } from '../../../../../hooks/use_time_range';
 import { getApmInternalServices } from '../../../../../plugin';
-import { useGetErrorMarkerHrefFromRouter } from '../waterfall_container/use_get_error_marker_href_from_router';
 
 const TRACE_WATERFALL_FLYOUT_HISTORY_KEY = Symbol.for('apmTraceWaterfallFlyout');
 
@@ -29,6 +30,24 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   contextSpanIds?: string[];
+  /**
+   * Shared with the parent flyout so the full trace timeline participates in the
+   * same EUI managed back-button stack (Discover FullScreenWaterfall pattern).
+   */
+  historyKey?: symbol;
+  /**
+   * Optional APM error-group deep link builder. Discover-style hosts omit this and
+   * rely on `onErrorClick` → document flyout instead of route-param-based hrefs.
+   */
+  getErrorMarkerHref?: WaterfallGetErrorMarkerHref;
+  /**
+   * Host-provided services for embedders without ApmPluginContext (e.g. Discover).
+   * Falls back to useApmPluginContext when omitted (APM app).
+   */
+  deps?: {
+    core: CoreStart;
+    share?: SharePublicStart;
+  };
 }
 
 export function TraceWaterfallFlyout({
@@ -38,11 +57,15 @@ export function TraceWaterfallFlyout({
   isOpen,
   onClose,
   contextSpanIds,
+  historyKey = TRACE_WATERFALL_FLYOUT_HISTORY_KEY,
+  getErrorMarkerHref,
+  deps,
 }: Props) {
   const { callApmApi } = getApmInternalServices();
-  const { core } = useApmPluginContext();
+  const apmPluginContext = useApmPluginContext();
+  const core = deps?.core ?? apmPluginContext.core;
+  const share = deps?.share ?? apmPluginContext.share;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const getErrorMarkerHref = useGetErrorMarkerHrefFromRouter();
   const { dataView, apmIndices } = useAdHocApmDataView();
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedDocIndex, setSelectedDocIndex] = useState<string | undefined>(undefined);
@@ -97,9 +120,10 @@ export function TraceWaterfallFlyout({
   return (
     <EuiFlyout
       session="start"
-      historyKey={TRACE_WATERFALL_FLYOUT_HISTORY_KEY}
+      historyKey={historyKey}
       onClose={onClose}
       size="m"
+      ownFocus={false}
       aria-label={i18n.translate('xpack.apm.traceWaterfallFlyout.ariaLabel', {
         defaultMessage: 'Full trace waterfall flyout',
       })}
@@ -131,7 +155,13 @@ export function TraceWaterfallFlyout({
           }}
         />
       </EuiFlyoutBody>
-      <TraceWaterfallFlyoutFooter traceId={traceId} rangeFrom={rangeFrom} rangeTo={rangeTo} />
+      <TraceWaterfallFlyoutFooter
+        traceId={traceId}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        share={share}
+        http={core.http}
+      />
       {selectedDocId && dataView && (
         <UnifiedDocViewerObservabilityTraceDocFlyout
           type={activeFlyoutType}
@@ -144,6 +174,7 @@ export function TraceWaterfallFlyout({
           onCloseFlyout={closeDetailFlyout}
           dataTestSubj="apmTraceWaterfallSpanDetailFlyout"
           size="fill"
+          historyKey={historyKey}
         />
       )}
     </EuiFlyout>

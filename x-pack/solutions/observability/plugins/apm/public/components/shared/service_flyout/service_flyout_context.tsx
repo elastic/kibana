@@ -56,6 +56,8 @@ export interface ServiceFlyoutContextValue {
   // APM index patterns — fetched once at the top level and shared to avoid duplicate requests
   // undefined = still loading, null = fetch failed or no indices, APMIndices = ready
   indices: APMIndices | null | undefined;
+  /** Shared EUI flyout history key for nested flyouts opened from this service flyout. */
+  flyoutHistoryKey: symbol;
   // Mutable query scope — changes stay local to the flyout and do not propagate to the host
   filters: {
     environment: Environment;
