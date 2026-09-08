@@ -8,6 +8,64 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 
 /**
+ * Arguments for {@link AttachmentPublicClient.create}.
+ */
+export interface CreateAttachmentArgs {
+  conversationId: string;
+  /** Optional custom ID for the attachment. */
+  id?: string;
+  /** The type of the attachment (e.g. 'text', 'esql', 'visualization'). */
+  type: string;
+  /** The attachment data/content. Required unless `origin` is provided. */
+  data?: unknown;
+  /** Origin string for by-reference attachments; content is resolved at creation time when `data` is omitted. */
+  origin?: string;
+  /** Human-readable description of the attachment. */
+  description?: string;
+  /** Whether the attachment should be hidden from the user. */
+  hidden?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentPublicClient.get}.
+ */
+export interface GetAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+}
+
+/**
+ * Arguments for {@link AttachmentPublicClient.update}.
+ */
+export interface UpdateAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  /** The new attachment data/content. */
+  data?: unknown;
+  /** Optional new description. */
+  description?: string;
+}
+
+/**
+ * Arguments for {@link AttachmentPublicClient.delete}.
+ */
+export interface DeleteAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  /** Permanently remove the attachment (only when unreferenced and no client_id). */
+  permanent?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentPublicClient.list}.
+ */
+export interface ListAttachmentsArgs {
+  conversationId: string;
+  /** Include soft-deleted attachments in the result. */
+  includeDeleted?: boolean;
+}
+
+/**
  * Result of a `list` call on the public client.
  */
 export interface ListAttachmentsResult {
@@ -27,46 +85,9 @@ export interface ListAttachmentsResult {
  *  - `AttachmentValidationError` when type validation fails or the target attachment is in an invalid state.
  */
 export interface AttachmentPublicClient {
-  create(args: {
-    conversationId: string;
-    /** Optional custom ID for the attachment. */
-    id?: string;
-    /** The type of the attachment (e.g. 'text', 'esql', 'visualization'). */
-    type: string;
-    /** The attachment data/content. Required unless `origin` is provided. */
-    data?: unknown;
-    /** Origin string for by-reference attachments; content is resolved at creation time when `data` is omitted. */
-    origin?: string;
-    /** Human-readable description of the attachment. */
-    description?: string;
-    /** Whether the attachment should be hidden from the user. */
-    hidden?: boolean;
-  }): Promise<VersionedAttachment>;
-
-  get(args: {
-    conversationId: string;
-    attachmentId: string;
-  }): Promise<VersionedAttachment>;
-
-  update(args: {
-    conversationId: string;
-    attachmentId: string;
-    /** The new attachment data/content. */
-    data?: unknown;
-    /** Optional new description. */
-    description?: string;
-  }): Promise<VersionedAttachment>;
-
-  delete(args: {
-    conversationId: string;
-    attachmentId: string;
-    /** Permanently remove the attachment (only when unreferenced and no client_id). */
-    permanent?: boolean;
-  }): Promise<void>;
-
-  list(args: {
-    conversationId: string;
-    /** Include soft-deleted attachments in the result. */
-    includeDeleted?: boolean;
-  }): Promise<ListAttachmentsResult>;
+  create(args: CreateAttachmentArgs): Promise<VersionedAttachment>;
+  get(args: GetAttachmentArgs): Promise<VersionedAttachment>;
+  update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
+  delete(args: DeleteAttachmentArgs): Promise<void>;
+  list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
 }

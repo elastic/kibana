@@ -243,39 +243,63 @@ export interface ListAttachmentsResult {
 }
 
 /**
+ * Arguments for {@link AttachmentBrowserClient.create}.
+ */
+export interface CreateAttachmentArgs {
+  conversationId: string;
+  id?: string;
+  type: string;
+  data?: unknown;
+  origin?: string;
+  description?: string;
+  hidden?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.get}.
+ */
+export interface GetAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.update}.
+ */
+export interface UpdateAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  data?: unknown;
+  description?: string;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.delete}.
+ */
+export interface DeleteAttachmentArgs {
+  conversationId: string;
+  attachmentId: string;
+  permanent?: boolean;
+}
+
+/**
+ * Arguments for {@link AttachmentBrowserClient.list}.
+ */
+export interface ListAttachmentsArgs {
+  conversationId: string;
+  includeDeleted?: boolean;
+}
+
+/**
  * A client for the AgentBuilder attachment HTTP APIs.
  * Obtain via {@link AttachmentServiceStartContract.getClient}.
  */
 export interface AttachmentBrowserClient {
-  create(args: {
-    conversationId: string;
-    id?: string;
-    type: string;
-    data?: unknown;
-    origin?: string;
-    description?: string;
-    hidden?: boolean;
-  }): Promise<VersionedAttachment>;
-
-  get(args: { conversationId: string; attachmentId: string }): Promise<VersionedAttachment>;
-
-  update(args: {
-    conversationId: string;
-    attachmentId: string;
-    data?: unknown;
-    description?: string;
-  }): Promise<VersionedAttachment>;
-
-  delete(args: {
-    conversationId: string;
-    attachmentId: string;
-    permanent?: boolean;
-  }): Promise<void>;
-
-  list(args: {
-    conversationId: string;
-    includeDeleted?: boolean;
-  }): Promise<ListAttachmentsResult>;
+  create(args: CreateAttachmentArgs): Promise<VersionedAttachment>;
+  get(args: GetAttachmentArgs): Promise<VersionedAttachment>;
+  update(args: UpdateAttachmentArgs): Promise<VersionedAttachment>;
+  delete(args: DeleteAttachmentArgs): Promise<void>;
+  list(args: ListAttachmentsArgs): Promise<ListAttachmentsResult>;
 }
 
 /**
