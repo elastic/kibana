@@ -47,7 +47,7 @@ type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
 
 type DashboardArtifact = RuleArtifact & {
   type: typeof DASHBOARD_ARTIFACT_TYPE;
-  data: { dashboardId: string };
+  data: { dashboard_id: string };
 };
 
 type RunbookArtifact = RuleArtifact & {
@@ -96,7 +96,7 @@ const toDashboardArtifacts = (
 ): DashboardArtifact[] => {
   const existingIdByDashboardId = new Map<string, string>();
   for (const artifact of existingArtifacts) {
-    existingIdByDashboardId.set(artifact.data.dashboardId, artifact.id);
+    existingIdByDashboardId.set(artifact.data.dashboard_id, artifact.id);
   }
 
   const seen = new Set<string>();
@@ -109,7 +109,7 @@ const toDashboardArtifacts = (
     dashboards.push({
       id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
       type: DASHBOARD_ARTIFACT_TYPE,
-      data: { dashboardId },
+      data: { dashboard_id: dashboardId },
     });
   }
   return dashboards;
@@ -200,7 +200,7 @@ export const setDashboardsOperationSchema = z
       ),
   })
   .describe(
-    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboardId } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
+    'Use `set_dashboards` to link investigation dashboards to the rule by saved-object ID. Each ID is stored as a `dashboard` artifact (`{ id, type: "dashboard", data: { dashboard_id } }`), matching the create/update API. Replaces any previously linked dashboards; other artifacts (e.g. runbooks) are preserved. Pass an empty array to unlink all dashboards.'
   );
 
 export const setRunbookOperationSchema = z

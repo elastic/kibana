@@ -171,6 +171,7 @@ dependsOn:
   - '@kbn/global-search-plugin'
   - '@kbn/nightshift-investigations-plugin'
   - '@kbn/zod'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
