@@ -65,18 +65,16 @@ export const classifyTest = (
   return passes > 0 || stats.retryFlakes > 0 ? 'flaky' : 'consistently-failing';
 };
 
+type Rankable = Pick<FlakyTestEntry, 'failedBuilds' | 'buildFailRate' | 'lastFailedAt'>;
+
 /** Most failed builds first; ties broken by build failure rate, then by most recent failure. */
-export const rankTests = <
-  T extends Pick<FlakyTestEntry, 'failedBuilds' | 'buildFailRate' | 'lastFailedAt'>
->(
-  entries: readonly T[]
-): T[] =>
-  [...entries].sort(
-    (a, b) =>
-      b.failedBuilds - a.failedBuilds ||
-      b.buildFailRate - a.buildFailRate ||
-      b.lastFailedAt.getTime() - a.lastFailedAt.getTime()
-  );
+export const compareByFailedBuilds = (a: Rankable, b: Rankable): number =>
+  b.failedBuilds - a.failedBuilds ||
+  b.buildFailRate - a.buildFailRate ||
+  b.lastFailedAt.getTime() - a.lastFailedAt.getTime();
+
+export const rankTests = <T extends Rankable>(entries: readonly T[]): T[] =>
+  [...entries].sort(compareByFailedBuilds);
 
 /** An entry before the per-test lookups (latest run, branch stats, failure samples) are attached. */
 type AggregatedEntry = Omit<FlakyTestEntry, 'latestRun' | 'byBranch' | 'sampleFailures'>;

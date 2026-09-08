@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import chalk from 'chalk';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type {
-  FlakyTestBranchStats,
-  FlakyTestEntry,
-  FlakyTestReport,
+import {
+  compareByFailedBuilds,
+  type FlakyTestBranchStats,
+  type FlakyTestClassification,
+  type FlakyTestEntry,
+  type FlakyTestReport,
 } from '../reporting/flaky_tests';
 
 const TITLE_COL_WIDTH = 40;
@@ -90,27 +93,59 @@ const formatLatestRun = (
 };
 
 /** Groups entries by file, preserving the order in which files first appear. */
-export const groupByFile = (entries: readonly FlakyTestEntry[]): Map<string, FlakyTestEntry[]> => {
-  const groups = new Map<string, FlakyTestEntry[]>();
-  for (const entry of entries) {
-    groups.set(entry.filePath, [...(groups.get(entry.filePath) ?? []), entry]);
+export const groupByFile = <T extends { entry: Pick<FlakyTestEntry, 'filePath'> }>(
+  items: readonly T[]
+): Map<string, T[]> => {
+  const groups = new Map<string, T[]>();
+  for (const item of items) {
+    const { filePath } = item.entry;
+    groups.set(filePath, [...(groups.get(filePath) ?? []), item]);
   }
   return groups;
 };
 
+/** A test together with the list of the report it came from. */
+export interface ClassifiedEntry {
+  entry: FlakyTestEntry;
+  classification: FlakyTestClassification;
+}
+
+const CLASSIFICATION_COLOR: Record<FlakyTestClassification, (text: string) => string> = {
+  flaky: chalk.yellow,
+  'consistently-failing': chalk.red,
+};
+
+const colorize = (classification: FlakyTestClassification, text: string | number): string =>
+  CLASSIFICATION_COLOR[classification](String(text));
+
+/** Both report lists as one ranking, so the table can show the worst offenders of either kind. */
+export const classifiedEntries = (
+  report: Pick<FlakyTestReport, 'flaky' | 'consistentlyFailing'>
+): ClassifiedEntry[] =>
+  [
+    ...report.flaky.map((entry) => ({ entry, classification: 'flaky' as const })),
+    ...report.consistentlyFailing.map((entry) => ({
+      entry,
+      classification: 'consistently-failing' as const,
+    })),
+  ].sort((a, b) => compareByFailedBuilds(a.entry, b.entry));
+
 /**
  * Renders the top-ranked tests one per row, with the tests of the same file kept together (in
  * order of first appearance) under a single spanning file cell so whole-suite failures stand out.
+ * Rank and title are yellow for flaky tests and red for consistently failing ones.
  */
-export const buildTopFlakyTable = (
-  top: readonly FlakyTestEntry[],
-  all: readonly FlakyTestEntry[],
+export const buildTopFailingTable = (
+  top: readonly ClassifiedEntry[],
+  all: readonly ClassifiedEntry[],
   minBuilds: number,
   now: Date
 ): CliTable3.Table => {
   const table = new CliTable3({
     head: ['#', 'Framework', 'Owners', 'Failed builds', 'Flakiest', 'Latest', 'Test', 'File'],
     colWidths: [null, null, OWNERS_COL_WIDTH, null, null, null, TITLE_COL_WIDTH, FILE_COL_WIDTH],
+    // the default red header would clash with red meaning "consistently failing"
+    style: { head: ['bold'] },
     wordWrap: true,
   });
   const qualifyingPerFile = groupByFile(all);
@@ -122,17 +157,17 @@ export const buildTopFlakyTable = (
       rowSpan: entries.length,
       content: [
         wrapOn(filePath, '/', contentWidth(FILE_COL_WIDTH)),
-        notShown > 0 ? `(+${notShown} more flaky in this file)` : '',
+        notShown > 0 ? `(+${notShown} more in this file)` : '',
       ]
         .filter(Boolean)
         .join('\n'),
     };
 
-    entries.forEach((entry, index) => {
+    entries.forEach(({ entry, classification }, index) => {
       rank += 1;
       const flakiest = flakiestBranch(entry.byBranch, minBuilds);
       table.push([
-        rank,
+        colorize(classification, rank),
         entry.framework,
         entry.owners
           .map((owner) => wrapOn(owner, '-', contentWidth(OWNERS_COL_WIDTH)))
@@ -140,7 +175,7 @@ export const buildTopFlakyTable = (
         `${entry.failedBuilds}/${entry.builds}`,
         formatFlakiestBranch(flakiest),
         formatLatestRun(entry, flakiest, now),
-        entry.title,
+        colorize(classification, entry.title),
         // later rows are laid out around the spanning cell, so only the first row carries it
         ...(index === 0 ? [fileCell] : []),
       ]);
@@ -150,9 +185,9 @@ export const buildTopFlakyTable = (
   return table;
 };
 
-/** Writes a panel with the report window, scope, totals and the top flaky tests to the log. */
+/** Writes a panel with the report window, scope, totals and the top failing tests to the log. */
 export const displaySummary = (report: FlakyTestReport, limit: number, log: ToolingLog): void => {
-  const { window, scope, summary, flaky } = report;
+  const { window, scope, summary } = report;
   const flakyByFramework = Object.entries(summary.flakyByFramework)
     .map(([framework, count]) => `${framework}: ${count}`)
     .join(', ');
@@ -187,12 +222,14 @@ export const displaySummary = (report: FlakyTestReport, limit: number, log: Tool
     ]
   );
 
-  if (flaky.length > 0) {
-    const top = flaky.slice(0, limit);
+  const all = classifiedEntries(report);
+  if (all.length > 0) {
+    const top = all.slice(0, limit);
+    const legend = `${chalk.yellow('flaky')}, ${chalk.red('consistently failing')}`;
     panel.push([
-      `Top ${top.length} flaky tests by failed builds\n${buildTopFlakyTable(
+      `Top ${top.length} failing tests by failed builds (${legend})\n${buildTopFailingTable(
         top,
-        flaky,
+        all,
         report.thresholds.minBuilds,
         report.generatedAt
       ).toString()}`,

@@ -14,12 +14,14 @@ import type {
   FlakyTestReport,
 } from '../reporting/flaky_tests';
 import {
-  buildTopFlakyTable,
+  buildTopFailingTable,
+  classifiedEntries,
   displaySummary,
   flakiestBranch,
   formatAge,
   groupByFile,
   wrapOn,
+  type ClassifiedEntry,
 } from './flaky_tests_summary';
 
 const now = new Date('2026-09-07T12:00:00.000Z');
@@ -126,11 +128,21 @@ describe('flakiestBranch', () => {
   });
 });
 
+const flaky = (overrides: Partial<FlakyTestEntry> = {}): ClassifiedEntry => ({
+  entry: entry(overrides),
+  classification: 'flaky',
+});
+
+const broken = (overrides: Partial<FlakyTestEntry> = {}): ClassifiedEntry => ({
+  entry: entry({ passes: 0, fails: 10, failedBuilds: 10, buildFailRate: 1, ...overrides }),
+  classification: 'consistently-failing',
+});
+
 describe('groupByFile', () => {
   it('keeps files in order of first appearance and tests in input order', () => {
-    const a1 = entry({ testId: 'a1', filePath: 'a.ts' });
-    const b1 = entry({ testId: 'b1', filePath: 'b.ts' });
-    const a2 = entry({ testId: 'a2', filePath: 'a.ts' });
+    const a1 = flaky({ testId: 'a1', filePath: 'a.ts' });
+    const b1 = flaky({ testId: 'b1', filePath: 'b.ts' });
+    const a2 = flaky({ testId: 'a2', filePath: 'a.ts' });
 
     const groups = groupByFile([a1, b1, a2]);
 
@@ -139,11 +151,28 @@ describe('groupByFile', () => {
   });
 });
 
-describe('buildTopFlakyTable', () => {
+describe('classifiedEntries', () => {
+  it('ranks flaky and consistently failing tests together by failed builds', () => {
+    const ranked = classifiedEntries({
+      flaky: [entry({ testId: 'f1', failedBuilds: 5 }), entry({ testId: 'f2', failedBuilds: 20 })],
+      consistentlyFailing: [entry({ testId: 'c1', failedBuilds: 10 })],
+    });
+
+    expect(ranked.map(({ entry: { testId }, classification }) => [testId, classification])).toEqual(
+      [
+        ['f2', 'flaky'],
+        ['c1', 'consistently-failing'],
+        ['f1', 'flaky'],
+      ]
+    );
+  });
+});
+
+describe('buildTopFailingTable', () => {
   it('renders one row per test with a shared file cell and the flakiest branch', () => {
-    const first = entry({ testId: 't1', title: 'first test' });
-    const second = entry({ testId: 't2', title: 'second test' });
-    const rendered = buildTopFlakyTable([first, second], [first, second], 10, now).toString();
+    const first = flaky({ testId: 't1', title: 'first test' });
+    const second = flaky({ testId: 't2', title: 'second test' });
+    const rendered = buildTopFailingTable([first, second], [first, second], 10, now).toString();
 
     expect(rendered).toContain('first test');
     expect(rendered).toContain('second test');
@@ -157,17 +186,34 @@ describe('buildTopFlakyTable', () => {
   });
 
   it('mentions qualifying tests of the same file that did not make the top list', () => {
-    const shown = entry({ testId: 't1' });
-    const hidden = [entry({ testId: 't2' }), entry({ testId: 't3' })];
-    const rendered = buildTopFlakyTable([shown], [shown, ...hidden], 10, now).toString();
+    const shown = flaky({ testId: 't1' });
+    const hidden = [flaky({ testId: 't2' }), broken({ testId: 't3' })];
+    const rendered = buildTopFailingTable([shown], [shown, ...hidden], 10, now).toString();
 
-    expect(rendered).toContain('(+2 more flaky in this file)');
+    expect(rendered).toContain('(+2 more in this file)');
+  });
+
+  it('renders consistently failing tests alongside flaky ones', () => {
+    const rendered = buildTopFailingTable(
+      [
+        broken({ testId: 'c1', title: 'always broken' }),
+        flaky({ testId: 'f1', title: 'sometimes' }),
+      ],
+      [],
+      10,
+      now
+    ).toString();
+
+    expect(rendered).toContain('always broken');
+    expect(rendered).toContain('10/10');
+    expect(rendered).toContain('sometimes');
+    expect(rendered).toContain('2/10');
   });
 
   it('uses the latest run of the flakiest branch rather than the overall latest run', () => {
-    const rendered = buildTopFlakyTable(
+    const rendered = buildTopFailingTable(
       [
-        entry({
+        flaky({
           byBranch: [
             branch({
               branch: 'main',
@@ -198,8 +244,8 @@ describe('buildTopFlakyTable', () => {
   });
 
   it('shows placeholders when owners and branch stats are missing', () => {
-    const rendered = buildTopFlakyTable(
-      [entry({ owners: [], byBranch: [], latestRun: undefined })],
+    const rendered = buildTopFailingTable(
+      [flaky({ owners: [], byBranch: [], latestRun: undefined })],
       [],
       10,
       now
@@ -226,6 +272,14 @@ describe('displaySummary', () => {
     flaky: [entry({ testId: 't1', title: 'first' }), entry({ testId: 't2', title: 'second' })],
     consistentlyFailing: [],
   };
+  const alwaysBroken = entry({
+    testId: 'c1',
+    title: 'always broken',
+    passes: 0,
+    fails: 10,
+    failedBuilds: 10,
+    buildFailRate: 1,
+  });
 
   const render = (input: FlakyTestReport, limit: number): string => {
     const writes: string[] = [];
@@ -247,12 +301,28 @@ describe('displaySummary', () => {
     expect(output).toContain('Frameworks : jest, playwright');
     expect(output).toContain('Flaky                : 2 (jest: 2)');
     expect(output).toContain('Consistently failing : 1');
-    expect(output).toContain('Top 1 flaky tests by failed builds');
+    expect(output).toContain('Top 1 failing tests by failed builds');
     expect(output).toContain('first');
     expect(output).not.toContain('second');
   });
 
-  it('omits the top list when nothing is flaky', () => {
+  it('includes consistently failing tests in the top list', () => {
+    const output = render(
+      {
+        ...report,
+        summary: { totalFlaky: 2, totalConsistentlyFailing: 1, flakyByFramework: { jest: 2 } },
+        consistentlyFailing: [alwaysBroken],
+      },
+      1
+    );
+
+    // 10 failed builds outranks the flaky tests' 2
+    expect(output).toContain('Top 1 failing tests by failed builds');
+    expect(output).toContain('always broken');
+    expect(output).not.toContain('first');
+  });
+
+  it('omits the top list when nothing qualifies', () => {
     const output = render(
       {
         ...report,
@@ -263,6 +333,6 @@ describe('displaySummary', () => {
     );
 
     expect(output).toContain('Flaky                : 0');
-    expect(output).not.toContain('flaky tests by failed builds');
+    expect(output).not.toContain('failing tests by failed builds');
   });
 });
