@@ -110,8 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click(incrementButtonTestSubj);
         await testSubjects.click(incrementButtonTestSubj);
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await dataGrid.clickRowToggle({
           rowIndex: 0,
           defaultTabId: 'doc_view_restorable_state_example',
@@ -234,8 +233,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click(incrementButtonTestSubj);
         await testSubjects.click(incrementButtonTestSubj);
 
-        await unifiedTabs.createNewTab();
-        await discover.waitUntilTabIsLoaded();
+        await discover.createNewTabAndSearch();
         await dataGrid.clickRowToggle({
           rowIndex: 0,
           defaultTabId: 'doc_view_restorable_state_example',
