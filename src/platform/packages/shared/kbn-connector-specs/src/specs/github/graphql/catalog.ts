@@ -14,6 +14,7 @@ import { orgCatalogTeamMembersTemplate } from './templates/org_catalog_team_memb
 import { orgCatalogMembersTemplate } from './templates/org_catalog_members';
 import { orgCatalogProjectsTemplate } from './templates/org_catalog_projects';
 import { orgCatalogProjectViewsTemplate } from './templates/org_catalog_project_views';
+import { orgCatalogProjectViewsBatchTemplate } from './templates/org_catalog_project_views_batch';
 import { orgCatalogProjectItemsTemplate } from './templates/org_catalog_project_items';
 import { activitySearchIssuesTemplate } from './templates/activity_search_issues';
 import { activitySearchPullRequestsTemplate } from './templates/activity_search_pull_requests';
@@ -27,6 +28,7 @@ export const GITHUB_QUERY_TEMPLATES: readonly GitHubQueryTemplate[] = [
   orgCatalogMembersTemplate,
   orgCatalogProjectsTemplate,
   orgCatalogProjectViewsTemplate,
+  orgCatalogProjectViewsBatchTemplate,
   orgCatalogProjectItemsTemplate,
   activitySearchIssuesTemplate,
   activitySearchPullRequestsTemplate,

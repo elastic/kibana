@@ -39,7 +39,7 @@ export interface GitHubGraphQLRequestBody {
 
 export interface GitHubGraphQLResponseBody<TData = unknown> {
   data?: TData;
-  errors?: Array<{ message: string; path?: string[] }>;
+  errors?: Array<{ message: string; path?: string[]; type?: string }>;
   extensions?: {
     rateLimit?: GitHubGraphQLRateLimit;
   };

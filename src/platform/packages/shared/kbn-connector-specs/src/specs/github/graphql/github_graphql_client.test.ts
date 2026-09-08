@@ -19,6 +19,7 @@ import {
 import { GITHUB_QUERY_TEMPLATES } from './catalog';
 import { validateReadOnlyGraphQLQuery } from './validate_read_only_query';
 import { orgCatalogReposTemplate } from './templates/org_catalog_repos';
+import { orgCatalogProjectViewsBatchTemplate } from './templates/org_catalog_project_views_batch';
 import { activitySearchIssuesTemplate } from './templates/activity_search_issues';
 import { graphIssueGraphTemplate } from './templates/graph_issue_graph';
 
@@ -89,7 +90,7 @@ describe('GITHUB_QUERY_TEMPLATES static assertions', () => {
     }
   });
 
-  it('all 11 expected template IDs are present', () => {
+  it('all 12 expected template IDs are present', () => {
     const ids = GITHUB_QUERY_TEMPLATES.map((t) => t.id);
     expect(ids).toEqual(
       expect.arrayContaining([
@@ -99,6 +100,7 @@ describe('GITHUB_QUERY_TEMPLATES static assertions', () => {
         'orgCatalog.members',
         'orgCatalog.projects',
         'orgCatalog.projectViews',
+        'orgCatalog.projectViewsBatch',
         'orgCatalog.projectItems',
         'activity.searchIssues',
         'activity.searchPullRequests',
@@ -106,7 +108,7 @@ describe('GITHUB_QUERY_TEMPLATES static assertions', () => {
         'graph.pullRequestGraph',
       ])
     );
-    expect(ids).toHaveLength(11);
+    expect(ids).toHaveLength(12);
   });
 });
 
@@ -353,6 +355,71 @@ describe('executeRunQueryTemplate', () => {
           variables: { org: 'elastic', first: 10 },
         })
       ).rejects.toThrow('Could not resolve to a Repository');
+    });
+
+    it('treats NOT_FOUND node errors as a partial success and drops the null nodes', async () => {
+      const ctx = makeContext(mockPost);
+      mockPost.mockResolvedValue({
+        headers: {},
+        data: {
+          data: {
+            rateLimit: makeRateLimit(),
+            nodes: [
+              null,
+              {
+                id: 'PVT_live',
+                number: 7,
+                title: 'Live project',
+                views: {
+                  pageInfo: { hasNextPage: false, endCursor: null },
+                  nodes: [{ id: 'PVTV_1', number: 1, name: 'All items', filter: null }],
+                },
+              },
+            ],
+          },
+          errors: [
+            {
+              type: 'NOT_FOUND',
+              message: "Could not resolve to a node with the global id of 'PVT_dead'.",
+              path: ['nodes', '0'],
+            },
+          ],
+        },
+      });
+
+      const result = await executeRunQueryTemplate({
+        ctx,
+        template: orgCatalogProjectViewsBatchTemplate,
+        variables: { projectIds: ['PVT_dead', 'PVT_live'], first: 50 },
+      });
+
+      // The deleted id must not fail the batch, and the null must never reach
+      // callers. Non-paginated templates wrap the resolved entity in a single
+      // page, so the batch array lands at data[0].
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0]).toEqual([expect.objectContaining({ id: 'PVT_live' })]);
+    });
+
+    it('still fails closed when a non-NOT_FOUND error accompanies NOT_FOUND', async () => {
+      const ctx = makeContext(mockPost);
+      mockPost.mockResolvedValue({
+        headers: {},
+        data: {
+          data: { rateLimit: makeRateLimit(), nodes: [null] },
+          errors: [
+            { type: 'NOT_FOUND', message: 'Could not resolve to a node', path: ['nodes', '0'] },
+            { type: 'FORBIDDEN', message: 'Resource not accessible', path: ['nodes', '1'] },
+          ],
+        },
+      });
+
+      await expect(
+        executeRunQueryTemplate({
+          ctx,
+          template: orgCatalogProjectViewsBatchTemplate,
+          variables: { projectIds: ['a', 'b'], first: 50 },
+        })
+      ).rejects.toThrow('Resource not accessible');
     });
 
     it('throws a descriptive error for 401', async () => {

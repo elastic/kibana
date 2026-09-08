@@ -149,7 +149,8 @@ export const unwrapTemplateResult = (
     }
 
     const { nodes, pageInfo, ...siblings } = target;
-    const data = Array.isArray(nodes) ? nodes : [];
+    // Null entries appear when a requested node id no longer resolves.
+    const data = Array.isArray(nodes) ? nodes.filter((n) => n !== null) : [];
     const pi = isRecord(pageInfo) ? pageInfo : {};
     const hasNextPage = typeof pi.hasNextPage === 'boolean' ? pi.hasNextPage : false;
     const endCursor = typeof pi.endCursor === 'string' ? pi.endCursor : null;
@@ -165,7 +166,12 @@ export const unwrapTemplateResult = (
   }
 
   // Single-entity template
-  const entity = target !== undefined && target !== null ? target : null;
+  const entity =
+    target !== undefined && target !== null
+      ? Array.isArray(target)
+        ? target.filter((n) => n !== null)
+        : target
+      : null;
   if (entity === null) {
     return {
       data: [],
@@ -262,10 +268,23 @@ export const executeRunQueryTemplate = async (params: {
           });
         }
 
-        const errorDetails = responseBody.errors
-          .map((e) => (e.path ? `${e.message} (path: ${e.path.join('.')})` : e.message))
-          .join('; ');
-        throw new Error(`GitHub GraphQL request failed: ${errorDetails}`);
+        // NOT_FOUND on an individual node is a partial success, not a failure:
+        // `nodes(ids: [...])` returns null in place of any id that no longer
+        // resolves (deleted entity) and reports it in `errors`. Failing the whole
+        // request would discard every sibling node in the batch, so one deleted
+        // project would take out its entire page. Drop the nulls and continue;
+        // every other error class still fails closed.
+        const nonNotFound = responseBody.errors.filter((e) => e.type !== 'NOT_FOUND');
+        if (nonNotFound.length > 0 || !isRecord(responseBody.data)) {
+          const errorDetails = responseBody.errors
+            .map((e) => (e.path ? `${e.message} (path: ${e.path.join('.')})` : e.message))
+            .join('; ');
+          throw new Error(`GitHub GraphQL request failed: ${errorDetails}`);
+        }
+        ctx.log.debug(
+          `GitHub GraphQL returned ${responseBody.errors.length} NOT_FOUND node(s); ` +
+            'continuing with the nodes that resolved.'
+        );
       }
 
       if (!isRecord(responseBody.data)) {

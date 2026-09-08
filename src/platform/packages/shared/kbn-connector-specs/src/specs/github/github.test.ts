@@ -522,7 +522,7 @@ describe('GithubConnector', () => {
           {}
         )) as { templates: Array<{ id: string; description: string }> };
 
-        expect(result.templates).toHaveLength(11);
+        expect(result.templates).toHaveLength(12);
         const ids = result.templates.map((t) => t.id);
         expect(ids).toContain('orgCatalog.repos');
         expect(ids).toContain('activity.searchIssues');
