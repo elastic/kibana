@@ -48,7 +48,12 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
   }) => {
     const { indexManagement } = pageObjects;
 
-    await esClient.indices.create({ index: testIndexName });
+    // A mapped field makes the mappings tab render the populated fields UI
+    // instead of the empty prompt, matching the migrated FTR a11y sweep.
+    await esClient.indices.create({
+      index: testIndexName,
+      mappings: { properties: { '@timestamp': { type: 'date' } } },
+    });
     await indexManagement.navigateToIndexManagementTab('indices');
     await expect(indexManagement.indexLink(testIndexName)).toBeVisible({
       timeout: 30000,
@@ -79,6 +84,8 @@ test.describe('Index details page', { tag: NOT_SVL_SEARCH }, () => {
     });
 
     await test.step('mappings tab has no a11y violations', async () => {
+      // Renders only for populated mappings — guards against regressing to the empty prompt.
+      await expect(page.testSubj.locator('indexDetailsMappingsToggleViewButton')).toBeVisible();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });

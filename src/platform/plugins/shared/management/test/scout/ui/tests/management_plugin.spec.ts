@@ -59,6 +59,8 @@ test.describe('Management plugin routing', { tag: tags.stateful.classic }, () =>
     await pageObjects.management.goto();
 
     await test.step('landing page has no a11y violations', async () => {
+      // `goto()` only waits for the sidebar, so the scan could otherwise pass vacuously.
+      await expect(page.testSubj.locator('managementHome')).toBeVisible();
       // The landing page only renders in-app content here (no modal/flyout/menu),
       // so the app wrapper is the whole surface to scan.
       const { violations } = await page.checkA11y({ include: ['.kbnAppWrapper'] });

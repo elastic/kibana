@@ -2736,8 +2736,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/w
 x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automation_generation @elastic/context-eng
 
 # Management Experience - Deployment Management
-/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-data-discovery # Assigned per test/functional/apps/management/group2/_scripted_fields_filter.ts
-/x-pack/platform/test/fixtures/es_archives/upgrade_assistant @elastic/kibana-management
+/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-core @elastic/kibana-data-discovery # Assigned per test/functional/apps/management/group2/_scripted_fields_filter.ts && Scout saved_objects_management import suites
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/ccs @elastic/kibana-management
@@ -2746,16 +2745,12 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/functional/page_objects/rollup_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/cross_cluster_replication_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv @elastic/kibana-management
-/x-pack/platform/test/functional/apps/painless_lab @elastic/kibana-management
 /x-pack/platform/test/stack_functional_integration/apps/management @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/*_management_page.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/tag_management_page.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/saved_query_management_component.ts @elastic/kibana-management
 /src/platform/test/functional/services/management @elastic/kibana-management
 /x-pack/platform/test/functional/apps/remote_clusters @elastic/kibana-management
-/x-pack/platform/test/functional/apps/upgrade_assistant @elastic/kibana-management
-/x-pack/platform/test/functional/apps/dev_tools @elastic/kibana-management
-/x-pack/platform/test/upgrade_assistant_integration @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/management/saved_objects_page.ts @elastic/kibana-core
 /src/platform/test/functional/page_objects/embedded_console.ts @elastic/search-ml-ux
@@ -2782,7 +2777,6 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 /x-pack/platform/test/accessibility/apps/group1/home.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/index_lifecycle_management.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/ingest_node_pipelines.ts @elastic/kibana-management
-/x-pack/platform/test/accessibility/apps/group1/painless_lab.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group1/search_profiler.ts @elastic/kibana-management
 /x-pack/platform/test/accessibility/apps/group3/upgrade_assistant.ts @elastic/kibana-management
 
