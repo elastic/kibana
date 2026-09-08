@@ -585,7 +585,7 @@ export const registerAiIndexRoutes = ({
       security: READ_SECURITY,
       access: 'public',
       summary: 'Describe an AI index',
-      description: `Returns a free-form text context block for an agent: the AI index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic. Field metadata is read as the current user, so Elasticsearch index privileges bound what it can reach.`,
+      description: `Returns a free-form text context block for an agent: the AI index, its ES|QL target, the fields its backing indices expose (at most ${MAX_AI_INDEX_DESCRIBE_FIELDS}) and which are semantic, knowledge item type and tag counts in the current space, and example ES|QL queries. Read as the current user, so Elasticsearch index privileges bound what it can reach.`,
       options: {
         tags: ['oas-tag:context engine'],
         availability: { stability: 'experimental' },

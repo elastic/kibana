@@ -23,7 +23,10 @@ import type { AiIndexField } from './types';
 const CONFLICT_FIELD_TYPE = 'conflict';
 const SEMANTIC_TEXT_TYPE = 'semantic_text';
 export interface AiIndexFieldsDescription {
+  /** Capped at `MAX_AI_INDEX_DESCRIBE_FIELDS`; what gets rendered. */
   fields: AiIndexField[];
+  /** Uncapped; use for decisions about specific paths, never render. */
+  allFields: AiIndexField[];
   /** Searchable `semantic_text` paths among `fields`. */
   semanticFields: string[];
   /** Fields beyond `MAX_AI_INDEX_DESCRIBE_FIELDS` that were dropped. */
@@ -122,6 +125,7 @@ export const describeAiIndexFields = async ({
   const fields = allFields.slice(0, MAX_AI_INDEX_DESCRIBE_FIELDS);
   return {
     fields,
+    allFields,
     semanticFields: fields
       .filter(({ type, searchable }) => type === SEMANTIC_TEXT_TYPE && searchable)
       .map(({ path }) => path),
