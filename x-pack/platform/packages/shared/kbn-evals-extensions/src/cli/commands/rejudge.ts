@@ -319,9 +319,20 @@ export const rejudgeCmd: Command<any> = {
       throw createFlagError('JUDGE_KBN_URL must point at a Kibana exposing the judge connector.');
     }
 
+    // JUDGE_KBN_API_KEY is an API key; JUDGE_KBN_AUTH is user:pass for a stack
+    // whose inference routes only accept Basic. Locally booted stacks are the
+    // latter, so supporting only the former blocks the common dev case.
+    const judgeBasicAuth = process.env.JUDGE_KBN_AUTH;
+    const judgeApiKey = process.env.JUDGE_KBN_API_KEY ?? evaluationsKbnApiKey;
+    const authHeader = judgeBasicAuth
+      ? `Basic ${Buffer.from(judgeBasicAuth).toString('base64')}`
+      : judgeApiKey
+      ? `ApiKey ${judgeApiKey}`
+      : undefined;
+
     const judge: CellJudge = createInferenceJudge({
       kbnUrl: judgeKbnUrl,
-      apiKey: process.env.JUDGE_KBN_API_KEY ?? evaluationsKbnApiKey,
+      authHeader,
       connectorId,
       jury,
       log,
@@ -411,13 +422,13 @@ export const rejudgeCmd: Command<any> = {
  */
 function createInferenceJudge({
   kbnUrl,
-  apiKey,
+  authHeader,
   connectorId,
   jury,
   log,
 }: {
   kbnUrl: string;
-  apiKey?: string;
+  authHeader?: string;
   connectorId: string;
   jury: JuryAdapter;
   log: ToolingLog;
@@ -434,7 +445,11 @@ function createInferenceJudge({
         // disabled route, not a missing header. Without this the whole rejudge
         // fails in a way that points at stack config instead of the request.
         'x-elastic-internal-origin': 'kibana',
-        ...(apiKey ? { Authorization: `ApiKey ${apiKey}` } : {}),
+        // Stacks differ: a serverless/cloud judge takes an API key, a locally
+        // booted one authenticates the inference routes with Basic only. The
+        // scheme is therefore explicit -- assuming ApiKey produced a 401 that
+        // reads as a bad credential rather than a wrong scheme.
+        ...(authHeader ? { Authorization: authHeader } : {}),
         ...(options.headers ?? {}),
       },
       ...(options.body ? { body: options.body } : {}),
