@@ -6,10 +6,6 @@
  */
 
 import type { KibanaRole, ScoutTestConfig } from '@kbn/scout';
-import {
-  NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES,
-  NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES,
-} from '@kbn/nightshift-shared';
 
 // Headers for internal APIs (version 1)
 export const COMMON_API_HEADERS = {
@@ -38,33 +34,6 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
     ? []
     : ['manage_ilm', 'manage_data_stream_global_retention'];
 
-  const adminElasticsearch = {
-    cluster: [
-      'manage_index_templates',
-      'monitor',
-      'manage_pipeline',
-      ...statefulOnlyClusterPrivileges,
-    ],
-    indices: [
-      { names: ['logs*'], privileges: ['all'] },
-      { names: ['.ds-logs*'], privileges: ['all'] },
-      { names: ['.streams*'], privileges: ['all'] },
-      { names: ['.kibana_streams*'], privileges: ['all'] },
-      { names: ['.significant_events*'], privileges: ['all'] },
-    ],
-  };
-
-  const nightshiftRole = (privileges: string[]): KibanaRole => ({
-    kibana: [
-      {
-        base: [],
-        feature: { nightshift: privileges },
-        spaces: ['*'],
-      },
-    ],
-    elasticsearch: adminElasticsearch,
-  });
-
   return {
     streamsAdmin: {
       kibana: [
@@ -74,28 +43,21 @@ export function getStreamsUsers(config: ScoutTestConfig): Record<string, KibanaR
           spaces: ['*'],
         },
       ],
-      elasticsearch: adminElasticsearch,
-    },
-
-    nightshiftAll: nightshiftRole(['all']),
-    nightshiftRead: nightshiftRole(['read']),
-    contextEngineAll: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES.all,
-    ]),
-    detectionEngineAll: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
-    ]),
-    streamsOnly: {
-      kibana: [
-        {
-          base: [],
-          feature: { streams: ['all'] },
-          spaces: ['*'],
-        },
-      ],
-      elasticsearch: adminElasticsearch,
+      elasticsearch: {
+        cluster: [
+          'manage_index_templates',
+          'monitor',
+          'manage_pipeline',
+          ...statefulOnlyClusterPrivileges,
+        ],
+        indices: [
+          { names: ['logs*'], privileges: ['all'] },
+          { names: ['.ds-logs*'], privileges: ['all'] },
+          { names: ['.streams*'], privileges: ['all'] },
+          { names: ['.kibana_streams*'], privileges: ['all'] },
+          { names: ['.significant_events*'], privileges: ['all'] },
+        ],
+      },
     },
 
     streamsReadOnly: {

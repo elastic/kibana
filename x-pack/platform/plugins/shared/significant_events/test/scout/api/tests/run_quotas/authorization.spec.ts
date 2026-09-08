@@ -37,10 +37,9 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest(
-      'allows a Nightshift reader to inspect the deployment-wide snapshot',
-      async ({ apiClient, samlAuth, config }) => {
-        const users = getStreamsUsers(config);
-        const { cookieHeader } = await samlAuth.asInteractiveUser(users.nightshiftRead);
+      'allows a Streams reader to inspect the deployment-wide snapshot',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsReadOnly();
 
         const response = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers: { ...COMMON_API_HEADERS, ...cookieHeader },
@@ -64,12 +63,12 @@ apiTest.describe(
     );
 
     apiTest(
-      'denies a manager whose Context Engine privilege is limited to one space',
+      'denies a manager whose Streams privilege is limited to one space',
       async ({ apiClient, samlAuth, config }) => {
-        const contextEngineAll = getStreamsUsers(config).contextEngineAll;
+        const streamsAdmin = getStreamsUsers(config).streamsAdmin;
         const oneSpaceManager = {
-          ...contextEngineAll,
-          kibana: contextEngineAll.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
+          ...streamsAdmin,
+          kibana: streamsAdmin.kibana.map((entry) => ({ ...entry, spaces: ['default'] })),
         };
         const { cookieHeader } = await samlAuth.asInteractiveUser(oneSpaceManager);
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
@@ -90,11 +89,9 @@ apiTest.describe(
     );
 
     apiTest(
-      'allows an all-spaces Context Engine manager to update and restore settings',
-      async ({ apiClient, samlAuth, config }) => {
-        const { cookieHeader } = await samlAuth.asInteractiveUser(
-          getStreamsUsers(config).contextEngineAll
-        );
+      'allows an all-spaces Streams manager to update and restore settings',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
         const headers = { ...COMMON_API_HEADERS, ...cookieHeader };
         const readResponse = await apiClient.get(RUN_QUOTAS_ENDPOINT, {
           headers,
