@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiBadge, EuiToolTip, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { type PerformanceInfo, PerformanceMonitor } from './performance_monitor';
 import { LongTaskMonitor } from './long_task_monitor';
 import { INPMonitor } from './inp_monitor';
@@ -148,8 +149,6 @@ export const FrameJankIndicator: React.FC = () => {
     }
 
     if (inpMonitor.isSupported()) {
-      inpMonitor.startMonitoring();
-
       inpUnsubscribe = inpMonitor.subscribe((inpInfo) => {
         setInpStats({
           currentINP: inpInfo.currentINP,
@@ -158,6 +157,7 @@ export const FrameJankIndicator: React.FC = () => {
           lastInteractionDelay: inpInfo.lastInteractionDelay,
         });
       });
+      inpMonitor.startMonitoring();
     }
 
     return () => {
@@ -224,10 +224,21 @@ export const FrameJankIndicator: React.FC = () => {
       )}
       <br />
       <div>
-        <strong>Slow Interactions ≥100ms:</strong>
+        <strong>
+          {i18n.translate('developerToolbar.interactions.windowTitle', {
+            defaultMessage: 'Slow interactions ≥100ms (last 30s):',
+          })}
+        </strong>
       </div>
       <div>
-        Current INP:{' '}
+        {i18n.translate('developerToolbar.interactions.metricDescription', {
+          defaultMessage: 'Based on recorded slow interactions, not the INP web vital.',
+        })}
+      </div>
+      <div>
+        {i18n.translate('developerToolbar.interactions.percentileLabel', {
+          defaultMessage: '75th percentile:',
+        })}{' '}
         <SeverityValue metricType="inp" value={inpStats.currentINP}>
           {Math.round(inpStats.currentINP)}ms
         </SeverityValue>

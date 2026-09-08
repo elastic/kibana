@@ -10,15 +10,15 @@
 import type { Monitor } from '../monitor';
 
 export interface MemoryInfo {
-  memoryUsage: number; // MB
+  memoryUsage: number; // MiB
   leak: boolean;
-  history: number[]; // MB samples
+  history: number[]; // MiB samples
   heapUsageRatio?: number; // used / limit
   details?: {
-    shortTrendPerMin: number; // MB/min
-    longTrendPerMin: number; // MB/min
-    baseline: number; // MB
-    absoluteIncrease: number; // MB
+    shortTrendPerMin: number; // MiB/min
+    longTrendPerMin: number; // MiB/min
+    baseline: number; // MiB
+    absoluteIncrease: number; // MiB
   };
 }
 
@@ -34,7 +34,7 @@ interface Config {
   intervalMs?: number; // sampling period
   warmupMs?: number; // time to skip leak detection
   maxHistory?: number; // cap stored samples
-  // Leak thresholds (MB/min, MB absolute, ratio)
+  // Leak thresholds (MiB/min, MiB absolute, ratio)
   shortTrendMbPerMin?: number;
   longTrendMbPerMin?: number;
   absoluteIncreaseMb?: number;
@@ -252,7 +252,7 @@ export class MemoryMonitor implements Monitor<MemoryInfo> {
     return sustainedGrowth && significantIncrease && highMemoryPressure;
   }
 
-  // Least squares slope in MB/min using elapsed sample time as x.
+  // Least squares slope in MiB/min using elapsed sample time as x.
   private linearSlope(data: number[], timestamps: number[]): number {
     const n = data.length;
     if (n < 2 || timestamps.length !== n) return 0;

@@ -10,6 +10,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiToolTip, EuiBadge, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 
 const badgeStyles = css`
@@ -34,7 +35,9 @@ export const MemoryUsageIndicator: React.FC = () => {
   }, []);
 
   if (!memoryInfo) {
-    const displayText = 'Mem -GB';
+    const displayText = i18n.translate('developerToolbar.memory.placeholderBadgeLabel', {
+      defaultMessage: 'Mem -GiB',
+    });
     const tooltipContent = MemoryMonitor.isSupported() ? (
       <div>Memory monitoring is initializing...</div>
     ) : (
@@ -50,25 +53,54 @@ export const MemoryUsageIndicator: React.FC = () => {
     );
   }
 
-  const warningThreshold = 1000; // 1GB in MB
-  const isWarning = memoryInfo.memoryUsage > warningThreshold || memoryInfo.leak;
-  const memoryGB = (memoryInfo.memoryUsage / 1000).toFixed(2);
+  const warningThresholdMiB = 1000;
+  const isOverSizeThreshold = memoryInfo.memoryUsage > warningThresholdMiB;
+  const isWarning = isOverSizeThreshold || memoryInfo.leak;
+  const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
 
   const tooltipContent = (
     <div>
-      <div>Memory usage: {memoryGB}GB</div>
-      <div>Threshold: {(warningThreshold / 1000).toFixed(1)}GB</div>
-      {memoryInfo.leak && (
+      <div>
+        {i18n.translate('developerToolbar.memory.heapUsageLabel', {
+          defaultMessage: 'JavaScript heap: {value} GiB',
+          values: { value: memoryGiB },
+        })}
+      </div>
+      <div>
+        {i18n.translate('developerToolbar.memory.sizeThresholdLabel', {
+          defaultMessage: 'Size warning threshold: {threshold} MiB',
+          values: { threshold: warningThresholdMiB },
+        })}
+      </div>
+      {isOverSizeThreshold && (
         <div>
-          <EuiIcon type="warningFill" color={'danger'} size="s" aria-hidden={true} /> Potential
-          memory leak detected
+          {i18n.translate('developerToolbar.memory.sizeWarningDescription', {
+            defaultMessage: 'Heap exceeds the size threshold; this alone does not indicate a leak.',
+          })}
         </div>
       )}
+      {memoryInfo.leak && (
+        <div>
+          <EuiIcon type="warningFill" color={'danger'} size="s" aria-hidden={true} />{' '}
+          {i18n.translate('developerToolbar.memory.growthWarningDescription', {
+            defaultMessage:
+              'Sustained heap growth under high pressure; possible leak, not a diagnosis.',
+          })}
+        </div>
+      )}
+      <div>
+        {i18n.translate('developerToolbar.memory.measurementDescription', {
+          defaultMessage: 'Approximate JavaScript heap usage, not total browser memory.',
+        })}
+      </div>
       <div>Samples: {memoryInfo.history.length}</div>
     </div>
   );
 
-  const displayText = `Mem ${memoryGB}GB`;
+  const displayText = i18n.translate('developerToolbar.memory.usageBadgeLabel', {
+    defaultMessage: 'Mem {value}GiB',
+    values: { value: memoryGiB },
+  });
 
   return (
     <EuiToolTip content={tooltipContent}>
