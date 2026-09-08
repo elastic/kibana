@@ -33,19 +33,3 @@ export const GITHUB_QUERY_TEMPLATES: readonly GitHubQueryTemplate[] = [
   graphIssueGraphTemplate,
   graphPullRequestGraphTemplate,
 ];
-
-const templateMap = new Map(GITHUB_QUERY_TEMPLATES.map((t) => [t.id, t]));
-const validIds = GITHUB_QUERY_TEMPLATES.map((t) => t.id).join(', ');
-
-export const getTemplate = (templateId: string): GitHubQueryTemplate => {
-  const template = templateMap.get(templateId);
-  if (!template) {
-    throw new Error(
-      `Unknown GitHub GraphQL template "${templateId}". Valid template IDs: ${validIds}`
-    );
-  }
-  return template;
-};
-
-export const listTemplates = (): Array<{ id: string; description: string }> =>
-  GITHUB_QUERY_TEMPLATES.map(({ id, description }) => ({ id, description }));

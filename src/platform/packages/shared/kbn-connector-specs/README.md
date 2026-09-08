@@ -603,3 +603,74 @@ When creating a new connector with a lazy icon:
 ## License
 
 Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0
+
+## Package-shippable query templates (CONN-006)
+
+The GitHub GraphQL template library (`github.runQueryTemplate`) is extensible at
+runtime: a Fleet package can contribute its own read-only templates at install
+time, so new product queries ship in the package instead of requiring a
+kibana-core PR.
+
+```ts
+import {
+  registerConnectorQueryTemplates,
+  unregisterConnectorQueryTemplates,
+} from '@kbn/connector-specs';
+
+// on package install
+registerConnectorQueryTemplates({
+  packageName: 'sdlc_intel',
+  templates: [
+    {
+      id: 'myTeamRoadmap',                      // becomes `sdlc_intel.myTeamRoadmap`
+      description: 'Team roadmap items for an org project.',
+      resultPath: 'organization.projectV2.items',
+      isPaginated: true,
+      variables: [{ name: 'org', type: 'string', required: true }],
+      document: `query MyTeamRoadmap($org: String!, $first: Int!, $after: String) { ... }`,
+    },
+  ],
+});
+
+// on package uninstall
+unregisterConnectorQueryTemplates('sdlc_intel');
+```
+
+The template is then callable with no core change:
+
+```yaml
+- { type: github.runQueryTemplate, with: { templateId: sdlc_intel.myTeamRoadmap, org: elastic } }
+```
+
+### Manifest schema
+
+| Field | Required | Notes |
+|---|---|---|
+| `id` | yes | `^[A-Za-z][A-Za-z0-9_.]{0,127}$`; auto-namespaced to `<packageName>.<id>` |
+| `document` | yes | GraphQL string, max 20000 chars |
+| `resultPath` | yes | dot-separated path into `data` (e.g. `organization.repositories`) |
+| `isPaginated` | no | defaults `false`; when `true` the document must declare `$first` and `$after` |
+| `variables` | no | `{ name, type: string\|number\|integer\|boolean, required?, description? }` — compiled to a Zod schema |
+| `description` | no | shown by `listTemplates` |
+
+Definitions are declarative and JSON-serializable — a package ships data, never
+executable code.
+
+### Registration guarantees
+
+Registration validates every template and **never throws for a bad template** —
+per-template failures come back in `result.errors` so one malformed template
+cannot abort a package install. A template is rejected when it:
+
+- is not valid GraphQL, or does not contain **exactly one `query` operation**
+  (mutations and subscriptions are rejected, including a mutation smuggled in
+  alongside a query),
+- exceeds the 20000-character document cap,
+- declares `isPaginated: true` without `$first`/`$after`,
+- targets a **core template id** (reserved — packages can never clobber core), or
+- targets an id **already owned by another package**.
+
+Both the raw and namespaced id are checked, so a package cannot claim a core id
+by relying on the namespace prefix. Re-registering the same package is
+idempotent (re-install replaces), and `unregisterConnectorQueryTemplates` only
+ever removes templates owned by that package — core templates are immutable.

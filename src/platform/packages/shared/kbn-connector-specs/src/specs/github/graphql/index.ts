@@ -16,7 +16,20 @@ export {
   GitHubRateLimitError,
   isGitHubRateLimitError,
 } from './github_graphql_client';
-export { getTemplate, listTemplates, GITHUB_QUERY_TEMPLATES } from './catalog';
+export { GITHUB_QUERY_TEMPLATES } from './catalog';
+export {
+  getTemplate,
+  listTemplates,
+  registerConnectorQueryTemplates,
+  unregisterConnectorQueryTemplates,
+  listRegisteredConnectorTemplates,
+  MAX_TEMPLATE_DOCUMENT_LENGTH,
+} from './template_registry';
+export type {
+  ConnectorQueryTemplateDefinition,
+  ConnectorTemplateVariable,
+  RegisterConnectorTemplatesOptions,
+} from './template_registry';
 export { validateReadOnlyGraphQLQuery } from './validate_read_only_query';
 export type {
   GitHubGraphQLPageInfo,
