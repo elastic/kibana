@@ -15,12 +15,13 @@ maybe_update_esql_definitions () {
   local latest
   local current
 
-  current=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
+  latest=$(npm view @elastic/esql-definitions version 2>/dev/null)
 
   if [ -z "$latest" ]; then
     echo "Could not determine latest @elastic/esql-definitions version; skipping version bump."
     return
   fi
+
   current=$(node -e "console.log(require('./package.json').dependencies['@elastic/esql'])")
 
   if [ "$latest" == "$current" ]; then
