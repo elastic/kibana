@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import {
   DEFAULT_INVESTIGATION_TRIGGER_TYPE,
@@ -28,7 +27,7 @@ export const emitLifecycleEventRoute = createNightshiftInvestigationsServerRoute
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: ['agentBuilder:write'],
     },
   },
   params: z.object({

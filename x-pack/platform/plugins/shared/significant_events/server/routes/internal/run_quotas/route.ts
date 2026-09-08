@@ -12,7 +12,6 @@ import {
   NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
   NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import {
   MAX_RUN_LIMIT,
@@ -65,7 +64,7 @@ const consumeRequestSchema = z.discriminatedUnion('group', [
 const CONSUME_GROUP_PRIVILEGES = {
   detection: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
   ki_extraction: NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage,
-  investigation: NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage,
+  investigation: NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage,
 } as const;
 
 const readRunQuotaSnapshot = async ({
@@ -169,7 +168,7 @@ const consumeRoute = createServerRoute({
     access: 'internal',
     summary: 'Consume one Significant Events scheduled run quota',
     description:
-      'Route-level any-engine manage opens the door. The handler then requires the engine that owns `group` via `authzResult` (detection / ki_extraction / investigation).',
+      'Route-level Context or Detection manage opens the door. The handler then requires the engine that owns `group` via `authzResult` (detection and investigation / ki_extraction).',
   },
   security: {
     authz: {

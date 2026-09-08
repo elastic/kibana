@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import { alertInvestigationContextSchema, freeFormContextSchema } from '../../common';
@@ -26,8 +25,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     description: 'Triggers an investigation workflow for a given subject.',
   },
   security: {
+    // agentBuilder:write is used as a proxy for "this user is authorized to spend AI tokens."
+    // The investigation workflow itself creates the Agent Builder conversation — the calling user
+    // does not create it directly — so this is not a strict AB permission requirement. We use
+    // agentBuilder:write because it is the best available signal that a user has been granted
+    // access to AI-resource-consuming features in this deployment. When conversation templates
+    // land with their own privilege model, this should be revisited.
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: ['agentBuilder:write'],
     },
   },
   params: z.object({

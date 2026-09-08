@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import {
   MAX_BLIND_SPOTS,
@@ -59,7 +58,7 @@ export const updateInvestigationRoute = createNightshiftInvestigationsServerRout
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: ['agentBuilder:write'],
     },
   },
   params: z.object({

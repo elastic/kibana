@@ -9,7 +9,6 @@ import type { KibanaRole, ScoutTestConfig } from '@kbn/scout';
 import {
   NIGHTSHIFT_CONTEXT_ENGINE_SUB_FEATURE_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 
 // Headers for internal APIs (version 1)
@@ -96,14 +95,6 @@ export function getSignificantEventsUsers(config: ScoutTestConfig): Record<strin
     detectionEngineRead: nightshiftRole([
       'minimal_all',
       NIGHTSHIFT_DETECTION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
-    ]),
-    investigationEngineAll: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.all,
-    ]),
-    investigationEngineRead: nightshiftRole([
-      'minimal_all',
-      NIGHTSHIFT_INVESTIGATION_ENGINE_SUB_FEATURE_PRIVILEGES.read,
     ]),
 
     streamsOnly: {

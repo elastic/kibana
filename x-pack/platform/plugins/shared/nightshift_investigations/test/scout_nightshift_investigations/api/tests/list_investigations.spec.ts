@@ -10,7 +10,7 @@ import { tags } from '@kbn/scout';
 import {
   apiTest,
   INVESTIGATIONS_READ_ROLE,
-  NO_INVESTIGATION_ENGINE_ROLE,
+  NO_AGENT_BUILDER_ROLE,
   listInvestigations,
   seedInvestigation,
   deleteInvestigation,
@@ -247,13 +247,10 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest(
-      'returns 403 for a user without Investigation Engine read',
-      async ({ apiClient, samlAuth }) => {
-        const unauthorized = await samlAuth.asInteractiveUser(NO_INVESTIGATION_ENGINE_ROLE);
-        const response = await listInvestigations(apiClient, unauthorized.cookieHeader);
-        expect(response).toHaveStatusCode(403);
-      }
-    );
+    apiTest('returns 403 for a user without agentBuilder:read', async ({ apiClient, samlAuth }) => {
+      const unauthorized = await samlAuth.asInteractiveUser(NO_AGENT_BUILDER_ROLE);
+      const response = await listInvestigations(apiClient, unauthorized.cookieHeader);
+      expect(response).toHaveStatusCode(403);
+    });
   }
 );

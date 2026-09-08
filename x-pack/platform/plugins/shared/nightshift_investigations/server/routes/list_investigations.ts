@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { INVESTIGATION_STATUSES } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -18,7 +17,7 @@ export const listInvestigationsRoute = createNightshiftInvestigationsServerRoute
     description: 'Returns a paginated list of investigations in the current space.',
   },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read] },
+    authz: { requiredPrivileges: ['agentBuilder:read'] },
   },
   params: z.object({
     query: z.object({

@@ -25,7 +25,6 @@ import { useInvestigationState } from '@kbn/investigation-output';
 import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigation } from './event_investigation';
@@ -59,8 +58,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const { euiTheme } = useEuiTheme();
   const formatTimestamp = useFormatTimestamp();
   const queryClient = useQueryClient();
-  const { agentBuilder, application, http } = useKibana().services;
-  const { canShowInvestigation } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { agentBuilder, http } = useKibana().services;
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
@@ -88,9 +86,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     status: investigationStatus,
   } = useInvestigationState({
     http,
-    workflowExecutionId: canShowInvestigation
-      ? availableInvestigation?.workflow_execution_id
-      : undefined,
+    workflowExecutionId: availableInvestigation?.workflow_execution_id,
     isRunning:
       latestRunStatus != null
         ? latestRunStatus === 'pending'
@@ -253,16 +249,14 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
         <EuiSpacer size="l" />
 
-        {canShowInvestigation && (
-          <EventInvestigation
-            event={event}
-            investigation={availableInvestigation}
-            status={investigationStatus}
-            state={investigationState}
-            error={investigationError}
-            conversationId={conversationId}
-          />
-        )}
+        <EventInvestigation
+          event={event}
+          investigation={availableInvestigation}
+          status={investigationStatus}
+          state={investigationState}
+          error={investigationError}
+          conversationId={conversationId}
+        />
       </EuiFlyoutBody>
 
       {selectedDetection && (
@@ -275,7 +269,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         />
       )}
 
-      {canShowInvestigation && agentBuilder && availableInvestigation && (
+      {agentBuilder && availableInvestigation && (
         <EuiFlyoutFooter
           css={css`
             /* The design uses a plain footer instead of EUI's shaded one. */

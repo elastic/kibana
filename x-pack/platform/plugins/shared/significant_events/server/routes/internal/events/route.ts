@@ -21,13 +21,9 @@ import {
   type LifecycleDetection,
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
-import { forbidden, notFound, serverUnavailable } from '@hapi/boom';
+import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import {
-  NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_EVENT_READ_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   attachInvestigationToEvent,
   type SignificantEventTriggerFeedback,
@@ -100,7 +96,7 @@ const eventsSearchRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_EVENT_READ_PRIVILEGES] }],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -165,7 +161,7 @@ const eventsLifecycleRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [{ anyRequired: [...NIGHTSHIFT_EVENT_READ_PRIVILEGES] }],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
     },
   },
   params: z.object({
@@ -242,8 +238,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
-      extendedPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -262,14 +257,6 @@ const eventsAttachInvestigationRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const { trigger_feedback: triggerFeedback, ...investigation } = params.body;
-    const canMutateDetectionFields =
-      request.authzResult?.[NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage] === true;
-
-    if (triggerFeedback != null && triggerFeedback.length > 0 && !canMutateDetectionFields) {
-      throw forbidden(
-        'Applying trigger feedback requires Detection Engine manage; Investigation Engine manage can only attach the run record'
-      );
-    }
 
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
@@ -291,7 +278,7 @@ const eventsTriggerInvestigationRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -417,7 +404,7 @@ const investigationStatusesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.read],
     },
   },
   params: z.object({

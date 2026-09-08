@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { concat, from, map, of, switchMap, takeWhile, timer } from 'rxjs';
 import { MAX_KEYWORD_LENGTH, type InvestigationStatusEvent } from '../../common';
@@ -39,7 +38,7 @@ export const followInvestigationRoute = createNightshiftInvestigationsServerRout
   },
   security: {
     authz: {
-      requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read],
+      requiredPrivileges: ['agentBuilder:read'],
     },
   },
   params: z.object({

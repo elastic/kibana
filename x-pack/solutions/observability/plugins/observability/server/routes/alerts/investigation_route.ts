@@ -7,7 +7,6 @@
 
 import { badRequest, notFound, serverUnavailable } from '@hapi/boom';
 import { InvestigationUnavailableError } from '@kbn/nightshift-investigations-plugin/server';
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
 import { ALERTS_API_URLS } from '../../../common/constants';
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
@@ -19,7 +18,7 @@ const availabilityRoute = createObservabilityServerRoute({
   endpoint: `GET ${ALERTS_API_URLS.INTERNAL_INVESTIGATION_AVAILABILITY}`,
   options: { access: 'internal' },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.read] },
+    authz: { requiredPrivileges: ['agentBuilder:write'] },
   },
   params: z.object({}),
   handler: async ({ dependencies, request }) => ({
@@ -32,7 +31,7 @@ const investigateRoute = createObservabilityServerRoute({
   endpoint: `POST ${ALERTS_API_URLS.INTERNAL_START_ALERT_INVESTIGATION}`,
   options: { access: 'internal' },
   security: {
-    authz: { requiredPrivileges: [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage] },
+    authz: { requiredPrivileges: ['agentBuilder:write'] },
   },
   params: z.object({
     path: z.object({ alertId: z.string().min(1).max(500) }),

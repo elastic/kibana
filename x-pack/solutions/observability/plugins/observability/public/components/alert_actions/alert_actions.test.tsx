@@ -140,14 +140,14 @@ describe('ObservabilityActions component', () => {
   });
 
   interface SetupOptions {
-    canManageInvestigation?: boolean;
+    canWriteAgentBuilder?: boolean;
     alert?: Alert;
   }
 
   const setup = async (
     pageId: string,
     {
-      canManageInvestigation = false,
+      canWriteAgentBuilder = false,
       alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
     }: SetupOptions = {}
   ) => {
@@ -220,7 +220,7 @@ describe('ObservabilityActions component', () => {
               ...mockKibana.services.application,
               capabilities: {
                 ...mockKibana.services.application.capabilities,
-                nightshift: { investigation_engine_manage: canManageInvestigation },
+                agentBuilder: { write: canWriteAgentBuilder },
               },
             },
           }}
@@ -262,7 +262,7 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('hides the investigate action without Investigation Engine manage', async () => {
+  it('hides the investigate action without Agent Builder write access', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
@@ -273,7 +273,7 @@ describe('ObservabilityActions component', () => {
 
   it('hides the investigate action when no investigation connector is available', async () => {
     mockUseInvestigationAvailability.mockReturnValue(false);
-    const wrapper = await setup('nothing', { canManageInvestigation: true });
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes()).toHaveLength(
@@ -283,7 +283,7 @@ describe('ObservabilityActions component', () => {
 
   it('starts an investigation for the alert', async () => {
     mockKibana.services.http.post.mockResolvedValue({ investigation_id: 'investigation-1' });
-    const wrapper = await setup('nothing', { canManageInvestigation: true });
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
 
@@ -299,7 +299,7 @@ describe('ObservabilityActions component', () => {
 
   it('reports an investigation request failure', async () => {
     mockKibana.services.http.post.mockRejectedValue(new Error('Request failed'));
-    const wrapper = await setup('nothing', { canManageInvestigation: true });
+    const wrapper = await setup('nothing', { canWriteAgentBuilder: true });
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     wrapper.find('[data-test-subj="o11yAlertActionsInvestigate"]').hostNodes().simulate('click');
 

@@ -88,20 +88,8 @@ const MINIMIZE_DETAILS_ARIA_LABEL = i18n.translate(
 );
 
 const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
-  const {
-    core: {
-      application: {
-        capabilities: { nightshift },
-      },
-    },
-  } = useKibana();
-  const { canManageInvestigation } = getNightshiftCapabilities(nightshift);
   const { triggerInvestigation, isTriggering } = useTriggerInvestigation();
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
-
-  if (!canManageInvestigation) {
-    return null;
-  }
 
   return (
     <EuiToolTip content={activityBlockTooltip ?? RUN_ARIA_LABEL} disableScreenReaderOutput>

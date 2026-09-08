@@ -14,7 +14,6 @@ import {
   NIGHTSHIFT_ANY_ENGINE_READ_PRIVILEGES,
   NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES,
   NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES,
-  NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES,
 } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../../types';
 import type {
@@ -57,7 +56,6 @@ const server = {} as SignificantEventsServer;
 const allEngineManageAuthz = {
   [NIGHTSHIFT_CONTEXT_ENGINE_API_PRIVILEGES.manage]: true,
   [NIGHTSHIFT_DETECTION_ENGINE_API_PRIVILEGES.manage]: true,
-  [NIGHTSHIFT_INVESTIGATION_ENGINE_API_PRIVILEGES.manage]: true,
 };
 const request = { authzResult: allEngineManageAuthz };
 

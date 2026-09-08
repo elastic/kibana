@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
-import { NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { allCasesPermissions, noCasesPermissions } from '@kbn/observability-shared-plugin/public';
 
@@ -80,7 +79,7 @@ const mockHttp = {
 
 const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
-  capabilities: { nightshift: { [NIGHTSHIFT_INVESTIGATION_ENGINE_UI_PRIVILEGES.manage]: true } },
+  capabilities: { agentBuilder: { write: true } },
 };
 
 jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
