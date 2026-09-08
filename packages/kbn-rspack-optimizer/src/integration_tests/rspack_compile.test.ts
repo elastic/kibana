@@ -9,18 +9,54 @@
 
 import Path from 'path';
 import Fs from 'fs';
+import { execFileSync } from 'child_process';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { rspack } from '@rspack/core';
 
 import {
   createSingleCompileConfig,
   type SingleCompileConfigOptions,
 } from '../config/create_single_compile_config';
-import {
-  createExternalPluginConfig,
-  type ExternalPluginConfigOptions,
-} from '../config/create_external_plugin_config';
+import { COMPILE_RESULT_FILENAME, type CompileWorkerResult } from './compile_worker';
+
+/**
+ * Real compilations run in a forked plain-Node worker process. Under Jest,
+ * the natively-loaded (pure ESM) @rspack/core lives in a different vm realm
+ * than the test file, so Rspack's `instanceof RegExp` config normalization
+ * fails on the Jest-realm RegExp conditions in our module rules and silently
+ * miscompiles (see compile_worker.ts). Keeping the compile in a plain Node
+ * process preserves production-realistic module semantics.
+ */
+const COMPILE_WORKER_PATH = Path.resolve(__dirname, 'compile_worker.ts');
+
+function compileInWorker(options: {
+  pluginDir: string;
+  pluginId: string;
+  outputDir: string;
+  dist: boolean;
+}): CompileWorkerResult {
+  try {
+    execFileSync(
+      process.execPath,
+      [
+        '-r',
+        '@kbn/swc-register/install',
+        COMPILE_WORKER_PATH,
+        JSON.stringify({ repoRoot: REPO_ROOT, ...options }),
+      ],
+      { encoding: 'utf-8', timeout: 110_000, maxBuffer: 32 * 1024 * 1024 }
+    );
+  } catch (e) {
+    // The worker exits non-zero only on unexpected harness failures. If it
+    // still wrote the result file, prefer it — it carries the real error.
+    if (!Fs.existsSync(Path.join(options.outputDir, COMPILE_RESULT_FILENAME))) {
+      throw e;
+    }
+  }
+
+  const resultPath = Path.join(options.outputDir, COMPILE_RESULT_FILENAME);
+  return JSON.parse(Fs.readFileSync(resultPath, 'utf-8'));
+}
 
 /**
  * Create a minimal fixture plugin inside a temporary directory.
@@ -160,37 +196,14 @@ describe('rspack compile integration', () => {
       Fs.rmSync(tmpDir, { recursive: true, force: true });
     });
 
-    it('compiles a minimal fixture plugin and emits output bundle', async () => {
+    it('compiles a minimal fixture plugin and emits output bundle', () => {
       const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
       const outputDir = Path.join(tmpDir, 'output');
 
-      const options: ExternalPluginConfigOptions = {
-        repoRoot: REPO_ROOT,
-        pluginDir,
-        pluginId,
-        outputDir,
-        dist: false,
-        watch: false,
-        cache: false,
-      };
+      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: false });
 
-      const config = await createExternalPluginConfig(options);
-
-      expect(config.name).toBe(`plugin-${pluginId}`);
-      expect(config.entry).toBeDefined();
-
-      const stats = await new Promise<any>((resolve, reject) => {
-        const compiler = rspack(config);
-        compiler.run((err, s) => {
-          compiler.close(() => {
-            if (err) return reject(err);
-            resolve(s);
-          });
-        });
-      });
-
-      expect(stats).toBeDefined();
-      expect(stats.hasErrors()).toBe(false);
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
 
       const outputFiles = Fs.readdirSync(outputDir).filter(
         (f) => !f.startsWith('.') && f.endsWith('.js')
@@ -218,35 +231,14 @@ describe('rspack compile integration', () => {
       { dist: true, mode: 'production' },
     ])(
       'compiles Emotion component selectors with injected targets in $mode mode',
-      async ({ dist }) => {
+      ({ dist }) => {
         const { pluginDir, pluginId } = createEmotionFixturePlugin(tmpDir);
         const outputDir = Path.join(tmpDir, dist ? 'output-emotion-dist' : 'output-emotion-dev');
 
-        const config = await createExternalPluginConfig({
-          repoRoot: REPO_ROOT,
-          pluginDir,
-          pluginId,
-          outputDir,
-          dist,
-          watch: false,
-          cache: false,
-        });
+        const result = compileInWorker({ pluginDir, pluginId, outputDir, dist });
 
-        const stats = await new Promise<any>((resolve, reject) => {
-          const compiler = rspack(config);
-          compiler.run((err, s) => {
-            compiler.close(() => {
-              if (err) return reject(err);
-              resolve(s);
-            });
-          });
-        });
-
-        expect(stats).toBeDefined();
-        if (stats.hasErrors()) {
-          throw new Error(
-            JSON.stringify(stats.toJson({ all: false, errors: true }).errors, null, 2)
-          );
+        if (!result.success) {
+          throw new Error(JSON.stringify(result.errors, null, 2));
         }
 
         const mainBundle = Fs.readdirSync(outputDir).find(
@@ -258,69 +250,34 @@ describe('rspack compile integration', () => {
         const emotionTargets = bundleContent.match(/target:\s*"e[a-z0-9]+"/g) ?? [];
         expect(emotionTargets).toHaveLength(2);
         if (dist) {
-          expect(config.mode).toBe('production');
-          expect(config.optimization?.minimize).toBe(true);
           expect(bundleContent).not.toContain('const Parent');
         }
       },
       120_000
     );
 
-    it('compiles a fixture plugin in production mode with minification', async () => {
+    it('compiles a fixture plugin in production mode with minification', () => {
       const { pluginDir, pluginId } = createFixturePlugin(tmpDir);
       const outputDir = Path.join(tmpDir, 'output-dist');
 
-      const config = await createExternalPluginConfig({
-        repoRoot: REPO_ROOT,
-        pluginDir,
-        pluginId,
-        outputDir,
-        dist: true,
-        watch: false,
-        cache: false,
-      });
+      const result = compileInWorker({ pluginDir, pluginId, outputDir, dist: true });
 
-      expect(config.mode).toBe('production');
-
-      const stats = await new Promise<any>((resolve, reject) => {
-        const compiler = rspack(config);
-        compiler.run((err, s) => {
-          compiler.close(() => {
-            if (err) return reject(err);
-            resolve(s);
-          });
-        });
-      });
-
-      expect(stats).toBeDefined();
-      expect(stats.hasErrors()).toBe(false);
+      expect(result.errors).toEqual([]);
+      expect(result.success).toBe(true);
 
       const mainBundle = Fs.readdirSync(outputDir).find(
         (f) => f.includes(pluginId) && f.endsWith('.js')
       );
       expect(mainBundle).toBeDefined();
 
-      const devConfig = await createExternalPluginConfig({
-        repoRoot: REPO_ROOT,
+      const devResult = compileInWorker({
         pluginDir,
         pluginId,
         outputDir: Path.join(tmpDir, 'output-dev'),
         dist: false,
-        watch: false,
-        cache: false,
       });
-
-      const devStats = await new Promise<any>((resolve, reject) => {
-        const compiler = rspack(devConfig);
-        compiler.run((err, s) => {
-          compiler.close(() => {
-            if (err) return reject(err);
-            resolve(s);
-          });
-        });
-      });
-
-      expect(devStats.hasErrors()).toBe(false);
+      expect(devResult.errors).toEqual([]);
+      expect(devResult.success).toBe(true);
 
       // Verify export names survive minification -- they appear as string keys
       // in Rspack's __webpack_exports__ define call (e.g. b.d(D, { MY_CONSTANT: ... }))

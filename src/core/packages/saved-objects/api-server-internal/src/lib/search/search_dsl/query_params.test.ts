@@ -1033,7 +1033,7 @@ describe('#getQueryParams', () => {
             namespaces: [],
             mappings,
           })
-        ).toThrowError('cannot specify empty namespaces array');
+        ).toThrow('cannot specify empty namespaces array');
       });
     });
   });

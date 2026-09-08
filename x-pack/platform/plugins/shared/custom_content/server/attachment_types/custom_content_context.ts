@@ -13,7 +13,7 @@ import {
 } from '../../common/panel_context_attachment';
 
 const formatPanelContext = (data: CustomContentContextAttachmentData): string => {
-  const parts = ['Current custom content panel:'];
+  const parts = [`Custom content panel (embeddable_id: ${data.embeddable_id}):`];
 
   if (data.esql_query) {
     parts.push(`\nES|QL Query:\n\`\`\`esql\n${data.esql_query}\n\`\`\``);
@@ -47,6 +47,6 @@ export const createCustomContentContextAttachmentType = (): AttachmentTypeDefini
     }),
   }),
   getAgentDescription: () =>
-    'A custom content panel context containing the current HTML template and optional ES|QL query. Use the custom_content_update_panel tool to propose refined templates or query changes.',
+    'A custom content panel context containing the current HTML template and optional ES|QL query. Each panel shows its embeddable_id in its context header. Use the custom_content_update_panel tool to propose refined templates or query changes, passing the embeddable_id of the panel you are updating — this is required to target the correct panel when multiple panels are in the conversation. After every successful update, render the attachment inline as the last part of your response with `<render_attachment id="{attachment_id}" version="{version}" />`, using the ids returned by the tool — this is what gives the user the preview and version history for the panel.',
   getTools: () => ['custom_content_update_panel'],
 });
