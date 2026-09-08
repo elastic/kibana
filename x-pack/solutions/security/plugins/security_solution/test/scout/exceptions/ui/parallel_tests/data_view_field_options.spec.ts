@@ -13,24 +13,25 @@ import { expect } from '@kbn/scout-security/ui';
  * data-view-backed rule.
  *
  * `useFetchIndexPatterns` resolves a data-view rule's fields through
- * `data.dataViews.get`, which is gated behind an async active-space lookup.
+ * `data.dataViews.get`, which runs only after an async active-space lookup.
  * Before the fix the flyout's loading flag initialized to `false` and only
  * flipped `true` after that lookup, so the `addExceptionFlyoutBuilder-loaded`
  * marker (which `waitForVisible()` waits on) could appear on the very first
  * render, while the field combobox was still empty. A test proceeding on that
  * transient "loaded" state would then fail to find any field option.
  *
- * Index-pattern rules don't flash — `useFetchIndex` reports loading on the
- * first render — so this data-view path is the one the shared page object
+ * Index-pattern rules don't flash (`useFetchIndex` reports loading on the
+ * first render), so this data-view path is the one the shared page object
  * couldn't cover. Here we assert that once `waitForVisible()` returns, the
  * field combobox is populated with the data view's fields (i.e. the field is
  * selectable), proving the marker no longer reports "loaded" prematurely.
  */
 
-// `platform_engineer` grants `all` on `logs-*`, so keeping the source index
-// under that prefix lets the flyout's field-caps request (run as the browser
-// user) read it without a bespoke role.
-const SOURCE_INDEX_PREFIX = 'logs-scout-dataview-exception';
+// `platform_engineer` grants `all` on `logs-*`, so backing the data view with a
+// data stream under that prefix lets the flyout's field-caps request (run as the
+// browser user) read it without a bespoke role. A plain index cannot be created
+// there: `logs-*-*` matches a data-stream-only template.
+const SOURCE_DATA_STREAM_PREFIX = 'logs-scout_dataview.exception';
 const CONDITION_FIELD = 'user.name';
 const CONDITION_VALUE = 'alice';
 
@@ -38,46 +39,42 @@ spaceTest.describe(
   'Exception flyout condition builder on a data-view rule',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    let sourceIndex: string;
+    let sourceDataStream: string;
     let dataViewId: string;
     let ruleName: string;
 
-    // Cover the longest path (rule firing + UI flow) — Playwright's default
+    // Cover the longest path (rule firing + UI flow): Playwright's default
     // per-test budget is too short for security_solution rule execution.
     spaceTest.setTimeout(5 * 60_000);
 
     spaceTest.beforeEach(async ({ browserAuth, esClient, kbnClient, scoutSpace }) => {
       const idSegment = scoutSpace.id.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      sourceIndex = `${SOURCE_INDEX_PREFIX}-${idSegment}`;
+      sourceDataStream = `${SOURCE_DATA_STREAM_PREFIX}-${idSegment}`;
       dataViewId = `scout-dataview-exception-${idSegment}`;
       ruleName = `Data view exception ${scoutSpace.id}`;
 
-      // Fresh source index with a mapped field the exception can reference.
-      await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
-      await esClient.indices.create({
-        index: sourceIndex,
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            'user.name': { type: 'keyword' },
-          },
-        },
-      });
+      // Fresh data stream (the `logs-*-*` template is data-stream only, so a
+      // plain index cannot be created here). The template's ECS mappings expose
+      // the field the exception references. Data streams are append-only, so the
+      // seed document is indexed with `op_type: 'create'`.
+      await esClient.indices.deleteDataStream({ name: sourceDataStream }).catch(() => {});
+      await esClient.indices.createDataStream({ name: sourceDataStream });
       await esClient.index({
-        index: sourceIndex,
+        index: sourceDataStream,
+        op_type: 'create',
         document: { '@timestamp': new Date().toISOString(), 'user.name': CONDITION_VALUE },
         refresh: 'wait_for',
       });
 
-      // Kibana data view over the source index, created in the test's space
-      // with an explicit id so the rule can reference it via `data_view_id`.
+      // Kibana data view over the data stream, created in the test's space with
+      // an explicit id so the rule can reference it via `data_view_id`.
       await kbnClient.request({
         method: 'POST',
         path: `/s/${scoutSpace.id}/api/data_views/data_view`,
         body: {
           data_view: {
             id: dataViewId,
-            title: `${sourceIndex}*`,
+            title: sourceDataStream,
             name: `Scout data view exception ${scoutSpace.id}`,
             timeFieldName: '@timestamp',
           },
@@ -120,7 +117,7 @@ spaceTest.describe(
           retries: 0,
         })
         .catch(() => {});
-      await esClient.indices.delete({ index: sourceIndex, ignore_unavailable: true });
+      await esClient.indices.deleteDataStream({ name: sourceDataStream }).catch(() => {});
     });
 
     spaceTest(
