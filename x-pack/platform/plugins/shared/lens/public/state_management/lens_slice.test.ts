@@ -22,6 +22,7 @@ import {
   removeDimension,
   setLayerDefaultDimension,
   setDimensionAndUpdateDatasource,
+  onDropToDimension,
 } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import {
@@ -778,6 +779,69 @@ describe('lensSlice', () => {
 
           expect(formBasedWithInit.initializeDimension).toHaveBeenCalled();
           expect(textBasedWithInit.initializeDimension).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('onDropToDimension', () => {
+        it('syncs the datasource that owns the target layer, not the active one', () => {
+          // active datasource is textBased (ES|QL chart); the drop target layer
+          // lives in formBased. Regression: syncLinkedDimensions defaulted to the
+          // active datasource and its state overwrote the formBased state.
+          const activeVisualization = visualizationMap[activeVisId] as Visualization;
+          const droppedFormBasedState = ['refLayer', 'newColumnMarker'];
+          const formBasedWithDrop = {
+            ...formBased('formBased'),
+            onDrop: jest.fn(() => droppedFormBasedState),
+          };
+          const textBasedWithDrop = {
+            ...formBased('textBased'),
+            onDrop: jest.fn(),
+          };
+
+          const customStoreWithDrop = makeLensStore({
+            preloadedState: {
+              activeDatasourceId: 'textBased',
+              datasourceStates: {
+                formBased: { isLoading: false, state: ['refLayer'] },
+                textBased: { isLoading: false, state: ['dataLayer'] },
+              },
+              visualization: {
+                activeId: activeVisId,
+                state: ['refLayer', 'dataLayer'],
+                selectedLayerId: null,
+              },
+            },
+            storeDeps: mockStoreDeps({
+              visualizationMap: {
+                [activeVisId]: {
+                  ...activeVisualization,
+                  getConfiguration: jest.fn(() => ({ groups: [] })),
+                  onDrop: jest.fn(({ prevState }) => prevState),
+                  getLinkedDimensions: jest.fn(() => undefined),
+                },
+              } as unknown as VisualizationMap,
+              datasourceMap: {
+                formBased: formBasedWithDrop,
+                textBased: textBasedWithDrop,
+              } as unknown as DatasourceMap,
+            }),
+          }).store;
+
+          customStoreWithDrop.dispatch(
+            onDropToDimension({
+              source: { id: 'col1', humanData: { label: 'Col 1' } },
+              target: { layerId: 'refLayer', columnId: 'col2', groupId: 'testGroup' },
+              dropType: 'duplicate_compatible',
+            })
+          );
+
+          const { lens } = customStoreWithDrop.getState();
+          expect(formBasedWithDrop.onDrop).toHaveBeenCalled();
+          expect(textBasedWithDrop.onDrop).not.toHaveBeenCalled();
+          // formBased received its own dropped state and was not overwritten
+          // with the active (textBased) datasource state
+          expect(lens.datasourceStates.formBased.state).toEqual(droppedFormBasedState);
+          expect(lens.datasourceStates.textBased.state).toEqual(['dataLayer']);
         });
       });
 

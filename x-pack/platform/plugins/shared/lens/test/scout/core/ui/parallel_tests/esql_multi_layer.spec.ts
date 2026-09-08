@@ -56,7 +56,15 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
     });
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+    // re-import the dashboard before every test: tests that save the dashboard
+    // (e.g. the persistence check) would otherwise leak their layers into
+    // subsequent tests running in the same worker space. `load` imports with
+    // createNewCopies, so each test gets its own pristine dashboard id.
+    const savedObjects = await scoutSpace.savedObjects.load(
+      testData.KBN_ARCHIVE_PATHS.ESQL_MULTI_LAYER_DASHBOARD
+    );
+    dashboardId = getImportedDashboardId(savedObjects, 'ESQL Multi-layer Dashboard');
     await browserAuth.loginAsPrivilegedUser();
     await pageObjects.dashboard.openDashboardWithIdInEditMode(dashboardId);
     await pageObjects.dashboard.waitForPanelsToLoad(2);
@@ -264,12 +272,18 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
         1
       );
       await lens.workspace.setInputValue('name-input', 'Deploy marker');
-      await lens.style.setAnnotationTextVisibility('name');
-      await lens.closeDimensionEditor();
-
+      // wait for the debounced rename to commit (reflected in the dimension
+      // trigger) before the next state update — otherwise the stale debounced
+      // snapshot would overwrite the text-visibility toggle
       await expect(lens.dimensions.getDimensionTriggersLocator(ANNOTATIONS_DIMENSION)).toHaveText(
         'Deploy marker'
       );
+      await lens.style.setAnnotationTextVisibility('name');
+      // Let the applied changes settle into a completed panel render before dragging:
+      // dropping while the chart still reflects pre-edit state can land on stale state
+      // and silently discard the change (pattern from reference_lines.spec.ts, adapted
+      // to inline editing where no lnsWorkspace render counter exists).
+      await lens.closeDimensionEditor();
       await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       await expect(page.testSubj.locator('xyVisAnnotationIcon')).toBeVisible();
       await expect(page.testSubj.locator('xyVisAnnotationText')).toBeVisible();
@@ -284,6 +298,7 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
         2
       );
       await expect(page.testSubj.locator('xyVisGroupedAnnotationIcon')).toHaveCount(1);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       // Reference line: set a custom static value and a below-fill style.
       await lens.layers.activateLayerTab(0);
@@ -295,12 +310,15 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
         2
       );
       await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '1000');
-      await lens.style.setReferenceLineFillBelow();
-      await lens.closeDimensionEditor();
-
+      // wait for the debounced value change to commit before the next state update
+      // (same stale-snapshot race as the annotation rename above)
       await expect(
         lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
       ).toHaveText('Static value: 1000');
+      await lens.style.setReferenceLineFillBelow();
+      // settle the applied changes into a completed panel render before dragging
+      await lens.closeDimensionEditor();
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       // Duplicating a reference line carries its value and style.
       await lens.dragDrop.dragDimensionToDimension({
@@ -310,6 +328,32 @@ spaceTest.describe('Lens ES|QL multi-layer editing', { tag: '@local-stateful-cla
       await expect(
         lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION)
       ).toHaveCount(2);
+      await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+
+      // Adding a value via the empty dimension button routes the new static value
+      // column to the form-based datasource even though the chart's active
+      // datasource is text-based (regression: the column used to land in the
+      // text-based state, breaking the panel with an invalid-column error).
+      await lens.dimensions.openDimensionEditor(
+        `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
+        2
+      );
+      // wait for the pre-filled static value before closing — it reflects the new
+      // column committed to state; closing earlier discards the pending dimension.
+      // (the trigger list itself is not queryable here: the dimension editor
+      // replaces the layer panel while open)
+      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue(/\d/);
+      await lens.closeDimensionEditor();
+      const referenceTriggers =
+        lens.dimensions.getDimensionTriggersLocator(REFERENCE_LINE_DIMENSION);
+      await expect(referenceTriggers).toHaveCount(3);
+      // every trigger carries a static value, proving initializeDimension ran
+      // against the form-based datasource for the newly added dimension too
+      await expect(referenceTriggers).toHaveText([
+        /^Static value: /,
+        /^Static value: /,
+        /^Static value: /,
+      ]);
       await expectChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
       await cancelLensInlineEditorAndWaitClosed({ lens });

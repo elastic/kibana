@@ -1193,7 +1193,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const {
             datasourceState: syncedDatasourceState,
             visualizationState: syncedVisualizationState,
-          } = syncLinkedDimensions(current(state), visualizationMap, datasourceMap);
+          } = syncLinkedDimensions(
+            current(state),
+            visualizationMap,
+            datasourceMap,
+            // sync the datasource that owns the target layer: defaulting to the
+            // active datasource would return its state and overwrite the layer
+            // datasource's state with it (e.g. textBased state written into
+            // formBased on mixed panels)
+            layerDatasourceId
+          );
 
           state.datasourceStates[layerDatasourceId].state = syncedDatasourceState;
           state.visualization.state = syncedVisualizationState;

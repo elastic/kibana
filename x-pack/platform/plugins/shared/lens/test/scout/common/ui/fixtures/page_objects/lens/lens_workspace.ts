@@ -589,7 +589,10 @@ export class LensWorkspace {
       { sel: selector, expected: value },
       { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
     );
-    await input.press('Tab');
+    // Blur programmatically instead of pressing Tab: Tab would focus the next
+    // control, and focus-opening widgets (e.g. EuiComboBox) would leave a portal
+    // popover behind that intercepts subsequent clicks.
+    await input.evaluate((el) => (el as HTMLElement).blur());
     // Blur completed — callers must poll a UI side effect (chart debug, dimension label)
     // before closing flyouts; useDebouncedValue (~256ms) has no DOM readiness hook here.
     await this.page.waitForFunction(
