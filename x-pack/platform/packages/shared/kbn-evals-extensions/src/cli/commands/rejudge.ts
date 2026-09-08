@@ -346,11 +346,18 @@ export const rejudgeCmd: Command<any> = {
     // while grading nothing. `planned > 0 && judged === 0` is that failure, and
     // it must not be excused just because there are no scores to inspect.
     if (plan.cells.length > 0 && results.length === 0) {
+      // Surface why. Without the reasons this message sends you looking at the
+      // jury while the actual cause is upstream (bad connector id, unreachable
+      // judge Kibana, auth). Distinct reasons only: 127 copies of one error is
+      // noise, and the count already says how widespread it is.
+      const reasons = [...new Set(failures.map((f) => f.reason))].slice(0, 3);
       throw createFailError(
         `Rejudge planned ${plan.cells.length} cell(s) but graded none, so no ` +
           `"${jury.name}" evaluator (${jury.evaluatorNames.join(', ')}) was produced. ` +
-          `The jury resolved without grading rather than erroring. Refusing to write ` +
-          `an artifact that would read as a refreshed column.`
+          `Refusing to write an artifact that would read as a refreshed column. ` +
+          (reasons.length
+            ? `${failures.length} cell(s) failed; distinct reason(s): ${reasons.join(' | ')}`
+            : `The jury resolved without grading rather than erroring.`)
       );
     }
     if (!coverage.ok) {
