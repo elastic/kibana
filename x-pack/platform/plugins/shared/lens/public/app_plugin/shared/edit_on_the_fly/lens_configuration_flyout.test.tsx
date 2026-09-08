@@ -386,7 +386,9 @@ describe('LensEditConfigurationFlyout', () => {
       state: {
         adHocDataViews: {},
         internalReferences: [],
-        datasourceStates: { formBased: mockFormBasedState, textBased: mockTextBasedState },
+        // the empty formBased state is dropped so consumers don't misdetect the
+        // chart's datasource from serialized attributes
+        datasourceStates: { textBased: mockTextBasedState },
         visualization: {},
         filters: [],
       },

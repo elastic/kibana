@@ -31,11 +31,17 @@ export const useCurrentAttributes = ({
     if (!activeVisualization) {
       return initialAttributes;
     }
+    // The editor store initializes every datasource in the map, so a pure
+    // form-based panel still carries an empty textBased state (and vice versa).
+    // Serializing such empty states would make consumers like
+    // getActiveDatasourceIdFromDoc misdetect the chart's datasource.
     const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
+      Object.entries(datasourceStates)
+        .filter(([, ds]) => !isEmptyLayeredState(ds.state))
+        .map(([id, ds]) => {
+          const dsState = ds.state;
+          return [id, dsState];
+        })
     );
     // ES|QL layers use adHoc dataviews whose ids are not saved objects, so their
     // references must not be persisted as top-level references. They still need to
@@ -96,4 +102,21 @@ export const useCurrentAttributes = ({
   ]);
 
   return currentAttributes;
+};
+
+/**
+ * True when a datasource state has a `layers` record with no entries, i.e. it was
+ * initialized by the store but holds no data.
+ */
+const isEmptyLayeredState = (state: unknown): boolean => {
+  if (!state || typeof state !== 'object' || !('layers' in state)) {
+    return false;
+  }
+  const { layers } = state as { layers: unknown };
+  return (
+    layers !== null &&
+    typeof layers === 'object' &&
+    !Array.isArray(layers) &&
+    Object.keys(layers).length === 0
+  );
 };

@@ -103,12 +103,33 @@ export const isEsqlChart = (datasourceLayers: FramePublicAPI['datasourceLayers']
     (layer) => layer?.datasourceId === LENS_DATASOURCE_ID.TEXT_BASED
   );
 
+/**
+ * True when a serialized datasource state actually holds data. Persisted panels can
+ * carry empty states for datasources that were merely initialized in the editor
+ * (e.g. `textBased: { layers: {} }` on a purely form-based chart) — those must not
+ * count when resolving the chart's active datasource.
+ */
+function hasNonEmptyState(doc: LensDocument, datasourceId: string): boolean {
+  const state = doc.state.datasourceStates[datasourceId];
+  if (!state || typeof state !== 'object') {
+    return false;
+  }
+  const { layers } = state as { layers?: unknown };
+  if (layers === undefined) {
+    // unknown shape — assume it holds data
+    return true;
+  }
+  return layers !== null && typeof layers === 'object' && Object.keys(layers).length > 0;
+}
+
 export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasourceId | null {
   if (!doc) {
     return null;
   }
 
-  const datasourceIds = Object.keys(doc.state.datasourceStates);
+  const datasourceIds = Object.keys(doc.state.datasourceStates).filter((id) =>
+    hasNonEmptyState(doc, id)
+  );
   // Mixed panels can hold both datasources (e.g. ES|QL data layers plus a
   // form-based reference line layer). The text-based datasource always owns the
   // data layers in that case, so it wins regardless of key order.
@@ -117,6 +138,15 @@ export function getActiveDatasourceIdFromDoc(doc?: LensDocument): LensDatasource
   }
   if (datasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
     return LENS_DATASOURCE_ID.FORM_BASED;
+  }
+  // all states are empty (e.g. a brand-new panel): fall back to the plain key
+  // check, preferring formBased since an empty text-based state carries no query
+  const allDatasourceIds = Object.keys(doc.state.datasourceStates);
+  if (allDatasourceIds.includes(LENS_DATASOURCE_ID.FORM_BASED)) {
+    return LENS_DATASOURCE_ID.FORM_BASED;
+  }
+  if (allDatasourceIds.includes(LENS_DATASOURCE_ID.TEXT_BASED)) {
+    return LENS_DATASOURCE_ID.TEXT_BASED;
   }
   return null;
 }
