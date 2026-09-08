@@ -262,7 +262,9 @@
     },
     "responsibilities": [
       "Discover",
-      "ES|QL editor"
+      "ES|QL editor",
+      "Data plugin",
+      "Data view plugin"
     ]
   },
   {
