@@ -25,6 +25,7 @@ import {
   deployGroup,
 } from './deploy_groups';
 import type { DeployGroup } from './deploy_groups';
+import { toSOServiceVars } from './package_inputs';
 
 export { getRegionFieldName, buildStreamVars, buildPackageInputs } from './package_inputs';
 
@@ -183,7 +184,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
           connectorId,
           mechanisms: ['agentless'],
           services: selectedServiceIds,
-          serviceVars: storedServiceVars as unknown as Record<string, Record<string, unknown>>,
+          serviceVars: toSOServiceVars(
+            storedServiceVars,
+            servicesMap ?? new Map()
+          ) as Record<string, Record<string, unknown>>,
           globalRegion,
         }).catch(() => null);
         onboardingDeploymentId = createResp?.item?.id;
