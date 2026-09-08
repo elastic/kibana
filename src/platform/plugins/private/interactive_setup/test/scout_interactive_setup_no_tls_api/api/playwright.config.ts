@@ -9,4 +9,5 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
+// retries: 0 — retries would run subsequent tests against a fully-booted Kibana and fail cryptically
 export default createPlaywrightConfig({ testDir: './tests', retries: 0 });

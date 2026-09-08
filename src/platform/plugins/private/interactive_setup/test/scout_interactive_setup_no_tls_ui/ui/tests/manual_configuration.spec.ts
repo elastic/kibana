@@ -22,6 +22,7 @@ test.describe(
   'Interactive setup - manual configuration without TLS',
   { tag: ['@local-stateful-classic'] },
   () => {
+    // Pre-migration tag 'skipFIPS'
     test('configures Kibana against a cluster without TLS', async ({
       pageObjects,
       apiClient,

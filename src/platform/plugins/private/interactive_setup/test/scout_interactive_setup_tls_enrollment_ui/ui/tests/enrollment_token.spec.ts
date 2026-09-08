@@ -21,6 +21,7 @@ import { getElasticsearchCaCertificate } from '../../../helpers/tls_tools';
 import { test } from '../fixtures';
 
 test.describe('Interactive setup - enrollment token', { tag: ['@local-stateful-classic'] }, () => {
+  // Pre-migration tag 'skipFIPS'
   let enrollmentApiKey: string;
 
   test.beforeEach(async ({ esClient }) => {

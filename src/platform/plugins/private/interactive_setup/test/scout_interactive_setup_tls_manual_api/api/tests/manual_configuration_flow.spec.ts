@@ -24,6 +24,7 @@ apiTest.describe(
   'Interactive setup - manual configuration flow',
   { tag: ['@local-stateful-classic'] },
   () => {
+    // Pre-migration tag 'skipFIPS'
     let verificationCode: string;
     let elasticsearchHost: string;
     let caCert: string;

@@ -28,6 +28,7 @@ apiTest.describe(
   'Interactive setup - enrollment flow',
   { tag: ['@local-stateful-classic'] },
   () => {
+    // Pre-migration tag 'skipFIPS'
     let verificationCode: string;
     let caFingerprint: string;
     let elasticsearchHost: string;

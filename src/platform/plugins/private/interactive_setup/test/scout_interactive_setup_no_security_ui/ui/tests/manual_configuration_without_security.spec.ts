@@ -21,6 +21,7 @@ test.describe(
   'Interactive setup - manual configuration without security',
   { tag: ['@local-stateful-classic'] },
   () => {
+    // Pre-migration tag 'skipFIPS'
     test('configures Kibana against a cluster with security disabled', async ({
       pageObjects,
       apiClient,
