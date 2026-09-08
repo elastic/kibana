@@ -20,11 +20,13 @@ import {
   mockShutdown,
 } from './otel_appender.test.mocks';
 
+import moment from 'moment';
 import { set } from '@kbn/safer-lodash-set';
 import { metrics, trace, type Attributes } from '@opentelemetry/api';
 import { LogLevel } from '@kbn/logging';
 import { SeverityNumber } from '@opentelemetry/api-logs';
 import { OtelAppender } from './otel_appender';
+import { RetryingLogRecordExporter } from './retrying_log_exporter';
 import { Layouts } from '../../layouts/layouts';
 import { JsonLayout } from '../../layouts/json_layout';
 
@@ -199,6 +201,40 @@ describe('OtelAppender', () => {
       expect(result.ssl?.verificationMode).toBe('full');
       expect(result.ssl?.certificateAuthorities).toBe('/etc/ssl/custom-ca.pem');
     });
+
+    it('rejects maxQueueSize and maxElapsedTime on the traditional offering', () => {
+      expect(() =>
+        OtelAppender.configSchema.validate(
+          { ...validConfig, maxQueueSize: 100 },
+          { serverless: false }
+        )
+      ).toThrow(/maxQueueSize/);
+      expect(() =>
+        OtelAppender.configSchema.validate(
+          { ...validConfig, maxElapsedTime: '2m' },
+          { serverless: false }
+        )
+      ).toThrow(/maxElapsedTime/);
+      // Traditional configs not setting them keep working, with the options unset.
+      const result = OtelAppender.configSchema.validate(validConfig, { serverless: false });
+      expect(result.maxQueueSize).toBeUndefined();
+      expect(result.maxElapsedTime).toBeUndefined();
+    });
+
+    it('defaults maxQueueSize and maxElapsedTime on the serverless offering', () => {
+      const result = OtelAppender.configSchema.validate(validConfig, { serverless: true });
+      expect(result.maxQueueSize).toBe(15_000);
+      expect(result.maxElapsedTime?.asMilliseconds()).toBe(120_000);
+    });
+
+    it('accepts explicit maxQueueSize and maxElapsedTime on the serverless offering', () => {
+      const result = OtelAppender.configSchema.validate(
+        { ...validConfig, maxQueueSize: 500, maxElapsedTime: '30s' },
+        { serverless: true }
+      );
+      expect(result.maxQueueSize).toBe(500);
+      expect(result.maxElapsedTime?.asMilliseconds()).toBe(30_000);
+    });
   });
 
   describe('runtimeConfigSchema (plugin path)', () => {
@@ -239,6 +275,23 @@ describe('OtelAppender', () => {
       expect(result.transformAttributes).toBeUndefined();
       expect(result.dropResourceAttributes).toBeUndefined();
     });
+
+    it('accepts maxQueueSize and maxElapsedTime without offering context, with no defaults', () => {
+      // The runtime path is internal (LoggingServiceSetup.configure) and is validated without
+      // the `serverless` context ref, so the options are allowed plainly and stay unset unless
+      // the plugin opts in.
+      const result = OtelAppender.runtimeConfigSchema.validate({
+        ...validConfig,
+        maxQueueSize: 500,
+        maxElapsedTime: '1m',
+      });
+      expect(result.maxQueueSize).toBe(500);
+      expect(result.maxElapsedTime?.asMilliseconds()).toBe(60_000);
+
+      const defaults = OtelAppender.runtimeConfigSchema.validate(validConfig);
+      expect(defaults.maxQueueSize).toBeUndefined();
+      expect(defaults.maxElapsedTime).toBeUndefined();
+    });
   });
 
   describe('OtelAppender constructor', () => {
@@ -250,6 +303,40 @@ describe('OtelAppender', () => {
         headers: validConfig.headers,
         selfObsMeterProvider: metrics.getMeterProvider(),
       });
+    });
+
+    it('uses the raw exporter and SDK batching defaults when no retry budget is configured', () => {
+      new OtelAppender(validConfig);
+
+      expect(mockBatchLogRecordProcessor).toHaveBeenCalledTimes(1);
+      const options = mockBatchLogRecordProcessor.mock.calls[0][0];
+      expect(options.exporter).toBe(mockOTLPLogExporter.mock.instances[0]);
+      expect(options).not.toHaveProperty('maxQueueSize');
+      expect(options).not.toHaveProperty('exportTimeoutMillis');
+    });
+
+    it('wraps the exporter in the retry layer and sizes the processor when configured', () => {
+      new OtelAppender({
+        ...validConfig,
+        maxQueueSize: 15_000,
+        maxElapsedTime: moment.duration(2, 'minutes'),
+      });
+
+      expect(mockBatchLogRecordProcessor).toHaveBeenCalledTimes(1);
+      const options = mockBatchLogRecordProcessor.mock.calls[0][0];
+      expect(options.exporter).toBeInstanceOf(RetryingLogRecordExporter);
+      expect(options.maxQueueSize).toBe(15_000);
+      // Must outlast the 2m retry budget, or the processor abandons the export mid-retry.
+      expect(options.exportTimeoutMillis).toBeGreaterThan(120_000);
+    });
+
+    it('passes maxQueueSize through without the retry layer when only maxQueueSize is set', () => {
+      new OtelAppender({ ...validConfig, maxQueueSize: 500 });
+
+      const options = mockBatchLogRecordProcessor.mock.calls[0][0];
+      expect(options.exporter).toBe(mockOTLPLogExporter.mock.instances[0]);
+      expect(options.maxQueueSize).toBe(500);
+      expect(options).not.toHaveProperty('exportTimeoutMillis');
     });
 
     it('enables SDK self-observability metrics on the exporter, processor, and logger provider', () => {

@@ -8,6 +8,7 @@
  */
 
 import type { Attributes } from '@opentelemetry/api';
+import type { Duration } from 'moment-timezone';
 
 import type { LayoutConfigType } from '../layout';
 
@@ -78,6 +79,28 @@ export interface OtelAppenderConfig {
    * Defaults to an empty object.
    */
   headers?: Record<string, string>;
+  /**
+   * **Serverless / internal only** — not accepted in YAML on the traditional offering.
+   *
+   * Maximum number of log records buffered in memory by the batch processor while the OTLP
+   * endpoint is unreachable; once the queue is full, new records are dropped. The queue is
+   * count-based — OTel imposes no byte-size cap on log bodies — so the effective memory bound
+   * is `maxQueueSize` × the assumed maximum event size.
+   *
+   * Defaults to `15000` on serverless; unset elsewhere (SDK default: `2048`).
+   */
+  maxQueueSize?: number;
+  /**
+   * **Serverless / internal only** — not accepted in YAML on the traditional offering.
+   *
+   * Wall-clock budget during which failed exports are retried with backoff and jitter before
+   * the batch is dropped. Only transient failures are retried: timeouts, common network errors,
+   * HTTP 429/502/503/504 and equivalent gRPC statuses. When unset, only the OTel SDK's built-in
+   * retry applies (5 attempts within ~13s).
+   *
+   * Defaults to `2m` on serverless; unset elsewhere.
+   */
+  maxElapsedTime?: Duration;
   /**
    * Controls how the log record body is serialised.
    *
