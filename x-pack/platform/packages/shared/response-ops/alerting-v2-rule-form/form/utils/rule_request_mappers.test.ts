@@ -302,7 +302,7 @@ describe('rule_request_mappers', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: 'dashboard-123' },
+            data: { dashboard_id: 'dashboard-123' },
           },
         ],
       };
@@ -319,7 +319,7 @@ describe('rule_request_mappers', () => {
         {
           id: 'dashboard-id',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: 'dashboard-123' },
+          data: { dashboard_id: 'dashboard-123' },
         },
       ]);
     });
@@ -509,7 +509,7 @@ describe('rule_request_mappers', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: '  dashboard-123  ' },
+            data: { dashboard_id: '  dashboard-123  ' },
           },
         ],
       };
@@ -521,7 +521,7 @@ describe('rule_request_mappers', () => {
         {
           id: 'dashboard-id',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: '  dashboard-123  ' },
+          data: { dashboard_id: '  dashboard-123  ' },
         },
       ]);
     });
@@ -534,7 +534,7 @@ describe('rule_request_mappers', () => {
           {
             id: 'dashboard-id',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: '   ' },
+            data: { dashboard_id: '   ' },
           },
         ],
       };
@@ -546,7 +546,7 @@ describe('rule_request_mappers', () => {
         {
           id: 'dashboard-id',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: '   ' },
+          data: { dashboard_id: '   ' },
         },
       ]);
     });
@@ -558,7 +558,7 @@ describe('rule_request_mappers', () => {
           {
             id: '',
             type: DASHBOARD_ARTIFACT_TYPE,
-            data: { dashboardId: 'dashboard-123' },
+            data: { dashboard_id: 'dashboard-123' },
           },
         ],
       };
@@ -569,7 +569,7 @@ describe('rule_request_mappers', () => {
         {
           id: '',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: 'dashboard-123' },
+          data: { dashboard_id: 'dashboard-123' },
         },
       ]);
     });
@@ -985,7 +985,7 @@ describe('rule_request_mappers', () => {
         artifacts: [
           { id: 'artifact-1', type: 'host', data: { value: 'host-a' } },
           { id: 'runbook-id', type: 'runbook', data: { content: 'Runbook from API' } },
-          { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+          { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
         ],
       } as RuleResponse;
 
@@ -998,7 +998,7 @@ describe('rule_request_mappers', () => {
         { id: 'runbook-id', type: 'runbook', data: { content: 'Runbook from API' } },
       ]);
       expect(result.dashboardArtifacts).toEqual([
-        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
       ]);
     });
 
