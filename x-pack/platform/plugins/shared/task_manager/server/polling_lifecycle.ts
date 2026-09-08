@@ -6,8 +6,8 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject } from 'rxjs';
-import { distinctUntilChanged, filter, startWith, pairwise } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
+import { distinctUntilChanged, filter, startWith, pairwise, map as rxMap, share, scan } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
@@ -28,11 +28,13 @@ import type {
   TaskPollingCycle,
   TaskManagerStat,
   TaskManagerMetric,
+  TaskManagerBackpressure,
 } from './task_events';
 import {
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
   asTaskManagerStatEvent,
+  asTaskManagerBackpressureEvent,
 } from './task_events';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
@@ -57,7 +59,10 @@ import {
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
+  BACKPRESSURE_HOLD_INTERVALS,
+  isBackpressureActive,
 } from './lib/create_managed_configuration';
+import type { BackpressureReason } from './lib/backpressure_reason';
 import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 import { resetInFlightTasksOwnedByThisNode } from './lib/task_reconciliation';
 import type { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
@@ -98,7 +103,8 @@ export type TaskLifecycleEvent =
   | TaskRunRequest
   | TaskPollingCycle
   | TaskManagerStat
-  | TaskManagerMetric;
+  | TaskManagerMetric
+  | TaskManagerBackpressure;
 
 /**
  * The public interface into the task manager system.
@@ -118,6 +124,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private readonly executionControlService: TaskExecutionControlService;
   private executionControlSubscription?: Subscription;
   private errorBackoffSubscription?: Subscription;
+  private backpressureSubscription?: Subscription;
 
   public pool: TaskPool;
 
@@ -175,7 +182,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.currentPollInterval = pollInterval;
     this.eventLogger = eventLogger;
 
-    const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
+    // `countErrors` is cold, so share it: the capacity scan, poll-interval scan,
+    // and reason tracker must all react to the same windowed error counts.
+    const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL).pipe(share());
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
     this.capacityConfiguration$ = errorCheck$.pipe(
@@ -214,6 +223,48 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     );
 
     const emitEvent = (event: TaskLifecycleEvent) => this.events$.next(event);
+
+    // Track windows since the last ES-pressure error (keeping the last cause) so
+    // `active` can be held across the sparse re-detections a cluster-block
+    // produces, rather than flapping with the raw config state.
+    const recentBackpressure$ = errorCheck$.pipe(
+      scan(
+        (
+          recent: { windowsSinceError: number; reason: BackpressureReason | null },
+          { count, reason }
+        ) =>
+          count > 0
+            ? { windowsSinceError: 0, reason: reason ?? recent.reason }
+            : {
+                windowsSinceError: Math.min(
+                  recent.windowsSinceError + 1,
+                  BACKPRESSURE_HOLD_INTERVALS
+                ),
+                reason: recent.reason,
+              },
+        { windowsSinceError: BACKPRESSURE_HOLD_INTERVALS, reason: null }
+      ),
+      startWith({ windowsSinceError: BACKPRESSURE_HOLD_INTERVALS, reason: null })
+    );
+
+    // `active` is the current managed-config state OR a recent ES-pressure error,
+    // so a sustained block reads as one period; distinctUntilChanged emits on change.
+    this.backpressureSubscription = combineLatest([
+      this.capacityConfiguration$,
+      this.pollIntervalConfiguration$,
+      recentBackpressure$,
+    ])
+      .pipe(
+        rxMap(([capacity, currentPollInterval, recent]) => {
+          const active =
+            isBackpressureActive(capacity, startingCapacity, currentPollInterval) ||
+            recent.windowsSinceError < BACKPRESSURE_HOLD_INTERVALS;
+          return { active, reason: active ? recent.reason : null };
+        }),
+        distinctUntilChanged((a, b) => a.active === b.active && a.reason === b.reason),
+        rxMap((snapshot) => asTaskManagerBackpressureEvent(asOk(snapshot)))
+      )
+      .subscribe(emitEvent);
 
     this.bufferedStore = new BufferedTaskStore(this.store, {
       bufferMaxOperations: MAX_BUFFER_OPERATIONS,
@@ -352,6 +403,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.executionControlSubscription?.unsubscribe();
     // `countErrors()` is cold, so this subscription owns its own flush interval timer.
     this.errorBackoffSubscription?.unsubscribe();
+    this.backpressureSubscription?.unsubscribe();
     this.poller.stop();
   }
 

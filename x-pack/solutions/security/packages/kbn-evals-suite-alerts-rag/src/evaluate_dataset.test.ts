@@ -128,6 +128,23 @@ describe('toDatasetExample', () => {
     });
   });
 
+  it('forwards spaceId into metadata when the example is space-scoped', () => {
+    const spaceScoped: AlertsRagExample = {
+      ...fixture,
+      metadata: {
+        ...fixture.metadata,
+        category: 'space_isolation',
+        spaceId: 'alerts-rag-empty',
+      },
+    };
+    const wrapped = toDatasetExample(spaceScoped);
+    expect(wrapped.metadata).toEqual({
+      category: 'space_isolation',
+      dataset_split: ['regression'],
+      spaceId: 'alerts-rag-empty',
+    });
+  });
+
   it('forwards tool_sequence into output when annotated', () => {
     const annotated: AlertsRagExample = {
       ...fixture,
