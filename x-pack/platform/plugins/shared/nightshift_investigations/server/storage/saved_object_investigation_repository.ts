@@ -7,8 +7,8 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { escapeQuotes } from '@kbn/es-query';
 import { NIGHTSHIFT_INVESTIGATION_SO_TYPE } from '../saved_objects';
+import { buildInvestigationFilter } from './build_investigation_filter';
 import { InvestigationAlreadyExistsError, InvestigationStaleWriteError } from './errors';
 import type {
   FindInvestigationsQuery,
@@ -19,11 +19,11 @@ import type {
   InvestigationRepository,
 } from './types';
 
-const toRecord = ({
+const toRecord = <Attributes extends Partial<InvestigationAttributes>>({
   id,
   version,
   attributes,
-}: SavedObject<InvestigationAttributes>): InvestigationRecord => ({
+}: SavedObject<Attributes>): Attributes & Pick<InvestigationRecord, 'id' | 'version'> => ({
   id,
   version,
   ...attributes,
@@ -105,41 +105,17 @@ export class SavedObjectInvestigationRepository implements InvestigationReposito
     }
   }
 
-  async find(query: FindInvestigationsQuery): Promise<FindInvestigationsResult> {
-    const filters: string[] = [];
-    const attr = (field: string) => `${NIGHTSHIFT_INVESTIGATION_SO_TYPE}.attributes.${field}`;
-
-    if (query.statuses?.length) {
-      const statusFilter = query.statuses
-        .map((status) => `${attr('status')}: "${escapeQuotes(status)}"`)
-        .join(' OR ');
-      filters.push(`(${statusFilter})`);
-    }
-
-    if (query.concurrencyKey) {
-      filters.push(`${attr('concurrency_key')}: "${escapeQuotes(query.concurrencyKey)}"`);
-    }
-
-    const rangeFilters: Array<[string, string | undefined, '>=' | '<=']> = [
-      ['created_at', query.createdAfter, '>='],
-      ['created_at', query.createdBefore, '<='],
-      ['completed_at', query.completedAfter, '>='],
-      ['completed_at', query.completedBefore, '<='],
-    ];
-
-    for (const [field, value, op] of rangeFilters) {
-      if (value) {
-        filters.push(`${attr(field)} ${op} "${escapeQuotes(value)}"`);
-      }
-    }
-
-    const result = await this.savedObjectsClient.find<InvestigationAttributes>({
+  async find<Fields extends keyof InvestigationAttributes = keyof InvestigationAttributes>(
+    query: FindInvestigationsQuery<Fields>
+  ): Promise<FindInvestigationsResult<Fields>> {
+    const result = await this.savedObjectsClient.find<Pick<InvestigationAttributes, Fields>>({
       type: NIGHTSHIFT_INVESTIGATION_SO_TYPE,
-      filter: filters.length > 0 ? filters.join(' AND ') : undefined,
+      filter: buildInvestigationFilter(query),
       sortField: query.sortField ?? 'created_at',
       sortOrder: query.sortOrder ?? 'desc',
       page: query.page,
       perPage: query.perPage,
+      fields: query.fields,
     });
 
     return {

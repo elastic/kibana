@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
+import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 
 import type { KIQueryGenerationOutput, QueryAttempt } from './types';
 import { expectedGenerationOutcomeEvaluator } from './expected_generation_outcome';
