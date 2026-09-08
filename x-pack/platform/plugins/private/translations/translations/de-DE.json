@@ -22192,7 +22192,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyMultiPlaceholderText": "Wählen Sie Agent Policies aus, zu denen diese Integration hinzugefügt werden soll",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText": "Wählen Sie eine Agent-Richtlinie, zu der Sie diese Integration hinzufügen möchten",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning": "Keiner der Agenten, die die ausgewählte Agent-Richtlinie verwenden, ist mit dieser Integration kompatibel. Diese Integration benötigt Agenten auf Version {versionCondition}.",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError": "Keine der Agenten, die die ausgewählten Agent-Richtlinien verwenden, ist mit dieser Integration kompatibel. Diese Integration benötigt Agenten auf Version {versionCondition}.",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError": "Diese Integration kann nur einmal pro Agent Policy hinzugefügt werden.",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "Fehler beim Laden von Agent Policies",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "Fehler beim Laden der Paketinformationen",

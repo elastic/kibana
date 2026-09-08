@@ -22265,7 +22265,6 @@
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyMultiPlaceholderText": "选择要将此集成添加到的代理策略",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText": "选择要将此集成添加到的代理策略",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.allIncompatibleAgentVersionWarning": "使用所选代理策略的代理均与此集成不兼容。此集成需要版本 {versionCondition} 的代理。",
-    "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddIncompatibleAgentVersionError": "使用所选代理策略的代理均与此集成不兼容。此集成需要版本 {versionCondition} 的代理。",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.cannotAddLimitedIntegrationError": "每个代理策略只可添加此集成一次。",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingAgentPoliciesTitle": "加载代理策略时出错",
     "xpack.fleet.createPackagePolicy.StepSelectPolicy.errorLoadingPackageTitle": "加载软件包信息时出错",
