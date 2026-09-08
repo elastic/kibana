@@ -210,7 +210,10 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             getOnboardingSessionKey(integrationId, 'hydratedDeploymentId'),
             onboardingDeploymentId
           );
-          history.replace({ ...history.location, search: `?deploymentId=${onboardingDeploymentId}` });
+          history.replace({
+            ...history.location,
+            search: `?deploymentId=${onboardingDeploymentId}`,
+          });
         }
       }
 
