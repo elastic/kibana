@@ -50,6 +50,7 @@ plugins:
     - infra
     - ingest_hub
     - ingest_pipelines
+    - interactive_setup
     - intercepts
     - kibana_overview
     - kql
