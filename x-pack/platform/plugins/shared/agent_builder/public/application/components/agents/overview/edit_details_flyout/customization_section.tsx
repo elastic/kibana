@@ -22,16 +22,19 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../../utils/i18n';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
+import { AiIndicesSection } from './ai_indices_section';
 import type { EditDetailsFormData } from './types';
 
 const { editDetails: flyoutLabels } = labels.agentOverview;
 
 interface CustomizationSectionProps {
   showWorkflowSection: boolean;
+  agentId: string;
 }
 
 export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
   showWorkflowSection,
+  agentId,
 }) => {
   const { control } = useFormContext<EditDetailsFormData>();
   const { isAdmin } = useUiPrivileges();
@@ -80,6 +83,8 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
+
+      <AiIndicesSection agentId={agentId} />
 
       {showWorkflowSection && (
         <>

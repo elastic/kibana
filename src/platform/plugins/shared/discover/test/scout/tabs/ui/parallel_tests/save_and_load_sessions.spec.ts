@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, testData } from '../fixtures';
 
 const FIRST_TAB_LABEL = 'Persisted data view';
@@ -94,67 +95,67 @@ spaceTest.describe(
 
     spaceTest(
       'saves and reloads data view and ESQL tabs',
-      async ({ discoverScoutSpace, pageObjects }) => {
+      async ({ apiServices, discoverScoutSpace, pageObjects }) => {
         const { datePicker, discover, lens, queryBar, unifiedFieldList, unifiedTabs } = pageObjects;
         const sessionName = `Multi tab Discover session ${Date.now()}`;
 
         await spaceTest.step('create saved session through the fixture', async () => {
-          await discoverScoutSpace.createDiscoverSession({
-            title: sessionName,
-            tabs: [
-              {
-                id: 'persisted-data-view',
-                label: FIRST_TAB_LABEL,
-                data_source: {
-                  type: 'data_view_reference',
-                  ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+          await apiServices.discover.create(
+            {
+              title: sessionName,
+              tabs: [
+                {
+                  id: 'persisted-data-view',
+                  label: FIRST_TAB_LABEL,
+                  data_source: {
+                    type: 'data_view_reference',
+                    ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                  },
+                  query: {
+                    language: 'kql',
+                    expression: FIRST_TAB_QUERY,
+                  },
+                  column_order: ['referer'],
+                  chart_interval: FIRST_TAB_CHART_INTERVAL_VALUE,
+                  time_range: {
+                    from: FIRST_TAB_TIME.start,
+                    to: FIRST_TAB_TIME.end,
+                  },
                 },
-                query: {
-                  language: 'kql',
-                  expression: FIRST_TAB_QUERY,
+                {
+                  id: 'ad-hoc-data-view',
+                  label: SECOND_TAB_LABEL,
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logs*',
+                    time_field: '@timestamp',
+                  },
+                  query: {
+                    language: 'kql',
+                    expression: SECOND_TAB_QUERY,
+                  },
+                  column_order: ['geo.src'],
+                  time_range: {
+                    from: SECOND_TAB_TIME.start,
+                    to: SECOND_TAB_TIME.end,
+                  },
                 },
-                column_order: ['referer'],
-                chart_interval: FIRST_TAB_CHART_INTERVAL_VALUE,
-                time_restore: true,
-                time_range: {
-                  from: FIRST_TAB_TIME.start,
-                  to: FIRST_TAB_TIME.end,
+                {
+                  id: 'esql',
+                  label: THIRD_TAB_LABEL,
+                  data_source: {
+                    type: 'esql',
+                    query: THIRD_TAB_QUERY,
+                  },
+                  time_range: {
+                    from: THIRD_TAB_TIME.start,
+                    to: THIRD_TAB_TIME.end,
+                  },
                 },
-              },
-              {
-                id: 'ad-hoc-data-view',
-                label: SECOND_TAB_LABEL,
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: 'logs*',
-                  time_field: '@timestamp',
-                },
-                query: {
-                  language: 'kql',
-                  expression: SECOND_TAB_QUERY,
-                },
-                column_order: ['geo.src'],
-                time_restore: true,
-                time_range: {
-                  from: SECOND_TAB_TIME.start,
-                  to: SECOND_TAB_TIME.end,
-                },
-              },
-              {
-                id: 'esql',
-                label: THIRD_TAB_LABEL,
-                data_source: {
-                  type: 'esql',
-                  query: THIRD_TAB_QUERY,
-                },
-                time_restore: true,
-                time_range: {
-                  from: THIRD_TAB_TIME.start,
-                  to: THIRD_TAB_TIME.end,
-                },
-              },
-            ],
-          });
+              ],
+            } satisfies DiscoverSessionApiDataInput,
+            discoverScoutSpace.id
+          );
         });
 
         await spaceTest.step('load and save the seeded session through the UI', async () => {

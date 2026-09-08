@@ -198,7 +198,7 @@ export interface DocLinks {
     readonly vectorSearchDenseVector: string;
     readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
-    readonly vectorDatabaseGetStarted: string;
+    readonly vectorDatabaseFullTextSearch: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -325,6 +325,7 @@ export interface DocLinks {
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
     readonly attacksPage: string;
+    readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
@@ -487,6 +488,7 @@ export interface DocLinks {
     authorization: string;
     guide: string;
     actionTypes: string;
+    actionPolicies: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -533,9 +535,11 @@ export interface DocLinks {
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
     definingRoles: string;
+    elasticCloudApiKeys: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
+    esqlDataFederationSecurityPrivileges: string;
     indicesPrivileges: string;
     kibanaTLS: string;
     kibanaPrivileges: string;
@@ -623,6 +627,7 @@ export interface DocLinks {
     elasticAgentLogFileRetention: string;
     elasticAgentDownloads: string;
     integrationsReference: string;
+    datastreamsTemplateConflicts: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -725,6 +730,7 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+    readonly securityData: string;
   };
   readonly playground: {
     readonly chatPlayground: string;
@@ -746,6 +752,18 @@ export interface DocLinks {
   };
   readonly datasetQuality: {
     readonly failureStore: string;
+  };
+  readonly dataFederation: {
+    readonly overview: string;
+    readonly quickstart: string;
+    readonly dataSources: string;
+    readonly datasets: string;
+    readonly datasetSettings: string;
+    readonly authentication: string;
+    readonly staticCredentials: string;
+    readonly federatedIdentity: string;
+    readonly querying: string;
+    readonly security: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;

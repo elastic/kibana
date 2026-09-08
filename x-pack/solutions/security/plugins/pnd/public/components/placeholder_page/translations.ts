@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const PLACEHOLDER_TITLE = i18n.translate('xpack.pnd.placeholder.title', {
-  defaultMessage: '{pageTitle}',
-});
-
 export const PLACEHOLDER_BODY = i18n.translate('xpack.pnd.placeholder.body', {
   defaultMessage: 'This area is coming soon in PND.',
 });

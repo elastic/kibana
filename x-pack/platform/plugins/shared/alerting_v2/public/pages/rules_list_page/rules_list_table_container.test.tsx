@@ -67,6 +67,11 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 
+const mockUpdateApiKeyMutate = jest.fn();
+jest.mock('../../hooks/use_bulk_update_rule_api_key', () => ({
+  useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
+}));
+
 const mockRunRuleMutate = jest.fn();
 const mockUseRunRule = jest.fn();
 jest.mock('../../hooks/use_run_rule', () => ({
@@ -387,6 +392,88 @@ describe('RulesListTableContainer', () => {
     });
   });
 
+  describe('single rule update API key', () => {
+    it('shows the update API key confirmation modal when the row action is clicked', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toHaveTextContent(/Rule One/);
+      });
+    });
+
+    it('calls the update API key mutation with the rule id when confirmed', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { mode: 'by_ids', ids: ['rule-1'] },
+        expect.objectContaining({ onSettled: expect.any(Function) })
+      );
+    });
+
+    it('dismisses the modal on cancel without calling the mutation', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-1')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('updateRuleApiKey-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+      });
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
+    });
+
+    it('disables the update API key action for a disabled rule', async () => {
+      renderContainer();
+      await waitForRules();
+
+      // rule-2 is disabled; open its row actions menu.
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-2')).toBeInTheDocument();
+      });
+      // The action is shown but disabled — a disabled rule has no key to rotate.
+      expect(screen.getByTestId('updateRuleApiKey-rule-2')).toBeDisabled();
+    });
+  });
+
   describe('toggle enabled', () => {
     it('calls toggleEnabled mutation with inverted enabled state', async () => {
       renderContainer();
@@ -543,6 +630,56 @@ describe('RulesListTableContainer', () => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
       });
     });
+
+    it('shows the bulk update API key confirmation modal', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toHaveTextContent(/1 rule/);
+      });
+
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
+    });
+
+    it('calls the update API key mutation with the by-ids selection when confirmed', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { mode: 'by_ids', ids: ['rule-1'] },
+        expect.objectContaining({
+          onSuccess: expect.any(Function),
+          onError: expect.any(Function),
+        })
+      );
+    });
+
+    it('dismisses the bulk update API key modal on cancel', async () => {
+      await selectFirstRuleAndOpenMenu();
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByText('Cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('updateApiKeyConfirmationModal')).not.toBeInTheDocument();
+      });
+      expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
+    });
   });
 
   describe('select all', () => {
@@ -651,6 +788,41 @@ describe('RulesListTableContainer', () => {
       );
     });
 
+    it('rotates API keys by query (force) when confirmed in select-all mode', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('selectAllRulesButton')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('selectAllRulesButton')).not.toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkUpdateRuleApiKey')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('bulkUpdateRuleApiKey'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateApiKeyConfirmationModal')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      expect(mockUpdateApiKeyMutate).toHaveBeenCalledWith(
+        { mode: 'by_query', match_all: true },
+        expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) })
+      );
+    });
     it('folds deselected rows into a NOT exclusion clause under select-all', async () => {
       renderContainer({ total: 40 });
       await waitForRules();

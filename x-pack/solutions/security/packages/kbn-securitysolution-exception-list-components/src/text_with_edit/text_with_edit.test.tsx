@@ -56,6 +56,6 @@ describe('TextWithEdit', () => {
     expect(wrapper.getByTestId('TextWithEditTestText')).toHaveTextContent('Test');
     expect(wrapper.queryByTestId('TextWithEditTestEditIcon')).toBeInTheDocument();
     fireEvent.click(wrapper.getByTestId('TextWithEditTestEditIcon'));
-    expect(onEdit).toBeCalled();
+    expect(onEdit).toHaveBeenCalled();
   });
 });

@@ -66,6 +66,13 @@ export function createGetServiceTopologyTool({
   const toolDefinition: BuiltinToolDefinition<typeof getServiceTopologyToolSchema> = {
     id: OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
     type: ToolType.builtin,
+    annotations: {
+      title: 'Get Service Topology',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieves the service topology (dependency graph) for a service, with RED metrics (latency, throughput, error rate) per connection.
 
 Returns connections with source/target nodes and RED metrics. Supports downstream, upstream, or both directions.

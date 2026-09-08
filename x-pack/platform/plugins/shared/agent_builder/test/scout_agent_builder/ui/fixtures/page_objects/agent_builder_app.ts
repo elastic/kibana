@@ -545,16 +545,7 @@ export class AgentBuilderApp {
   async getAgentLabels(agentId: string) {
     const row = this.page.testSubj.locator(this.agentListRowSelector(agentId));
     const labelsCell = row.getByTestId('agentBuilderAgentsListLabels');
-    const labelTexts = await labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-    const viewMore = labelsCell.getByTestId('agentBuilderLabelsViewMoreButton');
-    if (await viewMore.isVisible()) {
-      await viewMore.click();
-      const popover = this.page.testSubj.locator('agentBuilderLabelsViewMorePopover');
-      const hidden = await popover.locator(subj('^agentBuilderLabel-')).allInnerTexts();
-      labelTexts.push(...hidden);
-      await viewMore.click();
-    }
-    return labelTexts;
+    return labelsCell.locator(subj('^agentBuilderLabel-')).allInnerTexts();
   }
 
   async navigateToAgentOverview(agentId: string) {
@@ -801,8 +792,12 @@ export class AgentBuilderApp {
     return id;
   }
 
-  async openMcpClientEdit(clientId: string) {
+  async openMcpClientActionsMenu(clientId: string) {
     await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+  }
+
+  async openMcpClientEdit(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
     await this.page.testSubj
       .locator(`mcpClientEditAction-${clientId}`)
       .waitFor({ state: 'visible' });
@@ -847,7 +842,7 @@ export class AgentBuilderApp {
   }
 
   async openMcpClientRevokeModal(clientId: string) {
-    await this.page.testSubj.click(`agentBuilderMcpClientsListActions-${clientId}`);
+    await this.openMcpClientActionsMenu(clientId);
     await this.page.testSubj
       .locator(`mcpClientRevokeAction-${clientId}`)
       .waitFor({ state: 'visible' });
@@ -859,6 +854,21 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('mcpClientRevokeConfirmInput', clientName);
     await this.page.testSubj.click('mcpClientRevokeConfirmButton');
     await this.page.testSubj.locator('mcpClientRevokeModal').waitFor({ state: 'detached' });
+  }
+
+  async openMcpClientDeleteModal(clientId: string) {
+    await this.openMcpClientActionsMenu(clientId);
+    await this.page.testSubj
+      .locator(`mcpClientDeleteAction-${clientId}`)
+      .waitFor({ state: 'visible' });
+    await this.page.testSubj.click(`mcpClientDeleteAction-${clientId}`);
+    await this.page.testSubj.locator('mcpClientDeleteModal').waitFor({ state: 'visible' });
+  }
+
+  async confirmMcpClientDelete() {
+    const modal = this.page.testSubj.locator('mcpClientDeleteModal');
+    await modal.getByTestId('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
   }
 
   async getMcpClientRowStatus(clientId: string): Promise<string> {

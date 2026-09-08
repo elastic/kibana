@@ -62,3 +62,4 @@ redux-v4
 reselect-v4
 @swc/plugin-emotion
 graphql
+@cfworker/json-schema

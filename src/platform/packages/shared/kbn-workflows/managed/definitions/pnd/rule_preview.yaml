@@ -1,0 +1,80 @@
+version: "1"
+name: Detection rule preview
+description: Preview a detection rule and return its generated alert count.
+enabled: true
+tags:
+  - security
+  - detection-rule-preview
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        preview_body:
+          type: object
+          additionalProperties: true
+          description: Detection Engine rule preview request body.
+        space_id:
+          type: string
+          description: Space in which to run the preview.
+      required:
+        - preview_body
+        - space_id
+      additionalProperties: false
+outputs:
+  - name: succeeded
+    type: boolean
+  - name: alert_count
+    type: number
+  - name: preview_id
+    type: string
+  - name: is_aborted
+    type: boolean
+  - name: error_text
+    type: string
+steps:
+  - name: preview_rule
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ inputs.space_id }}/api/detection_engine/rules/preview"
+      headers:
+        kbn-xsrf: string
+        elastic-api-version: "2023-10-31"
+        Content-Type: application/json
+      body: "${{ inputs.preview_body }}"
+    on-failure:
+      continue: true
+
+  - name: count_preview_alerts
+    type: elasticsearch.search
+    if: "${{ steps.preview_rule.error == null and steps.preview_rule.output.previewId != null }}"
+    with:
+      index: ".preview.alerts-security.alerts-{{ inputs.space_id }}"
+      size: 0
+      track_total_hits: true
+      query:
+        term:
+          kibana.alert.rule.uuid: "{{ steps.preview_rule.output.previewId }}"
+    on-failure:
+      continue: true
+
+  # The preview API answers 200 even when the rule errored mid-execution, and such a run
+  # reports zero alerts. Flattening the per-invocation errors to text lets `succeeded`
+  # tell that apart from a query that genuinely matched nothing.
+  - name: collect_errors
+    type: data.set
+    with:
+      error_text: |-
+        {%- for log in steps.preview_rule.output.logs -%}
+        {%- for err in log.errors -%}{{ err }}; {% endfor -%}
+        {%- endfor -%}
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      succeeded: "${{ steps.preview_rule.error == null and steps.count_preview_alerts.error == null and steps.collect_errors.output.error_text == '' }}"
+      alert_count: "${{ steps.count_preview_alerts.output.hits.total.value | default: -1 }}"
+      preview_id: "{{ steps.preview_rule.output.previewId }}"
+      is_aborted: "${{ steps.preview_rule.output.isAborted | default: false }}"
+      error_text: "{{ steps.collect_errors.output.error_text }}"

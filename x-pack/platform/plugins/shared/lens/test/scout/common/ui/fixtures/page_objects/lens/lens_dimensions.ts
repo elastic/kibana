@@ -11,6 +11,9 @@ import { WAIT_FOR_FUNCTION_TIMEOUT_MS } from './lens_editor_helpers';
 /** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
 const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
 
+/** Stable test-subj for the dimension time-shift combo (also passed into `waitForFunction`). */
+const TIME_SHIFT_TEST_SUBJ = 'indexPattern-dimension-time-shift';
+
 /** `LensApp` close-editor helpers needed by dimension open/close actions. */
 interface LensDimensionsDeps {
   closeDimensionEditorButton: Locator;
@@ -23,9 +26,54 @@ interface LensDimensionsDeps {
 export class LensDimensions {
   /** Locator for all dimension-trigger buttons in the Lens config panel. */
   readonly dimensionTriggerLocator;
+  /** Reused across time-shift helpers (enable / set / clear). */
+  private readonly timeShift;
+  private readonly timeShiftComboInput;
+  private readonly timeShiftSearchInput;
+  private readonly timeShiftClearButton;
+  /** Workspace error one-click fix (e.g. terms → filters for time shift). */
+  readonly errorFixAction;
+  /** Terms dimension "Advanced" accordion (Other / missing bucket). */
+  readonly termsAdvancedAccordion;
+  /** Terms "Group remaining values as Other" switch. */
+  readonly termsOtherBucketSwitch;
+  /** Language switcher inside the open dimension Filter by input. */
+  readonly dimensionFilterLanguageButton;
+  readonly luceneLanguageMenuItem;
+  /** Close (X) control on the open dimension editor flyout. */
+  readonly editorCloseButton;
+  readonly quickFunctionsTab;
+  readonly formulaTab;
+  readonly staticValueTab;
+  /** Number input only — EuiRange also stamps the same test-subj on the slider. */
+  readonly formatDecimalsInput;
+  readonly dimensionColorPicker;
+  readonly dimensionNameInput;
 
   constructor(private readonly page: ScoutPage, private readonly deps: LensDimensionsDeps) {
     this.dimensionTriggerLocator = this.page.testSubj.locator('lns-dimensionTrigger');
+    this.editorCloseButton = deps.closeDimensionEditorButton;
+    this.quickFunctionsTab = this.page.testSubj.locator('lens-dimensionTabs-quickFunctions');
+    this.formulaTab = this.page.testSubj.locator('lens-dimensionTabs-formula');
+    this.staticValueTab = this.page.testSubj.locator('lens-dimensionTabs-static_value');
+    this.formatDecimalsInput = this.page.locator(
+      'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
+    );
+    this.dimensionColorPicker = this.page.testSubj.locator('~indexPattern-dimension-colorPicker');
+    this.dimensionNameInput = this.page.testSubj.locator('name-input');
+    this.timeShift = this.page.testSubj.locator(TIME_SHIFT_TEST_SUBJ);
+    this.timeShiftComboInput = this.timeShift.locator('[data-test-subj="comboBoxInput"]');
+    this.timeShiftSearchInput = this.timeShift.locator(
+      'input[data-test-subj="comboBoxSearchInput"]'
+    );
+    this.timeShiftClearButton = this.timeShift.locator('[data-test-subj="comboBoxClearButton"]');
+    this.errorFixAction = this.page.testSubj.locator('errorFixAction');
+    this.termsAdvancedAccordion = this.page.testSubj.locator('indexPattern-terms-advanced');
+    this.termsOtherBucketSwitch = this.page.testSubj.locator('indexPattern-terms-other-bucket');
+    this.dimensionFilterLanguageButton = this.page.testSubj.locator(
+      'indexPattern-filter-by-input > switchQueryLanguageButton'
+    );
+    this.luceneLanguageMenuItem = this.page.testSubj.locator('luceneLanguageMenuItem');
   }
 
   /**
@@ -142,11 +190,9 @@ export class LensDimensions {
 
   /** Enables empty rows for the current date histogram dimension. */
   async enableIncludeEmptyRows() {
-    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
-    await includeEmptyRows.click();
-    await includeEmptyRows
-      .and(this.page.locator('[aria-checked="true"]'))
-      .waitFor({ state: 'visible' });
+    const toggle = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await toggle.click();
+    await toggle.and(this.page.locator('[aria-checked="true"]')).waitFor({ state: 'visible' });
   }
 
   /**
@@ -211,6 +257,33 @@ export class LensDimensions {
     await this.page.testSubj.locator('lns-indexPattern-static_value-input').waitFor({
       state: 'visible',
     });
+  }
+
+  /**
+   * Enables terms "Group remaining values as Other" on the open dimension editor.
+   * Caller must have a terms dimension editor open with Other currently off
+   * (saved `lnsXYvis` omits `otherBucket`; the switch is unchecked until clicked).
+   */
+  async enableTermsOtherBucket() {
+    await this.termsAdvancedAccordion.click();
+    await this.termsOtherBucketSwitch.waitFor({ state: 'visible' });
+    await this.termsOtherBucketSwitch.click();
+    await this.termsOtherBucketSwitch
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switches the open dimension Filter-by input from KQL to Lucene and closes the language menu.
+   * Caller must already have the filter popover open (`workspace.enableFilter`).
+   */
+  async setDimensionFilterLanguageToLucene() {
+    await this.dimensionFilterLanguageButton.click();
+    await this.luceneLanguageMenuItem.waitFor({ state: 'visible' });
+    await this.luceneLanguageMenuItem.click();
+    // FTR clicks the switcher again to dismiss the language menu after selecting Lucene.
+    await this.dimensionFilterLanguageButton.click();
+    await this.luceneLanguageMenuItem.waitFor({ state: 'hidden' });
   }
 
   async switchToQuickFunctions() {
@@ -335,5 +408,220 @@ export class LensDimensions {
       const dimension = input.parentElement?.parentElement;
       return (dimension?.textContent ?? '').replace(/\u200b/g, '').trim();
     });
+  }
+
+  /**
+   * Opens the advanced accordion so time-shift / filter-by controls are available.
+   * Requires an open dimension editor.
+   */
+  async enableTimeShift() {
+    await this.page.testSubj.click('indexPattern-advanced-accordion');
+    await this.timeShift.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Clears any time-shift value on the open dimension (plain-text combo, not pills).
+   * Caller must open the advanced accordion first (`enableTimeShift`).
+   */
+  async clearTimeShift() {
+    await this.timeShiftComboInput.click();
+    // Prefer the EUI clear control — Backspace alone often leaves the humanized selection
+    // ("6 hours ago (6h)") when the options list is open.
+    await this.timeShiftClearButton.waitFor({ state: 'visible' });
+    await this.timeShiftClearButton.click();
+    await this.page.waitForFunction(
+      (testSubj) => {
+        const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
+        const inputEl = rootEl?.querySelector(
+          'input[data-test-subj="comboBoxSearchInput"]'
+        ) as HTMLInputElement | null;
+        const text = rootEl?.textContent ?? '';
+        return !inputEl?.value && !/\d+\s*hours?\s*ago/i.test(text);
+      },
+      TIME_SHIFT_TEST_SUBJ,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Sets a custom time-shift value (e.g. `6h`) on the open dimension.
+   * Caller must open the advanced accordion first (`enableTimeShift`).
+   *
+   * Mirrors FTR `comboBox.setCustom`: type + Enter. Lens humanizes the committed
+   * label (e.g. `6h` → `6 hours ago (6h)`), so EUI `setCustomSelectedOptions`
+   * exact-label membership checks are the wrong readiness signal.
+   */
+  async setTimeShift(shift: string) {
+    await this.timeShiftComboInput.click();
+    // Prefer fill over pressSequentially: EUI remounts the search input when the dropdown
+    // opens, which races character-by-character typing.
+    await this.timeShiftSearchInput.fill(shift);
+    await this.timeShiftSearchInput.press('Enter');
+    // Lens humanizes the label (e.g. `6h` → `6 hours ago (6h)`). Match the token anywhere
+    // under the combo root — committed asPlainText value may not live only on input.value.
+    await this.page.waitForFunction(
+      ({ testSubj, token }) => {
+        const rootEl = document.querySelector(`[data-test-subj="${testSubj}"]`);
+        return (rootEl?.textContent ?? '').includes(token);
+      },
+      { testSubj: TIME_SHIFT_TEST_SUBJ, token: shift },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Clicks the workspace error fix action (e.g. convert terms → filters for time shift).
+   * Waits for the fix button to clear so the next assert does not race the state update.
+   */
+  async useFixAction() {
+    await this.errorFixAction.click();
+    await this.errorFixAction.waitFor({ state: 'hidden', timeout: 30_000 });
+  }
+
+  /**
+   * Adds another terms field to a multi-field terms aggregation.
+   * Requires an open terms dimension editor.
+   *
+   * FieldInputs uses `useDebouncedValue` (256ms) before `secondaryFields` reaches store
+   * state. Closing the editor before that flush drops the pending commit and leaves a
+   * single-term column (fix-action then hits field-stats). Wait for the dimension trigger
+   * text to reflect the extra field before returning.
+   */
+  async addTermToAgg(field: string) {
+    const fieldCombos = this.page.locator('[data-test-subj^="indexPattern-dimension-field"]');
+    const nextIndex = await fieldCombos.count();
+    const comboTestSubj = `indexPattern-dimension-field-${nextIndex}`;
+
+    await this.page.testSubj.click('indexPattern-terms-add-field');
+    await this.page.testSubj.locator(comboTestSubj).waitFor({ state: 'visible' });
+    await this.page.components.comboBox(comboTestSubj).setSelectedOptions([field]);
+
+    await this.page.waitForFunction(
+      ({ expected }) => {
+        const triggers = [...document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]')];
+        return triggers.some((el) => {
+          const text = el.textContent ?? '';
+          return text.includes('+ 1 other') || text.includes(expected);
+        });
+      },
+      { expected: field },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Sets the display name of the currently open dimension.
+   * NameInput remounts when the label commits (`DebouncedInput` key); wait for the value
+   * rather than treating a detached node as success.
+   */
+  async editDimensionLabel(label: string) {
+    await this.dimensionNameInput.waitFor({ state: 'visible' });
+    await this.dimensionNameInput.scrollIntoViewIfNeeded();
+    await this.dimensionNameInput.fill(label);
+    await this.page.waitForFunction(
+      (expected) => {
+        const el = document.querySelector('[data-test-subj="name-input"]');
+        return el instanceof HTMLInputElement && el.value === expected;
+      },
+      label,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+    // The typed value is only in the input: `useDebouncedValue` holds it ~256ms, then commits
+    // the whole column from the state its closure captured. Anything edited in between (format,
+    // color) is silently reverted by that commit, so wait until the label reaches Lens state.
+    // The dimension trigger keeps rendering behind the editor flyout and shows the custom label.
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      (expected) =>
+        Array.from(document.querySelectorAll('[data-test-subj="lns-dimensionTrigger"]')).some(
+          (el) => (el.textContent ?? '').replace(/\u200b/g, '').includes(expected)
+        ),
+      label,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /**
+   * Configures the reference (sub-function / field) of the currently open dimension.
+   * Caller must have a reference-based operation editor open (e.g. moving_average).
+   *
+   * `operation` is the sub-function display label (`Sum`, `Unique count`, …), not the
+   * operation id: the reference combo lists labels and EUI matches them exactly.
+   */
+  async configureReference(opts: { operation?: string; field?: string }) {
+    const { operation, field } = opts;
+    if (operation != null) {
+      await this.page.components
+        .comboBox('indexPattern-reference-function')
+        .setSelectedOptions([operation]);
+    }
+    if (field != null) {
+      await this.page.components
+        .comboBox('indexPattern-dimension-field')
+        .setSelectedOptions([field], { timeout: 10_000 });
+      await this.page.waitForFunction(
+        (expected) =>
+          document
+            .querySelector('[data-test-subj="indexPattern-dimension-field"]')
+            ?.getAttribute('data-selected-field') === expected,
+        field,
+        { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+      );
+    }
+  }
+
+  /**
+   * Sets the color of the currently open dimension. EUI may normalize case
+   * (e.g. `#ff0000` → `#FF0000`); wait until the committed value matches ignoring case.
+   */
+  async editDimensionColor(hex: string) {
+    await this.dimensionColorPicker.waitFor({ state: 'visible' });
+    await this.dimensionColorPicker.fill('');
+    await this.dimensionColorPicker.fill(hex);
+    await this.page.waitForFunction(
+      (expected) => {
+        const el = document.querySelector('[data-test-subj*="indexPattern-dimension-colorPicker"]');
+        return el instanceof HTMLInputElement && el.value.toLowerCase() === expected.toLowerCase();
+      },
+      hex,
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
+  }
+
+  /** Returns the committed color-picker value of the currently open dimension. */
+  async getDimensionColor(): Promise<string> {
+    await this.dimensionColorPicker.waitFor({ state: 'visible' });
+    return this.dimensionColorPicker.inputValue();
+  }
+
+  /** Locator for the hover-revealed remove control of a dimension panel. */
+  getDimensionRemoveLocator(dimensionTestSubj: string) {
+    return this.page.testSubj.locator(`${dimensionTestSubj} > indexPattern-dimension-remove`);
+  }
+
+  /**
+   * Removes one dimension (the first) in the given panel and waits until its
+   * trigger count drops by one. Caller should hover-assert the remove control
+   * when that visibility is under test.
+   */
+  async removeDimension(dimensionTestSubj: string) {
+    const triggers = this.getDimensionTriggersLocator(dimensionTestSubj);
+    const removeLocator = this.getDimensionRemoveLocator(dimensionTestSubj);
+    const countBefore = await triggers.count();
+    const buttons = await removeLocator.all();
+    const button = buttons[0];
+    if (!button) {
+      throw new Error(`No remove control for "${dimensionTestSubj}"`);
+    }
+    await button.hover();
+    await button.click();
+    await this.page.waitForFunction(
+      ({ panelSubj, expected }) =>
+        document.querySelectorAll(
+          `[data-test-subj="${panelSubj}"] [data-test-subj="lns-dimensionTrigger"]`
+        ).length === expected,
+      { panelSubj: dimensionTestSubj, expected: Math.max(0, countBefore - 1) },
+      { timeout: WAIT_FOR_FUNCTION_TIMEOUT_MS }
+    );
   }
 }

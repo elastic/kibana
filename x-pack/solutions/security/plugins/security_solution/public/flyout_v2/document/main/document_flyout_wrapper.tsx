@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -16,8 +17,9 @@ import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { DataViewDegradedCallout } from '../../../data_view_manager/components/data_view_degraded_callout';
 import { PageScope } from '../../../data_view_manager/constants';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { EventKind } from './constants/event_kinds';
 import { DocumentFlyout } from '.';
 
@@ -59,6 +61,10 @@ export interface DocumentFlyoutWrapperProps {
    * Callback invoked after alert mutations to refresh parent and current flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
+   */
+  dataTestSubj?: string;
 }
 
 /**
@@ -67,12 +73,18 @@ export interface DocumentFlyoutWrapperProps {
  * It is currently used in Analyzer when opening a document from the detail panel.
  */
 export const DocumentFlyoutWrapper = memo(
-  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
+  ({
+    documentId,
+    indexName,
+    renderCellActions,
+    onAlertUpdated,
+    dataTestSubj,
+  }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
-    const isDataViewInvalid =
-      status === 'error' || (status === 'ready' && !dataView.hasMatchedIndices());
+    const isDataViewInvalid = status === 'error';
+    const isDataViewDegraded = status === 'ready' && !dataView.hasMatchedIndices();
 
     const shouldSkipSearch = useMemo(
       () => isDataViewLoading || isDataViewInvalid || !documentId || !indexName || !dataView,
@@ -125,11 +137,26 @@ export const DocumentFlyoutWrapper = memo(
 
     if (requestState === ElasticRequestState.Found && hit) {
       return (
-        <DocumentFlyout
-          hit={hit}
-          renderCellActions={renderCellActions}
-          onAlertUpdated={handleAlertUpdated}
-        />
+        <>
+          {isDataViewDegraded && (
+            <DataViewDegradedCallout
+              compact
+              dataView={dataView}
+              data-test-subj="document-overview-wrapper-data-view-degraded"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.document.overviewWrapper.dataViewDegradedDetailsDescription"
+                defaultMessage="The document is still shown below, but field-dependent features may be limited."
+              />
+            </DataViewDegradedCallout>
+          )}
+          <DocumentFlyout
+            hit={hit}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={handleAlertUpdated}
+            dataTestSubj={dataTestSubj}
+          />
+        </>
       );
     }
 

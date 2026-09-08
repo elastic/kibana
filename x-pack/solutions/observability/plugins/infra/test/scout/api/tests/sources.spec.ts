@@ -63,7 +63,7 @@ apiTest.describe(
     apiTest.beforeAll(async ({ requestAuth, infraSynthtraceEsClient }) => {
       const adminApiKey: RoleApiCredentials = await requestAuth.getApiKey('admin');
       headers = { ...adminApiKey.apiKeyHeader, ...testData.COMMON_HEADERS };
-      range = testData.getRecentTimerange(10);
+      range = testData.getRecentTimerange(10, 45);
 
       await infraSynthtraceEsClient.clean();
       await infraSynthtraceEsClient.index(generateMetricsData(range));

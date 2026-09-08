@@ -18,7 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { KnowledgeIndicator } from '@kbn/streams-ai';
+import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAIFeatures } from '../../../../hooks/use_ai_features';
@@ -183,8 +183,8 @@ export function KnowledgeIndicatorsTable() {
   });
 
   const generationRow = (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ width: '100%' }}>
+      <EuiFlexItem css={{ minWidth: 0 }}>
         <StreamPicker
           streams={filteredStreams}
           isStreamsLoading={isStreamsLoading}
@@ -241,7 +241,12 @@ export function KnowledgeIndicatorsTable() {
         color="plain"
         css={css`
           && {
-            max-width: 400px;
+            max-width: 560px;
+          }
+
+          .euiEmptyPrompt__actions {
+            width: 100%;
+            max-width: 100%;
           }
         `}
         icon={<AssetImage type="knowledgeIndicatorsEmptyState" size={140} />}

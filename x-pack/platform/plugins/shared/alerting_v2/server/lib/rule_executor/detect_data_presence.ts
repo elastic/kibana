@@ -6,6 +6,7 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../errors/esql_user_error';
@@ -31,11 +32,13 @@ export const detectDataPresence = async ({
   rule,
   input,
   logger,
+  maxResponseSize,
 }: {
   queryService: QueryServiceContract;
   rule: RuleResponse;
   input: RuleExecutionInput;
   logger: LoggerServiceContract;
+  maxResponseSize?: number;
 }): Promise<Set<string>> => {
   const noDataQuery = getNoDataEsqlQuery(rule.query, rule.no_data_strategy);
 
@@ -61,11 +64,12 @@ export const detectDataPresence = async ({
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
+      maxResponseSize,
     });
 
     return collectGroupHashesFromRows({ rule, rows, input });
   } catch (error) {
-    if (isEsqlUserError(error)) {
+    if (isMaximumResponseSizeExceededError(error) || isEsqlUserError(error)) {
       throw createTaskRunError(error as Error, TaskErrorSource.USER);
     }
     throw error;

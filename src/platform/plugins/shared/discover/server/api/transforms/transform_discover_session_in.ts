@@ -123,12 +123,16 @@ export const transformDiscoverSessionIn = (
         hideAggregatedPreview: tab.hide_aggregated_preview,
         breakdownField: tab.breakdown_field,
         chartInterval: tab.chart_interval,
-        timeRestore: tab.time_restore,
+        timeRestore: tab.time_range !== undefined,
         timeRange: tab.time_range,
         refreshInterval: tab.refresh_interval,
         visContext: transformVisContextIn(tab.vis_context, getVisContextRequestData(tab)),
         controlGroupJson: transformControlPanelsIn(tab.control_panels),
         usesAdHocDataView: tab.data_source.type === AS_CODE_DATA_VIEW_SPEC_TYPE,
+        ...(isEsqlTab(tab) &&
+          tab.esql_approximation !== undefined && {
+            esqlApproximation: tab.esql_approximation,
+          }),
       },
     };
   });

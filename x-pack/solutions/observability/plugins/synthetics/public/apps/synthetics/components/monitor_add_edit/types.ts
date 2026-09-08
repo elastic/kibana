@@ -162,6 +162,7 @@ export interface FieldMap {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: FieldMeta<ConfigKey.PLAYWRIGHT_OPTIONS>;
   [ConfigKey.SYNTHETICS_ARGS]: FieldMeta<ConfigKey.SYNTHETICS_ARGS>;
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
+  [ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST]: FieldMeta<ConfigKey.CERTIFICATE_ERROR_SPKI_ALLOWLIST>;
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
   [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;

@@ -10,6 +10,8 @@
 export { AppHeader } from './src';
 export {
   AppHeaderView,
+  AppHeaderLoading,
+  AppHeaderLoadingView,
   ChromeAppHeaderRegistration,
   useChromeAppHeaderRegistration,
   SuppressChromeBackButton,
@@ -23,6 +25,8 @@ export {
 export type { AppHeaderViewProps, AppHeaderConfig, ChromeAppHeaderConfig } from './src';
 export type {
   AppHeaderProps,
+  AppHeaderLoadingProps,
+  AppHeaderLoadingMenu,
   AppHeaderBack,
   AppHeaderBadge,
   AppHeaderBadgeItem,

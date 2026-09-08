@@ -50,6 +50,18 @@ export default ({ getService }: FtrProviderContext): void => {
                 label: 'Due Date',
                 type: 'date',
               },
+              {
+                control: 'TEXTAREA',
+                name: 'remediation_notes',
+                label: 'Remediation Notes',
+                type: 'keyword',
+              },
+              {
+                control: 'INPUT_NUMBER',
+                name: 'score',
+                label: 'Score',
+                type: 'integer',
+              },
             ],
           }),
           isEnabled: true,
@@ -184,6 +196,45 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.total).to.eql(0);
       });
 
+      it('searches long extended-field text by complete token', async () => {
+        const uniqueToken = 'runtimevalidationtoken';
+        const longText = `${Array.from({ length: 101 }, (_, index) => `word${index}`).join(
+          ' '
+        )} ${uniqueToken}`;
+        const caseWithLongText = await createCase(supertest, {
+          ...getPostCaseRequest({
+            owner: 'securitySolutionFixture',
+            title: 'Long text extended field case',
+            description: 'The unique word appears only in the template field.',
+          }),
+          template: { id: templateId, version: templateVersion },
+          [CASE_EXTENDED_FIELDS]: {
+            remediation_notes_as_keyword: longText,
+          },
+        });
+
+        const completeTokenResults = await searchCases({
+          supertest,
+          body: {
+            search: uniqueToken,
+            searchFields: ['cases.ef_all_values'],
+            owner: 'securitySolutionFixture',
+          },
+        });
+        const partialTokenResults = await searchCases({
+          supertest,
+          body: {
+            search: 'runtimevalidation',
+            searchFields: ['cases.ef_all_values'],
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        expect(completeTokenResults.total).to.eql(1);
+        expect(completeTokenResults.cases[0].id).to.eql(caseWithLongText.id);
+        expect(partialTokenResults.total).to.eql(0);
+      });
+
       it('does not include ef_all_values runtime mapping when field is not in searchFields', async () => {
         await createCase(supertest, {
           ...getPostCaseRequest({
@@ -200,6 +251,35 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           body: {
             search: 'High',
+            searchFields: ['cases.title'],
+            owner: 'securitySolutionFixture',
+          },
+        });
+
+        expect(cases.total).to.eql(0);
+      });
+    });
+
+    describe('numeric extended-field label search', () => {
+      it('does not fail when an optional numeric value is blank', async () => {
+        const caseWithBlankScore = await createCase(supertest, {
+          ...getPostCaseRequest({
+            owner: 'securitySolutionFixture',
+            title: 'Blank numeric extended field case',
+            description: 'The numeric extended field remains unset.',
+          }),
+          template: { id: templateId, version: templateVersion },
+          [CASE_EXTENDED_FIELDS]: {
+            score_as_integer: '',
+          },
+        });
+
+        expect(caseWithBlankScore[CASE_EXTENDED_FIELDS]).to.have.property('score_as_integer', '');
+
+        const cases = await searchCases({
+          supertest,
+          body: {
+            search: 'Score',
             searchFields: ['cases.title'],
             owner: 'securitySolutionFixture',
           },

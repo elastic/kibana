@@ -63,6 +63,7 @@ const mockedUuidv4 = uuidv4 as jest.MockedFunction<typeof uuidv4>;
 const mockedAgent: Agent = {
   id: 'agent-123',
   policy_id: 'policy-456',
+  policy_base_id: 'policy-456',
   last_checkin: new Date().toISOString(),
   components: [],
   local_metadata: {
@@ -282,7 +283,7 @@ describe('Agent migration', () => {
       mockedPolicy.is_protected = true;
       await expect(
         migrateSingleAgent(esClientMock, soClientMock, agentId, mockedPolicy, mockedAgent, options)
-      ).rejects.toThrowError('Agent is protected and cannot be migrated');
+      ).rejects.toThrow('Agent is protected and cannot be migrated');
     });
 
     it('should throw an error if the agent is a fleet server', async () => {
@@ -301,7 +302,7 @@ describe('Agent migration', () => {
           { ...mockedAgent, components: [{ type: 'fleet-server' } as any] },
           options
         )
-      ).rejects.toThrowError('Fleet server agents cannot be migrated');
+      ).rejects.toThrow('Fleet server agents cannot be migrated');
     });
 
     it('should throw an error if the agent has a not supported version', async () => {
@@ -320,7 +321,7 @@ describe('Agent migration', () => {
           { ...mockedAgent, agent: { version: '9.1.0' } as any },
           options
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Agent cannot be migrated. Migrate action is supported from version 9.2.0.'
       );
     });
@@ -377,7 +378,7 @@ describe('Agent migration', () => {
           },
           options
         )
-      ).rejects.toThrowError('Containerized agents cannot be migrated');
+      ).rejects.toThrow('Containerized agents cannot be migrated');
     });
 
     it('should proceed normally when license is sufficient', async () => {

@@ -112,6 +112,12 @@ export class RulesApi {
     });
   }
 
+  public async bulkUpdateRuleApiKey(params: BulkByIdsParams) {
+    return this.http.post<BulkResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_update_api_key`, {
+      body: JSON.stringify(params),
+    });
+  }
+
   public async deleteRulesByQuery(
     params: BulkByQueryParams & { force: true }
   ): Promise<BulkResponse>;
@@ -140,5 +146,18 @@ export class RulesApi {
     return this.http.post<BulkByQueryResult>(`${ALERTING_V2_RULE_API_PATH}/_disable_by_query`, {
       body: JSON.stringify(params),
     });
+  }
+
+  public async updateRuleApiKeyByQuery(
+    params: BulkByQueryParams & { force: true }
+  ): Promise<BulkResponse>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult>;
+  public async updateRuleApiKeyByQuery(params: BulkByQueryParams): Promise<BulkByQueryResult> {
+    return this.http.post<BulkByQueryResult>(
+      `${ALERTING_V2_RULE_API_PATH}/_update_api_key_by_query`,
+      {
+        body: JSON.stringify(params),
+      }
+    );
   }
 }

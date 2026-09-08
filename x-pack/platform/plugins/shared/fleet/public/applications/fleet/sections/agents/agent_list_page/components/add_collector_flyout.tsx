@@ -20,11 +20,10 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiHorizontalRule,
   EuiSpacer,
-  EuiLoadingSpinner,
   EuiFlyoutFooter,
-  EuiCallOut,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -34,6 +33,7 @@ import {
   EuiFilterButton,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -48,6 +48,7 @@ import {
   useDefaultOutput,
   useStartServices,
 } from '../../../../hooks';
+import { isBeatsOutput } from '../../../../../../../common/services/output_helpers';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
 import { useYaml } from '../../../../../../services';
@@ -179,7 +180,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
   const { spaceId } = useFleetStatus();
   const { output: defaultOutput } = useDefaultOutput();
-  const defaultEsHost = defaultOutput?.hosts?.[0] ?? DEFAULT_ES_HOST;
+  const defaultEsHost =
+    (defaultOutput && isBeatsOutput(defaultOutput) ? defaultOutput.hosts?.[0] : undefined) ??
+    DEFAULT_ES_HOST;
   // The active space resolves asynchronously (see useFleetStatus), starting as `undefined`.
   // Until it's known we must not resolve the OpAMP policy/token, otherwise getOpAMPPolicyId
   // falls back to the unprefixed default-space id and the collector enrolls into the Default
@@ -677,16 +680,21 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               </EuiCodeBlock>
             </>
           ) : loading || !yaml ? (
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="m"
-              color="primary"
-              iconType={EuiLoadingSpinner}
               title={
-                <FormattedMessage
-                  id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
-                  defaultMessage="Preparing OpAMP configuration..."
-                />
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.loading.preparingOpAMPConfig"
+                      defaultMessage="Preparing OpAMP configuration..."
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             />
           ) : null}

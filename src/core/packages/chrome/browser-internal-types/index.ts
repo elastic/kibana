@@ -20,8 +20,11 @@ import type {
   ChromeBreadcrumb,
   ChromeBreadcrumbsAppendExtension,
   ChromeBreadcrumbsBadge,
+  ChromeAiButton,
+  ChromeControls,
+  ChromeHelp,
+  ChromeNewsfeedHandler,
   ChromeNext,
-  GlobalHeaderAiButton,
   ChromeUserBanner,
   GlobalSearchConfig,
   NavigationCustomization,
@@ -147,32 +150,60 @@ export interface InternalChromeStart extends ChromeStart {
     registerCustomizeNavigationHandler(handler: () => void): void;
   };
 
+  /** Persistent chrome controls, including getters for Chrome-owned renderers. */
+  controls: InternalChromeControls;
+
+  /** Help action registration, including getters for Chrome-owned renderers. */
+  help: InternalChromeHelp;
+
+  /** Chrome-owned app-header registry. Public apps should use `@kbn/app-header`. */
+  appHeader: {
+    set(config: ChromeAppHeaderConfig): () => void;
+    get$(): Observable<ChromeAppHeaderConfig | undefined>;
+  };
+
+  /** Whether the active app currently mounts an inline `AppHeader`. */
+  inlineAppHeader: {
+    set(mounted: boolean): void;
+    get$(): Observable<boolean>;
+  };
+
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
   next: InternalChromeNext;
 }
 
 /** @internal */
-export interface InternalChromeNext extends ChromeNext {
-  aiButton: ChromeNext['aiButton'] & {
-    get$(): Observable<GlobalHeaderAiButton[]>;
+export interface InternalChromeControls extends ChromeControls {
+  aiButton: ChromeControls['aiButton'] & {
+    get$(): Observable<ChromeAiButton[]>;
   };
-  contextSwitcher: ChromeNext['contextSwitcher'] & {
-    get$(): Observable<ReactNode>;
-  };
-  projectPicker: ChromeNext['projectPicker'] & {
-    get$(): Observable<ReactNode>;
-  };
-  globalSearch: ChromeNext['globalSearch'] & {
+  globalSearch: ChromeControls['globalSearch'] & {
     get$(): Observable<GlobalSearchConfig | undefined>;
   };
-  inlineAppHeader: {
-    get$(): Observable<boolean>;
-    set(mounted: boolean): void;
-  };
-  appHeader: ChromeNext['appHeader'] & {
-    get$(): Observable<ChromeAppHeaderConfig | undefined>;
-  };
-  userMenu: ChromeNext['userMenu'] & {
+  contextSwitcher: ChromeControls['contextSwitcher'] & {
     get$(): Observable<ReactNode>;
   };
+  projectPicker: ChromeControls['projectPicker'] & {
+    get$(): Observable<ReactNode>;
+  };
+  userMenu: ChromeControls['userMenu'] & {
+    get$(): Observable<ReactNode>;
+  };
+}
+
+/** @internal */
+export interface InternalChromeHelp extends ChromeHelp {
+  getFeedbackHandler$(): Observable<(() => void) | undefined>;
+  getNewsfeedHandler$(): Observable<ChromeNewsfeedHandler | undefined>;
+}
+
+/** @internal */
+export interface InternalChromeNext extends ChromeNext {
+  aiButton: InternalChromeControls['aiButton'];
+  contextSwitcher: InternalChromeControls['contextSwitcher'];
+  projectPicker: InternalChromeControls['projectPicker'];
+  globalSearch: InternalChromeControls['globalSearch'];
+  userMenu: InternalChromeControls['userMenu'];
+  inlineAppHeader: InternalChromeStart['inlineAppHeader'];
+  appHeader: InternalChromeStart['appHeader'];
 }

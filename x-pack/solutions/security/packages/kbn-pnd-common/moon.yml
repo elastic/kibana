@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/zod'
   - '@kbn/i18n'
+  - '@kbn/deeplinks-security'
 tags:
   - shared-common
   - package

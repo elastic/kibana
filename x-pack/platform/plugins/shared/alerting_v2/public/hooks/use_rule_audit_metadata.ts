@@ -12,7 +12,10 @@ import { EMPTY_VALUE } from '../components/rule_details/utils';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 import { resolveDisplayName } from '../utils/resolve_display_name';
 
-type RuleAuditFields = Pick<RuleResponse, 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt'>;
+type RuleAuditFields = Pick<
+  RuleResponse,
+  'created_by' | 'created_at' | 'updated_by' | 'updated_at'
+>;
 
 export interface RuleAuditMetadata {
   createdByDisplay: string;
@@ -24,16 +27,18 @@ export interface RuleAuditMetadata {
 export const useRuleAuditMetadata = (rule?: RuleAuditFields): RuleAuditMetadata => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const dateFormat: string = uiSettings.get('dateFormat');
-  const auditUids = [rule?.createdBy, rule?.updatedBy].filter((uid): uid is string => Boolean(uid));
+  const auditUids = [rule?.created_by, rule?.updated_by].filter((uid): uid is string =>
+    Boolean(uid)
+  );
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: auditUids });
 
   const formatDate = (date: string | undefined): string =>
     date ? moment(date).format(dateFormat) : EMPTY_VALUE;
 
   return {
-    createdByDisplay: resolveDisplayName(rule?.createdBy, profileByUid, EMPTY_VALUE),
-    createdAtFormatted: formatDate(rule?.createdAt),
-    updatedByDisplay: resolveDisplayName(rule?.updatedBy, profileByUid, EMPTY_VALUE),
-    updatedAtFormatted: formatDate(rule?.updatedAt),
+    createdByDisplay: resolveDisplayName(rule?.created_by, profileByUid, EMPTY_VALUE),
+    createdAtFormatted: formatDate(rule?.created_at),
+    updatedByDisplay: resolveDisplayName(rule?.updated_by, profileByUid, EMPTY_VALUE),
+    updatedAtFormatted: formatDate(rule?.updated_at),
   };
 };

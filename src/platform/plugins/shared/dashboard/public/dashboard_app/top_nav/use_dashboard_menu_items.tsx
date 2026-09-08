@@ -303,7 +303,7 @@ export const useDashboardMenuItems = ({
 
       switchToViewMode: {
         order: 1,
-        iconType: 'logOut', // use 'logOut' when added to EUI
+        iconType: 'logOut',
         label: topNavStrings.switchToViewMode.label,
         id: 'cancel',
         disableButton: disableTopNav || !lastSavedId || isResetting,

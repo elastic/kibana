@@ -14,7 +14,6 @@ export {
   getSampleDocuments,
   getSampleDocumentsEsql,
 } from './src/tools/describe_dataset/get_sample_documents';
-export { getDiverseSampleDocuments } from './src/tools/describe_dataset/get_diverse_sample_documents';
 export type {
   DocumentAnalysis,
   FormattedDocumentAnalysis,
@@ -35,11 +34,21 @@ export {
   type EsqlColumnSchema,
   type GetEsqlColumnSchemaParams,
 } from './src/utils/get_esql_column_schema';
+export {
+  getMappingConflicts,
+  type MappingConflict,
+  type GetMappingConflictsParams,
+} from './src/utils/get_mapping_conflicts';
 export { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from './src/utils/default_esql_query_timeout';
 export {
   parseEsqlSourceDocuments,
   getEsqlDocumentId,
   type EsqlSourceDocument,
 } from './src/utils/parse_esql_source_documents';
+export {
+  categorizeWithNoiseExclusion,
+  columnPath,
+  type CategorizeWithSampleRow,
+} from './src/utils/esql_categorize';
 
 export { executeAsEsqlAgent } from './src/tools/esql';
