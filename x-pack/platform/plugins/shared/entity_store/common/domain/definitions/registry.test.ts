@@ -6,7 +6,7 @@
  */
 
 import { ALL_ENTITY_TYPES, entitySchema } from './entity_schema';
-import { getEntityDefinitionWithoutId } from './registry';
+import { getEntityDefinitionWithoutId, hasPriorityVariant, resolveProcessId } from './registry';
 
 /**
  * Tests that all entity definitions parse against the entitySchema (does not throw errors)
@@ -17,4 +17,23 @@ describe('entitiesDefinitionRegistry', () => {
 
     expect(() => entitySchema.parse({ ...definition, id: entityType })).not.toThrow();
   });
+});
+
+describe('hasPriorityVariant', () => {
+  it.each(ALL_ENTITY_TYPES)('%s: returns false', (type) => {
+    expect(hasPriorityVariant(type)).toBe(false);
+  });
+});
+
+describe('resolveProcessId', () => {
+  it.each(ALL_ENTITY_TYPES)('%s: returns single when flag is off', (type) => {
+    expect(resolveProcessId(false, type)).toBe('single');
+  });
+
+  it.each(ALL_ENTITY_TYPES)(
+    '%s: returns single when flag is on and no priority variant is registered',
+    (type) => {
+      expect(resolveProcessId(true, type)).toBe('single');
+    }
+  );
 });
