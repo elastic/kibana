@@ -458,6 +458,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           state.datasourceStates,
           (datasourceState, datasourceId) => {
             const datasource = datasourceMap[datasourceId!];
+            // mixed panels (e.g. ES|QL data layers plus a form-based reference line)
+            // spread layers across datasources, so the removed layer may live in a
+            // non-active datasource whose state must be committed too
+            const ownsLayer = datasource.getLayers(datasourceState.state).includes(layerId);
 
             const { newState, removedLayerIds: removedLayerIdsForThisDatasource } = isOnlyLayer
               ? datasource.clearLayer(datasourceState.state, layerId)
@@ -467,7 +471,7 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
             return {
               ...datasourceState,
-              ...(datasourceId === state.activeDatasourceId && {
+              ...((datasourceId === state.activeDatasourceId || ownsLayer) && {
                 state: newState,
               }),
             };

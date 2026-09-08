@@ -330,7 +330,7 @@ describe('lensSlice', () => {
             getOperationForColumnId: jest.fn(),
             getTableSpec: jest.fn(),
           }),
-          getLayers: () => ['layer1'],
+          getLayers: (layerIds: unknown) => layerIds as string[],
           clearLayer: (layerIds: unknown, layerId: string) => ({
             removedLayerIds: [],
             newState: (layerIds as string[]).map((id: string) =>
@@ -731,6 +731,23 @@ describe('lensSlice', () => {
         expect(state.visualization.state).toEqual(['layer2']);
         expect(state.datasourceStates.formBased.state).toEqual([]);
         expect(state.datasourceStates.textBased.state).toEqual(['layer2']);
+        expect(state.stagedPreview).not.toBeDefined();
+      });
+
+      it('removeLayer: should remove the layer from a non-active datasource that owns it', () => {
+        // active datasource is formBased, but layer2 lives in the textBased datasource
+        customStore.dispatch(
+          removeOrClearLayer({
+            visualizationId: 'testVis',
+            layerId: 'layer2',
+            layerIds: ['layer1', 'layer2'],
+          })
+        );
+        const state = customStore.getState().lens;
+
+        expect(state.visualization.state).toEqual(['layer1']);
+        expect(state.datasourceStates.formBased.state).toEqual(['layer1']);
+        expect(state.datasourceStates.textBased.state).toEqual([]);
         expect(state.stagedPreview).not.toBeDefined();
       });
 
