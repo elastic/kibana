@@ -10,7 +10,7 @@ import type {
   IndicesUpdateAliasesAction,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { sortBy } from 'lodash';
+import { omit, sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
@@ -19,7 +19,7 @@ import {
   evaluateTotalFieldsLimit,
   getTotalFieldsLimitSettings,
 } from './total_fields_limit_settings';
-import { doesLiveMappingSatisfyTarget } from './mapping_satisfies';
+import { computeResourceHash, RESOURCE_CONTENT_HASH_META_FIELD } from './resource_hash';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -96,35 +96,45 @@ const updateTotalFieldLimitSetting = async ({
   }
 };
 
-// This will update the mappings of backing indices but *not* the settings. This
-// is due to the fact settings can be classed as dynamic and static, and static
-// updates will fail on an index that isn't closed. New settings *will* be applied as part
-// of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const getLiveMappings = async (
+const readContentHash = (mappings: MappingTypeMapping | undefined): string | undefined => {
+  const contentHash = mappings?._meta?.[RESOURCE_CONTENT_HASH_META_FIELD];
+  return typeof contentHash === 'string' ? contentHash : undefined;
+};
+
+/**
+ * Reads the content hash stamped in `_meta` on the mapping of every index the given
+ * name resolves to, or `undefined` when the mappings cannot be read.
+ */
+const getInstalledMappingHashes = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger
-): Promise<MappingTypeMapping[] | undefined> => {
+): Promise<Array<string | undefined> | undefined> => {
   try {
+    // `index` may be a data stream name, which resolves to its backing indices.
     const response = await retryTransientEsErrors(() => esClient.indices.getMapping({ index }), {
       logger,
     });
-    const mappings = Object.values(response ?? {})
-      .map((indexMapping) => indexMapping.mappings)
-      .filter((mapping): mapping is MappingTypeMapping => mapping != null);
-    if (mappings.length === 0) {
+    const installed = Object.values(response ?? {});
+    if (installed.length === 0) {
       return undefined;
     }
-    return mappings;
+    return installed.map(({ mappings }) => readContentHash(mappings));
   } catch (err) {
-    // Any failure reading the live mapping leaves the installed content unknown,
-    // which falls through to the PUT. The check must never block an update that
-    // would otherwise have succeeded.
-    logger.debug(`Could not read live mapping for ${index}; will putMapping (${err.message})`);
+    // Any failure reading the installed hash (404, permissions, exhausted retries)
+    // leaves the installed mapping unknown, which falls through to the PUT. The
+    // check must never block an update that would otherwise have succeeded.
+    logger.debug(
+      `Could not read installed mapping hash for ${index}; will install (${err.message})`
+    );
     return undefined;
   }
 };
 
+// This will update the mappings of backing indices but *not* the settings. This
+// is due to the fact settings can be classed as dynamic and static, and static
+// updates will fail on an index that isn't closed. New settings *will* be applied as part
+// of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
 const updateUnderlyingMapping = async ({
   logger,
   esClient,
@@ -134,22 +144,31 @@ const updateUnderlyingMapping = async ({
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
 
-  // Skip only on a positive match, and only on the first attempt. After a
-  // total_fields.limit increase we must PUT so the new fields can apply.
+  // Stamp the content hash (over the mapping body, excluding the `_meta` that carries
+  // it) so a later install can detect an unchanged mapping and skip the write.
+  const contentHash = computeResourceHash(omit(simulatedMapping, '_meta'));
+  const mappingToInstall: MappingTypeMapping = {
+    ...simulatedMapping,
+    _meta: {
+      ...simulatedMapping._meta,
+      [RESOURCE_CONTENT_HASH_META_FIELD]: contentHash,
+    },
+  };
+
+  // Skip only when every index the name resolves to carries a matching stamp, and only
+  // on the first attempt: after a total_fields.limit increase we must PUT so the
+  // previously rejected fields can apply.
   if (attempt === 1) {
-    const liveMappings = await getLiveMappings(esClient, index, logger);
-    if (
-      liveMappings !== undefined &&
-      liveMappings.every((live) => doesLiveMappingSatisfyTarget(live, simulatedMapping))
-    ) {
-      logger.debug(`Skipping PUT mapping for ${alias}; live mapping already satisfies target`);
+    const installedHashes = await getInstalledMappingHashes(esClient, index, logger);
+    if (installedHashes !== undefined && installedHashes.every((hash) => hash === contentHash)) {
+      logger.debug(`Skipping PUT mapping for ${alias}; content unchanged (${contentHash})`);
       return;
     }
   }
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+      () => esClient.indices.putMapping({ index, ...mappingToInstall }),
       { logger }
     );
 
