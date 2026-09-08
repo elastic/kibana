@@ -76,12 +76,12 @@ const configSchema = schema.object({
   /**
    * Synchronous workflow execution path — used by the inference anonymization pipeline
    * to run workflows inline within an HTTP request without persisting execution state to
-   * Elasticsearch. Must be enabled alongside `xpack.inference.anonymization.workflow_driven`.
+   * Elasticsearch. Must be enabled alongside `xpack.inference.anonymization.workflowDriven`.
    */
   syncExecution: schema.object({
     /**
      * Master switch for the synchronous execution path. Must be set to true alongside
-     * `xpack.inference.anonymization.workflow_driven: true` to enable workflow-driven
+     * `xpack.inference.anonymization.workflowDriven: true` to enable workflow-driven
      * PII anonymization. Defaults to false so the path is inert until explicitly activated.
      */
     enabled: schema.boolean({ defaultValue: false }),
