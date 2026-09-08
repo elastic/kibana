@@ -18,7 +18,12 @@ describe('SuggestUserProfilesRoute', () => {
   it('returns suggested profiles for current space', async () => {
     const { ctx } = createRouteDependencies();
 
-    securityStart.userProfiles.suggest.mockResolvedValue([{ uid: 'u-1' } as UserProfile]);
+    securityStart.userProfiles.suggest.mockResolvedValue([
+      {
+        uid: 'u-1',
+        data: { avatar: { initials: 'TU', color: '#472554', imageUrl: 'random-url' } },
+      } as UserProfile,
+    ]);
 
     const route = new SuggestUserProfilesRoute(ctx, request, securityStart);
 
@@ -29,7 +34,9 @@ describe('SuggestUserProfilesRoute', () => {
       size: 10,
       dataPath: 'avatar',
     });
-    expect(ctx.response.ok).toHaveBeenCalledWith({ body: [{ uid: 'u-1' }] });
+    expect(ctx.response.ok).toHaveBeenCalledWith({
+      body: [{ uid: 'u-1', avatar: { initials: 'TU', color: '#472554', image_url: 'random-url' } }],
+    });
   });
 
   it('accepts dataPath in body', async () => {

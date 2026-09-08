@@ -15,6 +15,8 @@ const USER_PROFILES_PATH = ALERTING_V2_INTERNAL_SUGGESTIONS_USER_PROFILES_API_PA
 // Used to resolve the username / uid of the authenticated user so assertions
 // are not tied to hardcoded SAML test-user names.
 const SECURITY_ME_PATH = '/internal/security/me';
+const AVATAR_IMAGE_DATA_URL =
+  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 
 const suggest = (
   apiClient: ApiClientFixture,
@@ -29,7 +31,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
   let viewerUserBody: Record<string, string>;
   let sharedNameToken: string;
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, samlAuth, esClient }) => {
     const { cookieHeader: adminCookie } = await samlAuth.asInteractiveUser('admin');
     const { cookieHeader: viewerCookie } = await samlAuth.asInteractiveUser('viewer');
 
@@ -50,6 +52,13 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
     adminUserBody = adminUser.body;
     viewerUserBody = viewerUser.body;
     sharedNameToken = adminUserBody.full_name.split(' ')[0]; // Both admin and viewer have 'test' in their full_name, so this token should match both.
+
+    await esClient.security.updateUserProfileData({
+      uid: adminUserBody.profile_uid,
+      data: {
+        kibana: { avatar: { initials: 'TU', color: '#472554', imageUrl: AVATAR_IMAGE_DATA_URL } },
+      },
+    });
   });
 
   apiTest('returns suggested profiles', async ({ apiClient }) => {
@@ -67,6 +76,7 @@ apiTest.describe('Suggest user profiles API', { tag: '@local-stateful-classic' }
             full_name: adminUserBody.full_name,
             username: adminUserBody.username,
           },
+          avatar: { initials: 'TU', color: '#472554', image_url: AVATAR_IMAGE_DATA_URL },
         },
         {
           uid: viewerUserBody.profile_uid,
