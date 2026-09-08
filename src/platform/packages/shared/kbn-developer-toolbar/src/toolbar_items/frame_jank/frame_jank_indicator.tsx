@@ -32,10 +32,10 @@ const THRESHOLDS = {
 
 type SeverityLevel = 'normal' | 'warning' | 'danger';
 type PerformanceWarning =
-  | { kind: 'input'; severity: 'warning' | 'danger'; duration: number; startTime: number }
-  | { kind: 'stall'; severity: 'warning' | 'danger'; duration: number; startTime: number }
-  | { kind: 'blocking'; severity: 'warning' | 'danger'; duration: number }
-  | { kind: 'frames'; severity: 'warning' | 'danger'; percentage: number };
+  | { kind: 'input'; severity: 'warning' | 'danger'; startTime: number }
+  | { kind: 'stall'; severity: 'warning' | 'danger'; startTime: number }
+  | { kind: 'blocking'; severity: 'warning' | 'danger' }
+  | { kind: 'frames'; severity: 'warning' | 'danger' };
 
 const getPerformanceWarning = (
   perfInfo: PerformanceInfo | null,
@@ -44,19 +44,25 @@ const getPerformanceWarning = (
 ): PerformanceWarning | null => {
   const candidates: PerformanceWarning[] = [];
 
-  if (inpStats.worstInteractionStartTime !== null && inpStats.worstInteractionDelay >= 100) {
+  if (
+    inpStats.worstInteractionStartTime !== null &&
+    inpStats.worstInteractionDelay >= THRESHOLDS.inp.warning
+  ) {
     candidates.push({
       kind: 'input',
-      severity: inpStats.worstInteractionDelay >= 300 ? 'danger' : 'warning',
-      duration: inpStats.worstInteractionDelay,
+      severity:
+        inpStats.worstInteractionDelay >= THRESHOLDS.inp.danger ? 'danger' : 'warning',
       startTime: inpStats.worstInteractionStartTime,
     });
   }
-  if (longTaskStats.worstTaskStartTime !== null && longTaskStats.worstTaskDuration >= 100) {
+  if (
+    longTaskStats.worstTaskStartTime !== null &&
+    longTaskStats.worstTaskDuration >= THRESHOLDS.stall.warning
+  ) {
     candidates.push({
       kind: 'stall',
-      severity: longTaskStats.worstTaskDuration >= 300 ? 'danger' : 'warning',
-      duration: longTaskStats.worstTaskDuration,
+      severity:
+        longTaskStats.worstTaskDuration >= THRESHOLDS.stall.danger ? 'danger' : 'warning',
       startTime: longTaskStats.worstTaskStartTime,
     });
   }
@@ -65,7 +71,6 @@ const getPerformanceWarning = (
       kind: 'blocking',
       severity:
         longTaskStats.totalBlockingTime >= THRESHOLDS.blockingTime.danger ? 'danger' : 'warning',
-      duration: longTaskStats.totalBlockingTime,
     });
   }
   if (
@@ -76,7 +81,6 @@ const getPerformanceWarning = (
     candidates.push({
       kind: 'frames',
       severity: perfInfo.jankPercentage >= THRESHOLDS.jankPercentage.danger ? 'danger' : 'warning',
-      percentage: perfInfo.jankPercentage,
     });
   }
 
@@ -123,7 +127,7 @@ const getContainerStyles = (euiTheme: EuiThemeComputed) => css`
   overflow: hidden;
 `;
 
-const getGraphContainerStyles = (euiTheme: EuiThemeComputed) => css`
+const getGraphContainerStyles = () => css`
   position: absolute;
   left: 0;
   right: 0;
@@ -180,7 +184,6 @@ export const FrameJankIndicator: React.FC = () => {
   const [perfInfo, setPerfInfo] = useState<PerformanceInfo | null>(null);
   const [frameSupported, setFrameSupported] = useState<boolean | null>(null);
   const [longTaskStats, setLongTaskStats] = useState<LongTaskInfo>({
-    duration: 0,
     worstTaskDuration: 0,
     worstTaskStartTime: null,
     totalBlockingTime: 0,
@@ -191,7 +194,6 @@ export const FrameJankIndicator: React.FC = () => {
     slowInteractionsCount: 0,
     worstInteractionDelay: 0,
     worstInteractionStartTime: null,
-    lastInteractionDelay: 0,
   });
   const [longTaskSupported, setLongTaskSupported] = useState<boolean | null>(null);
   const [inpSupported, setInpSupported] = useState<boolean | null>(null);
@@ -233,27 +235,7 @@ export const FrameJankIndicator: React.FC = () => {
       inpUnsubscribe();
     };
   }, []);
-  const warning = getPerformanceWarning(
-    perfInfo,
-    longTaskSupported === false
-      ? {
-          duration: 0,
-          worstTaskDuration: 0,
-          worstTaskStartTime: null,
-          totalBlockingTime: 0,
-          tasksInLast30Seconds: 0,
-        }
-      : longTaskStats,
-    inpSupported === false
-      ? {
-          currentINP: 0,
-          slowInteractionsCount: 0,
-          worstInteractionDelay: 0,
-          worstInteractionStartTime: null,
-          lastInteractionDelay: 0,
-        }
-      : inpStats
-  );
+  const warning = getPerformanceWarning(perfInfo, longTaskStats, inpStats);
   const active = hovered || focused;
   const timingStartTime =
     warning?.kind === 'input' || warning?.kind === 'stall' ? warning.startTime : null;
@@ -452,7 +434,7 @@ export const FrameJankIndicator: React.FC = () => {
               <>Jank {badgeValue}</>
             )}
           </EuiBadge>
-          <div css={getGraphContainerStyles(euiTheme)}>
+          <div css={getGraphContainerStyles()}>
             {GRAPH_POSITIONS.map((position) => {
               const measuredIndex = position - placeholderCount;
               const sample = measuredIndex >= 0 ? measuredHistory[measuredIndex] : graphBaseline;

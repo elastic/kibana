@@ -74,6 +74,10 @@ export class PerformanceMonitor implements Monitor<PerformanceInfo> {
   destroy() {
     this.stopMonitoring();
     this.frameHistory = [];
+    this.baselineFps = 60;
+    this.warmupSamples = 0;
+    this.bucketStart = 0;
+    this.bucketFrames = 0;
     this.callbacks = [];
   }
 

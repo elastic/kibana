@@ -119,7 +119,6 @@ describe('LongTaskMonitor', () => {
   it('expires task statistics and last duration without another task', () => {
     deliver([timingEntry(300), timingEntry(80)]);
     expect(snapshots.at(-1)).toEqual({
-      duration: 300,
       totalBlockingTime: 250,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 300,
@@ -131,7 +130,6 @@ describe('LongTaskMonitor', () => {
 
     jest.advanceTimersByTime(20_000);
     expect(snapshots.at(-1)).toEqual({
-      duration: 100,
       totalBlockingTime: 50,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 100,
@@ -140,7 +138,6 @@ describe('LongTaskMonitor', () => {
 
     jest.advanceTimersByTime(10_000);
     expect(snapshots.at(-1)).toEqual({
-      duration: 0,
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
       worstTaskDuration: 0,
@@ -159,7 +156,6 @@ describe('LongTaskMonitor', () => {
 
     monitor.startMonitoring();
     expect(snapshots.at(-1)).toEqual({
-      duration: 0,
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
       worstTaskDuration: 0,
@@ -171,7 +167,6 @@ describe('LongTaskMonitor', () => {
   it('selects worst task metadata deterministically and falls back as tasks expire', () => {
     deliver([timingEntry(400, 0), timingEntry(400, 1_000), timingEntry(300, 2_000)]);
     expect(snapshots.at(-1)).toMatchObject({
-      duration: 300,
       worstTaskDuration: 400,
       worstTaskStartTime: 1_000,
     });
@@ -196,7 +191,6 @@ describe('LongTaskMonitor', () => {
     jest.advanceTimersByTime(5_000);
     monitor.startMonitoring();
     expect(snapshots.at(-1)).toEqual({
-      duration: 0,
       totalBlockingTime: 0,
       tasksInLast30Seconds: 0,
       worstTaskDuration: 0,
@@ -208,7 +202,6 @@ describe('LongTaskMonitor', () => {
 
     deliver([timingEntry(250, performance.now())]);
     expect(snapshots.at(-1)).toMatchObject({
-      duration: 250,
       tasksInLast30Seconds: 1,
       worstTaskDuration: 250,
     });
@@ -226,7 +219,6 @@ describe('LongTaskMonitor', () => {
     expect(TimingObserver.instances.at(-1)?.options).toEqual({ entryTypes: ['longtask'] });
     deliver([timingEntry(180, performance.now())]);
     expect(snapshots.at(-1)).toMatchObject({
-      duration: 180,
       tasksInLast30Seconds: 1,
     });
   });
@@ -289,7 +281,6 @@ describe('INPMonitor', () => {
       currentINP: 100,
       slowInteractionsCount: 1,
       worstInteractionDelay: 100,
-      lastInteractionDelay: 100,
       worstInteractionStartTime: 10_000,
     });
 
@@ -298,7 +289,6 @@ describe('INPMonitor', () => {
       currentINP: 0,
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
-      lastInteractionDelay: 0,
       worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
@@ -317,7 +307,6 @@ describe('INPMonitor', () => {
       currentINP: 0,
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
-      lastInteractionDelay: 0,
       worstInteractionStartTime: null,
     });
     expect(jest.getTimerCount()).toBe(0);
@@ -352,7 +341,6 @@ describe('INPMonitor', () => {
       currentINP: 0,
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
-      lastInteractionDelay: 0,
       worstInteractionStartTime: null,
     });
 
@@ -366,7 +354,7 @@ describe('INPMonitor', () => {
     });
   });
 
-  it('deduplicates interaction maxima and derives last from retained start times', () => {
+  it('deduplicates interaction maxima and expires retained start times', () => {
     deliverEvents([eventEntry(200, 1)]);
     jest.advanceTimersByTime(1_000);
     deliverEvents([eventEntry(300, 1)]);
@@ -382,7 +370,6 @@ describe('INPMonitor', () => {
       currentINP: 180,
       slowInteractionsCount: 4,
       worstInteractionDelay: 300,
-      lastInteractionDelay: 180,
       worstInteractionStartTime: 1_000,
     });
 
@@ -391,7 +378,6 @@ describe('INPMonitor', () => {
       currentINP: 180,
       slowInteractionsCount: 2,
       worstInteractionDelay: 180,
-      lastInteractionDelay: 180,
       worstInteractionStartTime: 2_000,
     });
 
@@ -400,7 +386,6 @@ describe('INPMonitor', () => {
       currentINP: 0,
       slowInteractionsCount: 0,
       worstInteractionDelay: 0,
-      lastInteractionDelay: 0,
       worstInteractionStartTime: null,
     });
   });
@@ -418,7 +403,6 @@ describe('INPMonitor', () => {
       currentINP: 300,
       slowInteractionsCount: 4,
       worstInteractionDelay: 400,
-      lastInteractionDelay: 400,
       worstInteractionStartTime: 0,
     });
   });

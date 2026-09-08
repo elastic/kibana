@@ -37,21 +37,13 @@ const memoryInfo = (
   memoryUsage: number,
   heapUsageRatio: number,
   growthDetected = false,
-  options: { historyLength?: number; shortTrendPerMin?: number } = {}
+  options: { sampleCount?: number; shortTrendPerMin?: number } = {}
 ): MemoryInfo => ({
   memoryUsage,
   heapUsageRatio,
   growthDetected,
-  history: Array.from({ length: options.historyLength ?? 1 }, () => memoryUsage),
-  details:
-    options.shortTrendPerMin === undefined
-      ? undefined
-      : {
-          shortTrendPerMin: options.shortTrendPerMin,
-          longTrendPerMin: 0,
-          baseline: memoryUsage,
-          absoluteIncrease: 0,
-        },
+  sampleCount: options.sampleCount ?? 1,
+  shortTrendPerMin: options.shortTrendPerMin ?? 0,
 });
 
 describe('MemoryUsageIndicator', () => {
@@ -106,36 +98,30 @@ describe('MemoryUsageIndicator', () => {
       'More than 85% of the browser-reported heap limit is in use.'
     );
 
-    act(() => publish({ memoryUsage: 900, growthDetected: true, history: [900] }));
-    expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('warning');
-    expect(screen.getByRole('tooltip').textContent).not.toContain('Heap limit used:');
-    expect(screen.getByRole('tooltip').textContent).toContain(
-      'Sustained heap growth; possible leak.'
-    );
   });
 
   it('shows trend only when enough samples and a finite slope are available', () => {
     render(<MemoryUsageIndicator />);
 
-    act(() => publish(memoryInfo(512, 0.25, false, { historyLength: 9, shortTrendPerMin: 25.04 })));
+    act(() => publish(memoryInfo(512, 0.25, false, { sampleCount: 9, shortTrendPerMin: 25.04 })));
     expect(screen.getByRole('tooltip').textContent).toContain('Recent trend: collecting samples…');
 
     act(() =>
-      publish(memoryInfo(512, 0.25, false, { historyLength: 10, shortTrendPerMin: 25.04 }))
+      publish(memoryInfo(512, 0.25, false, { sampleCount: 10, shortTrendPerMin: 25.04 }))
     );
     expect(screen.getByRole('tooltip').textContent).toContain('Recent trend: +25.0 MiB/min');
     expect(screen.getByTestId('memoryBadge').getAttribute('data-color')).toBe('#0B1628');
 
     act(() =>
-      publish(memoryInfo(512, 0.25, false, { historyLength: 10, shortTrendPerMin: -0.01 }))
+      publish(memoryInfo(512, 0.25, false, { sampleCount: 10, shortTrendPerMin: -0.01 }))
     );
     expect(screen.getByRole('tooltip').textContent).toContain('Recent trend: 0.0 MiB/min');
     expect(screen.getByRole('tooltip').textContent).not.toContain('-0.0');
 
-    act(() => publish(memoryInfo(512, 0.25, false, { historyLength: 10 })));
-    expect(screen.getByRole('tooltip').textContent).toContain('Recent trend unavailable.');
+    act(() => publish(memoryInfo(512, 0.25, false, { sampleCount: 10 })));
+    expect(screen.getByRole('tooltip').textContent).toContain('Recent trend: 0.0 MiB/min');
 
-    act(() => publish(memoryInfo(512, 0.25, false, { historyLength: 10, shortTrendPerMin: NaN })));
+    act(() => publish(memoryInfo(512, 0.25, false, { sampleCount: 10, shortTrendPerMin: NaN })));
     expect(screen.getByRole('tooltip').textContent).toContain('Recent trend unavailable.');
   });
 

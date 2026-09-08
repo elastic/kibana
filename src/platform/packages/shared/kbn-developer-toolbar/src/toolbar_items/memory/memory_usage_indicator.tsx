@@ -12,6 +12,8 @@ import { EuiBadge, EuiTextColor, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 
+const TREND_MIN_SAMPLES = 10;
+
 const badgeStyles = css`
   cursor: default;
 `;
@@ -59,44 +61,42 @@ export const MemoryUsageIndicator: React.FC = () => {
     );
   }
 
-  const { heapUsageRatio, growthDetected } = memoryInfo;
-  const isUnderHeapPressure = (heapUsageRatio ?? 0) > 0.85;
-  const isWarning = growthDetected || isUnderHeapPressure;
-  const badgeColor =
-    growthDetected && isUnderHeapPressure ? 'danger' : isWarning ? 'warning' : '#0B1628';
-  const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
-  const trend = memoryInfo.details?.shortTrendPerMin;
-  const trendText =
-    memoryInfo.history.length < 10
-      ? 'Recent trend: collecting samples…'
-      : trend === undefined || !Number.isFinite(trend)
-      ? 'Recent trend unavailable.'
-      : `Recent trend: ${formatTrend(trend)} MiB/min`;
-  const heapUtilizationPercentage =
-    heapUsageRatio !== undefined && Number.isFinite(heapUsageRatio)
-      ? Math.round(heapUsageRatio * 100)
+  const { heapUsageRatio, growthDetected, sampleCount, shortTrendPerMin } = memoryInfo;
+  const isUnderHeapPressure = heapUsageRatio > 0.85;
+  const warningSeverity =
+    growthDetected && isUnderHeapPressure
+      ? 'danger'
+      : growthDetected || isUnderHeapPressure
+      ? 'warning'
       : null;
+  const memoryGiB = (memoryInfo.memoryUsage / 1024).toFixed(2);
+  const trendText =
+    sampleCount < TREND_MIN_SAMPLES
+      ? 'Recent trend: collecting samples…'
+      : !Number.isFinite(shortTrendPerMin)
+      ? 'Recent trend unavailable.'
+      : `Recent trend: ${formatTrend(shortTrendPerMin)} MiB/min`;
+  const heapUtilizationPercentage = Math.round(heapUsageRatio * 100);
 
   const tooltipContent = (
     <div css={tooltipContentStyles}>
       <div>
         <div>Heap: {memoryGiB} GiB</div>
-        {heapUtilizationPercentage !== null &&
-          (isUnderHeapPressure ? (
-            <div css={emphasisStyles}>
-              <EuiTextColor color={growthDetected ? 'danger' : 'warning'}>
-                Heap limit used: {heapUtilizationPercentage}%
-              </EuiTextColor>
-            </div>
-          ) : (
-            <div>Heap limit used: {heapUtilizationPercentage}%</div>
-          ))}
+        {isUnderHeapPressure ? (
+          <div css={emphasisStyles}>
+            <EuiTextColor color={warningSeverity ?? 'warning'}>
+              Heap limit used: {heapUtilizationPercentage}%
+            </EuiTextColor>
+          </div>
+        ) : (
+          <div>Heap limit used: {heapUtilizationPercentage}%</div>
+        )}
       </div>
       <div>
         <div>{trendText}</div>
         {growthDetected && (
           <div css={emphasisStyles}>
-            <EuiTextColor color={isUnderHeapPressure ? 'danger' : 'warning'}>
+            <EuiTextColor color={warningSeverity ?? 'warning'}>
               Sustained heap growth; possible leak.
             </EuiTextColor>
           </div>
@@ -110,7 +110,7 @@ export const MemoryUsageIndicator: React.FC = () => {
           Approximate JavaScript heap; sampled every 20 s while visible. Growth can include
           allocations awaiting garbage collection.
         </div>
-        {isWarning && (
+        {warningSeverity && (
           <div>
             Compare heap snapshots in browser DevTools → Memory after repeating the same action.
           </div>
@@ -119,19 +119,17 @@ export const MemoryUsageIndicator: React.FC = () => {
     </div>
   );
 
-  const displayText = `Mem ${memoryGiB}GiB`;
-
   return (
     <EuiToolTip content={tooltipContent}>
       <EuiBadge
-        color={badgeColor}
+        color={warningSeverity ?? '#0B1628'}
         css={badgeStyles}
-        iconType={isWarning ? 'warningFill' : undefined}
+        iconType={warningSeverity ? 'warningFill' : undefined}
         iconSide={'right'}
         title={undefined}
         tabIndex={0}
       >
-        {displayText}
+        {`Mem ${memoryGiB}GiB`}
       </EuiBadge>
     </EuiToolTip>
   );

@@ -10,7 +10,6 @@
 import type { Monitor } from '../monitor';
 
 export interface LongTaskInfo {
-  duration: number; // last task duration (ms)
   worstTaskDuration: number; // largest retained task duration (ms)
   worstTaskStartTime: number | null; // start time of the worst retained task
   totalBlockingTime: number; // sum over window of max(0, duration - 50)
@@ -33,12 +32,11 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   private callbacks: Array<(info: LongTaskInfo) => void> = [];
   private observer?: PerformanceObserver;
   private supportedFlag: boolean;
-  private expiryTimer?: number;
+  private expiryTimer?: ReturnType<typeof setTimeout>;
   private isMonitoring = false;
   private sessionStartedAt = 0;
 
   private taskHistory: Array<{ duration: number; startTime: number }> = [];
-  private lastTaskDuration = 0;
 
   private worstTaskDuration = 0;
   private worstTaskStartTime: number | null = null;
@@ -94,7 +92,6 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       this.expiryTimer = undefined;
     }
     this.taskHistory = [];
-    this.lastTaskDuration = 0;
     this.worstTaskDuration = 0;
     this.worstTaskStartTime = null;
   }
@@ -115,11 +112,6 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
     if (this.taskHistory.length) {
       this.taskHistory = this.taskHistory.filter((task) => task.startTime > cutoff);
     }
-    const latestTask = this.taskHistory.reduce<{ duration: number; startTime: number } | undefined>(
-      (latest, task) => (!latest || task.startTime > latest.startTime ? task : latest),
-      undefined
-    );
-    this.lastTaskDuration = latestTask?.duration ?? 0;
 
     let worstTaskDuration = 0;
     let worstTaskStartTime: number | null = null;
@@ -167,7 +159,7 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
       1,
       oldestStartTime + LongTaskMonitor.HISTORY_DURATION - performance.now()
     );
-    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay) as unknown as number;
+    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay);
   }
 
   private handleLongTask(entry: PerformanceLongTaskTiming) {
@@ -214,7 +206,6 @@ export class LongTaskMonitor implements Monitor<LongTaskInfo> {
   getCurrentStats(): LongTaskInfo {
     this.cleanupHistory();
     return {
-      duration: this.lastTaskDuration,
       totalBlockingTime: this.calculateTotalBlockingTime(),
       worstTaskDuration: this.worstTaskDuration,
       worstTaskStartTime: this.worstTaskStartTime,

@@ -14,7 +14,6 @@ export interface INPInfo {
   slowInteractionsCount: number; // count of *unique* interactions in the window
   worstInteractionDelay: number; // max latency in the window
   worstInteractionStartTime: number | null; // start time of the worst retained interaction
-  lastInteractionDelay: number; // latency of the most recent interaction recorded
 }
 
 // Type definition for PerformanceEventTiming
@@ -36,7 +35,7 @@ export class INPMonitor implements Monitor<INPInfo> {
   private callbacks: Array<(info: INPInfo) => void> = [];
   private eventObserver?: PerformanceObserver;
   private supportedFlag: boolean;
-  private expiryTimer?: number;
+  private expiryTimer?: ReturnType<typeof setTimeout>;
   private isMonitoring = false;
   private sessionStartedAt = 0;
 
@@ -46,7 +45,6 @@ export class INPMonitor implements Monitor<INPInfo> {
    */
   private interactionMap: Map<number | string, { duration: number; startTime: number }> = new Map();
 
-  private lastInteractionDelay = 0;
   private worstInteractionDelay = 0;
   private worstInteractionStartTime: number | null = null;
 
@@ -102,7 +100,6 @@ export class INPMonitor implements Monitor<INPInfo> {
       this.expiryTimer = undefined;
     }
     this.interactionMap.clear();
-    this.lastInteractionDelay = 0;
     this.worstInteractionDelay = 0;
     this.worstInteractionStartTime = null;
   }
@@ -173,8 +170,6 @@ export class INPMonitor implements Monitor<INPInfo> {
     // Recompute delays from retained interactions only.
     let worst = 0;
     let worstStartTime: number | null = null;
-    let last = 0;
-    let latestStartTime = -Infinity;
     for (const { duration, startTime } of this.interactionMap.values()) {
       if (
         duration > worst ||
@@ -183,14 +178,9 @@ export class INPMonitor implements Monitor<INPInfo> {
         worst = duration;
         worstStartTime = startTime;
       }
-      if (startTime >= latestStartTime) {
-        latestStartTime = startTime;
-        last = duration;
-      }
     }
     this.worstInteractionDelay = worst;
     this.worstInteractionStartTime = worstStartTime;
-    this.lastInteractionDelay = last;
   }
 
   private calculateP75(): number {
@@ -225,7 +215,7 @@ export class INPMonitor implements Monitor<INPInfo> {
       if (startTime < oldestStartTime) oldestStartTime = startTime;
     }
     const delay = Math.max(1, oldestStartTime + INPMonitor.HISTORY_DURATION - performance.now());
-    this.expiryTimer = window.setTimeout(() => this.publishCurrentStats(), delay);
+    this.expiryTimer = setTimeout(() => this.publishCurrentStats(), delay);
   }
 
   stopMonitoring() {
@@ -265,7 +255,6 @@ export class INPMonitor implements Monitor<INPInfo> {
       currentINP: this.calculateP75(),
       slowInteractionsCount: this.interactionMap.size,
       worstInteractionDelay: this.worstInteractionDelay,
-      lastInteractionDelay: this.lastInteractionDelay,
       worstInteractionStartTime: this.worstInteractionStartTime,
     };
   }

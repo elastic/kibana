@@ -66,7 +66,6 @@ const neutralPerf: PerformanceInfo = {
   minFps: 60,
 };
 const neutralTask: LongTaskInfo = {
-  duration: 0,
   worstTaskDuration: 0,
   worstTaskStartTime: null,
   totalBlockingTime: 0,
@@ -77,7 +76,6 @@ const neutralInp: INPInfo = {
   slowInteractionsCount: 0,
   worstInteractionDelay: 0,
   worstInteractionStartTime: null,
-  lastInteractionDelay: 0,
 };
 
 const warningTrigger = () => screen.getByLabelText(/^Performance warning:/);

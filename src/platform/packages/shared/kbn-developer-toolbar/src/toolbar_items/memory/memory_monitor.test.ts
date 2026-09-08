@@ -17,8 +17,7 @@ const lastMeasured = (snapshots: Snapshot[]): MemoryInfo | undefined => {
   const last = snapshots.at(-1);
   return last ?? undefined;
 };
-const shortTrend = (snapshots: Snapshot[]) => lastMeasured(snapshots)?.details?.shortTrendPerMin;
-const longTrend = (snapshots: Snapshot[]) => lastMeasured(snapshots)?.details?.longTrendPerMin;
+const shortTrend = (snapshots: Snapshot[]) => lastMeasured(snapshots)?.shortTrendPerMin;
 
 describe('MemoryMonitor', () => {
   const originalMemory = Object.getOwnPropertyDescriptor(performance, 'memory');
@@ -77,7 +76,8 @@ describe('MemoryMonitor', () => {
     expect(snapshots).toHaveLength(publicationsAtStop);
 
     monitor.startMonitoring();
-    expect(lastMeasured(snapshots)?.history).toEqual([200]);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(1);
+    expect(lastMeasured(snapshots)?.memoryUsage).toBe(200);
     monitor.stopMonitoring();
     const readsAfterRestartStop = readMemory.mock.calls.length;
     const publicationsAfterRestartStop = snapshots.length;
@@ -102,7 +102,6 @@ describe('MemoryMonitor', () => {
     for (let sample = 1; sample <= 10; sample++) sampleAfter(60_000, 100 + sample * 20);
 
     expect(shortTrend(snapshots)).toBeCloseTo(20);
-    expect(longTrend(snapshots)).toBeCloseTo(20);
   });
 
   it('preserves the regular twenty-second cadence trend', () => {
@@ -113,7 +112,6 @@ describe('MemoryMonitor', () => {
     }
 
     expect(shortTrend(snapshots)).toBeCloseTo(60);
-    expect(longTrend(snapshots)).toBeCloseTo(60);
   });
 
   it('uses elapsed time for irregular visibility gaps', () => {
@@ -125,7 +123,6 @@ describe('MemoryMonitor', () => {
     }
 
     expect(shortTrend(snapshots)).toBeCloseTo(20);
-    expect(longTrend(snapshots)).toBeCloseTo(20);
   });
 
   it('reports finite zero trends for constant heap and identical timestamps', () => {
@@ -135,7 +132,6 @@ describe('MemoryMonitor', () => {
       sampleAfter(gap, usedMiB);
     }
     expect(shortTrend(snapshots)).toBe(0);
-    expect(longTrend(snapshots)).toBe(0);
 
     monitor.stopMonitoring();
     jest.spyOn(performance, 'now').mockReturnValue(1000);
@@ -148,9 +144,7 @@ describe('MemoryMonitor', () => {
     }
 
     expect(Number.isFinite(shortTrend(snapshots) ?? Number.NaN)).toBe(true);
-    expect(Number.isFinite(longTrend(snapshots) ?? Number.NaN)).toBe(true);
     expect(shortTrend(snapshots)).toBe(0);
-    expect(longTrend(snapshots)).toBe(0);
   });
 
   it('publishes unavailable for a partial API and keeps retrying', () => {
@@ -194,9 +188,9 @@ describe('MemoryMonitor', () => {
     expect(snapshots).toEqual([null]);
   });
 
-  it('retains history through valid to unavailable to valid cadence samples', () => {
+  it('retains samples through valid to unavailable to valid cadence samples', () => {
     monitor.startMonitoring();
-    expect(lastMeasured(snapshots)?.history).toEqual([100]);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(1);
 
     readMemory.mockReturnValue(undefined);
     jest.advanceTimersByTime(20_000);
@@ -207,7 +201,8 @@ describe('MemoryMonitor', () => {
       jsHeapSizeLimit: 4096 * MIB,
     }));
     jest.advanceTimersByTime(20_000);
-    expect(lastMeasured(snapshots)?.history).toEqual([100, 200]);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(2);
+    expect(lastMeasured(snapshots)?.memoryUsage).toBe(200);
   });
 
   it('replays the actual measured ratio and growth snapshot to late subscribers', () => {
@@ -228,7 +223,7 @@ describe('MemoryMonitor', () => {
 
   it('freezes a warmup median only after elapsed time and four samples', () => {
     monitor.startMonitoring();
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(1);
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
     hidden = true;
@@ -236,15 +231,14 @@ describe('MemoryMonitor', () => {
     jest.advanceTimersByTime(60_000);
     hidden = false;
     document.dispatchEvent(new Event('visibilitychange'));
-    expect(lastMeasured(snapshots)?.history).toHaveLength(2);
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(2);
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
     usedMiB = 140;
     jest.advanceTimersByTime(20_000);
     usedMiB = 160;
     jest.advanceTimersByTime(20_000);
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(120);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(4);
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
   });
 
@@ -256,14 +250,13 @@ describe('MemoryMonitor', () => {
     }
 
     const measured = lastMeasured(snapshots);
-    expect(measured?.details?.baseline).toBe(130);
     expect(measured?.growthDetected).toBe(true);
     expect(measured?.heapUsageRatio).toBeLessThan(0.85);
   });
 
   it('clears growth when heap holds and keeps the frozen baseline across rollover', () => {
     monitor.destroy();
-    monitor = new MemoryMonitor({ maxHistory: 8 });
+    monitor = new MemoryMonitor(8);
     monitor.subscribe((info) => snapshots.push(info));
     monitor.startMonitoring();
     for (let sample = 1; sample <= 10; sample++) {
@@ -271,15 +264,13 @@ describe('MemoryMonitor', () => {
       jest.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(true);
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
 
     usedMiB = 300;
     for (let sample = 0; sample < 20; sample++) {
       jest.advanceTimersByTime(20_000);
     }
     expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
-    expect(lastMeasured(snapshots)?.history).toHaveLength(8);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(8);
   });
 
   it('starts a new baseline window after restart', () => {
@@ -288,35 +279,21 @@ describe('MemoryMonitor', () => {
       usedMiB = 100 + sample * 20;
       jest.advanceTimersByTime(20_000);
     }
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(130);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(4);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
     usedMiB = 400;
     monitor.startMonitoring();
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(0);
-    expect(lastMeasured(snapshots)?.history).toEqual([400]);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(1);
+    expect(lastMeasured(snapshots)?.memoryUsage).toBe(400);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
 
     for (let sample = 1; sample <= 3; sample++) {
       usedMiB = 400 + sample * 10;
       jest.advanceTimersByTime(20_000);
     }
-    expect(lastMeasured(snapshots)?.details?.baseline).toBe(415);
-  });
-
-  it('does not mutate an earlier snapshot history after later samples roll', () => {
-    monitor.destroy();
-    monitor = new MemoryMonitor({ maxHistory: 4 });
-    monitor.subscribe((info) => snapshots.push(info));
-    monitor.startMonitoring();
-    const first = lastMeasured(snapshots);
-    expect(first?.history).toEqual([100]);
-
-    for (let sample = 1; sample <= 5; sample++) {
-      usedMiB = 100 + sample * 20;
-      jest.advanceTimersByTime(20_000);
-    }
-
-    expect(first?.history).toEqual([100]);
-    expect(lastMeasured(snapshots)?.history).toEqual([140, 160, 180, 200]);
+    expect(lastMeasured(snapshots)?.sampleCount).toBe(4);
+    expect(lastMeasured(snapshots)?.growthDetected).toBe(false);
   });
 
   it('replays null after a failed sample instead of a stale measurement', () => {
