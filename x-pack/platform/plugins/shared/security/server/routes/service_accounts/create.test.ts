@@ -10,12 +10,11 @@ import Boom from '@hapi/boom';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 
 import { defineCreateServiceAccountRoute } from './create';
 import { createServiceAccountBodySchema } from './schemas';
 import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
-import type { ServiceAccountsServiceStart } from '../../service_accounts';
+import { EsServiceAccounts, type ServiceAccountsServiceStart } from '../../service_accounts';
 import { serviceAccountsServiceMock } from '../../service_accounts/service_accounts_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
 
@@ -45,30 +44,21 @@ describe('Create service account route', () => {
   function setup(
     options: {
       serviceAccounts?: ServiceAccountsServiceStart | null;
-      serverlessOrganizationId?: string;
-      serverlessProjectId?: string;
-      serverlessProjectType?: KibanaSolution;
+      serverless?: boolean;
     } = {}
   ) {
-    const mockRouteDefinitionParams = routeDefinitionParamsMock.create(enabledConfig, {
-      serverless: true,
-    });
+    const mockRouteDefinitionParams = routeDefinitionParamsMock.create(
+      options.serverless === false ? {} : enabledConfig,
+      {
+        serverless: options.serverless ?? true,
+      }
+    );
 
     const serviceAccountsMock =
       'serviceAccounts' in options
         ? options.serviceAccounts ?? null
         : serviceAccountsServiceMock.createStart();
     mockRouteDefinitionParams.getServiceAccountsService.mockReturnValue(serviceAccountsMock);
-
-    if ('serverlessOrganizationId' in options) {
-      mockRouteDefinitionParams.serverlessOrganizationId = options.serverlessOrganizationId;
-    }
-    if ('serverlessProjectId' in options) {
-      mockRouteDefinitionParams.serverlessProjectId = options.serverlessProjectId;
-    }
-    if ('serverlessProjectType' in options) {
-      mockRouteDefinitionParams.serverlessProjectType = options.serverlessProjectType;
-    }
 
     defineCreateServiceAccountRoute(mockRouteDefinitionParams);
 
@@ -140,23 +130,26 @@ describe('Create service account route', () => {
     );
   });
 
-  describe('availability guards', () => {
-    it.each([
-      ['the feature is disabled', { serviceAccounts: null }],
-      ['the organization id is not configured', { serverlessOrganizationId: undefined }],
-      ['the project id is not configured', { serverlessProjectId: undefined }],
-      ['the project type is not configured', { serverlessProjectType: undefined }],
-      ['the project type is not supported', { serverlessProjectType: 'chat' as KibanaSolution }],
-    ])('returns 404 when %s', async (reason, options) => {
-      const { routeHandler } = setup(options);
-
-      const response = await callRoute(routeHandler);
-
-      expect(response.status).toBe(404);
-      expect(response.payload).toEqual({
-        message: `Service accounts are not available: ${reason}`,
-      });
+  it('returns 404 when the feature is disabled', async () => {
+    const { routeHandler } = setup({ serviceAccounts: null });
+    const response = await callRoute(routeHandler);
+    expect(response.status).toBe(404);
+    expect(response.payload).toEqual({
+      message: 'Service accounts are not available: the feature is disabled',
     });
+  });
+
+  it('reaches the Elasticsearch backend without serverless context', async () => {
+    const { routeHandler } = setup({ serviceAccounts: new EsServiceAccounts(), serverless: false });
+    expect((await callRoute(routeHandler)).status).toBe(501);
+  });
+
+  it.each([400, 401, 403, 501])('preserves backend status %s', async (statusCode) => {
+    const { routeHandler, serviceAccounts } = setup();
+    serviceAccounts.create.mockRejectedValue(
+      Boom.boomify(new Error('backend error'), { statusCode })
+    );
+    expect((await callRoute(routeHandler)).status).toBe(statusCode);
   });
 
   it('reproduces the upstream status code when creation fails', async () => {

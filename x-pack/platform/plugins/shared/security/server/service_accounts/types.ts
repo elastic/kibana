@@ -6,7 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
+import type {
+  CreateServiceAccountParams,
+  ServiceAccount,
+  UiamProjectType,
+} from '@kbn/core-security-server';
 
 /**
  * A backend capable of managing service accounts for the current runtime.
@@ -20,6 +24,12 @@ export interface ServiceAccountsBackend {
 
 /**
  * Start contract of the service accounts service. `null` when the feature is
- * disabled, mirroring how OAuth management is exposed.
+ * disabled.
  */
 export type ServiceAccountsServiceStart = ServiceAccountsBackend;
+
+export interface CloudProjectContext {
+  organizationId: string;
+  projectId: string;
+  projectType: UiamProjectType;
+}

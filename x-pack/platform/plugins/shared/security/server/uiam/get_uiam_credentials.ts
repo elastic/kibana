@@ -11,9 +11,9 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 
 /**
- * Extracts the Bearer access token from the request. The token must be a UIAM credential.
+ * Extracts UIAM bearer-token or API-key credentials from the request.
  */
-export const getUiamAccessTokenFromRequest = (request: KibanaRequest): string => {
+export const getUiamCredentialsFromRequest = (request: KibanaRequest): string => {
   const authorization = HTTPAuthorizationHeader.parseFromRequest(request);
 
   if (!authorization) {

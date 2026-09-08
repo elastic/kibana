@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
+import type { UiamProjectType } from '@kbn/core-security-server';
 import {
   KIBANA_OBSERVABILITY_SOLUTION,
   KIBANA_SEARCH_SOLUTION,
   KIBANA_SECURITY_SOLUTION,
   KIBANA_VECTORDB_SOLUTION,
+  KIBANA_WORKPLACE_AI_SOLUTION,
   type KibanaSolution,
 } from '@kbn/projects-solutions-groups';
 
 /**
- * Maps a Kibana solution onto the project type UIAM understands. Solutions absent
- * from this map are not supported by UIAM.
+ * Maps each Kibana solution to its UIAM project type.
  */
-export const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Partial<
-  Record<KibanaSolution, UiamOAuthProjectType>
-> = {
+export const KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE: Record<KibanaSolution, UiamProjectType> = {
   [KIBANA_SEARCH_SOLUTION]: 'elasticsearch',
   [KIBANA_OBSERVABILITY_SOLUTION]: 'observability',
   [KIBANA_SECURITY_SOLUTION]: 'security',
   [KIBANA_VECTORDB_SOLUTION]: 'vectordb',
+  [KIBANA_WORKPLACE_AI_SOLUTION]: 'workplaceai',
 };

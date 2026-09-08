@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-export {
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+import { z } from '@kbn/zod';
+
+import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-  SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES,
+  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
 } from './constants';
-export { serviceAccountIdSchema, serviceAccountNameSchema } from './schemas';
+
+export const serviceAccountIdSchema = z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH);
+export const serviceAccountNameSchema = z.string().max(SERVICE_ACCOUNT_NAME_MAX_LENGTH);

@@ -19,7 +19,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
@@ -55,7 +54,7 @@ import type { FipsServiceSetupInternal } from './fips';
 import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
-import type { ServiceAccountsServiceStart } from './service_accounts';
+import type { CloudProjectContext, ServiceAccountsServiceStart } from './service_accounts';
 import { ServiceAccountsService } from './service_accounts';
 import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
@@ -154,11 +153,7 @@ export class SecurityPlugin
    * Captured during `setup`: the project identifiers only exist on the cloud plugin's setup
    * contract, but service accounts are started later.
    */
-  private cloudProjectContext: {
-    organizationId?: string;
-    projectId?: string;
-    projectType?: UiamOAuthProjectType;
-  } = {};
+  private cloudProjectContext?: CloudProjectContext;
 
   private readonly serviceAccountsService: ServiceAccountsService;
   private serviceAccountsStart?: ServiceAccountsServiceStart | null;
@@ -272,13 +267,15 @@ export class SecurityPlugin
       license$: licensing.license$,
     });
     this.securityLicense = license;
-    this.cloudProjectContext = {
-      organizationId: cloud?.organizationId,
-      projectId: cloud?.serverless?.projectId,
-      projectType: cloud?.serverless?.projectType
-        ? KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE[cloud.serverless.projectType]
-        : undefined,
-    };
+    const organizationId = cloud?.organizationId;
+    const projectId = cloud?.serverless?.projectId;
+    const projectType = cloud?.serverless?.projectType
+      ? KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE[cloud.serverless.projectType]
+      : undefined;
+    this.cloudProjectContext =
+      organizationId && projectId && projectType
+        ? { organizationId, projectId, projectType }
+        : undefined;
 
     securityFeatures.forEach((securityFeature) =>
       features.registerElasticsearchFeature(securityFeature)
@@ -404,7 +401,6 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
-      serverlessOrganizationId: cloud?.organizationId,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
       analyticsService: this.analyticsService.setup({ analytics: core.analytics }),
@@ -512,7 +508,7 @@ export class SecurityPlugin
       license: this.securityLicense!,
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
-      ...this.cloudProjectContext,
+      cloudProjectContext: this.cloudProjectContext,
     });
 
     this.authorizationService.start({

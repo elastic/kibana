@@ -20,9 +20,11 @@ describe('ServiceAccountsService', () => {
     license: licenseMock.create(),
     uiam: uiamServiceMock.create(),
     checkPrivilegesWithRequest: jest.fn(),
-    organizationId: 'organization-id',
-    projectId: 'project-id',
-    projectType: 'security' as const,
+    cloudProjectContext: {
+      organizationId: 'organization-id',
+      projectId: 'project-id',
+      projectType: 'security' as const,
+    },
     ...overrides,
   });
 
@@ -53,13 +55,12 @@ describe('ServiceAccountsService', () => {
       ).toBeInstanceOf(EsServiceAccounts);
     });
 
-    it.each(['organizationId', 'projectId', 'projectType'])(
-      'falls back to the Elasticsearch backend when `%s` is missing',
-      (field) => {
-        expect(
-          service.start(startParams({ serviceAccounts: { enabled: true } }, { [field]: undefined }))
-        ).toBeInstanceOf(EsServiceAccounts);
-      }
-    );
+    it('falls back to Elasticsearch when project context is unavailable', () => {
+      expect(
+        service.start(
+          startParams({ serviceAccounts: { enabled: true } }, { cloudProjectContext: undefined })
+        )
+      ).toBeInstanceOf(EsServiceAccounts);
+    });
   });
 });

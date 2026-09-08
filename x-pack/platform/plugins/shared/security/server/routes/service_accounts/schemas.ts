@@ -7,11 +7,11 @@
 
 import { z } from '@kbn/zod';
 
-import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../../common/service_accounts';
+import { serviceAccountNameSchema } from '../../../common/service_accounts';
 
 export const createServiceAccountBodySchema = z
   .object({
-    name: z.string().min(1).max(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
+    name: serviceAccountNameSchema.min(1),
   })
   // Rejects unknown keys, so callers cannot supply `assumable_by` or `role_assignments` — Kibana
   // derives both itself.

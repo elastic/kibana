@@ -65,3 +65,4 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
+export type { UiamProjectType } from './src/uiam';

@@ -17,6 +17,7 @@ import type {
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH } from '../../common/service_accounts';
 import type { UiamServicePublic } from '../uiam';
 import { uiamServiceMock } from '../uiam/uiam_service.mock';
 
@@ -77,9 +78,11 @@ describe('UiamServiceAccounts', () => {
       license: mockLicense,
       uiam: mockUiam,
       checkPrivilegesWithRequest: mockCheckPrivilegesWithRequest,
-      organizationId: 'organization-id',
-      projectId: 'project-id',
-      projectType: 'security',
+      cloudProjectContext: {
+        organizationId: 'organization-id',
+        projectId: 'project-id',
+        projectType: 'security',
+      },
     });
   });
 
@@ -152,31 +155,31 @@ describe('UiamServiceAccounts', () => {
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
       expect(mockUiam.createServiceAccount).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Service account creation denied: missing `manage_security` cluster privilege'
+      );
     });
 
-    // Validating the response means a mismatch fails loudly rather than leaking undefined fields
-    // to consumers.
-    it('rejects when the upstream response does not match the expected shape', async () => {
-      mockUiam.createServiceAccount.mockResolvedValue({ id: 'service-account-id' } as never);
-
-      await expect(
-        serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toThrowError('Error occured during service account creation');
-    });
-
-    it('rejects when an `assumable_by` entry does not match the expected shape', async () => {
-      mockUiam.createServiceAccount.mockResolvedValue({
+    it.each([
+      { id: 'service-account-id' } as ServiceAccount,
+      { ...validResponse, assumable_by: [{ type: 'project-service-account' }] } as ServiceAccount,
+      { ...validResponse, id: 'a'.repeat(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH + 1) },
+      {
         ...validResponse,
-        assumable_by: [{ type: 'project-service-account' }],
-      } as never);
+        assumable_by: [validResponse.assumable_by[0], validResponse.assumable_by[0]],
+      },
+    ])('logs validation failures and returns the original response', async (result) => {
+      mockUiam.createServiceAccount.mockResolvedValue(result);
 
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), createParams)
-      ).rejects.toThrowError('Error occured during service account creation');
+      ).resolves.toBe(result);
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('failed validation'));
+      expect(mockUiam.createServiceAccount).toHaveBeenCalledTimes(1);
     });
 
-    // Consumers only ever see documented fields, so a field UIAM adds later cannot silently become
-    // part of Kibana's contract.
+    // Successful validation strips extra fields from the documented response.
     it('strips fields the upstream response does not declare', async () => {
       mockUiam.createServiceAccount.mockResolvedValue({
         ...validResponse,

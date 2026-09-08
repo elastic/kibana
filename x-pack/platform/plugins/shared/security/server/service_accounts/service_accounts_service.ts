@@ -6,11 +6,10 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 
 import { EsServiceAccounts } from './es_service_accounts';
-import type { ServiceAccountsServiceStart } from './types';
+import type { CloudProjectContext, ServiceAccountsServiceStart } from './types';
 import { UiamServiceAccounts } from './uiam_service_accounts';
 import type { SecurityLicense } from '../../common';
 import type { ConfigType } from '../config';
@@ -22,9 +21,7 @@ export interface ServiceAccountsServiceStartParams {
   /** The UIAM service, when UIAM is configured for this deployment. */
   uiam?: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
-  organizationId?: string;
-  projectId?: string;
-  projectType?: UiamOAuthProjectType;
+  cloudProjectContext?: CloudProjectContext;
 }
 
 export class ServiceAccountsService {
@@ -39,18 +36,16 @@ export class ServiceAccountsService {
     license,
     uiam,
     checkPrivilegesWithRequest,
-    organizationId,
-    projectId,
-    projectType,
+    cloudProjectContext,
   }: ServiceAccountsServiceStartParams): ServiceAccountsServiceStart | null {
-    if (config.serviceAccounts?.enabled !== true) {
+    if (!config.serviceAccounts?.enabled) {
       this.logger.debug('Service accounts are not enabled.');
       return null;
     }
 
     // Backend selection keys off UIAM availability rather than the build flavor, so
     // that the Elasticsearch path is reachable and testable before it is finished.
-    if (!uiam || !organizationId || !projectId || !projectType) {
+    if (!uiam || !cloudProjectContext) {
       this.logger.debug(
         'UIAM is not available; falling back to the Elasticsearch service accounts backend.'
       );
@@ -62,9 +57,7 @@ export class ServiceAccountsService {
       license,
       uiam,
       checkPrivilegesWithRequest,
-      organizationId,
-      projectId,
-      projectType,
+      cloudProjectContext,
     });
   }
 }

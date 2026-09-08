@@ -9,7 +9,6 @@ import { createServiceAccountBodySchema } from './schemas';
 import type { RouteDefinitionParams } from '..';
 import { SERVICE_ACCOUNT_CREATE_MAX_BODY_BYTES } from '../../../common/service_accounts';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE } from '../../uiam';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 const unavailable = (reason: string) => ({
@@ -19,9 +18,6 @@ const unavailable = (reason: string) => ({
 export function defineCreateServiceAccountRoute({
   router,
   getServiceAccountsService,
-  serverlessOrganizationId,
-  serverlessProjectId,
-  serverlessProjectType,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -44,22 +40,6 @@ export function defineCreateServiceAccountRoute({
         const serviceAccounts = getServiceAccountsService();
         if (!serviceAccounts) {
           return response.notFound(unavailable('the feature is disabled'));
-        }
-
-        if (!serverlessOrganizationId) {
-          return response.notFound(unavailable('the organization id is not configured'));
-        }
-
-        if (!serverlessProjectId) {
-          return response.notFound(unavailable('the project id is not configured'));
-        }
-
-        if (!serverlessProjectType) {
-          return response.notFound(unavailable('the project type is not configured'));
-        }
-
-        if (!Object.hasOwn(KIBANA_SOLUTION_TO_UIAM_PROJECT_TYPE, serverlessProjectType)) {
-          return response.notFound(unavailable('the project type is not supported'));
         }
 
         return response.ok({ body: await serviceAccounts.create(request, request.body) });

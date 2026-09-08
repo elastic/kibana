@@ -8,36 +8,27 @@
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type {
-  CreateServiceAccountParams,
-  ServiceAccount,
-  UiamOAuthProjectType,
-} from '@kbn/core-security-server';
+import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-server';
 import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
 import { z } from '@kbn/zod';
 
 import { buildAssumableBy } from './assumable_by';
 import { SERVICE_ACCOUNT_ROLE_ASSIGNMENTS } from './role_assignments';
-import type { ServiceAccountsBackend } from './types';
+import type { CloudProjectContext, ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
 import {
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
-  SERVICE_ACCOUNT_NAME_MAX_LENGTH,
+  serviceAccountIdSchema,
+  serviceAccountNameSchema,
 } from '../../common/service_accounts';
 import { getDetailedErrorMessage } from '../errors';
-import { getUiamAccessTokenFromRequest, type UiamServicePublic } from '../uiam';
+import { getUiamCredentialsFromRequest, type UiamServicePublic } from '../uiam';
 
-/**
- * Validates the payload UIAM returns, so that a shape change fails loudly here rather than leaking
- * partially-undefined objects to consumers. Verified against image
- * `docker.elastic.co/cloud-ci/uiam:git-a67a2f75a615`, whose create response carries exactly the
- * fields below; anything UIAM adds later is stripped rather than passed through, so consumers only
- * ever see documented fields.
- */
+/** Checks UIAM response compatibility without failing an already successful creation. */
 const serviceAccountSchema = z.object({
-  id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
+  id: serviceAccountIdSchema,
   type: z.literal('project'),
-  name: z.string().max(SERVICE_ACCOUNT_NAME_MAX_LENGTH),
+  name: serviceAccountNameSchema,
   organization_id: z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH),
   role_assignments: z.record(z.string().max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH), z.unknown()),
   assumable_by: z
@@ -57,9 +48,7 @@ export interface UiamServiceAccountsOptions {
   license: SecurityLicense;
   uiam: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
-  organizationId: string;
-  projectId: string;
-  projectType: UiamOAuthProjectType;
+  cloudProjectContext: CloudProjectContext;
 }
 
 export class UiamServiceAccounts implements ServiceAccountsBackend {
@@ -67,26 +56,20 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
   private readonly checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
-  private readonly organizationId: string;
-  private readonly projectId: string;
-  private readonly projectType: UiamOAuthProjectType;
+  private readonly cloudProjectContext: CloudProjectContext;
 
   constructor({
     logger,
     license,
     uiam,
     checkPrivilegesWithRequest,
-    organizationId,
-    projectId,
-    projectType,
+    cloudProjectContext,
   }: UiamServiceAccountsOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
     this.checkPrivilegesWithRequest = checkPrivilegesWithRequest;
-    this.organizationId = organizationId;
-    this.projectId = projectId;
-    this.projectType = projectType;
+    this.cloudProjectContext = cloudProjectContext;
   }
 
   async create(
@@ -99,13 +82,16 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const accessToken = getUiamAccessTokenFromRequest(request);
+    const credentials = getUiamCredentialsFromRequest(request);
 
     const { hasAllRequested } = await this.checkPrivilegesWithRequest(request).globally({
       elasticsearch: { cluster: ['manage_security'], index: {} },
     });
 
     if (!hasAllRequested) {
+      this.logger.warn(
+        'Service account creation denied: missing `manage_security` cluster privilege'
+      );
       throw Boom.forbidden(
         'Cannot create a service account: missing `manage_security` cluster privilege'
       );
@@ -114,14 +100,10 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
     this.logger.debug('Attempting to create a service account');
 
     try {
-      const result = await this.uiam.createServiceAccount(accessToken, {
+      const result = await this.uiam.createServiceAccount(credentials, {
         name: params.name,
         role_assignments: SERVICE_ACCOUNT_ROLE_ASSIGNMENTS,
-        assumable_by: buildAssumableBy({
-          organizationId: this.organizationId,
-          projectId: this.projectId,
-          projectType: this.projectType,
-        }),
+        assumable_by: buildAssumableBy(this.cloudProjectContext),
       });
 
       const parsed = serviceAccountSchema.safeParse(result);
@@ -129,7 +111,7 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
         this.logger.error(
           `Service account payload from UIAM failed validation: ${parsed.error.message}`
         );
-        throw new Error(`Error occured during service account creation.`);
+        return result;
       }
 
       return parsed.data;

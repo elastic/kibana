@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { ServiceAccountAssumableBy, UiamOAuthProjectType } from '@kbn/core-security-server';
+import type { ServiceAccountAssumableBy, UiamProjectType } from '@kbn/core-security-server';
 
 export interface BuildAssumableByParams {
   organizationId: string;
   projectId: string;
-  projectType: UiamOAuthProjectType;
+  projectType: UiamProjectType;
 }
 
 /**

@@ -42,7 +42,7 @@ import { securityTelemetry } from '../otel/instrumentation';
 /**
  * Represents the request body for creating a service account via UIAM.
  */
-export interface CreateServiceAccountRequestBody {
+interface CreateServiceAccountRequestBody {
   /** A descriptive name for the service account. */
   name: string;
   /** Roles granted to the service account, referenced by name. */
@@ -271,11 +271,11 @@ export interface UiamServicePublic {
    * Called with the caller's own credential, so UIAM downscopes the new account
    * to a subset of that caller's privileges.
    *
-   * @param accessToken UIAM session access token.
+   * @param credentials UIAM bearer-token or API-key credentials.
    * @param body The request body for creating the service account.
    */
   createServiceAccount(
-    accessToken: string,
+    credentials: string,
     body: CreateServiceAccountRequestBody
   ): Promise<ServiceAccount>;
 
@@ -711,7 +711,7 @@ export class UiamService implements UiamServicePublic {
    * See {@link UiamService.createServiceAccount}.
    */
   async createServiceAccount(
-    accessToken: string,
+    credentials: string,
     body: CreateServiceAccountRequestBody
   ): Promise<ServiceAccount> {
     try {
@@ -724,7 +724,7 @@ export class UiamService implements UiamServicePublic {
             'Content-Type': 'application/json',
             'User-Agent': this.#userAgentHeader,
             [ES_CLIENT_AUTHENTICATION_HEADER]: this.#config.sharedSecret,
-            Authorization: `Bearer ${accessToken}`,
+            Authorization: `Bearer ${credentials}`,
           },
           body: JSON.stringify({
             ...body,

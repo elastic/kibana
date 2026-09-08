@@ -13,3 +13,4 @@ export {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
 } from './attestation';
+export type { UiamProjectType } from './project_type';

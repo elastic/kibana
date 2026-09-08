@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  UiamOAuthType,
-  UiamOAuthClientResponse,
-  UiamOAuthClientLogo,
-  UiamOAuthClientType,
-  UiamOAuthConnectionsSummary,
-  UiamOAuthConnectionResponse,
-  CreateUiamOAuthClientParams,
-  UpdateUiamOAuthClientParams,
-  UpdateUiamOAuthConnectionParams,
-  UiamUserInfo,
-  UiamResolvedUsersResponse,
-} from './uiam_oauth';
+/** Identifies a project type supported by UIAM. */
+export type UiamProjectType =
+  | 'elasticsearch'
+  | 'observability'
+  | 'security'
+  | 'vectordb'
+  | 'workplaceai';

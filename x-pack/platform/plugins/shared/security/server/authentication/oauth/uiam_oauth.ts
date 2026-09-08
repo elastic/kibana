@@ -18,7 +18,7 @@ import type {
 
 import type { SecurityLicense } from '../../../common';
 import { getDetailedErrorMessage } from '../../errors';
-import { getUiamAccessTokenFromRequest, type UiamServicePublic } from '../../uiam';
+import { getUiamCredentialsFromRequest, type UiamServicePublic } from '../../uiam';
 
 export interface UiamOAuthOptions {
   logger: Logger;
@@ -304,6 +304,6 @@ export class UiamOAuth implements UiamOAuthType {
    * Extracts the Bearer access token from the request. The token must be a UIAM credential.
    */
   static getAccessToken(request: KibanaRequest): string {
-    return getUiamAccessTokenFromRequest(request);
+    return getUiamCredentialsFromRequest(request);
   }
 }

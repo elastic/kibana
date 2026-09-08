@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UiamOAuthProjectType } from '@kbn/core-security-server';
+import type { UiamProjectType } from '@kbn/core-security-server';
 
 import { buildAssumableBy } from './assumable_by';
 
@@ -27,16 +27,19 @@ describe('buildAssumableBy', () => {
     ]);
   });
 
-  it.each<UiamOAuthProjectType>(['elasticsearch', 'observability', 'security', 'vectordb'])(
-    'passes through the `%s` project type verbatim',
-    (projectType) => {
-      const [entry] = buildAssumableBy({
-        organizationId: 'organization-id',
-        projectId: 'project-id',
-        projectType,
-      });
+  it.each<UiamProjectType>([
+    'elasticsearch',
+    'observability',
+    'security',
+    'vectordb',
+    'workplaceai',
+  ])('passes through the `%s` project type verbatim', (projectType) => {
+    const [entry] = buildAssumableBy({
+      organizationId: 'organization-id',
+      projectId: 'project-id',
+      projectType,
+    });
 
-      expect(entry.project_type).toBe(projectType);
-    }
-  );
+    expect(entry.project_type).toBe(projectType);
+  });
 });
