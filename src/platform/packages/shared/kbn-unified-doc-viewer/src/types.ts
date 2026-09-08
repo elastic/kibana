@@ -12,6 +12,7 @@ export type {
   DocViewActions,
   DocViewFilterFn,
   DocViewRenderProps,
+  DocViewRestorableStateProps,
   DocViewerComponent,
   DocViewerRestorableState,
   DocViewerShareableState,

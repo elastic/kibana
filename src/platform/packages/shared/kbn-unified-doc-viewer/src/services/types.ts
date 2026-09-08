@@ -10,7 +10,6 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { EbtClickAttrs } from '@kbn/ebt-click';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ZodTypeAny } from '@kbn/zod';
@@ -96,8 +95,21 @@ export interface DocViewRenderProps {
 
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 
+/**
+ * Props a doc view uses to participate in the doc viewer's restorable/shareable state channel: seed
+ * from `initialState` on mount, and report changes via `onInitialStateChange`. Provider-agnostic —
+ * a tab may satisfy it with `withRestorableState` / `useRestorableState` from `@kbn/restorable-state`
+ * (the convenient default), or wire the props itself; it does not have to depend on that package.
+ */
+export interface DocViewRestorableStateProps<TState extends object = object> {
+  /** State to seed the tab with on mount, from local restore or a shared-link deep link. */
+  initialState?: Partial<TState>;
+  /** Reports the tab's current state so the host can persist it (locally and/or in the URL). */
+  onInitialStateChange?: (state: Partial<TState>) => void;
+}
+
 export type DocViewRenderFunction<TState extends object = object> = (
-  props: DocViewRenderProps & RestorableStateProviderProps<TState>
+  props: DocViewRenderProps & DocViewRestorableStateProps<TState>
 ) => ReactElement;
 
 export interface DocView<TState extends object = object> {
