@@ -228,7 +228,7 @@ describe('composeFormToCreateRequest', () => {
         {
           id: 'dashboard-id',
           type: DASHBOARD_ARTIFACT_TYPE,
-          data: { dashboardId: '  dashboard-123  ' },
+          data: { dashboard_id: '  dashboard-123  ' },
         },
       ],
     };
@@ -244,7 +244,7 @@ describe('composeFormToCreateRequest', () => {
       {
         id: 'dashboard-id',
         type: DASHBOARD_ARTIFACT_TYPE,
-        data: { dashboardId: '  dashboard-123  ' },
+        data: { dashboard_id: '  dashboard-123  ' },
       },
     ]);
   });
@@ -256,7 +256,7 @@ describe('composeFormToCreateRequest', () => {
         { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
       ],
       dashboardArtifacts: [
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: '' } },
       ],
       artifacts: [{ id: 'other-id', type: 'other', data: { value: 'kept' } }],
     };
@@ -266,7 +266,7 @@ describe('composeFormToCreateRequest', () => {
     expect(result.artifacts).toEqual([
       { id: 'other-id', type: 'other', data: { value: 'kept' } },
       { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
-      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: '' } },
     ]);
   });
 
@@ -277,7 +277,7 @@ describe('composeFormToCreateRequest', () => {
         { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
       ],
       dashboardArtifacts: [
-        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dashboard-123' } },
       ],
     };
 
@@ -285,7 +285,7 @@ describe('composeFormToCreateRequest', () => {
 
     expect(result.artifacts).toEqual([
       { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
-      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dashboard-123' } },
     ]);
   });
 });
@@ -553,7 +553,7 @@ describe('mapRuleToComposeFormValues', () => {
       artifacts: [
         { id: 'host-id', type: 'host', data: { value: 'host-a' } },
         { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
-        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
       ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
@@ -562,7 +562,7 @@ describe('mapRuleToComposeFormValues', () => {
       { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
     ]);
     expect(result.dashboardArtifacts).toEqual([
-      { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
+      { id: 'dashboard-id', type: 'dashboard', data: { dashboard_id: 'dashboard-123' } },
     ]);
   });
 
