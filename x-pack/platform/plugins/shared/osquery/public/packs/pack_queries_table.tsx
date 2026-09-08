@@ -6,19 +6,20 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PackQueryFormData, UsePackQueryFormProps } from './queries/use_pack_query_form';
 import { resolveInheritedScheduleInput } from './queries/use_pack_query_form';
 import { OS_LABELS, PLATFORM_IDS, isPlatformId } from './queries/platforms';
-import { ExperimentalFeaturesService } from '../common/experimental_features_service';
 import { formatQuerySchedule } from './format_query_schedule';
 
 export interface PackQueriesTableProps {
@@ -26,30 +27,64 @@ export interface PackQueriesTableProps {
   isReadOnly?: boolean;
   onDeleteClick?: (item: PackQueryFormData) => void;
   onEditClick?: (item: PackQueryFormData) => void;
+  onToggleEnabled?: (item: PackQueryFormData, enabled: boolean) => void;
   selectedItems?: PackQueryFormData[];
   setSelectedItems?: (selection: PackQueryFormData[]) => void;
   packSchedule?: UsePackQueryFormProps['packSchedule'];
 }
+
+const DISABLED_ROW_STYLE: React.CSSProperties = { opacity: 0.6 };
+
+/**
+ * Character budget for the Schedule cell before it truncates behind a tooltip.
+ * The longest untruncated output today is a six-weekday custom rule
+ * (`Every week on Sun, Mon, Tue, Wed, Thu, Fri`, 43 chars), so 48 leaves the
+ * common cases intact while still catching a full seven-day list or a
+ * large-interval variant.
+ */
+const SCHEDULE_TEXT_MAX_LENGTH = 48;
+
+/**
+ * Render schedule text, truncating behind an `EuiToolTip` when it exceeds
+ * {@link SCHEDULE_TEXT_MAX_LENGTH}. The tooltip carries the full string so the
+ * cell never hides information outright.
+ */
+const renderScheduleText = (text: string) => {
+  if (text.length <= SCHEDULE_TEXT_MAX_LENGTH) {
+    return text;
+  }
+
+  return (
+    <EuiToolTip content={text} disableScreenReaderOutput>
+      {/* tabIndex makes the truncated anchor keyboard-reachable, so the tooltip
+          is not mouse-only. `aria-label` carries the untruncated text. */}
+      <span tabIndex={0} aria-label={text}>
+        {`${text.slice(0, SCHEDULE_TEXT_MAX_LENGTH - 1).trimEnd()}…`}
+      </span>
+    </EuiToolTip>
+  );
+};
 
 const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
   data,
   isReadOnly,
   onDeleteClick,
   onEditClick,
+  onToggleEnabled,
   selectedItems,
   setSelectedItems,
   packSchedule,
 }) => {
-  const isRruleSchedulingEnabled = ExperimentalFeaturesService.get().rruleScheduling;
-
   const renderScheduleColumn = useCallback(
     (_: unknown, item: PackQueryFormData) => {
       if (item.schedule_type) {
-        return formatQuerySchedule({
-          schedule_type: item.schedule_type,
-          interval: item.interval,
-          rrule_schedule: item.rrule_schedule,
-        });
+        return renderScheduleText(
+          formatQuerySchedule({
+            schedule_type: item.schedule_type,
+            interval: item.interval,
+            rrule_schedule: item.rrule_schedule,
+          })
+        );
       }
 
       // A non-override query resolves its effective schedule through the shared
@@ -58,7 +93,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       // an explicitly persisted interval) or falls back to its own interval. A
       // legacy pack with no real pack-level schedule synthesizes an interval
       // default that must not shadow the query's own interval.
-      return formatQuerySchedule(resolveInheritedScheduleInput(packSchedule, item.interval));
+      return renderScheduleText(
+        formatQuerySchedule(resolveInheritedScheduleInput(packSchedule, item.interval))
+      );
     },
     [packSchedule]
   );
@@ -142,8 +179,52 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       version
         ? `${version}`
         : i18n.translate('xpack.osquery.pack.queriesTable.osqueryVersionAllLabel', {
-            defaultMessage: 'ALL',
+            defaultMessage: 'All',
           }),
+    []
+  );
+
+  const renderEnabledColumn = useCallback(
+    (_: unknown, item: PackQueryFormData) => {
+      // eslint-disable-next-line react-perf/jsx-no-new-function-as-prop
+      const handleChange = (e: EuiSwitchEvent) =>
+        onToggleEnabled && onToggleEnabled(item, e.target.checked);
+
+      return (
+        <EuiSwitch
+          label=""
+          checked={item.enabled !== false}
+          // eslint-disable-next-line react/jsx-no-bind
+          onChange={handleChange}
+          disabled={isReadOnly || !onToggleEnabled}
+          compressed
+          data-test-subj={`query-enabled-switch-${item.id}`}
+          aria-label={i18n.translate('xpack.osquery.pack.queriesTable.enabledSwitchAriaLabel', {
+            defaultMessage: 'Toggle query {queryId} enabled',
+            values: { queryId: item.id },
+          })}
+        />
+      );
+    },
+    [isReadOnly, onToggleEnabled]
+  );
+
+  const renderIdColumn = useCallback(
+    (id: string, item: PackQueryFormData) =>
+      item.enabled === false ? (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" wrap={false}>
+          <EuiFlexItem grow={false}>{id}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="default" data-test-subj={`query-disabled-badge-${id}`}>
+              {i18n.translate('xpack.osquery.pack.queriesTable.disabledBadgeLabel', {
+                defaultMessage: 'Disabled',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : (
+        <>{id}</>
+      ),
     []
   );
 
@@ -155,21 +236,8 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
           defaultMessage: 'ID',
         }),
         width: '20%',
+        render: renderIdColumn,
       },
-      // Flag off: keep the legacy "Interval (s)" column in its original
-      // position (right after ID). Flag on: the Schedule column moves to the
-      // end (after platform / version).
-      ...(!isRruleSchedulingEnabled
-        ? [
-            {
-              field: 'interval',
-              name: i18n.translate('xpack.osquery.pack.queriesTable.intervalColumnTitle', {
-                defaultMessage: 'Interval (s)',
-              }),
-              width: '100px',
-            },
-          ]
-        : []),
       {
         field: 'platform',
         name: i18n.translate('xpack.osquery.pack.queriesTable.osColumnTitle', {
@@ -179,22 +247,30 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       },
       {
         field: 'version',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.versionColumnTitle', {
-          defaultMessage: 'Min Osquery version',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.minVersionColumnTitle', {
+          defaultMessage: 'Min version',
         }),
         render: renderVersionColumn,
       },
-      ...(isRruleSchedulingEnabled
-        ? [
-            {
-              field: 'interval',
-              name: i18n.translate('xpack.osquery.pack.queriesTable.scheduleColumnTitle', {
-                defaultMessage: 'Schedule',
-              }),
-              render: renderScheduleColumn,
-            },
-          ]
-        : []),
+      // The Schedule column is not gated on `rruleScheduling`: with the flag
+      // off every query is interval-mode, and `formatQuerySchedule` renders
+      // that as `"{n}s"` — the same value the old "Interval (s)" column showed,
+      // just labelled honestly. One column, one i18n key, one order.
+      {
+        field: 'interval',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.scheduleColumnTitle', {
+          defaultMessage: 'Schedule',
+        }),
+        render: renderScheduleColumn,
+      },
+      {
+        field: 'enabled',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.enabledColumnTitle', {
+          defaultMessage: 'Enabled',
+        }),
+        width: '80px',
+        render: renderEnabledColumn,
+      },
       ...(!isReadOnly
         ? [
             {
@@ -216,13 +292,19 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     ],
     [
       isReadOnly,
-      isRruleSchedulingEnabled,
       renderDeleteAction,
       renderEditAction,
+      renderEnabledColumn,
+      renderIdColumn,
       renderPlatformColumn,
       renderScheduleColumn,
       renderVersionColumn,
     ]
+  );
+
+  const rowProps = useCallback(
+    (item: PackQueryFormData) => (item.enabled === false ? { style: DISABLED_ROW_STYLE } : {}),
+    []
   );
 
   const sorting = useMemo(
@@ -253,6 +335,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
       columns={columns}
       sorting={sorting}
       selection={isReadOnly ? undefined : selection}
+      rowProps={rowProps}
       tableCaption={i18n.translate('xpack.osquery.pack.queriesTable.tableCaption', {
         defaultMessage: 'Pack queries',
       })}
