@@ -20,6 +20,7 @@ import {
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WATCH_OFFICER_ID,
+  type WorkerScheduleUnit,
 } from '@kbn/pnd-common';
 
 /* -------------------------------------------------------------------------- */
@@ -154,6 +155,61 @@ export const AUTONOMY_RANGE_ARIA_LABEL = i18n.translate(
   'xpack.pnd.watches.settings.autonomy.rangeAriaLabel',
   { defaultMessage: 'Autonomy level' }
 );
+
+/* -------------------------------------------------------------------------- */
+/* Schedule interval                                                          */
+/* -------------------------------------------------------------------------- */
+
+export const SCHEDULE_INTERVAL_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.label',
+  { defaultMessage: 'Run every' }
+);
+
+export const SCHEDULE_INTERVAL_HELP_TEXT = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.helpText',
+  { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+);
+
+export const SCHEDULE_INTERVAL_NUMBER_ARIA_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.numberAriaLabel',
+  { defaultMessage: 'Schedule interval' }
+);
+
+export const SCHEDULE_INTERVAL_UNIT_ARIA_LABEL = i18n.translate(
+  'xpack.pnd.watches.settings.scheduleInterval.unitAriaLabel',
+  { defaultMessage: 'Schedule interval unit' }
+);
+
+const SCHEDULE_UNIT_MINUTE = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.minute', {
+    defaultMessage: '{intervalValue, plural, one {minute} other {minutes}}',
+    values: { intervalValue },
+  });
+
+const SCHEDULE_UNIT_HOUR = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.hour', {
+    defaultMessage: '{intervalValue, plural, one {hour} other {hours}}',
+    values: { intervalValue },
+  });
+
+const SCHEDULE_UNIT_DAY = (intervalValue: string) =>
+  i18n.translate('xpack.pnd.watches.settings.scheduleInterval.unit.day', {
+    defaultMessage: '{intervalValue, plural, one {day} other {days}}',
+    values: { intervalValue },
+  });
+
+/** Pluralised unit label, matching how the Attack Discovery schedule form reads its unit select. */
+export const scheduleUnitLabel = (unit: WorkerScheduleUnit, intervalValue: number): string => {
+  const value = String(intervalValue);
+  switch (unit) {
+    case 'm':
+      return SCHEDULE_UNIT_MINUTE(value);
+    case 'h':
+      return SCHEDULE_UNIT_HOUR(value);
+    case 'd':
+      return SCHEDULE_UNIT_DAY(value);
+  }
+};
 
 /* -------------------------------------------------------------------------- */
 /* Triggers                                                                   */

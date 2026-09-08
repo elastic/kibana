@@ -1,5 +1,5 @@
 {
-  "sha1": "fbd5c61c176f27c02a55391a2bc72ba58c386492",
+  "sha1": "0521a9fb629c4378458ce407b1f71a6d5a02df51",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2532,8 +2532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 160,
-        "column": 7
+        "line": 209,
+        "column": 29
       }
     },
     {
@@ -2546,8 +2546,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 163,
-        "column": 21
+        "line": 216,
+        "column": 16
       }
     },
     {
@@ -2560,8 +2560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 169,
-        "column": 32
+        "line": 220,
+        "column": 6
       }
     },
     {
@@ -2574,8 +2574,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
-        "line": 175,
-        "column": 13
+        "line": 223,
+        "column": 27
+      }
+    },
+    {
+      "id": "a150241e02b2685-81736073f340074",
+      "title": "Agent Builder — SML type permission contract a count-0 element naming an action is hidden from every caller, though its count-1 form is visible to the holder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_type_permissions_api.spec.ts",
+        "line": 231,
+        "column": 83
       }
     },
     {

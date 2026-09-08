@@ -1804,7 +1804,7 @@
     {
       "groupName": "p-limit",
       "matchDepNames": ["p-limit"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "allowedVersions": "<4.0.0",
       "minimumReleaseAge": "14 days",
@@ -1813,7 +1813,7 @@
     {
       "groupName": "p-map - ESM Required",
       "matchDepNames": ["p-map"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["effort:low", "blocked"],
       "minimumReleaseAge": "14 days",
@@ -1822,7 +1822,7 @@
     {
       "groupName": "p-retry - ESM Required",
       "matchDepNames": ["p-retry"],
-      "reviewers": ["team:streams-ui", "team:actionable-obs-team", "team:security-solution"],
+      "reviewers": ["team:streams-ui", "team:nightshift-sre-agent-team", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "addLabels": ["blocked", "effort:low"],
       "minimumReleaseAge": "14 days",
@@ -1831,7 +1831,7 @@
     {
       "groupName": "redux-actions",
       "matchDepNames": ["redux-actions", "@types/redux-actions"],
-      "reviewers": ["team:kibana-management", "team:actionable-obs-team"],
+      "reviewers": ["team:kibana-management", "team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -2026,7 +2026,7 @@
     {
       "groupName": "react-hook-form",
       "matchDepNames": ["react-hook-form"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2035,7 +2035,7 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2044,7 +2044,7 @@
     {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2053,7 +2053,7 @@
     {
       "groupName": "@faker-js/faker",
       "matchDepNames": ["@faker-js/faker"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
@@ -2070,7 +2070,7 @@
     {
       "groupName": "redux-saga",
       "matchDepNames": ["redux-saga"],
-      "reviewers": ["team:actionable-obs-team"],
+      "reviewers": ["team:nightshift-sre-agent-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
       "minimumReleaseAge": "14 days",
