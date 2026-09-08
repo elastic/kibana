@@ -43,7 +43,7 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
-import { useOptionalKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
+import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
 import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
@@ -345,7 +345,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { filteredStreams } = useOptionalKiGeneration() ?? {};
+  const { data: streamsData } = useFetchStreams();
   // Closed events are hidden by default; users can opt back in via the Status filter.
   const [statusFilter, setStatusFilter] = useState<SignificantEventStatus[]>(() =>
     SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => status === 'open')
@@ -377,8 +377,8 @@ export const SignificantEventsTab = () => {
   }, [selectedEventId]);
 
   const streamOptions = useMemo(
-    () => (filteredStreams ?? []).map((s) => s.stream.name).sort(),
-    [filteredStreams]
+    () => (streamsData?.streams ?? []).map((s) => s.stream.name).sort(),
+    [streamsData]
   );
 
   const { isRunning, isCanceling, handleRun, handleCancel } = useSignificantEventsPageContext();

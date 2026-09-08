@@ -99,8 +99,8 @@ jest.mock('../../../../hooks/use_timefilter', () => ({
 jest.mock('../../../../hooks/use_time_range_update', () => ({
   useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
 }));
-jest.mock('../knowledge_indicators_table/ki_generation_context', () => ({
-  useOptionalKiGeneration: jest.fn(() => ({ filteredStreams: [] })),
+jest.mock('../../hooks/use_fetch_streams', () => ({
+  useFetchStreams: jest.fn(() => ({ data: { streams: [] } })),
 }));
 jest.mock('../../context/significant_events_page_context', () => ({
   useSignificantEventsPageContext: jest.fn(() => ({
