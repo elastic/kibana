@@ -460,7 +460,7 @@ describe('InvestigationSection Source event link under CPS', () => {
     jest.mocked(useExpandSection).mockReturnValue(true);
     // Stub the flyout API for this block only. The tests above intentionally exercise the real
     // useFlyoutApi chain (down to overlays.openSystemFlyout), so a file-wide jest.mock is not an
-    // option; a scoped spy lets these tests assert on openDocumentFlyoutFromIndex directly.
+    // option; a scoped spy lets these tests assert on openDocumentFlyoutFromPattern directly.
     useFlyoutApiSpy = jest.spyOn(useFlyoutApiModule, 'useFlyoutApi').mockReturnValue(flyoutApiMock);
   });
 
@@ -498,7 +498,7 @@ describe('InvestigationSection Source event link under CPS', () => {
       )
     );
 
-    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+    expect(flyoutApiMock.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: 'ancestor-id-1',
         indexName: 'linked_local_project:logs-endpoint.alerts.caf6b705.2026.08.13',
@@ -517,7 +517,7 @@ describe('InvestigationSection Source event link under CPS', () => {
       )
     );
 
-    expect(flyoutApiMock.openDocumentFlyoutFromIndex).toHaveBeenCalledWith(
+    expect(flyoutApiMock.openDocumentFlyoutFromPattern).toHaveBeenCalledWith(
       expect.objectContaining({
         documentId: 'ancestor-id-1',
         indexName: 'logs-endpoint.alerts.caf6b705.2026.08.13',
