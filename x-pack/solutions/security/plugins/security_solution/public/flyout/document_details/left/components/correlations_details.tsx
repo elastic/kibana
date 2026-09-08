@@ -9,9 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { CorrelationsDetails as CorrelationsDetailsV2 } from '../../../../flyout_v2/correlations';
+import { CorrelationsDetailsView } from '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
+import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
+import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 
@@ -19,7 +21,7 @@ export const CORRELATIONS_TAB_ID = 'correlations';
  * Correlations displayed in the document details expandable flyout left section under the Insights tab
  */
 export const CorrelationsDetails: React.FC = () => {
-  const { scopeId, isRulePreview, searchHit } = useDocumentDetailsContext();
+  const { scopeId, searchHit } = useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onShowAlert = useCallback(
@@ -31,15 +33,24 @@ export const CorrelationsDetails: React.FC = () => {
     [openPreviewPanel, scopeId]
   );
 
+  const onShowAttack = useCallback(
+    (attackId: string, indexName: string) =>
+      openPreviewPanel({
+        id: AttackDetailsPreviewPanelKey,
+        params: { attackId, indexName, banner: ATTACK_PREVIEW_BANNER },
+      }),
+    [openPreviewPanel]
+  );
+
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <CorrelationsDetailsV2
+    <CorrelationsDetailsView
       hit={hit}
       scopeId={scopeId}
-      isRulePreview={isRulePreview}
       onShowAlert={onShowAlert}
-      hidePreviewLink={false}
+      onShowAttack={onShowAttack}
+      useLegacyExpandableFlyout
     />
   );
 };

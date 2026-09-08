@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { capitalize, isArray } from 'lodash/fp';
-import { EuiBadge, EuiButtonIcon, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiToolTip, type EuiBasicTableColumn } from '@elastic/eui';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -111,17 +111,28 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
     };
 
     return (
-      <EuiButtonIcon
-        iconType="maximize"
-        onClick={onClick}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',
           {
             defaultMessage: 'Preview event with id {id}',
             values: { id: record._id },
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="maximize"
+          onClick={onClick}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',
+            {
+              defaultMessage: 'Preview event with id {id}',
+              values: { id: record._id },
+            }
+          )}
+        />
+      </EuiToolTip>
     );
   },
   width: COLUMN_WIDTHS.actions,

@@ -6,7 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatAgentEvent } from '@kbn/agent-builder-common';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
+import type {
+  ChatAgentEvent,
+  AgentExecutionMode,
+  InteractivityConfigInput,
+} from '@kbn/agent-builder-common';
 import type { AgentParams, AgentResponse } from './provider';
 
 export interface RunAgentReturn {
@@ -18,6 +23,18 @@ export interface RunAgentReturn {
  * Params for {@link RunAgentFn}
  */
 export interface RunAgentParams {
+  /**
+   * Execution mode for this run. When 'standalone', HITL is disabled by default.
+   **/
+  executionMode?: AgentExecutionMode;
+  /**
+   * Interactivity configuration for this run,
+   */
+  interactive?: InteractivityConfigInput;
+  /**
+   * The id of the parent execution that spawned this one, when applicable.
+   */
+  parentExecutionId?: string;
   /**
    * ID of the agent to call.
    */
@@ -47,6 +64,19 @@ export interface RunAgentParams {
    * If unspecified, will use internal logic to use the default connector
    */
   defaultConnectorId?: string;
+  /**
+   * Optional connector telemetry used to attribute this run's LLM calls to a specific
+   * feature. When omitted, the default Agent Builder telemetry is used.
+   */
+  telemetryMetadata?: ConnectorTelemetryMetadata;
+  /**
+   * Optional connector response content length override for buffered LLM calls.
+   */
+  maxContentLength?: number;
+  /**
+   * Optional CPS project routing expression to scope this run's search tools to a specific projects
+   */
+  projectRouting?: string;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

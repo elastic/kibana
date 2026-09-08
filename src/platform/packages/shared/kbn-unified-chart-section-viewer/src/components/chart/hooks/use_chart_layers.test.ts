@@ -8,8 +8,9 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { ParsedMetricItem, MetricUnit, NullableMetricUnit } from '../../../types';
+import type { MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
+import { createMetricAggregation } from '../../../common/utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('../../../common/utils', () => ({
@@ -18,14 +19,14 @@ jest.mock('../../../common/utils', () => ({
   createTimeBucketAggregation: jest.fn(() => 'time_bucket_agg'),
 }));
 
+type MetricItemInput = Parameters<typeof useChartLayers>[0]['metricItem'];
+
 describe('useChartLayers', () => {
-  const mockMetric: ParsedMetricItem = {
+  const mockMetric: MetricItemInput = {
     metricName: 'system.cpu.total.norm.pct',
-    dataStream: 'metrics-*',
     fieldTypes: [ES_FIELD_TYPES.DOUBLE],
     metricTypes: ['gauge'],
     units: ['percent', null],
-    dimensionFields: [],
   };
 
   it('should return an area chart configuration when no dimensions are provided', () => {
@@ -78,7 +79,7 @@ describe('useChartLayers', () => {
   });
 
   it('should include format options if the metric has a unit', () => {
-    const metricWithUnit: ParsedMetricItem = { ...mockMetric, units: ['bytes'] as MetricUnit[] };
+    const metricWithUnit: MetricItemInput = { ...mockMetric, units: ['bytes'] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
         metricItem: metricWithUnit,
@@ -91,7 +92,7 @@ describe('useChartLayers', () => {
   });
 
   it('should normalize denormalized units like "byte" to "bytes"', () => {
-    const metricWithDenormalizedUnit: ParsedMetricItem = {
+    const metricWithDenormalizedUnit: MetricItemInput = {
       ...mockMetric,
       units: ['byte'] as unknown as NullableMetricUnit[],
     };
@@ -107,7 +108,7 @@ describe('useChartLayers', () => {
   });
 
   it('should select the first non-null normalized unit when multiple units exist', () => {
-    const metricWithMultipleUnits: ParsedMetricItem = {
+    const metricWithMultipleUnits: MetricItemInput = {
       ...mockMetric,
       units: [null, 'byte', 'bytes'] as unknown as NullableMetricUnit[],
     };
@@ -122,8 +123,8 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].format).toBe('bytes');
   });
 
-  it('should not include format options if the metric has no unit', () => {
-    const metricWithoutUnit: ParsedMetricItem = { ...mockMetric, units: [] as MetricUnit[] };
+  it('should format a metric with no unit as a compact whole number', () => {
+    const metricWithoutUnit: MetricItemInput = { ...mockMetric, units: [] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
         metricItem: metricWithoutUnit,
@@ -131,13 +132,42 @@ describe('useChartLayers', () => {
       })
     );
     const [layer] = result.current;
-    expect(layer.yAxis[0]).not.toHaveProperty('format');
-    expect(layer.yAxis[0]).not.toHaveProperty('formatString');
+    expect(layer.yAxis[0]).toEqual(
+      expect.objectContaining({
+        format: 'number',
+        decimals: 0,
+        compactValues: true,
+      })
+    );
   });
+
+  it.each(['1', 'count', '{request}'])(
+    'should format the %s unit as a compact whole number',
+    (unit) => {
+      const metricWithCountUnit: MetricItemInput = {
+        ...mockMetric,
+        units: [unit] as unknown as NullableMetricUnit[],
+      };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricWithCountUnit,
+          dimensions: [],
+        })
+      );
+      const [layer] = result.current;
+      expect(layer.yAxis[0]).toEqual(
+        expect.objectContaining({
+          format: 'number',
+          decimals: 0,
+          compactValues: true,
+        })
+      );
+    }
+  );
 
   describe('when type or instrument is null or undefined', () => {
     it('should return empty layers when fieldTypes is empty', () => {
-      const metricNoType: ParsedMetricItem = { ...mockMetric, fieldTypes: [] };
+      const metricNoType: MetricItemInput = { ...mockMetric, fieldTypes: [] };
       const { result } = renderHook(() =>
         useChartLayers({
           metricItem: metricNoType,
@@ -148,7 +178,7 @@ describe('useChartLayers', () => {
     });
 
     it('should return empty layers when metricTypes is empty', () => {
-      const metricNoInstrument: ParsedMetricItem = { ...mockMetric, metricTypes: [] };
+      const metricNoInstrument: MetricItemInput = { ...mockMetric, metricTypes: [] };
       const { result } = renderHook(() =>
         useChartLayers({
           metricItem: metricNoInstrument,
@@ -157,5 +187,25 @@ describe('useChartLayers', () => {
       );
       expect(result.current).toEqual([]);
     });
+  });
+
+  it('forwards gridSettings to createMetricAggregation', () => {
+    const gridSettings = {
+      counterAggregation: 'max' as const,
+      gaugeAggregation: 'avg' as const,
+      histogramPercentile: 'p95' as const,
+      dimensions: [],
+      searchTerm: '',
+    };
+
+    renderHook(() =>
+      useChartLayers({
+        metricItem: mockMetric,
+        dimensions: [],
+        gridSettings,
+      })
+    );
+
+    expect(createMetricAggregation).toHaveBeenCalledWith(expect.objectContaining({ gridSettings }));
   });
 });

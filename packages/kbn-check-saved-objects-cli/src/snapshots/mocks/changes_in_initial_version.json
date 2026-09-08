@@ -12,11 +12,14 @@
       "hidden": false,
       "namespaceType": "agnostic",
       "mappings": {
-        "properties": {
-          "name": {
-            "type": "keyword"
-          }
-        }
+        "dynamic": false,
+        "properties.domainId.type": "keyword",
+        "properties.counterName.type": "keyword",
+        "properties.counterType.type": "keyword",
+        "properties.source.type": "keyword",
+        "properties.count.type": "integer",
+        "properties.name.type": "keyword",
+        "properties.name.ignore_above": 256
       },
       "migrationVersions": [],
       "modelVersions": [

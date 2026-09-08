@@ -148,8 +148,9 @@ describe('findRuleTemplates', () => {
     });
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
+      '((alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
 
     expect(authorization.getByRuleTypeAuthorizationFilter).toHaveBeenCalledWith({
@@ -182,9 +183,10 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
+      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
   });
 
@@ -207,9 +209,10 @@ describe('findRuleTemplates', () => {
     expect(result.data[0].tags).toContain('tag1');
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.tags: tag1 AND ' +
+      '((alerting_rule_template.attributes.tags: tag1 AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
   });
 
@@ -228,10 +231,11 @@ describe('findRuleTemplates', () => {
     });
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.tags: tag1 OR ' +
+      '(((alerting_rule_template.attributes.tags: tag1 OR ' +
         'alerting_rule_template.attributes.tags: tag2) AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
   });
 
@@ -251,10 +255,11 @@ describe('findRuleTemplates', () => {
     });
 
     expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
+      '(((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
         'alerting_rule_template.attributes.tags: tag1) AND ' +
         '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
+        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)) AND ' +
+        '(alerting_rule_template.attributes.engine: v1 OR NOT alerting_rule_template.attributes.engine: *))'
     );
   });
 
@@ -370,7 +375,7 @@ describe('findRuleTemplates', () => {
   describe('authorization', () => {
     test('throws 403 when user has no access to any rule types', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -382,7 +387,7 @@ describe('findRuleTemplates', () => {
         output: {
           statusCode: 403,
         },
-        message: 'Unauthorized to find rules for any rule types',
+        message: 'Unauthorized to find rules for any rule types.',
       });
 
       expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
@@ -553,7 +558,7 @@ describe('findRuleTemplates', () => {
 
     test('throws on authorization failure without audit logging', async () => {
       authorization.getByRuleTypeAuthorizationFilter.mockRejectedValueOnce(
-        Boom.forbidden('Unauthorized to find rules for any rule types')
+        Boom.forbidden('Unauthorized to find rules for any rule types.')
       );
 
       await expect(
@@ -561,7 +566,7 @@ describe('findRuleTemplates', () => {
           perPage: 10,
           page: 1,
         })
-      ).rejects.toThrow('Unauthorized to find rules for any rule types');
+      ).rejects.toThrow('Unauthorized to find rules for any rule types.');
 
       expect(auditLogger.log).not.toHaveBeenCalled();
     });

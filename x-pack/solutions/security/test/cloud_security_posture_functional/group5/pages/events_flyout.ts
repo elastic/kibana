@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import {
   waitForPluginInitialized,
-  cleanupEntityStore,
   waitForEntityDataIndexed,
   dataViewRouteHelpersFactory,
-  initEntityEnginesWithRetry,
+  installEntityStoreV2,
+  uninstallEntityStoreV2,
+  waitForEntityStoreV2Running,
 } from '../../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../../config.base';
 
@@ -62,24 +62,26 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory setting (required for entity store with 'generic' type)
-      await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
+      // Enable asset inventory and entity store v2 settings.
+      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
+      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
+      await kibanaServer.uiSettings.update({
+        'securitySolution:enableAssetInventory': true,
+        'securitySolution:entityStoreEnableV2': true,
+        'securitySolution:enableNewFlyout': false,
+      });
 
       // Initialize security-solution-default data-view (required by entity store)
       const dataView = dataViewRouteHelpersFactory(supertest);
       await dataView.create('security-solution');
 
-      // Initialize entity engine (required for graph visualization)
-      await initEntityEnginesWithRetry({
-        supertest,
-        retry,
-        logger,
-        entityTypes: ['generic'],
-      });
+      // Install Entity Store V2 (required for graph visualization)
+      await installEntityStoreV2({ supertest, logger });
+      await waitForEntityStoreV2Running({ supertest, retry, logger });
     });
 
     after(async () => {
-      await cleanupEntityStore({ supertest, logger });
+      await uninstallEntityStoreV2({ supertest, logger });
       // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
       // Instead we delete all alerts from the index
       await es.deleteByQuery({
@@ -90,6 +92,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -108,8 +111,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
@@ -143,7 +144,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
 
       await expandedFlyoutGraph.expectFilterTextEquals(
@@ -159,7 +160,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -224,8 +225,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -249,8 +248,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
 
       // Add filter for actor entity
       await expandedFlyoutGraph.showSearchBar();
@@ -274,7 +271,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show event details from group node
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole)ln(c6579aaf5457eee679bb88bc31162a3d)oe(0)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(5cc3ec012284b76c9ebb137c692826dcba12e4cc6792de419b51667b02df4b58)oe(0)oa(0)'
       );
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
@@ -295,8 +292,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.addFilter({
@@ -330,12 +325,10 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole2)ln(528a070f7bdd4fdac70ee28fbe835f04)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(1)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -343,47 +336,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     describe('ECS fields only', function () {
-      // Entity store is initialized once at the parent level to avoid race conditions
-      // Tests run sequentially: first v1 (ENRICH), then v2 (LOOKUP JOIN)
-      before(async () => {
-        // Clean up any leftover resources from previous runs
-        await cleanupEntityStore({ supertest, logger });
-
-        // Delete entity indices completely to start fresh
-        try {
-          await es.indices.delete({
-            index: getEntitiesLatestIndexName(),
-            ignore_unavailable: true,
-          });
-        } catch (e) {
-          // Ignore if index doesn't exist
-        }
-
-        // Enable asset inventory setting
-        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
-
-        // Initialize security-solution-default data-view (required by entity store)
-        const dataView = dataViewRouteHelpersFactory(supertest);
-        await dataView.create('security-solution');
-
-        // Initialize entity engine for 'generic' type ONCE - this is reused by both v1 and v2 tests
-        await initEntityEnginesWithRetry({
-          supertest,
-          retry,
-          logger,
-          entityTypes: ['generic'],
-        });
-      });
-
-      after(async () => {
-        // Clean up entity store resources
-        await cleanupEntityStore({ supertest, logger });
-
-        // Disable asset inventory setting
-        await kibanaServer.uiSettings.update({
-          'securitySolution:enableAssetInventory': false,
-        });
-      });
+      // Entity store v2 is installed at the parent level for graph visibility.
+      // Enrichment tests use LOOKUP JOIN (v2) with custom entity data loaded via esArchiver.
 
       // Shared test suite that registers all test cases - called from both v1 and v2 describe blocks
       const runEnrichmentTests = () => {
@@ -411,16 +365,36 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.waitGraphIsLoaded();
           await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
-          const actorNodeId = 'dd46938f412437c539cbff915873c550';
+          const actorNodeId = '0dd7df1e4e0a04a8dcde50181928557ceff5b21dfa0a46b1e173feef4bb3ddbc';
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
 
-          const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
+          // The event's user.email / user.id / user.name are all multi-value, so MV_EXPAND
+          // produces a Cartesian product of rows for only 2 real actors. The node counter and the
+          // grouped-entities flyout must both report 2 — the flyout previously listed one item per
+          // Cartesian row (8) instead of one per entity id.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(actorNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(actorNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          // Both actors are enriched, so their titles render as links to the entity flyout.
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
+
+          const storageBucketNodeId =
+            '1abcf2b7cb329695e152ab9f1838188e0f61f5796fd20518c73488748e05b935';
           await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
           await expandedFlyoutGraph.assertNodeEntityDetails(
             storageBucketNodeId,
             'GCP Storage Bucket'
           );
+
+          // The two buckets come from a single multi-value field (entity.target.id), so there is no
+          // cross-product to collapse — but the counter and flyout must still agree.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(storageBucketNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(storageBucketNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
 
           const serviceNodeId = 'service:TargetMultiService1';
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
@@ -500,17 +474,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       describe('via LOOKUP JOIN (v2)', () => {
         before(async () => {
-          // Delete v2 manually since its not being deleted by the cleanupEntityStore function
-          try {
-            await es.indices.delete({
-              index: getEntitiesLatestIndexName(),
-              ignore_unavailable: true,
-            });
-          } catch (e) {
-            // Ignore if index doesn't exist
-          }
-
-          // Load v2 entity data
+          // Load v2 entity data into the entity store index created by v2 install
           await esArchiver.load(
             'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store_v2'
           );
@@ -520,8 +484,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             es,
             logger,
             retry,
-            entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            entitiesIndex: '.entities.v2.latest.*',
+            expectedCount: 46,
           });
         });
 
@@ -584,7 +548,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-            await expandedFlyoutGraph.dismissCallout();
 
             // Expected nodes:
             // - 1 actor node (gcp-admin-user)
@@ -603,7 +566,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-owns)';
             await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            const communicatesWithIdRelationshipTargetNodeId = '06530c8b5bd27028c4f78cb987f08cc0';
+            const communicatesWithIdRelationshipTargetNodeId =
+              'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932';
             await expandedFlyoutGraph.assertNodeEntityTag(
               communicatesWithIdRelationshipTargetNodeId,
               'Host'
@@ -617,7 +581,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               2
             );
 
-            const ownsIdRelationshipTargetNodeId = '2aab291bca8891f6ba943173ab574130';
+            const ownsIdRelationshipTargetNodeId =
+              'f30eb27265a364641d6b15acdf5cffc78f581d08acfa6af82b26587f6b3c353b';
             await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               ownsIdRelationshipTargetNodeId,
@@ -704,8 +669,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             const expectedTotalNodes = 4;
             await expandedFlyoutGraph.assertGraphNodesNumber(expectedTotalNodes);
 
-            await expandedFlyoutGraph.dismissCallout();
-
             // Verify root user (actor) node
             const rootNodeId = 'user:rel-hierarchy-root-user@gcp';
             await expandedFlyoutGraph.assertNodeEntityTag(rootNodeId, 'Identity');
@@ -774,7 +737,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'Hierarchy Delegate Agent'
             );
 
-            const communicatesWithIdRelationshipTargetNodeId = '3ed488a2068243098af41d666693f341';
+            const communicatesWithIdRelationshipTargetNodeId =
+              '28ddbf3f780ac0c16071a33d0ae9d8d92ed7bf0c28ed9ad9b606f9ddacdb589b';
             await expandedFlyoutGraph.assertNodeEntityTag(
               communicatesWithIdRelationshipTargetNodeId,
               'Networking'

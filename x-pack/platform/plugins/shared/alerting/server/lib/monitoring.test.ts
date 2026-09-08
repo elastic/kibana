@@ -108,6 +108,7 @@ describe('resetMonitoringLastRun', () => {
       total_alerts_created: null,
       gap_duration_s: null,
       gap_range: null,
+      gap_reason: null,
     });
   });
 

@@ -16,14 +16,14 @@ import type { PartitionSuggestionReason } from './use_review_suggestions_form';
 export function NoSuggestionsCallout({
   aiFeatures,
   isLoadingSuggestions,
-  onRegenerate,
+  onRetry,
   onDismiss,
   isDisabled = false,
   reason,
 }: {
   aiFeatures: AIFeatures;
   isLoadingSuggestions: boolean;
-  onRegenerate: (connectorId: string) => void;
+  onRetry: (connectorId: string) => void;
   onDismiss: () => void;
   isDisabled?: boolean;
   reason?: PartitionSuggestionReason;
@@ -61,20 +61,21 @@ export function NoSuggestionsCallout({
       data-test-subj="streamsAppNoSuggestionsCallout"
     >
       <EuiText size="s">{description}</EuiText>
-      <EuiSpacer size="m" />
-      <GenerateSuggestionButton
-        iconType="refresh"
-        size="s"
-        onClick={onRegenerate}
-        isLoading={isLoadingSuggestions}
-        aiFeatures={aiFeatures}
-        isDisabled={isDisabled}
-      >
-        {i18n.translate(
-          'xpack.streams.streamDetailRouting.childStreamList.regenerateSuggestedPartitions',
-          { defaultMessage: 'Regenerate' }
-        )}
-      </GenerateSuggestionButton>
+      {reason !== 'all_data_partitioned' && (
+        <>
+          <EuiSpacer size="m" />
+          <GenerateSuggestionButton
+            onClick={onRetry}
+            isLoading={isLoadingSuggestions}
+            isDisabled={isDisabled}
+            aiFeatures={aiFeatures}
+          >
+            {i18n.translate('xpack.streams.streamDetailRouting.childStreamList.tryAgainButton', {
+              defaultMessage: 'Try again',
+            })}
+          </GenerateSuggestionButton>
+        </>
+      )}
     </EuiCallOut>
   );
 }

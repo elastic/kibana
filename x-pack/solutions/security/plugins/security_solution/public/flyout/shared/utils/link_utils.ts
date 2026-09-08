@@ -7,7 +7,7 @@
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { getEcsField } from '../../document_details/right/components/table_field_name_cell';
+import { getEcsField } from '../../../flyout_v2/shared/components/table_field_name_cell';
 import {
   HOST_ENTITY_ID_FIELD_NAME,
   HOST_NAME_FIELD_NAME,
@@ -17,9 +17,9 @@ import {
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 import { HostPreviewPanelKey } from '../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../document_details/right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../flyout_v2/document/main/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../document_details/right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from '../../../flyout_v2/document/main/components/user_entity_overview';
 import {
   NetworkPanelKey,
   NetworkPreviewPanelKey,

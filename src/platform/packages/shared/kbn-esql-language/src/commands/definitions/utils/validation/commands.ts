@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { isFunctionExpression, isOptionNode, isColumn, isIdentifier } from '@elastic/esql';
-import type { ESQLAst, ESQLAstAllCommands, ESQLMessage } from '@elastic/esql/types';
+import type { ESQLAst, ESQLAstAllCommands } from '@elastic/esql/types';
 import { validateFunction } from './function';
 import { validateOption } from './option';
 import { validateColumnForCommand } from './column';
 import { errors } from '../errors';
 import type { ICommandCallbacks, ICommandContext } from '../../../registry/types';
-import { isTimeseriesSourceCommand } from '../timeseries_check';
 import { validateInlineCasts } from './inline_cast';
+import type { ESQLMessage } from '../../types';
 
 export const validateCommandArguments = (
   command: ESQLAstAllCommands,
@@ -42,7 +42,7 @@ export const validateCommandArguments = (
       } else if (isColumn(arg) || isIdentifier(arg)) {
         if (command.name === 'stats' || command.name === 'inline stats') {
           // In TS context, bare fields are allowed in STATS (implicitly aggregated)
-          if (!isTimeseriesSourceCommand(ast)) {
+          if (!context.isTimeseriesSource) {
             messages.push(errors.unknownAggFunction(arg));
           }
         } else {

@@ -267,6 +267,96 @@ export default ({ getService }: FtrProviderContext) => {
           expect(alerts_candidate_count).toBe(2);
         });
       });
+
+      describe('alerts_suppressed_count', () => {
+        it('records alerts_suppressed_count as 0 when no suppression is configured', async () => {
+          const timestamp = new Date().toISOString();
+          const documents = [
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0' },
+            },
+          ];
+
+          await indexListOfDocuments(documents);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getNewTermsRuleParams({
+              index: ['test-data-1'],
+              query: '*:*',
+              new_terms_fields: ['host.name'],
+              history_window_start: 'now-1h',
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(0);
+        });
+
+        it('records alerts_suppressed_count when alerts are suppressed', async () => {
+          const timestamp = new Date().toISOString();
+          const documents = [
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0', ip: '1.2.3.4' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-0', ip: '1.2.3.4' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-1', ip: '1.2.3.4' },
+            },
+            {
+              '@timestamp': timestamp,
+              host: { name: 'host-1', ip: '1.2.3.4' },
+            },
+          ];
+
+          await indexListOfDocuments(documents);
+
+          const createdRule = await createRule(
+            supertest,
+            log,
+            getNewTermsRuleParams({
+              index: ['test-data-1'],
+              query: '*:*',
+              new_terms_fields: ['host.name'],
+              history_window_start: 'now-1h',
+              alert_suppression: {
+                group_by: ['host.ip'],
+                duration: {
+                  value: 300,
+                  unit: 'm',
+                },
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+              enabled: true,
+            })
+          );
+          const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+          expect(alerts.hits.hits).toHaveLength(1);
+
+          const { alerts_suppressed_count } =
+            await getLatestSecurityRuleExecutionMetricsFromEventLog(es, log, createdRule.id);
+
+          expect(alerts_suppressed_count).toBe(1);
+        });
+      });
     });
   });
 };

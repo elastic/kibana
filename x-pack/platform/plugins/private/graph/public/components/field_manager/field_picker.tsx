@@ -74,6 +74,7 @@ export function FieldPicker({
 
   return (
     <EuiPopover
+      aria-label={badgeDescription}
       id="graphFieldPicker"
       anchorPosition="downCenter"
       ownFocus
@@ -82,7 +83,7 @@ export function FieldPicker({
         <EuiBadge
           data-test-subj="graph-add-field-button"
           color="hollow"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           aria-disabled={!hasFields}
           {...onClickProps}
           css={[
@@ -145,9 +146,12 @@ export function FieldPicker({
   );
 }
 
-function toOptions(
-  fields: WorkspaceField[]
-): Array<{ label: string; checked?: 'on' | 'off'; prepend?: ReactNode }> {
+function toOptions(fields: WorkspaceField[]): Array<{
+  label: string;
+  checked?: 'on' | 'off';
+  prepend?: ReactNode;
+  'data-test-subj': string;
+}> {
   return (
     fields
       // don't show non-aggregatable fields, except for the case when they are already selected.
@@ -158,6 +162,7 @@ function toOptions(
         label: field.name,
         prepend: <FieldIcon className="eui-alignMiddle" type={field.type} fill="none" />,
         checked: field.selected ? 'on' : undefined,
+        'data-test-subj': `graph-field-option-${field.name}`,
       }))
   );
 }

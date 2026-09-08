@@ -140,7 +140,11 @@ export const RuleSettingsModal: React.FC<RuleSettingsModalProps> = ({ isOpen, on
                 </EuiTitle>
                 <EuiSpacer size="s" />
                 <EuiText size="s" color="subdued">
-                  <p>{i18n.GAP_DETECTION_SCOPE_DESCRIPTION}</p>
+                  <p>
+                    {canAccessGapAutoFill
+                      ? i18n.GAP_DETECTION_SCOPE_DESCRIPTION_WITH_AUTO_FILL
+                      : i18n.GAP_DETECTION_SCOPE_DESCRIPTION_WITHOUT_AUTO_FILL}
+                  </p>
                 </EuiText>
                 <EuiSpacer size="m" />
                 <EuiFormRow>

@@ -123,6 +123,18 @@ export interface ReportWorkflowCreatedActionParams
    * Only presence is tracked; condition contents are never reported.
    */
   hasTriggerConditions: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: ignore`.
+   */
+  hasTriggerWorkflowEventsIgnore: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: allow-all`.
+   */
+  hasTriggerWorkflowEventsAllow: boolean;
+  /**
+   * Whether any trigger explicitly sets `on.workflowEvents: avoid-loop`.
+   */
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
 }
 
 /**
@@ -220,4 +232,8 @@ export interface ReportWorkflowEnabledStateChangedActionParams
    * Number of workflows in the bulk action (only present when isBulkAction is true)
    */
   bulkActionCount?: number;
+  /**
+   * Whether the workflow defines extension (event-driven) triggers when enabled state changed.
+   */
+  hasCustomEventTrigger?: boolean;
 }

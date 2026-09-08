@@ -45,6 +45,7 @@ export const classifyRuleForUiamProvisioning = (
       ruleId: id,
       attributes: rule.attributes,
       version: rule.version,
+      namespace: rule.namespace,
     },
   };
 };

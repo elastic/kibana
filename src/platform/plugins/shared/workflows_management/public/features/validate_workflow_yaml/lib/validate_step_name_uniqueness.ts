@@ -9,14 +9,18 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type { LineCounter } from 'yaml';
 import { collectAllStepNames } from './collect_all_step_names';
 import type { StepNameInfo, YamlValidationResult } from '../model/types';
 
-export function validateStepNameUniqueness(yamlDocument: any): YamlValidationResult[] {
+export function validateStepNameUniqueness(
+  yamlDocument: any,
+  lineCounter: LineCounter
+): YamlValidationResult[] {
   const errors: YamlValidationResult[] = [];
 
   // Validate step name uniqueness
-  const stepNames = collectAllStepNames(yamlDocument);
+  const stepNames = collectAllStepNames(yamlDocument, lineCounter);
   const stepNameCounts = new Map<string, StepNameInfo[]>();
 
   // Group step names by their values
@@ -36,6 +40,7 @@ export function validateStepNameUniqueness(yamlDocument: any): YamlValidationRes
         errors.push({
           id: `${stepName}-${occurrence.startLineNumber}-${occurrence.startColumn}-${occurrence.endLineNumber}-${occurrence.endColumn}`,
           owner: 'step-name-validation',
+          ruleId: 'duplicateStepName',
           message: `Step name "${stepName}" is not unique. Found ${occurrences.length} steps with this name.`,
           startLineNumber: occurrence.startLineNumber,
           startColumn: occurrence.startColumn,

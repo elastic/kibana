@@ -16,7 +16,7 @@ export const registerStatsRoutes = (
   _logger: Logger,
   { isServerless }: RouterContextData
 ): void => {
-  router.get<unknown, unknown, StatsResponse>(
+  router.get<unknown, unknown, StatsResponse | undefined>(
     {
       path: GET_STATS_ROUTE,
       security: {
@@ -33,11 +33,18 @@ export const registerStatsRoutes = (
     async (context, _request, response) => {
       const client = (await context.core).elasticsearch.client;
 
-      const stats = await fetchSizeStats(client, isServerless);
-      return response.ok({
-        headers: { 'content-type': 'application/json' },
-        body: stats,
-      });
+      try {
+        const stats = await fetchSizeStats(client, isServerless);
+        return response.ok({
+          headers: { 'content-type': 'application/json' },
+          body: stats,
+        });
+      } catch (error) {
+        if (error.statusCode === 403) {
+          return response.forbidden({ body: error.message });
+        }
+        throw error;
+      }
     }
   );
 };

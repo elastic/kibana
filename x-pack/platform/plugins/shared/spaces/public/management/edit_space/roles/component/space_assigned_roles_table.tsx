@@ -369,6 +369,10 @@ export const SpaceAssignedRolesTable = ({
                       isOpen={isBulkActionContextOpen}
                       closePopover={setBulkActionContextOpen.bind(null, false)}
                       anchorPosition="downCenter"
+                      aria-label={i18n.translate(
+                        'xpack.spaces.management.spaceDetails.rolesTable.bulkActionsPopoverAriaLabel',
+                        { defaultMessage: 'Bulk actions' }
+                      )}
                       button={
                         <EuiButtonEmpty
                           size="s"
@@ -386,16 +390,14 @@ export const SpaceAssignedRolesTable = ({
                       }
                     >
                       <EuiContextMenu
-                        size="s"
                         initialPanelId={0}
                         panels={[
                           {
                             id: 0,
-                            size: 's',
                             width: 180,
                             items: [
                               {
-                                icon: <EuiIcon type="trash" color="danger" />,
+                                icon: <EuiIcon type="trash" color="danger" aria-hidden={true} />,
                                 name: (
                                   <EuiTextColor color="danger">
                                     {i18n.translate(

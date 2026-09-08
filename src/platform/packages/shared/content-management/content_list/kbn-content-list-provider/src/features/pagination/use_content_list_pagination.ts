@@ -39,16 +39,30 @@ export interface UseContentListPaginationReturn {
 }
 
 /**
- * Resolve `pageSizeOptions` from the features config.
+ * Resolve `pageSizeOptions` from the features config, ensuring the active page size
+ * is always included in the dropdown.
  *
  * Returns a defensive copy to prevent consumers from mutating shared configuration
- * or the {@link DEFAULT_PAGE_SIZE_OPTIONS} constant.
+ * or the {@link DEFAULT_PAGE_SIZE_OPTIONS} constant. When the effective page size
+ * (e.g. from `savedObjects:perPage`) is not already in the list, it is inserted in
+ * sorted order so the dropdown always contains the active value — matching
+ * `TableListView` behavior.
  */
-const resolvePageSizeOptions = (pagination?: PaginationConfig | boolean): number[] => {
-  if (isPaginationConfig(pagination) && pagination.pageSizeOptions) {
-    return [...pagination.pageSizeOptions];
+const resolvePageSizeOptions = (
+  pagination: PaginationConfig | boolean | undefined,
+  activePageSize: number
+): number[] => {
+  const base =
+    isPaginationConfig(pagination) && pagination.pageSizeOptions
+      ? [...pagination.pageSizeOptions]
+      : [...DEFAULT_PAGE_SIZE_OPTIONS];
+
+  if (!base.includes(activePageSize)) {
+    base.push(activePageSize);
+    base.sort((a, b) => a - b);
   }
-  return [...DEFAULT_PAGE_SIZE_OPTIONS];
+
+  return base;
 };
 
 /**
@@ -81,13 +95,13 @@ export const useContentListPagination = (): UseContentListPaginationReturn => {
   const { supports, features, queryKeyScope } = useContentListConfig();
   const { state, dispatch } = useContentListState();
 
-  const pageSizeOptions = useMemo(
-    () => resolvePageSizeOptions(features.pagination),
-    [features.pagination]
-  );
-
   const { totalItems } = state;
   const { index: pageIndex, size: pageSize } = state.page;
+
+  const pageSizeOptions = useMemo(
+    () => resolvePageSizeOptions(features.pagination, pageSize),
+    [features.pagination, pageSize]
+  );
 
   const pageCount = useMemo(
     () => (pageSize > 0 ? Math.ceil(totalItems / pageSize) : 0),

@@ -159,7 +159,7 @@ describe('getCaseMetrics', () => {
       clientArgs
     );
 
-    expect(mockServices.services.alertsService.executeAggregations).toBeCalledTimes(1);
+    expect(mockServices.services.alertsService.executeAggregations).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -221,6 +221,7 @@ function createMockClientArgs() {
       alertsService,
       userActionService,
     },
+    config: { attachments: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

@@ -6,18 +6,21 @@
  */
 
 import Boom from '@hapi/boom';
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { i18n } from '@kbn/i18n';
-import type { SavedObjectAttributes } from '@kbn/core/server';
 import { isUndefined, omitBy } from 'lodash';
 import type { Connector } from '../../types';
 import type { ConnectorUpdateParams } from './types';
 import { PreconfiguredActionDisabledModificationError } from '../../../../lib/errors/preconfigured_action_disabled_modification';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { validateConfig, validateConnector, validateSecrets } from '../../../../lib';
+import { ensureConfigAuthType } from '../../../../lib/ensure_config_auth_type';
+import { ensureNotKibanaManagedAuthType } from '../../../../lib/ensure_not_kibana_managed_auth_type';
 import { inferAuthMode } from '../../../../lib/infer_auth_mode';
-import { isConnectorDeprecated } from '../../lib';
+import { getAuthMode, isConnectorDeprecated } from '../../lib';
 import type { RawAction, HookServices } from '../../../../types';
 import { tryCatch } from '../../../../lib';
+import { preserveInboundIngressHashIfNeeded } from '../../../../inbound/ensure_connector_ingress_credentials';
 
 const getAuthTypeId = (
   secrets?: Record<string, unknown>,
@@ -73,6 +76,9 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
   const currentAuthMode = authMode ?? 'shared';
   const currentAuthTypeId = getAuthTypeId(attributes.secrets, attributes.config);
   const requestedAuthTypeId = getAuthTypeId(secrets, config);
+
+  ensureNotKibanaManagedAuthType({ actionTypeId, secrets, config });
+
   const requestedAuthMode = inferAuthMode({
     authTypeRegistry: context.authTypeRegistry,
     secrets,
@@ -148,6 +154,21 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     })
   );
 
+  const configForSave =
+    actionType.source === ACTION_TYPE_SOURCES.spec
+      ? ensureConfigAuthType(
+          validatedActionTypeConfig as Record<string, unknown>,
+          validatedActionTypeSecrets as Record<string, unknown>
+        )
+      : validatedActionTypeConfig;
+
+  const storedConfig = attributes.config as Record<string, unknown> | undefined;
+  const configWithIngress = preserveInboundIngressHashIfNeeded({
+    actionTypeId,
+    config: configForSave as Record<string, unknown>,
+    storedConfig,
+  });
+
   const result = await tryCatch(
     async () =>
       await context.unsecuredSavedObjectsClient.create<RawAction>(
@@ -157,8 +178,8 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
           actionTypeId,
           name,
           isMissingSecrets: false,
-          config: validatedActionTypeConfig as SavedObjectAttributes,
-          secrets: validatedActionTypeSecrets as SavedObjectAttributes,
+          config: configWithIngress,
+          secrets: validatedActionTypeSecrets,
         },
         omitBy(
           {
@@ -199,13 +220,23 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     throw result;
   }
 
+  await context.evictClientPool?.(id);
+
   try {
-    await context.connectorTokenClient.deleteConnectorTokens({ connectorId: id, authMode });
+    await context.connectorTokenClient.deleteConnectorTokens({
+      connectorId: id,
+      authMode,
+      skipRevocation: true,
+    });
   } catch (e) {
     context.logger.error(
       `Failed to delete auth tokens for connector "${id}" after update: ${e.message}`
     );
   }
+
+  const resolvedAuthMode = getAuthMode(
+    result.attributes.authMode as Connector['authMode'] | undefined
+  );
 
   return {
     id,
@@ -217,8 +248,6 @@ export async function update({ context, id, action }: ConnectorUpdateParams): Pr
     isSystemAction: false,
     isDeprecated: isConnectorDeprecated(result.attributes),
     isConnectorTypeDeprecated: context.actionTypeRegistry.isDeprecated(actionTypeId),
-    authMode: result.attributes.authMode
-      ? (result.attributes.authMode as Connector['authMode'])
-      : 'shared',
+    authMode: resolvedAuthMode,
   };
 }

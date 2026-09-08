@@ -14,41 +14,45 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { IdField, AssetCriticalityRecord } from './common.gen';
 
+export const DeleteAssetCriticalityRecordRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The ID value of the asset.
+     */
+    id_value: z.string(),
+    /**
+     * The field representing the ID.
+     */
+    id_field: IdField,
+    /**
+     * If 'wait_for' the request will wait for the index refresh.
+     */
+    refresh: z.literal('wait_for').optional(),
+  })
+);
 export type DeleteAssetCriticalityRecordRequestQuery = z.infer<
   typeof DeleteAssetCriticalityRecordRequestQuery
 >;
-export const DeleteAssetCriticalityRecordRequestQuery = z.object({
-  /**
-   * The ID value of the asset.
-   */
-  id_value: z.string(),
-  /**
-   * The field representing the ID.
-   */
-  id_field: IdField,
-  /**
-   * If 'wait_for' the request will wait for the index refresh.
-   */
-  refresh: z.literal('wait_for').optional(),
-});
 export type DeleteAssetCriticalityRecordRequestQueryInput = z.input<
   typeof DeleteAssetCriticalityRecordRequestQuery
 >;
 
+export const DeleteAssetCriticalityRecordResponse = lazySchema(() =>
+  z.object({
+    /**
+     * True if the record was deleted or false if the record did not exist.
+     */
+    deleted: z.boolean(),
+    /**
+     * The deleted record if it existed.
+     */
+    record: AssetCriticalityRecord.optional(),
+  })
+);
 export type DeleteAssetCriticalityRecordResponse = z.infer<
   typeof DeleteAssetCriticalityRecordResponse
 >;
-export const DeleteAssetCriticalityRecordResponse = z.object({
-  /**
-   * True if the record was deleted or false if the record did not exist.
-   */
-  deleted: z.boolean(),
-  /**
-   * The deleted record if it existed.
-   */
-  record: AssetCriticalityRecord.optional(),
-});

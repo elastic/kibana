@@ -17,9 +17,18 @@ export function MachineLearningNavigationProviderSecurity({
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
+  async function navigateToStackManagement() {
+    await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
+    // ensure the side panel is visible
+    await testSubjects.existOrFail(
+      'kbnChromeNav-sidePanel kbnChromeNav-sidePanel_stack_management',
+      { timeout: 2500 }
+    );
+  }
+
   async function navigateToArea(id: string, expectedTestSubject: string) {
     await retry.tryForTime(20 * 1000, async () => {
-      await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
+      await navigateToStackManagement();
       await svlCommonNavigation.sidenav.clickPanelLink(id);
       await testSubjects.existOrFail(expectedTestSubject, { timeout: 2500 });
     });

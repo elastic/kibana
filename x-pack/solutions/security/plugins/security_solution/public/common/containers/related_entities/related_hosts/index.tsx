@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo } from 'react';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import type { inputsModel } from '../../../store';
 import type { InspectResponse } from '../../../../types';
 import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/security_solution/related_entities';
@@ -38,7 +39,7 @@ export const useUserRelatedHosts = ({
   const spaceId = useSpaceId();
   const namespace = spaceId || 'default';
   const entityStoreIndexPattern = useMemo(
-    () => [`.entities.v2.latest.security_${namespace}`],
+    () => [getEntitiesAlias(ENTITY_LATEST, namespace)],
     [namespace]
   );
 

@@ -10,23 +10,37 @@ import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
 
-export const createEntityAnalyticsNavigationTree = (): NodeDefinition => ({
-  id: SecurityGroupName.entityAnalytics,
-  icon: 'chartBarVerticalStack',
-  title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
-  renderAs: 'panelOpener',
-  children: [
-    {
-      id: SecurityPageName.entityAnalyticsOverview,
-      link: securityLink(SecurityPageName.entityAnalyticsOverview),
-    },
-    {
-      id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
-      link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
-    },
-    {
+export const createEntityAnalyticsNavigationTree = (
+  isNewHomePageEnabled?: boolean
+): NodeDefinition => {
+  const newHomePageEnabled = isNewHomePageEnabled ?? false;
+  if (newHomePageEnabled) {
+    return {
       id: SecurityPageName.entityAnalyticsHomePage,
+      icon: 'chartBarVerticalStack',
       link: securityLink(SecurityPageName.entityAnalyticsHomePage),
-    },
-  ],
-});
+      badgeType: 'new',
+    };
+  } else {
+    return {
+      id: SecurityGroupName.entityAnalytics,
+      icon: 'chartBarVerticalStack',
+      title: SecurityLinkGroup[SecurityGroupName.entityAnalytics].title,
+      renderAs: 'panelOpener',
+      children: [
+        {
+          id: SecurityPageName.entityAnalyticsOverview,
+          link: securityLink(SecurityPageName.entityAnalyticsOverview),
+        },
+        {
+          id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
+          link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
+        },
+        {
+          id: SecurityPageName.entityAnalyticsHomePage,
+          link: securityLink(SecurityPageName.entityAnalyticsHomePage),
+        },
+      ],
+    };
+  }
+};

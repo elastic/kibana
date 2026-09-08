@@ -52,8 +52,6 @@ export const INDEX_PATTERNS_DETAILS = 'Index patterns';
 
 export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
-export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
-
 export const INDICATOR_INDEX_PATTERNS = 'Indicator index patterns';
 
 export const INDICATOR_INDEX_QUERY = 'Indicator index query';
@@ -145,12 +143,6 @@ export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetails
 export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetailsSetupContent"]';
 
 export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
-
-export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
-
-export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
-
-export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
 
 export const EXECUTION_RESULTS_CONTAINER = `[data-test-subj="executionResultsContainer"]`;
 

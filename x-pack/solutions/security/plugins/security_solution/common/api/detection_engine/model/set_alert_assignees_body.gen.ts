@@ -14,22 +14,26 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { AlertIds } from '../../model/alert.gen';
 
+export const AlertAssignees = lazySchema(() =>
+  z.object({
+    add: z.array(z.string().min(1).superRefine(isNonEmptyString)),
+    remove: z.array(z.string().min(1).superRefine(isNonEmptyString)),
+  })
+);
 export type AlertAssignees = z.infer<typeof AlertAssignees>;
-export const AlertAssignees = z.object({
-  add: z.array(z.string().min(1).superRefine(isNonEmptyString)),
-  remove: z.array(z.string().min(1).superRefine(isNonEmptyString)),
-});
 
+export const SetAlertAssigneesBody = lazySchema(() =>
+  z.object({
+    /**
+     * Details about the assignees to assign and unassign.
+     */
+    assignees: AlertAssignees,
+    ids: AlertIds,
+  })
+);
 export type SetAlertAssigneesBody = z.infer<typeof SetAlertAssigneesBody>;
-export const SetAlertAssigneesBody = z.object({
-  /**
-   * Details about the assignees to assign and unassign.
-   */
-  assignees: AlertAssignees,
-  ids: AlertIds,
-});

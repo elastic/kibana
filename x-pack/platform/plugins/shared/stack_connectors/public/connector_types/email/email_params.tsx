@@ -122,7 +122,11 @@ export const EmailParamsFields = ({
           <>
             <span>
               {!addCC && (!cc || cc?.length === 0) ? (
-                <EuiButtonEmpty size="xs" onClick={() => setAddCC(true)}>
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={() => setAddCC(true)}
+                  data-test-subj="emailAddCcButton"
+                >
                   <FormattedMessage
                     defaultMessage="Cc"
                     id="xpack.stackConnectors.components.email.addCcButton"

@@ -225,12 +225,31 @@ export const readRiskScores = async (
   size: number = 1000,
   query?: Record<string, any>
 ): Promise<EcsRiskScore[]> => {
+  try {
+    await es.indices.refresh({ index: index.join(',') });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(`readRiskScores: index refresh failed (non-fatal): ${e}`);
+  }
   const results = await es.search({
     index,
     size,
     ...(query ? { query } : {}),
   });
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
+};
+
+const isRetryableRiskScoreReadError = (error: unknown): boolean => {
+  const err = error as { meta?: { statusCode?: number }; message?: string };
+  if (err?.meta?.statusCode === 404) {
+    return true;
+  }
+
+  const message = String(err?.message ?? '').toLowerCase();
+  return (
+    message.includes('no_shard_available_action_exception') ||
+    message.includes('search_phase_execution_exception')
+  );
 };
 
 /**
@@ -269,7 +288,7 @@ export const waitForRiskScoresToBePresent = async ({
         const riskScores = await readRiskScores(es, index, scoreCount + 10);
         return riskScores.length >= scoreCount;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;
@@ -356,7 +375,7 @@ export const waitForRiskScoreForId = async ({
         }
         return true;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;
@@ -371,31 +390,6 @@ export const waitForRiskScoreForId = async ({
   }
 
   return bestMatch;
-};
-
-/**
- *
- * It waits for the risk engine 'runAt' time to be bigger than the initial time.
- */
-export const waitForRiskEngineRun = async ({
-  supertest,
-  log,
-}: {
-  supertest: SuperTest.Agent;
-  log: ToolingLog;
-}): Promise<void> => {
-  const initialTime = new Date();
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
-
-  await waitFor(
-    async () => {
-      const { body } = await riskEngineRoutes.getStatus();
-      const runAtTime = body?.risk_engine_task_status?.runAt;
-      return !!runAtTime && new Date(runAtTime) > initialTime;
-    },
-    'waitForRiskEngineToRun',
-    log
-  );
 };
 
 export const getRiskEngineTasks = async ({
@@ -518,10 +512,12 @@ export const updateRiskEngineConfigSO = async ({
   }
 };
 
-const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
-  if (response.status !== statusCode) {
+const assertStatusCode = (statusCode: number | number[], response: SuperTest.Response) => {
+  const expected = Array.isArray(statusCode) ? statusCode : [statusCode];
+  if (!expected.includes(response.status)) {
     throw new Error(
-      `Expected status code ${statusCode}, but got ${response.statusCode} \n` + response.text
+      `Expected status code ${expected.join(' or ')}, but got ${response.statusCode} \n` +
+        response.text
     );
   }
 };
@@ -596,7 +592,7 @@ export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namesp
       return response;
     },
 
-    scheduleNow: async (expectStatusCode: number = 200) => {
+    scheduleNow: async (expectStatusCode: number | number[] = 200) => {
       const response = await supertest
         .post(routeWithNamespace(RISK_ENGINE_SCHEDULE_NOW_URL, namespace))
         .set('kbn-xsrf', 'true')

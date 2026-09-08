@@ -6,7 +6,7 @@ exports[`Should remove selected fields from selectable 1`] = `
   aria-label="Add tooltip field"
   button={
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       isDisabled={false}
       onClick={[Function]}
       size="xs"
@@ -28,6 +28,11 @@ exports[`Should remove selected fields from selectable 1`] = `
 >
   <EuiSelectable
     isPreFiltered={false}
+    listProps={
+      Object {
+        "paddingSize": "s",
+      }
+    }
     onChange={[Function]}
     optionMatcher={[Function]}
     options={
@@ -82,7 +87,7 @@ exports[`Should render 1`] = `
   aria-label="Add tooltip field"
   button={
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       isDisabled={false}
       onClick={[Function]}
       size="xs"
@@ -104,6 +109,11 @@ exports[`Should render 1`] = `
 >
   <EuiSelectable
     isPreFiltered={false}
+    listProps={
+      Object {
+        "paddingSize": "s",
+      }
+    }
     onChange={[Function]}
     optionMatcher={[Function]}
     options={

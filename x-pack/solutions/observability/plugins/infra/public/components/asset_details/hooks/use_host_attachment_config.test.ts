@@ -126,7 +126,6 @@ describe('useHostAttachmentConfig', () => {
     renderHook(() => useHostAttachmentConfig());
 
     expect(mockSetAgentBuilderChatConfig).toHaveBeenCalledWith({
-      agentId: 'observability.agent',
       attachments: [
         expect.objectContaining({
           type: 'observability.host',

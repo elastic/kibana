@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { RULE_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { deleteRuleOasExamples } from './delete_rule_oas_example';
 
 @injectable()
-export class DeleteRuleRoute {
+export class DeleteRuleRoute extends BaseAlertingRoute {
   static method = 'delete' as const;
   static path = `${ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
@@ -27,27 +29,29 @@ export class DeleteRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Delete a rule',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+    oasOperationObject: deleteRuleOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      params: ruleIdParamsSchema,
     },
     response: {
       204: {
-        description: 'Indicates a successful call.',
+        description: 'The rule was deleted successfully.',
       },
       404: {
-        description: 'Indicates a rule with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: RULE_NOT_FOUND_DESCRIPTION,
       },
     },
   };
 
+  protected readonly routeName = 'delete rule';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
@@ -55,20 +59,13 @@ export class DeleteRuleRoute {
       unknown,
       'delete'
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      await this.rulesClient.deleteRule({ id: this.request.params.id });
-      return this.response.noContent();
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  protected async execute() {
+    await this.rulesClient.deleteRule({ id: this.request.params.id });
+    return this.ctx.response.noContent();
   }
 }

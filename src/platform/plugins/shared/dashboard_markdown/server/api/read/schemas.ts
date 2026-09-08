@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-import { markdownAttributesSchema } from '../../markdown_saved_object/schema/v1';
+import { markdownLibraryItemSchema } from '../schema';
 
-export const readResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: markdownAttributesSchema,
-  meta: asCodeMetaSchema,
-});
+export const readResponseBodySchema = z
+  .object({
+    id: z.string().meta({
+      description:
+        'The unique ID of the markdown library item, as returned by the create or search endpoints.',
+    }),
+    data: markdownLibraryItemSchema,
+    meta: asCodeMetaSchema,
+  })
+  .strict();

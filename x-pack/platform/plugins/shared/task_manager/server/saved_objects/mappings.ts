@@ -81,12 +81,19 @@ export const taskMappings: SavedObjectsTypeMappingDefinition = {
         apiKeyId: {
           type: 'keyword',
         },
+        uiamApiKeyId: {
+          type: 'keyword',
+        },
         // NO NEED TO BE INDEXED
         // apiKeyCreatedByUser: {
         //   type: 'boolean',
         // },
         // spaceId: {
         //   type: 'keyword',
+        // },
+        // userProfileId: {
+        //   type: 'keyword',
+        //   ignore_above: 1024,
         // },
       },
     },
@@ -115,4 +122,11 @@ export const apiKeyToInvalidateMappings: SavedObjectsTypeMappingDefinition = {
       type: 'date',
     },
   },
+};
+
+// The single execution-control document is always fetched by id, never
+// searched, so none of its attributes need to be indexed.
+export const taskExecutionControlMapping: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {},
 };

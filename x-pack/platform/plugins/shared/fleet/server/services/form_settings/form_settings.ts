@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { type Props, schema } from '@kbn/config-schema';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 
@@ -30,6 +31,19 @@ export function _getSettingsAPISchema(settings: SettingsConfig[]): Props {
         schema.literal(null),
         schema.any({
           validate: (val: any) => {
+            if (setting.type === 'yaml') {
+              try {
+                parse(val);
+              } catch {
+                return i18n.translate(
+                  'xpack.fleet.settings.agentPolicyAdvanced.yamlValidationMessage',
+                  {
+                    defaultMessage: 'Must be a valid YAML string',
+                  }
+                );
+              }
+              return;
+            }
             const res = setting.schema.safeParse(val);
             if (!res.success) {
               return stringifyZodError(res.error);
@@ -71,7 +85,10 @@ export function _getSettingsValuesForAgentPolicy(
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
     if (val !== undefined && val !== '') {
-      settingsValues[setting.name] = convertValue(val, setting.type);
+      const convertedVal = convertValue(val, setting.type);
+      if (convertedVal !== undefined) {
+        settingsValues[setting.name] = convertedVal;
+      }
     }
   });
   return settingsValues;
@@ -79,12 +96,14 @@ export function _getSettingsValuesForAgentPolicy(
 
 function convertValue(val: any, type?: string) {
   if (type === 'yaml') {
-    const valJs = load(val);
+    const valJs = parse(val);
+    if (valJs == null) {
+      return undefined;
+    }
     if (valJs.agent?.internal) {
       return valJs.agent.internal;
-    } else {
-      return valJs;
     }
+    return valJs;
   }
   return val;
 }

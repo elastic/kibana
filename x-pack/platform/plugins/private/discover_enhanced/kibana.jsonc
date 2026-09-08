@@ -23,8 +23,7 @@
       "usageCollection"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "lens"
+      "kibanaUtils"
     ]
   }
 }

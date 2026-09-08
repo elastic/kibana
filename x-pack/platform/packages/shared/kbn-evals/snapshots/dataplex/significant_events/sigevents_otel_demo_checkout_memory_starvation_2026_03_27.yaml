@@ -1,0 +1,10 @@
+elastic-observability.global.es-snapshot-dataset:
+  data:
+    gcs_path: 'gs://significant-events-datasets/2026-03-27/otel-demo/checkout-memory-starvation'
+    description: 'SigEvents OTel Demo checkout-memory-starvation failure scenario — checkout service disruption with Kubernetes pod lifecycle events (termination, rolling update), affecting order flow across cart, payment, and shipping services.'
+    es_version: '9.4.0-SNAPSHOT'
+    indices: 'logs*,sigevents-streams-features-checkout-memory-starvation'
+    timestamp_range: '2026-03-27'
+    source: 'OTel Demo (opentelemetry-demo) checkout-memory-starvation scenario captured via scripts/capture_otel_demo_snapshots'
+    team: 'obs-sig-events'
+    deprecated: ''

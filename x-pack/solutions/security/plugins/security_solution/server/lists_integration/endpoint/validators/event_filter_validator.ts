@@ -19,17 +19,18 @@ import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
+import { ENTRY_FIELD_MAX_LENGTH } from './constants';
 
 const EventFilterDataSchema = schema.object(
   {
     entries: schema.arrayOf(
       schema.object(
         {
-          field: schema.string(),
+          field: schema.string({ maxLength: ENTRY_FIELD_MAX_LENGTH }),
         },
         { unknowns: 'ignore' }
       ),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
   },
   {

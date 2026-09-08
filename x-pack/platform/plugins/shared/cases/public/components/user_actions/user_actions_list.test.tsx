@@ -27,7 +27,6 @@ const defaultProps = {
   attachments: [basicCommentUnified],
   caseConnectors: getCaseConnectorsMockResponse(),
   data: basicCaseWithUnifiedComments,
-  manualAlertsData: { 'some-id': { _id: 'some-id' } },
   commentRefs: { current: {} },
   handleManageQuote: jest.fn(),
 };

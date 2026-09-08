@@ -11,6 +11,8 @@ import type { SloTabId } from '@kbn/deeplinks-observability';
 import { ALERTS_TAB_ID, DEFINITION_TAB_ID, HISTORY_TAB_ID } from '@kbn/deeplinks-observability';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
+import { isApmIndicatorType } from '../../../utils/slo/indicator';
+import { ApmSourcePanel } from './apm_source_panel';
 import { BurnRatePanel } from './burn_rate_panel/burn_rate_panel';
 import { EventsChartPanel } from './events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from './historical_data_charts';
@@ -64,8 +66,8 @@ export function SloDetails({ slo, isAutoRefreshing, selectedTabId }: Props) {
       <EuiFlexGroup direction="column" gutterSize="xl">
         <SloRemoteCallout slo={slo} />
         <SloHealthCallout slo={slo} />
-
         <EuiFlexGroup direction="column" gutterSize="l">
+          {isApmIndicatorType(slo.indicator) && <ApmSourcePanel slo={slo} />}
           <BurnRatePanel slo={slo} isAutoRefreshing={isAutoRefreshing} />
           <HistoricalDataCharts slo={slo} isAutoRefreshing={isAutoRefreshing} />
           <EventsChartPanel slo={slo} range={range} />

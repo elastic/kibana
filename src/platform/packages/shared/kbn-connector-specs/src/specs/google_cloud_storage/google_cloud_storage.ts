@@ -9,11 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
-import downloadWorkflow from './workflows/download.yaml';
-import getObjectMetadataWorkflow from './workflows/get_object_metadata.yaml';
-import listBucketsWorkflow from './workflows/list_buckets.yaml';
-import listObjectsWorkflow from './workflows/list_objects.yaml';
-import listProjectsWorkflow from './workflows/list_projects.yaml';
 import {
   ListProjectsInputSchema,
   ListBucketsInputSchema,
@@ -59,13 +54,20 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
     ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
   auth: {
     types: [
       'bearer',
       {
         type: 'oauth_authorization_code',
+        overrides: {
+          meta: {
+            authorizationUrl: { hidden: true },
+            tokenUrl: { hidden: true },
+            scope: { hidden: true },
+          },
+        },
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
@@ -82,6 +84,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
   actions: {
     listProjects: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List Google Cloud projects accessible to the configured credentials. This is the starting point for exploring Google Cloud Storage — use the returned project IDs with listBuckets.',
       input: ListProjectsInputSchema,
       handler: async (ctx, input: ListProjectsInput) => {
         const params: Record<string, string | number> = {
@@ -104,6 +109,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     listBuckets: {
       isTool: true,
+      scope: 'read',
+      description:
+        'List all Google Cloud Storage buckets in a project. Use listProjects first to discover available project IDs.',
       input: ListBucketsInputSchema,
       handler: async (ctx, input: ListBucketsInput) => {
         const params: Record<string, string | number> = {
@@ -125,6 +133,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     listObjects: {
       isTool: true,
+      scope: 'read',
+      description:
+        "List objects in a Google Cloud Storage bucket. This is the only way to find files — there is no search tool. Use prefix to filter by path and delimiter='/' to browse folder-by-folder, or omit delimiter to list all objects recursively under a prefix.",
       input: ListObjectsInputSchema,
       handler: async (ctx, input: ListObjectsInput) => {
         const params: Record<string, string | number> = {
@@ -149,6 +160,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     getObjectMetadata: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Get detailed metadata for a specific GCS object including content type, size, storage class, checksums, timestamps, and user-defined metadata. Use after listObjects to inspect a specific file. Prefer this over downloadObject when you only need file properties, not content.',
       input: GetObjectMetadataInputSchema,
       handler: async (ctx, input: GetObjectMetadataInput) => {
         try {
@@ -167,6 +181,9 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
 
     downloadObject: {
       isTool: true,
+      scope: 'read',
+      description:
+        'Download an object from Google Cloud Storage and return its raw content as base64. Works with PDFs, Office documents, text files, and other formats. Use getObjectMetadata instead if you only need file properties (size, type, dates). Files exceeding maximumDownloadSizeBytes are skipped and returned with metadata only (hasContent: false).',
       input: DownloadObjectInputSchema,
       handler: async (ctx, input: DownloadObjectInput) => {
         try {
@@ -222,46 +239,23 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'Navigate Google Cloud Storage in this order: listProjects → listBuckets (pass projectId) → listObjects (pass bucket) → downloadObject or getObjectMetadata.',
+    'There is no search tool. To find files, call listObjects with a prefix parameter to filter by path prefix.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.googleCloudStorage.test.description', {
       defaultMessage: 'Verifies Google Cloud Storage connection by calling the GCS API',
     }),
     handler: async (ctx) => {
-      try {
-        // Use the service discovery endpoint — it's accessible with any valid GCS token
-        // and doesn't require a project ID
-        const response = await ctx.client.get('https://storage.googleapis.com/storage/v1/b', {
-          params: { project: 'test', maxResults: 1 },
-        });
-        // A 200 or 400 (missing project) both prove the token is valid
-        if (response.status === 200 || response.status === 400) {
-          return { ok: true, message: 'Successfully connected to Google Cloud Storage API' };
-        }
-        return { ok: false, message: 'Failed to connect to Google Cloud Storage API' };
-      } catch (error) {
-        // A 400 error from GCS (e.g. "required" project param) still proves the token works
-        const axiosError = error as {
-          response?: { status?: number; data?: { error?: { code?: number } } };
-        };
-        const status = axiosError.response?.status ?? axiosError.response?.data?.error?.code;
-        if (status === 400) {
-          return { ok: true, message: 'Successfully connected to Google Cloud Storage API' };
-        }
-        return {
-          ok: false,
-          message: `Failed to connect to Google Cloud Storage API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      // A 200 or 400 (missing project id) both prove the token is valid
+      await ctx.client.get('https://storage.googleapis.com/storage/v1/b', {
+        params: { project: 'test', maxResults: 1 },
+        validateStatus: (status) => status === 200 || status === 400,
+      });
+      return {};
     },
+    enabled: true,
   },
-
-  agentBuilderWorkflows: [
-    listProjectsWorkflow,
-    listBucketsWorkflow,
-    listObjectsWorkflow,
-    getObjectMetadataWorkflow,
-    downloadWorkflow,
-  ],
 };

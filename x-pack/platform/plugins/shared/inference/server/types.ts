@@ -154,7 +154,7 @@ export interface InferenceServerStart {
    * @param request - The Kibana request to scope the operation to
    * @returns A promise that resolves to the default inference connector
    */
-  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector | undefined>;
 
   /**
    * Retrieves a specific inference connector by its ID.
@@ -214,6 +214,15 @@ export interface InferenceServerStart {
    * @throws Error if the endpoint does not exist
    */
   getInferenceEndpointById: (inferenceId: string) => Promise<InferenceEndpoint>;
+
+  /**
+   * Installs the managed inference token usage dashboard (and its data view) into
+   * the default space. Idempotent: existing assets are overwritten.
+   *
+   * Callers are responsible for gating this on whether token usage tracking is
+   * enabled — the inference plugin no longer self-installs the dashboard.
+   */
+  installTokenUsageDashboard: () => Promise<void>;
 }
 
 /**

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -23,23 +23,29 @@ import {
   ExceptionListItem,
 } from '../model/exception_list_common.gen';
 
+export const DeleteExceptionListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Exception item's identifier. Either `id` or `item_id` must be specified
+     */
+    id: ExceptionListItemId.optional(),
+    /**
+     * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified
+     */
+    item_id: ExceptionListItemHumanId.optional(),
+    /**
+      * `single` deletes the item in the current Kibana space; `agnostic` deletes an item in a space-agnostic list. Must match the list that owns the item.
+
+      */
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+  })
+);
 export type DeleteExceptionListItemRequestQuery = z.infer<
   typeof DeleteExceptionListItemRequestQuery
 >;
-export const DeleteExceptionListItemRequestQuery = z.object({
-  /**
-   * Exception item's identifier. Either `id` or `item_id` must be specified
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Human readable exception item string identifier, e.g. `trusted-linux-processes`. Either `id` or `item_id` must be specified
-   */
-  item_id: ExceptionListItemHumanId.optional(),
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-});
 export type DeleteExceptionListItemRequestQueryInput = z.input<
   typeof DeleteExceptionListItemRequestQuery
 >;
 
+export const DeleteExceptionListItemResponse = lazySchema(() => ExceptionListItem);
 export type DeleteExceptionListItemResponse = z.infer<typeof DeleteExceptionListItemResponse>;
-export const DeleteExceptionListItemResponse = ExceptionListItem;

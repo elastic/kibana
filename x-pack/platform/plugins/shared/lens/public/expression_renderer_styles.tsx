@@ -40,8 +40,10 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
  * These elements are rendered outside the Lens DOM tree and need global targeting.
  */
 export const lnsGlobalChartStyles = (euiThemeContext: UseEuiTheme) => css`
-  [id^='echTooltipPortal'],
-  [data-euiportal='true'] {
+  [id^='echTooltipPortal'] {
     ${lnsNumericFontStyles(euiThemeContext)}
+    // elastic-charts sets an inline z-index (chartZIndex + 100); override so tooltips
+    // appear above the inline editor flyout.
+    z-index: ${Number(euiThemeContext.euiTheme.levels.flyout) + 1} !important;
   }
 `;

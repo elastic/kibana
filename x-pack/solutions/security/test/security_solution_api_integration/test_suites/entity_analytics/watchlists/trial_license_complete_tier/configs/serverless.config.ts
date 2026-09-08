@@ -14,10 +14,16 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    // Merge with enableExperimental from config/serverless/config.base (last flag wins there too).
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'endpointExceptionsMovedUnderManagement',
       'entityAnalyticsWatchlistEnabled',
+      'entityAnalyticsEntityStoreV2',
     ])}`,
+    '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
   ],
+  // Entity analytics tests do not exercise prebuilt-rule management endpoints.
+  installMockPrebuiltRulesPackage: false,
   testFiles: [require.resolve('..')],
   junit: {
     reportName: 'Entity Analytics - Watchlists Integration Tests - Serverless Env - Complete Tier',

@@ -21,7 +21,7 @@ describe('buildSecurityApi', () => {
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();
-    api = buildSecurityApi({ authc });
+    api = buildSecurityApi({ authc, config: {} });
   });
 
   describe('authc.getCurrentUser', () => {
@@ -41,6 +41,30 @@ describe('buildSecurityApi', () => {
       expect(currentUser).toBe(delegateReturn);
     });
   });
+
+  describe('serviceAccounts.isEnabled', () => {
+    it('returns true when service accounts are enabled', () => {
+      const enabledApi = buildSecurityApi({
+        authc,
+        config: { serviceAccounts: { enabled: true } },
+      });
+
+      expect(enabledApi.serviceAccounts.isEnabled()).toBe(true);
+    });
+
+    it('returns false when service accounts are disabled', () => {
+      const disabledApi = buildSecurityApi({
+        authc,
+        config: { serviceAccounts: { enabled: false } },
+      });
+
+      expect(disabledApi.serviceAccounts.isEnabled()).toBe(false);
+    });
+
+    it('returns false when the setting is not available, as is the case outside of serverless', () => {
+      expect(api.serviceAccounts.isEnabled()).toBe(false);
+    });
+  });
 });
 
 describe('buildUserProfileApi', () => {
@@ -52,6 +76,7 @@ describe('buildUserProfileApi', () => {
       userProfile$: of(null),
       userProfileLoaded$: of(false),
       enabled$: of(true),
+      dataUpdates$: of({}),
       getCurrent: jest.fn(),
       bulkGet: jest.fn(),
       suggest: jest.fn(),

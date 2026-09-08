@@ -22,7 +22,7 @@
     "@kbn/esql-language",
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/dev-cli-runner",
     "@kbn/expect",
     "@kbn/tooling-log",
@@ -47,5 +47,6 @@
     "@kbn/anonymization-plugin",
     "@kbn/anonymization-common",
     "@kbn/utility-types",
+    "@kbn/management-settings-ids",
   ]
 }

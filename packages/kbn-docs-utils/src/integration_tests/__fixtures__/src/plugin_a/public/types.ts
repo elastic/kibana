@@ -106,13 +106,11 @@ export const overloadedFn: OverloadedFunction = ((input: string | number | strin
 }) as OverloadedFunction;
 
 // Expected issues:
-//   missing comments (15):
+//   missing comments (13):
 //     line 19 - TypeWithGeneric
 //     line 21 - ImAType
 //     line 28 - t
 //     line 28 - t
-//     line 36 - p
-//     line 36 - p
 //     line 36 - t
 //     line 52 - IRefANotExportedType
 //     line 53 - ImAnObject
@@ -122,8 +120,7 @@ export const overloadedFn: OverloadedFunction = ((input: string | number | strin
 //     line 62 - bar
 //     line 65 - AReactElementFn
 //     line 80 - input
-//   param doc mismatches (4):
-//     line 30 - FnTypeWithGeneric
+//   param doc mismatches (3):
 //     line 54 - foo
 //     line 62 - bar
 //     line 98 - overloadedFn

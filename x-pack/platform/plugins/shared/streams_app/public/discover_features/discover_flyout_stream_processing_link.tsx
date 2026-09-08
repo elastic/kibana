@@ -6,6 +6,7 @@
  */
 
 import { type DataTableRecord } from '@kbn/discover-utils';
+import type { HttpStart } from '@kbn/core/public';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import {
   EuiIconTip,
@@ -20,8 +21,17 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
-import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
-import { useResolvedDefinitionName } from './use_resolved_definition_name';
+import type { StreamsAppLocator, StreamsAppLocatorDefinitionParams } from '../../common/locators';
+import {
+  adaptDocToResolverInputs,
+  useResolvedDefinitionName,
+} from './use_resolved_definition_name';
+import {
+  getRemoteSearchType,
+  REMOTE_SEARCH_TYPE,
+  type RemoteSearchType,
+} from './stream_link_content';
+import { useCcsHasRemoteClusters } from './use_ccs_has_remote_clusters';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
   dataView: DataView;
@@ -29,32 +39,45 @@ export interface DiscoverFlyoutStreamProcessingLinkProps {
   fieldFormats: FieldFormatsStart;
   locator: StreamsAppLocator;
   streamsRepositoryClient: StreamsRepositoryClient;
-  renderCpsWarning?: boolean;
+  http: HttpStart;
+  isServerless: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export function DiscoverFlyoutStreamProcessingLink({
   doc,
   locator,
   streamsRepositoryClient,
-  renderCpsWarning,
+  http,
+  isServerless,
+  cpsHasLinkedProjects,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
+  const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
+  const ccsHasRemoteClusters = useCcsHasRemoteClusters({ http, isServerless });
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    doc,
+    index,
+    fallbackStreamName,
+    cpsHasLinkedProjects,
+    ccsHasRemoteClusters,
   });
+
+  const remoteSearchType = getRemoteSearchType({ cpsHasLinkedProjects, ccsHasRemoteClusters });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
-  if (!value || error) return null;
+  const { name, existsLocally } = value ?? {};
+
+  if (!name || !existsLocally || error) return null;
 
   const href = locator.getRedirectUrl({
-    name: value,
+    name,
     managementTab: 'processing',
     pageState: {
       v: 1,
-      dataSources: [getTargetDataSource(doc, value)],
+      dataSources: [getTargetDataSource(doc, name)],
     },
-  } as StreamsAppLocatorParams);
+  } as StreamsAppLocatorDefinitionParams);
 
   const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
     defaultMessage: 'Parse content in Streams',
@@ -71,13 +94,13 @@ export function DiscoverFlyoutStreamProcessingLink({
           </EuiFlexGroup>
         </EuiToolTip>
       </EuiLink>
-      {renderCpsWarning && (
+      {remoteSearchType && !index && (
         <EuiIconTip
-          content={CPS_WARNING_MESSAGE}
+          content={PROCESSING_WARNING_MESSAGES[remoteSearchType]}
           type="warning"
           size="s"
           color="warning"
-          data-test-subj="cpsStreamsProcessingWarningIcon"
+          data-test-subj={`${remoteSearchType}StreamsProcessingWarningIcon`}
           anchorProps={{
             css: { display: 'flex' },
           }}
@@ -87,13 +110,22 @@ export function DiscoverFlyoutStreamProcessingLink({
   );
 }
 
-const CPS_WARNING_MESSAGE = i18n.translate(
-  'xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning',
-  {
-    defaultMessage:
-      'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
-  }
-);
+const PROCESSING_WARNING_MESSAGES: Record<RemoteSearchType, string> = {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate(
+    'xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning',
+    {
+      defaultMessage:
+        'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
+    }
+  ),
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate(
+    'xpack.streams.discoverFlyoutStreamProcessingLink.ccsWarning',
+    {
+      defaultMessage:
+        'Cross-cluster search is active. This document may come from a remote cluster and might not be available in Streams.',
+    }
+  ),
+};
 
 const getTargetDataSource = (doc: DataTableRecord, streamName: string) => {
   const baseDataSource = {

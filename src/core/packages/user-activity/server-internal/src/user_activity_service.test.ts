@@ -109,6 +109,62 @@ describe('UserActivityService', () => {
       });
     });
 
+    it('logs optional event.outcome on the event object', () => {
+      service.trackUserAction({
+        message: 'Failed action',
+        event: { action: TEST_ACTION, type: 'error', outcome: 'failure' },
+        object: { id: 'obj-e', name: 'Object', type: 'rule', tags: [] },
+      });
+
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
+        event: { action: TEST_ACTION, type: 'error', outcome: 'failure' },
+      });
+    });
+
+    it('logs optional top-level ECS error fields', () => {
+      service.trackUserAction({
+        message: 'User failed to create a rule.',
+        event: { action: TEST_ACTION, type: 'creation', outcome: 'failure' },
+        object: { id: 'obj-err', name: 'Rule', type: 'rule', tags: [] },
+        error: {
+          type: 'ResponseError',
+          message: 'index_not_found_exception',
+          code: '404',
+          stack_trace: 'Error: index_not_found_exception\n    at handler',
+        },
+      });
+
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
+        event: { outcome: 'failure' },
+        error: {
+          type: 'ResponseError',
+          message: 'index_not_found_exception',
+          code: '404',
+          stack_trace: 'Error: index_not_found_exception\n    at handler',
+        },
+      });
+    });
+
+    it('merges outcome, error, and metadata into the log meta object', () => {
+      const params: TrackUserActionParams = {
+        message: 'Merged payload',
+        event: { action: TEST_ACTION, type: 'change', outcome: 'success' },
+        object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+        metadata: { attempt: 1 },
+        error: { message: 'ignored downstream' },
+      };
+
+      service.trackUserAction(params);
+
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
+        message: 'Merged payload',
+        event: { action: TEST_ACTION, type: 'change', outcome: 'success' },
+        object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+        metadata: { attempt: 1 },
+        error: { message: 'ignored downstream' },
+      });
+    });
+
     it('generates default message when not provided', () => {
       service.setInjectedContext({
         user: { name: 'test_user' },

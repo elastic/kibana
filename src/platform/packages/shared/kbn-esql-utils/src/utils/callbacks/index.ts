@@ -13,5 +13,6 @@ export { getEsqlPolicies } from './policies';
 export { getJoinIndices } from './lookup_indices';
 export { getTimeseriesIndices } from './timeseries_indices';
 export { getViews } from './views';
+export { getDatasets } from './datasets';
 export { getInferenceEndpoints } from './inference';
 export { getEditorExtensions } from './extensions';

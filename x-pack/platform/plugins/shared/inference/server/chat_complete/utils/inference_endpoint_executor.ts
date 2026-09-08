@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Readable } from 'stream';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ChatCompleteMetadata } from '@kbn/inference-common';
 
 export interface InferenceEndpointInvokeOptions {
   body: Record<string, unknown>;
   signal?: AbortSignal;
+  metadata?: ChatCompleteMetadata;
   timeout?: number;
 }
 
@@ -26,7 +28,7 @@ export const createInferenceEndpointExecutor = ({
   esClient: ElasticsearchClient;
 }): InferenceEndpointExecutor => {
   return {
-    async invoke({ body, signal, timeout = 180_000 }): Promise<Readable> {
+    async invoke({ body, signal, metadata, timeout = 180_000 }): Promise<Readable> {
       const response = await esClient.transport.request(
         {
           method: 'POST',
@@ -40,6 +42,10 @@ export const createInferenceEndpointExecutor = ({
         {
           asStream: true,
           requestTimeout: timeout,
+          headers: {
+            // always send a value for EIS
+            'X-Elastic-Product-Use-Case': metadata?.connectorTelemetry?.pluginId ?? 'inference',
+          },
           ...(signal ? { signal } : {}),
         }
       );

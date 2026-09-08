@@ -8,6 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import inquirer from 'inquirer';
+import moment from 'moment';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
@@ -15,8 +16,11 @@ import {
   DEFAULT_ENV_SNAPSHOT_LOGS_INDEX,
   INDEX_ALIAS_CONFIG,
   VALID_ALERT_INDICES,
-  VALID_SYSTEM_INDICES,
 } from './constants';
+
+export function toSnapshotName(index: string): string {
+  return `snapshot-${index.slice(1)}`;
+}
 
 export const parseRepeatableFlag = (value: unknown): string[] => {
   if (!value) return [];
@@ -26,7 +30,6 @@ export const parseRepeatableFlag = (value: unknown): string[] => {
 
 export interface CommonSnapshotFlags {
   snapshotName: string;
-  systemIndices: string[];
   alertIndices: string[];
   logsIndex: string;
 }
@@ -35,20 +38,6 @@ export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): Common
   const snapshotName = String(flags['snapshot-name'] || '');
   if (!snapshotName) {
     throw new Error('Required: --snapshot-name <name>');
-  }
-
-  const systemIndicesFlag = parseRepeatableFlag(flags['system-indices']);
-  const systemIndices =
-    systemIndicesFlag.length > 0 ? systemIndicesFlag : [...VALID_SYSTEM_INDICES];
-
-  const validSystemSet = new Set<string>(VALID_SYSTEM_INDICES);
-  for (const pattern of systemIndices) {
-    if (!validSystemSet.has(pattern)) {
-      throw new Error(
-        `Invalid --system-indices value "${pattern}". ` +
-          `Allowed values: ${VALID_SYSTEM_INDICES.join(', ')}`
-      );
-    }
   }
 
   const alertIndicesFlag = parseRepeatableFlag(flags['alert-indices']);
@@ -66,7 +55,32 @@ export const parseCommonSnapshotFlags = (flags: Record<string, unknown>): Common
 
   const logsIndex = String(flags['logs-index'] || DEFAULT_ENV_SNAPSHOT_LOGS_INDEX);
 
-  return { snapshotName, systemIndices, alertIndices, logsIndex };
+  return { snapshotName, alertIndices, logsIndex };
+};
+
+const DURATION_RE = /^(\d+)(s|m|h|d)$/;
+
+/**
+ * Parses a duration flag like "3m", "90s", "1h", "2d" into milliseconds. Returns `defaultMs`
+ * when the flag is absent; throws on a malformed value.
+ */
+export const parseDurationFlag = (
+  raw: string | string[] | boolean | undefined,
+  flagName: string,
+  defaultMs: number
+): number => {
+  if (!raw) return defaultMs;
+
+  const value = String(raw);
+
+  const match = value.match(DURATION_RE);
+  if (!match) {
+    throw new Error(`--${flagName} must be a duration like "3m", "90s", "1h". Got: "${value}"`);
+  }
+
+  const amount = Number(match[1]);
+  const unit = match[2] as moment.unitOfTime.DurationConstructor;
+  return moment.duration(amount, unit).asMilliseconds();
 };
 
 export async function resolvePatterns(
@@ -114,51 +128,19 @@ export async function resolvePatterns(
   return resolved;
 }
 
-export const validateIndexPrivileges = async (
-  esClient: Client,
-  log: ToolingLog,
-  patterns: string[],
-  onUnauthorized: (missing: string) => string
-): Promise<void> => {
-  // Superusers bypass index-level privilege checks at operation time, but
-  // has_privileges returns false for restricted index wildcards even for
-  // superusers. Check for the superuser role first and skip the index check.
-  const authInfo = await esClient.security.authenticate();
-  const roles: string[] = authInfo.roles ?? [];
-  if (roles.includes('superuser')) {
-    log.debug('Superuser detected — skipping index privilege check');
-    return;
-  }
-
-  const privResult = await esClient.security.hasPrivileges({
-    index: [{ names: patterns, privileges: ['manage'], allow_restricted_indices: true }],
-  });
-
-  if (!privResult.has_all_requested) {
-    const missing = Object.entries(privResult.index ?? {})
-      .filter(([, privs]) => !Object.values(privs as Record<string, boolean>).every(Boolean))
-      .map(([idx]) => idx);
-    throw new Error(onUnauthorized(missing.length > 0 ? missing.join(', ') : patterns.join(', ')));
-  }
-
-  log.debug('Index privilege check passed');
-};
-
 export const ensureKnownAliases = async ({
   esClient,
   log,
-  systemIndices,
   alertIndices,
 }: {
   esClient: Client;
   log: ToolingLog;
-  systemIndices: string[];
   alertIndices: string[];
 }): Promise<void> => {
   let created = 0;
   let skipped = 0;
 
-  for (const indexPattern of [...systemIndices, ...alertIndices]) {
+  for (const indexPattern of alertIndices) {
     const config = INDEX_ALIAS_CONFIG[indexPattern as keyof typeof INDEX_ALIAS_CONFIG];
     if (!config?.alias) {
       log.warning(`No alias config for "${indexPattern}" — skipping`);
@@ -221,6 +203,46 @@ export async function resolveExisting(esClient: Client, patterns: string[]): Pro
   return found;
 }
 
+/**
+ * Detect bare concrete indices whose name equals a stable alias from INDEX_ALIAS_CONFIG.
+ * Versioned wildcard patterns like `.kibana_alerting_cases_*` do not match a bare index named
+ * exactly `.kibana_alerting_cases`, so these slip past `resolveExisting` and only surface later
+ * as `invalid_alias_name_exception` during `updateAliases`. Deleting them up-front keeps the
+ * restore linear.
+ */
+async function findCollidingAliasNameIndices(
+  esClient: Client,
+  patterns: string[]
+): Promise<string[]> {
+  const aliasNames = new Set<string>();
+  for (const pattern of patterns) {
+    const config = INDEX_ALIAS_CONFIG[pattern as keyof typeof INDEX_ALIAS_CONFIG];
+    if (config?.alias) {
+      aliasNames.add(config.alias);
+    }
+  }
+
+  const colliding: string[] = [];
+  for (const aliasName of aliasNames) {
+    try {
+      const response = await esClient.indices.resolveIndex({
+        name: aliasName,
+        expand_wildcards: 'all',
+      });
+      const exactConcrete = (response.indices ?? []).find((i) => i.name === aliasName);
+      if (exactConcrete) {
+        colliding.push(aliasName);
+      }
+    } catch (err) {
+      if (err instanceof errors.ResponseError && err.statusCode === 404) {
+        continue;
+      }
+      throw err;
+    }
+  }
+  return colliding;
+}
+
 export async function deleteExisting(
   esClient: Client,
   log: ToolingLog,
@@ -258,23 +280,31 @@ async function promptConfirm(question: string): Promise<boolean> {
 export async function ensureCleanEnvironment({
   esClient,
   log,
-  systemIndices,
+  dataStreamIndices,
   alertIndices,
   logsIndex,
   clean,
 }: {
   esClient: Client;
   log: ToolingLog;
-  systemIndices: string[];
+  dataStreamIndices: string[];
   alertIndices: string[];
   logsIndex: string;
   clean: boolean;
 }): Promise<void> {
-  const allExisting = await resolveExisting(esClient, [
-    logsIndex,
-    ...systemIndices,
-    ...alertIndices,
+  const [matchedByPattern, aliasNameCollisions] = await Promise.all([
+    resolveExisting(esClient, [logsIndex, ...dataStreamIndices, ...alertIndices]),
+    findCollidingAliasNameIndices(esClient, alertIndices),
   ]);
+
+  const seen = new Set<string>();
+  const allExisting: string[] = [];
+  for (const name of [...matchedByPattern, ...aliasNameCollisions]) {
+    if (!seen.has(name)) {
+      seen.add(name);
+      allExisting.push(name);
+    }
+  }
 
   if (allExisting.length === 0) {
     log.debug('Environment is clean — no existing indices found');

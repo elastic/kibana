@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/charts-plugin'
   - '@kbn/data-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/discover-utils'
   - '@kbn/expressions-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/embeddable-plugin'
@@ -83,7 +84,6 @@ dependsOn:
   - '@kbn/search-response-warnings'
   - '@kbn/content-management-utils'
   - '@kbn/react-hooks'
-  - '@kbn/presentation-panel-plugin'
   - '@kbn/deeplinks-analytics'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/css-utils'
@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/cps-utils'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

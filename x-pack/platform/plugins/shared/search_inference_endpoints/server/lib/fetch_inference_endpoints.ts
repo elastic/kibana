@@ -17,7 +17,5 @@ export const fetchInferenceEndpoints = async (
     inference_id: '_all',
   });
 
-  return {
-    inferenceEndpoints: endpoints as InferenceAPIConfigResponse[],
-  };
+  return { inferenceEndpoints: endpoints as InferenceAPIConfigResponse[] };
 };

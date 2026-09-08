@@ -6,43 +6,63 @@
  */
 
 import { Route, Routes } from '@kbn/shared-ux-router';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
 import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
-import { getEnabledRoutes } from './route_config';
-import { useFeatureFlags } from './hooks/use_feature_flags';
+import { AgentRouteGuard } from './components/redirects/agent_route_guard';
+import { getEnabledRoutes, getViewIdForPathname } from './route_config';
+import { useRouteAccessConfig } from './hooks/use_route_access_config';
+import { useKibana } from './hooks/use_kibana';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
-  const featureFlags = useFeatureFlags();
+  const routeAccessConfig = useRouteAccessConfig();
+  const { pathname } = useLocation();
+  const {
+    services: { executionContext },
+  } = useKibana();
 
-  const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
+  const enabledRoutes = useMemo(() => getEnabledRoutes(routeAccessConfig), [routeAccessConfig]);
+
+  const viewId = useMemo(
+    () => getViewIdForPathname(pathname, enabledRoutes),
+    [pathname, enabledRoutes]
+  );
+
+  useExecutionContext(executionContext, { type: 'application', page: viewId });
 
   return (
     <AppLayout>
-      <Routes>
-        {enabledRoutes.map((route) => (
-          <Route key={route.path} path={route.path} exact>
-            {route.element}
+      {/* Redirects restricted users off any agent that isn't their space
+          default. No-op for admins, unconfigured spaces, and non-agent routes. */}
+      <AgentRouteGuard>
+        <Routes>
+          {enabledRoutes.map((route) => (
+            <Route key={route.path} path={route.path} exact>
+              <TrackApplicationView viewId={route.viewId}>{route.element}</TrackApplicationView>
+            </Route>
+          ))}
+
+          {/* Legacy routes - redirect to new structure */}
+          <Route path="/conversations/:conversationId">
+            <LegacyConversationRedirect />
           </Route>
-        ))}
 
-        {/* Legacy routes - redirect to new structure */}
-        <Route path="/conversations/:conversationId">
-          <LegacyConversationRedirect />
-        </Route>
+          {/* Redirect /agents to /agents/:lastAgentId */}
+          <Route path="/agents" exact>
+            <RootRedirect />
+          </Route>
 
-        {/* Redirect /agents to /agents/:lastAgentId */}
-        <Route path="/agents" exact>
-          <RootRedirect />
-        </Route>
-
-        {/* Root route - redirect to last used agent */}
-        <Route path="/" exact>
-          <RootRedirect />
-        </Route>
-      </Routes>
+          {/* Root route - redirect to last used agent */}
+          <Route path="/" exact>
+            <RootRedirect />
+          </Route>
+        </Routes>
+      </AgentRouteGuard>
     </AppLayout>
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn, EuiSwitchEvent } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -13,13 +13,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
-  EuiSwitch,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { ApplicationStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -33,6 +32,20 @@ import type { RolesAPIClient } from '../../roles';
 import { ConfirmDeleteUsers } from '../components';
 import type { UserAPIClient } from '../user_api_client';
 import { getExtendedUserDeprecationNotice, isUserDeprecated, isUserReserved } from '../user_utils';
+
+const usersListTitle = i18n.translate('xpack.security.management.users.usersTitle', {
+  defaultMessage: 'Users',
+});
+
+const createUserButtonLabel = i18n.translate(
+  'xpack.security.management.users.createNewUserButtonLabel',
+  { defaultMessage: 'Create user' }
+);
+
+const showReservedUsersLabel = i18n.translate(
+  'xpack.security.management.users.showReservedUsersLabel',
+  { defaultMessage: 'Show reserved users' }
+);
 
 interface Props {
   userAPIClient: PublicMethodsOf<UserAPIClient>;
@@ -53,6 +66,8 @@ interface State {
   filter: string;
   includeReservedUsers: boolean;
   isTableLoading: boolean;
+  pageIndex: number;
+  pageSize: number;
 }
 
 export class UsersGridPage extends Component<Props, State> {
@@ -60,8 +75,18 @@ export class UsersGridPage extends Component<Props, State> {
     readOnly: false,
   };
 
+  private static readonly PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
+  private static readonly DEFAULT_PAGE_SIZE = 20;
+
   constructor(props: Props) {
     super(props);
+
+    const params = new URLSearchParams(props.history.location.search);
+    const pageIndex = parseInt(params.get('page') ?? '', 10);
+    const pageSize = parseInt(params.get('perPage') ?? '', 10);
+    const filter = params.get('q') ?? '';
+    const includeReservedUsers = params.get('includeReserved') !== 'false';
+
     this.state = {
       users: [],
       visibleUsers: [],
@@ -69,9 +94,15 @@ export class UsersGridPage extends Component<Props, State> {
       selection: [],
       showDeleteConfirmation: false,
       permissionDenied: false,
-      filter: '',
-      includeReservedUsers: true,
-      isTableLoading: false,
+      filter,
+      includeReservedUsers,
+      isTableLoading: true,
+      pageIndex: Number.isFinite(pageIndex) && pageIndex >= 0 ? pageIndex : 0,
+      pageSize:
+        Number.isFinite(pageSize) &&
+        (UsersGridPage.PAGE_SIZE_OPTIONS as readonly number[]).includes(pageSize)
+          ? pageSize
+          : UsersGridPage.DEFAULT_PAGE_SIZE,
     };
   }
 
@@ -185,8 +216,9 @@ export class UsersGridPage extends Component<Props, State> {
       },
     ];
     const pagination = {
-      initialPageSize: 20,
-      pageSizeOptions: [10, 20, 50, 100],
+      pageIndex: this.state.pageIndex,
+      pageSize: this.state.pageSize,
+      pageSizeOptions: [...UsersGridPage.PAGE_SIZE_OPTIONS],
     };
 
     const selectionConfig = {
@@ -198,20 +230,24 @@ export class UsersGridPage extends Component<Props, State> {
     };
     const search = {
       toolsLeft: this.renderToolsLeft(),
-      toolsRight: this.renderToolsRight(),
+      defaultQuery: this.state.filter,
       box: {
         incremental: true,
         'data-test-subj': 'searchUsers',
       },
       onChange: (query: any) => {
-        this.setState({
-          filter: query.queryText,
-          visibleUsers: this.getVisibleUsers(
-            this.state.users,
-            query.queryText,
-            this.state.includeReservedUsers
-          ),
-        });
+        this.setState(
+          {
+            filter: query.queryText,
+            pageIndex: 0,
+            visibleUsers: this.getVisibleUsers(
+              this.state.users,
+              query.queryText,
+              this.state.includeReservedUsers
+            ),
+          },
+          () => this.updateUrlParams()
+        );
       },
     };
     const sorting = {
@@ -226,35 +262,32 @@ export class UsersGridPage extends Component<Props, State> {
       };
     };
 
+    const showCreateInHeader = !this.props.readOnly && !this.state.isTableLoading;
+    const menu: AppHeaderMenu = {
+      switch: {
+        id: 'showReservedUsers',
+        label: showReservedUsersLabel,
+        checked: this.state.includeReservedUsers,
+        onChange: this.onIncludeReservedUsersChange,
+        'data-test-subj': 'showReservedUsersSwitch',
+      },
+      ...(showCreateInHeader
+        ? {
+            primaryActionItem: {
+              id: 'createUser',
+              label: createUserButtonLabel,
+              iconType: 'plusCircle',
+              testId: 'createUserButton',
+              href: this.props.history.createHref({ pathname: '/create' }),
+              run: () => this.props.history.push('/create'),
+            },
+          }
+        : {}),
+    };
+
     return (
       <>
-        <EuiPageHeader
-          bottomBorder
-          pageTitle={
-            <FormattedMessage
-              id="xpack.security.management.users.usersTitle"
-              defaultMessage="Users"
-            />
-          }
-          data-test-subj="securityUsersPageHeader"
-          rightSideItems={
-            this.props.readOnly
-              ? undefined
-              : [
-                  <EuiButton
-                    data-test-subj="createUserButton"
-                    {...reactRouterNavigate(this.props.history, `/create`)}
-                    fill
-                    iconType="plusCircle"
-                  >
-                    <FormattedMessage
-                      id="xpack.security.management.users.createNewUserButtonLabel"
-                      defaultMessage="Create user"
-                    />
-                  </EuiButton>,
-                ]
-          }
-        />
+        <AppHeader title={usersListTitle} menu={menu} spacing="bleed" />
 
         <EuiSpacer size="l" />
 
@@ -282,6 +315,7 @@ export class UsersGridPage extends Component<Props, State> {
             loading={this.state.isTableLoading}
             search={search}
             sorting={sorting}
+            onTableChange={this.onTableChange}
             rowProps={rowProps}
           />
         }
@@ -374,28 +408,20 @@ export class UsersGridPage extends Component<Props, State> {
     );
   }
 
-  private onIncludeReservedUsersChange = (e: EuiSwitchEvent) => {
-    this.setState({
-      includeReservedUsers: e.target.checked,
-      visibleUsers: this.getVisibleUsers(this.state.users, this.state.filter, e.target.checked),
-    });
-  };
-
-  private renderToolsRight() {
-    return (
-      <EuiSwitch
-        data-test-subj="showReservedUsersSwitch"
-        label={
-          <FormattedMessage
-            id="xpack.security.management.users.showReservedUsersLabel"
-            defaultMessage="Show reserved users"
-          />
-        }
-        checked={this.state.includeReservedUsers}
-        onChange={this.onIncludeReservedUsersChange}
-      />
+  private onIncludeReservedUsersChange = (includeReservedUsers: boolean) => {
+    this.setState(
+      {
+        includeReservedUsers,
+        pageIndex: 0,
+        visibleUsers: this.getVisibleUsers(
+          this.state.users,
+          this.state.filter,
+          includeReservedUsers
+        ),
+      },
+      () => this.updateUrlParams()
     );
-  }
+  };
 
   private getUserStatusBadges = (user: User) => {
     const enabled = user.enabled;
@@ -437,6 +463,36 @@ export class UsersGridPage extends Component<Props, State> {
         ))}
       </EuiFlexGroup>
     );
+  };
+
+  private updateUrlParams = () => {
+    const { pageIndex, pageSize, filter, includeReservedUsers } = this.state;
+    const params = new URLSearchParams();
+
+    if (pageIndex > 0) {
+      params.set('page', String(pageIndex));
+    }
+    if (pageSize !== UsersGridPage.DEFAULT_PAGE_SIZE) {
+      params.set('perPage', String(pageSize));
+    }
+    if (filter) {
+      params.set('q', filter);
+    }
+    if (!includeReservedUsers) {
+      params.set('includeReserved', 'false');
+    }
+
+    const search = params.toString();
+    if (search !== this.props.history.location.search.replace(/^\?/, '')) {
+      this.props.history.replace({ search });
+    }
+  };
+
+  private onTableChange = ({ page }: CriteriaWithPagination<User>) => {
+    if (page) {
+      const { index: pageIndex, size: pageSize } = page;
+      this.setState({ pageIndex, pageSize }, () => this.updateUrlParams());
+    }
   };
 
   private onCancelDelete = () => {

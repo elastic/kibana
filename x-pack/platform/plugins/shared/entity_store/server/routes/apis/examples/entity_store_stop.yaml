@@ -1,0 +1,37 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        stopAllExample:
+          summary: "Stop all entity engines"
+          description: "Stop all running entity engines."
+          value:
+            entityTypes:
+              - user
+              - host
+              - service
+              - generic
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          stopSuccessExample:
+            summary: "Engines stopped"
+            description: "The specified entity engines were successfully stopped."
+            value:
+              ok: true
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityTypes":["user","host","service","generic"]}' \
+        "${KIBANA_URL}/api/security/entity_store/stop"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store/stop
+      {
+        "entityTypes": ["user", "host", "service", "generic"]
+      }

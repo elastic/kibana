@@ -7,18 +7,12 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { InferenceConnector } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
+import type { ApiInferenceConnector } from '@kbn/inference-common';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
 import { isOpenAiProviderType } from './openai_provider_type_guard';
 import type { AIConnector } from './types';
 
-type InferenceConnectorFromApi = InferenceConnector & { isRecommended?: boolean };
-
-export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector => ({
+export const toAIConnector = (connector: ApiInferenceConnector): AIConnector => ({
   id: connector.connectorId,
   name: connector.name,
   actionTypeId: connector.type,
@@ -39,37 +33,22 @@ export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector
       : undefined,
 });
 
-export const applyConnectorSettings = <T extends { id: string }>(
-  allConnectors: T[],
-  settings: SettingsStart
-): T[] => {
-  const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultConnectorOnly = settings.client.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
-  if (defaultConnectorOnly && defaultConnectorId) {
-    const connector = allConnectors.find((c) => c.id === defaultConnectorId);
-    return connector ? [connector] : allConnectors;
-  }
-  return allConnectors;
-};
-
 /**
- * Fetches AI connectors for a given feature, maps them to {@link AIConnector},
- * and applies the default-connector UI settings filter.
+ * Fetches AI connectors for a given feature from the search_inference_endpoints backend
+ * and maps them to {@link AIConnector}. The backend route applies feature resolution,
+ * default-connector UI settings, and recommended-endpoint flagging.
+ *
+ * @param settings - Deprecated; no longer read. Default-connector UI settings are applied
+ *                   server-side. Kept for call-site compatibility.
  */
 export const loadConnectors = async ({
   http,
   featureId,
-  settings,
 }: {
   http: HttpSetup;
   featureId: string;
-  settings: SettingsStart;
+  settings?: SettingsStart;
 }): Promise<AIConnector[]> => {
   const { connectors } = await fetchConnectorsForFeature(http, featureId);
-  const aiConnectors = connectors.map(toAIConnector);
-  return applyConnectorSettings(aiConnectors, settings);
+  return connectors.map(toAIConnector);
 };

@@ -67,11 +67,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     };
 
     before(async () => {
-      await pageObjects.common.navigateToApp('rules');
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
       await testSubjects.click('rulesTab');
     });
 
     afterEach(async () => {
+      await toasts.dismissAll();
       await objectRemover.removeAll();
     });
 
@@ -245,7 +248,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.existOrFail('untrackAlertsModal');
+
       await testSubjects.click('untrackAlertsModalSwitch');
+      await retry.waitFor('untrack switch to be checked', () =>
+        testSubjects.isEuiSwitchChecked('untrackAlertsModalSwitch')
+      );
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -540,7 +548,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expect(alertsErrorBannerExistErrors).to.have.length(1);
         expect(
           await (await alertsErrorBannerExistErrors[0].findByTagName('p')).getVisibleText()
-        ).to.equal(' Error found in 1 rule. Show rule with error');
+        ).to.equal('Error found in 1 rule. Show rule with error');
       });
 
       await retry.try(async () => {

@@ -46,7 +46,12 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
       if ('controlConfig' in control) {
         // >8.18 to <9.4 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
-        return { ...rest, config: controlConfig };
+        control = { ...rest, config: controlConfig };
+      }
+      // < 9.4 `id` is stored as `uid`
+      if (control.uid) {
+        const { uid, ...rest } = control;
+        control = { id: uid, ...rest };
       }
       return control; // otherwise, we are dealing with state >=9.4
     });
@@ -61,7 +66,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
         if ('explicitInput' in control) {
           const { explicitInput, order, ...restOfControlState } = control;
           return {
-            uid: controlId,
+            id: controlId,
             ...restOfControlState,
             config: explicitInput,
           };
@@ -69,7 +74,7 @@ export function extractPinnedPanelsState(state: { [key: string]: unknown }): {
           // >=8.16 to <=8.18 controls were exported as flat objects for all configs
           const { grow, order, type, width, ...config } = control;
           return {
-            uid: controlId,
+            id: controlId,
             type,
             ...(grow !== undefined && { grow }),
             ...(width !== undefined && { width }),

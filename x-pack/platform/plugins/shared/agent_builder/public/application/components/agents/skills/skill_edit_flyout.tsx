@@ -25,6 +25,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormProvider } from 'react-hook-form';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
 import { useEditSkill } from '../../../hooks/skills/use_edit_skill';
 import { useSkillForm } from '../../../hooks/skills/use_skill_form';
@@ -32,6 +34,7 @@ import { useTools } from '../../../hooks/tools/use_tools';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { FLYOUT_WIDTH } from '../common/constants';
+import type { SkillFormData } from '../../skills/skill_form_validation';
 import { SkillForm } from './skill_form';
 
 interface SkillEditFlyoutProps {
@@ -64,11 +67,11 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   useEffect(() => {
     if (skill) {
       reset({
-        id: skill.id,
         name: skill.name,
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);
@@ -79,12 +82,12 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
   );
 
   const onSubmit = useCallback(
-    async (data: { name: string; description: string; content: string; tool_ids: string[] }) => {
+    async (data: SkillFormData) => {
       await editSkill({
-        name: data.name,
         description: data.description,
         content: data.content,
         tool_ids: data.tool_ids,
+        referenced_content: data.referenced_content,
       });
     },
     [editSkill]
@@ -99,7 +102,15 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
           <h2 id="skillEditFlyoutTitle">{labels.agentSkills.editSkillFlyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        <EuiLink href={skillLibraryUrl} external>
+        <EuiLink
+          href={skillLibraryUrl}
+          external
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.flyout,
+            action: AGENT_BUILDER_UI_EBT.action.libraryPanel.VIEW_IN_LIBRARY,
+            detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+          })}
+        >
           {labels.agentSkills.viewSkillLibraryLink}
         </EuiLink>
       </EuiFlyoutHeader>
@@ -119,7 +130,11 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
         ) : (
           <FormProvider {...form}>
             <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
-              <SkillForm control={control} toolOptions={toolOptions} readonlySkillId={skillId} />
+              <SkillForm
+                control={control}
+                toolOptions={toolOptions}
+                readonlySkillName={skill?.name ?? skillId}
+              />
             </EuiForm>
           </FormProvider>
         )}
@@ -128,7 +143,16 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>{labels.skills.cancelButtonLabel}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              onClick={onClose}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_CANCEL,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
+            >
+              {labels.skills.cancelButtonLabel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -136,6 +160,11 @@ export const SkillEditFlyout: React.FC<SkillEditFlyoutProps> = ({ skillId, onClo
               onClick={handleSubmit(onSubmit)}
               isLoading={isSubmitting}
               disabled={hasErrors || isSubmitting || !isDirty}
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.flyout,
+                action: AGENT_BUILDER_UI_EBT.action.libraryPanel.FLYOUT_SAVE,
+                detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              })}
             >
               {labels.skills.saveButtonLabel}
             </EuiButton>

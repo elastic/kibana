@@ -39,7 +39,7 @@ export default createTestConfig({
       pathname: '/app/search_playground',
     },
     searchInferenceEndpoints: {
-      pathname: '/app/management/ml/inference_endpoints',
+      pathname: '/app/management/modelManagement/inference_endpoints',
     },
     searchHomepage: {
       pathname: '/app/elasticsearch/home',

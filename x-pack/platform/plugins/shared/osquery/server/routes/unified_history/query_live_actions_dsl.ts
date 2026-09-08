@@ -7,10 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { SourceFilter } from '../../../common/api/unified_history/types';
-
-const SIMPLE_QUERY_STRING_SPECIAL_CHARS = /[+\-|"*()~\\{}[\]:^!/&]/g;
-const escapeSimpleQueryString = (input: string): string =>
-  input.replace(SIMPLE_QUERY_STRING_SPECIAL_CHARS, '\\$&');
+import { buildSpaceIdFilter } from '../../utils/build_space_id_filter';
 
 export type SortValues = Array<string | number>;
 
@@ -44,20 +41,8 @@ export const buildLiveActionsQuery = ({
   const filters: estypes.QueryDslQueryContainer[] = [
     { term: { type: { value: 'INPUT_ACTION' } } },
     { term: { input_type: { value: 'osquery' } } },
+    buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer,
   ];
-
-  if (spaceId === 'default') {
-    filters.push({
-      bool: {
-        should: [
-          { term: { space_id: 'default' } },
-          { bool: { must_not: { exists: { field: 'space_id' } } } },
-        ],
-      },
-    });
-  } else {
-    filters.push({ term: { space_id: spaceId } });
-  }
 
   if (startDate || endDate) {
     const rangeFilter: Record<string, string> = {};
@@ -68,10 +53,11 @@ export const buildLiveActionsQuery = ({
 
   if (kuery) {
     filters.push({
-      simple_query_string: {
-        query: `${escapeSimpleQueryString(kuery)}*`,
+      multi_match: {
+        query: kuery,
+        type: 'bool_prefix',
         fields: ['pack_name', 'queries.query', 'queries.id'],
-        analyze_wildcard: true,
+        operator: 'and',
       },
     });
   }

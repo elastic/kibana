@@ -12,6 +12,5 @@
   ],
   "kbn_references": [
     "@kbn/content-list-provider",
-    "@kbn/content-list-mock-data",
   ]
 }

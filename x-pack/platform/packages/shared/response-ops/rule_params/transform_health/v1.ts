@@ -8,28 +8,37 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-export const transformHealthRuleParamsSchema = schema.object({
-  includeTransforms: schema.arrayOf(schema.string()),
-  excludeTransforms: schema.nullable(schema.arrayOf(schema.string(), { defaultValue: [] })),
-  testsConfig: schema.nullable(
-    schema.object({
-      notStarted: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-        })
-      ),
-      errorMessages: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: false }),
-        })
-      ),
-      healthCheck: schema.nullable(
-        schema.object({
-          enabled: schema.boolean({ defaultValue: true }),
-        })
-      ),
-    })
-  ),
-});
+export const transformHealthRuleParamsSchema = schema.object(
+  {
+    includeTransforms: schema.arrayOf(schema.string()),
+    excludeTransforms: schema.nullable(schema.arrayOf(schema.string(), { defaultValue: [] })),
+    testsConfig: schema.nullable(
+      schema.object({
+        notStarted: schema.nullable(
+          schema.object({
+            enabled: schema.boolean({ defaultValue: true }),
+          })
+        ),
+        errorMessages: schema.nullable(
+          schema.object({
+            enabled: schema.boolean({ defaultValue: false }),
+          })
+        ),
+        healthCheck: schema.nullable(
+          schema.object({
+            enabled: schema.boolean({ defaultValue: true }),
+          })
+        ),
+      })
+    ),
+  },
+  {
+    meta: {
+      title: 'Transform Health Rule Params',
+      description:
+        'The parameters for the transform health rule. These parameters are appropriate when `rule_type_id` is `transform_health`.',
+    },
+  }
+);
 
 export type TransformHealthRuleParams = TypeOf<typeof transformHealthRuleParamsSchema>;

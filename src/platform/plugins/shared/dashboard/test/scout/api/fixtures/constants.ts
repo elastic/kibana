@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** The base API path for dashboard endpoints (no leading slash for apiClient). */
-export const DASHBOARD_API_PATH = 'api/dashboards';
+import { DASHBOARD_API_VERSION } from '@kbn/scout/constants';
+
+export { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '@kbn/scout/constants';
 
 /** Common headers for Dashboard API requests (internal API version 1) */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  'elastic-api-version': DASHBOARD_API_VERSION,
 } as const;
 
 /** Test data paths */

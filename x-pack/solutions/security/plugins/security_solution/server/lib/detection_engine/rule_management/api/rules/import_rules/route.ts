@@ -183,12 +183,19 @@ export const importRulesRoute = (
               endpointService,
               spaceId,
               rulesToImport: validatedActionRules,
+              checkOsqueryResponseActionAuthz:
+                ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
             });
 
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
 
           const importRuleResponse = await importRules({
             ruleChunks,
+            changeTracking: {
+              metadata: {
+                bulkCount: validatedResponseActionsRules.length,
+              },
+            },
             overwriteRules: request.query.overwrite,
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,

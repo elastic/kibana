@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,6 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
@@ -34,46 +36,39 @@ const labels = {
   }),
 };
 
-interface RenameConversationModalProps {
-  isOpen: boolean;
+export interface BaseRenameConversationModalProps {
   onClose: () => void;
+  conversationId: string;
+  initialTitle: string;
+  onRename: (conversationId: string, title: string) => Promise<void>;
 }
 
-export const RenameConversationModal: React.FC<RenameConversationModalProps> = ({
-  isOpen,
+export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalProps> = ({
   onClose,
+  conversationId,
+  initialTitle,
+  onRename,
 }) => {
-  const conversationId = useConversationId();
-  const { title } = useConversationTitle();
-  const { conversationActions } = useConversationContext();
   const { addErrorToast } = useToasts();
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitle, setNewTitle] = useState(initialTitle || '');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync input to current title each time the modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setNewTitle(title || '');
-    }
-  }, [isOpen, title]);
-
-  const isDirty = newTitle.trim() !== (title || '').trim();
+  const isDirty = newTitle.trim() !== (initialTitle || '').trim();
 
   const handleSave = useCallback(async () => {
     if (!conversationId || !newTitle.trim() || !isDirty) return;
     setIsLoading(true);
     try {
-      await conversationActions.renameConversation(conversationId, newTitle.trim());
+      await onRename(conversationId, newTitle.trim());
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
+      setIsLoading(false);
       addErrorToast({
         title: labels.renameErrorToast,
         text: formatAgentBuilderErrorMessage(error),
       });
-    } finally {
-      setIsLoading(false);
     }
-  }, [conversationId, newTitle, isDirty, conversationActions, onClose, addErrorToast]);
+  }, [conversationId, newTitle, isDirty, onRename, onClose, addErrorToast]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -85,7 +80,7 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
 
   const modalTitleId = useGeneratedHtmlId();
 
-  if (!isOpen || !conversationId) return null;
+  if (!conversationId) return null;
 
   return (
     <EuiModal onClose={onClose} maxWidth="360px" aria-labelledby={modalTitleId}>
@@ -111,7 +106,15 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="renameConversationModalCancel">
+        <EuiButtonEmpty
+          onClick={onClose}
+          data-test-subj="renameConversationModalCancel"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME_CANCEL,
+            detail: 'conversation',
+          })}
+        >
           <FormattedMessage
             id="xpack.agentBuilder.renameConversationModal.cancelButton"
             defaultMessage="Cancel"
@@ -123,6 +126,11 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
           isLoading={isLoading}
           isDisabled={!newTitle.trim() || !isDirty}
           data-test-subj="renameConversationModalSave"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.RENAME_SAVE,
+            detail: 'conversation',
+          })}
         >
           <FormattedMessage
             id="xpack.agentBuilder.renameConversationModal.saveButton"
@@ -131,5 +139,30 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
+  );
+};
+
+interface RenameConversationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const RenameConversationModal: React.FC<RenameConversationModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const conversationId = useConversationId();
+  const { title } = useConversationTitle();
+  const { conversationActions } = useConversationContext();
+
+  if (!isOpen || !conversationId) return null;
+
+  return (
+    <BaseRenameConversationModal
+      onClose={onClose}
+      conversationId={conversationId}
+      initialTitle={title || ''}
+      onRename={conversationActions.renameConversation}
+    />
   );
 };

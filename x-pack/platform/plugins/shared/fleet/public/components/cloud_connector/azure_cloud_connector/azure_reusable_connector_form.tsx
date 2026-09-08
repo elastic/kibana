@@ -21,23 +21,14 @@ export const AzureReusableConnectorForm: React.FC<{
   setCredentials: (credentials: AzureCloudConnectorCredentials) => void;
   accountType?: AccountType;
   packageName?: string;
-  policyTemplate?: string;
-}> = ({
-  credentials,
-  setCredentials,
-  isEditPage,
-  cloudConnectorId,
-  accountType,
-  packageName,
-  policyTemplate,
-}) => {
+}> = ({ credentials, setCredentials, isEditPage, cloudConnectorId, accountType, packageName }) => {
   return (
     <>
       <EuiSpacer size="m" />
       <EuiText size="s" color="subdued">
         <FormattedMessage
           id="xpack.fleet.cloudConnector.azure.reusableConnectorInstructions"
-          defaultMessage="To streamline your Azure integration process, you can reuse the same cloud connector for different use cases within Elastic. Simply choose the existing connection from the options below:"
+          defaultMessage="To streamline your Azure integration process, you can reuse the same federated identity for different use cases within Elastic. Simply choose the existing identity from the options below:"
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -48,7 +39,6 @@ export const AzureReusableConnectorForm: React.FC<{
         setCredentials={setCredentials}
         accountType={accountType}
         packageName={packageName}
-        policyTemplate={policyTemplate}
       />
       <EuiSpacer size="m" />
     </>

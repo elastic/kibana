@@ -114,8 +114,8 @@ describe('useMissingPrivileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: false, read: true },
-          exceptions: { edit: false, read: true },
         },
         alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: false } },
       })
@@ -134,8 +134,8 @@ describe('useMissingPrivileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: true, read: true },
-          exceptions: { edit: true, read: true },
         },
         alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })
@@ -171,6 +171,7 @@ describe('useMissingPrivileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: false, read: true },
           exceptions: { edit: false, read: true },
         },
@@ -192,8 +193,8 @@ describe('useMissingPrivileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: true, read: true },
-          exceptions: { edit: true, read: true },
         },
         alertsPrivileges: { alerts: { edit: true, read: true, legacyUpdate: true } },
       })
@@ -208,8 +209,8 @@ describe('useMissingPrivileges', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue(
       buildUseUserPrivilegesMockReturn({
         rulesPrivileges: {
+          ...getUserPrivilegesMockDefaultValue().rulesPrivileges,
           rules: { edit: false, read: true },
-          exceptions: { edit: false, read: true },
         },
         alertsPrivileges: { alerts: { edit: false, read: true, legacyUpdate: false } },
       })

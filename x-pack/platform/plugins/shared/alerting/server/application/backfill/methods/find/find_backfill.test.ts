@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { actionsAuthorizationMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../..';
@@ -204,6 +205,7 @@ describe('findBackfill()', () => {
     mockActionsClient.isSystemAction.mockImplementation(isSystemAction);
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -213,6 +215,7 @@ describe('findBackfill()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -881,7 +884,7 @@ describe('findBackfill()', () => {
         initiator: 'user',
         initiatorId: 'id',
       })
-    ).rejects.toThrowError('Failed to find backfills: Could not validate find parameters');
+    ).rejects.toThrow('Failed to find backfills: Could not validate find parameters');
   });
 
   describe('error handling', () => {

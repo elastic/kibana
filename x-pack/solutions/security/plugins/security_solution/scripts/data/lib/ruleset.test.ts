@@ -8,7 +8,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { resolveRulesetForInstall } from './ruleset';
+import { createCustomRule, disableRules, enableRules, resolveRulesetForInstall } from './ruleset';
 
 describe('resolveRulesetForInstall', () => {
   const createdFiles: string[] = [];
@@ -87,5 +87,56 @@ describe('resolveRulesetForInstall', () => {
     });
 
     expect(resolved).toEqual([]);
+  });
+});
+
+describe('rule enable/disable/create wiring', () => {
+  const log = new ToolingLog({
+    level: 'silent',
+    writeTo: { write: () => {} },
+  });
+
+  it('posts enable bulk action with rule ids', async () => {
+    const request = jest.fn().mockResolvedValue({ data: {} });
+    await enableRules({ kbnClient: { request } as never, ids: ['a', 'b'] });
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        path: `/api/detection_engine/rules/_bulk_action`,
+        body: { action: 'enable', ids: ['a', 'b'] },
+      })
+    );
+  });
+
+  it('posts disable bulk action with rule ids', async () => {
+    const request = jest.fn().mockResolvedValue({ data: {} });
+    await disableRules({ kbnClient: { request } as never, ids: ['c'] });
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: { action: 'disable', ids: ['c'] },
+      })
+    );
+  });
+
+  it('creates a custom rule and returns refs', async () => {
+    const request = jest.fn().mockResolvedValue({
+      data: { id: 'so-1', rule_id: 'data-generator-pack-okta-x', name: 'Hunt X' },
+    });
+    const created = await createCustomRule({
+      kbnClient: { request } as never,
+      log,
+      rule: { name: 'Hunt X', rule_id: 'data-generator-pack-okta-x', type: 'query' },
+    });
+    expect(created).toEqual({
+      id: 'so-1',
+      rule_id: 'data-generator-pack-okta-x',
+      name: 'Hunt X',
+    });
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        method: 'POST',
+        path: `/api/detection_engine/rules`,
+      })
+    );
   });
 });

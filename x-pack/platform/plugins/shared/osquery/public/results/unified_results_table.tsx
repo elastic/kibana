@@ -49,6 +49,7 @@ import {
   PaginationLimitToastContent,
   euiProgressCss,
 } from './results_table_shared';
+import { useExportFiltersContext } from './export_filters_context';
 
 const ITEMS_PER_PAGE_OPTIONS = [...PAGE_SIZE_OPTIONS];
 
@@ -100,7 +101,11 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     [euiTheme.size.m, euiTheme.colors.body]
   );
 
-  const { data: actionResultsData } = useActionResults({
+  const {
+    data: actionResultsData,
+    isFetched: actionResultsFetched,
+    isError: actionResultsErrored,
+  } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -236,6 +241,27 @@ const UnifiedResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     scheduleId,
     executionCount,
   });
+
+  const exportFiltersStore = useExportFiltersContext();
+  const unfilteredTotal =
+    actionResultsFetched && !actionResultsErrored
+      ? actionResultsData?.aggregations?.totalRowCount
+      : undefined;
+  useEffect(() => {
+    exportFiltersStore?.setFilters(actionId, {
+      kuery: userKuery,
+      activeFilters,
+      filteredTotal: allResultsData?.total,
+      total: unfilteredTotal,
+    });
+  }, [
+    exportFiltersStore,
+    actionId,
+    userKuery,
+    activeFilters,
+    allResultsData?.total,
+    unfilteredTotal,
+  ]);
 
   // Register missing columns as runtime fields on the data view so that
   // UnifiedDataTable can resolve their field type tokens (icons in column headers).

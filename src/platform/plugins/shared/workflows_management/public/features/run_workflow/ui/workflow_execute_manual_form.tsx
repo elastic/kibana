@@ -8,16 +8,17 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
-import { applyInputDefaults } from '@kbn/workflows/spec/lib/field_conversion';
+import { applyInputDefaults, hasDefaultsRecursive } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { generateSampleFromJsonSchema, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
-import { generateSampleFromJsonSchema } from '../../../../common/lib/generate_sample_from_json_schema';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 const SCHEMA_URI = `inmemory://schemas/workflow-manual-json-editor-schema`;
 
@@ -26,19 +27,50 @@ const getDefaultWorkflowInput = (inputs?: JsonModelSchemaType): Record<string, u
     return {};
   }
 
-  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
-  // This ensures the same behavior as legacy format and handles all JSON Schema features
-  const defaults = applyInputDefaults(undefined, inputs) ?? {};
+  // Resolve defaults (with $ref and nested object support) so we can reuse the
+  // same values applyInputDefaults would produce at execution time.
+  const resolvedDefaults = applyInputDefaults(undefined, inputs) ?? {};
 
-  // Fallback to generating samples for properties with no defaults
+  // Only include a property when the user should see/edit it: required fields, fields with
+  // defaults in the subtree (hasDefaultsRecursive), or $ref inputs (optional: partial defaults
+  // from applyInputDefaults; required: full generated sample via resolveRef).
+  // Optional properties without defaults stay omitted so runtime can treat them as unset.
+  // See issue elastic/security-team#16857.
+  const requiredProps = new Set(inputs.required ?? []);
+  const result: Record<string, unknown> = {};
+
   for (const [propertyName, propertySchema] of Object.entries(inputs.properties)) {
-    if (defaults[propertyName] === undefined) {
-      const jsonSchema = propertySchema as JSONSchema7;
-      defaults[propertyName] = generateSampleFromJsonSchema(jsonSchema);
+    const jsonSchema = propertySchema as JSONSchema7;
+    const isRequired = requiredProps.has(propertyName);
+    const hasDefaults = hasDefaultsRecursive(jsonSchema, inputs);
+    const resolvedValue = resolvedDefaults[propertyName];
+    const isRefProp = Boolean(jsonSchema.$ref);
+
+    // Required $ref: prefer a full generated sample (resolveRef + placeholders) so the run
+    // modal matches what authors need to edit; fall back to applyInputDefaults if sampling fails.
+    if (isRequired && isRefProp) {
+      const sample = generateSampleFromJsonSchema(jsonSchema, inputs);
+      if (sample !== undefined) {
+        result[propertyName] = sample;
+      } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
+        result[propertyName] = resolvedValue;
+      } else {
+        // Unknown/invalid $ref: keep the key editable so the run modal is not missing a required field.
+        result[propertyName] = {};
+      }
+    } else if (resolvedValue !== undefined && (hasDefaults || isRefProp)) {
+      // Optional $ref (or defaults in subtree): partial structs from applyInputDefaults without
+      // hasDefaultsRecursive on the $ref wrapper alone.
+      result[propertyName] = resolvedValue;
+    } else if (isRequired) {
+      const sample = generateSampleFromJsonSchema(jsonSchema, inputs);
+      if (sample !== undefined) {
+        result[propertyName] = sample;
+      }
     }
   }
 
-  return defaults;
+  return result;
 };
 
 interface WorkflowExecuteManualFormProps {
@@ -56,6 +88,15 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(() => buildFieldsZodValidator(inputs), [inputs]);
+
+  /** Same root merge as workflow YAML Monaco schema so `#/kibana/definitions/*` $ref resolves. */
+  const monacoInputsJsonSchema = useMemo(() => {
+    if (!inputs) {
+      return undefined;
+    }
+    return (mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(inputs as object) ??
+      inputs) as JsonModelSchemaType;
+  }, [inputs]);
 
   useEffect(() => {
     setValue(JSON.stringify(getDefaultWorkflowInput(inputs), null, 2));
@@ -90,7 +131,7 @@ export const WorkflowExecuteManualForm = ({
   const mountedOnce = useRef(false);
   const handleMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      if (!inputs || mountedOnce.current) return;
+      if (!monacoInputsJsonSchema || mountedOnce.current) return;
       mountedOnce.current = true;
 
       try {
@@ -103,7 +144,7 @@ export const WorkflowExecuteManualForm = ({
             {
               uri: SCHEMA_URI,
               fileMatch: [currentModel?.uri.toString() ?? ''],
-              schema: inputs,
+              schema: monacoInputsJsonSchema,
             },
           ],
         });
@@ -111,31 +152,56 @@ export const WorkflowExecuteManualForm = ({
         // Monaco setup failed — fall back to basic JSON editing
       }
     },
-    [inputs]
+    [monacoInputsJsonSchema]
   );
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      css={css`
+        flex: 1;
+        min-height: 0;
+        align-self: stretch;
+      `}
+    >
       {errors && (
         <EuiFlexItem grow={false}>
           <InputValidationCallout errors={errors} />
         </EuiFlexItem>
       )}
 
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow
+        css={css`
+          flex: 1;
+          min-height: 0;
+          overflow: hidden;
+        `}
+      >
         <EuiFormRow
           label={i18n.translate('workflows.workflowExecuteManualForm.inputDataLabel', {
             defaultMessage: 'Input Data',
           })}
           fullWidth
+          css={css`
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            .euiFormRow__fieldWrapper {
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
+            }
+          `}
         >
           <CodeEditor
             languageId="json"
             value={value}
-            fitToContent={{
-              minLines: 5,
-              maxLines: 15,
-            }}
+            width="100%"
+            height="100%"
             onChange={setValue}
             editorDidMount={handleMount}
             dataTestSubj={'workflow-manual-json-editor'}

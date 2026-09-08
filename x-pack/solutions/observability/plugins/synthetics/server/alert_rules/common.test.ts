@@ -295,7 +295,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -399,7 +399,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -498,7 +498,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -584,7 +584,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -670,7 +670,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -755,7 +755,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: false,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -790,6 +790,339 @@ describe('setRecoveredAlertsContext', () => {
         serviceName: undefined,
         failedStepInfo: '',
       },
+    });
+  });
+
+  describe('findConfigKeyByAlertId prefix-match fallback', () => {
+    it('matches staleDownConfigs by prefix when alert ID has no location suffix', () => {
+      const alertsClientMock = {
+        report: jest.fn(),
+        getAlertLimitValue: jest.fn().mockReturnValue(10),
+        setAlertLimitReached: jest.fn(),
+        getRecoveredAlerts: jest.fn().mockReturnValue([
+          {
+            alert: {
+              getUuid: () => alertUuid,
+              getId: () => configId,
+              getState: () => ({ downThreshold: 1 }),
+              setContext: jest.fn(),
+            },
+            hit: {
+              'kibana.alert.instance.id': configId,
+              'location.id': location,
+              configId,
+              '@timestamp': new Date().toISOString(),
+              downThreshold: 1,
+            },
+          },
+        ]),
+        setAlertData: jest.fn(),
+        isTrackedAlert: jest.fn(),
+      };
+      const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
+        [idWithLocation]: {
+          configId,
+          monitorQueryId: 'stale-config',
+          status: 'down',
+          locationId: location,
+          latestPing: {
+            '@timestamp': new Date().toISOString(),
+            state: { id: '123456' },
+            monitor: { name: monitorName },
+            observer: { geo: { name: location } },
+          } as StaleDownConfig['latestPing'],
+          timestamp: new Date().toISOString(),
+          isDeleted: true,
+          checks: { downWithinXChecks: 1, down: 1 },
+        },
+      };
+      setRecoveredAlertsContext({
+        alertsClient: alertsClientMock,
+        basePath,
+        spaceId: 'default',
+        staleDownConfigs,
+        upConfigs: {},
+        dateFormat,
+        tz: 'UTC',
+        groupByLocation: true,
+        stalePendingConfigs: {},
+      });
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: configId,
+          context: expect.objectContaining({
+            recoveryStatus: 'has been deleted',
+            recoveryReason: 'has been deleted',
+            stateId: '123456',
+            linkMessage: '',
+          }),
+        })
+      );
+    });
+
+    it('matches stalePendingConfigs by prefix when alert ID has no location suffix', () => {
+      const alertsClientMock = {
+        report: jest.fn(),
+        getAlertLimitValue: jest.fn().mockReturnValue(10),
+        setAlertLimitReached: jest.fn(),
+        getRecoveredAlerts: jest.fn().mockReturnValue([
+          {
+            alert: {
+              getUuid: () => alertUuid,
+              getId: () => configId,
+              getState: () => ({ downThreshold: 1 }),
+              setContext: jest.fn(),
+            },
+            hit: {
+              'kibana.alert.instance.id': configId,
+              'location.id': location,
+              configId,
+              '@timestamp': new Date().toISOString(),
+              downThreshold: 1,
+            },
+          },
+        ]),
+        setAlertData: jest.fn(),
+        isTrackedAlert: jest.fn(),
+      };
+      const stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'] = {
+        [idWithLocation]: {
+          configId,
+          monitorQueryId: 'stale-config',
+          status: 'pending',
+          locationId: location,
+          monitorInfo: {
+            monitor: { name: monitorName, id: monitorId, type: 'http' },
+            observer: { geo: { name: location } },
+            tags: [],
+            state: { id: '789' },
+          },
+          latestPing: {
+            '@timestamp': new Date().toISOString(),
+            state: { id: '789' },
+            monitor: { name: monitorName },
+            observer: { geo: { name: location } },
+          } as StaleDownConfig['latestPing'],
+          timestamp: new Date().toISOString(),
+          isLocationRemoved: true,
+        },
+      };
+      setRecoveredAlertsContext({
+        alertsClient: alertsClientMock,
+        basePath,
+        spaceId: 'default',
+        staleDownConfigs: {},
+        upConfigs: {},
+        dateFormat,
+        tz: 'UTC',
+        groupByLocation: true,
+        stalePendingConfigs,
+      });
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: configId,
+          context: expect.objectContaining({
+            recoveryReason: 'this location has been removed from the monitor',
+            recoveryStatus: 'has recovered',
+            stateId: '789',
+            linkMessage: '',
+          }),
+        })
+      );
+    });
+
+    it('matches upConfigs by prefix when alert ID has no location suffix', () => {
+      const alertsClientMock = {
+        report: jest.fn(),
+        getAlertLimitValue: jest.fn().mockReturnValue(10),
+        setAlertLimitReached: jest.fn(),
+        getRecoveredAlerts: jest.fn().mockReturnValue([
+          {
+            alert: {
+              getUuid: () => alertUuid,
+              getId: () => configId,
+              getState: () => ({ downThreshold: 1 }),
+              setContext: jest.fn(),
+            },
+            hit: {
+              'kibana.alert.instance.id': configId,
+              'location.id': location,
+              configId,
+              '@timestamp': new Date().toISOString(),
+              downThreshold: 1,
+            },
+          },
+        ]),
+        setAlertData: jest.fn(),
+        isTrackedAlert: jest.fn(),
+      };
+      setRecoveredAlertsContext({
+        alertsClient: alertsClientMock,
+        basePath,
+        spaceId: 'default',
+        staleDownConfigs: {},
+        upConfigs,
+        dateFormat,
+        tz: 'UTC',
+        groupByLocation: true,
+        stalePendingConfigs: {},
+      });
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: configId,
+          context: expect.objectContaining({
+            status: 'up',
+            recoveryStatus: 'is now up',
+            linkMessage: expect.stringContaining(
+              `https://localhost:5601/app/synthetics/monitor/${configId}/errors/123456`
+            ),
+          }),
+        })
+      );
+    });
+
+    it('prefers staleDownConfigs over stalePendingConfigs on prefix match', () => {
+      const alertsClientMock = {
+        report: jest.fn(),
+        getAlertLimitValue: jest.fn().mockReturnValue(10),
+        setAlertLimitReached: jest.fn(),
+        getRecoveredAlerts: jest.fn().mockReturnValue([
+          {
+            alert: {
+              getUuid: () => alertUuid,
+              getId: () => configId,
+              getState: () => ({ downThreshold: 1 }),
+              setContext: jest.fn(),
+            },
+            hit: {
+              'kibana.alert.instance.id': configId,
+              'location.id': location,
+              configId,
+              '@timestamp': new Date().toISOString(),
+              downThreshold: 1,
+            },
+          },
+        ]),
+        setAlertData: jest.fn(),
+        isTrackedAlert: jest.fn(),
+      };
+      const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
+        [idWithLocation]: {
+          configId,
+          monitorQueryId: 'stale-config',
+          status: 'down',
+          locationId: location,
+          latestPing: {
+            '@timestamp': new Date().toISOString(),
+            state: { id: 'down-state' },
+            monitor: { name: monitorName },
+            observer: { geo: { name: location } },
+          } as StaleDownConfig['latestPing'],
+          timestamp: new Date().toISOString(),
+          isDeleted: true,
+          checks: { downWithinXChecks: 1, down: 1 },
+        },
+      };
+      const stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'] = {
+        [idWithLocation]: {
+          configId,
+          monitorQueryId: 'stale-config',
+          status: 'pending',
+          locationId: location,
+          monitorInfo: {
+            monitor: { name: monitorName, id: monitorId, type: 'http' },
+            observer: { geo: { name: location } },
+            tags: [],
+            state: { id: 'pending-state' },
+          },
+          latestPing: {
+            '@timestamp': new Date().toISOString(),
+            state: { id: 'pending-state' },
+            monitor: { name: monitorName },
+            observer: { geo: { name: location } },
+          } as StaleDownConfig['latestPing'],
+          timestamp: new Date().toISOString(),
+          isDeleted: true,
+        },
+      };
+      setRecoveredAlertsContext({
+        alertsClient: alertsClientMock,
+        basePath,
+        spaceId: 'default',
+        staleDownConfigs,
+        upConfigs: {},
+        dateFormat,
+        tz: 'UTC',
+        groupByLocation: true,
+        stalePendingConfigs,
+      });
+      expect(alertsClientMock.setAlertData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: configId,
+          context: expect.objectContaining({
+            stateId: 'down-state',
+          }),
+        })
+      );
+    });
+
+    it('does not prefix-match when alert ID does not match any config key', () => {
+      const nonMatchingConfigId = 'no-match-config';
+      const alertsClientMock = {
+        report: jest.fn(),
+        getAlertLimitValue: jest.fn().mockReturnValue(10),
+        setAlertLimitReached: jest.fn(),
+        getRecoveredAlerts: jest.fn().mockReturnValue([
+          {
+            alert: {
+              getUuid: () => alertUuid,
+              getId: () => nonMatchingConfigId,
+              getState: () => ({ downThreshold: 1 }),
+              setContext: jest.fn(),
+            },
+            hit: {
+              'kibana.alert.instance.id': nonMatchingConfigId,
+              'location.id': location,
+              configId: nonMatchingConfigId,
+              '@timestamp': new Date().toISOString(),
+              downThreshold: 1,
+            },
+          },
+        ]),
+        setAlertData: jest.fn(),
+        isTrackedAlert: jest.fn(),
+      };
+      const staleDownConfigs: AlertOverviewStatus['staleDownConfigs'] = {
+        [idWithLocation]: {
+          configId,
+          monitorQueryId: 'stale-config',
+          status: 'down',
+          locationId: location,
+          latestPing: {
+            '@timestamp': new Date().toISOString(),
+            state: { id: '123456' },
+            monitor: { name: monitorName },
+            observer: { geo: { name: location } },
+          } as StaleDownConfig['latestPing'],
+          timestamp: new Date().toISOString(),
+          isDeleted: true,
+          checks: { downWithinXChecks: 1, down: 1 },
+        },
+      };
+      setRecoveredAlertsContext({
+        alertsClient: alertsClientMock,
+        basePath,
+        spaceId: 'default',
+        staleDownConfigs,
+        upConfigs,
+        dateFormat,
+        tz: 'UTC',
+        groupByLocation: true,
+        stalePendingConfigs: {},
+      });
+      const call = alertsClientMock.setAlertData.mock.calls[0][0];
+      expect(call.context.recoveryStatus).toBe('has recovered');
+      expect(call.context.recoveryReason).toBe('the alert condition is no longer met');
     });
   });
 });

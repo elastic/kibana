@@ -57,6 +57,7 @@ export function QuickFilters({
   return (
     <div
       css={css`
+        min-width: 460px;
         .controlsWrapper {
           align-items: flex-start;
           min-height: initial;
@@ -66,6 +67,7 @@ export function QuickFilters({
         }
         .controlGroup {
           min-height: initial;
+          flex-wrap: nowrap;
         }
       `}
     >

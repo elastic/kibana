@@ -10,9 +10,11 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
+  getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
+import { useRuleBasedSourceState } from './use_rule_based_source_state';
 
 export const useCreateWatchlistFormState = (): WatchlistFormState => {
   const defaultWatchlist = useMemo<CreateWatchlistRequestBodyInput>(
@@ -40,18 +42,34 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     setWatchlist(defaultWatchlist);
   }, [defaultWatchlist, hasUserEdits]);
 
-  const { trimmedName, isNameInvalid } = getWatchlistNameValidation(
-    watchlist.name,
-    watchlist.name.length > 0
-  );
-  const isDisabled = isNameInvalid || !trimmedName;
+  const ruleBasedSource = useRuleBasedSourceState({
+    watchlistName: watchlist.name,
+    isEditMode: false,
+    isManaged: watchlist.managed ?? false,
+    initialEntitySources: watchlist.entitySources,
+    onFieldChange: setWatchlistField,
+  });
+
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
+  const isDisabled =
+    !watchlist.name.trim() ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    isRiskModifierInvalid ||
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,
     normalizedWatchlistId: undefined,
+    ruleBasedSourceIds: {},
     isEditMode: false,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    ruleBasedSource,
   };
 };

@@ -63,10 +63,13 @@ export function DataTypesSelect({ seriesId, series }: Props) {
     <>
       {!series.dataType && (
         <EuiPopover
+          aria-label={i18n.translate('xpack.exploratoryView.dataTypesSelect.popoverAriaLabel', {
+            defaultMessage: 'Select data type',
+          })}
           button={
             <EuiButton
               data-test-subj="o11yDataTypesSelectButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"

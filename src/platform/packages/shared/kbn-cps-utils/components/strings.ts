@@ -10,14 +10,22 @@
 import { i18n } from '@kbn/i18n';
 
 export const strings = {
-  allButtonLabel: () =>
-    i18n.translate('cpsUtils.projectPicker.allButtonLabel', {
+  get allButtonLabel() {
+    return i18n.translate('cpsUtils.projectPicker.allButtonLabel', {
       defaultMessage: 'All',
-    }),
-  getProjectPickerButtonAriaLabel: () =>
-    i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
-      defaultMessage: 'Cross-project search project picker',
-    }),
+    });
+  },
+  get projectPickerButtonAriaLabel() {
+    return i18n.translate('cpsUtils.projectPicker.projectPickerButtonLabel', {
+      defaultMessage: 'Cross-project search scope selector',
+    });
+  },
+  get projectPickerButtonDisabledAriaLabel() {
+    return i18n.translate('cpsUtils.projectPicker.projectPickerButtonDisabledLabel', {
+      defaultMessage:
+        'Cross-project search is not available here. Unless otherwise informed, your project scope will be limited to this project alone.',
+    });
+  },
   getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('cpsUtils.projectPicker.originProjectTooltip', {
       defaultMessage:
@@ -39,14 +47,23 @@ export const strings = {
     i18n.translate('cpsUtils.projectPicker.thisProjectLabel', {
       defaultMessage: 'This project',
     }),
-  getProjectPickerTourTitle: () =>
+  getProjectPickerTourTitle: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('cpsUtils.projectPicker.tour.title', {
-      defaultMessage: 'Cross-project search (CPS) is now available',
+      defaultMessage:
+        "{isAllProjects, select, true {You're searching all projects} other {You're searching {numberOfProjects} of {totalProjects, plural, one {# project} other {# projects}}}}",
+      values: {
+        isAllProjects: String(numberOfProjects === totalProjects),
+        numberOfProjects,
+        totalProjects,
+      },
     }),
-  getProjectPickerTourContent: () =>
+  getProjectPickerTourContent: (linkedProjectsCount: number) =>
     i18n.translate('cpsUtils.projectPicker.tour.content', {
       defaultMessage:
-        'Your searches now include data from this project and any linked projects by default. Use this selector to adjust the scope of your searches, or set a different default scope from your space settings.',
+        "Based on this space's defaults, your results include data from this project and {linkedProjectsCount, plural, one {# other} other {# others}}. Use this button to change which projects are included.",
+      values: {
+        linkedProjectsCount,
+      },
     }),
   getProjectPickerTourCloseButton: () =>
     i18n.translate('cpsUtils.projectPicker.tour.closeButton', {
@@ -59,7 +76,8 @@ export const strings = {
     }),
   getProjectPickerReadonlyCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyCallout', {
-      defaultMessage: 'This page inherits its CPS scope from the space settings.',
+      defaultMessage:
+        'Your default CPS scope controls which linked projects are searched. You can adjust it for your space, or override it for individual queries.',
     }),
   getProjectPickerReadonlyLensCallout: () =>
     i18n.translate('cpsUtils.projectPicker.readonlyLensCallout', {

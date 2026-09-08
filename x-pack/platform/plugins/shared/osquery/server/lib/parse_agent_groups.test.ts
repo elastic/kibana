@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { fromKueryExpression } from '@kbn/es-query';
 import { aggregateResults, parseAgentSelection } from './parse_agent_groups';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -65,6 +66,9 @@ function createMockContext(
         perPage?: number;
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
+    >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
     >;
   },
   mockPackagePolicyService: {
@@ -189,6 +193,9 @@ describe('parseAgentSelection', () => {
         page?: number;
       }) => Promise<{ agents: Agent[]; total: number }>
     >;
+    getByIds: jest.MockedFunction<
+      (agentIds: string[], options?: { ignoreMissing?: boolean }) => Promise<Agent[]>
+    >;
   };
   let mockPackagePolicyService: {
     list: jest.MockedFunction<
@@ -209,6 +216,7 @@ describe('parseAgentSelection', () => {
 
     mockAgentService = {
       listAgents: jest.fn(),
+      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
     };
 
     mockPackagePolicyService = {
@@ -412,7 +420,7 @@ describe('parseAgentSelection', () => {
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
     });
 
-    it('should enforce space isolation for explicitly provided agent IDs', async () => {
+    it('should omit explicitly provided agent IDs that the agent service does not return', async () => {
       const spaceId = 'space-A';
       const mockAsInternalScopedUser = jest.fn().mockReturnValue(mockAgentService);
 
@@ -430,6 +438,7 @@ describe('parseAgentSelection', () => {
         agents: [],
         total: 0,
       });
+      mockAgentService.getByIds.mockResolvedValue([]);
 
       const result = await parseAgentSelection(
         mockSoClient,
@@ -438,8 +447,35 @@ describe('parseAgentSelection', () => {
         { agents: ['agent-from-space-B'], spaceId }
       );
 
-      expect(result).toContain('agent-from-space-B');
+      expect(result).not.toContain('agent-from-space-B');
+      expect(result).toEqual([]);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(['agent-from-space-B'], {
+        ignoreMissing: true,
+      });
       expect(mockAsInternalScopedUser).toHaveBeenCalledWith(spaceId);
+    });
+
+    it('should keep only the explicitly provided agent IDs returned by the agent service', async () => {
+      const spaceId = 'space-A';
+
+      mockAgentService.listAgents.mockResolvedValue({
+        agents: [],
+        total: 0,
+      });
+      mockAgentService.getByIds.mockResolvedValue([{ id: 'agent-in-space' } as Agent]);
+
+      const result = await parseAgentSelection(
+        mockSoClient,
+        mockElasticsearchClient,
+        mockContextWithServices,
+        { agents: ['agent-in-space', 'agent-from-space-B'], spaceId }
+      );
+
+      expect(result).toEqual(['agent-in-space']);
+      expect(mockAgentService.getByIds).toHaveBeenCalledWith(
+        ['agent-in-space', 'agent-from-space-B'],
+        { ignoreMissing: true }
+      );
     });
   });
 
@@ -448,7 +484,13 @@ describe('parseAgentSelection', () => {
       {
         name: 'always includes base filters',
         selection: { allAgentsSelected: true },
-        expectedFragments: ['status:online', 'policy_id:(policy-1 or policy-2 or policy-3)'],
+        expectedFragments: [
+          'status:online',
+          'policy_id:(policy-1 or policy-2 or policy-3)',
+          'policy_id:policy-1#*',
+          'policy_id:policy-2#*',
+          'policy_id:policy-3#*',
+        ],
       },
       {
         name: 'combines platform and policy filters',
@@ -457,6 +499,7 @@ describe('parseAgentSelection', () => {
           'status:online',
           'local_metadata.os.platform:(linux or darwin)',
           'policy_id:(policy-1)',
+          'policy_id:policy-1#*',
         ],
       },
     ])('$name', async ({ selection, expectedFragments }) => {
@@ -471,6 +514,7 @@ describe('parseAgentSelection', () => {
       expectedFragments.forEach((fragment) => {
         expect(kueryCall).toContain(fragment);
       });
+      expect(() => fromKueryExpression(kueryCall ?? '')).not.toThrow();
     });
 
     it('should set showInactive to false', async () => {
@@ -483,6 +527,33 @@ describe('parseAgentSelection', () => {
 
       const callArgs = mockAgentService.listAgents.mock.calls[0][0];
       expect(callArgs.showInactive).toBe(false);
+    });
+
+    it('should also match agents on version-specific variants of osquery-enabled policies', async () => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        allAgentsSelected: true,
+        spaceId: 'default',
+      });
+
+      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
+      expect(kueryCall).toContain('policy_id:policy-1#*');
+      expect(kueryCall).toContain('policy_id:policy-2#*');
+      expect(kueryCall).toContain('policy_id:policy-3#*');
+    });
+
+    it('should also match agents on version-specific variants of explicitly selected policies', async () => {
+      mockAgentService.listAgents = createSimpleMockResponse(['agent-1']);
+
+      await parseAgentSelection(mockSoClient, mockElasticsearchClient, mockContextWithServices, {
+        policiesSelected: ['policy-1'],
+        spaceId: 'default',
+      });
+
+      const kueryCall = mockAgentService.listAgents.mock.calls[0][0].kuery;
+      expect(kueryCall).toContain('policy_id:(policy-1)');
+      expect(kueryCall).toContain('policy_id:policy-1#*');
     });
   });
 

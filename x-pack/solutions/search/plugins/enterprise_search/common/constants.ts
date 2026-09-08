@@ -113,8 +113,6 @@ export const ENTERPRISE_SEARCH_RELEVANCE_LOGS_SOURCE_ID = 'ent-search-logs';
 export const ENTERPRISE_SEARCH_AUDIT_LOGS_SOURCE_ID = 'ent-search-audit-logs';
 export const ENTERPRISE_SEARCH_ANALYTICS_LOGS_SOURCE_ID = 'ent-search-analytics-logs';
 
-export const CREATE_NEW_INDEX_URL = '/search_indices/new_index';
-
 export const SEARCH_HOMEPAGE_URL = '/app/elasticsearch/home';
 
 export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
@@ -139,13 +137,6 @@ export interface DefaultConnectorsPipelineMeta {
   default_run_ml_inference: boolean;
 }
 
-export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
-  default_extract_binary_content: DEFAULT_PIPELINE_VALUES.extract_binary_content,
-  default_name: DEFAULT_PIPELINE_NAME,
-  default_reduce_whitespace: DEFAULT_PIPELINE_VALUES.reduce_whitespace,
-  default_run_ml_inference: DEFAULT_PIPELINE_VALUES.run_ml_inference,
-};
-
 export enum INGESTION_METHOD_IDS {
   API = 'api',
   CONNECTOR = 'connector',
@@ -162,13 +153,6 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
 
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
 export const PLUGIN_ID = 'enterpriseSearch';
-
-export const CONNECTOR_NATIVE_TYPE = 'native';
-export const CONNECTOR_CLIENTS_TYPE = 'connector_clients';
-
-export const CRAWLER = {
-  github_repo: 'https://github.com/elastic/crawler',
-};
 
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];

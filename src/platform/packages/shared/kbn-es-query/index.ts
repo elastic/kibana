@@ -141,7 +141,7 @@ export {
   getDataViewFieldSubtypeNested,
   isDataViewFieldSubtypeMulti,
   isDataViewFieldSubtypeNested,
-  isCCSRemoteIndexName,
+  isNonLocalIndexName,
   getTimeZoneFromSettings,
 } from './src/utils';
 

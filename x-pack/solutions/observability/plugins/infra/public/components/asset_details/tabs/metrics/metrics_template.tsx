@@ -138,7 +138,6 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
         >
           <div ref={quickAccessRef}>
             <EuiListGroup
-              flush
               css={css`
                 ${useEuiMaxBreakpoint('xl')} {
                   flex-direction: row;
@@ -155,7 +154,6 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
                   key={sectionId}
                   onClick={() => onQuickAccessItemClick(sectionId)}
                   color="text"
-                  size="s"
                   className={cx({
                     [css`
                       text-decoration: underline;

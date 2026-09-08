@@ -11,6 +11,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useBulkDeleteRules } from './use_bulk_delete_rules';
 
 const mockBulkDeleteRules = jest.fn();
+const mockDeleteRulesByQuery = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddWarning = jest.fn();
 const mockAddDanger = jest.fn();
@@ -27,7 +28,10 @@ jest.mock('@kbn/core-di-browser', () => ({
       };
     }
     // RulesApi
-    return { bulkDeleteRules: mockBulkDeleteRules };
+    return {
+      bulkDeleteRules: mockBulkDeleteRules,
+      deleteRulesByQuery: mockDeleteRulesByQuery,
+    };
   },
   CoreStart: (key: string) => key,
 }));
@@ -46,43 +50,58 @@ describe('useBulkDeleteRules', () => {
     jest.clearAllMocks();
   });
 
-  it('calls bulkDeleteRules with the provided ids', async () => {
-    mockBulkDeleteRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-ID endpoint with the provided ids', async () => {
+    mockBulkDeleteRules.mockResolvedValueOnce({ affected_count: 2, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockBulkDeleteRules).toHaveBeenCalledWith({ ids: ['rule-1', 'rule-2'] });
+    expect(mockDeleteRulesByQuery).not.toHaveBeenCalled();
   });
 
-  it('shows success toast when all rules are deleted', async () => {
-    mockBulkDeleteRules.mockResolvedValueOnce({ rules: [], errors: [] });
+  it('calls the by-query endpoint with force=true when using match_all', async () => {
+    mockDeleteRulesByQuery.mockResolvedValueOnce({ affected_count: 5, errors: [] });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_query', match_all: true });
     });
 
-    expect(mockAddSuccess).toHaveBeenCalledWith('Rules deleted successfully');
+    expect(mockDeleteRulesByQuery).toHaveBeenCalledWith({ match_all: true, force: true });
+    expect(mockBulkDeleteRules).not.toHaveBeenCalled();
+  });
+
+  it('shows success toast with affected_count when all rules are deleted', async () => {
+    mockBulkDeleteRules.mockResolvedValueOnce({ affected_count: 3, errors: [] });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
+    });
+
+    expect(mockAddSuccess).toHaveBeenCalledWith('3 rules deleted successfully');
   });
 
   it('shows warning toast when there are partial errors', async () => {
     mockBulkDeleteRules.mockResolvedValueOnce({
-      rules: [],
-      errors: [{ id: 'rule-2', error: { message: 'Not found', statusCode: 404 } }],
+      affected_count: 1,
+      errors: [{ id: 'rule-2', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } }],
     });
     const { Wrapper } = createWrapper();
 
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1', 'rule-2'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith(expect.stringContaining('1 error'));
@@ -97,7 +116,7 @@ describe('useBulkDeleteRules', () => {
 
     await act(async () => {
       try {
-        await result.current.mutateAsync({ ids: ['rule-1'] });
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
       } catch {
         // expected
       }
@@ -106,15 +125,35 @@ describe('useBulkDeleteRules', () => {
     expect(mockAddDanger).toHaveBeenCalledWith('Failed to delete rules');
   });
 
+  it('shows danger toast with title and server message when HTTP error body has message', async () => {
+    mockBulkDeleteRules.mockRejectedValueOnce({ body: { message: 'Forbidden' } });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
+
+    await act(async () => {
+      try {
+        await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
+      } catch {
+        // expected
+      }
+    });
+
+    expect(mockAddDanger).toHaveBeenCalledWith({
+      title: 'Failed to delete rules',
+      text: 'Forbidden',
+    });
+  });
+
   it('invalidates rule list queries on success', async () => {
-    mockBulkDeleteRules.mockResolvedValueOnce({ rules: [], errors: [] });
+    mockBulkDeleteRules.mockResolvedValueOnce({ affected_count: 1, errors: [] });
     const { Wrapper, queryClient } = createWrapper();
     const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     const { result } = renderHook(() => useBulkDeleteRules(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ ids: ['rule-1'] });
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1'] });
     });
 
     expect(invalidateSpy).toHaveBeenCalledWith(['rule', 'list']);

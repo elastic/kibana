@@ -4,7 +4,7 @@ Functional tests on report generation are under the applications that use report
 
 **PDF/PNG Report testing:**
 
-- `x-pack/platform/test/functional/apps/canvas/reports.ts`
+- `x-pack/platform/plugins/private/canvas/test/scout/api/tests/canvas_pdf_report.spec.ts` (Scout; Canvas PDF reporting was migrated from FTR)
 - `x-pack/platform/test/functional/apps/dashboard/reporting/screenshots.ts`
 - `x-pack/platform/test/functional/apps/lens/group15/lens_reporting.ts`
 - `x-pack/platform/test/functional/apps/visualize/reporting.ts`

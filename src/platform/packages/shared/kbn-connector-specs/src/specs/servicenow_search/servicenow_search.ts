@@ -21,7 +21,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
@@ -43,16 +43,6 @@ import type {
   GetAttachmentInput,
   DescribeTableInput,
 } from './types';
-import describeTableWorkflow from './workflows/describe_table.yaml';
-import getAttachmentWorkflow from './workflows/get_attachment.yaml';
-import getCommentsWorkflow from './workflows/get_comments.yaml';
-import getRecordWorkflow from './workflows/get_record.yaml';
-import getRecordWithCommentsWorkflow from './workflows/get_record_with_comments.yaml';
-import listKnowledgeBasesWorkflow from './workflows/list_knowledge_bases.yaml';
-import listRecordsWorkflow from './workflows/list_records.yaml';
-import listTablesWorkflow from './workflows/list_tables.yaml';
-import searchWorkflow from './workflows/search.yaml';
-
 export const ServicenowSearch: ConnectorSpec = {
   metadata: {
     id: '.servicenow_search',
@@ -62,25 +52,14 @@ export const ServicenowSearch: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {},
-        overrides: {
-          meta: {
-            tokenUrl: {
-              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
-            },
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
+        isRecommended: true,
         defaults: {},
         overrides: {
           meta: {
@@ -94,24 +73,39 @@ export const ServicenowSearch: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_client_credentials',
+        defaults: {},
+        overrides: {
+          meta: {
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 
-  schema: z.object({
-    instanceUrl: z
-      .string()
-      .url()
-      .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
-      .meta({
-        label: 'Instance URL',
-        widget: 'text',
-        placeholder: 'https://your-instance.service-now.com',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      instanceUrl: z
+        .string()
+        .url()
+        .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
+        .meta({
+          label: 'Instance URL',
+          widget: 'text',
+          placeholder: 'https://your-instance.service-now.com',
+        }),
+    })
+  ),
 
   actions: {
     search: {
       isTool: true,
+      scope: 'read',
       description: 'Search ServiceNow records using full-text search across a given table',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
@@ -140,6 +134,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getRecord: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve a specific ServiceNow record by its sys_id. Works for any table. ' +
         'For knowledge articles (kb_knowledge table), request fields: sys_id,number,short_description,text,topic,category,author,sys_created_on,sys_updated_on,workflow_state,kb_knowledge_base,kb_category',
@@ -161,6 +156,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listRecords: {
       isTool: true,
+      scope: 'read',
       description: 'List records from a ServiceNow table with optional encoded query filter',
       input: ListRecordsInputSchema,
       handler: async (ctx, input: ListRecordsInput) => {
@@ -185,6 +181,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listTables: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow tables with their labels and descriptions. Use this to discover what tables exist in the instance before querying them.',
       input: ListTablesInputSchema,
@@ -211,6 +208,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     listKnowledgeBases: {
       isTool: true,
+      scope: 'read',
       description:
         'List available ServiceNow knowledge bases with their titles and descriptions. Use this to discover what knowledge bases exist before searching for articles.',
       input: ListKnowledgeBasesInputSchema,
@@ -235,6 +233,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getComments: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve comments and work notes for a ServiceNow record (e.g., an incident or change request). ' +
         'Returns journal entries in chronological order. Call this after retrieving a record to understand its history.',
@@ -260,16 +259,19 @@ export const ServicenowSearch: ConnectorSpec = {
 
     getAttachment: {
       isTool: true,
+      scope: 'read',
       description:
         'Download a ServiceNow attachment as base64-encoded content by its attachment sys_id. ' +
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>.',
       input: GetAttachmentInputSchema,
-      output: z.object({
-        fileName: z.string().describe('Name of the attachment file'),
-        contentType: z.string().describe('MIME type of the attachment'),
-        base64: z.string().describe('Base64-encoded attachment content'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          fileName: z.string().describe('Name of the attachment file'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          base64: z.string().describe('Base64-encoded attachment content'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
@@ -297,6 +299,7 @@ export const ServicenowSearch: ConnectorSpec = {
 
     describeTable: {
       isTool: true,
+      scope: 'read',
       description:
         'Describe the schema of a ServiceNow table by listing all its fields (including inherited fields), ' +
         'their types, labels, and constraints. Use this to understand the structure of a table before ' +
@@ -315,49 +318,48 @@ export const ServicenowSearch: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'ServiceNow connector — cross-action usage guidance for LLMs.',
+    '',
+    '## Discovery pattern',
+    'When the target table is unknown, start with listTables (optionally filter by query keyword),',
+    'then call describeTable on the chosen table to understand available fields before querying.',
+    '',
+    '## Knowledge articles',
+    'listKnowledgeBases → search (or listRecords) on kb_knowledge table.',
+    'Useful fields: sys_id, number, short_description, text, topic, category, author,',
+    'sys_created_on, sys_updated_on, workflow_state, kb_knowledge_base, kb_category.',
+    'To filter by knowledge base: include kb_knowledge_base=<kb_sys_id> in encodedQuery.',
+    '',
+    '## Attachments',
+    'Attachment sys_ids are not stored on the parent record. Find them first:',
+    '  listRecords(table=sys_attachment, encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>)',
+    'Then call getAttachment with the attachment sys_id to retrieve base64-encoded content.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.servicenowSearch.test.description', {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
     }),
     handler: async (ctx) => {
-      try {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        // Fetch the authenticated user's own record — readable by any authenticated user
-        // regardless of role. Avoids relying on admin-only tables like sys_properties.
-        const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
-          params: {
-            sysparm_query: 'sys_created_on!=NULL',
-            sysparm_limit: 1,
-            sysparm_fields: 'sys_id',
-          },
-        });
-        const results = response.data?.result ?? [];
-        if (results.length > 0) {
-          return {
-            ok: true,
-            message: 'Successfully connected to ServiceNow',
-          };
-        }
-        return {
-          ok: true,
-          message: 'Successfully connected to ServiceNow (no user records visible)',
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
+      const { instanceUrl } = ctx.config as { instanceUrl: string };
+      // Fetch a minimal record from sys_user — readable by any authenticated user
+      // regardless of role. Avoids relying on admin-only tables like sys_properties.
+      const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
+        params: {
+          sysparm_query: 'sys_created_on!=NULL',
+          sysparm_limit: 1,
+          sysparm_fields: 'sys_id',
+        },
+      });
+      const results = response.data?.result ?? [];
+      if (results.length === 0) {
+        throw new Error(
+          'Connected to ServiceNow but no user records are visible — verify that the connector has the required role permissions.'
+        );
       }
+      return {};
     },
+    enabled: true,
   },
-
-  agentBuilderWorkflows: [
-    describeTableWorkflow,
-    getAttachmentWorkflow,
-    getCommentsWorkflow,
-    getRecordWorkflow,
-    getRecordWithCommentsWorkflow,
-    listKnowledgeBasesWorkflow,
-    listRecordsWorkflow,
-    listTablesWorkflow,
-    searchWorkflow,
-  ],
 };

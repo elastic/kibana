@@ -12,6 +12,7 @@ class ESDocLinks {
   public notebooksExamples: string = '';
   public elasticsearchDocs: string = '';
   public elasticTraining: string = '';
+  public releaseNotes: string = '';
   public serverlessReleaseNotes: string = '';
   public hostedCloudReleaseNotes: string = '';
 
@@ -22,6 +23,7 @@ class ESDocLinks {
     this.visitSearchLabs = newDocLinks.searchGettingStarted.visitSearchLabs;
     this.notebooksExamples = newDocLinks.searchGettingStarted.notebooksExamples;
     this.elasticTraining = newDocLinks.searchGettingStarted.elasticTraining;
+    this.releaseNotes = newDocLinks.releaseNotes;
     this.serverlessReleaseNotes = newDocLinks.serverlessReleaseNotes;
     this.hostedCloudReleaseNotes = newDocLinks.hostedCloudReleaseNotes;
   }

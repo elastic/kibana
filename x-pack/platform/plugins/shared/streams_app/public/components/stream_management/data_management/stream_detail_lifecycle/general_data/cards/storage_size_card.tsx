@@ -84,7 +84,7 @@ export const StorageSizeCard = ({
   const title = (
     <FormattedMessage
       id="xpack.streams.streamDetailLifecycle.storageSize.title"
-      defaultMessage="Storage size {tooltipIcon}"
+      defaultMessage="Storage summary {tooltipIcon}"
       data-test-subj="storageSize-title"
       values={{
         tooltipIcon: inaccurateMetric && (

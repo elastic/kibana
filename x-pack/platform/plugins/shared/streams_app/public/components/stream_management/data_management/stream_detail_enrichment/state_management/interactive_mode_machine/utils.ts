@@ -9,13 +9,14 @@ import {
   isActionBlock,
   isConditionBlock,
   type StreamlangStepWithUIAttributes,
+  type StreamlangUIBranch,
 } from '@kbn/streamlang';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type { DataSourceSimulationMode } from '../data_source_state_machine';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine/types';
 import type { StepActorRef, StepInput, StepParentActor } from '../steps_state_machine';
 import { isStepUnderEdit } from '../steps_state_machine';
-import type { InteractiveModeContext } from './types';
+import type { InteractiveModeContext, InteractiveModeParentRef } from './types';
 import { collectDescendantStepIds } from '../utils';
 
 export type StepSpawner = (
@@ -94,6 +95,39 @@ export function getStepsForSimulation({
 
   // Return processors
   return newStepSnapshots.map((snapshot) => snapshot.context.step);
+}
+
+/**
+ * Checks whether any child of the given parent step is in the 'else' branch.
+ */
+export function stepHasElseBranch(stepRefs: StepActorRef[], parentId: string): boolean {
+  return stepRefs.some((ref) => {
+    const step = ref.getSnapshot()?.context.step;
+    return step?.parentId === parentId && step?.branch === 'else';
+  });
+}
+
+/**
+ * Auto-selects a parent condition for simulation filtering when a step is created/edited
+ * under a condition without an else branch. When a condition has both if and else branches,
+ * all documents are covered, so filtering would not be useful.
+ */
+export function maybeAutoFilterByParentCondition(
+  stepRefs: StepActorRef[],
+  parentId: string | null | undefined,
+  parentRef: InteractiveModeParentRef,
+  branch?: StreamlangUIBranch
+): void {
+  if (!parentId || branch === 'else') return;
+
+  const parentStep = stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()?.context.step;
+
+  if (parentStep && isConditionBlock(parentStep) && !stepHasElseBranch(stepRefs, parentId)) {
+    parentRef.send({
+      type: 'simulation.filterByConditionAuto',
+      conditionId: parentId,
+    });
+  }
 }
 
 export function getConfiguredSteps(context: InteractiveModeContext) {

@@ -21,6 +21,7 @@ import {
   EuiFlexItem,
   EuiButton,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,9 +42,15 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
   subscriptionLink,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const popoverTitleId = useGeneratedHtmlId();
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
-      <EuiPopoverTitle>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>
         {i18n.translate('searchConnectors.connectors.upgradeTitle', {
           defaultMessage: 'Upgrade to Elastic Platinum',
         })}

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { EisInferenceEndpointMetadata } from '../inference_endpoints';
+
 /**
  * The list of connector types that can be used with the inference APIs
  */
@@ -57,6 +59,8 @@ export interface InferenceConnector {
   isConnectorTypeDeprecated?: boolean;
   /** Present when sourced from a stack connector that exposes missing-secrets state. */
   isMissingSecrets?: boolean;
+  /** Metadata for Connectors based on EIS inference endpoints */
+  metadata?: EisInferenceEndpointMetadata;
 }
 
 export interface InferenceConnectorCapabilities {
@@ -93,4 +97,5 @@ export interface RawInferenceConnector {
   isDeprecated?: boolean;
   isConnectorTypeDeprecated?: boolean;
   isMissingSecrets?: boolean;
+  metadata?: EisInferenceEndpointMetadata;
 }

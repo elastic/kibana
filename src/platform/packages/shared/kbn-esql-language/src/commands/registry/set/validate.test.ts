@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { ESQLMessage } from '../../definitions/types';
 import { validate } from './validate';
 import { Parser } from '@elastic/esql';
-import type { ESQLMessage } from '@elastic/esql/types';
 
 const setExpectErrors = (query: string, expectedErrors: string[]) => {
   const { root } = Parser.parse(query);

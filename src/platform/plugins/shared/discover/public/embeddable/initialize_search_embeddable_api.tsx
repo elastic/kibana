@@ -18,13 +18,18 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   PublishesWritableUnifiedSearch,
   PublishesWritableDataViews,
-  StateComparators,
   ProjectRoutingOverrides,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
 } from '@kbn/presentation-publishing';
 import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { DataGridDensity, DataTableColumnsMeta } from '@kbn/unified-data-table';
+import type {
+  DataGridDensity,
+  DataTableColumnsMeta,
+  JsonModeSettings,
+  DocumentsDisplayMode,
+} from '@kbn/unified-data-table';
 
 import {
   isOfAggregateQueryType,
@@ -38,7 +43,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getEsqlDataView } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../build_services';
 import { EDITABLE_SAVED_SEARCH_KEYS } from '../../common/embeddable/constants';
-import { getSearchEmbeddableDefaults } from './get_search_embeddable_defaults';
 import type {
   PublishesWritableSavedSearch,
   SearchEmbeddableSerializedAttributes,
@@ -115,10 +119,10 @@ export const initializeSearchEmbeddableApi = async ({
   api: PublishesWritableSavedSearch &
     PublishesWritableDataViews &
     Omit<PublishesWritableUnifiedSearch, keyof PublishesWritableTimeRange> &
-    PublishesProjectRoutingOverrides;
+    PublishesProjectRoutingOverrides &
+    PublishesEsqlUsage;
   stateManager: SearchEmbeddableStateManager;
   anyStateChange$: Observable<void>;
-  comparators: StateComparators<SearchEmbeddableSerializedAttributes>;
   cleanup: () => void;
   reinitializeState: (lastSaved: SearchEmbeddableSerializedAttributes) => Promise<void>;
 }> => {
@@ -130,8 +134,6 @@ export const initializeSearchEmbeddableApi = async ({
   const searchSource$ = new BehaviorSubject<ISearchSource>(searchSource);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(dataView ? [dataView] : undefined);
 
-  const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
-
   /** This is the state that can be initialized from the saved initial state */
   const columns$ = new BehaviorSubject<string[] | undefined>(initialState.columns);
   const grid$ = new BehaviorSubject<DiscoverGridSettings | undefined>(initialState.grid);
@@ -140,6 +142,12 @@ export const initializeSearchEmbeddableApi = async ({
   const rowsPerPage$ = new BehaviorSubject<number | undefined>(initialState.rowsPerPage);
   const sampleSize$ = new BehaviorSubject<number | undefined>(initialState.sampleSize);
   const density$ = new BehaviorSubject<DataGridDensity | undefined>(initialState.density);
+  const documentsDisplayMode$ = new BehaviorSubject<DocumentsDisplayMode | undefined>(
+    initialState.documentsDisplayMode
+  );
+  const jsonModeSettings$ = new BehaviorSubject<JsonModeSettings | undefined>(
+    initialState.jsonModeSettings
+  );
   const sort$ = new BehaviorSubject<SortOrder[] | undefined>(initialState.sort);
   const savedSearchViewMode$ = new BehaviorSubject<VIEW_MODE | undefined>(initialState.viewMode);
 
@@ -159,6 +167,7 @@ export const initializeSearchEmbeddableApi = async ({
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
     getProjectRoutingOverrides(initialQuery)
   );
+  const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(initialQuery));
 
   const canEditUnifiedSearch = () => false;
 
@@ -185,6 +194,8 @@ export const initializeSearchEmbeddableApi = async ({
     totalHitCount: totalHitCount$,
     viewMode: savedSearchViewMode$,
     density: density$,
+    documentsDisplayMode: documentsDisplayMode$,
+    jsonModeSettings: jsonModeSettings$,
     inspectorAdapters: inspectorAdapters$,
   };
 
@@ -250,6 +261,8 @@ export const initializeSearchEmbeddableApi = async ({
     headerRowHeight$.next(state.headerRowHeight);
     savedSearchViewMode$.next(state.viewMode);
     density$.next(state.density);
+    documentsDisplayMode$.next(state.documentsDisplayMode);
+    jsonModeSettings$.next(state.jsonModeSettings);
   };
 
   /** Keep the saved search in sync with any state changes */
@@ -266,13 +279,18 @@ export const initializeSearchEmbeddableApi = async ({
       savedSearch$.next(newSavedSearch);
     });
 
-  /** Keep projectRoutingOverrides$ in sync with query$ changes */
+  /** Keep projectRoutingOverrides$ and usesEsql$ in sync with query$ changes */
   const syncProjectRoutingOverrides = query$.subscribe((query) => {
     const currentOverrides = projectRoutingOverrides$.getValue();
     const nextOverrides = getProjectRoutingOverrides(query);
 
     if (!deepEqual(currentOverrides, nextOverrides)) {
       projectRoutingOverrides$.next(nextOverrides);
+    }
+
+    const nextUsesEsql = isOfAggregateQueryType(query);
+    if (usesEsql$.getValue() !== nextUsesEsql) {
+      usesEsql$.next(nextUsesEsql);
     }
   });
 
@@ -290,24 +308,15 @@ export const initializeSearchEmbeddableApi = async ({
       query$,
       setQuery,
       projectRoutingOverrides$,
+      usesEsql$,
       canEditUnifiedSearch,
       setColumns,
     },
     stateManager,
-    anyStateChange$: onAnyStateChange.pipe(map(() => undefined)),
-    comparators: {
-      sort: (a, b) => deepEqual(a ?? [], b ?? []),
-      columns: 'deepEquality',
-      grid: (a, b) => deepEqual(a ?? {}, b ?? {}),
-      sampleSize: (a, b) => (a ?? defaults.sampleSize) === (b ?? defaults.sampleSize),
-      rowsPerPage: (a, b) => (a ?? defaults.rowsPerPage) === (b ?? defaults.rowsPerPage),
-      rowHeight: (a, b) => (a ?? defaults.rowHeight) === (b ?? defaults.rowHeight),
-      headerRowHeight: (a, b) =>
-        (a ?? defaults.headerRowHeight) === (b ?? defaults.headerRowHeight),
-      serializedSearchSource: 'referenceEquality',
-      viewMode: 'referenceEquality',
-      density: 'referenceEquality',
-    },
+    anyStateChange$: onAnyStateChange.pipe(
+      skip(1),
+      map(() => undefined)
+    ),
     reinitializeState,
   };
 };

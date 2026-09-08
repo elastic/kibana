@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -22,7 +23,10 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
+import { getConnectorSpec } from '@kbn/connector-specs';
 import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.mock';
+import { generateConfigSchema } from '../../../../lib/single_file_connectors/generate_config_schema';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -332,6 +336,82 @@ describe('create()', () => {
       ).rejects.toThrow(
         'This preconfigured-connector-id already exists in a preconfigured action.'
       );
+    });
+  });
+
+  describe('Kibana managed auth types', () => {
+    test('throws an error when creating a connector with a Kibana managed auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('throws when the Kibana managed auth type is only present in config', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: { authType: 'relay' },
+            secrets: {},
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .slack2.'
+      );
+    });
+
+    test('throws for a connector type whose spec does not offer the Kibana managed auth type', async () => {
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.notion',
+            config: {},
+            secrets: { authType: 'relay', tenantKey: 'tenant-A' },
+          },
+        })
+      ).rejects.toThrow(
+        'Authentication type relay is set by Kibana and cannot be configured on a connector. Action type: .notion.'
+      );
+    });
+
+    test('allows a user-facing auth type on the same connector type', async () => {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: '.slack2',
+          isMissingSecrets: false,
+          config: {},
+        },
+        references: [],
+      });
+
+      await expect(
+        create({
+          context: mockContext,
+          action: {
+            name: 'my name',
+            actionTypeId: '.slack2',
+            config: {},
+            secrets: { authType: 'bearer', token: 'xoxb-token' },
+          },
+        })
+      ).resolves.toEqual(expect.objectContaining({ actionTypeId: '.slack2' }));
     });
   });
 
@@ -663,6 +743,110 @@ describe('create()', () => {
           config: {},
           secrets: {},
         },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+  });
+
+  describe('spec connector config.authType', () => {
+    test('persists config.authType from secrets when config is empty (spec source)', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('does not inject config.authType for stack source when secrets include authType', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.stack,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
         { id: 'mock-saved-object-id' }
       );
     });
@@ -1104,6 +1288,57 @@ describe('create()', () => {
       });
 
       expect(result.isDeprecated).toBe(true);
+    });
+  });
+
+  describe('inbound ingress credentials', () => {
+    const inboundSpec = getConnectorSpec('.inboundWebhook');
+    if (inboundSpec === undefined) {
+      throw new Error('Expected .inboundWebhook spec');
+    }
+
+    const inboundContext: ActionsClientContext = {
+      ...mockContext,
+      spaceId: 'default',
+    };
+
+    beforeEach(() => {
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(
+        getConnectorType({
+          id: '.inboundWebhook',
+          source: ACTION_TYPE_SOURCES.spec,
+          validate: {
+            config: generateConfigSchema(inboundSpec.schema),
+            secrets: { schema: z4.object({}) },
+            params: { schema: z.object({}) },
+          },
+        })
+      );
+      unsecuredSavedObjectsClient.create.mockImplementation(async (_type, attributes, options) => ({
+        id: options?.id ?? 'mock-saved-object-id',
+        type: 'action',
+        attributes,
+        references: [],
+      }));
+    });
+
+    test('does not mint credentials or return secrets', async () => {
+      const result = await create({
+        context: inboundContext,
+        action: {
+          name: 'Sales ingress',
+          actionTypeId: '.inboundWebhook',
+          config: { ingestTokenHash: 'a'.repeat(64) },
+          secrets: {},
+        },
+      });
+
+      const saved = unsecuredSavedObjectsClient.create.mock.calls[0][1] as {
+        config: { ingestTokenHash?: string };
+      };
+
+      expect(result).not.toHaveProperty('secrets');
+      expect(saved.config.ingestTokenHash).toBeUndefined();
     });
   });
 });

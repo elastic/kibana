@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, type ReactElement, useCallback } from 'react';
+import React, { memo, type ReactElement, type ReactNode, useCallback } from 'react';
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiAccordion, EuiFlexGroup, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -53,6 +53,16 @@ export interface ExpandableSectionProps {
    * Title value to render in the header of the accordion
    */
   title: ReactElement | string;
+  /**
+   * Optional content rendered in the accordion header row
+   */
+  extraAction?: ReactNode;
+  /**
+   * HTML heading level for the section title. Defaults to 'h4'.
+   * Pass 'h3' for sections that sit at a higher nesting level in the page
+   * outline (e.g. entity-analytics flyout sections).
+   */
+  headingLevel?: 'h3' | 'h4';
 }
 
 /**
@@ -69,6 +79,8 @@ export const ExpandableSection = memo(
     localStorageKey,
     sectionId,
     title,
+    extraAction,
+    headingLevel = 'h4',
   }: ExpandableSectionProps) => {
     const accordionId = useGeneratedHtmlId({ prefix: 'accordion' });
     const { renderContent, state, toggle } = useAccordionState(expanded);
@@ -76,9 +88,10 @@ export const ExpandableSection = memo(
     const headerDataTestSub = dataTestSub + HEADER_TEST_ID;
     const contentDataTestSub = dataTestSub + CONTENT_TEST_ID;
 
+    const HeadingTag = headingLevel;
     const header = (
       <EuiTitle size="xs" data-test-subj={headerDataTestSub}>
-        <h4>{title}</h4>
+        <HeadingTag>{title}</HeadingTag>
       </EuiTitle>
     );
 
@@ -93,6 +106,7 @@ export const ExpandableSection = memo(
         id={accordionId}
         buttonContent={header}
         css={accordionCss}
+        extraAction={extraAction}
       >
         <EuiSpacer size="m" />
         <EuiFlexGroup

@@ -14,17 +14,13 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
-import type { Streams } from '@kbn/streams-schema';
 import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import type { PartitionableDefinition } from './state_management/stream_routing_state_machine/types';
 
-export function CurrentStreamEntry({
-  definition,
-}: {
-  definition: Streams.WiredStream.GetResponse;
-}) {
+export function CurrentStreamEntry({ definition }: { definition: PartitionableDefinition }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
 
@@ -37,6 +33,7 @@ export function CurrentStreamEntry({
         hasShadow={false}
         hasBorder={false}
         paddingSize="m"
+        data-test-subj="streamsAppCurrentStreamPanel"
         className={css`
           overflow: hidden;
           border: ${euiTheme.border.thin};
@@ -56,11 +53,16 @@ export function CurrentStreamEntry({
                         type={isLast ? 'folderOpen' : 'folderClosed'}
                         size="m"
                         color="subdued"
+                        aria-hidden={true}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {isLast ? (
-                        <EuiText size="xs" color="subdued">
+                        <EuiText
+                          size="xs"
+                          color="subdued"
+                          data-test-subj={`streamsAppBreadcrumbEntry-${streamName}`}
+                        >
                           {streamName}
                         </EuiText>
                       ) : (
@@ -74,6 +76,7 @@ export function CurrentStreamEntry({
                         >
                           <EuiText
                             size="xs"
+                            data-test-subj={`streamsAppBreadcrumbEntry-${streamName}`}
                             css={css`
                               font-weight: ${euiTheme.font.weight.bold};
                             `}
@@ -95,6 +98,7 @@ export function CurrentStreamEntry({
                       css={css`
                         margin: 0 ${euiTheme.size.xs};
                       `}
+                      aria-hidden={true}
                     />
                   </EuiFlexItem>
                 )}

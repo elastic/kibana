@@ -52,7 +52,9 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((n) => ({ label: n })) ?? [{ la
 
 const useDefaultTimzezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
-  if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
+  if (!kibanaTz || kibanaTz === 'Browser') {
+    return moment.tz?.guess() ?? 'UTC';
+  }
   return kibanaTz;
 };
 
@@ -63,6 +65,14 @@ const ruleSnoozeSchedulerPseudoFocusCss = css`
     outline: none;
   }
 `;
+
+export const hiddenCalendarClassName = 'RuleSnoozeScheduler__hiddenCalendar';
+
+const ruleSnoozeSchedulerHiddenCalendarCss = css({
+  [`.${hiddenCalendarClassName}`]: {
+    display: 'none !important',
+  },
+});
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
@@ -86,7 +96,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
         <EuiPopoverTitle>
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="chevronSingleLeft" />
+              <EuiIcon type="chevronSingleLeft" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>
@@ -239,13 +249,17 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
 
       if (applyToEndDate && newDateAfterStart) {
         selectEndDT(date);
-      } else selectStartDT(date, !isStartDateTimeChange);
+      } else {
+        selectStartDT(date, !isStartDateTimeChange);
+      }
     },
     [selectingEndDate, selectingEndTime, startDT, endDT, selectEndDT, selectStartDT]
   );
 
   const onClickSaveSchedule = useCallback(() => {
-    if (!startDT || !endDT) return;
+    if (!startDT || !endDT) {
+      return;
+    }
 
     const tzid = selectedTimezone[0].label ?? defaultTz;
     // Convert the dtstart from Kibana timezone to the selected timezone
@@ -294,7 +308,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   }, [initialSchedule, onCancelSchedules, bulkSnoozeSchedule]);
 
   return (
-    <>
+    <div css={ruleSnoozeSchedulerHiddenCalendarCss}>
       <EuiFlexGroup
         gutterSize="xs"
         alignItems="center"
@@ -305,7 +319,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           <EuiDatePickerRange
             startDateControl={
               <EuiDatePicker
-                calendarClassName="hidden"
+                calendarClassName={hiddenCalendarClassName}
                 preventOpenOnFocus
                 showTimeSelect
                 onFocus={onFocusStart}
@@ -317,7 +331,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             }
             endDateControl={
               <EuiDatePicker
-                calendarClassName="hidden"
+                calendarClassName={hiddenCalendarClassName}
                 preventOpenOnFocus
                 showTimeSelect
                 className={selectingEndDate && !endDT ? 'RuleSnoozeScheduler__pseudofocus' : ''}
@@ -428,6 +442,6 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           </EuiPopoverFooter>
         </>
       )}
-    </>
+    </div>
   );
 };

@@ -8,17 +8,23 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import { ResolutionSection } from './resolution_section';
 import { RESOLUTION_SECTION_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
 import { useResolutionGroup } from './hooks/use_resolution_group';
 
 jest.mock('./hooks/use_resolution_group');
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({ openFlyout: jest.fn() }),
+}));
 
 const mockUseResolutionGroup = useResolutionGroup as jest.Mock;
 
 describe('ResolutionSection', () => {
   const defaultProps = {
     entityId: 'alice-id',
+    entityType: EntityType.user,
+    scopeId: 'test-scope',
     openDetailsPanel: jest.fn(),
   };
 
@@ -34,14 +40,14 @@ describe('ResolutionSection', () => {
       isLoading: false,
     });
 
-    const { getByTestId, getAllByText } = render(
+    const { getByTestId, getByText } = render(
       <TestProviders>
         <ResolutionSection {...defaultProps} />
       </TestProviders>
     );
 
     expect(getByTestId(RESOLUTION_SECTION_TEST_ID)).toBeInTheDocument();
-    expect(getAllByText('alice').length).toBeGreaterThanOrEqual(1);
+    expect(getByText('alice')).toBeInTheDocument();
   });
 
   it('shows loading spinner while loading', () => {

@@ -19,7 +19,7 @@ import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
-import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
+import { generateMissingFieldMessage, getFilter } from '../helpers';
 import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
@@ -180,8 +180,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       // carry over the format settings from previous operation for seamless transfer
       // NOTE: this works only for non-default formatters set in Lens
       let format = {};
-      if (previousColumn && isColumnFormatted(previousColumn)) {
-        format = { format: previousColumn.params?.format };
+      if (previousColumn?.params?.format) {
+        format = { format: previousColumn.params.format };
       }
 
       if (columnParams?.format) {

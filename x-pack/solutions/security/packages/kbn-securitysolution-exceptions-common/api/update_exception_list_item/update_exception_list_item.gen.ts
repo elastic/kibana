@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import {
@@ -45,147 +45,163 @@ import {
 } from '../model/exception_list_common.gen';
 import { ExceptionListItemEntryArray } from '../model/exception_list_item_entry.gen';
 
+export const UpdateExceptionListItemComment = lazySchema(() =>
+  z.object({
+    id: NonEmptyString.optional(),
+    comment: NonEmptyString,
+  })
+);
 export type UpdateExceptionListItemComment = z.infer<typeof UpdateExceptionListItemComment>;
-export const UpdateExceptionListItemComment = z.object({
-  id: NonEmptyString.optional(),
-  comment: NonEmptyString,
-});
 
+export const UpdateExceptionListItemCommentArray = lazySchema(() =>
+  z.array(UpdateExceptionListItemComment)
+);
 export type UpdateExceptionListItemCommentArray = z.infer<
   typeof UpdateExceptionListItemCommentArray
 >;
-export const UpdateExceptionListItemCommentArray = z.array(UpdateExceptionListItemComment);
 
-export type UpdateExceptionListItemBase = z.infer<typeof UpdateExceptionListItemBase>;
-export const UpdateExceptionListItemBase = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  item_id: ExceptionListItemHumanId.optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  namespace_type: ExceptionNamespaceType.optional().default('single'),
-  meta: ExceptionListItemMeta.optional(),
-  expire_time: ExceptionListItemExpireTime.optional(),
-  comments: UpdateExceptionListItemCommentArray.optional().default([]),
-  /**
-   * The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.
-   */
-  _version: z.string().optional(),
-});
-
-export type UpdateExceptionListItemGeneric = z.infer<typeof UpdateExceptionListItemGeneric>;
-export const UpdateExceptionListItemGeneric = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemBase = lazySchema(() =>
   z.object({
-    list_id: ExceptionListHumanId.optional(),
-    entries: ExceptionListItemEntryArray,
-    os_types: ExceptionListItemOsTypeArray.optional().default([]),
-    tags: ExceptionListItemTags.optional(),
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    id: ExceptionListItemId.optional(),
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    item_id: ExceptionListItemHumanId.optional(),
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    namespace_type: ExceptionNamespaceType.optional().default('single'),
+    meta: ExceptionListItemMeta.optional(),
+    expire_time: ExceptionListItemExpireTime.optional(),
+    comments: UpdateExceptionListItemCommentArray.optional().default([]),
+    /**
+     * The version ID, normally returned by the API when the item is retrieved. Use it to ensure updates are made against the latest version.
+     */
+    _version: z.string().optional(),
   })
 );
+export type UpdateExceptionListItemBase = z.infer<typeof UpdateExceptionListItemBase>;
 
+export const UpdateExceptionListItemGeneric = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(
+    z.object({
+      list_id: ExceptionListHumanId.optional(),
+      entries: ExceptionListItemEntryArray,
+      os_types: ExceptionListItemOsTypeArray.optional().default([]),
+      tags: ExceptionListItemTags.optional(),
+    })
+  )
+);
+export type UpdateExceptionListItemGeneric = z.infer<typeof UpdateExceptionListItemGeneric>;
+
+export const UpdateExceptionListItemEndpointList = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(EndpointListProperties)
+);
 export type UpdateExceptionListItemEndpointList = z.infer<
   typeof UpdateExceptionListItemEndpointList
 >;
-export const UpdateExceptionListItemEndpointList =
-  UpdateExceptionListItemBase.merge(EndpointListProperties);
 
+export const UpdateExceptionListItemTrustedAppsWindows = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedAppsWindowsProperties)
+);
 export type UpdateExceptionListItemTrustedAppsWindows = z.infer<
   typeof UpdateExceptionListItemTrustedAppsWindows
 >;
-export const UpdateExceptionListItemTrustedAppsWindows = UpdateExceptionListItemBase.merge(
-  TrustedAppsWindowsProperties
-);
 
+export const UpdateExceptionListItemTrustedAppsMac = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedAppsMacProperties)
+);
 export type UpdateExceptionListItemTrustedAppsMac = z.infer<
   typeof UpdateExceptionListItemTrustedAppsMac
 >;
-export const UpdateExceptionListItemTrustedAppsMac =
-  UpdateExceptionListItemBase.merge(TrustedAppsMacProperties);
 
+export const UpdateExceptionListItemTrustedAppsLinux = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedAppsLinuxProperties)
+);
 export type UpdateExceptionListItemTrustedAppsLinux = z.infer<
   typeof UpdateExceptionListItemTrustedAppsLinux
 >;
-export const UpdateExceptionListItemTrustedAppsLinux = UpdateExceptionListItemBase.merge(
-  TrustedAppsLinuxProperties
-);
 
+export const UpdateExceptionListItemTrustedDevicesWindows = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedDevicesWindowsProperties)
+);
 export type UpdateExceptionListItemTrustedDevicesWindows = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesWindows
 >;
-export const UpdateExceptionListItemTrustedDevicesWindows = UpdateExceptionListItemBase.merge(
-  TrustedDevicesWindowsProperties
-);
 
+export const UpdateExceptionListItemTrustedDevicesMac = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedDevicesMacProperties)
+);
 export type UpdateExceptionListItemTrustedDevicesMac = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesMac
 >;
-export const UpdateExceptionListItemTrustedDevicesMac = UpdateExceptionListItemBase.merge(
-  TrustedDevicesMacProperties
-);
 
+export const UpdateExceptionListItemTrustedDevicesWindowsMac = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(TrustedDevicesWindowsMacProperties)
+);
 export type UpdateExceptionListItemTrustedDevicesWindowsMac = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesWindowsMac
 >;
-export const UpdateExceptionListItemTrustedDevicesWindowsMac = UpdateExceptionListItemBase.merge(
-  TrustedDevicesWindowsMacProperties
-);
 
+export const UpdateExceptionListItemEventFilters = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(EventFiltersProperties)
+);
 export type UpdateExceptionListItemEventFilters = z.infer<
   typeof UpdateExceptionListItemEventFilters
 >;
-export const UpdateExceptionListItemEventFilters =
-  UpdateExceptionListItemBase.merge(EventFiltersProperties);
 
+export const UpdateExceptionListItemHostIsolation = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(HostIsolationProperties)
+);
 export type UpdateExceptionListItemHostIsolation = z.infer<
   typeof UpdateExceptionListItemHostIsolation
 >;
-export const UpdateExceptionListItemHostIsolation =
-  UpdateExceptionListItemBase.merge(HostIsolationProperties);
 
+export const UpdateExceptionListItemBlocklistWindows = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(BlocklistWindowsProperties)
+);
 export type UpdateExceptionListItemBlocklistWindows = z.infer<
   typeof UpdateExceptionListItemBlocklistWindows
 >;
-export const UpdateExceptionListItemBlocklistWindows = UpdateExceptionListItemBase.merge(
-  BlocklistWindowsProperties
-);
 
+export const UpdateExceptionListItemBlocklistLinux = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(BlocklistLinuxProperties)
+);
 export type UpdateExceptionListItemBlocklistLinux = z.infer<
   typeof UpdateExceptionListItemBlocklistLinux
 >;
-export const UpdateExceptionListItemBlocklistLinux =
-  UpdateExceptionListItemBase.merge(BlocklistLinuxProperties);
 
+export const UpdateExceptionListItemBlocklistMac = lazySchema(() =>
+  UpdateExceptionListItemBase.merge(BlocklistMacProperties)
+);
 export type UpdateExceptionListItemBlocklistMac = z.infer<
   typeof UpdateExceptionListItemBlocklistMac
 >;
-export const UpdateExceptionListItemBlocklistMac =
-  UpdateExceptionListItemBase.merge(BlocklistMacProperties);
 
+export const UpdateExceptionListItemRequestBody = lazySchema(() =>
+  z.union([
+    UpdateExceptionListItemGeneric,
+    UpdateExceptionListItemEndpointList,
+    UpdateExceptionListItemTrustedAppsWindows,
+    UpdateExceptionListItemTrustedAppsMac,
+    UpdateExceptionListItemTrustedAppsLinux,
+    UpdateExceptionListItemTrustedDevicesWindows,
+    UpdateExceptionListItemTrustedDevicesMac,
+    UpdateExceptionListItemTrustedDevicesWindowsMac,
+    UpdateExceptionListItemEventFilters,
+    UpdateExceptionListItemHostIsolation,
+    UpdateExceptionListItemBlocklistWindows,
+    UpdateExceptionListItemBlocklistLinux,
+    UpdateExceptionListItemBlocklistMac,
+  ])
+);
 export type UpdateExceptionListItemRequestBody = z.infer<typeof UpdateExceptionListItemRequestBody>;
-export const UpdateExceptionListItemRequestBody = z.union([
-  UpdateExceptionListItemGeneric,
-  UpdateExceptionListItemEndpointList,
-  UpdateExceptionListItemTrustedAppsWindows,
-  UpdateExceptionListItemTrustedAppsMac,
-  UpdateExceptionListItemTrustedAppsLinux,
-  UpdateExceptionListItemTrustedDevicesWindows,
-  UpdateExceptionListItemTrustedDevicesMac,
-  UpdateExceptionListItemTrustedDevicesWindowsMac,
-  UpdateExceptionListItemEventFilters,
-  UpdateExceptionListItemHostIsolation,
-  UpdateExceptionListItemBlocklistWindows,
-  UpdateExceptionListItemBlocklistLinux,
-  UpdateExceptionListItemBlocklistMac,
-]);
 export type UpdateExceptionListItemRequestBodyInput = z.input<
   typeof UpdateExceptionListItemRequestBody
 >;
 
+export const UpdateExceptionListItemResponse = lazySchema(() => ExceptionListItem);
 export type UpdateExceptionListItemResponse = z.infer<typeof UpdateExceptionListItemResponse>;
-export const UpdateExceptionListItemResponse = ExceptionListItem;

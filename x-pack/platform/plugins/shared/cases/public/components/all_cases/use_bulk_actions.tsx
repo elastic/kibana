@@ -9,7 +9,8 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
+import { CaseStatuses } from '@kbn/cases-components';
 
 import type { CasesUI } from '../../containers/types';
 import { useDeleteAction } from '../actions/delete/use_delete_action';
@@ -21,6 +22,8 @@ import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAssigneesAction } from '../actions/assignees/use_assignees_action';
 import { EditAssigneesFlyout } from '../actions/assignees/edit_assignees_flyout';
+import { useCloseCaseModal } from './use_close_case_modal';
+import { useCanSyncCloseReasonToAlerts } from './use_can_sync_close_reason_to_alerts';
 import * as i18n from './translations';
 
 interface UseBulkActionsProps {
@@ -76,6 +79,33 @@ export const useBulkActions = ({
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
   const canAssign = permissions.assign;
+  const canSyncCloseReasonToAlerts = useCanSyncCloseReasonToAlerts({
+    selectedCases,
+  });
+
+  const onCloseCase = useCallback(
+    (closeReason?: string) => {
+      statusAction.handleUpdateCaseStatus(selectedCases, CaseStatuses.closed, closeReason);
+    },
+    [selectedCases, statusAction]
+  );
+  const { openCloseCaseModal, closeCaseModal } = useCloseCaseModal({
+    canSyncCloseReasonToAlerts,
+    onCloseCase,
+  });
+
+  const statusActions = useMemo((): EuiContextMenuPanelItemDescriptor[] => {
+    return statusAction.getActions(selectedCases).map((statusActionMenuItem) => {
+      if (statusActionMenuItem.key === 'cases-bulk-action-status-closed') {
+        return {
+          ...statusActionMenuItem,
+          onClick: openCloseCaseModal,
+        } as EuiContextMenuPanelItemDescriptor;
+      }
+
+      return statusActionMenuItem;
+    });
+  }, [openCloseCaseModal, selectedCases, statusAction]);
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -133,7 +163,7 @@ export const useBulkActions = ({
       panelsToBuild.push({
         id: 1,
         title: i18n.STATUS,
-        items: statusAction.getActions(selectedCases),
+        items: statusActions,
       });
 
       panelsToBuild.push({
@@ -152,7 +182,7 @@ export const useBulkActions = ({
     isDisabled,
     selectedCases,
     severityAction,
-    statusAction,
+    statusActions,
     tagsAction,
     assigneesAction,
   ]);
@@ -167,6 +197,7 @@ export const useBulkActions = ({
             onConfirm={deleteAction.onConfirmDeletion}
           />
         ) : null}
+        {closeCaseModal}
       </>
     ),
     flyouts: (

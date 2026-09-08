@@ -35,9 +35,12 @@ jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
 
 const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
 
+const mockParse = () => ({});
+
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -55,6 +58,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but not contained in the input', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -72,6 +76,7 @@ describe('shouldShowStreamsByDefault', () => {
 
   it('should return false if a datastreamId is provided but the input is disabled', () => {
     const res = shouldShowStreamsByDefault(
+      mockParse,
       {} as any,
       [],
       {
@@ -760,7 +765,7 @@ describe('PackagePolicyInputPanel', () => {
       });
     });
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       const simpleStreams: RegistryStreamWithDataStream[] = [
         {
           input: 'logfile',
@@ -814,11 +819,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1074,7 +1076,7 @@ describe('PackagePolicyInputPanel', () => {
       streams: [packagePolicyInput.streams[0]],
     } as NewPackagePolicyInput;
 
-    it('should render title without toggle switch when isSingleInputAndStreams is true', async () => {
+    it('should render toggle switch when isSingleInputAndStreams is true', async () => {
       renderResult = testRenderer.render(
         <PackagePolicyInputPanel
           packageInfo={mockPackageInfo}
@@ -1088,11 +1090,8 @@ describe('PackagePolicyInputPanel', () => {
       );
       await waitFor(() => {
         expect(
-          renderResult.getByTestId('PackagePolicy.InputStreamConfig.title')
+          renderResult.getByTestId('PackagePolicy.InputStreamConfig.Switch')
         ).toBeInTheDocument();
-        expect(
-          renderResult.queryByTestId('PackagePolicy.InputStreamConfig.Switch')
-        ).not.toBeInTheDocument();
       });
     });
 
@@ -1154,6 +1153,38 @@ describe('PackagePolicyInputPanel', () => {
       await waitFor(() => {
         expect(renderResult.getByText('Processors')).toBeInTheDocument();
       });
+    });
+
+    it('should show input config panel when single-stream but input has vars', async () => {
+      const inputWithVars: RegistryInput = {
+        ...mockPackageInput,
+        vars: [
+          {
+            name: 'api_key',
+            type: 'text',
+            title: 'API Key',
+            required: true,
+            show_user: true,
+          },
+        ],
+      };
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={inputWithVars}
+          packageInputStreams={singleStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+          isSingleInputAndStreams={true}
+        />
+      );
+
+      await waitFor(() => {
+        expect(renderResult.getByText('API Key')).toBeInTheDocument();
+      });
+      expect(renderResult.getAllByText('Advanced options')).toHaveLength(2);
     });
   });
 
@@ -1347,6 +1378,279 @@ describe('PackagePolicyInputPanel', () => {
         const lastCall = mockUpdateOtelInput.mock.lastCall?.[0];
         expect(lastCall?.streams?.[0]?.vars).not.toHaveProperty(USE_APM_VAR_NAME);
       });
+    });
+
+    it('hoists the non-GA release badge up to the input header for input-type packages', async () => {
+      const betaOtelStreams: RegistryStreamWithDataStream[] = [
+        {
+          ...otelPackageInputStreams[0],
+          data_stream: {
+            ...otelPackageInputStreams[0].data_stream,
+            release: 'beta',
+          },
+        },
+      ];
+      const otelPolicyInput = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'logs', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {},
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={betaOtelStreams}
+          packagePolicyInput={otelPolicyInput}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Stream-level toggle should not render for input-type packages,
+        // which is why the badge is hoisted up to the input header instead.
+        expect(renderResult.queryByTestId('streamOptions.switch')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Non-GA release badge hoisting', () => {
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    const singleBetaStream: RegistryStreamWithDataStream[] = [
+      {
+        input: 'logfile',
+        title: 'Stream 1',
+        template_path: 'stream.yml.hbs',
+        vars: [
+          {
+            name: 'paths',
+            type: 'text',
+            title: 'Paths',
+            multi: false,
+            required: false,
+            show_user: true,
+          },
+        ],
+        description: 'Test stream',
+        data_stream: {
+          ...mockPackageInputStreams[0].data_stream,
+          release: 'beta',
+        },
+      },
+    ];
+
+    const singleStreamPolicyInput = {
+      ...packagePolicyInput,
+      streams: [packagePolicyInput.streams[0]],
+    } as NewPackagePolicyInput;
+
+    it('hoists the release badge to the input header when there is a single stream', async () => {
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={singleBetaStream}
+          packagePolicyInput={singleStreamPolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+        />
+      );
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Single-stream rows don't render their own toggle, so the badge
+        // would otherwise float alone - here we expect it at the input header.
+        expect(renderResult.queryByTestId('streamOptions.switch')).not.toBeInTheDocument();
+      });
+    });
+
+    it('renders the release badge at the stream row for multi-stream integrations', async () => {
+      const multiStreamsWithBeta: RegistryStreamWithDataStream[] = [
+        {
+          input: 'logfile',
+          title: 'Stream 1',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 1',
+          data_stream: {
+            ...mockPackageInputStreams[0].data_stream,
+            release: 'beta',
+          },
+        },
+        {
+          input: 'logfile',
+          title: 'Stream 2',
+          template_path: 'stream.yml.hbs',
+          vars: [
+            {
+              name: 'paths',
+              type: 'text',
+              title: 'Paths',
+              multi: false,
+              required: false,
+              show_user: true,
+            },
+          ],
+          description: 'Test stream 2',
+          data_stream: {
+            ...mockPackageInputStreams[1].data_stream,
+          },
+        },
+      ];
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={multiStreamsWithBeta}
+          packagePolicyInput={packagePolicyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={inputValidationResults}
+        />
+      );
+      await waitFor(() => {
+        expect(renderResult.getByText('Beta')).toBeInTheDocument();
+        // Multi-stream integrations show per-stream toggles, so the badge
+        // stays at the stream row - no need to hoist.
+        expect(renderResult.getAllByTestId('streamOptions.switch').length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe('condition field gating', () => {
+    const minimalStream: RegistryStreamWithDataStream = {
+      input: 'logfile',
+      title: 'Test stream',
+      template_path: 'stream.yml.hbs',
+      vars: [],
+      description: 'Test stream',
+      data_stream: {
+        title: 'Test',
+        release: 'ga',
+        type: 'logs',
+        package: 'test',
+        dataset: 'test.test',
+        path: 'test',
+        elasticsearch: {},
+        ingest_pipeline: 'default',
+        streams: [],
+      },
+    };
+    const minimalValidationResults = { streams: { 'test.test': { vars: {} } } };
+
+    const renderCondition = (
+      inputOverrides: Partial<NewPackagePolicyInput> = {},
+      panelProps: Partial<{ isAgentless: boolean }> = {}
+    ) => {
+      const policyInput: NewPackagePolicyInput = {
+        type: 'logfile',
+        enabled: true,
+        streams: [{ data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} }],
+        ...inputOverrides,
+      };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={mockPackageInput}
+          packageInputStreams={[minimalStream]}
+          packagePolicyInput={policyInput}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+          {...panelProps}
+        />
+      );
+    };
+
+    beforeEach(() => {
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+    });
+
+    it('shows condition field in advanced options for non-agentless non-otelcol enabled input', async () => {
+      renderCondition();
+      fireEvent.click(renderResult.getByText('Advanced options'));
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyInputConditionInput')).toBeInTheDocument();
+      });
+    });
+
+    it('hides condition field when isAgentless is true', async () => {
+      renderCondition({}, { isAgentless: true });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input type is otelcol', async () => {
+      const otelStream = { ...minimalStream, input: OTEL_COLLECTOR_INPUT_TYPE };
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={mockPackageInfo}
+          packageInput={{ ...mockPackageInput, type: OTEL_COLLECTOR_INPUT_TYPE }}
+          packageInputStreams={[otelStream]}
+          packagePolicyInput={{
+            type: OTEL_COLLECTOR_INPUT_TYPE,
+            enabled: true,
+            streams: [
+              { data_stream: { type: 'logs', dataset: 'test.test' }, enabled: true, vars: {} },
+            ],
+          }}
+          updatePackagePolicyInput={mockUpdatePackagePolicyInput}
+          inputValidationResults={minimalValidationResults}
+        />
+      );
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides condition field when input is disabled', async () => {
+      renderCondition({ enabled: false });
+      expect(
+        renderResult.queryByTestId('packagePolicyInputConditionInput')
+      ).not.toBeInTheDocument();
     });
   });
 });

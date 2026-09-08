@@ -15,6 +15,7 @@ import React, { useCallback, useMemo } from 'react';
 import * as i18n from '../../components/alerts_table/translations';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import {
+  RUN_WORKFLOWS_PANEL_WIDTH,
   AlertWorkflowsPanel,
   RUN_WORKFLOW_BULK_PANEL_ID,
 } from '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
@@ -66,6 +67,7 @@ export const useBulkRunAlertWorkflowPanel = (): UseBulkRunAlertWorkflowPanelResu
               id: RUN_WORKFLOW_BULK_PANEL_ID,
               title: i18n.SELECT_WORKFLOW_PANEL_TITLE,
               'data-test-subj': 'bulk-alert-workflow-context-menu-panel',
+              width: RUN_WORKFLOWS_PANEL_WIDTH,
               renderContent,
             },
           ]

@@ -16,9 +16,9 @@ import { EuiIconLegend } from '@kbn/chart-icons';
 const typeToIconMap: { [type: string]: string | IconType } = {
   legend: EuiIconLegend as IconType,
   values: 'number',
-  list: 'list',
+  list: 'listBullet',
   visualOptions: 'brush',
-  titlesAndText: 'visText',
+  titlesAndText: 'text',
 };
 
 export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {

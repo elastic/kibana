@@ -7,9 +7,9 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import {
   getSAMLRequestId,
   getSAMLResponse,
@@ -61,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', findSessionCookie(handshakeResponse.headers['set-cookie']).cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = findSessionCookie(authenticationResponse.headers['set-cookie']);
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
     return cookie;
   }
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await es.indices.refresh({ index: '.kibana_security_session*' });
 
-      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = findSessionCookie(response.headers['set-cookie']);
       await checkSessionCookie(sessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await es.indices.refresh({ index: '.kibana_security_session*' });
 
-      const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      const basicSessionCookie = findSessionCookie(response.headers['set-cookie']);
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',

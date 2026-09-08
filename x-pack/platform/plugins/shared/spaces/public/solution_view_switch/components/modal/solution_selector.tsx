@@ -34,7 +34,7 @@ export const SolutionSelector = ({ selectedSolution, onSolutionChange }: Solutio
   return (
     <EuiFormRow
       label={i18n.translate('xpack.spaces.solutionViewSwitch.modal.solutionLabel', {
-        defaultMessage: 'Switch to solution view',
+        defaultMessage: 'Select solution view',
       })}
       fullWidth
     >

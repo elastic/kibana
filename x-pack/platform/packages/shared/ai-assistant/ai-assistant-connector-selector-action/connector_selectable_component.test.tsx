@@ -137,12 +137,12 @@ describe('ConnectorSelectableComponent', () => {
     it('renders panel with correct initial selection', async () => {
       renderComponent(defaultProps);
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-selected', 'false');
     });
 
     it('renders panel with correct selection change', async () => {
@@ -165,12 +165,12 @@ describe('ConnectorSelectableComponent', () => {
 
       act(() => screen.queryByTestId('connector1')?.click());
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-selected', 'false');
 
       expect(onValueChange).toHaveBeenCalledTimes(1);
       expect(onValueChange).toHaveBeenCalledWith(
@@ -199,21 +199,21 @@ describe('ConnectorSelectableComponent', () => {
         wrapper: EuiThemeProvider,
       });
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-selected', 'false');
 
       act(() => screen.queryByTestId('connector1')?.click());
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector3')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector3')).toHaveAttribute('aria-selected', 'false');
 
       expect(onValueChange).toHaveBeenCalledTimes(1);
       expect(onValueChange).toHaveBeenCalledWith(
@@ -247,10 +247,10 @@ describe('ConnectorSelectableComponent', () => {
     it('sets initial selection from defaultValue without firing callbacks', () => {
       renderComponent({ ...baseProps, defaultValue: '2', onValueChange });
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'true');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
 
       expect(onValueChange).not.toHaveBeenCalled();
     });
@@ -258,10 +258,10 @@ describe('ConnectorSelectableComponent', () => {
     it('has no initial selection when defaultValue is not provided', () => {
       renderComponent({ ...baseProps });
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-checked', 'false');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('customConnector2')).toHaveAttribute('aria-selected', 'false');
     });
 
     it('updates selection and fires callbacks on user change', () => {
@@ -269,8 +269,8 @@ describe('ConnectorSelectableComponent', () => {
 
       act(() => screen.queryByTestId('connector2')?.click());
 
-      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-checked', 'false');
-      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-checked', 'true');
+      expect(screen.queryByTestId('connector1')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByTestId('connector2')).toHaveAttribute('aria-selected', 'true');
 
       expect(onValueChange).toHaveBeenCalledTimes(1);
       expect(onValueChange).toHaveBeenCalledWith(

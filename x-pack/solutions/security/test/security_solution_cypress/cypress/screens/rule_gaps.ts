@@ -12,6 +12,7 @@ export const LAST_RESPONSE_SUMMARY_TABLE = '[data-test-subj="last-response-summa
 export const RULE_GAP_SUMMARY_CHART = '[data-test-subj="rule-gap-summary-chart"]';
 export const RULE_GAP_SUMMARY_TABLE = '[data-test-subj="rule-gap-summary-table"]';
 export const GAP_AUTO_FILL_STATUS_BADGE = '[data-test-subj="gap-auto-fill-status-badge"]';
+export const RULE_SETTINGS_BUTTON = '[data-test-subj="rules-settings-button"]';
 export const RULE_SETTINGS_MODAL = '[data-test-subj="rule-settings-modal"]';
 export const RULE_SETTINGS_ENABLE_SWITCH = '[data-test-subj="rule-settings-enable-switch"]';
 export const RULE_SETTINGS_SAVE_BUTTON = '[data-test-subj="rule-settings-save"]';

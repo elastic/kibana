@@ -8,9 +8,9 @@
  */
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getBreakdownField } from '@kbn/discover-utils';
 import { useServicesBootstrap } from './use_services_bootstrap';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { getBreakdownField } from '../utils/local_storage_utils';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
@@ -18,7 +18,10 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
-jest.mock('../utils/local_storage_utils');
+jest.mock('@kbn/discover-utils', () => ({
+  ...jest.requireActual('@kbn/discover-utils/src/constants'),
+  getBreakdownField: jest.fn(),
+}));
 
 const createStateServiceMock = createStateService as jest.MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as jest.MockedFunction<typeof useStateProps>;
@@ -50,9 +53,9 @@ describe('useServicesBootstrap', () => {
       )
     );
 
-    expect(createStateServiceMock).toBeCalledTimes(1);
-    expect(getBreakdownFieldMock).toBeCalledTimes(1);
-    expect(useStatePropsMock).toBeCalledTimes(1);
+    expect(createStateServiceMock).toHaveBeenCalledTimes(1);
+    expect(getBreakdownFieldMock).toHaveBeenCalledTimes(1);
+    expect(useStatePropsMock).toHaveBeenCalledTimes(1);
 
     expect(hook.result.current.api).not.toBeUndefined();
     expect(hook.result.current.fetch$).not.toBeUndefined();
@@ -65,7 +68,7 @@ describe('useServicesBootstrap', () => {
     const subscriber = jest.fn();
     hook.result.current.fetch$.subscribe(subscriber);
 
-    expect(subscriber).toBeCalledTimes(0);
+    expect(subscriber).toHaveBeenCalledTimes(0);
 
     const fetchParamsExternal: UnifiedHistogramFetchParamsExternal = {
       searchSessionId: 'test-session',
@@ -91,8 +94,8 @@ describe('useServicesBootstrap', () => {
     );
     expect(hook.result.current.lensVisService).toBeDefined();
     expect(hook.result.current.lensVisServiceState).toBeDefined();
-    expect(subscriber).toBeCalledTimes(1);
-    expect(subscriber).toBeCalledWith({
+    expect(subscriber).toHaveBeenCalledTimes(1);
+    expect(subscriber).toHaveBeenCalledWith({
       fetchParams: hook.result.current.fetchParams,
       lensVisServiceState: hook.result.current.lensVisServiceState,
     });

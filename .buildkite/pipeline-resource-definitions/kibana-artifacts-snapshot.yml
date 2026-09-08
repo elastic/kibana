@@ -19,12 +19,17 @@ spec:
       description: Kibana snapshot artifact builds
     spec:
       env:
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: true
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts.yml
+      initial_step_plugins:
+        - sparse-checkout#v1.6.0:
+            paths:
+              - .buildkite/pipelines/artifacts.yml
+            cleanup_sparse_state: true
       provider_settings:
         build_branches: false
         build_pull_requests: false

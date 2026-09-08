@@ -26,8 +26,15 @@
       "min_score": "",
       "preference": "",
       "routing": [],
+      "stats": [],
+      "_slice": "",
       "terminate_after": "",
       "q": ""
+    },
+    "data_autocomplete_rules": {
+      "query": {
+        "__scope_link": "GLOBAL.query"
+      }
     },
     "methods": [
       "POST",

@@ -61,7 +61,7 @@ export function getCastingTypesSuggestions(typeBeingCasted?: SupportedDataType):
   if (typeBeingCasted) {
     Object.entries(inlineCastsMapping).forEach(([castingType, fnName]) => {
       const castFunctionDef = getFunctionDefinition(fnName);
-      if (!castFunctionDef) {
+      if (!castFunctionDef || castFunctionDef.signatures.length === 0) {
         return;
       }
 

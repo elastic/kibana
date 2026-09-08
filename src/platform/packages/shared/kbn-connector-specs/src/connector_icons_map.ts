@@ -47,6 +47,14 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.bigquery',
+    lazy(() => import(/* webpackChunkName: "connectorIconBigQuery" */ './specs/bigquery/icon')),
+  ],
+  [
+    '.censys',
+    lazy(() => import(/* webpackChunkName: "connectorIconCensys" */ './specs/censys/icon')),
+  ],
+  [
     '.github',
     lazy(() => import(/* webpackChunkName: "connectorIconGithub" */ './specs/github/icon')),
   ],
@@ -90,6 +98,10 @@ export const ConnectorIconsMap: Map<
         import(/* webpackChunkName: "connectorIconJiraCloud" */ './specs/atlassian/jira-cloud/icon')
     ),
   ],
+  [
+    '.databricks',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatabricks" */ './specs/databricks/icon')),
+  ],
   ['.figma', lazy(() => import(/* webpackChunkName: "connectorIconFigma" */ './specs/figma/icon'))],
   [
     '.confluence-cloud',
@@ -101,16 +113,30 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.google_docs',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconGoogleDocs" */ './specs/google_docs/icon')
+    ),
+  ],
+  [
     '.google_drive',
     lazy(
       () => import(/* webpackChunkName: "connectorIconGoogleDrive" */ './specs/google_drive/icon')
     ),
   ],
   [
+    '.graphql',
+    lazy(() => import(/* webpackChunkName: "connectorIconGraphQL" */ './specs/graphql/icon')),
+  ],
+  [
     '.slack2',
     lazy(() => import(/* webpackChunkName: "connectorIconSlack2" */ './specs/slack/icon')),
   ],
   ['.gmail', lazy(() => import(/* webpackChunkName: "connectorIconGmail" */ './specs/gmail/icon'))],
+  [
+    '.azure-blob',
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureBlob" */ './specs/azure_blob/icon')),
+  ],
   [
     '.firecrawl',
     lazy(() => import(/* webpackChunkName: "connectorIconFirecrawl" */ './specs/firecrawl/icon')),
@@ -151,10 +177,18 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconAwsLambda" */ './specs/aws_lambda/icon')),
   ],
   [
+    '.gcp_cloud_functions',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpCloudFunctions" */ './specs/gcp_cloud_functions/icon'
+        )
+    ),
+  ],
+  [
     '.amazon_s3',
     lazy(() => import(/* webpackChunkName: "connectorIconAmazons3" */ './specs/amazon_s3/icon')),
   ],
-
   [
     '.sharepoint-server',
     lazy(
@@ -165,6 +199,10 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.hubspot',
+    lazy(() => import(/* webpackChunkName: "connectorIconHubspot" */ './specs/hubspot/icon')),
+  ],
+  [
     '.microsoft-teams',
     lazy(
       () =>
@@ -172,11 +210,181 @@ export const ConnectorIconsMap: Map<
     ),
   ],
   [
+    '.outlook',
+    lazy(() => import(/* webpackChunkName: "connectorIconOutlook" */ './specs/outlook/icon')),
+  ],
+  [
     '.google_cloud_storage',
     lazy(
       () =>
         import(
           /* webpackChunkName: "connectorIconGoogleCloudStorage" */ './specs/google_cloud_storage/icon'
+        )
+    ),
+  ],
+  [
+    '.snowflake',
+    lazy(() => import(/* webpackChunkName: "connectorIconsnowflake" */ './specs/snowflake/icon')),
+  ],
+
+  ['.box', lazy(() => import(/* webpackChunkName: "connectorIconbox" */ './specs/box/icon'))],
+
+  [
+    '.dropbox',
+    lazy(() => import(/* webpackChunkName: "connectorIcondropbox" */ './specs/dropbox/icon')),
+  ],
+  [
+    '.one_drive',
+    lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
+  ],
+  [
+    '.ansible_controller',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon'
+        )
+    ),
+  ],
+  [
+    '.argocd',
+    lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
+  ],
+  [
+    '.monday_com',
+    lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
+  ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
+
+  [
+    '.trello',
+    lazy(() => import(/* webpackChunkName: "connectorIcontrello" */ './specs/trello/icon')),
+  ],
+  [
+    '.workday',
+    lazy(() => import(/* webpackChunkName: "connectorIconWorkday" */ './specs/workday/icon')),
+  ],
+  [
+    '.kubernetes',
+    lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
+  [
+    '.posthog',
+    lazy(() => import(/* webpackChunkName: "connectorIconposthog" */ './specs/posthog/icon')),
+  ],
+  [
+    '.new_relic',
+    lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
+  ],
+  [
+    '.grafana',
+    lazy(() => import(/* webpackChunkName: "connectorIconGrafana" */ './specs/grafana/icon')),
+  ],
+  [
+    '.rootly',
+    lazy(() => import(/* webpackChunkName: "connectorIconRootly" */ './specs/rootly/icon')),
+  ],
+  [
+    '.sentry',
+    lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
+  ],
+  [
+    '.buildkite',
+    lazy(() => import(/* webpackChunkName: "connectorIconBuildkite" */ './specs/buildkite/icon')),
+  ],
+  [
+    '.dynatrace',
+    lazy(() => import(/* webpackChunkName: "connectorIconDynatrace" */ './specs/dynatrace/icon')),
+  ],
+  [
+    '.datadog',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
+  ],
+  [
+    '.jenkins',
+    lazy(() => import(/* webpackChunkName: "connectorIconjenkins" */ './specs/jenkins/icon')),
+  ],
+  [
+    '.azure_monitor',
+    lazy(
+      () => import(/* webpackChunkName: "connectorIconazuremonitor" */ './specs/azure_monitor/icon')
+    ),
+  ],
+  [
+    '.aws_cloudwatch',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconawscloudwatch" */ './specs/aws_cloudwatch/icon')
+    ),
+  ],
+  [
+    '.aws_x_ray',
+    lazy(() => import(/* webpackChunkName: "connectorIconawsxray" */ './specs/aws_x_ray/icon')),
+  ],
+  [
+    '.prometheus',
+    lazy(() => import(/* webpackChunkName: "connectorIconPrometheus" */ './specs/prometheus/icon')),
+  ],
+
+  [
+    '.google_cloud_monitoring',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIcongooglecloudmonitoring" */ './specs/google_cloud_monitoring/icon'
+        )
+    ),
+  ],
+
+  [
+    '.opensearch_aws_opensearch_service',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconopensearchawsopensearchservice" */ './specs/opensearch_aws_opensearch_service/icon'
+        )
+    ),
+  ],
+  [
+    '.zabbix',
+    lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
+  ],
+
+  ['.okta', lazy(() => import(/* webpackChunkName: "connectorIconOkta" */ './specs/okta/icon'))],
+  [
+    '.gcp_iam',
+    lazy(() => import(/* webpackChunkName: "connectorIconGcpIam" */ './specs/gcp_iam/icon')),
+  ],
+  [
+    '.gcp_secret_manager',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGcpSecretManager" */ './specs/gcp_secret_manager/icon'
+        )
+    ),
+  ],
+  ['.unifi', lazy(() => import(/* webpackChunkName: "connectorIconUnifi" */ './specs/unifi/icon'))],
+  [
+    '.urlscan_io',
+    lazy(() => import(/* webpackChunkName: "connectorIconUrlscanIo" */ './specs/urlscan_io/icon')),
+  ],
+  ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
+
+  [
+    '.google_threat_intelligence',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
         )
     ),
   ],

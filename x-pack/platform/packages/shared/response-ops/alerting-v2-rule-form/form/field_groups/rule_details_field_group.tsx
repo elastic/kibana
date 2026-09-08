@@ -6,12 +6,14 @@
  */
 
 import React from 'react';
+import { NameField } from '../fields/name_field';
 import { TagsField } from '../fields/tags_field';
 import { DescriptionField } from '../fields/description_field';
 
 export const RuleDetailsFieldGroup = () => {
   return (
     <>
+      <NameField />
       <TagsField />
       <DescriptionField />
     </>

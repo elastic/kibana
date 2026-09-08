@@ -7,17 +7,15 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { EisInferenceEndpoint } from '../../../common/types';
 
 import { ModelEndpointRow } from './model_endpoint_row';
 
-const createEndpoint = (
-  overrides: Partial<InferenceAPIConfigResponse> = {}
-): InferenceAPIConfigResponse => ({
+const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInferenceEndpoint => ({
   inference_id: 'my-endpoint',
   task_type: 'text_embedding',
   service: 'elastic',
-  service_settings: {},
+  service_settings: { model_id: 'test-model' },
   ...overrides,
 });
 
@@ -59,6 +57,23 @@ describe('ModelEndpointRow', () => {
     );
 
     expect(screen.getByLabelText('Preconfigured endpoint')).toBeInTheDocument();
+  });
+
+  it('associates preconfigured tooltip text with the focusable trigger for screen readers', () => {
+    render(
+      <ModelEndpointRow
+        endpoint={createEndpoint({ inference_id: '.elser-endpoint' })}
+        onView={onView}
+        onCopy={onCopy}
+      />
+    );
+
+    const trigger = screen.getByLabelText('Preconfigured endpoint');
+    const tooltipText = screen.getByText(
+      'Preconfigured endpoints are system generated and can not be edited'
+    );
+
+    expect(trigger).toHaveAttribute('aria-describedby', tooltipText.getAttribute('id'));
   });
 
   it('does not show lock icon for user-defined endpoints', () => {

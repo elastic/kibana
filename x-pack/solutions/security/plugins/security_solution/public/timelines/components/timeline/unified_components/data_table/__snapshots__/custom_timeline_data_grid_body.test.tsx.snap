@@ -66,17 +66,16 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
           style="height: 0px; width: 100%;"
         >
           <div
+            aria-rowindex="2"
             css="[object Object]"
             role="row"
             style="position: absolute; left: 0px; top: 0px; height: 0px; width: 100%;"
           >
             <div
               class="euiDataGridRow "
-              role="row"
             >
               <div
                 class="c1 rawEvent rowCellWrapper rawEvent"
-                role="row"
               >
                 <div>
                   Cell-0-0
@@ -94,17 +93,16 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
             </div>
           </div>
           <div
+            aria-rowindex="3"
             css="[object Object]"
             role="row"
             style="position: absolute; left: 0px; top: 0px; height: 0px; width: 100%;"
           >
             <div
               class="euiDataGridRow--striped euiDataGridRow euiDataGridRow--striped"
-              role="row"
             >
               <div
                 class="c1 rawEvent rowCellWrapper rawEvent"
-                role="row"
               >
                 <div>
                   Cell-1-0

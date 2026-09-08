@@ -7,8 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
-import type { StepStabilityLevel } from '@kbn/workflows';
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
+import type { StabilityLevel } from '@kbn/workflows';
+
+export interface EditorCommand {
+  id: string;
+  label: string;
+  iconType: IconType;
+  description?: string;
+  shortcut?: string[];
+}
+
+export type IconVariant =
+  | 'trigger'
+  | 'platform'
+  | 'external'
+  | 'flowControl'
+  | 'neutral'
+  | 'dataTransformation';
+
+export interface JumpToStepEntry {
+  id: string;
+  label: string;
+  lineStart: number;
+  yaml?: string;
+}
+
+export type MenuItemData =
+  | { kind: 'action'; action: ActionOptionData }
+  | { kind: 'command'; command: EditorCommand }
+  | { kind: 'jump'; entry: JumpToStepEntry }
+  | { kind: 'nav'; target: 'viewAll' | 'viewExisting' };
+
+/** Reads menu data before or after EuiSelectable expands the `data` property. */
+export type MenuSelectableOption = EuiSelectableOption & {
+  data?: { menuItem: MenuItemData };
+};
+
+export const getMenuItemData = (option: EuiSelectableOption): MenuItemData | undefined => {
+  const o = option as unknown as Record<string, unknown>;
+  return (
+    (o.menuItem as MenuItemData | undefined) ??
+    ((o.data as Record<string, unknown> | undefined)?.menuItem as MenuItemData | undefined)
+  );
+};
 
 interface ActionBase {
   id: string;
@@ -16,12 +58,19 @@ interface ActionBase {
   description?: string;
   instancesLabel?: string;
   iconColor?: string;
-  stability?: StepStabilityLevel;
+  iconVariant?: IconVariant;
+  stability?: StabilityLevel;
+  /**
+   * Ids from the root menu down through this row (for groups: path to open this group).
+   * Set in `getActionOptions` for O(1) navigation when selecting from search.
+   */
+  pathIds?: readonly string[];
 }
 
 export interface ActionGroup extends ActionBase {
   iconType: IconType;
   options: ActionOptionData[];
+  nestedGroups?: ActionGroup[];
 }
 
 export interface ActionConnectorGroup extends ActionBase {

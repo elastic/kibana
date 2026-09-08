@@ -5,39 +5,62 @@
  * 2.0.
  */
 
-import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
+  CreateRuleData,
+  DryRunResponse,
+  FindRulesResponse,
+  FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { RuleSavedObjectAttributes } from '../../saved_objects';
 
 /** Re-exported from the shared schemas package. */
-export type { CreateRuleData, UpdateRuleData, RuleResponse };
+export type {
+  BulkByIdsParams,
+  BulkByQueryParams,
+  BulkByQueryResult,
+  BulkResponse,
+  CreateRuleData,
+  DryRunResponse,
+  FindRulesResponse,
+  FindRulesSortField,
+  RuleResponse,
+  UpdateRuleData,
+};
+
+export type BulkOperationError = BulkResponse['errors'][number];
+
+/** An enabled rule whose executor task API key is a candidate for rotation. */
+export interface RotationCandidate {
+  id: string;
+  taskId: string;
+  attrs: RuleSavedObjectAttributes;
+  version?: string;
+  references: SavedObjectReference[];
+}
 
 export interface CreateRuleParams {
   data: CreateRuleData;
   options?: { id?: string };
 }
-export interface FindRulesParams {
+
+export interface FindRulesArgs {
   page?: number;
   perPage?: number;
   filter?: string;
   search?: string;
+  sortField?: FindRulesSortField;
+  sortOrder?: 'asc' | 'desc';
 }
 
-export interface FindRulesResponse {
-  items: RuleResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-}
-
-export type BulkRulesParams =
-  | { ids: string[]; filter?: undefined }
-  | { filter: string; ids?: undefined };
-
-export interface BulkOperationError {
+export interface UpdateRuleParams {
   id: string;
-  error: { message: string; statusCode: number };
-}
-
-export interface BulkOperationResponse {
-  rules: RuleResponse[];
-  errors: BulkOperationError[];
+  data: UpdateRuleData;
+  options?: { version?: string };
 }

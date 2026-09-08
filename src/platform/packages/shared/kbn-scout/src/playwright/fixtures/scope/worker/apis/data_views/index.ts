@@ -10,20 +10,37 @@
 import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 import type {
+  CreateDataViewParams,
   DataView,
   DataViewApiResponse,
   DataViewStatusResponse,
   GetDataViewsResponse,
   GetDataViewResponse,
+  UpdateDataViewParams,
 } from './types';
 
-export type { DataView } from './types';
+export type { CreateDataViewParams, DataView, UpdateDataViewParams } from './types';
 
 /**
  * Data Views API Service
  * Provides methods to interact with Kibana's Data Views API
  */
 export interface DataViewsApiService {
+  /**
+   * Create a new data view
+   * @param params - Data view properties (title is required, other fields are optional)
+   * @returns Promise with the created data view and status
+   */
+  create: (params: CreateDataViewParams) => Promise<DataViewApiResponse<DataView>>;
+
+  /**
+   * Update an existing data view by ID
+   * @param id - The data view ID to update
+   * @param params - Fields to update on the data view
+   * @returns Promise with the updated data view and status
+   */
+  update: (id: string, params: UpdateDataViewParams) => Promise<DataViewApiResponse<DataView>>;
+
   /**
    * Get all data views
    * @returns Promise with array of data views and status
@@ -85,6 +102,53 @@ export const getDataViewsApiHelper = (
   const withSpace = (path: string, spaceId?: string) => (spaceId ? `/s/${spaceId}${path}` : path);
 
   return {
+    create: async (params: CreateDataViewParams) => {
+      const { override, spaceId, ...dataViewFields } = params;
+
+      return await measurePerformanceAsync(
+        log,
+        'dataViewsApi.create',
+        async (): Promise<DataViewApiResponse<DataView>> => {
+          const response = await kbnClient.request<GetDataViewResponse>({
+            method: 'POST',
+            path: withSpace('/api/data_views/data_view', spaceId),
+            body: {
+              ...(override ? { override: true } : {}),
+              data_view: dataViewFields,
+            },
+          });
+
+          return {
+            data: response.data.data_view,
+            status: response.status,
+          };
+        }
+      );
+    },
+
+    update: async (id: string, params: UpdateDataViewParams) => {
+      const { spaceId, ...dataViewFields } = params;
+
+      return await measurePerformanceAsync(
+        log,
+        'dataViewsApi.update',
+        async (): Promise<DataViewApiResponse<DataView>> => {
+          const response = await kbnClient.request<GetDataViewResponse>({
+            method: 'POST',
+            path: withSpace(`/api/data_views/data_view/${id}`, spaceId),
+            body: {
+              data_view: dataViewFields,
+            },
+          });
+
+          return {
+            data: response.data.data_view,
+            status: response.status,
+          };
+        }
+      );
+    },
+
     getAll: async (spaceId?: string) => {
       return await measurePerformanceAsync(
         log,

@@ -66,7 +66,7 @@ export function CalendarPeriodPicker({
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
         onClick={() => handlePrevious()}
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
           defaultMessage: 'Previous',
@@ -88,7 +88,7 @@ export function CalendarPeriodPicker({
           size="s"
           data-test-subj="sloSloDetailsHistoryNextButton"
           onClick={() => handleNext()}
-          iconType="arrowRight"
+          iconType="chevronSingleRight"
           iconSide="right"
         >
           {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {

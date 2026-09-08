@@ -8,6 +8,8 @@
 import { EuiPanel, EuiTitle, EuiIconTip, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
@@ -26,6 +28,9 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getThroughputScreenContext } from './get_throughput_screen_context';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
+import { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { OpenAnomalies } from '../../../shared/links/machine_learning_links/open_anomalies';
+import { useAnomalyThreshold } from '../../../../hooks/use_anomaly_threshold';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -47,6 +52,8 @@ export function ServiceOverviewThroughputChart({
 
   const { environment } = useEnvironmentsContext();
 
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
+  const { anomalyThreshold } = useAnomalyThreshold();
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     AnomalyDetectorType.txThroughput
   );
@@ -184,24 +191,41 @@ export function ServiceOverviewThroughputChart({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <OpenInDiscover
-            dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
-            variant="iconButton"
-            label={i18n.translate('xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover', {
-              defaultMessage: 'Open traces in Discover',
-            })}
-            indexType="traces"
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            queryParams={{
-              kuery,
-              serviceName,
-              environment,
-              transactionName,
-              transactionType,
-              sortDirection: 'DESC',
-            }}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <OpenAnomalies
+                dataTestSubj="apmServiceOverviewThroughputChartOpenAnomalies"
+                mlJobId={preferredAnomalyTimeseries?.jobId}
+                detectorType={AnomalyDetectorType.txThroughput}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <OpenInDiscover
+                dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+                variant="iconButton"
+                label={i18n.translate(
+                  'xpack.apm.serviceOverviewThroughputChart.openTracesInDiscover',
+                  {
+                    defaultMessage: 'Open traces in Discover',
+                  }
+                )}
+                indexType="traces"
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                queryParams={{
+                  kuery,
+                  serviceName,
+                  environment,
+                  transactionName,
+                  transactionType,
+                  sortDirection: 'DESC',
+                }}
+                ebt={{
+                  element: APM_CHART_EBT_ELEMENTS.THROUGHPUT,
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -214,13 +238,14 @@ export function ServiceOverviewThroughputChart({
         yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
         anomalyTimeseries={
-          preferredAnomalyTimeseries
+          shouldShowAnomalyUi && !!preferredAnomalyTimeseries
             ? {
                 ...preferredAnomalyTimeseries,
                 color: previousPeriodColor,
               }
             : undefined
         }
+        anomalyThreshold={anomalyThreshold}
       />
     </EuiPanel>
   );

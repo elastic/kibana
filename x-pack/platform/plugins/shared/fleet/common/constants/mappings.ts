@@ -106,9 +106,6 @@ export const AGENT_MAPPINGS = {
         },
       },
     },
-    default_api_key: {
-      type: 'keyword',
-    },
     default_api_key_id: {
       type: 'keyword',
     },
@@ -281,6 +278,9 @@ export const AGENT_MAPPINGS = {
     policy_id: {
       type: 'keyword',
     },
+    policy_base_id: {
+      type: 'keyword',
+    },
     policy_revision_idx: {
       type: 'integer',
     },
@@ -440,6 +440,48 @@ export const AGENT_MAPPINGS = {
             },
           },
         },
+        elastic: {
+          properties: {
+            display: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+            collector: {
+              properties: {
+                group: {
+                  type: 'keyword',
+                },
+                group_name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+        config: {
+          properties: {
+            description: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        deployment: {
+          properties: {
+            environment: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
       },
     },
     host: {
@@ -459,6 +501,48 @@ export const AGENT_MAPPINGS = {
         },
         description: {
           type: 'keyword',
+        },
+      },
+    },
+    elastic: {
+      properties: {
+        display: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        collector: {
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            group_name: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    config: {
+      properties: {
+        description: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+    deployment: {
+      properties: {
+        environment: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
         },
       },
     },

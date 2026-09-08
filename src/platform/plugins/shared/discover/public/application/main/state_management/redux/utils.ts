@@ -121,7 +121,24 @@ export const parseControlGroupJson = (
   jsonString?: string | null
 ): ControlPanelsState<OptionsListESQLControlState> => {
   try {
-    return jsonString ? JSON.parse(jsonString) : {};
+    if (!jsonString) {
+      return {};
+    }
+
+    const controlGroup = JSON.parse(jsonString) as ControlPanelsState<OptionsListESQLControlState>;
+
+    if (!isObject(controlGroup)) {
+      return {};
+    }
+
+    for (const panel of Object.values(controlGroup)) {
+      // Migrate legacy control type if necessary
+      if (panel.type === 'esqlControl') {
+        panel.type = ESQL_CONTROL;
+      }
+    }
+
+    return controlGroup;
   } catch (e) {
     return {};
   }

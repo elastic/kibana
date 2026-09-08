@@ -36,6 +36,23 @@ test.each([
       required: ['key1'],
     },
   ],
+  [
+    schema.object({
+      requiredField: schema.string(),
+      nullableField: schema.nullable(schema.string()),
+    }),
+    {
+      type: 'object',
+      properties: {
+        requiredField: { type: 'string' },
+        nullableField: {
+          anyOf: [{ type: 'string' }, { enum: [null], nullable: true, anyOf: [] }],
+        },
+      },
+      additionalProperties: false,
+      required: ['requiredField'],
+    },
+  ],
 ])('processObject %#', (input, result) => {
   const parsed = joi2JsonInternal(input.getSchema());
   processObject(parsed);

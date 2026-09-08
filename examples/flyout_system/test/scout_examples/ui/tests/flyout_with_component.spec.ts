@@ -14,6 +14,9 @@ test.describe('Flyout System - EuiFlyout component', { tag: ['@local-stateful-cl
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsViewer();
     await page.gotoApp('flyoutSystemExamples');
+    // Wait for the app to be fully rendered before any test interacts with it.
+    // gotoApp() only waits for navigation, not for React to mount and paint.
+    await expect(page.testSubj.locator('flyoutTypeSwitch-Session J')).toBeVisible();
   });
 
   test('Session J: open main flyout, open child flyout A, both remain visible', async ({

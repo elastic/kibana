@@ -202,7 +202,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
   });
 
-  test('should pass undefined projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
+  test('should not pass projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
     getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
     await act(async () => {
@@ -237,7 +237,11 @@ describe('EsqlQueryRuleTypeExpression', () => {
       expect.objectContaining({
         pattern: '*',
         allowNoIndex: true,
-        projectRouting: undefined,
+      })
+    );
+    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        projectRouting: expect.anything(),
       })
     );
   });
@@ -340,7 +344,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query matched 1 documents in the last 15s.')).toBeInTheDocument();
@@ -384,7 +388,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query returned 1 rows in the last 15s.')).toBeInTheDocument();
@@ -419,7 +423,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
 
     fireEvent.click(result.getByTestId('testQuery'));
-    await waitFor(() => expect(getESQLResults).toBeCalled());
+    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
 
     expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(result.getByTestId('testQueryError')).toBeInTheDocument();

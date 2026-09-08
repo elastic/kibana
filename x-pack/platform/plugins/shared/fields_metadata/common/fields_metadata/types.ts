@@ -15,6 +15,7 @@ export const fieldSourceRT = rt.keyof({
   integration: null,
   metadata: null,
   otel: null,
+  streams: null,
   unknown: null,
 });
 

@@ -9,7 +9,13 @@
 
 // TODO: This cannot be imported until Kibana supports ESM
 // import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
-const KIBANA_SOLUTIONS = ['observability', 'security', 'search', 'workplaceai'] as const;
+const KIBANA_SOLUTIONS = [
+  'observability',
+  'security',
+  'search',
+  'workplaceai',
+  'vectordb',
+] as const;
 
 export const aggregationGroups: string[] = [
   ...KIBANA_SOLUTIONS.flatMap((solution) => [

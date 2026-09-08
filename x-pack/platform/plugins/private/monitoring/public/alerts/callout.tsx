@@ -49,7 +49,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
       <div>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" size="m" color="danger" />
+            <EuiIcon type="warning" size="m" color="danger" aria-hidden={true} />
           </EuiFlexItem>
 
           <EuiFlexItem>
@@ -80,10 +80,7 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
           </EuiCodeBlock>
         ) : null}
         <EuiListGroup
-          flush={true}
           bordered={true}
-          gutterSize="m"
-          size="xs"
           style={{
             marginTop: '0.5rem',
             paddingTop: '0.5rem',

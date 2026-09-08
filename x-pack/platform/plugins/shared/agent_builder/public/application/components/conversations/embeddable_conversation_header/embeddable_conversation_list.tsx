@@ -9,14 +9,18 @@ import React, { useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiTextTruncate,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
+import { useInfiniteScroll } from '../../../hooks/use_infinite_scroll';
 import {
   createConversationListItemStyles,
   createActiveConversationListItemStyles,
@@ -33,9 +37,17 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   onClose,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { agentId, conversationId, setConversationId } = useConversationContext();
-  const { removeError } = useSendMessage();
-  const { conversations = [], isLoading } = useConversationList({ agentId });
+  const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
+  const { removeAllErrors } = useStreamingContext();
+  const { conversationTemplatesService } = useAgentBuilderServices();
+  const {
+    conversations = [],
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useConversationList({ agentId });
+  const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
 
   const sortedConversations = useMemo(
     () =>
@@ -83,17 +95,51 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
             <button
               css={isActive ? activeItemStyles : itemStyles}
               onClick={() => {
-                removeError();
+                removeAllErrors();
+                if (!isActive) {
+                  resetAttachments?.();
+                }
                 setConversationId?.(conversation.id);
                 onClose();
               }}
               data-test-subj={`agentBuilderEmbeddableConversation-${conversation.id}`}
             >
-              <EuiTextTruncate text={conversation.title || conversation.id} />
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={getConversationTemplateIcon(
+                      conversationTemplatesService,
+                      conversation.template_id
+                    )}
+                    size="s"
+                    aria-hidden={true}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem
+                  css={css`
+                    min-width: 0;
+                  `}
+                >
+                  <EuiTextTruncate text={conversation.title || conversation.id} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </button>
           </EuiFlexItem>
         );
       })}
+
+      <EuiFlexItem grow={false}>
+        <div ref={sentinelRef} data-test-subj="agentBuilderEmbeddableConversationsScrollSentinel" />
+      </EuiFlexItem>
+      {isFetchingNextPage && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="center" gutterSize="none">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="s" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

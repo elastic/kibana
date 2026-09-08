@@ -11,9 +11,12 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiTitle,
   EuiSplitPanel,
+  EuiToolTip,
   useGeneratedHtmlId,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useRuleFormMeta } from '../contexts';
@@ -94,20 +97,24 @@ export const FieldGroup = (props: FieldGroupProps) => {
       : { initialIsOpen: true };
 
     return (
-      <EuiAccordion
-        id={id}
-        buttonContent={
-          <EuiTitle size="xxs">
-            <h3>
-              <strong>{title}</strong>
-            </h3>
-          </EuiTitle>
-        }
-        paddingSize="s"
-        {...accordionProps}
-      >
-        {children}
-      </EuiAccordion>
+      <>
+        <EuiAccordion
+          id={id}
+          buttonContent={
+            <EuiTitle size="xxs">
+              <h3>
+                <strong>{title}</strong>
+              </h3>
+            </EuiTitle>
+          }
+          paddingSize="s"
+          {...accordionProps}
+        >
+          {children}
+        </EuiAccordion>
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
+      </>
     );
   }
 
@@ -117,18 +124,23 @@ export const FieldGroup = (props: FieldGroupProps) => {
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           {isCollapsible ? (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-                onClick={onToggle}
-                aria-label={i18n.translate(
-                  'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
-                  {
-                    defaultMessage: 'Toggle {title}',
-                    values: { title },
-                  }
-                )}
-                color="text"
-              />
+              <EuiToolTip
+                content={i18n.translate('xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel', {
+                  defaultMessage: 'Toggle {title}',
+                  values: { title },
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType={isOpen ? 'chevronSingleDown' : 'chevronSingleRight'}
+                  onClick={onToggle}
+                  aria-label={i18n.translate(
+                    'xpack.alertingV2.ruleForm.fieldGroup.toggleButtonLabel',
+                    { defaultMessage: 'Toggle {title}', values: { title } }
+                  )}
+                  color="text"
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem grow={false}>

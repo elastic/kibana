@@ -13,6 +13,8 @@
  */
 export const RUNTIME_FIELD_COMPOSITE_TYPE = 'composite' as const;
 
+export type RuntimeFieldCompositeType = typeof RUNTIME_FIELD_COMPOSITE_TYPE;
+
 export const PRIMITIVE_RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
@@ -22,6 +24,8 @@ export const PRIMITIVE_RUNTIME_FIELD_TYPES = [
   'boolean',
   'geo_point',
 ] as const;
+
+export type PrimitiveRuntimeFieldTypes = typeof PRIMITIVE_RUNTIME_FIELD_TYPES;
 
 export const RUNTIME_FIELD_TYPES = [
   ...PRIMITIVE_RUNTIME_FIELD_TYPES,

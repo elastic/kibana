@@ -12,7 +12,6 @@ import type {
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuPrimaryActionItem,
-  DiscoverAppMenuSecondaryActionItem,
 } from '../../types';
 
 /**
@@ -23,7 +22,6 @@ export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
   private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
-  private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 
   /**
    * Register a custom menu item.
@@ -31,21 +29,6 @@ export class AppMenuRegistry {
    */
   public registerCustomItem(item: DiscoverAppMenuItemType) {
     this.items.set(item.id, { ...item, isCustom: true });
-  }
-
-  /**
-   * Register a custom popover item under a parent menu item.
-   * @param parentId The ID of the parent menu item
-   * @param popoverItem The popover item to register
-   */
-  public registerCustomPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
-    const parent = this.items.get(parentId);
-    if (parent) {
-      this.items.set(parentId, {
-        ...parent,
-        items: [...(parent.items || []), popoverItem],
-      });
-    }
   }
 
   /**
@@ -73,14 +56,6 @@ export class AppMenuRegistry {
   }
 
   /**
-   * Set the secondary action item for the app menu.
-   * @param item The secondary action item
-   */
-  public setSecondaryActionItem(item: DiscoverAppMenuSecondaryActionItem) {
-    this.secondaryActionItem = item;
-  }
-
-  /**
    * Register a popover item for a specific parent menu item.
    * @param parentId The ID of the parent menu item
    * @param popoverItem The popover item to register
@@ -88,68 +63,37 @@ export class AppMenuRegistry {
   public registerPopoverItem(parentId: string, popoverItem: DiscoverAppMenuPopoverItem) {
     const parent = this.items.get(parentId);
     if (parent) {
+      const { href, render, run, target, ...parentSubmenuItem } = parent;
+
       this.items.set(parentId, {
-        ...parent,
+        ...parentSubmenuItem,
         items: [...(parent.items || []), popoverItem],
       });
     }
   }
 
   /**
-   * Remove a menu item by ID.
-   * @param id The ID of the menu item to remove
+   * Get popover items registered under a parent menu item.
+   * Returns a copy so callers cannot mutate registry state.
+   * @param parentId The ID of the parent menu item
    */
-  public deleteItem(id: string): void {
-    this.items.delete(id);
+  public getPopoverItems(parentId: string): DiscoverAppMenuPopoverItem[] {
+    return [...(this.items.get(parentId)?.items ?? [])];
   }
 
   /**
-   * Get a menu item by ID.
-   * @param id The ID of the menu item to retrieve
-   * @returns The menu item or undefined if not found
+   * Get a registered menu item by ID.
+   * Returns a copy of nested popover items so callers cannot mutate registry state.
+   * @param id The ID of the menu item
    */
   public getItem(id: string): DiscoverAppMenuItemType | undefined {
     const item = this.items.get(id);
-    if (item) {
-      const { isCustom, ...cleanItem } = item;
-      return cleanItem;
-    }
-    return undefined;
-  }
-
-  /**
-   * Merge popover items from a source menu into a target submenu.
-   * @param targetMenuId The ID of the target menu item
-   * @param targetSubmenuId The ID of the submenu within the target menu to merge items into
-   * @param sourceMenuId The ID of the source menu item whose items should be merged
-   */
-  public mergePopoverItems(
-    targetMenuId: string,
-    targetSubmenuId: string,
-    sourceMenuId: string
-  ): void {
-    const targetMenu = this.items.get(targetMenuId);
-    const sourceMenu = this.items.get(sourceMenuId);
-
-    if (!targetMenu || !sourceMenu || !sourceMenu.items?.length) {
-      return;
+    if (!item) {
+      return undefined;
     }
 
-    const updatedItems = targetMenu.items?.map((item) => {
-      if (item.id === targetSubmenuId && item.items) {
-        // Sort items by order, putting source items before "manage rules" (which has MAX_SAFE_INTEGER order)
-        const mergedItems = [...item.items, ...sourceMenu.items!].sort(
-          (a, b) => (a.order ?? 0) - (b.order ?? 0)
-        );
-        return { ...item, items: mergedItems };
-      }
-      return item;
-    });
-
-    this.items.set(targetMenuId, {
-      ...targetMenu,
-      items: updatedItems,
-    });
+    const { isCustom, ...menuItem } = item;
+    return menuItem.items ? { ...menuItem, items: [...menuItem.items] } : menuItem;
   }
 
   /**
@@ -168,7 +112,6 @@ export class AppMenuRegistry {
     return {
       items: cleanItems,
       primaryActionItem: this.primaryActionItem,
-      secondaryActionItem: this.secondaryActionItem,
     };
   }
 }

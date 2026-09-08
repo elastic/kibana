@@ -7,27 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 
-export const filterSchema = schema.object(
-  {
-    language: schema.oneOf([schema.literal('kuery'), schema.literal('lucene')], {
-      defaultValue: 'kuery',
+export const filterSchema = z
+  .object({
+    language: z
+      .union([z.literal('kql'), z.literal('lucene')])
+      .default('kql')
+      .meta({
+        description:
+          'Query language: `kql` (Kibana Query Language) or `lucene`. Defaults to `kql`.',
+      }),
+    expression: z.string().meta({
+      description: 'A query expression in KQL or Lucene syntax',
     }),
-    /**
-     * Filter query
-     */
-    query: schema.string({
-      meta: {
-        description: 'Filter query',
-      },
-    }),
-  },
-  { meta: { id: 'filterSimple', title: 'Simple Filter' } }
-);
+  })
+  .strict()
+  .meta({
+    id: 'filterSimple',
+    title: 'Filter',
+    description:
+      'A KQL or Lucene query that filters panel data. Applied on top of any dashboard-level filters.',
+  });
 
-export const filterWithLabelSchema = schema.object(
-  {
+export const filterWithLabelSchema = z
+  .object({
     /**
      * Filter query
      */
@@ -35,15 +39,15 @@ export const filterWithLabelSchema = schema.object(
     /**
      * Label for the filter
      */
-    label: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Label for the filter',
-        },
-      })
-    ),
-  },
-  { meta: { id: 'filterWithLabel', title: 'Filter with Label' } }
-);
+    label: z.string().optional().meta({
+      description: 'Label for the filter',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'filterWithLabel',
+    title: 'Filter with Label',
+    description: 'A KQL or Lucene filter with an optional display label.',
+  });
 
-export type LensApiFilterType = typeof filterSchema.type;
+export type LensApiFilterType = z.output<typeof filterSchema>;

@@ -25,25 +25,43 @@ Do NOT use for:
 
 ---
 
+## Memory Integration (Optional)
+
+If the **significant-events-memory** skill is loaded (check your available skills), you have access to a
+shared knowledge base containing architecture overviews, service descriptions, and operational
+patterns learned from previous investigations.
+
+**How to use memory during RCA:**
+- **Before investigating:** Search memory for the affected service or stream name to load prior
+  context (architecture, known failure modes, dependencies). This helps you form better hypotheses
+  in Step A-3.
+- **After confirming a root cause:** If you discovered something new and noteworthy about the system
+  (a previously unknown dependency, failure mode, or architectural detail), offer to save it to
+  memory for future investigations.
+- **Skip memory entirely** if the significant-events-memory skill is not in your available skills list.
+  Memory has no effect when the skill is not loaded.
+
+---
+
 ## Mandatory First Step
 
-**If `search_kis` is in your tool list, your FIRST tool call MUST be
-`search_kis`. Do not call `get_logs`, `execute_esql`, or any other
+**If `ki_search` is in your tool list, your FIRST tool call MUST be
+`ki_search`. Do not call `get_logs`, `execute_esql`, or any other
 tool before it.**
 
 **Tool identity:** Your tool list may show a **longer registry id** (e.g. containing
-`platform.streams` and ending in `search_kis`). That is the same tool as
-`search_kis` in these instructions.
+`platform.streams` and ending in `ki_search`). That is the same tool as
+`ki_search` in these instructions.
 
 Knowledge Indicators (KIs) are curated, stream-specific signals — operator-written detection
 queries and automatically extracted behavioral patterns. They encode what "bad" looks like for
 this stream and are faster and more targeted than raw log search.
 
-**If `search_kis` errors** (timeout, permission, internal error): retry **once**.
+**If `ki_search` errors** (timeout, permission, internal error): retry **once**.
 If it still fails, tell the user and **proceed to Track B** — do not block the investigation.
 
 Only fall back to Track B (log funnel) if:
-- `search_kis` is NOT in your tool list, OR
+- `ki_search` is NOT in your tool list, OR
 - it **failed** after one retry (see above), OR
 - it returned no KIs for the target stream after two attempts, OR
 - every KI-derived hypothesis was explicitly refuted by live query data
@@ -63,10 +81,14 @@ Before calling any tool, read the user's message carefully and note:
 This context shapes every tool call you will make. Do not invent details not present in
 the user's message, but do use them to fill in parameters precisely.
 
+If the **significant-events-memory** skill is available, search memory for the suspect service/stream name
+now. Prior architecture context, known dependencies, and past failure patterns will improve your
+hypotheses in Step A-3.
+
 ### Step A-1: Identify Target Stream and Time Window
 
 **Stream:** Use the service or stream name from Step A-0 as `stream_names`. If the user
-did not name a specific stream, call `search_kis` with no `stream_names`
+did not name a specific stream, call `ki_search` with no `stream_names`
 to discover which streams have KIs, present the list, and ask the user to confirm.
 
 **Time window:** Pin a single investigation window from the user's description.
@@ -260,11 +282,15 @@ State the specific mechanism in one sentence. Include confidence level: Confirme
 - Query KIs with `backed: false`: recommend creating Kibana alert rules.
 - Feature KIs with `status: "stale"` that remain relevant: recommend refreshing feature extraction.
 
+**Memory update:** If the **significant-events-memory** skill is available and you discovered new
+architectural details, dependencies, or failure patterns not already in memory, offer to save
+them for future investigations.
+
 ---
 
 ## Track B: Log Funnel Investigation (Fallback Only)
 
-Enter this track if `search_kis` is not in your tool list, **failed after one retry**,
+Enter this track if `ki_search` is not in your tool list, **failed after one retry**,
 returned no KIs after two attempts, or all KI-derived hypotheses were explicitly refuted.
 
 ### Phase 1: Initial Peek
@@ -349,7 +375,7 @@ User: "The payment service has been throwing database errors since 2pm."
 
 **A-1**: stream = "payment", window = 14:00 → now.
 
-**A-2 (targeted)**: search_kis(stream_names=["payment"], search_text="database errors", limit=20)
+**A-2 (targeted)**: ki_search(stream_names=["payment"], search_text="database errors", limit=20)
 → Returns 4 KIs (features first, then queries — read all before forming hypotheses):
   - Feature KI F1: type="error_logs", confidence=93, description="FATAL: connection pool exhausted — all 100 slots occupied", filter={"field":"service.name","eq":"payment"}, status="active"
   - Feature KI F2: type="log_patterns", confidence=61, description="Slow query warnings from PostgreSQL", filter={"field":"service.name","eq":"payment"}, status="stale"

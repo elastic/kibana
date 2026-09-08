@@ -41,7 +41,7 @@ export const updateCaseStepCommonDefinition: CommonStepDefinition<
   UpdateCaseStepOutputSchema
 > = {
   id: UpdateCaseStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.UPDATE_CASE_STEP_LABEL,
   description: i18n.UPDATE_CASE_STEP_DESCRIPTION,
   documentation: {
@@ -56,6 +56,17 @@ export const updateCaseStepCommonDefinition: CommonStepDefinition<
     updates:
       status: "in-progress"
       severity: "high"
+\`\`\``,
+      `## Update case fields (extended_fields)
+Keys provided are merged into the stored map; unlisted keys are left untouched. Discover keys with \`GET /api/cases/fields\`.
+\`\`\`yaml
+- name: update_case_fields
+  type: ${UpdateCaseStepTypeId}
+  with:
+    case_id: "abc-123-def-456"
+    updates:
+      extended_fields:
+        priority_as_keyword: "low"
 \`\`\``,
     ],
   },

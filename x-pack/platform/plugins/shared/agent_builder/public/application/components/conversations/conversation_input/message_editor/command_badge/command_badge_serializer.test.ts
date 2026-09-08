@@ -86,17 +86,45 @@ describe('serializeEditorContent', () => {
     expect(serializeEditorContent(div)).toBe('[/Test](skill://skill-1?type=security)');
   });
 
+  it('preserves line breaks from <br> elements', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('Hi can you tell'));
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode('me the'));
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode('wheather ?'));
+
+    expect(serializeEditorContent(div)).toBe('Hi can you tell\nme the\nwheather ?');
+  });
+
+  it('preserves line breaks adjacent to badges', () => {
+    const div = document.createElement('div');
+    div.appendChild(document.createTextNode('Use '));
+    div.appendChild(
+      createCommandBadgeElement({
+        commandId: CommandId.Skill,
+        label: 'Summarize',
+        id: 'skill-1',
+        metadata: {},
+      })
+    );
+    div.appendChild(document.createElement('br'));
+    div.appendChild(document.createTextNode('on this'));
+
+    expect(serializeEditorContent(div)).toBe('Use [/Summarize](skill://skill-1)\non this');
+  });
+
   it('serializes an SML badge element', () => {
     const div = document.createElement('div');
     const badge = createCommandBadgeElement({
       commandId: CommandId.Sml,
       label: 'visualization/Pacific Sales',
-      id: 'chunk-1',
+      id: 'entry-1',
       metadata: {},
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://chunk-1)');
+    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://entry-1)');
   });
 });
 
@@ -186,7 +214,7 @@ describe('deserializeBadgeContent', () => {
   });
 
   it('parses an SML badge', () => {
-    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://chunk-1)');
+    const segments = deserializeCommandBadge('[@visualization/Pacific Sales](sml://entry-1)');
 
     expect(segments).toEqual([
       {
@@ -194,7 +222,7 @@ describe('deserializeBadgeContent', () => {
         data: {
           commandId: CommandId.Sml,
           label: 'visualization/Pacific Sales',
-          id: 'chunk-1',
+          id: 'entry-1',
           metadata: {},
         },
       },
@@ -237,7 +265,7 @@ describe('round-trip serialization', () => {
   });
 
   it('round-trips SML badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](sml://chunk-1) here';
+    const original = 'Ref [@visualization/Pacific Sales](sml://entry-1) here';
     const segments = deserializeCommandBadge(original);
 
     const div = document.createElement('div');

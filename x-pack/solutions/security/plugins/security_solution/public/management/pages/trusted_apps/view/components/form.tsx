@@ -31,6 +31,8 @@ import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
+  hasEntryEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   hasSimpleExecutableName,
@@ -43,6 +45,7 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
 import {
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
   WildCardWithWrongOperatorCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -84,7 +87,8 @@ import {
   TRUSTED_APPLICATIONS,
   TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
 } from '../translations';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { OS_TITLES } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -130,7 +134,8 @@ interface ValidationResult {
   }>;
 
   /**  Additional Warning callout after submit */
-  extraWarning?: boolean;
+  showWildcardWithWrongOperatorCalloutAndConfirmModal?: boolean;
+  showUnnecessaryEscapingCalloutAndConfirmModal?: boolean;
 }
 
 const addResultToValidation = (
@@ -166,7 +171,6 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
     isValid,
     result: {},
   };
-  let extraWarning: ValidationResult['extraWarning'];
 
   // Name field
   if (!values.name.trim()) {
@@ -221,7 +225,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
         })
       ) {
         if (entry.field === ConditionEntryField.PATH) {
-          extraWarning = true;
+          validation.showWildcardWithWrongOperatorCalloutAndConfirmModal = true;
           addResultToValidation(
             validation,
             'entries',
@@ -236,6 +240,10 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
             INPUT_ERRORS.wildcardWithWrongField(index)
           );
         }
+      }
+
+      if (entry.field === ConditionEntryField.PATH && hasEntryEscaping(entry, [os])) {
+        validation.showUnnecessaryEscapingCalloutAndConfirmModal = true;
       }
 
       if (!entry.field || !(entry as TrustedAppConditionEntry).value.trim()) {
@@ -271,7 +279,7 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
     });
   }
 
-  if (extraWarning) {
+  if (validation.showWildcardWithWrongOperatorCalloutAndConfirmModal) {
     addResultToValidation(
       validation,
       'entries',
@@ -282,7 +290,18 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
       </>,
       true
     );
-    validation.extraWarning = extraWarning;
+  }
+  if (validation.showUnnecessaryEscapingCalloutAndConfirmModal) {
+    addResultToValidation(
+      validation,
+      'entries',
+      'errors',
+      <>
+        <EuiSpacer size="s" />
+        <UnnecessaryEscapingCallout />
+      </>,
+      true
+    );
   }
   validation.isValid = isValid;
   return validation;
@@ -331,6 +350,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       areValid: !!item.entries.length,
       hasDuplicateFields: false,
       hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard([item]),
+      hasUnnecessaryEscaping: hasEscaping([item], item.os_types),
       hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry([item]),
     });
 
@@ -338,7 +358,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
         const trustedAppsAPIClient = new TrustedAppsApiClient(http);
@@ -395,19 +418,44 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         const updatedValidationResult: ValidationResult = validateValues(updatedItem);
         setValidationResult(updatedValidationResult);
 
+        const shouldShowWildcardConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasWildcardWithWrongOperator
+          : updatedValidationResult.showWildcardWithWrongOperatorCalloutAndConfirmModal;
+
+        const shouldShowUnnecessaryEscapingConfirmModal = isAdvancedModeEnabled(updatedItem)
+          ? conditionsState.hasUnnecessaryEscaping
+          : updatedValidationResult.showUnnecessaryEscapingCalloutAndConfirmModal;
+
         onChange({
           item: updatedItem,
           isValid: updatedValidationResult.isValid && conditionsState.areValid && hasFormChanged,
-          confirmModalLabels: updatedValidationResult.extraWarning
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'trusted application',
-                })
-              )
-            : undefined,
+          confirmModalLabels:
+            shouldShowWildcardConfirmModal || shouldShowUnnecessaryEscapingConfirmModal
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'trusted application',
+                    }
+                  ),
+                  {
+                    hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal,
+                    hasUnnecessaryEscaping: shouldShowUnnecessaryEscapingConfirmModal,
+                  },
+                  links
+                )
+              : undefined,
         });
       },
-      [conditionsState.areValid, hasFormChanged, item, onChange]
+      [
+        conditionsState.areValid,
+        conditionsState.hasUnnecessaryEscaping,
+        conditionsState.hasWildcardWithWrongOperator,
+        hasFormChanged,
+        item,
+        links,
+        onChange,
+      ]
     );
 
     const handleEffectedPolicyOnChange: EffectedPolicySelectProps['onChange'] = useCallback(
@@ -544,6 +592,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         }
 
         processChanged(nextItem);
+        setConditionsState((prev) => ({
+          ...prev,
+          hasUnnecessaryEscaping: hasEscaping([nextItem], nextItem.os_types),
+        }));
         setHasFormChanged(true);
       },
       [item, processChanged]
@@ -659,6 +711,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         setConditionsState((prev) => ({
           ...prev,
           hasWildcardWithWrongOperator: hasWrongOperatorWithWildcard(arg.exceptionItems),
+          hasUnnecessaryEscaping: hasEscaping(arg.exceptionItems, item.os_types),
           hasPartialCodeSignatureWarning: hasPartialCodeSignatureEntry(arg.exceptionItems),
         }));
 
@@ -891,7 +944,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFill" size="s" color="warning" />
+                <EuiIcon type="warningFill" size="s" color="warning" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText
@@ -946,10 +999,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode ? (
             <>
               {exceptionBuilderComponentMemo}
-              {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-              {conditionsState.hasWildcardWithWrongOperator &&
-                conditionsState.hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-              {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+
+              <EuiFlexGroup direction="column" gutterSize="s">
+                {conditionsState.hasWildcardWithWrongOperator && (
+                  <WildCardWithWrongOperatorCallout />
+                )}
+                {conditionsState.hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+                {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+              </EuiFlexGroup>
+
               {conditionsState.hasDuplicateFields && (
                 <>
                   <EuiSpacer size="xs" />
@@ -977,12 +1035,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                 onVisited={handleConditionBuilderOnVisited}
                 data-test-subj={getTestId('conditionsBuilder')}
               />
-              {conditionsState.hasWildcardWithWrongOperator && (
-                <>
-                  <EuiSpacer size="s" />
-                  <WildCardWithWrongOperatorCallout />
-                </>
-              )}
             </>
           )}
         </EuiFormRow>

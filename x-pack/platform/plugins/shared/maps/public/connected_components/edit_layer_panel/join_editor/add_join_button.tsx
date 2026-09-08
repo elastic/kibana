@@ -20,7 +20,7 @@ export function AddJoinButton(props: Props) {
     <EuiButtonEmpty
       onClick={props.onClick}
       size="xs"
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       aria-label={props.label}
       isDisabled={props.isDisabled}
     >

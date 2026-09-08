@@ -19,13 +19,13 @@ import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { parseInterval } from '@kbn/ml-parse-interval';
 
-import type { GetAnnotationsResponse } from '../../../common/types/annotations';
+import type { GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { CriteriaField } from '@kbn/ml-common-types/results';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import { timeBucketsServiceFactory } from './time_buckets_service';
-import type { Job } from '../../../common/types/anomaly_detection_jobs';
-import type { CriteriaField } from '../services/results_service';
 import {
   MAX_SCHEDULED_EVENTS,
   TIME_FIELD_NAME,

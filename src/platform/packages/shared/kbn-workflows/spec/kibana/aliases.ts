@@ -47,3 +47,7 @@ export const KIBANA_TYPE_ALIASES: Record<string, string> = Object.fromEntries(
     .filter(([, v]) => v.backward)
     .map(([oldOp, v]) => [`kibana.${oldOp}`, `kibana.${v.type}`])
 );
+
+export function resolveKibanaStepTypeAlias(stepType: string): string {
+  return KIBANA_TYPE_ALIASES[stepType] ?? stepType;
+}

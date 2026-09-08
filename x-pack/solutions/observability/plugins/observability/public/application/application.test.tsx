@@ -119,7 +119,7 @@ describe('renderApp', () => {
         telemetryClient: createTelemetryClientMock(),
       });
       unmount();
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should clear search sessions when unmounting', () => {
@@ -141,7 +141,7 @@ describe('renderApp', () => {
     });
     unmount();
 
-    expect(mockSearchSessionClear).toBeCalled();
+    expect(mockSearchSessionClear).toHaveBeenCalled();
   });
 
   function AppWrapper({ children }: { children?: ReactNode }) {

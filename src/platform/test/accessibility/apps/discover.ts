@@ -10,7 +10,8 @@
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, share, timePicker, unifiedFieldList } = getPageObjects([
+  const { appMenu, common, discover, share, timePicker, unifiedFieldList } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'share',
@@ -72,8 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test on share panel', async () => {
       // The tabs bar menu button tooltip can get in the way of the share button
       // after closing the inspector flyout, so we move the mouse to hide it first
-      await testSubjects.moveMouseTo('shareTopNavButton');
-      await share.clickShareTopNavButton();
+      await appMenu.clickMenuItem('shareTopNavButton');
       await a11y.testAppSnapshot();
       await share.closeShareModal();
     });

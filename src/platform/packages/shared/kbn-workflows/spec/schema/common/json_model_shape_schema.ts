@@ -8,6 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { builtinWorkflowInputDefinitionRefSchema } from '../../builtin_workflow_input_definitions';
 
 /**
  * JSON Schema type values (Draft 7 / 2020-12 standard).
@@ -80,6 +81,7 @@ export interface JsonSchema {
   pattern?: string;
   minItems?: number;
   maxItems?: number;
+  uniqueItems?: boolean;
 }
 
 /**
@@ -114,7 +116,13 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
   'multipleOf',
   'minItems',
   'maxItems',
+  'uniqueItems',
 ] as const satisfies readonly (keyof JsonSchema)[];
+
+/** Shared `type` keyword (single type or array of types). */
+const jsonSchemaTypeField = z
+  .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
+  .optional();
 
 /**
  * Zod schema representing any JSON Schema node (Draft 7 / 2020-12)
@@ -124,14 +132,12 @@ export const JSON_SCHEMA_PROPERTY_KEYS = [
 export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
     z.object({
-      type: z
-        .union([z.enum(JSON_SCHEMA_TYPE_VALUES), z.array(z.enum(JSON_SCHEMA_TYPE_VALUES))])
-        .optional(),
+      type: jsonSchemaTypeField,
       title: z.string().optional(),
       description: z.string().optional(),
       format: z.enum(JSON_SCHEMA_FORMAT_VALUES).optional(),
       default: z.any().optional(),
-      $ref: z.string().optional(),
+      $ref: builtinWorkflowInputDefinitionRefSchema.optional(),
 
       // --- Logical Operators ---
       anyOf: z.array(JsonModelShapeSchema).optional(),
@@ -146,6 +152,7 @@ export const JsonModelShapeSchema: z.ZodType<JsonSchema> = z
       items: z.union([JsonModelShapeSchema, z.array(JsonModelShapeSchema)]).optional(),
       minItems: z.number().int().nonnegative().optional(),
       maxItems: z.number().int().nonnegative().optional(),
+      uniqueItems: z.boolean().optional(),
 
       // --- Reusability ---
       definitions: z.record(z.string(), JsonModelShapeSchema).optional(),
@@ -179,7 +186,7 @@ export const JsonModelRootShapeSchema = z
     type: z.literal('object').optional(),
     title: z.string().optional(),
     description: z.string().optional(),
-    $ref: z.string().optional(),
+    $ref: builtinWorkflowInputDefinitionRefSchema.optional(),
     properties: z.record(z.string(), JsonModelShapeSchema).optional(),
     additionalProperties: z.boolean().optional(),
     required: z.array(z.string()).optional(),

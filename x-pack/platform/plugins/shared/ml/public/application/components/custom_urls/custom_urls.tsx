@@ -13,14 +13,15 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
   EuiModal,
   EuiModalBody,
+  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalFooter,
+  EuiPanel,
   EuiScreenReaderOnly,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -293,17 +294,27 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
 
     return editMode === 'inline' ? (
       <EuiPanel className="edit-custom-url-panel">
-        <EuiButtonIcon
-          color="text"
-          onClick={this.closeEditor}
-          iconType="cross"
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
             {
               defaultMessage: 'Close custom URL editor',
             }
           )}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            color="text"
+            onClick={this.closeEditor}
+            iconType="cross"
+            aria-label={i18n.translate(
+              'xpack.ml.jobsList.editJobFlyout.customUrls.closeEditorAriaLabel',
+              {
+                defaultMessage: 'Close custom URL editor',
+              }
+            )}
+          />
+        </EuiToolTip>
 
         {editor}
 

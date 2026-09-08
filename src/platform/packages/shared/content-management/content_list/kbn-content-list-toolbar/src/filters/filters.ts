@@ -12,6 +12,7 @@ import { filtersPart } from './part';
 import { SortFilter } from './sort';
 import { TagFilter } from './tags';
 import { StarredFilter } from './starred';
+import { CreatedByFilter } from './created_by';
 
 /**
  * Props for the {@link Filters} container component.
@@ -51,4 +52,5 @@ export const Filters = Object.assign(FiltersComponent, {
   Sort: SortFilter,
   Tags: TagFilter,
   Starred: StarredFilter,
+  CreatedBy: CreatedByFilter,
 });

@@ -32,7 +32,7 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
     id: OPTIONS_LIST_ACTION,
     type: OPTIONS_LIST_CONTROL,
     order: 1,
-    getIconType: () => 'editorChecklist',
+    getIconType: () => 'listCheck',
     getDisplayName: () =>
       i18n.translate('controls.optionsList.action.displayName', {
         defaultMessage: 'Options list',
@@ -40,15 +40,20 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
     isCompatible: async ({ state: { data_view_id: dataViewId, field_name: fieldName } }) => {
       if (!dataViewId || !fieldName) return false;
       const dataView = await dataViewsService.get(dataViewId);
-      const field = dataView.getFieldByName(fieldName);
+      // ES|QL-source controls can sometimes pass a field name that omits a .keyword suffix, so try adding it before
+      // declaring the field non-existent
+      const field =
+        dataView.getFieldByName(fieldName) ??
+        (!fieldName.endsWith('.keyword')
+          ? dataView.getFieldByName(`${fieldName}.keyword`)
+          : undefined);
       return Boolean(field && isFieldCompatible(field));
     },
-    execute: async ({ embeddable, state, controlId, isPinned }) => {
+    execute: async ({ embeddable, state, controlId }) => {
       createDataControlOfType(OPTIONS_LIST_CONTROL, {
         embeddable,
         state: { ...DEFAULT_DSL_OPTIONS_LIST_STATE, ...state },
         controlId,
-        isPinned,
       });
     },
     extension: {

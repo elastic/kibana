@@ -10,7 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
 import { schema } from '@kbn/config-schema';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetInferenceEndpointsRoute = (
   router: IRouter,
@@ -21,13 +21,18 @@ export const registerGetInferenceEndpointsRoute = (
       path: '/internal/esql/autocomplete/inference_endpoints/{taskType}',
       validate: {
         params: schema.object({
-          taskType: schema.oneOf([
-            schema.literal('completion'),
-            schema.literal('rerank'),
-            schema.literal('text_embedding'),
-            schema.literal('sparse_embedding'),
-            schema.literal('chat_completion'),
-          ]),
+          // Validate shape only. ES itself is the source of truth for which
+          // task types are valid and rejects unknown ones with a clean 400.
+          // Keeping an allowlist here would require a coordinated Kibana PR
+          // every time ES adds a task type — see ESQL_INFERENCE_TASK_TYPES
+          // in @kbn/esql-types for the Kibana-side list used by autocomplete.
+          taskType: schema.string({
+            maxLength: 64,
+            validate: (value) =>
+              /^[a-z_]+$/.test(value)
+                ? undefined
+                : 'must contain only lowercase letters and underscores',
+          }),
         }),
       },
       security: {

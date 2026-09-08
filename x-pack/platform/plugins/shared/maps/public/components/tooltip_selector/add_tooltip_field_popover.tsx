@@ -137,7 +137,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
       <EuiButtonEmpty
         onClick={this._togglePopover}
         size="xs"
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         isDisabled={!this.props.fields}
       >
         <FormattedMessage id="xpack.maps.tooltipSelector.togglePopoverLabel" defaultMessage="Add" />
@@ -164,6 +164,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
           options={this.state.options}
           onChange={this._onSelect}
           optionMatcher={comboBoxFieldOptionMatcher}
+          listProps={{ paddingSize: 's' }}
         >
           {(list, search) => (
             <div style={{ width: '300px' }}>

@@ -28,7 +28,7 @@ export type EditableSavedSearchAttributes = Partial<
   Pick<SavedSearchAttributes, (typeof EDITABLE_SAVED_SEARCH_KEYS)[number]>
 >;
 
-type SearchEmbeddableBaseState = SerializedTitles &
+export type SearchEmbeddableBaseState = SerializedTitles &
   SerializedTimeRange &
   SerializedDrilldowns &
   EditableSavedSearchAttributes & {

@@ -66,6 +66,7 @@ export interface HookServices {
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -99,6 +100,7 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -195,7 +197,6 @@ export type ConnectorLifecyclePostCreateParams = Omit<
 > & {
   connectorType: string;
   connectorName: string;
-  workflowTemplates: string[];
 };
 export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
   connectorType: string;
@@ -242,6 +243,18 @@ export interface ActionTypeCoreFields<
    * Only applies to system actions (isSystemActionType: true).
    */
   allowMultipleSystemActions?: boolean;
+  /**
+   * Description of this connector type.
+   */
+  description?: string;
+  /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
+  /**
+   * When true, the connector type is shown as technical preview in the UI.
+   */
+  isExperimental?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
@@ -312,6 +325,17 @@ export interface ActionTaskParams extends SavedObjectAttributes {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params: Record<string, any>;
   apiKey?: string;
+  /**
+   * Id of the UIAM API key in `apiKey`. Unencrypted and mapped so the alerting API key
+   * invalidation task can see this pending execution still needs the key.
+   */
+  uiamApiKeyId?: string;
+  /**
+   * True when `apiKey` is an external (user-created Cloud) UIAM API key. Marks the execution
+   * fake request so the Elasticsearch cluster client does not attach the UIAM shared secret,
+   * which UIAM rejects for external keys.
+   */
+  uiamApiKeyExternal?: boolean;
   executionId?: string;
   consumer?: string;
   source?: string;

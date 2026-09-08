@@ -11,113 +11,46 @@ import type { FieldType as FieldTypeType } from '../../../../common/types/domain
 export const fieldTypesArray = Object.keys(FieldType) as FieldTypeType[];
 
 export const exampleTemplateDefinition = `
-# name is required
-name: Example template
-# description is optional
-description: A short description of the template
-# severity is optional (low, medium, high, critical)
+# Case defaults applied when this template creates a case.
+name: Example case title
+description: A short default case description
 severity: low
-# category is optional
 category: General
-# tags are optional
 tags:
   - example
+assignees: []
+# Custom fields rendered on the case when this template is applied.
 fields:
-  - name: start_date
-    control: DATE_PICKER
-    label: Start date
-    type: date
-    metadata:
-      default: "2024-01-01T00:00:00Z"
-      # set to true to include time selection
-      # show_time: true
-      # 'utc' (default) or 'local' to use the browser's timezone
-      # timezone: local     
   - name: summary
     control: INPUT_TEXT
     label: Summary
     type: keyword
+  - name: requires_escalation
+    control: TOGGLE
+    label: Requires escalation
+    type: boolean
     metadata:
-      default: Default summary text
-  - name: effort
-    control: INPUT_NUMBER
-    label: Effort estimate
-    type: integer
-    metadata:
-      default: 1
-  - name: details
+      default: false
+  # Shown and required only when escalation is toggled on.
+  - name: escalation_reason
     control: TEXTAREA
-    label: Details
-    type: keyword
-    metadata:
-      default: Enter details here...
-  - name: priority
-    control: SELECT_BASIC
-    label: Priority
-    type: keyword
-    metadata:
-      default: medium
-      options:
-        - low
-        - medium
-        - high
-        - urgent
-  # display.show_when hides this field unless priority is urgent
-  - name: urgency_reason
-    control: TEXTAREA
-    label: Reason for urgency
+    label: Escalation reason
     type: keyword
     display:
       show_when:
-        field: priority
+        field: requires_escalation
         operator: eq
-        value: urgent
+        value: true
     validation:
       required_when:
-        field: priority
+        field: requires_escalation
         operator: eq
-        value: urgent
-      pattern:
-        regex: "^[A-Z]"
-        message: "Must start with a capital letter"
-  - name: score
-    control: INPUT_NUMBER
-    label: Score
-    type: integer
-    validation:
-      required: true
-      min: 0
-      max: 100
-  # DATE_PICKER with show_time enabled and local timezone
-  # show_when: not_empty — this field appears only when a date is selected above
-  - name: scheduled_at
-    control: DATE_PICKER
-    label: Scheduled date and time
-    type: date
-    metadata:
-      show_time: true
-      timezone: local
-  # deadline_notes is shown and required only when scheduled_at has been filled in
-  - name: deadline_notes
+        value: true
+  # Required before a case can move to the closed state.
+  - name: resolution_notes
     control: TEXTAREA
-    label: Deadline notes
+    label: Resolution notes
     type: keyword
-    display:
-      show_when:
-        field: scheduled_at
-        operator: not_empty
     validation:
-      required_when:
-        field: scheduled_at
-        operator: not_empty
-  # kickoff_agenda is shown only when scheduled_at equals a specific ISO datetime value
-  - name: kickoff_agenda
-    control: TEXTAREA
-    label: Kickoff agenda
-    type: keyword
-    display:
-      show_when:
-        field: scheduled_at
-        operator: eq
-        value: "2024-06-01T09:00:00.000Z"
+      required_on_close: true
 `.trimStart();

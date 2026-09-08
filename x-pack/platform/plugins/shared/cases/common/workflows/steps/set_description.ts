@@ -34,7 +34,7 @@ export const setDescriptionStepCommonDefinition: CommonStepDefinition<
   SetDescriptionStepOutputSchema
 > = {
   id: SetDescriptionStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_DESCRIPTION_STEP_LABEL,
   description: i18n.SET_DESCRIPTION_STEP_DESCRIPTION,
   documentation: {

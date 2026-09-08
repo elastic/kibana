@@ -17,6 +17,7 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/plugins/shared/home
 dependsOn:
+  - '@kbn/scout'
   - '@kbn/core'
   - '@kbn/data-views-plugin'
   - '@kbn/custom-integrations-plugin'
@@ -31,6 +32,7 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/test-jest-helpers'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/app-header'
   - '@kbn/utility-types'
   - '@kbn/ui-theme'
   - '@kbn/config-schema'
@@ -38,12 +40,12 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/ebt-tools'
   - '@kbn/core-analytics-server'
-  - '@kbn/storybook'
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-common'
   - '@kbn/core-http-browser'
-  - '@kbn/react-kibana-context-theme'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -56,6 +58,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - .storybook/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -76,7 +76,7 @@ export const DateFormatsField = ({ onGenerate }: { onGenerate?: () => void }) =>
     >
       <EuiComboBox
         {...inputProps}
-        data-test-subj="input"
+        data-test-subj="streamsAppDateProcessorFormatsComboBox"
         fullWidth
         compressed={true}
         inputRef={ref}

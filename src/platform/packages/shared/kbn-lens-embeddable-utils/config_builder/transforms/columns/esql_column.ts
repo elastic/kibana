@@ -33,7 +33,6 @@ export const getValueColumn = (
 export const getValueApiColumn = (accessor: string, layer: TextBasedLayer) => {
   const column = layer.columns.find((c) => c.columnId === accessor)!;
   return {
-    operation: 'value' as const,
     column: column.fieldName,
     ...(column.customLabel && column.label ? { label: column.label } : {}),
     ...(column.params?.format ? { format: fromFormatLensStateToAPI(column.params.format) } : {}),

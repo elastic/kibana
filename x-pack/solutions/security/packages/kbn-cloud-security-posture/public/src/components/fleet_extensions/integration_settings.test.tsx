@@ -116,6 +116,7 @@ describe('<IntegrationSettings />', () => {
           description: [],
           namespace: [],
           additional_datastreams_permissions: [],
+          condition: null,
           inputs: null,
         },
       };
@@ -132,6 +133,7 @@ describe('<IntegrationSettings />', () => {
           description: ['Description must be less than 200 characters'],
           namespace: [],
           additional_datastreams_permissions: [],
+          condition: null,
           inputs: null,
         },
       };
@@ -160,6 +162,7 @@ describe('<IntegrationSettings />', () => {
           description: [],
           namespace: [],
           additional_datastreams_permissions: [],
+          condition: null,
           inputs: null,
         },
       };

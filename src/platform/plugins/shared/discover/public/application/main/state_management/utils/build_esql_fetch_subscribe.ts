@@ -9,12 +9,14 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { shouldResetProfileAppStateDefaultField } from './profile_app_state_defaults';
 
 const ESQL_MAX_NUM_OF_COLUMNS = 50;
 const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
@@ -73,9 +75,9 @@ export const buildEsqlFetchSubscribe = ({
       return;
     }
 
-    // We need to mark profile state fields to reset on index pattern changes
-    // when loading starts to ensure the correct pre fetch state is available
-    // before data fetching is triggered
+    // We need to mark profile app state default fields to reset on index pattern
+    // changes when loading starts to ensure the correct pre fetch state is
+    // available before data fetching is triggered
     if (next.fetchStatus === FetchStatus.LOADING) {
       // We have to grab the current query from appState
       // here since nextQuery has not been updated yet
@@ -90,10 +92,10 @@ export const buildEsqlFetchSubscribe = ({
           getIndexPatternFromESQLQuery(appStateQuery.esql) !==
           getIndexPatternFromESQLQuery(prevEsqlData.query);
 
-        // Mark all profile state fields to reset when the index pattern changes
+        // Mark all profile app state default fields to reset when the index pattern changes
         if (indexPatternChanged) {
           internalState.dispatch(
-            injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
+            injectCurrentTab(internalStateActions.setProfileAppStateDefaultFieldsToReset)({
               fieldsToReset: 'all',
             })
           );
@@ -116,8 +118,12 @@ export const buildEsqlFetchSubscribe = ({
     let nextAllColumns = prevEsqlData.allColumns;
     let nextDefaultColumns = prevEsqlData.defaultColumns;
 
-    if (next.result?.length) {
-      nextAllColumns = Object.keys(next.result[0].raw);
+    const responseColumns =
+      next.esqlQueryColumns?.map((c) => c.name) ??
+      (next.result?.length ? Object.keys(next.result[0].raw) : undefined);
+
+    if (responseColumns !== undefined) {
+      nextAllColumns = responseColumns;
 
       if (
         hasTransformationalCommand(nextQuery.esql) ||
@@ -129,7 +135,9 @@ export const buildEsqlFetchSubscribe = ({
       }
     }
 
-    if (prevEsqlData.initialFetch) {
+    const isInitialFetch = prevEsqlData.initialFetch;
+
+    if (isInitialFetch) {
       prevEsqlData.initialFetch = false;
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.allColumns = nextAllColumns;
@@ -145,34 +153,40 @@ export const buildEsqlFetchSubscribe = ({
       getIndexPatternFromESQLQuery(nextQuery.esql) !==
       getIndexPatternFromESQLQuery(prevEsqlData.query);
 
-    const allColumnsChanged = !isEqual(nextAllColumns, prevEsqlData.allColumns);
-
     const changeDefaultColumns =
       indexPatternChanged || !isEqual(nextDefaultColumns, prevEsqlData.defaultColumns);
+
+    const appStateColumns = getCurrentTab().appState.columns ?? [];
+    const stickSource = !shouldResetProfileAppStateDefaultField(
+      getCurrentTab().profileAppStateDefaults,
+      'columns'
+    );
+    const columnsFromResponse = appStateColumns.filter(
+      (column) => responseColumns?.includes(column) ?? true
+    );
+    const nextSelectedColumns = withStickySource(appStateColumns, columnsFromResponse, stickSource);
+    const changeSelectedColumns = !isInitialFetch && !isEqual(nextSelectedColumns, appStateColumns);
 
     const { viewMode } = getCurrentTab().appState;
     const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
 
-    // If the index pattern hasn't changed, but the available columns have changed
-    // due to transformational commands, mark the associated profile state fields to reset
-    if (!indexPatternChanged && allColumnsChanged) {
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setProfileStateFieldsToReset)({
-          fieldsToReset: ['columns'],
-        })
-      );
-    }
-
     prevEsqlData.allColumns = nextAllColumns;
 
-    if (indexPatternChanged || changeDefaultColumns || changeViewMode) {
+    if (indexPatternChanged || changeDefaultColumns || changeSelectedColumns || changeViewMode) {
       prevEsqlData.query = nextQuery.esql;
       prevEsqlData.defaultColumns = nextDefaultColumns;
 
       // just change URL state if necessary
-      if (changeDefaultColumns || changeViewMode) {
+      if (changeDefaultColumns || changeSelectedColumns || changeViewMode) {
+        let nextColumns: string[] | undefined;
+        if (changeDefaultColumns) {
+          nextColumns = withStickySource(appStateColumns, nextDefaultColumns, stickSource);
+        } else if (changeSelectedColumns) {
+          nextColumns = nextSelectedColumns;
+        }
+
         const nextState = {
-          ...(changeDefaultColumns && { columns: nextDefaultColumns }),
+          ...(nextColumns && { columns: nextColumns }),
           ...(changeViewMode && { viewMode: undefined }),
         };
 
@@ -191,4 +205,31 @@ export const buildEsqlFetchSubscribe = ({
   };
 
   return { esqlFetchSubscribe, cleanupEsql };
+};
+
+/**
+ * Inserts Summary (`_source`) into the new ES|QL column list at its previous index
+ * when `stickSource` is true. Does not re-insert Summary if the user turned it off.
+ */
+const withStickySource = (
+  previousColumns: string[],
+  nextColumns: string[],
+  stickSource: boolean
+): string[] => {
+  if (!stickSource) {
+    return nextColumns;
+  }
+
+  const sourceIndex = previousColumns.indexOf(SOURCE_COLUMN);
+  if (sourceIndex === -1) {
+    return nextColumns;
+  }
+
+  const columnsWithoutSource = nextColumns.filter((column) => column !== SOURCE_COLUMN);
+  const insertAt = Math.min(sourceIndex, columnsWithoutSource.length);
+  return [
+    ...columnsWithoutSource.slice(0, insertAt),
+    SOURCE_COLUMN,
+    ...columnsWithoutSource.slice(insertAt),
+  ];
 };

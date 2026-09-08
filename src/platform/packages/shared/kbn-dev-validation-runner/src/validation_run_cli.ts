@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FlagHelpItem } from '@kbn/dev-cli-runner';
 import type { ResolvedValidationContract } from '@kbn/dev-utils';
 import type { MoonAffectedBase } from '@kbn/moon';
 import type { ValidationRunFlagsInput } from './resolve_validation_run_context';
@@ -23,15 +24,21 @@ export const VALIDATION_RUN_STRING_FLAGS = [
 
 const VALIDATION_RUN_FLAGS = new Set(VALIDATION_RUN_STRING_FLAGS.map((flag) => `--${flag}`));
 
-/** Shared validation help text block for CLI usage messages. */
-export const VALIDATION_RUN_HELP = `
-        --profile [name]        Validation profile: precommit, quick, agent, branch, pr, full (default: branch)
-        --scope [scope]         Scope: staged, local, branch, full
-        --test-mode [mode]      Test selection mode: related, affected, all
-        --base-ref [git-ref]    Base revision for branch scope
-        --head-ref [git-ref]    Head revision for branch scope (default: HEAD)
-        --downstream [mode]     Downstream mode for related/affected: none, direct, deep
-`;
+/** Shared validation flag help items for CLI usage messages. */
+export const VALIDATION_RUN_HELP: FlagHelpItem[] = [
+  {
+    flag: '--profile [name]',
+    description: 'Validation profile: precommit, quick, agent, branch, pr, full (default: branch)',
+  },
+  { flag: '--scope [scope]', description: 'Scope: staged, local, branch, full' },
+  { flag: '--test-mode [mode]', description: 'Test selection mode: related, affected, all' },
+  { flag: '--base-ref [git-ref]', description: 'Base revision for branch scope' },
+  { flag: '--head-ref [git-ref]', description: 'Head revision for branch scope (default: HEAD)' },
+  {
+    flag: '--downstream [mode]',
+    description: 'Downstream mode for related/affected: none, direct, deep',
+  },
+];
 
 /** Minimal flags reader contract needed to parse shared validation flags. */
 export interface ValidationRunFlagsReader {

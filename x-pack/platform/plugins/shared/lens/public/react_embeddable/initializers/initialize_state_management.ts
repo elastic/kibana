@@ -12,15 +12,17 @@ import {
   type PublishesSavedObjectId,
   type PublishesRendered,
 } from '@kbn/presentation-publishing';
-import { noop } from 'lodash';
+import deepEqual from 'fast-deep-equal';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, map, merge } from 'rxjs';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensRuntimeState,
   LensSerializedState,
 } from '@kbn/lens-common';
+import type { LensWireAPIConfig } from '@kbn/lens-common-2';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../../common/transforms/utils';
 
 export interface StateManagementConfig {
   api: Pick<IntegrationCallbacks, 'updateAttributes' | 'updateRefId'> &
@@ -47,6 +49,25 @@ export function initializeStateManagement(
   // savedObjectId$ exposed for PublishesSavedObjectId compatibility, sourced from ref_id in state
   const savedObjectId$ = new BehaviorSubject<string | undefined>(initialState.ref_id);
 
+  const resolveAttributes = (
+    value: LensSerializedState['attributes'] | undefined,
+    state?: LensWireAPIConfig
+  ) => {
+    if (value !== undefined) return value;
+    if (state && 'attributes' in state && state.attributes) {
+      return state.attributes;
+    }
+    if (state && isFlattenedAPIConfig(state)) {
+      return unflattenAPIConfig(state).attributes;
+    }
+    return value;
+  };
+
+  const publicRenderCount$ = new BehaviorSubject(internalApi.renderCount$.getValue() + 1);
+  const renderCountSubscription = internalApi.renderCount$.subscribe((count) =>
+    publicRenderCount$.next(count + 1)
+  );
+
   return {
     api: {
       updateAttributes: internalApi.updateAttributes,
@@ -56,11 +77,24 @@ export function initializeStateManagement(
       dataLoading$: internalApi.dataLoading$,
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
+      renderCount$: publicRenderCount$,
     },
-    anyStateChange$: merge(internalApi.attributes$).pipe(map(() => undefined)),
+    anyStateChange$: merge(
+      internalApi.attributes$.pipe(
+        skip(1),
+        map(() => undefined)
+      )
+    ),
     getComparators: () => {
       return {
-        attributes: initialState.ref_id === undefined ? 'deepEquality' : 'skip',
+        attributes:
+          initialState.ref_id === undefined
+            ? (lastValue, currentValue, lastState, currentState) => {
+                const lastAttributes = resolveAttributes(lastValue, lastState);
+                const currentAttributes = resolveAttributes(currentValue, currentState);
+                return deepEqual(lastAttributes, currentAttributes);
+              }
+            : 'skip',
         ref_id: 'skip',
       };
     },
@@ -73,6 +107,8 @@ export function initializeStateManagement(
     reinitializeRuntimeState: (lastSavedRuntimeState: LensRuntimeState) => {
       internalApi.updateAttributes(lastSavedRuntimeState.attributes);
     },
-    cleanup: noop,
+    cleanup: () => {
+      renderCountSubscription.unsubscribe();
+    },
   };
 }

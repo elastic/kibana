@@ -197,7 +197,6 @@ export const RangeSliderControl: FC<Props> = ({
   return (
     <ConditionalLabelWrapper label={label} isPinned={isPinned}>
       <span
-        data-shared-item
         css={[styles.rangeSliderControl, isInvalid && styles.invalid, isEdit && styles.editMode]}
         className="rangeSliderAnchor__button kbnGridLayout--hideDragHandle"
         data-test-subj={`range-slider-control-${uuid}`}
@@ -228,11 +227,10 @@ export const RangeSliderControl: FC<Props> = ({
                 <EuiToolTip
                   position="top"
                   content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}
-                  delay="long"
                 >
                   <EuiToken
                     tabIndex={0}
-                    iconType="alert"
+                    iconType="warning"
                     size="s"
                     color="euiColorVis9"
                     shape="square"

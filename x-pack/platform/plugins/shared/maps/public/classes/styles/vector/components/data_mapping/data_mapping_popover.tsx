@@ -40,12 +40,7 @@ export class DataMappingPopover extends Component<Props, State> {
 
   _renderButton() {
     return (
-      <EuiButtonEmpty
-        onClick={this._togglePopover}
-        size="xs"
-        iconType="controlsHorizontal"
-        iconSide="left"
-      >
+      <EuiButtonEmpty onClick={this._togglePopover} size="xs" iconType="controls" iconSide="left">
         <FormattedMessage
           id="xpack.maps.styles.fieldMetaOptions.popoverToggle"
           defaultMessage="Data mapping"

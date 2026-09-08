@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+import type { SavedObjectErrorResult } from '@kbn/core/server';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   UiamApiKeyProvisioningStatus,
   UiamApiKeyProvisioningEntityType,
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import type { ProvisioningStatusDocs, UiamApiKeyByRuleId } from '../types';
+import { getErrorMessage } from './error_utils';
 
 /**
  * Builds a provisioning status doc for a rule that was skipped (no API key, already has UIAM key, or user-created key).
@@ -35,7 +38,8 @@ export const createSkippedRuleStatus = (
  */
 export const createFailedConversionStatus = (
   ruleId: string,
-  message: string
+  message: string,
+  errorCode?: string
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
   id: ruleId,
@@ -45,6 +49,7 @@ export const createFailedConversionStatus = (
     entityType: UiamApiKeyProvisioningEntityType.RULE,
     status: UiamApiKeyProvisioningStatus.FAILED,
     message,
+    ...(errorCode ? { errorCode } : {}),
   },
 });
 
@@ -53,7 +58,7 @@ export const createFailedConversionStatus = (
  */
 export interface BulkUpdateResultItem {
   id: string;
-  error?: { message?: string };
+  error?: SavedObjectErrorResult['error'];
 }
 
 export interface ProvisioningStatusWritePayload {
@@ -105,7 +110,9 @@ export const createStatusFromBulkUpdateResult = (
     status: so.error ? UiamApiKeyProvisioningStatus.FAILED : UiamApiKeyProvisioningStatus.COMPLETED,
     ...(so.error
       ? {
-          message: `Error bulk updating the rule with ID ${so.id}: ${so.error.message ?? so.error}`,
+          message: `Error bulk updating the rule with ID ${so.id}: ${
+            so.error.message ?? getErrorMessage(so.error)
+          }`,
         }
       : {}),
   },
@@ -129,7 +136,7 @@ export const statusDocsAndOrphanedKeysFromBulkUpdate = (
   const orphanedUiamApiKeys: string[] = [];
   for (const so of savedObjects) {
     const statusDoc = createStatusFromBulkUpdateResult(so);
-    if (so.error) {
+    if (isSavedObjectErrorResult(so)) {
       provisioningStatusForFailedRules.push(statusDoc);
       const uiamApiKey = rulesWithUiamApiKeys.get(so.id)?.uiamApiKey;
       if (uiamApiKey) {

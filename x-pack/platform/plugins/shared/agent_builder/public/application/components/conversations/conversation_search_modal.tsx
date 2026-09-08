@@ -15,13 +15,14 @@ import {
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
   EuiTextTruncate,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import {
   createActiveConversationListItemStyles,
@@ -37,9 +38,6 @@ const labels = {
     'xpack.agentBuilder.conversationSearchModal.searchPlaceholder',
     { defaultMessage: 'Search chats' }
   ),
-  latestChats: i18n.translate('xpack.agentBuilder.conversationSearchModal.latestChats', {
-    defaultMessage: 'Latest chats',
-  }),
 };
 
 const MODAL_WIDTH = 480;
@@ -63,14 +61,21 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
 
-  const { conversations = [], isLoading } = useConversationList({ agentId });
+  // Consume both the pinned and unpinned caches — opening the modal costs no
+  // extra network request since ConversationList and PinnedConversationList
+  // have already populated these keys in the sidebar.
+  const { conversations: unpinnedConversations = [], isLoading: isLoadingUnpinned } =
+    useConversationList({ agentId, pinned: false });
+  const { conversations: pinnedConversations = [], isLoading: isLoadingPinned } =
+    useConversationList({ agentId, pinned: true });
+  const isLoading = isLoadingUnpinned || isLoadingPinned;
 
   const sortedConversations = useMemo(
     () =>
-      [...conversations].sort(
+      [...pinnedConversations, ...unpinnedConversations].sort(
         (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
       ),
-    [conversations]
+    [pinnedConversations, unpinnedConversations]
   );
 
   const filteredConversations = useMemo(() => {
@@ -85,7 +90,7 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
   const listStyles = css`
     overflow-y: auto;
     max-height: ${LIST_MAX_HEIGHT}px;
-    margin-top: ${euiTheme.size.s};
+    margin-top: ${euiTheme.size.m};
   `;
 
   const renderList = () => {
@@ -116,6 +121,10 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
                   onClose();
                 }}
                 data-test-subj={`agentBuilderConversationSearchResult-${conversation.id}`}
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.sidebar,
+                  action: AGENT_BUILDER_UI_EBT.action.conversationList.CONVERSATION_RESUME,
+                })}
               >
                 <EuiTextTruncate text={conversation.title || conversation.id} />
               </button>
@@ -147,16 +156,6 @@ export const ConversationSearchModal: React.FC<ConversationSearchModalProps> = (
           onChange={(e) => setSearchValue(e.target.value)}
           data-test-subj="agentBuilderConversationSearchInput"
         />
-
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            margin-top: ${euiTheme.size.m};
-          `}
-        >
-          <p>{labels.latestChats}</p>
-        </EuiText>
 
         <div css={listStyles}>{renderList()}</div>
       </EuiModalBody>

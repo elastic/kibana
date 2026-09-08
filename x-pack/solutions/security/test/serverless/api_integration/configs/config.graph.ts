@@ -19,7 +19,7 @@ export default createTestConfig({
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
     '--coreApp.allowDynamicConfigOverrides=true',
     `--xpack.securitySolutionServerless.cloudSecurityUsageReportingTaskInterval=5s`,
-    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8081`,
+    `--xpack.securitySolutionServerless.usageApi.url=http://localhost:8089`,
     '--xpack.dataUsage.enabled=true',
     '--xpack.dataUsage.enableExperimental=[]',
     '--xpack.dataUsage.autoops.enabled=true',

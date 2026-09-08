@@ -39,9 +39,6 @@ describe('searchEmbeddableTransforms', () => {
     jest.clearAllMocks();
   });
 
-  const whenEnabled = () => true;
-  const whenDisabled = () => false;
-
   describe('transformOut', () => {
     it('converts by-reference stored state to DiscoverSession API shape', () => {
       const state: StoredSearchEmbeddableState = {
@@ -52,15 +49,15 @@ describe('searchEmbeddableTransforms', () => {
       const references = [
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-123' },
       ];
-      const result = getSearchEmbeddableTransforms(
-        mockDrilldownTransforms,
-        whenEnabled
-      ).transformOut?.(state, references);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
+        state,
+        references
+      );
       expect(result).toEqual({
         title: 'Test Title',
         description: 'Test Description',
         time_range: { from: 'now-15m', to: 'now' },
-        discover_session_id: 'session-123',
+        ref_id: 'session-123',
         selected_tab_id: undefined,
         overrides: {},
       });
@@ -117,10 +114,10 @@ describe('searchEmbeddableTransforms', () => {
           id: 'data-view-1',
         },
       ];
-      const result = getSearchEmbeddableTransforms(
-        mockDrilldownTransforms,
-        whenEnabled
-      ).transformOut?.(state, references) as DiscoverSessionEmbeddableByValueState;
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
+        state,
+        references
+      ) as DiscoverSessionEmbeddableByValueState;
       expect(result.title).toBe('Panel Title');
       expect(result.description).toBe('Panel description');
       expect(result.tabs).toHaveLength(1);
@@ -136,10 +133,11 @@ describe('searchEmbeddableTransforms', () => {
       } = result.tabs[0] as DiscoverSessionClassicTab;
       expect(sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
       expect(viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-      expect(density).toBe(DataGridDensity.COMPACT);
+      expect(density).toBeUndefined();
+      expect(result.tabs[0].header_row_height).toBeUndefined();
       expect(dataSource).toEqual({
         type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
-        id: 'data-view-1',
+        ref_id: 'data-view-1',
       });
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, references);
     });
@@ -153,15 +151,15 @@ describe('searchEmbeddableTransforms', () => {
       const mockReferences = [
         { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-xyz' },
       ];
-      const result = getSearchEmbeddableTransforms(
-        mockDrilldownTransforms,
-        whenEnabled
-      ).transformOut?.(state, mockReferences);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformOut?.(
+        state,
+        mockReferences
+      );
       expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(state, mockReferences);
       expect(result).toMatchObject({
         title: 'Test Title',
         description: 'Test Description',
-        discover_session_id: 'session-xyz',
+        ref_id: 'session-xyz',
       });
     });
   });
@@ -173,13 +171,13 @@ describe('searchEmbeddableTransforms', () => {
           title: 'Test Search',
           description: 'Test Description',
           time_range: { from: 'now-15m', to: 'now' },
-          discover_session_id: 'test-saved-object-id',
+          ref_id: 'test-saved-object-id',
           selected_tab_id: undefined,
           overrides: {},
         };
 
-        const result = getSearchEmbeddableTransforms(mockDrilldownTransforms, whenEnabled)
-          .transformIn!(apiState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
         expect(result.state).toEqual({
           title: 'Test Search',
@@ -201,13 +199,13 @@ describe('searchEmbeddableTransforms', () => {
           title: 'My Search',
           description: 'My description',
           time_range: { from: 'now-1h', to: 'now' },
-          discover_session_id: 'session-456',
+          ref_id: 'session-456',
           selected_tab_id: 'tab-1',
           overrides: {},
         };
 
-        const result = getSearchEmbeddableTransforms(mockDrilldownTransforms, whenEnabled)
-          .transformIn!(apiState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
         expect(result.state).toEqual({
           title: 'My Search',
@@ -239,17 +237,17 @@ describe('searchEmbeddableTransforms', () => {
               density: DataGridDensity.COMPACT,
               header_row_height: 'auto',
               row_height: 'auto',
-              query: { language: 'kuery', query: '' },
+              query: { language: 'kql', expression: '' },
               filters: [],
               rows_per_page: 100,
               sample_size: 1000,
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-1' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
             },
           ],
         };
 
-        const result = getSearchEmbeddableTransforms(mockDrilldownTransforms, whenEnabled)
-          .transformIn!(apiState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
         expect(result.references).toContainEqual({
           id: 'data-view-1',
@@ -279,15 +277,15 @@ describe('searchEmbeddableTransforms', () => {
               density: DataGridDensity.COMPACT,
               header_row_height: 3,
               row_height: 3,
-              query: { language: 'kuery', query: '' },
+              query: { language: 'kql', expression: '' },
               filters: [],
-              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, id: 'data-view-id-123' },
+              data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-id-123' },
             },
           ],
         };
 
-        const result = getSearchEmbeddableTransforms(mockDrilldownTransforms, whenEnabled)
-          .transformIn!(apiState);
+        const result =
+          getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
 
         expect(result.references).toContainEqual(dataViewRef);
         expect((result.state as StoredSearchEmbeddableByValueState).attributes).not.toHaveProperty(
@@ -297,43 +295,19 @@ describe('searchEmbeddableTransforms', () => {
     });
   });
 
-  describe('when feature flag is disabled (legacy main behavior)', () => {
-    it('transformIn runs legacy transform: extracts savedObjectId to reference (by-ref)', () => {
+  describe('legacy incoming panel state (BWC)', () => {
+    it('transformIn extracts savedObjectId to a reference (by-ref)', () => {
       const apiState: SearchEmbeddableState = {
         title: 'Title',
         savedObjectId: 'session-1',
       };
-      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms, whenDisabled)
-        .transformIn!(apiState);
+      const result = getSearchEmbeddableTransforms(mockDrilldownTransforms).transformIn!(apiState);
       expect(mockDrilldownTransforms.transformIn).toHaveBeenCalledWith(apiState);
       expect(result.state).not.toHaveProperty('savedObjectId');
       expect(result.references).toContainEqual({
         name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME,
         type: SavedSearchType,
         id: 'session-1',
-      });
-    });
-
-    it('transformOut runs legacy transform: injects savedObjectId from references (by-ref)', () => {
-      const storedState: StoredSearchEmbeddableState = {
-        title: 'Title',
-        description: 'Description',
-        time_range: { from: 'now-15m', to: 'now' },
-      };
-      const references = [
-        { name: SAVED_SEARCH_SAVED_OBJECT_REF_NAME, type: SavedSearchType, id: 'session-1' },
-      ];
-      const result = getSearchEmbeddableTransforms(
-        mockDrilldownTransforms,
-        whenDisabled
-      ).transformOut?.(storedState, references);
-      expect(mockDrilldownTransforms.transformOut).toHaveBeenCalledWith(
-        expect.anything(),
-        references
-      );
-      expect(result).toMatchObject({
-        title: 'Title',
-        savedObjectId: 'session-1',
       });
     });
   });

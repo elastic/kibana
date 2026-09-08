@@ -7,6 +7,8 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -99,6 +101,7 @@ interface ActionButtonConfig {
   label: string;
   iconType: string;
   onClick?: () => void;
+  ebtProps?: Record<string, string>;
 }
 
 const healthStatusMessages: Record<McpToolUnhealthyStatus, StatusMessageConfig> = {
@@ -139,24 +142,40 @@ export const McpHealthBanner = ({
     label: mcpHealthI18nMessages.deleteToolButtonLabel,
     iconType: 'trash',
     onClick: onDeleteTool,
+    ebtProps: getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+    }),
   };
 
   const createNewToolButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.createNewToolButtonLabel,
     iconType: 'plus',
     onClick: onCreateNewTool,
+    ebtProps: getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.globalManagement.NEW_TOOL,
+    }),
   };
 
   const viewConnectorsButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.viewConnectorsButtonLabel,
     iconType: 'eye',
     onClick: onViewConnectors,
+    ebtProps: getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.globalManagement.VIEW_CONNECTORS,
+    }),
   };
 
   const viewMcpServerButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.viewMcpServerButtonLabel,
     iconType: 'eye',
     onClick: onViewMcpServer,
+    ebtProps: getEbtProps({
+      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_MCP,
+    }),
   };
 
   const healthStatusButtons: Record<McpToolUnhealthyStatus, ActionButtonConfig[]> = {
@@ -198,6 +217,7 @@ export const McpHealthBanner = ({
                 iconType={button.iconType}
                 onClick={button.onClick}
                 fill={index === 0}
+                {...button.ebtProps}
               >
                 {button.label}
               </EuiButton>

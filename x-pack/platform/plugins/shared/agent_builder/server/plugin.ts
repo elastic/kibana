@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
-  AGENT_BUILDER_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-  AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-} from '@kbn/agent-builder-common/constants';
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+  SUPPORTED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_BYTES,
+} from '@kbn/agent-builder-common/attachments';
+import { createConversationPublicClient } from './services/conversation/conversation_public_client';
 import type { AgentBuilderConfig } from './config';
+import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
 import type {
   AgentBuilderPluginSetup,
@@ -24,8 +33,9 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
-import { getRunAgentStepDefinition } from './step_types';
+import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
 import { registerAgentBuilderHandlerContext } from './request_handler_context';
 import { createAgentBuilderUsageCounter } from './telemetry/usage_counters';
@@ -35,12 +45,17 @@ import { AnalyticsService } from './telemetry';
 import { registerSampleData } from './register_sample_data';
 import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/register_before_agent_workflows_hook';
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
-import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
-import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
+import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
+import { registerInferenceFeatures } from './inference_features';
+import { createConversationEventBus } from './workflows/triggers/conversation_event_bus';
+import { registerConversationWorkflowSteps } from './workflows';
+import { registerConversationWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { AGENTBUILDER_FEATURE_ID } from '../common/features';
+import { runToolIdBackfill } from './backfills/tool_id_backfill';
 
 export class AgentBuilderPlugin
   implements
@@ -58,6 +73,10 @@ export class AgentBuilderPlugin
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
   private home: HomeServerPluginSetup | null = null;
+  private teardownTracing?: () => Promise<void>;
+  private startDeps?: AgentBuilderStartDependencies;
+  private readonly conversationEventBus = createConversationEventBus();
+  private isExperimentalEnabled?: (request: KibanaRequest) => Promise<boolean>;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get();
@@ -69,6 +88,20 @@ export class AgentBuilderPlugin
     setupDeps: AgentBuilderSetupDependencies
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
+
+    setupDeps.files.registerFileKind({
+      id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+      allowedMimeTypes: [...SUPPORTED_IMAGE_MIME_TYPES],
+      maxSizeBytes: MAX_IMAGE_BYTES,
+      http: {
+        create: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        download: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        getById: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        list: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+        delete: { requiredPrivileges: [AGENTBUILDER_FEATURE_ID] },
+      },
+    });
+
     // Create usage counter for telemetry (if usageCollection is available)
     if (setupDeps.usageCollection) {
       this.usageCounter = createAgentBuilderUsageCounter(setupDeps.usageCollection);
@@ -82,24 +115,7 @@ export class AgentBuilderPlugin
       this.logger.warn('Usage collection plugin not available, telemetry disabled');
     }
 
-    if (setupDeps.searchInferenceEndpoints) {
-      setupDeps.searchInferenceEndpoints.features.register({
-        featureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Parent feature for Agent Builder',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-
-      setupDeps.searchInferenceEndpoints.features.register({
-        parentFeatureId: AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID,
-        featureId: AGENT_BUILDER_INFERENCE_FEATURE_ID,
-        featureName: 'Agent Builder',
-        featureDescription: 'Agent Builder inference endpoint configuration',
-        taskType: 'chat_completion',
-        recommendedEndpoints: AGENT_BUILDER_RECOMMENDED_ENDPOINTS,
-      });
-    }
+    registerInferenceFeatures({ searchInferenceEndpoints: setupDeps.searchInferenceEndpoints });
 
     // Register server-side EBT events for Agent Builder
     this.analyticsService = new AnalyticsService(
@@ -114,6 +130,7 @@ export class AgentBuilderPlugin
       trackingService: this.trackingService,
       cloud: setupDeps.cloud,
       usageApi: setupDeps.usageApi,
+      actions: setupDeps.actions,
     });
 
     registerTaskDefinitions({
@@ -127,26 +144,9 @@ export class AgentBuilderPlugin
       },
     });
 
-    // Register SML crawler task definition
-    registerSmlCrawlerTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getCrawlerDeps: async () => {
-        const [coreStart] = await coreSetup.getStartServices();
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('getCrawlerDeps called before service init');
-        }
-        return {
-          smlService: services.sml,
-          elasticsearch: coreStart.elasticsearch,
-          savedObjects: coreStart.savedObjects,
-          uiSettings: coreStart.uiSettings,
-          logger: this.logger.get('services.sml'),
-        };
-      },
-    });
-
     registerFeatures({ features: setupDeps.features });
+
+    coreSetup.savedObjects.registerType(agentBuilderSpaceSettingsType);
 
     // Phantom capability: not a registered feature privilege. Used as an admin check
     // (e.g. superuser / wildcard roles get true). Resolved in the switcher via ES hasPrivileges.
@@ -163,8 +163,29 @@ export class AgentBuilderPlugin
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
+    this.isExperimentalEnabled = async (request: KibanaRequest): Promise<boolean> => {
+      const [coreStart] = await coreSetup.getStartServices();
+      const soClient = coreStart.savedObjects.getScopedClient(request);
+      return coreStart.uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+    };
+
     setupDeps.workflowsExtensions.registerStepDefinition(
       getRunAgentStepDefinition(this.serviceManager)
+    );
+    setupDeps.workflowsExtensions.registerStepDefinition(rerankStepDefinition);
+
+    registerConversationWorkflowSteps(
+      setupDeps.workflowsExtensions,
+      async (request) => {
+        const services = this.serviceManager.internalStart;
+        if (!services) {
+          throw new Error('Conversation service not available — plugin has not started');
+        }
+        return services.conversations.getScopedClient({ request });
+      },
+      this.isExperimentalEnabled
     );
 
     registerAgentBuilderHandlerContext({ coreSetup });
@@ -194,36 +215,35 @@ export class AgentBuilderPlugin
       getInternalServices,
     });
 
-    registerSkillToolsLoaderHook(serviceSetups);
+    registerSkillToolsLoaderHook(serviceSetups, {
+      analyticsService: this.analyticsService,
+      trackingService: this.trackingService,
+    });
 
     const smlTools = createSmlTools({
-      getSmlService: () => {
-        const services = this.serviceManager.internalStart;
-        if (!services) {
-          throw new Error('SML service not available — plugin has not started');
+      getAgentBuilderSml: () => {
+        if (!this.startDeps) {
+          throw new Error('Agent Builder SML not available — plugin has not started');
         }
-        return services.sml;
+        return this.startDeps.agentBuilderSml;
       },
     });
     smlTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 
-    // Register connector lifecycle listener to auto-create workflows/tools
-    // when connectors with workflow definitions are created.
-    // The handler checks the connectors-enabled feature flag and workflows
-    // availability at runtime, so we always register.
-    const connectorLifecycleHandler = createConnectorLifecycleHandler({
-      serviceManager: this.serviceManager,
-      workflowsManagement: setupDeps.workflowsManagement,
-      logger: this.logger.get('connector-lifecycle'),
-      getStartServices: coreSetup.getStartServices,
+    const connectorTools = createConnectorTools({
+      getActions: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
+      getInference: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.inference;
+      },
     });
-
-    setupDeps.actions.registerConnectorLifecycleListener({
-      connectorTypes: '*',
-      onPostCreate: connectorLifecycleHandler.onPostCreate,
-      onPostDelete: connectorLifecycleHandler.onPostDelete,
+    connectorTools.forEach((tool) => {
+      serviceSetups.tools.register(tool);
     });
 
     return {
@@ -232,9 +252,16 @@ export class AgentBuilderPlugin
       },
       agents: {
         register: serviceSetups.agents.register.bind(serviceSetups.agents),
+        registerType: serviceSetups.agents.registerType.bind(serviceSetups.agents),
+        registerAiIndexResolver: serviceSetups.agents.registerAiIndexResolver.bind(
+          serviceSetups.agents
+        ),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
+      renderers: {
+        register: serviceSetups.renderers.register.bind(serviceSetups.renderers),
       },
       hooks: {
         register: serviceSetups.hooks.register.bind(serviceSetups.hooks),
@@ -245,22 +272,49 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
-      sml: {
-        registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
+      conversationTemplates: {
+        register: serviceSetups.conversationTemplates.register.bind(
+          serviceSetups.conversationTemplates
+        ),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 
-  start(
-    coreStart: CoreStart,
-    { inference, spaces, actions, taskManager }: AgentBuilderStartDependencies
-  ): AgentBuilderPluginStart {
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+  start(coreStart: CoreStart, startDeps: AgentBuilderStartDependencies): AgentBuilderPluginStart {
+    this.startDeps = startDeps;
+    void registerTracingExporter({
+      core: coreStart,
+      tracingConfig: this.config.tracing,
+      logger: this.logger.get('tracing'),
+    }).then((teardownTracing) => {
+      this.teardownTracing = teardownTracing;
+    });
+    const {
+      inference,
+      spaces,
+      actions,
+      taskManager,
+      searchInferenceEndpoints,
+      security: securityPlugin,
+    } = startDeps;
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
+
+    this.cleanupLegacySmlTasks(taskManager).catch((error) => {
+      this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
+    });
+
+    this.runBackfill(elasticsearch).catch((error) => {
+      this.logger.error(`Backfill failed: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
+      securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
@@ -271,10 +325,27 @@ export class AgentBuilderPlugin
       taskManager,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      searchInferenceEndpoints,
+      conversationEventBus: this.conversationEventBus,
     });
 
-    const { tools, agents, skills, runnerFactory, execution, plugins, conversations } =
-      startServices;
+    registerConversationWorkflowEventBridge(
+      this.conversationEventBus,
+      startDeps.workflowsExtensions,
+      this.logger,
+      this.isExperimentalEnabled!
+    );
+
+    const {
+      tools,
+      agents,
+      skills,
+      runnerFactory,
+      execution,
+      plugins,
+      conversations,
+      conversationTemplates,
+    } = startServices;
     const runner = runnerFactory.getRunner();
 
     if (this.home) {
@@ -286,22 +357,14 @@ export class AgentBuilderPlugin
       uiSettings,
       savedObjects,
       trackingService: this.trackingService,
+      searchInferenceEndpoints,
+      logger: this.logger.get('model-provider'),
     });
-
-    // Schedule SML crawler tasks for all registered types
-    scheduleSmlCrawlerTasks({
-      taskManager,
-      smlService: startServices.sml,
-      logger: this.logger.get('services.sml'),
-    }).catch((error) => {
-      this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
-    });
-
-    const smlService = startServices.sml;
 
     return {
       agents: {
         getRegistry: ({ request }) => agents.getRegistry({ request }),
+        ensure: agents.ensure,
         runAgent: runner.runAgent.bind(runner),
       },
       tools: {
@@ -326,31 +389,43 @@ export class AgentBuilderPlugin
       conversations: {
         getScopedClient: async ({ request }) => {
           const client = await conversations.getScopedClient({ request });
-          return {
-            get: client.get.bind(client),
-            list: client.list.bind(client),
-          };
+          const agentRegistry = await agents.getRegistry({ request });
+          return createConversationPublicClient({ client, agentRegistry });
         },
       },
-      sml: {
-        indexAttachment: async (params) => {
-          const soClient = savedObjects.getScopedClient(params.request);
-          const spaceId =
-            params.spaceId ?? spaces?.spacesService?.getSpaceId(params.request) ?? 'default';
-          return smlService.indexAttachment({
-            originId: params.originId,
-            attachmentType: params.attachmentType,
-            action: params.action,
-            spaces: [spaceId],
-            esClient: elasticsearch.client.asInternalUser,
-            savedObjectsClient: soClient,
-            logger: this.logger.get('services.sml'),
-            request: params.request,
-          });
-        },
-      },
+      conversationTemplates,
     };
   }
 
-  stop() {}
+  async stop() {
+    await this.teardownTracing?.();
+  }
+
+  /**
+   * Applies all registered tool ID backfills.
+   */
+  private async runBackfill(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+    const logger = this.logger.get('backfill');
+    const esClient = elasticsearch.client.asInternalUser;
+    await runToolIdBackfill(logger, esClient);
+  }
+
+  /**
+   * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
+   * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
+   */
+  private async cleanupLegacySmlTasks(taskManager: AgentBuilderStartDependencies['taskManager']) {
+    const logger = this.logger.get('sml-migration');
+    const legacyTaskIds = [
+      'agent_builder:sml_crawler:visualization',
+      'agent_builder:sml_crawler:connector',
+      'agent_builder:sml_crawler:dashboard',
+      'agent_builder:sml_crawler:workflow',
+    ];
+    try {
+      await taskManager.bulkRemove(legacyTaskIds);
+    } catch (error) {
+      logger.warn(`Failed to remove legacy SML crawler tasks: ${(error as Error).message}`);
+    }
+  }
 }

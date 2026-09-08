@@ -15,9 +15,9 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  // Elastic Defend should be heavily boosted so that even if it is slighly relevant to the keywords, it should be available for LLM to make a correct choice. Since Defend is a general puporse integration,
-  // LLM chooses it for rules implementing broad detection logic
+  // These integrations should be boosted because in many cases they are used as fallback.
   { ids: ['endpoint'], weight: 10 },
+  { ids: ['network_traffic'], weight: 10 },
 ];
 
 const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];
@@ -29,12 +29,19 @@ const MAX_KB_TOKENS = 80_000;
  * for which artifacts are being migrated
  *
  * */
-const EXCLUDED_INTEGRATIONS = ['splunk', 'elastic_security', 'ibm_qradar'];
+const EXCLUDED_INTEGRATIONS = [
+  'splunk',
+  'elastic_security',
+  'ibm_qradar',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'sentinel_one_cloud_funnel',
+];
 
 /* The minimum score required for a integration to be considered correct, might need to change this later */
 const MIN_SCORE = 7 as const;
 /* The number of integrations the RAG will return, sorted by score */
-const RETURNED_INTEGRATIONS = 5 as const;
+const RETURNED_INTEGRATIONS = 7 as const;
 const PACKAGE_METADATA_CONCURRENCY = 30 as const;
 
 export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBaseClient {
@@ -100,13 +107,13 @@ export class RuleMigrationsDataIntegrationsClient extends SiemMigrationsDataBase
         pkg.version
       );
 
-      const allPaths = await packageArchive?.archiveIterator.getPaths();
+      const allPaths = await packageArchive?.archiveIterator?.getPaths();
       const relevantPaths = allPaths?.filter((path) =>
         PATH_PATTERNS_TO_INCLUDE_IN_KB.some((includedPath) => path.includes(includedPath))
       );
 
       let currentTokens = 0;
-      await packageArchive?.archiveIterator.traverseEntries(
+      await packageArchive?.archiveIterator?.traverseEntries(
         async (entry) => {
           if (!entry.buffer || !relevantPaths?.includes(entry.path)) {
             return;

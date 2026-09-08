@@ -17,6 +17,7 @@ export {
 } from './search_embeddable_transforms';
 export {
   isDiscoverSessionEmbeddableByReferenceState,
+  isDiscoverSessionEsqlTab,
   isSearchEmbeddableLegacyPanelState,
 } from './type_guards';
 export {

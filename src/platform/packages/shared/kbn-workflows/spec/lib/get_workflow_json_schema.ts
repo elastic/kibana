@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { getOrResolveObject } from '../../common/utils';
+import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '../builtin_workflow_input_definitions';
 
 export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.JSONSchema | null {
   try {
@@ -51,7 +52,9 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
       },
     });
 
-    return stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema;
+    return mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(
+      stripNestedSchemaIds(jsonSchema) as z.core.JSONSchema.JSONSchema
+    );
   } catch (error) {
     // console.error('Error generating JSON schema from YAML schema:', error);
     return null;
@@ -59,10 +62,10 @@ export function getWorkflowJsonSchema(zodSchema: z.ZodType): z.core.JSONSchema.J
 }
 
 /**
- * AJV resolves relative refs against the nearest `$id` scope. After migrating to Zod v4,
- * nested schemas can contain generated refs like `#/definitions/__schemaN`. If a nested
- * object also has `$id`, AJV may resolve these refs from that nested scope ("from id ...")
- * instead of the root schema, causing compile failures.
+ * Some JSON Schema consumers resolve relative `$ref` values against the nearest `$id` scope.
+ * After migrating to Zod v4, nested schemas can contain generated refs like `#/definitions/__schemaN`.
+ * If a nested object also has `$id`, those refs may resolve from that nested scope ("from id ...")
+ * instead of the root schema and break validation or tooling.
  *
  * We strip non-root `$id` fields so draft-7 root-level `definitions` refs stay resolvable.
  */

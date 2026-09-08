@@ -25,7 +25,7 @@ describe('getGraph', () => {
   });
 
   it('should call fetchGraph and parseRecords with correct parameters', async () => {
-    const fakeFetchResult = { events: ['event1', 'event2'], relationships: [] };
+    const fakeFetchResult = { events: ['event1', 'event2'], relationships: [], entities: [] };
     (fetchGraph as jest.Mock).mockResolvedValue(fakeFetchResult);
 
     const parsedResult = { nodes: ['node1'], edges: ['edge1'], messages: ['msg1'] };
@@ -69,6 +69,7 @@ describe('getGraph', () => {
       mockLogger,
       fakeFetchResult.events,
       fakeFetchResult.relationships,
+      fakeFetchResult.entities,
       10
     );
     expect(result).toEqual(parsedResult);

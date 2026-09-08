@@ -89,7 +89,7 @@ export const AssetManager: FC<Props> = (props) => {
   const emptyAssets = (
     <EuiPanel className="canvasAssetManager__emptyPanel">
       <EuiEmptyPrompt
-        iconType="importAction"
+        iconType="download"
         title={<h2>{strings.getEmptyAssetsDescription()}</h2>}
         titleSize="xs"
       />

@@ -30,8 +30,8 @@ export function createStreamsGlobalSearchResultProvider(
   return {
     id: 'streams',
     getSearchableTypes: () => streamTypes,
-    find: ({ term = '' as string, types = [] }, { aborted$, maxResults, client }) => {
-      if (!client) {
+    find: ({ term = '' as string, tags, types = [] }, { aborted$, maxResults, client }) => {
+      if (!client || tags) {
         return from([]);
       }
 

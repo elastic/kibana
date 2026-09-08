@@ -23,13 +23,11 @@ import {
   useEuiMinBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import type { CoreStart } from '@kbn/core/public';
-import {
-  useKibana,
-  overviewPageActions,
-  OverviewPageFooter,
-} from '@kbn/kibana-react-plugin/public';
+import { useKibana, OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -70,8 +68,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const isDarkMode = useKibanaIsDarkMode();
   const minBreakpointM = useEuiMinBreakpoint('m');
 
-  // Home does not have a locator implemented, so hard-code it here.
-  const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
   const managementHref = share.url.locators
     .get('MANAGEMENT_APP_LOCATOR')
@@ -122,7 +118,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     const app = kibanaApps.find(({ id }) => id === appId);
 
     return app ? (
-      <EuiFlexItem className="kbnOverviewApps__item" key={appId}>
+      <EuiFlexItem
+        className="kbnOverviewApps__item"
+        key={appId}
+        data-test-subj={`kbnOverviewAppCard-${appId}`}
+      >
         <EuiCard
           description={app?.subtitle || ''}
           href={addBasePath(app.path)}
@@ -155,6 +155,40 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
     return applications;
   }, [application.capabilities]);
+
+  const menu = useMemo<AppHeaderMenu>(() => {
+    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+      application.capabilities.navLinks;
+    const items: NonNullable<AppHeaderMenu['items']> = [];
+
+    if (managementHref && isManagementEnabled) {
+      items.push({
+        id: 'manage',
+        label: i18n.translate('kibanaOverview.header.stackManagementButtonLabel', {
+          defaultMessage: 'Manage',
+        }),
+        iconType: 'gear',
+        href: managementHref,
+        testId: 'homeManage',
+        order: 0,
+      });
+    }
+
+    if (devToolsHref && !!devTools && isDevToolsEnabled) {
+      items.push({
+        id: 'devTools',
+        label: i18n.translate('kibanaOverview.header.devToolsButtonLabel', {
+          defaultMessage: 'Dev tools',
+        }),
+        iconType: 'wrench',
+        href: devToolsHref,
+        testId: 'homeDevTools',
+        order: 1,
+      });
+    }
+
+    return { items };
+  }, [application.capabilities.navLinks, devTools, devToolsHref, managementHref]);
 
   const onDataViewCreated = () => {
     setNewKibanaInstance(false);
@@ -218,25 +252,23 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   }
 
   return (
-    <KibanaPageTemplate
-      css={styles(euiTheme, minBreakpointM)}
-      pageHeader={{
-        iconType: 'logoKibana',
-        pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
-        rightSideItems: overviewPageActions({
-          addDataHref,
-          application,
-          devToolsHref,
-          hidden: isNewKibanaInstance,
-          managementHref,
-          showDevToolsLink: !!devTools,
-          showManagementLink: !!manageDataFeatures,
-        }),
-        bottomBorder: true,
-      }}
-      panelled={false}
-    >
-      <KibanaPageTemplate.Section bottomBorder aria-labelledby="kbnOverviewApps__title">
+    <KibanaPageTemplate panelled={false}>
+      <AppHeader
+        title={i18n.translate('kibanaOverview.header.title', { defaultMessage: 'Analytics' })}
+        menu={menu}
+        showAddIntegrations
+      />
+
+      <KibanaPageTemplate.Section
+        css={styles(euiTheme, minBreakpointM)}
+        bottomBorder
+        aria-labelledby="kbnOverviewApps__title"
+        contentProps={{
+          css: css({
+            paddingTop: euiTheme.size.xl,
+          }),
+        }}
+      >
         <EuiScreenReaderOnly>
           <h2 id="kbnOverviewApps__title">
             <FormattedMessage id="kibanaOverview.apps.title" defaultMessage="Explore these apps" />
@@ -260,7 +292,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         ) : null}
       </KibanaPageTemplate.Section>
 
-      <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
+      <KibanaPageTemplate.Section
+        css={styles(euiTheme, minBreakpointM)}
+        bottomBorder
+        paddingSize="xl"
+      >
         <EuiFlexGroup
           alignItems="flexStart"
           className={classNames({

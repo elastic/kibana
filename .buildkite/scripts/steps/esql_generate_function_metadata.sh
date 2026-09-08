@@ -3,6 +3,7 @@ set -euo pipefail
 
 VALIDATION_PACKAGE_DIR="src/platform/packages/shared/kbn-esql-language"
 EDITOR_PACKAGE_DIR="src/platform/packages/private/kbn-language-documentation"
+SCRIPTS_PACKAGE_DIR="src/platform/packages/private/kbn-esql-scripts"
 GIT_SCOPE="$VALIDATION_PACKAGE_DIR/**/* $EDITOR_PACKAGE_DIR/**/*"
 
 report_main_step () {
@@ -10,30 +11,21 @@ report_main_step () {
 }
 
 main () {
-  cd "$PARENT_DIR"
-
-  report_main_step "Cloning Elasticsearch repository"
-
-  rm -rf elasticsearch
-  git clone https://github.com/elastic/elasticsearch --depth 1
-
   report_main_step "Bootstrapping Kibana"
 
   cd "$KIBANA_DIR"
 
   .buildkite/scripts/bootstrap.sh
 
-  cd "$KIBANA_DIR/$VALIDATION_PACKAGE_DIR"
+  cd "$KIBANA_DIR/$SCRIPTS_PACKAGE_DIR"
 
   report_main_step "Generate function definitions"
 
-  yarn make:defs $PARENT_DIR/elasticsearch
+  yarn make:defs
 
   report_main_step "Generate inline function docs"
 
-  cd "$KIBANA_DIR/$EDITOR_PACKAGE_DIR"
-
-  yarn make:docs $PARENT_DIR/elasticsearch
+  yarn make:docs
 
   report_main_step "Run i18n check"
 

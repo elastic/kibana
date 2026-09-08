@@ -34,7 +34,7 @@ export const setStatusStepCommonDefinition: CommonStepDefinition<
   SetStatusStepOutputSchema
 > = {
   id: SetStatusStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.SET_STATUS_STEP_LABEL,
   description: i18n.SET_STATUS_STEP_DESCRIPTION,
   documentation: {

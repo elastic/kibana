@@ -111,7 +111,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="discoverApp" />}
+                    icon={<EuiIcon size="xxl" type="discoverApp" aria-hidden />}
                     titleSize="s"
                     title={i18n.translate(
                       'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.exploreYourDataLabel',
@@ -135,10 +135,9 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                           onClick={() => {
                             discover.locator?.navigate({
                               dataViewSpec: {
-                                title: connector?.name,
+                                name: connector?.name,
+                                ...(connector?.index_name && { title: connector?.index_name }),
                               },
-                              indexPattern: connector?.index_name,
-                              title: connector?.name,
                             });
                           }}
                         >
@@ -171,7 +170,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type={connectorLogo} />}
+                    icon={<EuiIcon size="xxl" type={connectorLogo} aria-hidden />}
                     titleSize="s"
                     title={i18n.translate(
                       'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.manageYourConnectorLabel',
@@ -237,6 +236,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       `}
                       size="m"
                       type="code"
+                      aria-hidden
                     />
                   }
                   title={i18n.translate(
@@ -264,7 +264,8 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                         margin-top: ${euiTheme.size.xs};
                       `}
                       size="m"
-                      type="console"
+                      type="commandLine"
+                      aria-hidden
                     />
                   }
                   title={i18n.translate(

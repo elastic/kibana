@@ -57,7 +57,7 @@ describe('SET Autocomplete', () => {
       mockCallbacks.isServerless = true;
     });
     const serverlessSettings = settings
-      .filter((s) => s.serverlessOnly)
+      .filter((s) => !s.ignoreAsSuggestion)
       .map((setting) => `${setting.name} = `);
 
     it('suggests available settings after SET command', async () => {
@@ -116,11 +116,15 @@ describe('SET Autocomplete', () => {
 
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
-        await setExpectSuggestions('SET unmapped_fields = ', ['"DEFAULT";', '"NULLIFY";']);
+        await setExpectSuggestions('SET unmapped_fields = ', [
+          '"DEFAULT";',
+          '"LOAD";',
+          '"NULLIFY";',
+        ]);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['DEFAULT', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['DEFAULT', 'LOAD', 'NULLIFY']);
       });
     });
 

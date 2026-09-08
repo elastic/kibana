@@ -73,7 +73,7 @@ export const useDeletePluginService = ({
     mutationFn: ({ pluginId, force }) => pluginsService.delete({ pluginId, force }),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.plugins.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.skills.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.skills.list });
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
     },
     onSuccess,

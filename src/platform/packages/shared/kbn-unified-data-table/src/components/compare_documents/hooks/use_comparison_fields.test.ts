@@ -11,7 +11,11 @@ import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { UseComparisonFieldsProps } from './use_comparison_fields';
 import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
-import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import {
+  buildDataViewMock,
+  columnsMetaWithCustomField,
+  generateEsHits,
+} from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { fieldList } from '@kbn/data-views-plugin/common';
@@ -33,14 +37,14 @@ const renderFields = ({
   props,
   transformHit = (hit) => hit,
 }: {
-  props?: Partial<Omit<UseComparisonFieldsProps, 'getDocById'>>;
+  props?: Partial<Omit<UseComparisonFieldsProps, 'docMap'>>;
   transformHit?: (hit: EsHitRecord) => EsHitRecord;
 } = {}) => {
   const dataView = props?.dataView ?? dataViewWithTimefieldMock;
   const docs = generateEsHits(dataView, 5).map((hit) =>
     buildDataTableRecord(transformHit(hit), dataView)
   );
-  const getDocById = (id: string) => docs.find((doc) => doc.raw._id === id);
+  const docMap = new Map(docs.map((doc, docIndex) => [doc.raw._id ?? doc.id, { doc, docIndex }]));
   const {
     result: {
       current: { comparisonFields, totalFields },
@@ -48,11 +52,12 @@ const renderFields = ({
   } = renderHook(() =>
     useComparisonFields({
       dataView,
+      columnsMeta: undefined,
       selectedFieldNames: ['message', 'extension', 'bytes'],
       selectedDocIds: ['0', '1', '2'],
       showAllFields: true,
       showMatchingValues: true,
-      getDocById,
+      docMap,
       ...props,
     })
   );
@@ -77,6 +82,17 @@ describe('useComparisonFields', () => {
     const { comparisonFields, totalFields } = renderFields({ props: { showAllFields: false } });
     expect(comparisonFields).toEqual(['message', 'extension', 'bytes']);
     expect(totalFields).toBe(3);
+  });
+
+  it('should exclude _source from selectedFieldNames when showAllFields is false', () => {
+    const { comparisonFields, totalFields } = renderFields({
+      props: {
+        showAllFields: false,
+        selectedFieldNames: ['message', '_source', 'extension'],
+      },
+    });
+    expect(comparisonFields).toEqual(['message', 'extension']);
+    expect(totalFields).toBe(2);
   });
 
   it('should include fields with matching values if showMatchingValues is true', () => {
@@ -146,5 +162,25 @@ describe('useComparisonFields', () => {
     const { comparisonFields, totalFields } = renderFields({ props: { dataView } });
     expect(comparisonFields).toHaveLength(fields.length - overflow);
     expect(totalFields).toBe(fields.length);
+  });
+
+  it('should display computed fields from ES|QL querys (EVALS, RENAMES, etc.)', () => {
+    const { comparisonFields, totalFields } = renderFields({
+      props: { columnsMeta: columnsMetaWithCustomField },
+      transformHit: (hit) => {
+        hit.fields!.custom_esql_field = 'test';
+        return hit;
+      },
+    });
+    expect(comparisonFields).toEqual([
+      'timestamp',
+      '_index',
+      'bytes',
+      'custom_esql_field',
+      'extension',
+      'message',
+      'scripted',
+    ]);
+    expect(totalFields).toBe(7);
   });
 });

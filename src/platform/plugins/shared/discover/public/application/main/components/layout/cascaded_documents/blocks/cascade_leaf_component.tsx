@@ -162,7 +162,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     dataGridDensityState,
     showTimeCol,
     dataView,
-    showKeyboardShortcuts,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
@@ -170,6 +169,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
+      cascadedColumnsMeta,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -188,6 +188,22 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     const [cascadeDataGridDensityState, setCascadeDataGridDensityState] = useState<DataGridDensity>(
       dataGridDensityState ?? DataGridDensity.COMPACT
+    );
+
+    const { getDataGridUiStateMap, setDataGridUiState } = useCascadedDocumentsContext();
+
+    const initialGridState = useMemo(
+      () => getDataGridUiStateMap()?.[cellId],
+      [cellId, getDataGridUiStateMap]
+    );
+
+    const onInitialStateChange = useCallback<
+      NonNullable<UnifiedDataTableProps['onInitialStateChange']>
+    >(
+      (newInitialGridState) => {
+        setDataGridUiState(cellId, newInitialGridState);
+      },
+      [cellId, setDataGridUiState]
     );
 
     // TODO: Implement column selection logic,
@@ -233,7 +249,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         footerRow,
       }) => (
         <CustomCascadeGridBodyMemoized
-          key={isCellInFullScreenMode ? `full-screen-${cellId}` : cellId}
+          key={cellId}
           Cell={Cell}
           data={cellData}
           visibleColumns={visibleColumns}
@@ -250,22 +266,21 @@ export const ESQLDataCascadeLeafCell = React.memo(
       ),
       [virtualizerController, isCellInFullScreenMode, cellId, cellData, rowIndex]
     );
-
     return (
       <UnifiedDataTable
         isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
-        showKeyboardShortcuts={showKeyboardShortcuts}
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
-        enableInTableSearch
+        enableInTableSearch={false}
+        showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"
-        consumer={`discover_esql_cascade_row_leaf_${cellId}`}
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
+        columnsMeta={cascadedColumnsMeta}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}
@@ -279,6 +294,8 @@ export const ESQLDataCascadeLeafCell = React.memo(
         externalCustomRenderers={externalCustomRenderers}
         paginationMode="infinite"
         sampleSizeState={cellData.length}
+        initialState={initialGridState}
+        onInitialStateChange={onInitialStateChange}
       />
     );
   }

@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/config-schema'
   - '@kbn/css-utils'
+  - '@kbn/config'
 tags:
   - plugin
   - prod

@@ -27,7 +27,7 @@ export function loadApplication({ bind, onActivation }: ContainerModuleLoadOptio
           try {
             return callback();
           } finally {
-            scope.unbindAll();
+            scope.unbindAllAsync();
           }
         };
 

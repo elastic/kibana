@@ -18,7 +18,7 @@ export function serializeLayout(
 ): Pick<DashboardState, 'panels' | 'pinned_panels'> {
   const sections: { [sectionId: string]: DashboardSection } = {};
   Object.entries(layout.sections).forEach(([sectionId, sectionState]) => {
-    sections[sectionId] = { ...sectionState, uid: sectionId, panels: [] };
+    sections[sectionId] = { ...sectionState, id: sectionId, panels: [] };
   });
 
   const panels: DashboardState['panels'] = [];
@@ -29,7 +29,7 @@ export function serializeLayout(
     const panelState = {
       type,
       grid: restOfGridData,
-      uid: panelId,
+      id: panelId,
       config,
     };
 
@@ -46,7 +46,7 @@ export function serializeLayout(
       .sort(([, { order: orderA }], [, { order: orderB }]) => orderA - orderB)
       .map(([id, panel]) => {
         return {
-          uid: id,
+          id,
           ...omit(panel, 'order'),
           config: childState[id],
         } as Required<DashboardState>['pinned_panels'][number];

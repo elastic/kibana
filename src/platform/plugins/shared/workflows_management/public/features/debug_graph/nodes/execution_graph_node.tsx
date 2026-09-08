@@ -44,6 +44,8 @@ const getNodeBorderColor = (status: ExecutionStatus | undefined, euiTheme: EuiTh
       return euiTheme.colors.borderBaseNeutral;
     case ExecutionStatus.WAITING_FOR_INPUT:
       return euiTheme.colors.borderBaseNeutral;
+    case ExecutionStatus.WAITING_FOR_CHILD:
+      return euiTheme.colors.borderBaseNeutral;
     default:
       return 'transparent';
   }
@@ -131,10 +133,10 @@ export function ExecutionGraphNode(node: Node<WorkflowNodeData>) {
                     {node.data.label}
                   </span>
                   {node.data.stepExecution?.status === ExecutionStatus.COMPLETED && (
-                    <EuiIcon type="checkCircleFill" color="#16C5C0" />
+                    <EuiIcon type="checkCircleFill" color="#16C5C0" aria-hidden={true} />
                   )}
                   {node.data.stepExecution?.status === ExecutionStatus.FAILED && (
-                    <EuiIcon type="warning" color={euiTheme.colors.danger} />
+                    <EuiIcon type="warning" color={euiTheme.colors.danger} aria-hidden={true} />
                   )}
                 </span>
                 <div

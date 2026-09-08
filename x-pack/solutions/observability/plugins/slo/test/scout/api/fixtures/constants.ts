@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-/** The base API path for dashboard endpoints (no leading slash for apiClient). */
-export const DASHBOARD_API_PATH = 'api/dashboards';
+import { DASHBOARD_API_VERSION } from '@kbn/scout-oblt/constants';
+
+export { DASHBOARD_API_PATH } from '@kbn/scout-oblt/constants';
 
 /**
  * SLO embeddable type IDs. Must match common/embeddables/{overview,error_budget,burn_rate}/constants.ts.
@@ -17,9 +18,9 @@ export const SLO_ERROR_BUDGET_ID = 'slo_error_budget';
 export const SLO_BURN_RATE_EMBEDDABLE_ID = 'slo_burn_rate';
 export const SLO_ALERTS_EMBEDDABLE_ID = 'slo_alerts';
 
-/** Common headers for Dashboard API requests (internal API version 1) */
+/** Common headers for Dashboard API requests */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
-  'elastic-api-version': '1',
+  'elastic-api-version': DASHBOARD_API_VERSION,
 } as const;

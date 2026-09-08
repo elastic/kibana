@@ -15,7 +15,7 @@ import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { DiscoverDocuments, onResize } from './discover_documents';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, type DataTableColumnsMeta } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { InternalStateMockToolkit } from '../../../../__mocks__/discover_state.mock';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -26,6 +26,7 @@ import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 jest.mock('../../../../components/discover_grid', () => ({
   ...jest.requireActual('../../../../components/discover_grid'),
@@ -38,8 +39,12 @@ jest.mock('../../../../components/discover_grid_flyout', () => ({
 }));
 
 const discoverGridMock = jest.mocked(DiscoverGrid);
-const discoverGridFlyoutMock = jest.mocked(DiscoverGridFlyout);
 const singleEsHit = esHitsMock.slice(0, 1);
+const cascadedColumnsMeta: DataTableColumnsMeta = {
+  bytes: {
+    type: 'number',
+  },
+};
 
 const setup = async ({ services }: { services?: DiscoverServices } = {}) => {
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -93,7 +98,10 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next = jest.fn();
 
   const props = {
-    viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
+    renderViewModeToggle: jest.fn<
+      ReturnType<RenderViewModeToggle>,
+      Parameters<RenderViewModeToggle>
+    >(() => <div data-test-subj="viewModeToggle">test</div>),
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -231,7 +239,7 @@ describe('Discover documents layout', () => {
       jest
         .mocked(DiscoverGridFlyout)
         .mockImplementation((props) => (
-          <div data-test-subj="discoverGridFlyoutMock">{props.hit.id}</div>
+          <div data-test-subj="discoverGridFlyoutMock">{props.hit?.id ?? 'no-expanded-doc'}</div>
         ));
     });
 
@@ -259,10 +267,9 @@ describe('Discover documents layout', () => {
       expect(discoverGridProps.expandedDoc).toEqual(expandedDoc);
       expect(discoverGridProps.setRenderDocumentViewMeta).toEqual(expect.any(Function));
       expect(toolkit.getCurrentTab().expandedDocOwner).toBe(DEFAULT_EXPANDED_DOC_OWNER);
-      expect(screen.queryByTestId('discoverGridFlyoutMock')).not.toBeInTheDocument();
     });
 
-    it('hides expanded state from the main grid and preserves the active owner through flyout navigation', async () => {
+    it('hides expanded state from the main grid and preserves the active owner when another grid owns the flyout', async () => {
       const { toolkit } = await setup();
       const tabId = toolkit.getCurrentTab().id;
       const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewMock);
@@ -282,6 +289,16 @@ describe('Discover documents layout', () => {
           renderDocumentViewMeta: {
             displayedRows: [expandedDoc, nextExpandedDoc],
             displayedColumns: ['bytes'],
+          },
+        })
+      );
+
+      toolkit.internalState.dispatch(
+        internalStateActions.setCascadedDocumentsState({
+          tabId,
+          cascadedDocumentsState: {
+            ...toolkit.getCurrentTab().cascadedDocumentsState,
+            columnsMeta: cascadedColumnsMeta,
           },
         })
       );
@@ -310,24 +327,6 @@ describe('Discover documents layout', () => {
       expect(toolkit.getCurrentTab().renderDocumentViewMeta).toEqual({
         displayedRows: [expandedDoc, nextExpandedDoc],
         displayedColumns: ['bytes'],
-      });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('discoverGridFlyoutMock')).toBeVisible();
-      });
-
-      const flyoutProps = discoverGridFlyoutMock.mock.lastCall?.[0]!;
-      expect(flyoutProps.hit).toEqual(expandedDoc);
-      expect(flyoutProps.hits).toEqual([expandedDoc, nextExpandedDoc]);
-      expect(flyoutProps.columns).toEqual(['bytes']);
-
-      act(() => {
-        flyoutProps.setExpandedDoc(nextExpandedDoc);
-      });
-
-      await waitFor(() => {
-        expect(toolkit.getCurrentTab().expandedDoc).toEqual(nextExpandedDoc);
-        expect(toolkit.getCurrentTab().expandedDocOwner).toBe('nested-grid');
       });
     });
   });

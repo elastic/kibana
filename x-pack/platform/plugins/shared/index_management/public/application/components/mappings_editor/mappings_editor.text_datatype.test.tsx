@@ -223,7 +223,7 @@ const renderMappingsEditor = (props: Partial<MappingsEditorTestProps>) => {
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseAppContext.mockReturnValue({
-    canUseSyntheticSource: true,
+    hasAtLeastEnterpriseLicense: true,
     config: { enableMappingsSourceFieldSection: false },
   } as unknown as ReturnType<typeof useAppContext>);
 });

@@ -17,11 +17,7 @@ export type { DataCascadeUISnapshot, DataCascadeRestorableState } from '../lib/c
 export { toRestorableState } from '../lib/core/api';
 export { DataCascadeRow, DataCascadeRowCell } from './data_cascade_impl';
 
-export type {
-  DataCascadeRowProps,
-  DataCascadeRowCellProps,
-  CascadeGroupNodeUIInteraction,
-} from './data_cascade_impl';
+export type { DataCascadeRowProps, DataCascadeRowCellProps } from './data_cascade_impl';
 
 type DataCascadeProviderProps = ComponentProps<typeof DataCascadeProvider>;
 

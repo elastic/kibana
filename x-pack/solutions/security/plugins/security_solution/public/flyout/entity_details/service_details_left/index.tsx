@@ -51,7 +51,8 @@ export const ServiceDetailsPanel = ({
     identityFields ?? {},
     scopeId,
     tabs,
-    path
+    path,
+    entityStoreEntityId
   );
 
   if (!selectedTabId) {
@@ -75,7 +76,8 @@ const useSelectedTab = (
   identityFields: IdentityFields,
   scopeId: string,
   tabs: LeftPanelTabsType,
-  path: PanelPath | undefined
+  path: PanelPath | undefined,
+  entityStoreEntityId?: string
 ) => {
   const { openLeftPanel } = useExpandableFlyoutApi();
 
@@ -93,6 +95,7 @@ const useSelectedTab = (
         identityFields,
         isRiskScoreExist,
         scopeId,
+        entityStoreEntityId,
         path: {
           tab: tabId,
         },

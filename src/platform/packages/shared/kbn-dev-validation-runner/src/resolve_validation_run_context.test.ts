@@ -277,9 +277,11 @@ describe('resolveValidationRunContext', () => {
       changedFiles: [],
     });
 
-    expect(warning).toHaveBeenCalledWith(
-      'Moon reported no changed files for scope=local, but this repository is shallow. A full Git history is required for affected validation; run `git fetch --unshallow`.'
+    expect(warning).toHaveBeenNthCalledWith(
+      1,
+      'affected file detection is unavailable in a shallow repository'
     );
+    expect(warning).toHaveBeenNthCalledWith(2, 'run `git fetch --unshallow`');
   });
 });
 

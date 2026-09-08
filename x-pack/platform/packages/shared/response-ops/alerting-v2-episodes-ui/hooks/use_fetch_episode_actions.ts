@@ -7,41 +7,41 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EpisodeAction } from '../types/action';
-import { executeEsqlQuery } from '../utils/execute_esql_query';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { EpisodeActionState } from '../types/action';
+import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
+import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
-import { buildEpisodeActionsQuery } from '../utils/queries/build_episode_actions_query';
+import { useSpaceId } from './use_space_id';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
-  services: { expressions: ExpressionsStart };
+  services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
 }
 
-export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) =>
-  useQuery({
-    queryKey: queryKeys.actions(episodeIds),
-    queryFn: async ({ signal }) => {
-      const query = buildEpisodeActionsQuery(episodeIds);
-      return executeEsqlQuery({
-        expressions: services.expressions,
-        query,
-        input: null,
-        abortSignal: signal,
-        noCache: true,
-      });
-    },
+export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) => {
+  const { expressions } = services;
+  const spaceId = useSpaceId(services.spaces);
+  return useQuery({
+    queryKey: queryKeys.actions(spaceId, episodeIds),
+    queryFn: ({ signal }) =>
+      fetchEpisodeActions({ spaceId, episodeIds, abortSignal: signal, expressions }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
-    select: (result) => {
-      const map = new Map<string, EpisodeAction>();
-      for (const row of result.rows) {
+    staleTime: QUERY_STALE_TIME,
+    select: (rows) => {
+      const map = new Map<string, EpisodeActionState>();
+      for (const row of rows) {
         map.set(row.episode_id, {
           episodeId: row.episode_id,
           ruleId: row.rule_id ?? null,
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
+          lastAssigneeUid: row.last_assignee_uid ?? null,
+          lastAckActor: row.last_ack_actor ?? null,
         });
       }
       return map;
     },
   });
+};

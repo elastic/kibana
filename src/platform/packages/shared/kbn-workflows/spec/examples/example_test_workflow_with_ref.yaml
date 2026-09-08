@@ -5,29 +5,28 @@ description: Simple test workflow demonstrating JSON Schema $ref with default va
 
 triggers:
   - type: manual
-
-inputs:
-  properties:
-    user:
-      $ref: "#/definitions/UserSchema"
-  required: [user]
-  additionalProperties: false
-  definitions:
-    UserSchema:
-      type: object
+    inputs:
       properties:
-        name:
-          type: string
-          default: "John Doe"
-        email:
-          type: string
-          format: email
-          default: "john.doe@example.com"
-        age:
-          type: number
-          default: 30
-      required: [name, email]
+        user:
+          $ref: "#/definitions/UserSchema"
+      required: [user]
       additionalProperties: false
+      definitions:
+        UserSchema:
+          type: object
+          properties:
+            name:
+              type: string
+              default: "John Doe"
+            email:
+              type: string
+              format: email
+              default: "john.doe@example.com"
+            age:
+              type: number
+              default: 30
+          required: [name, email]
+          additionalProperties: false
 
 steps:
   - name: print-user-info

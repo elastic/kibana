@@ -135,7 +135,9 @@ export interface IVectorLayer extends ILayer {
   getMasks(): Mask[];
 }
 
-export const noResultsIcon = <EuiIcon size="m" color="subdued" type="minusInCircle" />;
+export const noResultsIcon = (
+  <EuiIcon size="m" color="subdued" type="minusCircle" aria-hidden={true} />
+);
 export const NO_RESULTS_ICON_AND_TOOLTIPCONTENT = {
   icon: noResultsIcon,
   tooltipContent: i18n.translate('xpack.maps.vectorLayer.noResultsFoundTooltip', {
@@ -322,7 +324,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getLayerTypeIconName() {
-    return 'vector';
+    return 'vectorSquare';
   }
 
   async hasLegendDetails() {

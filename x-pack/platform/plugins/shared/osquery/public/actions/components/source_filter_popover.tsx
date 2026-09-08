@@ -83,7 +83,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
 
   const triggerButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={togglePopover}
       isSelected={isOpen}
       hasActiveFilters={isFiltered}
@@ -103,6 +103,7 @@ const SourceFilterPopoverComponent: React.FC<SourceFilterPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={PANEL_PROPS}
+      aria-label={SOURCE_LABEL}
     >
       <EuiSelectable aria-label={SOURCE_LABEL} options={selectableOptions} onChange={handleChange}>
         {(list) => <div style={POPOVER_CONTENT_STYLE}>{list}</div>}

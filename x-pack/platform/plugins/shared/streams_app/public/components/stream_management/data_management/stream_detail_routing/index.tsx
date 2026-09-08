@@ -4,14 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiResizableContainer,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -29,8 +22,7 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { RequestPreviewFlyout } from '../request_preview_flyout';
 import { useRequestPreviewFlyoutState } from '../request_preview_flyout/use_request_preview_flyout_state';
-import { ChildStreamList } from './child_stream_list';
-import { PreviewPanel } from './preview_panel';
+import { PartitioningLayout } from './partitioning_layout';
 import {
   StreamRoutingContextProvider,
   useStreamRoutingEvents,
@@ -38,7 +30,6 @@ import {
   selectHasRoutingChanges,
 } from './state_management/stream_routing_state_machine';
 import { buildRoutingSaveRequestPayload, routingConverter } from './utils';
-import { QueryStreamCreationProvider } from './query_stream_creation_context';
 
 interface StreamDetailRoutingProps {
   definition: Streams.WiredStream.GetResponse;
@@ -67,7 +58,7 @@ export function StreamDetailRouting(props: StreamDetailRoutingProps) {
       data={data}
       timeState$={timeState$}
       streamsRepositoryClient={streamsRepositoryClient}
-      forkSuccessNofitier={createForkSuccessNofitier({ core, router })}
+      forkSuccessNotifier={createForkSuccessNotifier({ core, router })}
       telemetryClient={telemetryClient}
     >
       <StreamDetailRoutingImpl />
@@ -89,6 +80,8 @@ export function StreamDetailRoutingImpl() {
   const { cancelChanges, saveChanges } = useStreamRoutingEvents();
 
   const definition = useStreamsRoutingSelector((snapshot) => snapshot.context.definition);
+  // StreamDetailRoutingImpl is only rendered for wired streams (classic uses ClassicStreamPartitioningImpl)
+  const wiredDefinition = definition as Streams.WiredStream.GetResponse;
   const routing = useStreamsRoutingSelector((snapshot) => snapshot.context.routing);
   const canSaveRouting = useStreamsRoutingSelector((snapshot) =>
     snapshot.can({ type: 'routingRule.save' })
@@ -161,7 +154,7 @@ export function StreamDetailRoutingImpl() {
 
   const onBottomBarViewCodeClick = () => {
     const routingPayload = routing.map(routingConverter.toAPIDefinition);
-    const body = buildRoutingSaveRequestPayload(definition, routingPayload);
+    const body = buildRoutingSaveRequestPayload(wiredDefinition, routingPayload);
 
     openRequestPreviewFlyout({
       method: 'PUT',
@@ -171,92 +164,33 @@ export function StreamDetailRoutingImpl() {
   };
 
   return (
-    <EuiFlexItem
-      className={css`
-        overflow: auto;
-      `}
-      grow
-    >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
-        className={css`
-          overflow: auto;
-        `}
-      >
-        <QueryStreamCreationProvider>
-          <EuiPanel
-            hasShadow={false}
-            className={css`
-              display: flex;
-              max-width: 100%;
-              overflow: auto;
-              flex-grow: 1;
-            `}
-            paddingSize="none"
-          >
-            <EuiResizableContainer>
-              {(EuiResizablePanel, EuiResizableButton) => (
-                <>
-                  <EuiResizablePanel
-                    initialSize={40}
-                    minSize="400px"
-                    tabIndex={0}
-                    paddingSize="l"
-                    className={css`
-                      overflow: auto;
-                      display: flex;
-                    `}
-                  >
-                    <ChildStreamList availableStreams={availableStreams} />
-                  </EuiResizablePanel>
-
-                  <EuiResizableButton indicator="border" />
-
-                  <EuiResizablePanel
-                    initialSize={60}
-                    tabIndex={0}
-                    minSize="300px"
-                    paddingSize="l"
-                    className={css`
-                      display: flex;
-                      flex-direction: column;
-                    `}
-                  >
-                    <PreviewPanel />
-                  </EuiResizablePanel>
-                </>
-              )}
-            </EuiResizableContainer>
-          </EuiPanel>
-        </QueryStreamCreationProvider>
-        {shouldDisplayBottomBar && (
-          <EuiFlexItem grow={false}>
-            <ManagementBottomBar
-              confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
-                defaultMessage: 'Change routing',
-              })}
-              onCancel={cancelChanges}
-              onConfirm={saveChanges}
-              isLoading={isUpdatingStream}
-              disabled={!canSaveRouting}
-              insufficientPrivileges={!canSaveRouting}
-              onViewCodeClick={onBottomBarViewCodeClick}
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+    <PartitioningLayout availableStreams={availableStreams}>
+      {shouldDisplayBottomBar && (
+        <EuiFlexItem grow={false}>
+          <ManagementBottomBar
+            confirmButtonText={i18n.translate('xpack.streams.streamDetailRouting.change', {
+              defaultMessage: 'Change routing',
+            })}
+            onCancel={cancelChanges}
+            onConfirm={saveChanges}
+            isLoading={isUpdatingStream}
+            disabled={!canSaveRouting}
+            insufficientPrivileges={!canSaveRouting}
+            onViewCodeClick={onBottomBarViewCodeClick}
+          />
+        </EuiFlexItem>
+      )}
       {isRequestPreviewFlyoutOpen && (
         <RequestPreviewFlyout
           codeContent={requestPreviewFlyoutCodeContent}
           onClose={closeRequestPreviewFlyout}
         />
       )}
-    </EuiFlexItem>
+    </PartitioningLayout>
   );
 }
 
-const createForkSuccessNofitier =
+const createForkSuccessNotifier =
   ({ core, router }: { core: CoreStart; router: StatefulStreamsAppRouter }) =>
   (streamName: string) =>
     core.notifications.toasts.addSuccess({

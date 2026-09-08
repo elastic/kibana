@@ -6,9 +6,16 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EvaluationCriterion } from '@kbn/evals';
+import type { EvaluationCriterionStructured } from '@kbn/evals';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
+import type { ExistingQuerySummary } from '@kbn/streams-ai';
 import type { GcsConfig } from '../data_generators/replay';
-import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction/evaluators';
+import type { ChronicSeedConfig as ChronicSeedInput } from '../data_generators/seed_chronic_background';
+import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
+
+export interface SamplingCriterion extends EvaluationCriterionStructured {
+  sampling_filters?: QueryDslQueryContainer[];
+}
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -30,13 +37,19 @@ export interface KIQueryGenerationScenario {
     stream_description: string;
   };
   output: {
-    criteria: EvaluationCriterion[];
+    criteria: SamplingCriterion[];
     expected_categories: string[];
-    esql_substrings?: string[];
     expected_ground_truth: string;
+    expect_stats?: boolean;
+    expect_queries?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
+  /** Eval-only novelty arm: seeds existing_queries, scored against hidden criteria. */
+  rerun?: {
+    existing_queries: ExistingQuerySummary[];
+    criteria: SamplingCriterion[];
+  };
 }
 
 export interface KIFeatureExtractionScenario {
@@ -45,7 +58,7 @@ export interface KIFeatureExtractionScenario {
     log_query_filter?: QueryDslQueryContainer[];
   };
   output: {
-    criteria: EvaluationCriterion[];
+    criteria: SamplingCriterion[];
     min_features?: number;
     max_features?: number;
     required_types?: ValidKIFeatureType[];
@@ -76,12 +89,52 @@ export interface KIFeatureExclusionScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface KIFeatureDuplicationScenario {
+export interface KIFeatureDeduplicationScenario {
   input: {
     scenario_id: string;
-    sample_document_count: number;
-    runs: number;
+    iterations: number;
   };
+  snapshot_source?: SnapshotSourceOverride;
+}
+
+export type { ChronicSeedInput };
+
+export interface DiscoveryScenario {
+  input: {
+    scenario_id: string;
+    stream_name: string;
+    detections: Array<Partial<Detection>>;
+    /**
+     * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)
+     * instead of relying on snapshot incident data; the detection `@timestamp` is stamped from
+     * the seed's change point. Positive fixture for the grounding skill's rate gate.
+     */
+    chronic_seed?: ChronicSeedInput;
+  };
+  /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
+  continuationChains?: Record<string, string[]>;
+  /** Memory pages seeded via the memory API before the agent runs (the spec wipes the memory data stream between scenarios). */
+  memoryPages?: Array<{
+    name: string;
+    title: string;
+    content: string;
+    categories?: string[];
+  }>;
+  output: {
+    criteria: SamplingCriterion[];
+    expected_min_evidence_count?: number;
+    /** Human-readable summary of expected output for quick orientation. */
+    expected_ground_truth?: string;
+    /** Expected confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
+    /**
+     * The significant events the agent is expected to generate — signals + causal_features +
+     * blast_radius + status. The grouping check derives its expected groups from these events'
+     * `signals[].metadata.rule_uuid`s.
+     */
+    expected_significant_events: Array<Partial<SignificantEvent>>;
+  };
+  metadata: Record<string, unknown> & ScenarioMetadata;
   snapshot_source?: SnapshotSourceOverride;
 }
 
@@ -92,5 +145,6 @@ export interface DatasetConfig {
   kiQueryGeneration: KIQueryGenerationScenario[];
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
-  kiFeatureDuplication: KIFeatureDuplicationScenario[];
+  kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
+  discovery: DiscoveryScenario[];
 }

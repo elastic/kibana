@@ -20,20 +20,26 @@ get:
             type: array
             maxItems: 10000
             items:
-              type: object
-              properties:
-                id:
-                  type: string
-                  description: The case identifier.
-                title:
-                  type: string
-                  description: The case title.
-            example:
-              - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
-                title: security_case
+              $ref: '../components/schemas/related_case.yaml'
+          examples:
+            getCasesByAlertResponse:
+              summary: Cases associated with a given alert.
+              value:
+                - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                  title: security_case
+                  description: Investigating suspicious activity
+                  status: open
+                  createdAt: '2020-02-19T23:06:33.798Z'
+                  totals:
+                    alerts: 1
+                    events: 0
+                    userComments: 0
     '401':
       description: Authorization information is missing or invalid.
       content:
         application/json:
           schema:
             $ref: '../components/schemas/response_4xx.yaml'
+          examples:
+            response401:
+              $ref: '../components/examples/response_401.yaml'

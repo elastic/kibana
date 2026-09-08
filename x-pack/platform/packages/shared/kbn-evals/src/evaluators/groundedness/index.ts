@@ -109,6 +109,7 @@ export function createGroundednessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: QUALITATIVE_EVALUATOR_NAME,
   };
 }
@@ -135,10 +136,11 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata: metadata ?? undefined,
+        metadata: { ...(metadata ?? {}), groundednessAnalysis },
       };
     },
     kind: 'LLM',
+    direction: 'maximize',
     name: QUANTITATIVE_EVALUATOR_NAME,
   };
 }

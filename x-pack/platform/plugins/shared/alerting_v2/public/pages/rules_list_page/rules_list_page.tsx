@@ -5,114 +5,201 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { EuiButton, EuiCallOut, EuiPageHeader, EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { CriteriaWithPagination } from '@elastic/eui';
-import { useDebouncedValue } from '@kbn/react-hooks';
-import type { RuleApiResponse } from '../../services/rules_api';
-import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useBoolean } from '@kbn/react-hooks';
+import { UserCapabilities } from '../../services/user_capabilities';
+import { RULES_CONTENT_LIST_ID, paths } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { paths } from '../../constants';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
+import {
+  useAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements,
+} from '../../hooks/use_are_agent_builder_skills_available';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import {
+  RuleCreateOptionsPanel,
+  getCreateWithAgentTooltipText,
+} from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
+import {
+  KindFilter,
+  RULES_LIST_FEATURES_FIELDS,
+  StatusFilter,
+  TagsFilter,
+} from './rules_list_filters';
+import { RulesListHeader } from './rules_list_header';
 import { RulesListTableContainer } from './rules_list_table_container';
-
-const DEFAULT_PER_PAGE = 20;
-export const SEARCH_DEBOUNCE_MS = 300;
+import { useRulesDataSource } from './rules_data_source';
+import { CentralizedActionPoliciesBanner } from './centralized_action_policies_banner';
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-
   useBreadcrumbs('rules_list');
 
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
-  const [searchInput, setSearchInput] = useState('');
-  const debouncedSearch = useDebouncedValue(searchInput.trim(), SEARCH_DEBOUNCE_MS);
+  const canWrite = useService(UserCapabilities).canWrite('rules');
+  const dataSource = useRulesDataSource();
 
-  useEffect(() => {
-    setPage(1);
-  }, [debouncedSearch]);
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
+  const {
+    flyout,
+    confirmationModal,
+    openCreateFlyout,
+    openCreateBuilderFlyout,
+    openCreateFromTemplateFlyout,
+    openEditFlyout,
+    openCloneFlyout,
+  } = useComposeDiscoverFlyout();
 
-  const { data, isLoading, isError, error } = useFetchRules({
-    page,
-    perPage,
-    search: debouncedSearch || undefined,
-  });
+  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
+  const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
+  const abSkillRequirements = useAgentBuilderSkillsRequirements();
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const basePath = useService(CoreStart('http')).basePath;
+  const navigateToSequenceBuilder = useCallback(() => {
+    navigateToUrl(basePath.prepend(paths.sequenceRuleCreate));
+  }, [navigateToUrl, basePath]);
+  // We always render the "Create with agent" entry points; when the skill is unavailable they
+  // are shown disabled with a tooltip naming the missing prerequisite rather than hidden.
+  const createWithAgentTooltipText = getCreateWithAgentTooltipText(abSkillRequirements);
 
-  const onTableChange = ({ page: tablePage }: CriteriaWithPagination<RuleApiResponse>) => {
-    setPage(tablePage.index + 1);
-    setPerPage(tablePage.size);
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateFlyout();
   };
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
+  const onCreateThresholdRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateBuilderFlyout('threshold');
+  };
+
+  const emptyState = canWrite ? (
+    <RuleCreateOptionsPanel
+      onCreateEsqlRule={openCreateFlyout}
+      onCreateWithAgent={navigateToAgentBuilder}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+      createWithAgentTooltipText={createWithAgentTooltipText}
+      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+    />
+  ) : (
+    <EuiEmptyPrompt
+      iconType="bell"
+      data-test-subj="rulesListReadOnlyEmpty"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyTitle"
+            defaultMessage="No rules"
+          />
+        </h2>
+      }
+      body={
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.readOnlyEmptyBody"
+            defaultMessage="There are no rules to display."
+          />
+        </p>
+      }
+    />
+  );
 
   return (
     <div>
-      <EuiPageHeader
-        pageTitle={
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.pageTitle"
-            defaultMessage="Alerting V2 Rules"
-          />
-        }
-        rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            fill
-            href={basePath.prepend(paths.ruleCreate)}
-            data-test-subj="createRuleButton"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
-        ]}
-      />
-      <EuiSpacer size="m" />
-      {isError ? (
-        <>
-          <EuiCallOut
-            announceOnMount
-            title={
-              <FormattedMessage
-                id="xpack.alertingV2.rulesList.loadErrorTitle"
-                defaultMessage="Failed to load rules"
-              />
-            }
-            color="danger"
-            iconType="error"
-          >
-            {error instanceof Error ? error.message : String(error)}
-          </EuiCallOut>
-          <EuiSpacer />
-        </>
-      ) : null}
-      {!isError ? (
-        <>
-          <EuiSearchBar
-            query={searchInput}
-            box={{
-              incremental: true,
-              placeholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
-                defaultMessage: 'Search rules',
-              }),
-              'data-test-subj': 'rulesListSearchBar',
-            }}
-            onChange={({ queryText }) => setSearchInput(queryText ?? '')}
-          />
-          <EuiSpacer size="m" />
+      <ContentListProvider
+        id={RULES_CONTENT_LIST_ID}
+        queryKeyScope={RULES_CONTENT_LIST_ID}
+        labels={{
+          entity: i18n.translate('xpack.alertingV2.rulesList.entity', {
+            defaultMessage: 'rule',
+          }),
+          entityPlural: i18n.translate('xpack.alertingV2.rulesList.entityPlural', {
+            defaultMessage: 'rules',
+          }),
+          searchPlaceholder: i18n.translate('xpack.alertingV2.rulesList.searchPlaceholder', {
+            defaultMessage: 'Search rules',
+          }),
+        }}
+        dataSource={dataSource}
+        features={{
+          sorting: {
+            initialSort: { field: 'name', direction: 'asc' },
+            fields: [
+              {
+                field: 'name',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.name', {
+                  defaultMessage: 'Name',
+                }),
+              },
+              {
+                field: 'kind',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.kind', {
+                  defaultMessage: 'Outcome',
+                }),
+              },
+              {
+                field: 'enabled',
+                name: i18n.translate('xpack.alertingV2.rulesList.sort.enabled', {
+                  defaultMessage: 'Enabled',
+                }),
+              },
+            ],
+          },
+          pagination: { initialPageSize: 20 },
+          search: true,
+          // useBulkSelect owns selection — Content List's page-scoped selectedIds
+          // cannot express select-all-with-exclusions.
+          selection: false,
+          fields: RULES_LIST_FEATURES_FIELDS,
+        }}
+      >
+        <RulesListHeader
+          canWrite={canWrite}
+          onCreateRule={openCreateOptionsFlyout}
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={navigateToAgentBuilder}
+          onBuildSequence={navigateToSequenceBuilder}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+          createWithAgentTooltipText={createWithAgentTooltipText}
+        />
+        <CentralizedActionPoliciesBanner />
+        <ContentList emptyState={emptyState} data-test-subj="rulesList">
+          <ContentListToolbar>
+            <ContentListToolbar.Filters>
+              <StatusFilter />
+              <TagsFilter />
+              <KindFilter />
+            </ContentListToolbar.Filters>
+          </ContentListToolbar>
           <RulesListTableContainer
-            items={data?.items ?? []}
-            totalItemCount={data?.total ?? 0}
-            page={page}
-            perPage={perPage}
-            search={debouncedSearch}
-            isLoading={isLoading}
-            onTableChange={onTableChange}
+            onEditInFlyout={openEditFlyout}
+            onCloneInFlyout={openCloneFlyout}
           />
-        </>
+        </ContentList>
+      </ContentListProvider>
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          onClose={closeCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
+          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+          createWithAgentTooltipText={createWithAgentTooltipText}
+          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+        />
       ) : null}
+      {flyout}
+      {confirmationModal}
     </div>
   );
 };

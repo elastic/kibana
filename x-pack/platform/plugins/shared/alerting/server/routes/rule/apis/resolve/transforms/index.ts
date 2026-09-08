@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { transformResolveResponse } from './transform_resolve_response/latest';
+export { transformResolveResponseInternal } from './transform_resolve_response/latest';
 
-export { transformResolveResponse as transformResolveResponseV1 } from './transform_resolve_response/v1';
+export { transformResolveResponseInternal as transformResolveResponseInternalV1 } from './transform_resolve_response/v1';

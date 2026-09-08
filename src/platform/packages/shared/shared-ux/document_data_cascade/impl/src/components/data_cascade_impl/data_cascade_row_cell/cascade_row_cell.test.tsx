@@ -12,8 +12,8 @@ import { render, waitFor } from '@testing-library/react';
 import type { Row } from '@tanstack/react-table';
 import { CascadeRowCellPrimitive } from './cascade_row_cell';
 import type {
-  CascadeVirtualizerReturnValue,
   ChildVirtualizerController,
+  CascadeRootVirtualizerReturnValue,
 } from '../../../lib/core/virtualizer';
 import { DataCascadeProvider } from '../../../store_provider';
 
@@ -68,7 +68,13 @@ describe('CascadeRowCellPrimitive', () => {
         activeStickyIndex: null,
         virtualizedRowComputedTranslateValue: new Map(),
         preventRowSizeChangePropagation: jest.fn(() => jest.fn()),
-      } as unknown as CascadeVirtualizerReturnValue)
+        childController: {
+          subscribe: jest.fn(() => () => {}),
+          shouldActivate: jest.fn(() => true),
+          enqueue: jest.fn(() => jest.fn()),
+          isReturningCell: jest.fn(() => false),
+        },
+      } as unknown as CascadeRootVirtualizerReturnValue)
   );
 
   it('will invoke the passed onCascadeLeafNodeExpanded if the leafNode has no data', () => {
@@ -204,7 +210,7 @@ describe('CascadeRowCellPrimitive', () => {
             activeStickyIndex: null,
             virtualizedRowComputedTranslateValue: new Map(),
             childController: mockChildController,
-          } as unknown as CascadeVirtualizerReturnValue)
+          } as unknown as CascadeRootVirtualizerReturnValue)
       );
 
       const rowData = cascadeGroups.reduce((acc, value, idx) => ({ ...acc, [value]: idx }), {

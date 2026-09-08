@@ -7,8 +7,8 @@
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 
 import { i18n } from '@kbn/i18n';
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import type { CspBenchmarkRulesStates } from '../schema/rules/latest';
-import { ENTITIES_LATEST_INDEX } from '../constants';
 
 interface BuildEntityAlertsQueryParams {
   field: string;
@@ -203,9 +203,12 @@ export const buildEntityAlertsQuery = ({
 };
 
 /**
- * Gets the entities latest index name (v2) for a specific space.
- * Used for LOOKUP JOIN queries.
+ * Gets the solution-neutral entities latest index name (v2) for a specific space.
+ * Test-seeding helper only: un-migrated deployments still use the legacy
+ * `.entities.v2.latest.security_{space}` name, so production code must resolve
+ * the live name via `resolveEntitiesIndexName` (server) or
+ * `useResolvedLatestEntitiesIndexName` (browser) instead of calling this.
  */
 export const getEntitiesLatestIndexName = (spaceId: string = 'default'): string => {
-  return ENTITIES_LATEST_INDEX.replace('<space>', spaceId);
+  return getLatestEntitiesIndexName(spaceId);
 };

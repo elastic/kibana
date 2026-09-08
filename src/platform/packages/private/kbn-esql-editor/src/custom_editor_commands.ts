@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/code-editor';
+import { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from '@kbn/esql-language';
 import {
   ESQLVariableType,
   QuerySource,
@@ -21,6 +23,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ESQLEditorDeps } from './types';
 import type { ESQLEditorTelemetryService } from './telemetry/telemetry_service';
 import { IndicesBrowserOpenMode } from './resource_browser/types';
+import { getRangeFromOffsets } from './resource_browser/utils';
 
 export interface MonacoCommandDependencies {
   application?: CoreStart['application'];
@@ -40,6 +43,48 @@ export interface MonacoCommandDependencies {
     preloadedFields?: Array<{ name: string; type?: string }>;
   }) => void;
 }
+
+interface TextReplacementCommandPayload {
+  replacementText?: string;
+  replaceStart?: string;
+  replaceEnd?: string;
+}
+
+const applyTextReplacement = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  payload: TextReplacementCommandPayload | undefined
+) => {
+  if (!payload?.replacementText) {
+    return;
+  }
+
+  const model = editor.getModel();
+
+  if (!model) {
+    return;
+  }
+
+  // Suggestion command arguments are serialized as string maps by contract.
+  const replaceStart = Number(payload.replaceStart);
+  const replaceEnd = Number(payload.replaceEnd);
+
+  if (!Number.isFinite(replaceStart) || !Number.isFinite(replaceEnd) || replaceStart > replaceEnd) {
+    return;
+  }
+
+  const modelLength = model.getValue().length;
+  const boundedStart = Math.max(0, Math.min(replaceStart, modelLength));
+  const boundedEnd = Math.max(boundedStart, Math.min(replaceEnd, modelLength));
+
+  editor.executeEdits('applyTextReplacement', [
+    {
+      range: getRangeFromOffsets(model, boundedStart, boundedEnd),
+      text: payload.replacementText,
+    },
+  ]);
+
+  editor.setPosition(model.getPositionAt(boundedStart + payload.replacementText.length));
+};
 
 const triggerControl = async (
   queryString: string,
@@ -92,6 +137,19 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
       openTimePickerPopover();
+    })
+  );
+
+  commandDisposables.push(
+    monaco.editor.registerCommand(ESQL_APPLY_TEXT_REPLACEMENT_COMMAND, (...args) => {
+      const [, payload] = args;
+      const editor = editorRef.current;
+
+      if (!editor) {
+        return;
+      }
+
+      applyTextReplacement(editor, payload);
     })
   );
 
@@ -190,8 +248,12 @@ export const registerCustomCommands = (deps: MonacoCommandDependencies): monaco.
   commandDisposables.push(
     monaco.editor.registerCommand('esql.multiCommands', (...args) => {
       const [, { commands }] = args;
-      const commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[] =
-        JSON.parse(commands);
+      let commandsToExecute: { id: string; payload?: unknown; arguments?: unknown[] }[];
+      try {
+        commandsToExecute = JSON.parse(commands);
+      } catch {
+        return;
+      }
       commandsToExecute.forEach((command) => {
         const payload = command.payload ?? command.arguments?.[0] ?? {};
         editorRef.current?.trigger(undefined, command.id, payload);
@@ -257,28 +319,65 @@ export const addEditorKeyBindings = (
   editor: monaco.editor.IStandaloneCodeEditor,
   onQuerySubmit: (source: QuerySource) => void,
   toggleVisor: () => void,
-  onPrettifyQuery: () => void
-) => {
-  // Add editor key bindings
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-    () => onQuerySubmit(QuerySource.MANUAL)
-  );
+  onPrettifyQuery: () => void,
+  onGenerateFromComment?: () => void
+): monaco.IDisposable[] => {
+  // Actions, not commands: `addCommand` keybindings are page-wide and fire while another editor on
+  // the page has focus.
+  const disposables = [
+    editor.addAction({
+      id: 'esql.submitQuery',
+      label: i18n.translate('esqlEditor.query.submitQueryLabel', {
+        defaultMessage: 'Run query',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter],
+      run: () => onQuerySubmit(QuerySource.MANUAL),
+    }),
+    editor.addAction({
+      id: 'esql.insertNewline',
+      label: i18n.translate('esqlEditor.query.insertNewlineLabel', {
+        defaultMessage: 'Insert newline',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.Enter],
+      run: (currentEditor) => currentEditor.trigger('keyboard', 'type', { text: '\n' }),
+    }),
+    editor.addAction({
+      id: 'esql.toggleVisor',
+      label: i18n.translate('esqlEditor.query.toggleVisorLabel', {
+        defaultMessage: 'Toggle quick search',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK],
+      run: () => toggleVisor(),
+    }),
+    editor.addAction({
+      id: 'esql.prettifyQuery',
+      label: i18n.translate('esqlEditor.query.prettifyQueryLabel', {
+        defaultMessage: 'Prettify query',
+      }),
+      // eslint-disable-next-line no-bitwise
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],
+      run: () => onPrettifyQuery(),
+    }),
+  ];
 
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-    () => toggleVisor()
-  );
+  if (onGenerateFromComment) {
+    disposables.push(
+      editor.addAction({
+        id: 'esql.generateFromComment',
+        label: i18n.translate('esqlEditor.query.generateFromCommentLabel', {
+          defaultMessage: 'Generate query from comment',
+        }),
+        // eslint-disable-next-line no-bitwise
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ],
+        run: () => onGenerateFromComment(),
+      })
+    );
+  }
 
-  editor.addCommand(
-    // eslint-disable-next-line no-bitwise
-    monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
-    () => {
-      onPrettifyQuery();
-    }
-  );
+  return disposables;
 };
 
 export const addTabKeybindingRules = () => {

@@ -9,95 +9,161 @@
 
 import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { ExecutionStatus, isEventDrivenWorkflowTriggerSource } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isTerminalStatus,
+} from '@kbn/workflows';
+import { handlePostExecutionLoop } from './handle_post_execution_loop';
 import { setupDependencies } from './setup_dependencies';
+import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
+import { handleQueuedWorkflowRunAtTaskStart } from '../concurrency/handle_queued_workflow_run_at_task_start';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
-import type { WorkflowsExecutionEnginePluginStart } from '../types';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type {
+  InternalResumeWorkflowExecution,
+  WorkflowsExecutionEnginePluginStart,
+} from '../types';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { workflowExecutionLoop } from '../workflow_execution_loop';
+
+export interface RunWorkflowResult {
+  /** Dormant queued `workflow:run` tasks must be deleted by Task Manager after handling. */
+  shouldDeleteTask?: boolean;
+}
 
 export async function runWorkflow({
   workflowRunId,
   spaceId,
-  taskAbortController,
+  signal,
   logger,
   config,
   fakeRequest,
   dependencies,
   workflowsExecutionEngine,
   meteringService,
-  isEventDrivenExecutionEnabled,
+  internalResumeWorkflowExecution,
+  workflowExecutionRepository,
+  stepExecutionRepository,
 }: {
   workflowRunId: string;
   spaceId: string;
-  taskAbortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
-  isEventDrivenExecutionEnabled?: () => boolean;
-}): Promise<void> {
+  internalResumeWorkflowExecution?: InternalResumeWorkflowExecution;
+  workflowExecutionRepository: WorkflowExecutionRepository;
+  stepExecutionRepository: StepExecutionRepository;
+}): Promise<RunWorkflowResult | void> {
   // Span for setup/initialization phase
   const setupSpan = apm.startSpan('workflow setup', 'workflow', 'setup');
+  let setupResult: Awaited<ReturnType<typeof setupDependencies>>;
+  try {
+    setupResult = await setupDependencies(
+      workflowRunId,
+      spaceId,
+      logger,
+      config,
+      dependencies,
+      workflowExecutionRepository,
+      stepExecutionRepository,
+      fakeRequest,
+      workflowsExecutionEngine
+    );
+  } catch (error) {
+    // The graph could not be built — a permanent author error (the parallel
+    // branch-body constraints, normally caught in the editor by validateGraphBuild
+    // but reachable here for API/imported/legacy workflows that bypass the UI).
+    // setupDependencies has already persisted the execution as FAILED with the
+    // actionable reason, so return cleanly here instead of rethrowing — a rethrow
+    // would be treated as a transient task failure and recovered into an opaque
+    // TaskRecoveryError.
+    if (isWorkflowGraphSetupError(error)) {
+      return;
+    }
+    throw error;
+  } finally {
+    setupSpan?.end();
+  }
+
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
     workflowExecutionState,
+    stepIoService,
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
     workflowTaskManager,
-    workflowExecutionRepository,
     esClient,
     telemetryClient,
-  } = await setupDependencies(
-    workflowRunId,
-    spaceId,
-    logger,
-    config,
-    dependencies,
-    fakeRequest,
-    workflowsExecutionEngine
-  );
-  setupSpan?.end();
+    workflowExecutionCursor,
+  } = setupResult;
 
-  // Execution-time gate: skip event-driven runs when the kill switch is disabled
-  if (isEventDrivenExecutionEnabled) {
-    const execution = await workflowExecutionRepository.getWorkflowExecutionById(
-      workflowRunId,
-      spaceId
+  const execution = workflowExecutionState.getWorkflowExecution();
+  if (isTerminalStatus(execution.status)) {
+    logger.debug(
+      `Skipping workflow run ${workflowRunId}: execution already terminal [${execution.status}]`
     );
-    if (execution) {
-      const triggeredBy = execution.triggeredBy;
-      const isEventDriven = isEventDrivenWorkflowTriggerSource(triggeredBy);
-      if (isEventDriven && !isEventDrivenExecutionEnabled()) {
-        const cancelledAt = new Date().toISOString();
-        await workflowExecutionRepository.updateWorkflowExecution({
-          id: workflowRunId,
-          status: ExecutionStatus.SKIPPED,
-          cancellationReason: 'Event-driven execution disabled by operator',
-          cancelledAt,
-          cancelledBy: 'system',
-        });
-        logger.debug(
-          `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
-        );
-        telemetryClient.reportEventDrivenExecutionSuppressed({
-          workflowExecution: {
-            ...execution,
-            status: ExecutionStatus.SKIPPED,
-            cancellationReason: 'Event-driven execution disabled by operator',
-            cancelledAt,
-            cancelledBy: 'system',
-          },
-          logTriggerEventsEnabled: workflowsExecutionEngine?.isLogTriggerEventsEnabled() ?? false,
-        });
-        return;
-      }
+    if (meteringService) {
+      void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
     }
+    return;
+  }
+
+  const handledQueuedRun = await handleQueuedWorkflowRunAtTaskStart({
+    execution,
+    workflowRunId,
+    workflowExecutionRepository,
+    logger,
+  });
+  if (handledQueuedRun) {
+    await handlePostExecutionLoop({
+      workflowRunId,
+      spaceId,
+      logger,
+      fakeRequest,
+      workflowExecutionRepository,
+      internalResumeWorkflowExecution,
+      workflowTaskManager,
+      meteringService,
+      cloudSetup: dependencies.cloudSetup,
+    });
+    return { shouldDeleteTask: true };
+  }
+
+  const triggeredBy = execution.triggeredBy;
+  const isEventDriven = isEventDrivenWorkflowTriggerSource(execution);
+  if (isEventDriven && !workflowsExecutionEngine.triggerEvents.isEnabled) {
+    const cancelledAt = new Date().toISOString();
+    await workflowExecutionRepository.updateWorkflowExecution({
+      id: workflowRunId,
+      status: ExecutionStatus.SKIPPED,
+      cancellationReason: 'Event-driven execution disabled by operator',
+      cancelledAt,
+      cancelledBy: 'system',
+    });
+    logger.debug(
+      `Event-driven execution is disabled; skipping workflow run ${workflowRunId} (triggeredBy: ${triggeredBy}).`
+    );
+    telemetryClient.reportEventDrivenExecutionSuppressed({
+      workflowExecution: {
+        ...execution,
+        status: ExecutionStatus.SKIPPED,
+        cancellationReason: 'Event-driven execution disabled by operator',
+        cancelledAt,
+        cancelledBy: 'system',
+      },
+      logTriggerEventsEnabled: workflowsExecutionEngine.triggerEvents.isLogEventsEnabled,
+    });
+    return;
   }
 
   // Span for runtime initialization (graph building, topsort, etc.)
@@ -123,8 +189,10 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
+      stepIoService,
       workflowExecutionRepository,
       workflowLogger,
       nodesFactory,
@@ -132,7 +200,7 @@ export async function runWorkflow({
       esClient,
       fakeRequest,
       coreStart: dependencies.coreStart,
-      taskAbortController,
+      signal,
       workflowTaskManager,
     });
     loopSpan?.setOutcome('success');
@@ -141,26 +209,26 @@ export async function runWorkflow({
     throw error;
   } finally {
     loopSpan?.end();
+
+    await emitWorkflowExecutionFailedEventIfFailed({
+      workflowRuntime,
+      workflowExecutionState,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
+      request: fakeRequest,
+      logger,
+      workflowRunId,
+    });
   }
 
-  // Report metering after execution completes and state is flushed.
-  // This is fire-and-forget: the metering service handles retries and
-  // will no-op for non-terminal states (e.g., WAITING for resume).
-  if (meteringService) {
-    try {
-      const finalExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-        workflowRunId,
-        spaceId
-      );
-      if (finalExecution) {
-        void meteringService.reportWorkflowExecution(finalExecution, dependencies.cloudSetup);
-      }
-    } catch (err) {
-      logger.warn(
-        `Failed to fetch execution for metering (execution=${workflowRunId}): ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    }
-  }
+  await handlePostExecutionLoop({
+    workflowRunId,
+    spaceId,
+    logger,
+    fakeRequest,
+    workflowExecutionRepository,
+    internalResumeWorkflowExecution,
+    workflowTaskManager,
+    meteringService,
+    cloudSetup: dependencies.cloudSetup,
+  });
 }

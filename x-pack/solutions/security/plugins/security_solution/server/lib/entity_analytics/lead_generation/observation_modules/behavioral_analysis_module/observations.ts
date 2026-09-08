@@ -6,7 +6,7 @@
  */
 
 import type { LeadEntity, Observation } from '../../types';
-import { makeObservation } from '../utils';
+import { makeObservation, entityTypeLabel } from '../utils';
 import {
   MODULE_ID,
   ALERT_SEVERITY_TIERS,
@@ -50,7 +50,9 @@ export const buildObservationsForEntity = (
         score: Math.min(100, (totalAlerts / HIGH_VOLUME_ALERT_THRESHOLD) * 60),
         severity: totalAlerts >= HIGH_VOLUME_ALERT_THRESHOLD * 3 ? 'high' : 'medium',
         confidence: 0.8,
-        description: `Entity ${entity.name} has ${totalAlerts} alerts in the last 7 days, suggesting elevated threat activity`,
+        description: `${entityTypeLabel(entity)} ${
+          entity.name
+        } has ${totalAlerts} alerts in the last 7 days, suggesting elevated threat activity`,
         metadata: { total_alerts: totalAlerts, distinct_rules: distinctRuleNames.length },
       })
     );
@@ -64,7 +66,9 @@ export const buildObservationsForEntity = (
         score: Math.min(100, ruleCount * 20),
         severity: ruleCount >= MULTI_TACTIC_RULE_THRESHOLD * 2 ? 'critical' : 'high',
         confidence: 0.75,
-        description: `Entity ${entity.name} is targeted by ${ruleCount} distinct detection rules, indicating a potential multi-tactic attack`,
+        description: `${entityTypeLabel(entity)} ${
+          entity.name
+        } is targeted by ${ruleCount} distinct detection rules, indicating a potential multi-tactic attack`,
         metadata: {
           distinct_rule_count: ruleCount,
           rule_names: distinctRuleNames,

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { bulkOperationParamsSchema, bulkOperationResponseSchema } from '@kbn/alerting-v2-schemas';
-import type { BulkOperationParams } from '@kbn/alerting-v2-schemas';
+import { Request } from '@kbn/core-di-server';
+import { bulkByIdsSchema, bulkResponseSchema, errorResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { BulkByIdsParams } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { bulkDeleteRulesOasExamples } from './bulk_delete_rules_oas_example';
 
 @injectable()
-export class BulkDeleteRulesRoute {
+export class BulkDeleteRulesRoute extends BaseAlertingRoute {
   static method = 'post' as const;
   static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_delete`;
   static security: RouteSecurity = {
@@ -27,46 +28,39 @@ export class BulkDeleteRulesRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'public',
-    summary: 'Delete rules in bulk',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+  static routeOptions = {
+    summary: 'Delete rules in bulk by ID',
+    oasOperationObject: bulkDeleteRulesOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(bulkOperationParamsSchema),
+      body: bulkByIdsSchema,
     },
     response: {
       200: {
-        body: () => bulkOperationResponseSchema,
-        description: 'Indicates a successful call.',
+        body: () => bulkResponseSchema,
+        description: 'Returns the result of the bulk delete operation.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
 
-  constructor(
-    @inject(Request)
-    private readonly request: KibanaRequest<unknown, unknown, BulkOperationParams>,
-    @inject(Response) private readonly response: KibanaResponseFactory,
-    @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  protected readonly routeName = 'bulk delete rules';
 
-  async handle() {
-    try {
-      const { ids, filter } = this.request.body;
-      const params = ids ? { ids } : { filter: filter ?? '' };
-      const result = await this.rulesClient.bulkDeleteRules(params);
-      return this.response.ok({ body: result });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+  constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, BulkByIdsParams>,
+    @inject(RulesClient) private readonly rulesClient: RulesClient
+  ) {
+    super(ctx);
+  }
+
+  protected async execute() {
+    const result = await this.rulesClient.bulkDeleteRules({ ids: this.request.body.ids });
+    return this.ctx.response.ok({ body: result });
   }
 }

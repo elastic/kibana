@@ -6,15 +6,14 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
 import { flattenObject } from '@kbn/object-utils';
+import { inject, injectable } from 'inversify';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { alertEpisodeStatus } from '../../../resources/datastreams/alert_events';
+import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
 import { EsServiceScopedToken } from '../es_service/tokens';
 import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
-import {
-  ALERT_EVENTS_DATA_STREAM,
-  alertEpisodeStatus,
-} from '../../../resources/datastreams/alert_events';
-import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
 const MAX_DATA_FIELDS = 100;
@@ -26,8 +25,7 @@ const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
 enum MatcherField {
   EpisodeStatus = 'episode_status',
   RuleName = 'rule.name',
-  RuleDescription = 'rule.description',
-  RuleLabels = 'rule.labels',
+  RuleTags = 'rule.tags',
   RuleId = 'rule.id',
   EpisodeId = 'episode_id',
   GroupHash = 'group_hash',
@@ -42,10 +40,6 @@ const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
   [MatcherField.RuleName]: {
     searchField: 'metadata.name',
     accessor: (a) => a.metadata.name,
-  },
-  [MatcherField.RuleDescription]: {
-    searchField: 'metadata.description',
-    accessor: (a) => a.metadata.description,
   },
 };
 
@@ -93,8 +87,8 @@ export class MatcherSuggestionsService {
       case MatcherField.EpisodeStatus:
         return this.getStaticSuggestions(EPISODE_STATUS_VALUES, query);
 
-      case MatcherField.RuleLabels:
-        return this.getRuleLabelsSuggestions(query);
+      case MatcherField.RuleTags:
+        return this.getRuleTagsSuggestions(query);
 
       case MatcherField.RuleId:
         return this.getRuleIdSuggestions(query);
@@ -107,12 +101,13 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(): Promise<string[]> {
+  async getDataFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
         size: DATA_FIELD_SAMPLE_SIZE,
         timeout: '10s',
+        terminate_after: DATA_FIELD_SAMPLE_SIZE,
         _source: ['data'],
         query: {
           bool: {
@@ -121,6 +116,7 @@ export class MatcherSuggestionsService {
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
               { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
         },
@@ -163,7 +159,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: MAX_SUGGESTIONS,
       ...(query ? { search: `${getEscapedQuery(query)}*`, searchFields: [searchField] } : {}),
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -172,29 +168,29 @@ export class MatcherSuggestionsService {
       .filter((v): v is string => typeof v === 'string' && v.length > 0);
   }
 
-  private async getRuleLabelsSuggestions(query: string): Promise<string[]> {
+  private async getRuleTagsSuggestions(query: string): Promise<string[]> {
     const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      fields: ['metadata.labels'],
-      sortField: 'updatedAt',
+      fields: ['metadata.tags'],
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
-    const allLabels = new Set<string>();
+    const allTags = new Set<string>();
     for (const so of result.saved_objects) {
-      const labels = so.attributes.metadata?.labels;
-      if (Array.isArray(labels)) {
-        for (const label of labels) {
-          allLabels.add(label);
+      const tags = so.attributes.metadata?.tags;
+      if (Array.isArray(tags)) {
+        for (const tag of tags) {
+          allTags.add(tag);
         }
       }
     }
 
     const lowerQuery = query.toLowerCase();
-    return Array.from(allLabels)
-      .filter((label) => !lowerQuery || label.toLowerCase().startsWith(lowerQuery))
+    return Array.from(allTags)
+      .filter((tag) => !lowerQuery || tag.toLowerCase().startsWith(lowerQuery))
       .sort()
       .slice(0, MAX_SUGGESTIONS);
   }
@@ -204,7 +200,7 @@ export class MatcherSuggestionsService {
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 

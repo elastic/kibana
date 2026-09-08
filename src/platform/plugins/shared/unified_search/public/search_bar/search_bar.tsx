@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { compact } from 'lodash';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
@@ -40,7 +39,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ESQLQueryStats } from '@kbn/esql-types';
+import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
@@ -50,10 +49,11 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
+import { QuerySubmitTrigger } from './query_submit_metadata';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -77,8 +77,15 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  // Toggle the datepicker with a boolean, or use `{ disabled: true }` to show it disabled
+  showDatePicker?: ShowDatePicker;
   showAutoRefreshOnly?: boolean;
+  /**
+   * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
+   * to opt out and keep the legacy EuiSuperDatePicker. Only takes effect when
+   * the `unifiedSearch.newDateRangePickerEnabled` feature flag is also enabled.
+   */
+  enableDateRangePicker?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
@@ -150,6 +157,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   submitOnBlur?: boolean;
 
   renderQueryInputAppend?: () => React.ReactNode;
+  esqlApproximation?: QueryBarTopRowProps['esqlApproximation'];
   onESQLDocsFlyoutVisibilityChanged?: QueryBarTopRowProps['onESQLDocsFlyoutVisibilityChanged'];
   /**
    * Optional configuration for ES|QL variables.
@@ -345,15 +353,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     this.renderSavedQueryManagement.clear();
   }
 
-  private shouldRenderFilterBar() {
-    return (
-      this.props.showFilterBar &&
-      this.props.filters &&
-      this.props.indexPatterns &&
-      compact(this.props.indexPatterns).length > 0
-    );
-  }
-
   /*
    * This Function is here to show the toggle in saved query form
    * in case you the date range (from/to)
@@ -502,7 +501,38 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     );
   };
 
-  public onQueryBarSubmit = (queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query }) => {
+  private async trackESQLQuerySubmitted(
+    query: Query | AggregateQuery | undefined,
+    trigger?: QuerySubmitTrigger
+  ) {
+    if (!query || !isOfAggregateQueryType(query)) {
+      return;
+    }
+
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    switch (trigger) {
+      case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
+        source = QuerySource.SEARCH_BUTTON;
+        break;
+      case QuerySubmitTrigger.TIME_FILTER:
+        source = QuerySource.TIME_FILTER;
+        break;
+      default:
+        return;
+    }
+
+    try {
+      const telemetryService = await this.services.esql?.getTelemetryService();
+      telemetryService?.trackQuerySubmitted({ source, query: query.esql });
+    } catch {
+      // best effort, don't block the query submission if telemetry fails
+    }
+  }
+
+  public onQueryBarSubmit = (
+    queryAndDateRange: { dateRange?: TimeRange; query?: QT | Query },
+    trigger?: QuerySubmitTrigger
+  ) => {
     this.setState(
       {
         query: queryAndDateRange.query,
@@ -525,6 +555,8 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
             this.isDirty()
           );
         }
+
+        void this.trackESQLQuerySubmitted(this.state.query, trigger);
         this.services.usageCollection?.reportUiCounter(
           this.services.appName,
           METRIC_TYPE.CLICK,
@@ -620,7 +652,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
   };
 
   private shouldShowDatePickerAsBadge() {
-    return this.shouldRenderFilterBar() && !this.props.showQueryInput;
+    return this.props.showFilterBar && !this.props.showQueryInput;
   }
 
   public render() {
@@ -714,12 +746,12 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     ) : undefined;
 
     let filterBar;
-    if (this.shouldRenderFilterBar()) {
+    if (this.props.showFilterBar) {
       filterBar = this.shouldShowDatePickerAsBadge() ? (
         <FilterItems
-          filters={this.props.filters!}
+          filters={this.props.filters ?? []}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={this.props.indexPatterns ?? []}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -729,9 +761,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       ) : (
         <FilterBar
           afterQueryBar
-          filters={this.props.filters!}
+          filters={this.props.filters ?? []}
           onFiltersUpdated={this.props.onFiltersUpdated}
-          indexPatterns={this.props.indexPatterns!}
+          indexPatterns={this.props.indexPatterns ?? []}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={this.props.filtersForSuggestions}
           hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
@@ -802,6 +834,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
           renderQueryInputAppend={this.props.renderQueryInputAppend}
+          esqlApproximation={this.props.esqlApproximation}
           disableExternalPadding={this.props.displayStyle === 'withBorders'}
           onESQLDocsFlyoutVisibilityChanged={this.props.onESQLDocsFlyoutVisibilityChanged}
           bubbleSubmitEvent={this.props.bubbleSubmitEvent}
@@ -811,6 +844,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlQueryStats={this.props.esqlQueryStats}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
+          enableDateRangePicker={this.props.enableDateRangePicker}
           enableResourceBrowser={this.props.enableResourceBrowser}
         />
       </div>

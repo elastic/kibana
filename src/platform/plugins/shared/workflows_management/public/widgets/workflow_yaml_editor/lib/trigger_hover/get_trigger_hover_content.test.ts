@@ -9,8 +9,13 @@
 
 import { z } from '@kbn/zod/v4';
 import { getTriggerHoverContent, getTriggerTypeAtPath } from './get_trigger_hover_content';
+import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 describe('getTriggerHoverContent', () => {
+  beforeEach(() => {
+    setMockStabilityBadgeThemeForTests();
+  });
+
   it('returns null for built-in trigger: manual', () => {
     const result = getTriggerHoverContent('manual');
     expect(result).toBeNull();
@@ -35,6 +40,7 @@ describe('getTriggerHoverContent', () => {
       id === 'cases.updated'
         ? {
             id: 'cases.updated',
+            stability: 'tech_preview' as const,
             title: 'Case updated',
             description: 'Fired when a case is created or updated.',
             eventSchema,
@@ -43,8 +49,9 @@ describe('getTriggerHoverContent', () => {
 
     const result = getTriggerHoverContent('cases.updated', getTriggerDefinition('cases.updated'));
     expect(result).not.toBeNull();
-    expect(result!.value).toContain('Tech Preview');
-    expect(result!.value).toContain(
+    expect(result!.value).toContain('Tech preview');
+    expect(result!.value).toContain('<img src="data:image/svg+xml,');
+    expect(result!.value).not.toContain(
       'This functionality is experimental and not supported. It may change or be removed at any time.'
     );
     expect(result!.value).toContain('Case updated');
@@ -71,6 +78,7 @@ describe('getTriggerHoverContent', () => {
     });
     const definition = {
       id: 'example.nested',
+      stability: 'tech_preview' as const,
       title: 'Nested example',
       description: 'Trigger with nested event shape.',
       eventSchema,
@@ -92,6 +100,7 @@ describe('getTriggerHoverContent', () => {
       id === 'alerts.severity_high'
         ? {
             id: 'alerts.severity_high',
+            stability: 'tech_preview' as const,
             title: 'High severity alert',
             description: 'Fired when an alert has high severity.',
             eventSchema,

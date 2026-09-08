@@ -9,7 +9,7 @@
 
 import Path from 'path';
 import type { Node } from 'ts-morph';
-import { Project } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import type { PluginOrPackage } from '../types';
@@ -501,6 +501,46 @@ describe('buildBasicApiDeclaration edge cases', () => {
 });
 
 describe('buildVariableDec edge cases', () => {
+  it('inherits variable statement @param and @returns for property assignment arrow functions', () => {
+    const project = new Project({
+      useInMemoryFileSystem: true,
+    });
+
+    const sourceFile = project.createSourceFile(
+      'test.ts',
+      `
+      /**
+       * Property assignment docs.
+       * @param input Parent input.
+       * @returns Parent result.
+       */
+      export const api = {
+        run: (input: string) => input,
+      };
+      `
+    );
+
+    const property = sourceFile
+      .getVariableDeclarationOrThrow('api')
+      .getInitializerIfKindOrThrow(SyntaxKind.ObjectLiteralExpression)
+      .getPropertyOrThrow('run')
+      .asKindOrThrow(SyntaxKind.PropertyAssignment);
+
+    const result = buildVariableDec(property, {
+      name: 'run',
+      id: 'test-id',
+      currentPluginId: 'test-plugin',
+      plugins: [],
+      log,
+      captureReferences: false,
+      scope: ApiScope.CLIENT,
+    });
+
+    expect(result.returnComment).toEqual(['Parent result.']);
+    expect(result.children).toBeDefined();
+    expect(result.children![0].description).toEqual(['Parent input.']);
+  });
+
   it('handles variable with multiple call signatures (function overloads)', () => {
     const project = new Project({
       useInMemoryFileSystem: true,

@@ -10,7 +10,6 @@ import { useMemo } from 'react';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import type { AttachmentUIV2, UserActionUI } from '../../containers/types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-
 interface UserActionsPagination {
   userActivityQueryParams: UserActivityParams;
   caseId: string;

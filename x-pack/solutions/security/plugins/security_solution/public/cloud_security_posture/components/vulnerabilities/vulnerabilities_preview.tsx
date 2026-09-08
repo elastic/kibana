@@ -19,7 +19,8 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import {
   buildEuidCspPreviewOptions,
   inferEntityTypeFromIdentityFields,
@@ -31,7 +32,6 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
-import { useUiSetting } from '../../../common/lib/kibana';
 
 const VulnerabilitiesCount = ({
   vulnerabilitiesTotal,
@@ -68,23 +68,29 @@ const VulnerabilitiesCount = ({
 
 export const VulnerabilitiesPreview = ({
   identityFields,
+  entityRecord,
   isPreviewMode,
   openDetailsPanel,
+  hideHeaderIcons,
 }: {
   identityFields: IdentityFields;
+  entityRecord?: EntityStoreRecord | null;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  hideHeaderIcons?: boolean;
 }) => {
   useEffect(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW);
   }, []);
 
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const entityType = inferEntityTypeFromIdentityFields(identityFields);
   const cspPreviewOptions = useMemo(
-    () => buildEuidCspPreviewOptions(entityType, identityFields, euidApi, { entityStoreV2Enabled }),
-    [euidApi, entityStoreV2Enabled, entityType, identityFields]
+    () =>
+      buildEuidCspPreviewOptions(entityType, entityRecord, euidApi, {
+        legacyIdentityFields: identityFields,
+      }),
+    [entityType, entityRecord, euidApi, identityFields]
   );
   const { data } = useVulnerabilitiesPreview(cspPreviewOptions);
 
@@ -139,7 +145,10 @@ export const VulnerabilitiesPreview = ({
   return (
     <ExpandablePanel
       header={{
-        iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'chevronLimitLeft' : '',
+        iconType:
+          !isPreviewMode && !hideHeaderIcons && hasVulnerabilitiesFindings
+            ? 'chevronLimitLeft'
+            : '',
         title: (
           <EuiTitle
             css={css`
@@ -152,7 +161,7 @@ export const VulnerabilitiesPreview = ({
             />
           </EuiTitle>
         ),
-        link,
+        link: hasVulnerabilitiesFindings ? link : undefined,
       }}
       data-test-subj={'securitySolutionFlyoutInsightsVulnerabilities'}
     >

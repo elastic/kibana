@@ -181,13 +181,9 @@ export const EventFiltersFlyout: React.FC<EventFiltersFlyoutProps> = memo(
 
     const confirmModal = useMemo(() => {
       if (confirmModalLabels) {
-        const { title, body, confirmButton, cancelButton } = confirmModalLabels;
         return (
           <ArtifactConfirmModal
-            title={title}
-            body={body}
-            confirmButton={confirmButton}
-            cancelButton={cancelButton}
+            labels={confirmModalLabels}
             onSuccess={submitEventFilter}
             onCancel={() => setShowConfirmModal(false)}
             data-test-subj="artifactConfirmModal"

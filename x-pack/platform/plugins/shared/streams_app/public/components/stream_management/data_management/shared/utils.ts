@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+const KIBANA_PREFIX = 'kbn:';
+
 export const buildRequestPreviewCodeContent = ({
   method,
   url,
@@ -14,9 +16,11 @@ export const buildRequestPreviewCodeContent = ({
   url: string;
   body?: unknown;
 }): string => {
+  const requestUrl = url.startsWith(KIBANA_PREFIX) ? url : `${KIBANA_PREFIX}${url}`;
+
   if (body === undefined || body === null) {
-    return `${method} ${url}`;
+    return `${method} ${requestUrl}`;
   }
 
-  return [`${method} ${url}`, JSON.stringify(body, null, 2)].join('\n');
+  return [`${method} ${requestUrl}`, JSON.stringify(body, null, 2)].join('\n');
 };

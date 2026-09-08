@@ -319,9 +319,9 @@ export const EndpointScriptEditForm = memo<EndpointScriptEditFormProps>(
 
     const onChangePathToExecutable = useCallback(
       (event: React.ChangeEvent<HTMLInputElement>) => {
-        const pathToExecutable = event.target.value.trim();
+        const pathToExecutable = event.target.value;
         toggleHasPathToExecutableError(
-          draftScript.fileType === 'archive' && !pathToExecutable.length
+          draftScript.fileType === 'archive' && !pathToExecutable.trim().length
         );
         setHasFormChanged(true);
 

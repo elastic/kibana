@@ -12,25 +12,19 @@ import {
   getOutcomeAggregation,
   getDurationFieldForTransactions,
 } from '@kbn/apm-data-access-plugin/server/utils';
+import type { ServiceTransactionDetailedStatPeriodsResponse } from '@kbn/apm-api-shared';
 import { calculateThroughputWithInterval } from '../../../lib/helpers/calculate_throughput';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
-import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
+import { nullifyEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import type { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { maybe } from '../../../../common/utils/maybe';
-
-export interface ServiceTransactionDetailedStat {
-  serviceName: string;
-  latency: Array<{ x: number; y: number | null }>;
-  transactionErrorRate?: Array<{ x: number; y: number | null }>;
-  throughput?: Array<{ x: number; y: number | null }>;
-}
 
 export async function getServiceTransactionDetailedStats({
   serviceNames,
@@ -141,7 +135,7 @@ export async function getServiceTransactionDetailedStats({
 
       return {
         serviceName: bucket.key as string,
-        latency: nullifyLeadingTrailingEmptyRedMetricPoints(
+        latency: nullifyEmptyRedMetricPoints(
           topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             docCount: dateBucket.doc_count,
@@ -149,7 +143,7 @@ export async function getServiceTransactionDetailedStats({
           })) ?? []
         ),
         transactionErrorRate: topTransactionTypeBucket
-          ? nullifyLeadingTrailingEmptyRedMetricPoints(
+          ? nullifyEmptyRedMetricPoints(
               topTransactionTypeBucket.timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key + offsetInMs,
                 docCount: dateBucket.doc_count,
@@ -157,7 +151,7 @@ export async function getServiceTransactionDetailedStats({
               }))
             )
           : undefined,
-        throughput: nullifyLeadingTrailingEmptyRedMetricPoints(
+        throughput: nullifyEmptyRedMetricPoints(
           topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
             docCount: dateBucket.doc_count,
@@ -171,11 +165,6 @@ export async function getServiceTransactionDetailedStats({
     }) ?? [],
     'serviceName'
   );
-}
-
-export interface ServiceTransactionDetailedStatPeriodsResponse {
-  currentPeriod: Record<string, ServiceTransactionDetailedStat>;
-  previousPeriod: Record<string, ServiceTransactionDetailedStat>;
 }
 
 export async function getServiceTransactionDetailedStatsPeriods({

@@ -6,6 +6,11 @@
  */
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE,
+  NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE,
+  PERMANENT_UIAM_CONVERSION_ERROR_CODES,
+} from '@kbn/uiam-api-keys-provisioning-status';
 import { UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import {
   UiamApiKeyProvisioningStatus,
@@ -13,14 +18,21 @@ import {
 } from '../../saved_objects/schemas/raw_uiam_api_keys_provisioning_status';
 import { getExcludeRulesFilter, buildChunkedOrNode } from './get_exclude_rules_filter';
 
-function createStatusSavedObject(entityId: string) {
+function createStatusSavedObject(
+  entityId: string,
+  status: UiamApiKeyProvisioningStatus = UiamApiKeyProvisioningStatus.COMPLETED,
+  message?: string,
+  errorCode?: string
+) {
   return {
     id: entityId,
     type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
     attributes: {
       entityId,
       entityType: UiamApiKeyProvisioningEntityType.RULE,
-      status: UiamApiKeyProvisioningStatus.COMPLETED,
+      status,
+      ...(message ? { message } : {}),
+      ...(errorCode ? { errorCode } : {}),
     },
     references: [],
     score: 1,
@@ -57,6 +69,100 @@ describe('getExcludeRulesFilter', () => {
     const orNode = result!.arguments[0];
     expect(orNode.function).toBe('or');
     expect(orNode.arguments).toHaveLength(2);
+  });
+
+  it.each(PERMANENT_UIAM_CONVERSION_ERROR_CODES)(
+    'includes failed permanent UIAM conversion error code %s in the exclusion query',
+    async (errorCode) => {
+      const client = savedObjectsRepositoryMock.create();
+      client.find.mockResolvedValue({
+        saved_objects: [
+          createStatusSavedObject(
+            'rule-1',
+            UiamApiKeyProvisioningStatus.FAILED,
+            undefined,
+            errorCode
+          ),
+        ],
+        total: 1,
+        per_page: 500,
+        page: 1,
+      });
+
+      const result = await getExcludeRulesFilter(client);
+
+      expect(result).toBeDefined();
+      const findFilter = client.find.mock.calls[0][0].filter;
+      expect(findFilter.function).toBe('and');
+      expect(findFilter.arguments[0].function).toBe('or');
+      expect(findFilter.arguments[0].arguments).toContainEqual(
+        expect.objectContaining({
+          function: 'and',
+          arguments: expect.arrayContaining([
+            expect.objectContaining({
+              function: 'is',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.status`,
+                }),
+                expect.objectContaining({ value: UiamApiKeyProvisioningStatus.FAILED }),
+              ]),
+            }),
+            expect.objectContaining({
+              function: 'or',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  function: 'is',
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({
+                      value: `${UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE}.attributes.errorCode`,
+                    }),
+                    expect.objectContaining({ value: errorCode }),
+                  ]),
+                }),
+              ]),
+            }),
+          ]),
+        })
+      );
+    }
+  );
+
+  it('ors all permanent UIAM conversion error codes inside the failed branch', async () => {
+    const client = savedObjectsRepositoryMock.create();
+    client.find.mockResolvedValue({
+      saved_objects: [
+        createStatusSavedObject(
+          'rule-1',
+          UiamApiKeyProvisioningStatus.FAILED,
+          undefined,
+          NON_CLOUD_USER_API_KEY_CREATOR_ERROR_CODE
+        ),
+        createStatusSavedObject(
+          'rule-2',
+          UiamApiKeyProvisioningStatus.FAILED,
+          undefined,
+          API_KEY_CREATOR_NOT_ORG_MEMBER_ERROR_CODE
+        ),
+      ],
+      total: 2,
+      per_page: 500,
+      page: 1,
+    });
+
+    await getExcludeRulesFilter(client);
+    const findFilter = client.find.mock.calls[0][0].filter;
+    const failedBranch = findFilter.arguments[0].arguments.find(
+      (arg: { function: string }) => arg.function === 'and'
+    );
+    const errorCodeOrNode = failedBranch.arguments.find(
+      (arg: { function: string }) => arg.function === 'or'
+    );
+    expect(errorCodeOrNode.arguments).toHaveLength(PERMANENT_UIAM_CONVERSION_ERROR_CODES.length);
+    const codes = errorCodeOrNode.arguments.map(
+      (arg: { arguments: Array<{ value: string }> }) => arg.arguments[1].value
+    );
+    expect(codes.sort()).toEqual([...PERMANENT_UIAM_CONVERSION_ERROR_CODES].sort());
   });
 
   it('paginates through multiple pages of status docs', async () => {

@@ -14,10 +14,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_RESUME_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerResumeExecutionRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit } = deps;
+  const { router, api, spaces } = deps;
   router.versioned
     .post({
       path: '/api/workflows/executions/{executionId}/resume',
@@ -47,15 +47,15 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
           const { input } = request.body;
           const spaceId = spaces.getSpaceId(request);
 
-          await api.resumeWorkflowExecution(executionId, spaceId, input, request);
-
-          audit.logExecutionResumed(request, { executionId });
+          await api.resumeWorkflowExecution(executionId, spaceId, input, request, {
+            channel: 'kibana_execution_view',
+          });
 
           return response.ok({
             body: {
@@ -65,10 +65,6 @@ export function registerResumeExecutionRoute(deps: RouteDependencies) {
             },
           });
         } catch (error) {
-          audit.logExecutionResumed(request, {
-            executionId: request.params.executionId,
-            error,
-          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

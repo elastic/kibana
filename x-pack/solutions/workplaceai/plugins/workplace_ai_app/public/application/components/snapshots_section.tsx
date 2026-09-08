@@ -21,7 +21,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { DATA_SOURCES_APP_ID } from '@kbn/deeplinks-data-sources';
 import type { AgentConfiguration, ToolSelection } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_AGENTS } from '../../../common';
 import { useAgents } from '../hooks/use_agents';
@@ -244,7 +243,7 @@ export const SnapshotsSection: React.FC = () => {
                   render: (name: string, item: { icon: string }) => (
                     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={item.icon} />
+                        <EuiIcon type={item.icon} aria-hidden={true} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiLink onClick={() => {}}>{name}</EuiLink>
@@ -261,7 +260,7 @@ export const SnapshotsSection: React.FC = () => {
                     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                       {status === 'Sync error' && (
                         <EuiFlexItem grow={false}>
-                          <EuiIcon type="warning" color="danger" />
+                          <EuiIcon type="warning" color="danger" aria-hidden={true} />
                         </EuiFlexItem>
                       )}
                       <EuiFlexItem>
@@ -277,7 +276,7 @@ export const SnapshotsSection: React.FC = () => {
                 <EuiSpacer size="s" />
                 <EuiFlexGroup justifyContent="center">
                   <EuiFlexItem grow={false}>
-                    <EuiLink onClick={() => navigateToApp(DATA_SOURCES_APP_ID)}>
+                    <EuiLink onClick={() => {}}>
                       <FormattedMessage
                         id="xpack.workplaceai.gettingStarted.snapshots.seeAllSources"
                         defaultMessage="See all"

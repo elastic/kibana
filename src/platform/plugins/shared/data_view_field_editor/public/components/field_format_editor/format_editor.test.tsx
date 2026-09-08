@@ -7,58 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  FieldFormatEditorFactory,
+  FormatEditorProps as FieldFormatEditorProps,
+} from './editors';
 import React, { PureComponent } from 'react';
-import { shallow } from 'enzyme';
 import { FormatEditor } from './format_editor';
+import { render, screen } from '@testing-library/react';
 
-class TestEditor extends PureComponent {
+type FormatEditorComponentProps = React.ComponentProps<typeof FormatEditor>;
+type FieldFormatEditors = FormatEditorComponentProps['fieldFormatEditors'];
+
+class TestEditor extends PureComponent<FieldFormatEditorProps<{}>> {
+  static formatId = 'number';
+
   render() {
-    if (this.props) {
-      return null;
-    }
     return <div>Test editor</div>;
   }
 }
 
-const formatEditors = {
-  byFormatId: {
-    ip: TestEditor,
-    number: TestEditor,
-  },
-  getById: jest.fn(() => TestEditor as any),
-  getAll: jest.fn(),
+const testEditorFactory: FieldFormatEditorFactory = Object.assign(async () => TestEditor, {
+  formatId: TestEditor.formatId,
+});
+
+const createFormatEditors = (editorFactory?: FieldFormatEditorFactory): FieldFormatEditors => ({
+  getAll: jest.fn(() => (editorFactory ? [editorFactory] : [])),
+  getById: jest.fn(() => editorFactory) as FieldFormatEditors['getById'],
+});
+
+const defaultProps: FormatEditorComponentProps = {
+  fieldFormat: {} as FormatEditorComponentProps['fieldFormat'],
+  fieldFormatEditors: createFormatEditors(testEditorFactory),
+  fieldFormatId: 'number',
+  fieldFormatParams: {},
+  fieldType: 'number',
+  onChange: jest.fn(),
+  onError: jest.fn(),
 };
 
 describe('FieldFormatEditor', () => {
   it('should render normally', async () => {
-    const component = shallow(
-      <FormatEditor
-        fieldType="number"
-        fieldFormat={{} as any}
-        fieldFormatId="number"
-        fieldFormatParams={{}}
-        fieldFormatEditors={formatEditors}
-        onChange={() => {}}
-        onError={() => {}}
-      />
-    );
+    const fieldFormatEditors = createFormatEditors(testEditorFactory);
 
-    expect(component).toMatchSnapshot();
+    render(<FormatEditor {...defaultProps} fieldFormatEditors={fieldFormatEditors} />);
+
+    expect(await screen.findByText('Test editor')).toBeVisible();
+    expect(fieldFormatEditors.getById).toHaveBeenCalledWith('number');
   });
 
-  it('should render nothing if there is no editor for the format', async () => {
-    const component = shallow(
-      <FormatEditor
-        fieldType="number"
-        fieldFormat={{} as any}
-        fieldFormatId="ip"
-        fieldFormatParams={{}}
-        fieldFormatEditors={formatEditors}
-        onChange={() => {}}
-        onError={() => {}}
-      />
+  it('should render nothing if there is no editor for the format', () => {
+    const fieldFormatEditors = createFormatEditors();
+
+    const { container } = render(
+      <FormatEditor {...defaultProps} fieldFormatId="ip" fieldFormatEditors={fieldFormatEditors} />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
+    expect(fieldFormatEditors.getById).toHaveBeenCalledWith('ip');
   });
 });

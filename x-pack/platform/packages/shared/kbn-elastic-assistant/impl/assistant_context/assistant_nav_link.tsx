@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { EuiShowFor, EuiToolTip } from '@elastic/eui';
+import { EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
@@ -49,7 +49,7 @@ export const AssistantNavLink: FC = () => {
   } = useAssistantContext();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   const [tooltipVisible, setTooltipVisible] = useState(true);
 
   useEffect(() => {

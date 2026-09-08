@@ -6,9 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { within } from '@elastic/esql';
-import type { ESQLAstAllCommands, ESQLAstPromqlCommand } from '@elastic/esql/types';
-import { correctPromqlQuerySyntax, getBracketsToClose } from '../../definitions/utils/ast';
+import {
+  isBinaryExpression,
+  isIdentifier,
+  type PromQLAstExpression,
+  Walker,
+  within,
+} from '@elastic/esql';
+import type { ESQLAstAllCommands, ESQLAstPromqlCommand, ESQLIdentifier } from '@elastic/esql/types';
+import { getBracketsToClose } from '../../definitions/utils/ast';
 import { getPreGroupedAggregationName } from '../../definitions/utils/promql';
 import { getTrailingIdentifier } from '../../definitions/utils/shared';
 
@@ -20,6 +26,7 @@ export enum PromqlParamValueType {
 
 export enum PromqlParamName {
   Index = 'index',
+  Time = 'time',
   Step = 'step',
   Start = 'start',
   End = 'end',
@@ -38,6 +45,12 @@ export interface PromqlParamDefinition {
 // ============================================================================
 // Types
 // ============================================================================
+
+export interface PromqlOutputMetadata {
+  expression: PromQLAstExpression | undefined;
+  metrics: Set<string>;
+  breakdownLabels: Set<string>;
+}
 
 type ParamPositionKind = 'after_command' | 'after_param_keyword' | 'after_param_equals';
 
@@ -84,6 +97,11 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
     valueType: PromqlParamValueType.TimeseriesSources,
   },
   {
+    name: PromqlParamName.Time,
+    description: 'Instant query evaluation time',
+    valueType: PromqlParamValueType.DateLiterals,
+  },
+  {
     name: PromqlParamName.Step,
     description: 'Query resolution step (e.g. 1m, 5m, 1h)',
     valueType: PromqlParamValueType.Static,
@@ -112,10 +130,82 @@ export const PROMQL_PARAMS: PromqlParamDefinition[] = [
 
 export const PROMQL_PARAM_NAMES: string[] = PROMQL_PARAMS.map(({ name }) => name);
 
+export const PROMQL_RANGE_PARAM_NAMES = [
+  PromqlParamName.Step,
+  PromqlParamName.Buckets,
+  PromqlParamName.Start,
+  PromqlParamName.End,
+] as const;
+
+export const PROMQL_PARAM_CONFLICTS: Readonly<Record<string, readonly string[]>> = {
+  [PromqlParamName.Step]: [PromqlParamName.Buckets, PromqlParamName.Time],
+  [PromqlParamName.Buckets]: [PromqlParamName.Step, PromqlParamName.Time],
+  [PromqlParamName.Start]: [PromqlParamName.Time],
+  [PromqlParamName.End]: [PromqlParamName.Time],
+  [PromqlParamName.Time]: PROMQL_RANGE_PARAM_NAMES,
+};
+
+export function isPromqlParamAvailable(name: string, usedParams: Set<string>): boolean {
+  if (usedParams.has(name)) {
+    return false;
+  }
+
+  return !PROMQL_PARAM_CONFLICTS[name]?.some((param) => usedParams.has(param));
+}
+
 const PARAM_ASSIGNMENT_PATTERNS = PROMQL_PARAM_NAMES.map((param) => ({
   param,
   pattern: new RegExp(`${param}\\s*=`, 'i'),
 }));
+
+// ============================================================================
+// Output Column Helpers
+// ============================================================================
+
+/** Returns the identifier assigned to the PROMQL query, if one is present. */
+export const getPromqlUserDefinedColumn = (
+  command: ESQLAstPromqlCommand
+): ESQLIdentifier | undefined => {
+  const { query } = command;
+
+  if (!isBinaryExpression(query) || query.name !== '=') {
+    return undefined;
+  }
+
+  const target = query.args[0];
+  return isIdentifier(target) ? target : undefined;
+};
+
+/** Collects the query expression, referenced metrics, and grouping labels. */
+export const getPromqlOutputMetadata = (command: ESQLAstPromqlCommand): PromqlOutputMetadata => {
+  const metrics = new Set<string>();
+  const breakdownLabels = new Set<string>();
+  let expression: PromQLAstExpression | undefined;
+
+  Walker.walk(command, {
+    promql: {
+      visitPromqlQuery: (node) => {
+        expression ??= node.expression;
+      },
+      visitPromqlSelector: (node) => {
+        if (node.metric?.name) {
+          metrics.add(node.metric.name);
+        }
+      },
+      visitPromqlFunction: (node) => {
+        if (node.grouping) {
+          for (const label of node.grouping.args) {
+            if (label.name) {
+              breakdownLabels.add(label.name);
+            }
+          }
+        }
+      },
+    },
+  });
+
+  return { expression, metrics, breakdownLabels };
+};
 
 // ============================================================================
 // Query Slice Helpers
@@ -144,10 +234,8 @@ function getPromqlQuerySlice(
     return undefined;
   }
 
-  const text = correctPromqlQuerySyntax(rawText);
-
-  // Keep original length to clamp cursor (cursor shouldn't appear on added brackets)
-  return { text, start: queryBounds.queryStart, originalLength: rawText.length };
+  // Keep original length to clamp cursor after the query parser adds syntax fixups.
+  return { text: rawText, start: queryBounds.queryStart, originalLength: rawText.length };
 }
 
 function getPromqlQueryBounds(

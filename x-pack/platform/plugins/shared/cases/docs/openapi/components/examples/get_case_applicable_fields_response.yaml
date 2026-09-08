@@ -1,0 +1,38 @@
+summary: Fields applicable to a case
+value:
+  fields:
+    - key: priority_as_keyword
+      name: priority
+      label: Priority
+      type: keyword
+      control: SELECT_BASIC
+      required: true
+      requiredOnClose: false
+      displayOnly: false
+      options:
+        - low
+        - medium
+        - high
+      defaultValue: medium
+      source: global
+      isGlobal: true
+    - key: rollout_notes_as_keyword
+      name: rollout_notes
+      label: Rollout notes
+      type: keyword
+      control: TEXTAREA
+      required: false
+      requiredOnClose: true
+      displayOnly: false
+      source: template
+      isGlobal: false
+    - key: instructions_as_keyword
+      name: instructions
+      label: Instructions
+      type: keyword
+      control: MARKDOWN
+      required: false
+      requiredOnClose: false
+      displayOnly: true
+      source: template
+      isGlobal: false

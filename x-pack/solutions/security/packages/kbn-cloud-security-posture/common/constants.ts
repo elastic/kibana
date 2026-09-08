@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { EntityStoreEuid } from '@kbn/entity-store/common/euid_helpers';
 import type { VulnSeverity } from './types/vulnerabilities';
 import type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
@@ -108,22 +109,17 @@ export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-defa
 export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';
 
 /**
- * Entity store latest index pattern for LOOKUP JOIN queries.
- * The <space> placeholder should be replaced with the actual space ID.
- */
-export const ENTITIES_LATEST_INDEX = '.entities.v2.latest.security_<space>';
-
-/**
  * Relationship fields available in the generic entities index.
  * These represent static/configuration-based relationships between entities.
  *
- * WARNING: ES|QL FORK supports a maximum of 8 branches. If more than 8 fields are added here,
- * the relationship fetching logic in fetch_entity_relationships_graph.ts will need to be updated
- * to batch the FORK queries.
+ * NOTE: ES|QL FORK supports a maximum of 8 branches. The relationship fetching logic in
+ * fetch_entity_relationships_graph.ts batches this list into groups of at most 8 fields, each
+ * issued as its own ES|QL query, so this list may grow past 8 entries without further changes.
  */
 export const ENTITY_RELATIONSHIP_FIELDS = [
   'accesses_frequently',
   'accesses_infrequently',
+  'administers',
   'communicates_with',
   'depends_on',
   'owns',
@@ -138,6 +134,7 @@ export const ENTITY_RELATIONSHIP_LABELS: Record<
 > = {
   accesses_frequently: 'Accesses frequently',
   accesses_infrequently: 'Accesses infrequently',
+  administers: 'Administers',
   communicates_with: 'Communicates with',
   depends_on: 'Depends on',
   owns: 'Owns',
@@ -167,42 +164,92 @@ export const GRAPH_TARGET_ENTITY_FIELDS = [
   'service.target.entity.id',
   'entity.target.id',
 ] as const;
-
 /**
  * Raw source fields used to compute actor EUIDs in entity store v2.
  * These mirror the identity fields from Entity Store definitions.
  * Server-side code derives these dynamically via euid.getEuidSourceFields().
  */
-export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = [
-  // user EUID source fields
-  'user.email',
-  'user.id',
-  'user.name',
-  // host EUID source fields
-  'host.id',
-  'host.name',
-  'host.hostname',
-  // service EUID source field
-  'service.name',
-  // generic entity id
-  'entity.id',
-] as const;
+export const getGraphActorEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
+
+function toTargetField(field: string): string {
+  return field.replace('.', '.target.');
+}
 
 /**
  * Raw source fields used to compute target EUIDs in entity store v2.
  * Target-namespace equivalents of GRAPH_ACTOR_EUID_SOURCE_FIELDS.
  */
-export const GRAPH_TARGET_EUID_SOURCE_FIELDS = [
-  // user target EUID source fields
-  'user.target.email',
-  'user.target.id',
-  'user.target.name',
-  // host target EUID source fields
-  'host.target.id',
-  'host.target.name',
-  'host.target.hostname',
-  // service target EUID source field
-  'service.target.name',
-  // generic target entity id
-  'entity.target.id',
+export const getGraphTargetEuidSourceFields = (euid: EntityStoreEuid) => {
+  return {
+    user: [...euid.getEuidSourceFields('user').identitySourceFields.map(toTargetField)],
+    host: [...euid.getEuidSourceFields('host').identitySourceFields.map(toTargetField)],
+    service: [...euid.getEuidSourceFields('service').identitySourceFields.map(toTargetField)],
+    generic: [...euid.getEuidSourceFields('generic').identitySourceFields.map(toTargetField)],
+    all: ['event.dataset', 'event.module', 'data_stream.dataset'],
+  };
+};
+
+export type EuidSourceFields = ReturnType<typeof getGraphActorEuidSourceFields>;
+
+export const GRAPH_SUPPORTED_RUNTIME_MAPPINGS_INTEGRATIONS = [
+  'aws_bedrock',
+  'aws_bedrock_agentcore',
+  'aws_cloudtrail_otel',
+  'aws_securityhub',
+  'aws_vpcflow_otel',
+  'azure_ai_foundry',
+  'azure_app_service',
+  'azure_openai',
+  'checkpoint_email',
+  'cisco_meraki',
+  'cisco_secure_email_gateway',
+  'cisco_umbrella',
+  'citrix_waf',
+  'corelight',
+  'cyera',
+  'darktrace',
+  'entityanalytics_ad',
+  'entityanalytics_okta',
+  'extrahop',
+  'forgerock',
+  'fortinet_fortigate',
+  'gcp_vertexai',
+  'gitlab',
+  'greenhouse',
+  'infoblox_bloxone_ddi',
+  'jamf_pro',
+  'linux',
+  'm365_defender',
+  'microsoft_dhcp',
+  'microsoft_intune',
+  'openai',
+  'osquery',
+  'ping_federate',
+  'ping_one',
+  'prisma_cloud',
+  'qualys_vmdr',
+  'salesforce',
+  'servicenow',
+  'slack',
+  'snort',
+  'snyk',
+  'suricata',
+  'sysdig',
+  'tanium',
+  'ti_misp',
+  'wiz',
+  'zscaler_zia',
 ] as const;
+
+export const isGraphSupportedRuntimeMappingsIntegration = (dataset: string): boolean =>
+  GRAPH_SUPPORTED_RUNTIME_MAPPINGS_INTEGRATIONS.some(
+    (integration) => dataset === integration || dataset.startsWith(`${integration}.`)
+  );

@@ -13,13 +13,17 @@ import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
+import { ChartSectionInspectorProvider } from '../../../context/chart_section_inspector';
+import { ExternalServicesProvider } from '../../../context/external_services';
 import type { UnifiedMetricsGridProps } from '../../../types';
 
 const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) => {
   return (
     <PerformanceContextProvider>
       <EventBasedTelemetryProvider analytics={props.services.analytics}>
-        <MetricsExperienceGrid {...props} />
+        <ChartSectionInspectorProvider setLensRequestAdapter={props.setLensRequestAdapter}>
+          <MetricsExperienceGrid {...props} />
+        </ChartSectionInspectorProvider>
       </EventBasedTelemetryProvider>
     </PerformanceContextProvider>
   );
@@ -27,9 +31,20 @@ const InternalUnifiedMetricsExperienceGrid = (props: UnifiedMetricsGridProps) =>
 
 const InternalUnifiedMetricsExperienceGridWithState = (props: UnifiedMetricsGridProps) => {
   return (
-    <MetricsExperienceStateProvider>
-      <InternalUnifiedMetricsExperienceGrid {...props} />
-    </MetricsExperienceStateProvider>
+    <ExternalServicesProvider externalServices={props.externalServices}>
+      <MetricsExperienceStateProvider
+        profileId={props.profileId}
+        gridSettings={props.gridSettings}
+        onGridSettingsChange={props.onGridSettingsChange}
+        metricsSort={props.metricsSort}
+        onMetricsSortChange={props.onMetricsSortChange}
+        getRecentlyExploredMetrics={props.getRecentlyExploredMetrics}
+        discoverFetch$={props.fetch$}
+        onMetricExplored={props.onMetricExplored}
+      >
+        <InternalUnifiedMetricsExperienceGrid {...props} />
+      </MetricsExperienceStateProvider>
+    </ExternalServicesProvider>
   );
 };
 

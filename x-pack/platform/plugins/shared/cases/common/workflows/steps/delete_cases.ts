@@ -34,7 +34,7 @@ export const deleteCasesStepCommonDefinition: CommonStepDefinition<
   DeleteCasesStepOutputSchema
 > = {
   id: DeleteCasesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.DELETE_CASES_STEP_LABEL,
   description: i18n.DELETE_CASES_STEP_DESCRIPTION,
   documentation: {

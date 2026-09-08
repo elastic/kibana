@@ -12,9 +12,44 @@ import type { WaitForInputStep } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
 import { WaitForInputStepSchema } from '@kbn/workflows/spec/schema';
 import { WaitForInputStepImpl } from './wait_for_input_step';
+import type { ConnectorExecutor } from '../../connector_executor';
+import { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { ContextDependencies } from '../../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
+
+jest.mock('./hitl_external_resume_helpers', () => ({
+  invalidateHitlExternalResumeTokenIfPresent: jest.fn(),
+  mintHitlExternalResumeToken: jest.fn().mockReturnValue({
+    token: 'resume-token',
+    tokenHash: 'resume-token-hash',
+    expiresAt: '2999-01-01T00:00:00.000Z',
+  }),
+}));
+
+jest.mock('../hitl_notifications/has_external_hitl_channels', () => ({
+  hasExternalHitlChannels: jest.fn().mockReturnValue(false),
+}));
+
+jest.mock('../hitl_notifications/send_wait_for_input_notifications', () => ({
+  sendWaitForInputNotifications: jest.fn(),
+}));
+
+const mockMintHitlExternalResumeToken = jest.requireMock('./hitl_external_resume_helpers')
+  .mintHitlExternalResumeToken as jest.Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = jest.requireMock(
+  './hitl_external_resume_helpers'
+).invalidateHitlExternalResumeTokenIfPresent as jest.Mock;
+
+const { hasExternalHitlChannels } = jest.requireMock(
+  '../hitl_notifications/has_external_hitl_channels'
+);
+const { sendWaitForInputNotifications } = jest.requireMock(
+  '../hitl_notifications/send_wait_for_input_notifications'
+);
+const mockHasExternalHitlChannels = hasExternalHitlChannels as jest.Mock;
+const mockSendWaitForInputNotifications = sendWaitForInputNotifications as jest.Mock;
 
 describe('WaitForInputStepImpl', () => {
   let underTest: WaitForInputStepImpl;
@@ -23,8 +58,16 @@ describe('WaitForInputStepImpl', () => {
   let mockStepExecutionRuntime: jest.Mocked<StepExecutionRuntime>;
   let mockWorkflowRuntime: jest.Mocked<WorkflowExecutionRuntimeManager>;
   let workflowLogger: IWorkflowEventLogger;
+  let mockConnectorExecutor: jest.Mocked<ConnectorExecutor>;
+  let mockDependencies: ContextDependencies;
 
   beforeEach(() => {
+    mockHasExternalHitlChannels.mockReturnValue(false);
+    mockSendWaitForInputNotifications.mockReset();
+    mockSendWaitForInputNotifications.mockResolvedValue(undefined);
+    mockMintHitlExternalResumeToken.mockClear();
+    mockInvalidateHitlExternalResumeTokenIfPresent.mockClear();
+
     node = {
       id: 'wait-for-input-step',
       type: 'waitForInput',
@@ -43,25 +86,52 @@ describe('WaitForInputStepImpl', () => {
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
+      abortController: new AbortController(),
       contextManager: {
         renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
+        getEsClientAsUser: jest.fn().mockReturnValue({ security: { createApiKey: jest.fn() } }),
       },
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({ context: {} }),
+      getWorkflowExecution: jest.fn().mockReturnValue({
+        id: 'exec-abc',
+        workflowId: 'wf-1',
+        spaceId: 'default',
+        context: {},
+      }),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
+    mockConnectorExecutor = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<ConnectorExecutor>;
+
+    mockDependencies = {
+      spaceId: 'default',
+      coreStart: {
+        security: {
+          authc: {
+            apiKeys: {
+              invalidateAsInternalUser: jest.fn().mockResolvedValue({}),
+            },
+          },
+        },
+      },
+      cloudSetup: undefined,
+    } as unknown as ContextDependencies;
+
     underTest = new WaitForInputStepImpl(
       node,
       mockStepExecutionRuntime,
       mockWorkflowRuntime,
-      workflowLogger
+      workflowLogger,
+      mockConnectorExecutor,
+      mockDependencies
     );
   });
 
@@ -89,31 +159,56 @@ describe('WaitForInputStepImpl', () => {
       });
     });
 
-    it('should render message with the workflow context and persist schema verbatim', async () => {
+    it('should render the message and schema property default values via the templating engine', async () => {
+      // Typed schema defaults must use ${{ }} so the engine preserves the
+      // underlying type (plain {{ }} always stringifies — e.g. "true").
+      // String defaults can keep plain {{ }} syntax.
       const schema = {
         type: 'object',
-        properties: { approved: { type: 'boolean', title: '{{ do not touch }}' } },
+        properties: {
+          approved: {
+            type: 'boolean',
+            title: 'Approve isolation?',
+            default: '${{ inputs.approved }}',
+          },
+          reason: {
+            type: 'string',
+            default: '{{ inputs.reason }}',
+          },
+        },
+        required: ['approved'],
       };
-      node.configuration.with = {
-        message: '{{inputs.message}}',
-        schema,
-      } as WaitForInputStep['with'];
+      const renderContext = {
+        inputs: { message: 'hello world', approved: true, reason: 'looks good' },
+      };
+      const templatingEngine = new WorkflowTemplatingEngine();
       (
         mockStepExecutionRuntime.contextManager.renderValueAccordingToContext as jest.Mock
-      ).mockImplementation((v: unknown) => (v === '{{inputs.message}}' ? 'hello world' : v));
+      ).mockImplementation((v: unknown) => templatingEngine.render(v, renderContext));
+
+      node.configuration.with = {
+        message: '{{ inputs.message }}',
+        schema,
+      } as WaitForInputStep['with'];
 
       underTest = new WaitForInputStepImpl(
         node,
         mockStepExecutionRuntime,
         mockWorkflowRuntime,
-        workflowLogger
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
       );
       await underTest.run();
 
-      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith({
-        message: 'hello world',
-        schema,
-      });
+      expect(
+        mockStepExecutionRuntime.contextManager.renderValueAccordingToContext
+      ).toHaveBeenCalledWith(schema);
+      const persisted = (mockStepExecutionRuntime.setInput as jest.Mock).mock.calls[0][0];
+      expect(persisted.message).toBe('hello world');
+      expect(persisted.schema.properties.approved.default).toBe(true);
+      expect(typeof persisted.schema.properties.approved.default).toBe('boolean');
+      expect(persisted.schema.properties.reason.default).toBe('looks good');
     });
 
     it('should not call setInput when the with block is absent', async () => {
@@ -125,7 +220,9 @@ describe('WaitForInputStepImpl', () => {
         node,
         mockStepExecutionRuntime,
         mockWorkflowRuntime,
-        workflowLogger
+        workflowLogger,
+        mockConnectorExecutor,
+        mockDependencies
       );
       await underTest.run();
       expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
@@ -145,6 +242,56 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
     });
+
+    it('should persist the external resume token metadata before sending notifications', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      node.configuration = {
+        ...node.configuration,
+        with: {
+          message: 'Please approve',
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+        },
+      } as WaitForInputStep;
+
+      await underTest.run();
+
+      expect(mockMintHitlExternalResumeToken).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          _hitlTokenHash: 'resume-token-hash',
+          _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+          message: 'Please approve',
+        })
+      );
+      expect(mockSendWaitForInputNotifications).toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledTimes(2);
+    });
+
+    it('should persist the external resume token metadata when notification delivery fails', async () => {
+      mockHasExternalHitlChannels.mockReturnValue(true);
+      mockSendWaitForInputNotifications.mockRejectedValue(new Error('Slack connector failed'));
+      node.configuration = {
+        ...node.configuration,
+        with: {
+          message: 'Please approve',
+          channels: {
+            slack: { 'connector-id': 'slack-1' },
+          },
+        },
+      } as WaitForInputStep;
+
+      await expect(underTest.run()).rejects.toThrow('Slack connector failed');
+
+      expect(mockStepExecutionRuntime.setInput).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _hitlTokenHash: 'resume-token-hash',
+          _hitlTokenExpiresAt: '2999-01-01T00:00:00.000Z',
+        })
+      );
+    });
   });
 
   describe('resume run — exiting wait state with input', () => {
@@ -153,13 +300,75 @@ describe('WaitForInputStepImpl', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
-        context: { resumeInput, otherKey: 'preserved' },
+        id: 'exec-abc',
+        context: { resumeInput, resumedBy: 'jane.doe', otherKey: 'preserved' },
       } as any);
     });
 
     it('should call finishStep with the resumeInput from context', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: 'jane.doe',
+          channel: 'inbox',
+          respondedAt: '2026-08-25T12:00:00.000Z',
+        },
+      };
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(resumeInput);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'jane.doe',
+        channel: 'inbox',
+        respondedAt: '2026-08-25T12:00:00.000Z',
+      });
+    });
+
+    it('prefers claim-time hitl.respondedBy over engine resume profile UID', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: 'elastic',
+          channel: 'kibana_execution_view',
+          respondedAt: '2026-08-25T15:06:54.847Z',
+        },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: {
+          resumeInput,
+          resumedBy: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+        },
+      } as any);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'elastic',
+        channel: 'kibana_execution_view',
+        respondedAt: '2026-08-25T15:06:54.847Z',
+      });
+    });
+
+    it('falls back to engine resumedBy when hitl.respondedBy is empty', async () => {
+      (mockStepExecutionRuntime as { stepExecution?: unknown }).stepExecution = {
+        hitl: {
+          respondedBy: '',
+          channel: 'inbox',
+          respondedAt: '2026-08-25T15:06:54.847Z',
+        },
+      };
+      mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
+        context: { resumeInput, resumedBy: 'jane.doe' },
+      } as any);
+
+      await underTest.run();
+
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: resumeInput,
+        respondedBy: 'jane.doe',
+        channel: 'inbox',
+        respondedAt: '2026-08-25T15:06:54.847Z',
+      });
     });
 
     it('should not call setInput on resume run', async () => {
@@ -170,7 +379,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { otherKey: 'preserved' },
+        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
       });
     });
 
@@ -192,19 +401,41 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
+
+    it('should emit a hitl:resumed audit log event with responder identity', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        'Workflow exec-abc resumed by jane.doe',
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'hitl:resumed',
+            category: ['workflow'],
+            outcome: 'success',
+          }),
+          labels: expect.objectContaining({
+            responder: 'jane.doe',
+            execution_id: 'exec-abc',
+          }),
+        })
+      );
+    });
   });
 
   describe('resume run — exiting wait state with no input', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: {},
       } as any);
     });
 
     it('should call finishStep with undefined when resumeInput is absent', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: {},
+        respondedBy: 'unknown',
+      });
     });
 
     it('should not throw when resumeInput is absent', async () => {
@@ -222,10 +453,45 @@ describe('WaitForInputStepImpl', () => {
     });
   });
 
+  describe('aborted runtime — race with workflow-level timeout', () => {
+    // Regression: when the workflow-level timeout monitor fires in parallel
+    // with a resume iteration, it aborts the step runtime and calls
+    // `failStep(timeoutError)`. Without this guard the waitForInput step
+    // proceeded to re-enter its wait state, overwriting `status: FAILED` back
+    // to `status: WAITING_FOR_INPUT` (error/finishedAt survived because
+    // `updateStep` spreads). The zombie step then permanently reappeared in
+    // the Inbox because `listWaitingForInputSteps` filters only on status.
+    beforeEach(() => {
+      mockStepExecutionRuntime.abortController.abort();
+    });
+
+    it('should not call tryEnterWaitUntil when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('should not mutate step state when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+    });
+
+    it('should emit an observable hitl:aborted debug event', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('run aborted before wait-entry'),
+        expect.objectContaining({ event: { action: 'hitl:aborted' } })
+      );
+    });
+  });
+
   describe('resume run — exiting wait state with null context', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: null,
       } as any);
     });
@@ -236,12 +502,31 @@ describe('WaitForInputStepImpl', () => {
 
     it('should call finishStep with undefined', async () => {
       await underTest.run();
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(undefined);
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
+        response: {},
+        respondedBy: 'unknown',
+      });
     });
 
     it('should not call updateWorkflowExecution when context is null', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onCancel', () => {
+    it('invalidates the external resume token when the step is cancelled', async () => {
+      await expect(underTest.onCancel()).resolves.toBeUndefined();
+      expect(mockInvalidateHitlExternalResumeTokenIfPresent).toHaveBeenCalledWith(
+        mockStepExecutionRuntime
+      );
+    });
+
+    it('still delegates cleanup when no external resume token was minted', async () => {
+      await expect(underTest.onCancel()).resolves.toBeUndefined();
+      expect(mockInvalidateHitlExternalResumeTokenIfPresent).toHaveBeenCalledWith(
+        mockStepExecutionRuntime
+      );
     });
   });
 });

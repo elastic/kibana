@@ -13,6 +13,8 @@ export type {
   DiscoverSessionEsqlTab,
   DiscoverSessionTab,
   DiscoverSessionPanelOverrides,
+  DiscoverSessionEmbeddableByValueProps,
+  DiscoverSessionEmbeddableByReferenceProps,
   DiscoverSessionEmbeddableByValueState,
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,

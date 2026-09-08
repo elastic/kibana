@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+
+import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/core-security-common/mocks';
 import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { Logger } from '@kbn/logging';
 
@@ -27,7 +30,17 @@ describe('UiamAPIKeys', () => {
   >;
   let mockLicense: jest.Mocked<SecurityLicense>;
   let mockUiam: jest.Mocked<UiamServicePublic>;
+  let mockGetCurrentUser: jest.Mock<AuthenticatedUser | null, [KibanaRequest]>;
   let logger: Logger;
+
+  /** Mimics what Elasticsearch reports for a request authenticated with a UIAM API key. */
+  const authenticatedWithApiKey = (internal: boolean) =>
+    mockGetCurrentUser.mockReturnValue(
+      mockAuthenticatedUser({
+        authentication_type: 'api_key',
+        api_key: { id: 'key-id', name: 'key-name', managed_by: 'cloud', internal },
+      }) as AuthenticatedUser
+    );
 
   beforeEach(() => {
     mockClusterClient = elasticsearchServiceMock.createClusterClient();
@@ -42,18 +55,34 @@ describe('UiamAPIKeys', () => {
     mockUiam = {
       getAuthenticationHeaders: jest.fn(),
       getClientAuthentication: jest.fn(),
+      getInternalCallerAttestationHeaders: jest.fn(),
       refreshSessionTokens: jest.fn(),
       invalidateSessionTokens: jest.fn(),
       grantApiKey: jest.fn(),
       revokeApiKey: jest.fn(),
       convertApiKeys: jest.fn(),
       exchangeOAuthToken: jest.fn(),
+      createOAuthClient: jest.fn(),
+      listOAuthClients: jest.fn(),
+      updateOAuthClient: jest.fn(),
+      revokeOAuthClient: jest.fn(),
+      deleteOAuthClient: jest.fn(),
+      listOAuthConnections: jest.fn(),
+      updateOAuthConnection: jest.fn(),
+      revokeOAuthConnection: jest.fn(),
+      deleteOAuthConnection: jest.fn(),
+      resolveUsers: jest.fn(),
     };
+
+    // Defaults to a session-authenticated user, which is not an API key and therefore still needs
+    // Kibana's client authentication.
+    mockGetCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser() as AuthenticatedUser);
 
     uiamApiKeys = new UiamAPIKeys({
       logger,
       license: mockLicense,
       uiam: mockUiam,
+      getCurrentUser: mockGetCurrentUser,
     });
   });
 
@@ -126,7 +155,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-key',
           expiration: '7d',
-        }
+        },
+        { includeClientAuthentication: true }
       );
 
       expect(logger.debug).toHaveBeenCalledWith('Trying to grant an API key');
@@ -158,8 +188,57 @@ describe('UiamAPIKeys', () => {
         }),
         {
           name: 'test-key',
-        }
+        },
+        { includeClientAuthentication: true }
       );
+    });
+
+    // UIAM requires Kibana's client authentication for everything except external API keys, which
+    // it rejects outright when it's present.
+    describe('client authentication', () => {
+      const grantWith = async (request: KibanaRequest) => {
+        mockUiam.grantApiKey.mockResolvedValue({
+          id: 'new_key_id',
+          key: 'essu_new_key_value',
+          description: 'My Test Key',
+        });
+
+        await uiamApiKeys.grant(request, { name: 'test-key' });
+
+        return mockUiam.grantApiKey.mock.calls[0][2];
+      };
+
+      it('is omitted for an external API key', async () => {
+        authenticatedWithApiKey(false);
+
+        expect(await grantWith(createMockRequest('ApiKey essu_external_credential_123'))).toEqual({
+          includeClientAuthentication: false,
+        });
+      });
+
+      it('is included for an internal API key', async () => {
+        authenticatedWithApiKey(true);
+
+        expect(await grantWith(createMockRequest('ApiKey essu_internal_credential_123'))).toEqual({
+          includeClientAuthentication: true,
+        });
+      });
+
+      it('is included for a session access token', async () => {
+        expect(await grantWith(createMockRequest('Bearer essu_access_token_123'))).toEqual({
+          includeClientAuthentication: true,
+        });
+      });
+
+      it('is included for a fake request, which carries an internal API key', async () => {
+        mockGetCurrentUser.mockReturnValue(null);
+
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'ApiKey essu_internal_credential_123' },
+        });
+
+        expect(await grantWith(request)).toEqual({ includeClientAuthentication: true });
+      });
     });
 
     it('logs and throws error when UIAM API key grant fails', async () => {
@@ -213,7 +292,8 @@ describe('UiamAPIKeys', () => {
         {
           name: 'test-bearer-key',
           expiration: '30d',
-        }
+        },
+        { includeClientAuthentication: true }
       );
       expect(logger.debug).toHaveBeenCalledWith('Using authorization scheme: Bearer');
     });
@@ -272,7 +352,7 @@ describe('UiamAPIKeys', () => {
       expect(logger.debug).toHaveBeenCalledWith('API key key_id_123 was invalidated successfully');
     });
 
-    it('returns error details when UIAM API key invalidation fails', async () => {
+    it('returns error details with type "exception" when a non-Boom error occurs', async () => {
       const request = createMockRequest('ApiKey essu_uiam_credential_123');
       const error = new Error('Revocation failed');
       mockUiam.revokeApiKey.mockRejectedValue(error);
@@ -295,6 +375,47 @@ describe('UiamAPIKeys', () => {
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to invalidate API key key_id_123: Revocation failed'
       );
+    });
+
+    it('surfaces the UIAM error code in error_details type when a Boom error with payload occurs', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('APIKEY_REVOKED');
+      boomError.output = {
+        statusCode: 404,
+        payload: { error: { code: '0xD38358', message: 'APIKEY_REVOKED' } } as any,
+        headers: {},
+      };
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result).toEqual({
+        invalidated_api_keys: [],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+        error_details: [
+          {
+            type: 'exception',
+            reason: expect.stringContaining('Failed to invalidate API key key_id_123'),
+            code: '0xD38358',
+          },
+        ],
+      });
+    });
+
+    it('does not include code when Boom error has no UIAM error code', async () => {
+      const request = createMockRequest('ApiKey essu_uiam_credential_123');
+      const boomError = new Boom.Boom('Bad request', { statusCode: 400 });
+      mockUiam.revokeApiKey.mockRejectedValue(boomError);
+
+      const result = await uiamApiKeys.invalidate(request, {
+        id: 'key_id_123',
+      });
+
+      expect(result!.error_details![0].type).toBe('exception');
+      expect(result!.error_details![0].code).toBeUndefined();
     });
   });
 

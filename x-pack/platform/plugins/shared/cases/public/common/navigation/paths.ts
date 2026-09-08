@@ -7,7 +7,7 @@
 
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { ExtractRouteParams } from 'react-router';
-import { generatePath } from 'react-router-dom';
+import { generatePath, matchPath } from 'react-router-dom';
 import {
   CASES_CREATE_PATH,
   CASES_CONFIGURE_PATH,
@@ -17,6 +17,7 @@ import {
   CASES_CONFIGURE_TEMPLATES_PATH,
   CASES_CONFIGURE_CREATE_TEMPLATE_PATH,
   CASES_CONFIGURE_EDIT_TEMPLATE_PATH,
+  CASES_CONFIGURE_FIELD_LIBRARY_PATH,
 } from '../../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
@@ -47,6 +48,8 @@ export interface TemplateViewPathParams {
 
 export const getCasesConfigureTemplatesPath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_CONFIGURE_TEMPLATES_PATH}`);
+export const getCasesConfigureFieldLibraryPath = (casesBasePath: string) =>
+  normalizePath(`${casesBasePath}${CASES_CONFIGURE_FIELD_LIBRARY_PATH}`);
 export const getCasesConfigureCreateTemplatePath = (casesBasePath: string) =>
   normalizePath(`${casesBasePath}${CASES_CONFIGURE_CREATE_TEMPLATE_PATH}`);
 export const getCasesConfigureEditTemplatePath = (casesBasePath: string) =>
@@ -81,4 +84,16 @@ export const generateCaseViewPath = (params: CaseViewPathParams): string => {
   return normalizePath(
     generatePath(CASE_VIEW_PATH, params as ExtractRouteParams<typeof CASE_VIEW_PATH>)
   );
+};
+export const isCaseViewPath = (pathname: string, caseId?: string): boolean => {
+  const match = matchPath(pathname, {
+    // needs the wildcard because of spaces etc in front
+    path: `*${CASE_VIEW_PATH}/:detailName`,
+    strict: false,
+  });
+  if (caseId && match) {
+    return (match.params as unknown as Record<string, string>).detailName === caseId;
+  } else {
+    return !!match;
+  }
 };

@@ -14,13 +14,12 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { getConnectorDefaultModel } from '@kbn/inference-common';
 
-import type { CombinedPrompts } from '../graphs/default_attack_discovery_graph/prompts';
+import type { CombinedPrompts, DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
-import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
@@ -41,6 +40,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId,
   evaluatorConnectorId,
   getInferenceConnectorById,
+  inferenceClient,
   langSmithApiKey,
   langSmithProject,
   logger,
@@ -59,6 +59,7 @@ export const evaluateAttackDiscovery = async ({
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
+  inferenceClient?: InferenceClient;
   langSmithApiKey: string | undefined;
   langSmithProject: string | undefined;
   logger: Logger;
@@ -130,6 +131,7 @@ export const evaluateAttackDiscovery = async ({
       evaluatorConnectorId,
       datasetName,
       getInferenceConnectorById,
+      inferenceClient,
       graphs,
       langSmithApiKey,
       logger,

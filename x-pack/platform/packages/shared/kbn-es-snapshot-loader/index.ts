@@ -6,7 +6,7 @@
  */
 
 export { restoreSnapshot } from './src/restore';
-export { replaySnapshot } from './src/replay';
+export { replaySnapshot, TEMP_INDEX_PREFIX } from './src/replay';
 export { createSnapshot } from './src/create';
 export {
   type RestoreConfig,
@@ -24,3 +24,4 @@ export {
   type GcsRepositoryConfig,
   type FsRepositoryConfig,
 } from './src/repository';
+export { extractDataStreamName } from './src/utils';

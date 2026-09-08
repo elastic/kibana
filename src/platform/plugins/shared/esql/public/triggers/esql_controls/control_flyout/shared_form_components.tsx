@@ -17,9 +17,8 @@ import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
-  EuiComboBox,
+  EuiSuperSelect,
   EuiRadioGroup,
-  type EuiComboBoxOptionOption,
   EuiButtonGroup,
   EuiSpacer,
   EuiSwitch,
@@ -39,6 +38,7 @@ import {
   EuiCode,
   EuiCallOut,
   useEuiTheme,
+  useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ServiceDeps } from '../../../kibana_services';
@@ -106,19 +106,11 @@ export function ControlType({
   initialControlFlyoutType: EsqlControlType;
   onFlyoutTypeChange?: (flyoutType: EsqlControlType) => void;
 }) {
-  const controlFlyoutType = controlTypeOptions.find(
-    (option) => option.key === initialControlFlyoutType
-  )!;
-
-  const onTypeChange = useCallback(
-    (selectedOptions: EuiComboBoxOptionOption[]) => {
-      const flyoutType = controlTypeOptions.find(
-        (option) => option.key === selectedOptions[0].key
-      )!;
-      onFlyoutTypeChange?.(flyoutType.key);
-    },
-    [onFlyoutTypeChange]
-  );
+  const superSelectOptions = controlTypeOptions.map((opt) => ({
+    value: opt.key,
+    inputDisplay: opt.label,
+    'data-test-subj': opt['data-test-subj'],
+  }));
 
   return (
     <>
@@ -138,23 +130,15 @@ export function ControlType({
           })}
           fullWidth
         >
-          <EuiComboBox
-            aria-label={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            placeholder={i18n.translate('esql.flyout.controlTypeOptionsOptions.placeholder', {
-              defaultMessage: 'Select a control type',
-            })}
-            singleSelection={{ asPlainText: true }}
-            options={controlTypeOptions}
-            selectedOptions={[controlFlyoutType]}
-            onChange={onTypeChange}
+          <EuiSuperSelect
+            options={superSelectOptions}
+            valueOfSelected={initialControlFlyoutType}
+            onChange={(value) => onFlyoutTypeChange?.(value)}
             fullWidth
-            isDisabled={isDisabled}
+            disabled={isDisabled}
             compressed
-            isClearable={false}
             data-test-subj="esqlControlTypeDropdown"
-            inputPopoverProps={{
+            popoverProps={{
               'data-test-subj': 'esqlControlTypeInputPopover',
             }}
           />
@@ -356,6 +340,7 @@ export function ControlSelectionType({
     services: { docLinks },
   } = useKibana<ServiceDeps>();
   const multiValuesGuideLink = docLinks?.links.query.queryESQLMultiValueControls ?? '';
+  const mvIntersectsLink = docLinks?.links.query.queryESQLMvIntersects ?? '';
   return (
     <>
       <EuiSpacer size="m" />
@@ -394,11 +379,16 @@ export function ControlSelectionType({
             <EuiText size="s">
               <FormattedMessage
                 id="esql.flyout.selectionType.callout"
-                defaultMessage="You must use {mvContainsLink} in your ES|QL query for multi-select controls to work."
+                defaultMessage="You must use {mvContainsLink} or {mvIntersectsLink} in your ES|QL query for multi-select controls to work."
                 values={{
                   mvContainsLink: (
                     <EuiLink href={multiValuesGuideLink} target="_blank">
                       MV_CONTAINS
+                    </EuiLink>
+                  ),
+                  mvIntersectsLink: (
+                    <EuiLink href={mvIntersectsLink} target="_blank">
+                      MV_INTERSECTS
                     </EuiLink>
                   ),
                 }}
@@ -460,16 +450,20 @@ export function Header({
 }
 
 export function Footer({
-  onCancelControl,
+  type,
   isSaveDisabled,
   closeFlyout,
   onCreateControl,
+  onCancelControl,
 }: {
+  type: EsqlControlType;
   isSaveDisabled: boolean;
   closeFlyout: () => void;
   onCreateControl: () => void;
   onCancelControl?: () => void;
 }) {
+  const disabledTooltipAnchorStyle = useEuiMemoizedStyles(() => css({ cursor: 'not-allowed' }));
+
   const onCancel = useCallback(() => {
     closeFlyout();
     onCancelControl?.();
@@ -494,21 +488,37 @@ export function Footer({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            onClick={onCreateControl}
-            fill
-            aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
-              defaultMessage: 'Apply changes',
-            })}
-            disabled={isSaveDisabled}
-            color="primary"
-            iconType="check"
-            data-test-subj="saveEsqlControlsFlyoutButton"
+          <EuiToolTip
+            anchorProps={{ css: isSaveDisabled ? disabledTooltipAnchorStyle : undefined }}
+            content={
+              !isSaveDisabled
+                ? undefined
+                : type === EsqlControlType.STATIC_VALUES
+                ? i18n.translate('esql.flyout.staticValues.saveTooltip', {
+                    defaultMessage: 'Add at least one value to save.',
+                  })
+                : i18n.translate('esql.flyout.valuesFromQuery.saveTooltip', {
+                    defaultMessage: 'Add a valid query to save.',
+                  })
+            }
           >
-            {i18n.translate('esql.flyout.saveLabel', {
-              defaultMessage: 'Save',
-            })}
-          </EuiButton>
+            <EuiButton
+              onClick={onCreateControl}
+              fill
+              aria-label={i18n.translate('esql.flyout..applyFlyoutAriaLabel', {
+                defaultMessage: 'Apply changes',
+              })}
+              disabled={isSaveDisabled}
+              hasAriaDisabled={isSaveDisabled}
+              color="primary"
+              iconType="check"
+              data-test-subj="saveEsqlControlsFlyoutButton"
+            >
+              {i18n.translate('esql.flyout.saveLabel', {
+                defaultMessage: 'Save',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlyoutFooter>

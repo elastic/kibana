@@ -9,32 +9,28 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import { isReferenceObject } from '../../../common';
+import { ensureNullableEnumIncludesNull } from './utils';
 
 /** Identify special case output of schema.nullable() */
 const isNullableOutput = (schema: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject) => {
-  return (
-    !isReferenceObject(schema) &&
-    Object.keys(schema).length === 3 &&
-    schema.enum?.length === 0 &&
-    schema.nullable === true &&
-    schema.type === undefined
-  );
+  if (isReferenceObject(schema) || schema.nullable !== true || schema.type !== undefined) {
+    return false;
+  }
+
+  if (schema.enum?.length === 1 && schema.enum[0] === null) {
+    return true;
+  }
+
+  return Object.keys(schema).length === 3 && schema.enum?.length === 0;
 };
 
-const replaceNullableOutputWithNullEnum = (schema: OpenAPIV3.SchemaObject) => {
-  let replaced = false;
-  schema.anyOf = schema.anyOf!.map((item) => {
-    if (!isNullableOutput(item)) {
-      return item;
-    }
+const replaceNullableOutputWithNullable = (schema: OpenAPIV3.SchemaObject) => {
+  const remaining = schema.anyOf!.filter((item) => !isNullableOutput(item));
+  if (remaining.length === schema.anyOf!.length) return false;
 
-    replaced = true;
-    return {
-      enum: [null],
-    };
-  });
-
-  return replaced;
+  schema.anyOf = remaining;
+  schema.nullable = true;
+  return true;
 };
 
 /**
@@ -44,7 +40,7 @@ const replaceNullableOutputWithNullEnum = (schema: OpenAPIV3.SchemaObject) => {
  * { anyOf: [ { type: 'string' }, { nullable: true, enum: [] } ] }
  *
  * To:
- * { type: 'string', nullable: true }
+ * { type: 'string', nullable: true, default: null }
  */
 const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
   if (schema.anyOf!.length !== 2) return false;
@@ -52,14 +48,26 @@ const processNullableOutput = (schema: OpenAPIV3.SchemaObject) => {
   if (idx === -1) return false;
   const anyOf = schema.anyOf!;
   const nullableTarget = anyOf[1 - idx];
+  const preservedDefault = schema.default;
 
   if (isReferenceObject(nullableTarget)) {
-    return false;
+    delete schema.anyOf;
+    schema.nullable = true;
+    Object.assign(schema, { allOf: [nullableTarget] });
+    if (preservedDefault === null) {
+      schema.default = null;
+    }
+    return true;
   }
+
+  delete nullableTarget.default;
 
   delete schema.anyOf;
   schema.nullable = true;
   Object.assign(schema, nullableTarget);
+  if (preservedDefault === null) {
+    schema.default = null;
+  }
   return true;
 };
 
@@ -80,7 +88,9 @@ const prettifyEnum = (schema: OpenAPIV3.SchemaObject) => {
 
 export const processEnum = (schema: OpenAPIV3.SchemaObject) => {
   if (!schema.anyOf) return;
-  if (processNullableOutput(schema)) return;
-  replaceNullableOutputWithNullEnum(schema);
-  prettifyEnum(schema);
+  if (!processNullableOutput(schema)) {
+    replaceNullableOutputWithNullable(schema);
+    prettifyEnum(schema);
+  }
+  ensureNullableEnumIncludesNull(schema);
 };

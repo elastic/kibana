@@ -9,8 +9,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText, EuiLink, EuiBadge } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiSwitch, EuiButtonGroup, EuiText } from '@elastic/eui';
 
 import type { TimePrecision } from '../types';
 
@@ -21,7 +20,6 @@ import {
   PanelBodySection,
   PanelBodySectionInfo,
   SubPanelHeading,
-  PanelFooter,
 } from '../date_range_picker_panel_ui';
 import { AutoRefresh } from '../settings/auto_refresh';
 import { useDateRangePickerContext } from '../date_range_picker_context';
@@ -29,15 +27,19 @@ import { settingsPanelTexts } from '../translations';
 import { useTimeZoneDisplay } from '../hooks/use_time_zone_display';
 
 const ADVANCED_SETTINGS_URL_TIME_ZONE = '/app/management/kibana/settings?query=dateFormat:tz';
-const ADVANCED_SETTINGS_URL_LEGACY_PICKER =
-  '/app/management/kibana/settings?query=timepicker:useDateRangePicker';
 
 /**
  * Settings panel for the date range picker, accessible from the main panel gear button.
  */
 export function SettingsPanel() {
-  const { settings, onSettingsChange, hasAutoRefresh, timeZone, prependBasePath } =
-    useDateRangePickerContext();
+  const {
+    settings,
+    onSettingsChange,
+    hasAutoRefresh,
+    timeZone,
+    prependBasePath,
+    canAccessAdvancedSettings,
+  } = useDateRangePickerContext();
 
   const handleRoundRelativeTimeChange = useCallback(() => {
     onSettingsChange({ ...settings, roundRelativeTime: !settings.roundRelativeTime });
@@ -77,8 +79,14 @@ export function SettingsPanel() {
             <PanelBodySectionInfo
               heading={settingsPanelTexts.timeFormatHeading}
               markdown={settingsPanelTexts.timeFormatDescription(timeZoneLabel)}
-              linkLabel={settingsPanelTexts.advancedSettingsLink}
-              linkHref={prependBasePath(ADVANCED_SETTINGS_URL_TIME_ZONE)}
+              linkLabel={
+                canAccessAdvancedSettings ? settingsPanelTexts.advancedSettingsLink : undefined
+              }
+              linkHref={
+                canAccessAdvancedSettings
+                  ? prependBasePath(ADVANCED_SETTINGS_URL_TIME_ZONE)
+                  : undefined
+              }
             />
             <PanelBodySectionInfo heading={settingsPanelTexts.relativeTimeRangeHeading}>
               <EuiSwitch
@@ -108,22 +116,6 @@ export function SettingsPanel() {
           </EuiFlexGroup>
         </PanelBodySection>
       </PanelBody>
-      <PanelFooter>
-        <EuiBadge aria-label="Tech preview" color="hollow" iconType="flask" />
-        <EuiText size="xs" color="subdued" component="p">
-          <FormattedMessage
-            id="sharedUXPackages.dateRangePicker.settingsPanel.technicalPreviewNotice"
-            defaultMessage="This time picker is in a technical preview. You can revert to the legacy picker in {advancedSettingsLink}."
-            values={{
-              advancedSettingsLink: (
-                <EuiLink href={prependBasePath(ADVANCED_SETTINGS_URL_LEGACY_PICKER)}>
-                  {settingsPanelTexts.advancedSettingsLink}
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiText>
-      </PanelFooter>
     </PanelContainer>
   );
 }

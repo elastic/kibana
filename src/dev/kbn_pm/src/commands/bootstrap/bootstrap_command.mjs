@@ -25,6 +25,7 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
+import { prefetchSharedTarballs } from './prefetch_shared_tarballs.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
@@ -52,6 +53,9 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
+                          subsequent distribution build will rebuild them in production mode anyway.
+                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -61,11 +65,16 @@ export const command = {
   },
   async run({ args, log, time }) {
     const offline = args.getBooleanValue('offline') ?? false;
+    if (offline) {
+      process.env.CI_STATS_DISABLED = 'true';
+    }
     const validate = args.getBooleanValue('validate') ?? true;
     const quiet = args.getBooleanValue('quiet') ?? false;
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     const forceInstall = args.getBooleanValue('force-install');
+    const skipPrebuilt =
+      args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
@@ -106,20 +115,32 @@ export const command = {
         if (forceInstall) {
           await removeYarnIntegrityFileIfExists();
         }
+        if (!offline) {
+          // defuse yarn-classic duplicate-entry fetch race (yarnpkg/yarn#6407)
+          await prefetchSharedTarballs(log);
+        }
         await yarnInstallDeps(log, { offline, quiet });
       }
     });
 
+    if (skipPrebuilt) {
+      log.info('skipping pre-built webpack bundles (--no-prebuilt)');
+    }
+
     await Promise.all([
-      time('prepare webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles');
-        await moonRun([':build-webpack'], {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-        log.success('relevant versions extracted for packages and shared webpack bundles built');
-      }),
+      skipPrebuilt
+        ? undefined
+        : time('prepare webpack bundles for packages', async () => {
+            log.info('pre-build webpack bundles');
+            await moonRun([':build-webpack'], {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success(
+              'relevant versions extracted for packages and shared webpack bundles built'
+            );
+          }),
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });

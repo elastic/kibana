@@ -8,20 +8,21 @@
 import React from 'react';
 
 import {
-  EuiAvatar,
   EuiBadge,
   EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
+  EuiCard,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { getProviderKeyForCreator, TASK_TYPE_DISPLAY_NAME } from '../../utils/eis_utils';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
+import { EisModelStatus } from '../../types';
 
 interface ModelCardProps {
   model: GroupedModel;
@@ -36,26 +37,19 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
   const taskTypeLabels = taskTypes.map((tt) => TASK_TYPE_DISPLAY_NAME[tt] ?? tt).join(', ');
 
   return (
-    <EuiPanel
-      paddingSize="l"
+    <EuiCard
+      icon={<EuiIcon type={provider?.icon ?? 'machineLearningApp'} size="l" aria-hidden={true} />}
+      title={modelName}
+      titleSize="xs"
+      textAlign="left"
+      paddingSize="m"
       data-test-subj={`eisModelCard-${modelName}`}
       hasBorder
       onClick={onClick}
+      display={model.modelStatus === EisModelStatus.DeprecatedEOL ? 'subdued' : 'plain'}
     >
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem grow={false}>
-          <EuiAvatar
-            name={modelCreator}
-            iconType={provider?.icon ?? 'machineLearningApp'}
-            color="subdued"
-            size="l"
-            type="space"
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>{modelName}</h4>
-          </EuiTitle>
           <EuiText size="xs" color="subdued">
             {i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.supports', {
               defaultMessage: 'Supports {taskTypes}',
@@ -71,9 +65,14 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onClick }) => {
                 {cat}
               </EuiBadge>
             ))}
+            <ModelStatusBadge
+              id={model.modelName}
+              metadata={model.modelMetadata}
+              status={model.modelStatus}
+            />
           </EuiBadgeGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCard>
   );
 };

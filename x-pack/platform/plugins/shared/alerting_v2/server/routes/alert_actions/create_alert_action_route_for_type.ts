@@ -5,29 +5,38 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   createAlertActionParamsSchema,
+  errorResponseSchema,
   type CreateAlertActionBody,
   type CreateAlertActionParams,
 } from '@kbn/alerting-v2-schemas';
-import { Request, Response, type RouteDefinition, type RouteHandler } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { Request, type RouteDefinition } from '@kbn/core-di-server';
+import type {
+  KibanaRequest,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteSecurity,
+} from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 interface CreateAlertActionRouteForTypeOptions<
   TAction extends CreateAlertActionBody['action_type']
 > {
   actionType: TAction;
   pathSuffix: string;
+  summary: string;
   bodySchema: z.ZodType<
     Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>
   >;
+  oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
 }
 
 export const createAlertActionRouteForType = <
@@ -35,7 +44,9 @@ export const createAlertActionRouteForType = <
 >({
   actionType,
   pathSuffix,
+  summary,
   bodySchema,
+  oasOperationObject,
 }: CreateAlertActionRouteForTypeOptions<TAction>): RouteDefinition<
   CreateAlertActionParams,
   unknown,
@@ -45,55 +56,67 @@ export const createAlertActionRouteForType = <
   type ActionBody = Omit<Extract<CreateAlertActionBody, { action_type: TAction }>, 'action_type'>;
 
   @injectable()
-  class CreateTypedAlertActionRoute implements RouteHandler {
+  class CreateTypedAlertActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/action/${pathSuffix}`;
+    static path = `${ALERTING_V2_ALERT_API_PATH}/{group_hash}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
       },
     };
-    static options = {
-      access: 'public',
-      summary: `Create an alert ${pathSuffix} action`,
+    static routeOptions = {
+      summary,
       description: 'Create an action for a specific alert group.',
-      tags: ['oas-tag:alerting-v2'],
-      availability: { stability: 'experimental' },
+      oasOperationObject,
     } as const;
-    static validate = {
+    static schemas = {
       request: {
-        params: buildRouteValidationWithZod(createAlertActionParamsSchema),
-        body: buildRouteValidationWithZod(bodySchema),
+        params: createAlertActionParamsSchema,
+        body: bodySchema,
       },
-    } as const;
+      response: {
+        204: {
+          description: 'Returns the newly created alert action.',
+        },
+        400: {
+          body: () => errorResponseSchema,
+          description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+        },
+        404: {
+          body: () => errorResponseSchema,
+          description: 'Indicates the alert event was not found.',
+        },
+      },
+    };
+
+    protected readonly routeName = `create alert ${pathSuffix} action`;
 
     constructor(
+      @inject(AlertingRouteContext) ctx: AlertingRouteContext,
       @inject(Request)
       private readonly request: KibanaRequest<CreateAlertActionParams, unknown, ActionBody>,
-      @inject(Response) private readonly response: KibanaResponseFactory,
       @inject(AlertActionsClient) private readonly alertActionsClient: AlertActionsClient
-    ) {}
+    ) {
+      super(ctx);
+    }
 
-    async handle() {
-      try {
-        await this.alertActionsClient.createAction({
-          groupHash: this.request.params.group_hash,
-          action: {
-            action_type: actionType,
-            ...this.request.body,
-          } as Extract<CreateAlertActionBody, { action_type: TAction }>,
-        });
+    protected async execute() {
+      await this.alertActionsClient.createAction({
+        groupHash: this.request.params.group_hash,
+        action: {
+          action_type: actionType,
+          ...this.request.body,
+        } as Extract<CreateAlertActionBody, { action_type: TAction }>,
+      });
 
-        return this.response.noContent();
-      } catch (e) {
-        const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-        return this.response.customError({
-          statusCode: boom.output.statusCode,
-          body: boom.output.payload,
-        });
-      }
+      return this.ctx.response.noContent();
     }
   }
 
-  return CreateTypedAlertActionRoute;
+  return CreateTypedAlertActionRoute as RouteDefinition<
+    CreateAlertActionParams,
+    unknown,
+    ActionBody,
+    'post'
+  >;
 };

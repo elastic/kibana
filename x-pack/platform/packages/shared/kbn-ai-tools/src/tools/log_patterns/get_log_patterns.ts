@@ -16,12 +16,19 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
+import { buildCountQuery } from '../../utils/build_count_query';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
+import { categorizeWithNoiseExclusion } from '../../utils/esql_categorize';
+
+const MAX_DOCS_TO_SAMPLE = 100_000;
 
 interface FieldPatternResultBase {
   field: string;
@@ -50,6 +57,13 @@ export type FieldPatternResult<TChanges extends boolean | undefined = undefined>
   FieldPatternResultBase & (TChanges extends true ? FieldPatternResultChanges : {});
 
 export type FieldPatternResultWithChanges = FieldPatternResult<true>;
+
+export interface LogPatternEsqlEntry {
+  field: string;
+  pattern: string;
+  count: number;
+  sample: string;
+}
 
 interface CategorizeTextOptions {
   query: QueryDslQueryContainer;
@@ -264,6 +278,15 @@ interface LogPatternOptions {
   kql?: string;
 }
 
+interface SigEventsLogPatternEsqlOptions {
+  esClient: TracedElasticsearchClient;
+  start: number;
+  end: number;
+  samplingSource: string;
+  fields: string[];
+  kql?: string;
+}
+
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
   options: LogPatternOptions & { includeChanges?: TChanges }
 ): Promise<Array<FieldPatternResult<TChanges>>>;
@@ -387,4 +410,97 @@ export async function getLogPatterns({
     orderBy(allPatterns.flat(), (pattern) => pattern.count, 'desc'),
     (pattern) => pattern.sample
   );
+}
+
+export async function getSigEventsLogPatternsEsql({
+  esClient,
+  start,
+  end,
+  samplingSource,
+  kql,
+  fields,
+}: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
+  const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  const columns = await getEsqlColumnSchema({
+    esClient: esClient.client,
+    index: samplingSource,
+    start,
+    end,
+    signal,
+  });
+  // Both `text` and `match_only_text` mappings report as `text` in `column.type`.
+  const textColumnNames = new Set(
+    columns.filter((column) => column.type === 'text').map((column) => column.name)
+  );
+  const eligibleFields = fields.filter((field) => textColumnNames.has(field));
+
+  if (!eligibleFields.length) {
+    return [];
+  }
+
+  const totalDocs = await runEsqlCountQuery({
+    esClient,
+    samplingSource,
+    start,
+    end,
+    kql,
+  });
+  if (totalDocs === 0) {
+    return [];
+  }
+
+  const samplingProbability =
+    MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+
+  const filter = { bool: { filter: [...kqlQuery(kql), ...dateRangeQuery(start, end)] } };
+
+  const perField = await Promise.all(
+    eligibleFields.map(async (field) => {
+      // Metadata-free, so it works on ES|QL views as well as concrete indices.
+      const rows = await categorizeWithNoiseExclusion({
+        esClient,
+        indices: samplingSource,
+        field,
+        total: totalDocs,
+        samplingProbability,
+        filter,
+      });
+
+      return rows.map((row) => ({
+        field,
+        pattern: row.pattern,
+        count: row.count,
+        sample: row.sample,
+      }));
+    })
+  );
+
+  return uniqBy(
+    // Dedupe by sample so `message` and `body.text` don't repeat the same representative line.
+    perField.flat().sort((a, b) => b.count - a.count),
+    (pattern) => pattern.sample
+  );
+}
+
+async function runEsqlCountQuery({
+  esClient,
+  samplingSource,
+  start,
+  end,
+  kql,
+}: {
+  esClient: TracedElasticsearchClient;
+  samplingSource: string;
+  start: number;
+  end: number;
+  kql?: string;
+}): Promise<number> {
+  const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
+    query: buildCountQuery({ index: samplingSource, kql }),
+    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const total = response.values[0]?.[0];
+
+  return typeof total === 'number' ? total : 0;
 }

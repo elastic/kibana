@@ -41,13 +41,25 @@ import type { FailureStoreSamplesResponse } from './failure_store_samples_handle
 import { getFailureStoreSamples } from './failure_store_samples_handler';
 import { isNoLLMSuggestionsError } from './no_llm_suggestions_error';
 
+const simulationBaseBodySchema = {
+  documents: z.array(flattenRecord),
+  detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
+};
+
+const PROCESSOR_TYPE_NAME_MAX_LENGTH = 128;
+
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
-  body: z.object({
-    processing: streamlangDSLSchema,
-    documents: z.array(flattenRecord),
-    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
-  }),
+  body: z.union([
+    z.object({
+      ...simulationBaseBodySchema,
+      processing: streamlangDSLSchema,
+    }),
+    z.object({
+      ...simulationBaseBodySchema,
+      processors: z.array(z.record(z.string().max(PROCESSOR_TYPE_NAME_MAX_LENGTH), z.any())),
+    }),
+  ]),
 }) satisfies z.Schema<ProcessingSimulationParams>;
 
 export const simulateProcessorRoute = createServerRoute({
@@ -128,10 +140,13 @@ export const processingGrokSuggestionRoute = createServerRoute({
         request,
       });
 
+    const { connector_id: connectorId } = params.body;
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingGrokSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,
@@ -192,10 +207,13 @@ export const processingDissectSuggestionRoute = createServerRoute({
         request,
       });
 
+    const { connector_id: connectorId } = params.body;
+
     // Wrap in Observable SSE to avoid timeout issues with long-running LLM requests
     return from(
       handleProcessingDissectSuggestions({
         params,
+        connectorId,
         inferenceClient,
         streamsClient,
         scopedClusterClient,

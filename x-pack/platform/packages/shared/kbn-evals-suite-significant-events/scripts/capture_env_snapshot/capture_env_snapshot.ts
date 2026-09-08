@@ -6,80 +6,104 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
+import { extractDataStreamName } from '@kbn/es-snapshot-loader';
+import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
 import { createSnapshot, generateGcsBasePath, registerGcsRepository } from '../lib/gcs';
-import { GCS_BUCKET } from '../lib/constants';
 import {
-  resolvePatterns,
-  parseCommonSnapshotFlags,
-  validateIndexPrivileges,
-} from '../lib/snapshot_utils';
-
-function toSnapshotName(index: string): string {
-  return `snapshot-${index.slice(1)}`;
-}
+  GCS_BUCKET,
+  SIGNIFICANT_EVENTS_DATA_STREAMS,
+  SIGEVENTS_OPTIONAL_STREAMS,
+} from '../lib/constants';
+import { resolvePatterns, parseCommonSnapshotFlags, toSnapshotName } from '../lib/snapshot_utils';
+import { withTempSuperuser } from '../lib/user_utils';
 
 async function fetchMapping(
   esClient: Client,
   indexName: string
 ): Promise<MappingTypeMapping | undefined> {
-  const response = await esClient.indices.getMapping({ index: indexName });
-  return response[indexName]?.mappings;
+  try {
+    const response = await esClient.indices.getMapping({ index: indexName });
+    // `getMapping` keys the response by concrete index name. For a data stream the
+    // keys are its backing indices (`.ds-…`), not the data-stream name, so fall back
+    // to the first entry when an exact-name match isn't present.
+    return response[indexName]?.mappings ?? Object.values(response)[0]?.mappings;
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      return undefined;
+    }
+    throw err;
+  }
 }
 
-async function captureSystemIndex({
+async function captureDataStream({
   esClient,
   log,
+  config,
   sourceIndex,
+  optional = false,
 }: {
   esClient: Client;
+  config: ConnectionConfig;
   log: ToolingLog;
   sourceIndex: string;
-}): Promise<string> {
-  const snapshotIndex = toSnapshotName(sourceIndex);
+  optional?: boolean;
+}): Promise<string | undefined> {
+  return withTempSuperuser(esClient, log, config, async (sysClient) => {
+    const snapshotIndex = toSnapshotName(sourceIndex);
 
-  const mappings = await fetchMapping(esClient, sourceIndex);
-  if (!mappings) {
-    throw new Error(`Could not fetch mapping for "${sourceIndex}"`);
-  }
+    const mappings = await fetchMapping(sysClient, sourceIndex);
+    if (!mappings) {
+      if (optional) {
+        log.info(
+          `Skipping "${sourceIndex}" — stream does not exist (discovery workflow was not run).`
+        );
+        return undefined;
+      }
+      throw new Error(
+        `Could not fetch mapping for "${sourceIndex}". ` +
+          `The Significant Events data stream has no backing indices — run the feature extraction workflow before capturing.`
+      );
+    }
 
-  await esClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
+    await sysClient.indices.delete({ index: snapshotIndex, ignore_unavailable: true });
 
-  await esClient.indices.create({
-    index: snapshotIndex,
-    mappings,
-  });
+    await sysClient.indices.create({
+      index: snapshotIndex,
+      mappings,
+    });
 
-  const result = await esClient.reindex(
-    {
-      wait_for_completion: true,
-      source: { index: sourceIndex },
-      dest: { index: snapshotIndex },
-    },
-    { requestTimeout: 30 * 60 * 1000 }
-  );
-
-  if (result.timed_out) {
-    throw new Error(`Reindex timed out capturing "${sourceIndex}"`);
-  }
-
-  const failures = result.failures ?? [];
-  if (failures.length > 0) {
-    throw new Error(
-      `Reindex had ${failures.length} failure(s) capturing "${sourceIndex}": ${failures
-        .slice(0, 3)
-        .map((f) => f.cause?.reason ?? 'unknown')
-        .join('; ')}`
+    const result = await sysClient.reindex(
+      {
+        wait_for_completion: true,
+        source: { index: sourceIndex },
+        dest: { index: snapshotIndex },
+      },
+      { requestTimeout: 30 * 60 * 1000 }
     );
-  }
 
-  const created = result.created ?? 0;
-  log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
+    if (result.timed_out) {
+      throw new Error(`Reindex timed out capturing "${sourceIndex}"`);
+    }
 
-  return snapshotIndex;
+    const failures = result.failures ?? [];
+    if (failures.length > 0) {
+      throw new Error(
+        `Reindex had ${failures.length} failure(s) capturing "${sourceIndex}": ${failures
+          .slice(0, 3)
+          .map((f) => f.cause?.reason ?? 'unknown')
+          .join('; ')}`
+      );
+    }
+
+    const created = result.created ?? 0;
+    log.info(`Captured ${sourceIndex} → ${snapshotIndex} (${created} docs)`);
+
+    return snapshotIndex;
+  });
 }
 
 export async function captureEnvSnapshot({
@@ -96,47 +120,67 @@ export async function captureEnvSnapshot({
   });
 
   const runId = String(flags['run-id'] || moment().format('YYYY-MM-DD'));
-  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
+  const { snapshotName, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Snapshot: ${snapshotName} | Run: ${runId} | ES: ${config.esUrl}`);
 
-  await validateIndexPrivileges(
-    esClient,
-    log,
-    systemIndices,
-    (missing) =>
-      `Capture requires a user with manage privilege on system indices. ` +
-      `Pass superuser credentials via --es-username/--es-password. ` +
-      `Missing index:manage privilege on: ${missing}`
-  );
-
-  const resolvedSystemIndices = await resolvePatterns(esClient, log, systemIndices);
+  // All SigEvents data streams are reindexed to snapshot-safe plain indices.
+  // SIGEVENTS_OPTIONAL_STREAMS (discoveries/detections) are skipped silently when absent —
+  // the user may have chosen not to run the discovery workflow.
+  const resolvedDataStreams = await resolvePatterns(esClient, log, [
+    ...SIGNIFICANT_EVENTS_DATA_STREAMS,
+  ]);
   const resolvedIndices = await resolvePatterns(esClient, log, [logsIndex, ...alertIndices]);
 
-  const capturedSystemIndices: string[] = [];
-  for (const idx of resolvedSystemIndices) {
-    let snapshotIndex: string;
-    try {
-      snapshotIndex = await captureSystemIndex({ esClient, log, sourceIndex: idx });
-    } catch (err) {
-      if (err?.meta?.body?.error?.type === 'security_exception') {
-        throw new Error(
-          `Capture requires a user with manage privilege on system indices. ` +
-            `Pass superuser credentials via --es-username/--es-password. ` +
-            `Missing index:manage privilege on: ${idx}`
-        );
-      }
-      throw err;
+  const capturedDataStreams: string[] = [];
+  for (const idx of resolvedDataStreams) {
+    const optional = (SIGEVENTS_OPTIONAL_STREAMS as readonly string[]).includes(idx);
+    const snapshotIndex = await captureDataStream({
+      esClient,
+      config,
+      log,
+      sourceIndex: idx,
+      optional,
+    });
+    if (snapshotIndex !== undefined) {
+      capturedDataStreams.push(snapshotIndex);
     }
-    capturedSystemIndices.push(snapshotIndex);
   }
 
-  const allSnapshotIndices = [...resolvedIndices, ...capturedSystemIndices].join(',');
+  const allSnapshotIndices = [...resolvedIndices, ...capturedDataStreams].join(',');
 
   await registerGcsRepository(esClient, log, runId);
-  await createSnapshot({ esClient, log, snapshotName, runId, indices: allSnapshotIndices });
+  const actualIndices = await createSnapshot({
+    esClient,
+    log,
+    snapshotName,
+    runId,
+    indices: allSnapshotIndices,
+  });
 
-  log.info(`Snapshot created: sigevents-${runId}/${snapshotName} (${allSnapshotIndices})`);
+  // `ignore_unavailable: true` silently drops missing indices — report what was actually
+  // captured so a partial snapshot surfaces immediately rather than at restore time.
+  log.info(`Snapshot contains ${actualIndices.length} indices: ${actualIndices.join(', ')}`);
+  // `actualIndices` lists concrete indices — for a data stream these are its backing indices
+  // (`.ds-logs.otel-…`), not the data-stream name. Add the resolved data-stream name for each
+  // backing index so a requested data stream (e.g. `logs.otel`) isn't falsely flagged missing.
+  const capturedNames = new Set<string>();
+  for (const idx of actualIndices) {
+    capturedNames.add(idx);
+    const dataStream = extractDataStreamName(idx);
+    if (dataStream) {
+      capturedNames.add(dataStream);
+    }
+  }
+  // `requested` comes from `resolvePatterns` / `toSnapshotName`, so wildcards are already
+  // expanded — a plain membership check is enough.
+  const requested = allSnapshotIndices.split(',');
+  const missing = requested.filter((i) => !capturedNames.has(i));
+  if (missing.length > 0) {
+    log.warning(
+      `Requested indices NOT in snapshot (skipped — did not exist): ${missing.join(', ')}`
+    );
+  }
 
   log.info('');
   log.info('='.repeat(70));

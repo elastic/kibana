@@ -27,7 +27,8 @@ import {
   dataViewMock,
   createDataViewWithBytesField,
   columnsMetaOverridingBytesType,
-  createFormatFieldValueSpy,
+  columnsMetaWithCustomField,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
@@ -61,7 +62,7 @@ const getSummaryProps = (
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
-        convert: jest.fn().mockImplementation((t: string) => String(t)),
+        convertToText: jest.fn().mockImplementation((t: string) => String(t)),
       })),
   },
   setCellProps: () => {},
@@ -284,7 +285,7 @@ describe('SummaryCellPopover', () => {
 
 describe('SummaryColumn with columnsMeta', () => {
   it('should use data view field type when columnsMeta is undefined', () => {
-    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
     const record = buildDataTableRecord(
@@ -306,12 +307,12 @@ describe('SummaryColumn with columnsMeta', () => {
       />
     );
 
-    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
-    formatFieldValueSpy.mockRestore();
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+    formatFieldValueReactSpy.mockRestore();
   });
 
   it('should use columnsMeta type instead of data view field type when provided', () => {
-    const formatFieldValueSpy = createFormatFieldValueSpy();
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
     const record = buildDataTableRecord(
@@ -333,7 +334,36 @@ describe('SummaryColumn with columnsMeta', () => {
       />
     );
 
-    expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
-    formatFieldValueSpy.mockRestore();
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    formatFieldValueReactSpy.mockRestore();
+  });
+
+  it('should format a computed ES|QL column absent from the data view when message is dropped', () => {
+    const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
+    const testDataView = createDataViewWithBytesField();
+
+    // Mirrors `FROM logs-* | eval custom_esql_field = ... | drop message`: the field exists only
+    // in columnsMeta, and there is no `message` for the summary to fall back on.
+    const record = buildDataTableRecord(
+      {
+        fields: {
+          '@timestamp': 1726218404776,
+          custom_esql_field: [200],
+        },
+      },
+      testDataView
+    );
+
+    render(
+      <SummaryColumn
+        {...getSummaryProps(record, {
+          dataView: testDataView,
+          columnsMeta: columnsMetaWithCustomField,
+        })}
+      />
+    );
+
+    expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
+    formatFieldValueReactSpy.mockRestore();
   });
 });

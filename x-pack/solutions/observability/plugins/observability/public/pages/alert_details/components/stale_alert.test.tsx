@@ -51,6 +51,7 @@ describe('Stale alert', () => {
     const staleAlert = render(
       <StaleAlert
         alert={alert}
+        alertIndex=".internal.alerts-observability.apm.alerts-default-000001"
         alertStatus="active"
         rule={ruleMock}
         refetchRule={() => {}}
@@ -75,6 +76,7 @@ describe('Stale alert', () => {
     const staleAlert = render(
       <StaleAlert
         alert={alertUpdated}
+        alertIndex=".internal.alerts-observability.apm.alerts-default-000001"
         alertStatus="active"
         rule={ruleMock}
         refetchRule={() => {}}

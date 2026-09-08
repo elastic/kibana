@@ -56,7 +56,7 @@ describe('FeatureRegistry', () => {
             },
             app: ['app1'],
             savedObject: {
-              all: ['space', 'etc', 'telemetry'],
+              all: ['space', 'etc', 'telemetry', 'user-storage', 'user-storage-global'],
               read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -64,8 +64,17 @@ describe('FeatureRegistry', () => {
           },
           read: {
             savedObject: {
-              all: [],
-              read: ['config', 'config-global', 'url', 'telemetry', 'tag', 'cloud'],
+              all: ['user-storage', 'user-storage-global'],
+              read: [
+                'config',
+                'config-global',
+                'url',
+                'telemetry',
+                'tag',
+                'cloud',
+                'user-storage',
+                'user-storage-global',
+              ],
             },
             ui: [],
           },
@@ -129,7 +138,7 @@ describe('FeatureRegistry', () => {
                 },
                 app: ['app1'],
                 savedObject: {
-                  all: ['space', 'etc', 'telemetry'],
+                  all: ['space', 'etc', 'telemetry', 'user-storage', 'user-storage-global'],
                   read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -292,7 +301,11 @@ describe('FeatureRegistry', () => {
       expect(result[0].privileges).toHaveProperty('read');
 
       const allPrivilege = result[0].privileges?.all;
-      expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
+      expect(allPrivilege?.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
     });
 
     it(`automatically grants access to config, config-global, url, telemetry and tag saved objects`, () => {
@@ -336,6 +349,7 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
       ]);
+      expect(readPrivilege?.savedObject.all).toEqual(['user-storage', 'user-storage-global']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -376,7 +390,11 @@ describe('FeatureRegistry', () => {
       const result = featureRegistry.getAllKibanaFeatures();
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
-      expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
+      expect(reservedPrivilege.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       expect(reservedPrivilege.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -420,7 +438,11 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
-      expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
+      expect(allPrivilege?.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       expect(allPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -428,6 +450,7 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
       ]);
+      expect(readPrivilege?.savedObject.all).toEqual(['user-storage', 'user-storage-global']);
       expect(readPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -869,6 +892,105 @@ describe('FeatureRegistry', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"Feature test-feature specifies catalogue entries which are not granted to any privileges: baz"`
       );
+    });
+
+    describe('aiIndex privileges', () => {
+      it('allows a feature privilege to declare AI Index read types', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              aiIndex: { read: ['dashboard'] },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              aiIndex: { read: ['dashboard'] },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        };
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
+      });
+
+      it('allows a sub-feature privilege to declare AI Index read types', () => {
+        const feature: KibanaFeatureConfig = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+          subFeatures: [
+            {
+              name: 'sub-feature',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'sub-1',
+                      name: 'Sub 1',
+                      includeIn: 'read',
+                      aiIndex: { read: ['dashboard'] },
+                      savedObject: { all: [], read: [] },
+                      ui: [],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        };
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
+      });
+
+      it('rejects a non-array aiIndex.read', () => {
+        const feature = {
+          id: 'test-feature',
+          name: 'Test Feature',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              aiIndex: { read: 'dashboard' },
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+            read: {
+              savedObject: { all: [], read: [] },
+              ui: [],
+            },
+          },
+        } as unknown as KibanaFeatureConfig;
+
+        const featureRegistry = new FeatureRegistry();
+        expect(() =>
+          featureRegistry.registerKibanaFeature(feature)
+        ).toThrowErrorMatchingInlineSnapshot(
+          `
+          "[privileges]: types that failed validation:
+          - [privileges.0]: expected value to equal [null]
+          - [privileges.1.all.aiIndex.read]: could not parse array value from json input"
+        `
+        );
+      });
     });
 
     describe('alerting', () => {
@@ -2037,7 +2159,7 @@ describe('FeatureRegistry', () => {
       };
 
       const featureRegistry = new FeatureRegistry();
-      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrowError();
+      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrow();
     });
 
     it('does not allow features with both regular and reserved privileges to be hidden', () => {
@@ -2235,6 +2357,119 @@ describe('FeatureRegistry', () => {
         - [subFeatures.0.privilegeGroups.0.0.privileges.0.minimumLicense]: a value wasn't expected to be present
         - [subFeatures.0.privilegeGroups.0.1.groupType]: expected value to equal [independent]"
       `);
+    });
+
+    it('allows independent sub-feature privileges to register excludeFromBasePrivileges', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'independent',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    excludeFromBasePrivileges: true,
+                    includeIn: 'none',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.registerKibanaFeature(feature);
+    });
+
+    it('allows mutually exclusive sub-feature privileges to register excludeFromBasePrivileges', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        subFeatures: [
+          {
+            name: 'foo',
+            privilegeGroups: [
+              {
+                groupType: 'mutually_exclusive',
+                privileges: [
+                  {
+                    id: 'foo',
+                    name: 'foo',
+                    excludeFromBasePrivileges: true,
+                    includeIn: 'none',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                  {
+                    id: 'bar',
+                    name: 'bar',
+                    excludeFromBasePrivileges: true,
+                    includeIn: 'none',
+                    savedObject: {
+                      all: [],
+                      read: [],
+                    },
+                    ui: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      featureRegistry.registerKibanaFeature(feature);
     });
 
     it('cannot register kibana feature after lockRegistration has been called', () => {
@@ -2566,7 +2801,7 @@ describe('FeatureRegistry', () => {
           all: {
             ui: [],
             savedObject: {
-              all: ['telemetry'],
+              all: ['telemetry', 'user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
             composedOf: [
@@ -2577,7 +2812,7 @@ describe('FeatureRegistry', () => {
           read: {
             ui: [],
             savedObject: {
-              all: [],
+              all: ['user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
             },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
@@ -2600,7 +2835,7 @@ describe('FeatureRegistry', () => {
           all: {
             ui: [],
             savedObject: {
-              all: ['telemetry'],
+              all: ['telemetry', 'user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
             composedOf: [{ feature: 'featureE', privileges: ['all'] }],
@@ -2608,7 +2843,7 @@ describe('FeatureRegistry', () => {
           read: {
             ui: [],
             savedObject: {
-              all: [],
+              all: ['user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
             },
           },

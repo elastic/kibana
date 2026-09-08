@@ -14,12 +14,16 @@ import {
   CasesStepCaseIdSchema,
   CasesStepSingleCaseOutputSchema,
 } from './shared';
-import { MAX_OBSERVABLES_PER_CASE } from '../../constants';
+import {
+  OBSERVABLE_TYPES_BUILTIN_KEYS,
+  MAX_OBSERVABLES_PER_CASE,
+  OBSERVABLE_TYPE_IPV4,
+} from '../../constants';
 
 export const AddObservablesStepTypeId = 'cases.addObservables';
 
 const ObservableInputSchema = z.object({
-  typeKey: z.string().min(1, 'typeKey is required'),
+  typeKey: z.enum(OBSERVABLE_TYPES_BUILTIN_KEYS),
   value: z.string().min(1, 'value is required'),
   description: z.string().nullable().optional(),
 });
@@ -40,7 +44,7 @@ export const addObservablesStepCommonDefinition: CommonStepDefinition<
   AddObservablesStepOutputSchema
 > = {
   id: AddObservablesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_OBSERVABLES_STEP_LABEL,
   description: i18n.ADD_OBSERVABLES_STEP_DESCRIPTION,
   documentation: {
@@ -53,7 +57,7 @@ export const addObservablesStepCommonDefinition: CommonStepDefinition<
   with:
     case_id: "abc-123-def-456"
     observables:
-      - typeKey: "ip"
+      - typeKey: "${OBSERVABLE_TYPE_IPV4.key}"
         value: "10.0.0.8"
         description: "Source IP"
 \`\`\``,

@@ -10,7 +10,9 @@ import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { EmbeddableTypes } from '../../canvas_plugin_src/expression_types';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
+import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { DEFAULT_TIME_RANGE } from '../../common/lib';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
@@ -77,7 +79,7 @@ export function transformWorkpadOut(
             fn.function = 'embeddable';
             fn.arguments = {
               config: [encode(lensConfig)],
-              type: [EmbeddableTypes.lens],
+              type: [LENS_EMBEDDABLE_TYPE],
             };
             break;
           }
@@ -97,7 +99,7 @@ export function transformWorkpadOut(
             fn.function = 'embeddable';
             fn.arguments = {
               config: [encode(visualizationConfig)],
-              type: [EmbeddableTypes.visualization],
+              type: [VISUALIZE_EMBEDDABLE_TYPE],
             };
             break;
           }
@@ -115,20 +117,19 @@ export function transformWorkpadOut(
             fn.function = 'embeddable';
             fn.arguments = {
               config: [encode(mapConfig)],
-              type: [EmbeddableTypes.map],
+              type: [MAP_SAVED_OBJECT_TYPE],
             };
             break;
           }
         }
 
         const embeddableConfig = decode(fn.arguments.config[0] as string);
-        const storedEmbeddableType = fn.arguments.type[0] as string;
-        const embeddableType = transformType(storedEmbeddableType);
+        const embeddableType = transformType(fn.arguments.type[0] as string);
         fn.arguments.type[0] = embeddableType;
         // Temporary escape hatch for lens as code
         // TODO remove when lens as code transforms are ready for production
         const transforms = embeddableService.getTransforms(
-          embeddableType === 'lens' ? 'lens-dashboard-app' : embeddableType
+          embeddableType === LENS_EMBEDDABLE_TYPE ? 'lens-dashboard-app' : embeddableType
         );
 
         try {
@@ -137,7 +138,7 @@ export function transformWorkpadOut(
           if (embeddableConfig.savedObjectId) {
             referencesForElement = ensureLibraryReference(
               referencesForElement,
-              storedEmbeddableType,
+              embeddableType,
               embeddableConfig.savedObjectId
             );
           }

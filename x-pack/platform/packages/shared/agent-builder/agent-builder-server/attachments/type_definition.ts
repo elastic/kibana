@@ -73,6 +73,12 @@ export interface AttachmentTypeDefinition<TType extends string = string, TConten
    * Whether attachments of this type are read-only. Defaults to false.
    */
   isReadonly?: boolean;
+  /**
+   * Maximum content length (in characters) for attachments of this type when presented inline
+   * to the LLM. Applied per-attachment — each attachment is truncated to its own type's limit.
+   * Defaults to the global DEFAULT_MAX_CONTENT_LENGTH (10 000).
+   */
+  maxContentLength?: number;
 }
 
 /**
@@ -89,9 +95,8 @@ export interface AttachmentFormatContext {
 export interface AttachmentResolveContext extends AttachmentFormatContext {
   /**
    * Saved objects client scoped to the current user.
-   * Optional to keep the core attachment contract generic and allow non-Kibana environments.
    */
-  savedObjectsClient?: SavedObjectsClientContract;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
@@ -117,11 +122,18 @@ export interface TextAttachmentRepresentation {
 }
 
 /**
- * Representation of an attachment when exposed to the LLM.
- *
- * Only plain text (inlined into the message) is supported for now.
+ * Image representation of an attachment when exposed to the LLM.
  */
-export type AttachmentRepresentation = TextAttachmentRepresentation;
+export interface ImageAttachmentRepresentation {
+  type: 'image';
+  mimeType: string;
+  getBase64: () => MaybePromise<string>;
+}
+
+/**
+ * Representation of an attachment when exposed to the LLM.
+ */
+export type AttachmentRepresentation = TextAttachmentRepresentation | ImageAttachmentRepresentation;
 
 /**
  * Structure containing all methods which will be used to present the attachment to the agent.

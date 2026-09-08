@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, type SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { SLOS_BASE_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
@@ -52,16 +52,23 @@ export function SloInstance({ slo }: { slo: SLOWithSummaryResponse }) {
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          disabled={!isFlyoutAvailable}
-          data-test-subj="sloOpenSelectInstanceFlyoutButton"
-          iconType="search"
-          aria-label={i18n.translate('xpack.slo.sloInstance.selectInstanceFlyoutLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.slo.sloInstance.selectInstanceFlyoutLabel', {
             defaultMessage: 'Open instance selector flyout',
           })}
-          color="primary"
-          onClick={() => setShowSelectInstanceFlyout((prev) => !prev)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            disabled={!isFlyoutAvailable}
+            data-test-subj="sloOpenSelectInstanceFlyoutButton"
+            iconType="magnify"
+            aria-label={i18n.translate('xpack.slo.sloInstance.selectInstanceFlyoutLabel', {
+              defaultMessage: 'Open instance selector flyout',
+            })}
+            color="primary"
+            onClick={() => setShowSelectInstanceFlyout((prev) => !prev)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       {isFlyoutAvailable && showSelectInstanceFlyout && (
         <SloSelectInstanceFlyout

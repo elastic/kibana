@@ -1,0 +1,45 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putCloudOnboardingDeploymentRequestExample:
+          description: 'Update a cloud onboarding deployment after the CFN stack has been submitted'
+          value:
+            status: 'deploying'
+            deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
+            deploymentName: 'elastic-aws-onboarding'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putCloudOnboardingDeploymentExample:
+            description: 'The updated cloud onboarding deployment'
+            value:
+              item:
+                id: 'onboarding-deployment-id-1'
+                provider: 'aws'
+                connectorId: 'cloud-connector-id-1'
+                mechanisms:
+                  - 'agentless'
+                deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
+                deploymentName: 'elastic-aws-onboarding'
+                services:
+                  - 'cloudwatch_metrics'
+                  - 'cloudtrail'
+                status: 'deploying'
+                attemptCount: 1
+                packagePolicyIds:
+                  - 'package-policy-id-1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -14,47 +14,60 @@ import {
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { AGENT_BUILDER_NAV_AT_TOP_FLAG } from '@kbn/navigation-plugin/public';
+import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { type Services } from '../common/services';
-import { SOLUTION_NAME } from './translations';
 
 export const createNavigationTree = (
   services: Services,
   chatExperience: AIChatExperience = AIChatExperience.Classic
 ): NavigationTreeDefinition => {
-  const showAlertingV2 = Boolean(services.application.capabilities.alertingVTwo);
+  const showAgentBuilder = chatExperience === AIChatExperience.Agent;
+  const agentBuilderNavAtTop = services.featureFlags.getBooleanValue(
+    AGENT_BUILDER_NAV_AT_TOP_FLAG,
+    false
+  );
+
+  const agentBuilderLink = {
+    icon: 'productAgent',
+    link: 'agent_builder' as AppDeepLinkId,
+  };
+  const contextEngineLink = {
+    icon: 'sparkles',
+    link: 'context_engine' as AppDeepLinkId,
+  };
+
   return {
     body: [
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      contextEngineLink,
       {
-        id: 'security_solution_home',
-        icon: 'logoSecurity',
-        link: securityLink(SecurityPageName.landing),
-        renderAs: 'home',
-        title: SOLUTION_NAME,
+        link: 'inbox' as AppDeepLinkId,
+        icon: 'mail',
       },
+      // PND body (nodes omitted when xpack.pnd.enabled is false)
+      ...defaultNavigationTree.pnd(),
       {
         link: 'discover',
         icon: 'productDiscover',
       },
       defaultNavigationTree.dashboards(),
+      ...defaultNavigationTree.pndSecondary(),
       defaultNavigationTree.rules(),
-      services.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
+      services.uiSettings.get(
+        ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+        services.experimentalFeatures?.enableAlertsAndAttacksAlignment
+      )
         ? defaultNavigationTree.alertDetections()
         : {
             id: SecurityPageName.alerts,
             icon: 'warning',
             link: securityLink(SecurityPageName.alerts),
           },
-      {
-        link: 'workflows',
-      },
-      ...(chatExperience === AIChatExperience.Agent
-        ? [
-            {
-              icon: 'productAgent',
-              link: 'agent_builder' as AppDeepLinkId,
-            },
-          ]
-        : []),
+      ...getWorkflowsNavPanel(services),
+      // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
@@ -66,7 +79,9 @@ export const createNavigationTree = (
         link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
       },
       defaultNavigationTree.cases(),
-      defaultNavigationTree.entityAnalytics(),
+      defaultNavigationTree.entityAnalytics(
+        services.experimentalFeatures?.entityAnalyticsNewHomePageEnabled
+      ),
       defaultNavigationTree.explore(),
       defaultNavigationTree.investigations(),
       {
@@ -81,6 +96,10 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.assets(services),
       defaultNavigationTree.ml(),
+      {
+        link: 'onboarding' as AppDeepLinkId,
+        sideNavStatus: 'hidden',
+      },
     ],
     footer: [
       {
@@ -98,6 +117,7 @@ export const createNavigationTree = (
               {
                 id: SecurityPageName.siemReadiness,
                 link: securityLink(SecurityPageName.siemReadiness),
+                badgeType: 'new',
               },
               {
                 // value report
@@ -109,6 +129,10 @@ export const createNavigationTree = (
           {
             title: i18nStrings.launchPad.migrations.title,
             children: [
+              {
+                id: SecurityPageName.siemMigrationsManage,
+                link: securityLink(SecurityPageName.siemMigrationsManage),
+              },
               {
                 id: SecurityPageName.siemMigrationsRules,
                 link: securityLink(SecurityPageName.siemMigrationsRules),
@@ -154,6 +178,7 @@ export const createNavigationTree = (
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
+              { link: 'management:data_federation' },
               { link: 'management:data_quality' },
             ],
           },
@@ -188,26 +213,13 @@ export const createNavigationTree = (
                       link: 'cloud_connect' as const,
                     },
                   ]),
-              { link: 'monitoring' },
             ],
           },
-          ...(showAlertingV2
-            ? [
-                {
-                  id: 'v2_alerting_preview',
-                  title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
-                  renderAs: 'panelOpener' as const,
-                  children: [
-                    { link: 'management:rules' as const },
-                    { link: 'management:notification_policies' as const },
-                  ],
-                },
-              ]
-            : []),
+          ...getAlertingV2ManagementNavPanel(services),
           {
             title: i18nStrings.stackManagementV2.alertsAndInsights.title,
             children: [
-              { link: 'management:triggersActions' },
+              { id: 'stackRules', link: 'management:triggersActions' },
               { link: 'management:cases' },
               { link: 'management:triggersActionsConnectors' },
               { link: 'management:reporting' },
@@ -221,6 +233,13 @@ export const createNavigationTree = (
             ],
           },
           {
+            title: i18nStrings.clusterPerformance.title,
+            children: [
+              { link: 'monitoring' },
+              { link: 'management:queryActivity', badgeType: 'new' },
+            ],
+          },
+          {
             title: i18nStrings.ml.title,
             children: [
               { link: 'management:overview' },
@@ -228,6 +247,14 @@ export const createNavigationTree = (
               { link: 'management:analytics' },
               { link: 'management:trained_models' },
               { link: 'management:supplied_configurations' },
+            ],
+          },
+          {
+            title: i18nStrings.modelManagement.title,
+            children: [
+              { link: 'management:elastic_inference_service' },
+              { link: 'management:inference_endpoints' },
+              { link: 'management:model_settings' },
             ],
           },
           {

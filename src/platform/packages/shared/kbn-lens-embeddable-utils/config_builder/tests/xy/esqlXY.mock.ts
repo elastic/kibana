@@ -9,6 +9,7 @@
 
 import type { XYDataLayerConfig } from '@kbn/lens-common';
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 const LAYER_ID = 'c2eacea8-91d4-4372-a82d-8760979ff893';
 
@@ -52,9 +53,7 @@ export const esqlChart: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)\n  | STATS count = COUNT(*) BY buckets /* try out different intervals */',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       legend: {
         isVisible: true,
@@ -130,7 +129,7 @@ export const esqlChart: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsXY',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 /**
@@ -166,9 +165,7 @@ export const esqlChartWithBreakdownColorMapping: LensAttributes = {
         },
       },
     },
-    query: {
-      esql: 'FROM kibana_sample_data_ecommerce \n| EVAL buckets = DATE_TRUNC(12 hours, order_date)  | STATS count = COUNT(*) BY buckets, category',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       ...(esqlChart.state.visualization as Record<string, unknown>),
       layers: [
@@ -267,9 +264,7 @@ export const esqlXYWithCollapseByBreakdown: LensAttributes = {
       },
     },
     filters: [],
-    query: {
-      esql: 'FROM kibana_sample_data_logs | LIMIT 1000\n',
-    },
+    query: { language: 'kuery', query: '' },
     visualization: {
       legend: {
         isVisible: true,
@@ -328,5 +323,5 @@ export const esqlXYWithCollapseByBreakdown: LensAttributes = {
     needsRefresh: false,
   },
   visualizationType: 'lnsXY',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
@@ -13,6 +14,7 @@ import type { Duration } from '../domain/models';
 import { DefaultBurnRatesClient } from './burn_rates_client';
 import { SLODefinitionClient } from './slo_definition_client';
 import { DefaultSLODefinitionRepository } from './slo_definition_repository';
+import { getSloApmLabels } from './utils';
 
 interface Services {
   soClient: SavedObjectsClientContract;
@@ -49,6 +51,7 @@ export async function getBurnRates({
   const definitionClient = new SLODefinitionClient(repository, esClient, logger);
 
   const { slo } = await definitionClient.execute(sloId, spaceId, remoteName);
+  addTransactionLabels(getSloApmLabels(slo));
   const burnRates = await burnRatesClient.calculate(slo, instanceId, windows, remoteName);
 
   return { burnRates };

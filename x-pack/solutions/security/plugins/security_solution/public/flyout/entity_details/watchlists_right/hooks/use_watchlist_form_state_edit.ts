@@ -11,9 +11,11 @@ import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
+  getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
+import { useRuleBasedSourceState } from './use_rule_based_source_state';
 
 export interface UseEditWatchlistFormStateParams {
   watchlistId?: string;
@@ -46,8 +48,11 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const { initialWatchlist: fetchedWatchlist, entitySourceId } =
-    useGetWatchlistFormData(normalizedWatchlistId);
+  const {
+    initialWatchlist: fetchedWatchlist,
+    ruleBasedSourceIds,
+    indexSourceWithMissingApiKey,
+  } = useGetWatchlistFormData(normalizedWatchlistId);
 
   useResetEditsOnFlyoutOpen(setHasUserEdits);
 
@@ -66,8 +71,13 @@ export const useEditWatchlistFormState = ({
     }
   }, [normalizedWatchlistId]);
 
-  const isNameChanged = watchlist.name.trim() !== initialWatchlist.name.trim();
-  const { isNameInvalid } = getWatchlistNameValidation(watchlist.name, isNameChanged);
+  const ruleBasedSource = useRuleBasedSourceState({
+    watchlistName: watchlist.name,
+    isEditMode: true,
+    isManaged: watchlist.managed ?? false,
+    initialEntitySources: watchlist.entitySources,
+    onFieldChange: setWatchlistField,
+  });
 
   const isMissingId = !normalizedWatchlistId;
   const hasChanges =
@@ -75,15 +85,29 @@ export const useEditWatchlistFormState = ({
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
-  const isDisabled = isMissingId || isNameInvalid || !hasChanges;
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const { isRiskModifierInvalid } = getWatchlistRiskModifierValidation(watchlist);
+  const isDisabled =
+    isMissingId ||
+    !watchlist.name.trim() ||
+    !hasChanges ||
+    isNameTooLong ||
+    isDescriptionTooLong ||
+    isRiskModifierInvalid ||
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,
     normalizedWatchlistId,
-    entitySourceId,
+    ruleBasedSourceIds: ruleBasedSourceIds ?? {},
+    indexSourceWithMissingApiKey,
     isEditMode: true,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
+    isRiskModifierInvalid,
     setWatchlistField,
+    ruleBasedSource,
   };
 };

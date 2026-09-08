@@ -69,12 +69,13 @@ export const AzureArmTemplateGuide: React.FC<AzureArmTemplateGuideProps> = ({ el
           <li>
             <FormattedMessage
               id="xpack.fleet.cloudConnector.azure.guide.steps.outputs"
-              defaultMessage="Once the deployment is complete, go to the {outputs} tab and copy the {outputValues} fields and paste them into Kibana, below."
+              defaultMessage="Once the deployment is complete, go to the {outputs} tab and copy the {clientId}, {tenantId}, and {connectorId} fields. Paste the Client ID and Tenant ID into their respective fields below, and paste the Elastic Cloud Connector ID into the {federatedIdentityId} field."
               values={{
                 outputs: <strong>{'Outputs'}</strong>,
-                outputValues: (
-                  <strong>{'ClientID, TenantID, and Elastic Cloud Connector ID'}</strong>
-                ),
+                clientId: <strong>{'Client ID'}</strong>,
+                tenantId: <strong>{'Tenant ID'}</strong>,
+                connectorId: <strong>{'Elastic Cloud Connector ID'}</strong>,
+                federatedIdentityId: <strong>{'Federated Identity ID'}</strong>,
               }}
             />
           </li>

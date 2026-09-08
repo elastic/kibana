@@ -12,15 +12,6 @@ import { getRiskScoreOverTimeAreaAttributes } from './risk_score_over_time_area'
 import { useLensAttributes } from '../../common/components/visualization_actions/use_lens_attributes';
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
-
 jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {

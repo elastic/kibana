@@ -14,6 +14,8 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
+import type { CpsData } from '../types';
+import { resolveCpsData } from './resolve_cps_data';
 import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
 import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
@@ -39,7 +41,6 @@ interface GetExecutorServicesOpts {
   ruleResultService: RuleResultService;
   ruleData: { name: string; alertTypeId: string; id: string; spaceId: string };
   ruleTaskTimeout?: string;
-  uiamApiKey?: string | null;
 }
 
 export interface ExecutorServices {
@@ -53,6 +54,7 @@ export interface ExecutorServices {
   getAsyncSearchClient: <T extends AsyncSearchParams>(
     strategy: AsyncSearchStrategies
   ) => AsyncSearchClient<T>;
+  getCpsData: () => Promise<CpsData>;
 }
 
 // Default project routing for rules when CPS is enabled is 'space'
@@ -94,9 +96,12 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
     wrappedScopedClusterClient,
     getDataViews: async () => {
       const dataViews = await withAlertingSpan('alerting:get-data-views-factory', () =>
+        // Use the current-user client so `fieldCaps` requests carry the rule's UIAM auth and fan
+        // out across the space's CPS-connected projects, consistent with the search clients. The
+        // internal user is always origin-only and is not CPS-capable.
         context.dataViews.dataViewsServiceFactory(
           savedObjectsClient,
-          scopedClusterClient.asInternalUser
+          scopedClusterClient.asCurrentUser
         )
       );
       return dataViews;
@@ -122,5 +127,19 @@ export const getExecutorServices = (opts: GetExecutorServicesOpts): ExecutorServ
         abortController,
       });
     },
+
+    // `resolveCpsData` reads two different kinds of ES endpoint:
+    // - `/_project_routing/{npre}` (routing expression) is operator-only and user-agnostic, so it
+    //   is called as the internal user to avoid the `security_exception` a rule's scoped API key
+    //   raises (see #276771).
+    // - `/_project/tags` (linked projects) is role-filtered, so it is called as the current user to
+    //   reflect the projects the rule execution actually targets.
+    getCpsData: () =>
+      resolveCpsData(
+        scopedClusterClient.asInternalUser,
+        scopedClusterClient.asCurrentUser,
+        ruleData.spaceId,
+        logger
+      ),
   };
 };

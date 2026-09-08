@@ -42,6 +42,7 @@ export interface ProcessingDissectSuggestionsParams {
 
 export interface ProcessingDissectSuggestionsHandlerDeps {
   params: ProcessingDissectSuggestionsParams;
+  connectorId: string;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
@@ -66,6 +67,7 @@ type FieldReviewResults = ToolCallsOfToolOptions<
 
 export const handleProcessingDissectSuggestions = async ({
   params,
+  connectorId,
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
@@ -74,7 +76,6 @@ export const handleProcessingDissectSuggestions = async ({
   logger,
 }: ProcessingDissectSuggestionsHandlerDeps): Promise<DissectProcessor | null> => {
   const { name: streamName } = params.path;
-  const { connector_id: connectorId } = params.body;
 
   logger.debug(
     `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`

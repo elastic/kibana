@@ -10,10 +10,14 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { Parser } from '@elastic/esql';
+import { DiscoverTabType } from '@kbn/discover-utils';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import { METRICS_STATE_DEF } from '../../../../../common/context_awareness';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createChartSection } from './accessor/chart_section';
+import { getDefaultAppState } from './accessor/get_default_app_state';
+import { getDeepAnalysisPlaybook } from './accessor/get_deep_analysis_playbook';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
@@ -26,6 +30,8 @@ export const createMetricsDataSourceProfileProvider =
     restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
     profile: {
       getChartSectionConfiguration: createChartSection(),
+      getDefaultAppState,
+      getDeepAnalysisPlaybook,
     },
     resolve: async ({ query, rootContext }) => {
       if (!isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {
@@ -36,6 +42,10 @@ export const createMetricsDataSourceProfileProvider =
         isMatch: true,
         context: {
           category: DataSourceCategory.Metrics,
+          // Opts the profile into `_p` URL sync: Discover only syncs the `Url` fields of the
+          // definition the active data source profile hands back here.
+          profileState: METRICS_STATE_DEF,
+          tabType: DiscoverTabType.Metrics,
         },
       };
     },

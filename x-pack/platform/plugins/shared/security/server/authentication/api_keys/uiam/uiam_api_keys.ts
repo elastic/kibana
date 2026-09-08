@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
+
+import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type {
   ConvertUiamAPIKeysResponse,
@@ -27,6 +29,7 @@ export interface UiamAPIKeysOptions {
   logger: Logger;
   license: SecurityLicense;
   uiam: UiamServicePublic;
+  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 /**
@@ -37,11 +40,13 @@ export class UiamAPIKeys implements UiamAPIKeysType {
   private readonly logger: Logger;
   private readonly license: SecurityLicense;
   private readonly uiam: UiamServicePublic;
+  private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
-  constructor({ logger, license, uiam }: UiamAPIKeysOptions) {
+  constructor({ logger, license, uiam, getCurrentUser }: UiamAPIKeysOptions) {
     this.logger = logger;
     this.license = license;
     this.uiam = uiam;
+    this.getCurrentUser = getCurrentUser;
   }
 
   /**
@@ -76,7 +81,15 @@ export class UiamAPIKeys implements UiamAPIKeysType {
     }
 
     try {
-      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params);
+      // UIAM requires Kibana's client authentication alongside session tokens and internal API keys,
+      // and rejects an external API key that arrives with it. The `internal` flag is absent both
+      // when no API key was involved (a session token) and when the credential cannot be retrieved
+      // from the Core's internal state e.g., for a fake request, carrying a key Kibana granted
+      // itself, and both of those need client authentication.
+      const isExternalApiKey = this.getCurrentUser(request)?.api_key?.internal === false;
+      const { id, key, description } = await this.uiam?.grantApiKey(authorization, params, {
+        includeClientAuthentication: !isExternalApiKey,
+      });
 
       result = {
         id,
@@ -134,6 +147,10 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       const errorMessage = `Failed to invalidate API key ${id}: ${getDetailedErrorMessage(e)}`;
       this.logger.error(errorMessage);
 
+      const code = Boom.isBoom(e)
+        ? (e.output.payload as Record<string, any>)?.error?.code
+        : undefined;
+
       return {
         invalidated_api_keys: [],
         previously_invalidated_api_keys: [],
@@ -142,6 +159,7 @@ export class UiamAPIKeys implements UiamAPIKeysType {
           {
             type: 'exception',
             reason: errorMessage,
+            ...(code ? { code } : {}),
           },
         ],
       };
@@ -167,6 +185,14 @@ export class UiamAPIKeys implements UiamAPIKeysType {
       this.logger.error(`Failed to convert API keys: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
+  }
+
+  /**
+   * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
+   * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
+    return this.uiam.getInternalCallerAttestationHeaders(credential);
   }
 
   /**

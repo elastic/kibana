@@ -19,6 +19,7 @@ import {
 } from '../../../../common/lib/constants';
 
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
+import { useCanvasContextMenuTopBorderStyles } from '../../../lib/use_canvas_context_menu_top_border_styles';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
 
@@ -166,6 +167,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
   autoplayInterval,
   setAutoplayInterval,
 }) => {
+  const contextMenuTopBorderStyles = useCanvasContextMenuTopBorderStyles();
   const setRefresh = (val: number) => setRefreshInterval(val);
 
   const disableInterval = () => {
@@ -195,14 +197,14 @@ export const ViewMenu: FunctionComponent<Props> = ({
     ...getScaleMenuItems(),
     {
       name: strings.getZoomInText(),
-      icon: 'magnifyWithPlus',
+      icon: 'magnifyPlus',
       onClick: zoomIn,
       disabled: zoomScale === MAX_ZOOM_LEVEL,
       className: 'canvasContextMenu--topBorder',
     },
     {
       name: strings.getZoomOutText(),
-      icon: 'magnifyWithMinus',
+      icon: 'magnifyMinus',
       onClick: zoomOut,
       disabled: zoomScale <= MIN_ZOOM_LEVEL,
     },
@@ -242,7 +244,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getFullscreenMenuItemLabel(),
-        icon: <EuiIcon type="fullScreen" size="m" />,
+        icon: <EuiIcon type="fullScreen" size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           enterFullscreen();
@@ -265,7 +267,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeClosed' : 'eye'} size="m" />,
+        icon: <EuiIcon type={isWriteable ? 'eyeSlash' : 'eye'} size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           toggleWriteable();
@@ -274,7 +276,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getZoomMenuItemLabel(),
-        icon: 'magnifyWithPlus',
+        icon: 'magnifyPlus',
         panel: {
           id: 3,
           title: strings.getZoomMenuItemLabel(),
@@ -291,6 +293,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
           initialPanelId={0}
           panels={flattenPanelTree(getPanelTree(closePopover))}
           className="canvasViewMenu"
+          css={contextMenuTopBorderStyles}
         />
       )}
     </Popover>

@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableState, DatatableStateNoESQL } from '../../schema';
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
+import type { DatatableConfig, DatatableConfigNoESQL } from '../../schema';
 
 /**
  * Basic datatable with single metric column and ad hoc dataView
  */
-export const singleMetricDatatableWithAdhocDataView: DatatableState = {
+export const singleMetricDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Single metric',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -28,17 +32,17 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
       empty_as_null: true,
     },
   ],
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable with multiple metrics, rows, and split_metrics_by columns
  */
-export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
+export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with ad hoc dataView',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -62,8 +66,8 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -85,8 +89,8 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -98,23 +102,23 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
   ],
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Full config datatable and ad hoc dataView
  */
-export const fullConfigDatatableWithAdhocDataView: DatatableState = {
+export const fullConfigDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   sampling: 1,
@@ -205,8 +209,8 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -236,8 +240,8 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -249,37 +253,39 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 10,
+    row_numbers: { visible: true },
   },
-  paging: 10,
-  row_numbers: { visible: true },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Full config datatable and dataView
  */
-export const fullConfigDatatableWithDataView: DatatableState = {
+export const fullConfigDatatableWithDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -369,8 +375,8 @@ export const fullConfigDatatableWithDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -400,8 +406,8 @@ export const fullConfigDatatableWithDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -413,36 +419,38 @@ export const fullConfigDatatableWithDataView: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 10,
   },
-  paging: 10,
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByPivotedMetricColumnDatatable: DatatableState = {
+export const sortedByPivotedMetricColumnDatatable: DatatableConfig = {
   title: 'Sorted by a pivoted metric column',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
-    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -532,8 +540,8 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -563,8 +571,8 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -576,42 +584,44 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 10,
+    sort_by: {
+      column_type: 'pivoted_metric',
+      index: 0,
+      values: ['US', 'CH'],
+      direction: 'desc',
+    },
   },
-  paging: 10,
-  sort_by: {
-    column_type: 'pivoted_metric',
-    index: 0,
-    values: ['US', 'CH'],
-    direction: 'desc',
-  },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable sorted by a row column
  */
-export const sortedByRowDatatable: DatatableState = {
+export const sortedByRowDatatable: DatatableConfig = {
   title: 'Sorted by row column',
   type: 'data_table',
-  dataset: {
-    type: 'dataView',
-    id: '90943e30-9a47-11e8-b64d-95841ca0b247',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -701,8 +711,8 @@ export const sortedByRowDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
       alignment: 'right',
@@ -732,8 +742,8 @@ export const sortedByRowDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
@@ -745,28 +755,30 @@ export const sortedByRowDatatable: DatatableState = {
         include_documents_without_field: false,
       },
       rank_by: {
-        type: 'column',
-        metric: 0,
+        type: 'metric',
+        metric_index: 0,
         direction: 'desc',
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 30,
+    sort_by: {
+      column_type: 'row',
+      index: 1,
+      direction: 'asc',
+    },
   },
-  paging: 30,
-  sort_by: {
-    column_type: 'row',
-    index: 1,
-    direction: 'asc',
-  },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;

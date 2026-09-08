@@ -14,12 +14,12 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * The type of the resource
  */
+export const SplunkResourceType = lazySchema(() => z.enum(['lookup', 'macro']));
 export type SplunkResourceType = z.infer<typeof SplunkResourceType>;
-export const SplunkResourceType = z.enum(['lookup', 'macro']);
 export type SplunkResourceTypeEnum = typeof SplunkResourceType.enum;
 export const SplunkResourceTypeEnum = SplunkResourceType.enum;

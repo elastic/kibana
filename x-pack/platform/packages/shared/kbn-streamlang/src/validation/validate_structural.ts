@@ -51,6 +51,9 @@ export function validateStepsRecursively(
       }
       // Nested steps are within a where block
       validateStepsRecursively(step.condition.steps, errors, processorCounter, streamType, true);
+      if (step.condition.else) {
+        validateStepsRecursively(step.condition.else, errors, processorCounter, streamType, true);
+      }
     } else if (isActionBlock(step)) {
       processorCounter.count++;
       const processorNumber = processorCounter.count;
@@ -82,18 +85,24 @@ export function validateStepsRecursively(
         });
       }
 
-      // Check for split/convert with conditional execution without a distinct target field.
+      // Check for split/convert/user_agent with conditional execution without a distinct target field.
       // This covers the case where the processor is nested inside a parent condition block —
       // the Zod schema refinement only catches the processor's own 'where' property, not tree-level context.
+      //
+      // For `user_agent` the runtime default for `to` is 'user_agent', use that when deciding whether the target collides with the source.
       if (
-        (step.action === 'split' || step.action === 'convert') &&
-        'from' in step &&
-        (!('to' in step) || !step.to || step.to === step.from)
+        (step.action === 'split' || step.action === 'convert' || step.action === 'user_agent') &&
+        'from' in step
       ) {
+        const targetCollidesWithFrom =
+          step.action === 'user_agent'
+            ? step.to === step.from || (step.to === undefined && step.from === 'user_agent')
+            : !('to' in step) || !step.to || step.to === step.from;
+
         const hasOwnCondition =
           'where' in step && step.where !== undefined && !isAlwaysCondition(step.where);
 
-        if (isWithinWhereBlock || hasOwnCondition) {
+        if (targetCollidesWithFrom && (isWithinWhereBlock || hasOwnCondition)) {
           errors.push({
             type: 'invalid_processor_placement',
             message: i18n.translate(

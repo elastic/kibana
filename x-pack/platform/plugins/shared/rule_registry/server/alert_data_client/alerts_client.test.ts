@@ -69,6 +69,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -163,6 +167,10 @@ describe('AlertsClient', () => {
         Object {
           "_source": undefined,
           "aggs": undefined,
+          "expand_wildcards": Array [
+            "open",
+            "hidden",
+          ],
           "fields": Array [
             "kibana.alert.rule.rule_type_id",
             "kibana.alert.rule.consumer",
@@ -299,8 +307,11 @@ describe('AlertsClient', () => {
       expect(getRuleListMock).not.toHaveBeenCalled();
 
       expect(getAlertIndicesAliasMock).toHaveBeenCalledTimes(2);
-      expect(getAlertIndicesAliasMock).nthCalledWith(1, ['siem.esqlRule']);
-      expect(getAlertIndicesAliasMock).nthCalledWith(2, ['.es-query', 'logs.alert.document.count']);
+      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(1, ['siem.esqlRule']);
+      expect(getAlertIndicesAliasMock).toHaveBeenNthCalledWith(2, [
+        '.es-query',
+        'logs.alert.document.count',
+      ]);
     });
 
     test('should fetch alert fields correctly', async () => {

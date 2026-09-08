@@ -70,6 +70,7 @@ export type {
   AnyRequiredCondition,
   Privilege,
   PrivilegeSet,
+  Privileges,
   RouteDeprecationInfo,
   PostValidationMetadata,
 } from './route';
@@ -86,6 +87,9 @@ export type {
   RouteValidator,
   RouteValidatorRequestAndResponses,
   LazyValidator,
+  OnRequestValidationError,
+  RequestValidationError,
+  RequestValidationErrorHandler,
 } from './route_validator';
 export { RouteValidationError } from './route_validator';
 export type {

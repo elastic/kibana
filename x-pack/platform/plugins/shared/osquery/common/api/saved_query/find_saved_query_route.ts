@@ -15,6 +15,7 @@ export const findSavedQueryRequestQuerySchema = t.type({
   sortOrder: t.union([t.union([t.literal('asc'), t.literal('desc')]), t.undefined]),
   search: t.union([t.string, t.undefined]),
   createdBy: t.union([t.string, t.undefined]),
+  id: t.union([t.string, t.undefined]),
 });
 
 export type FindSavedQueryRequestQuerySchema = t.OutputOf<typeof findSavedQueryRequestQuerySchema>;

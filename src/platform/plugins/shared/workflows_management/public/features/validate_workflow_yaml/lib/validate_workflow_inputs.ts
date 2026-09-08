@@ -12,7 +12,7 @@ import type { LineCounter } from 'yaml';
 import { i18n } from '@kbn/i18n';
 import { convertJsonSchemaToZodWithRefs } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { isDynamicValue } from '../../../../common/lib/regex';
+import { isDynamicValue } from '@kbn/workflows-yaml';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import {
   getValueFromValueNode,
@@ -50,6 +50,7 @@ function createUnknownKeyResult(
       },
     }),
     owner: 'workflow-inputs-validation',
+    ruleId: 'unknownInputKey',
     startLineNumber: startPos.line,
     startColumn: startPos.col,
     endLineNumber: endPos.line,
@@ -83,6 +84,7 @@ function createTypeErrorResult(
       },
     }),
     owner: 'workflow-inputs-validation',
+    ruleId: 'invalidInputType',
     startLineNumber: startPos.line,
     startColumn: startPos.col,
     endLineNumber: endPos.line,
@@ -112,6 +114,7 @@ function createMissingRequiredResult(
       },
     }),
     owner: 'workflow-inputs-validation',
+    ruleId: 'missingRequiredInput',
     startLineNumber: startPos.line,
     startColumn: startPos.col,
     endLineNumber: endPos.line,
@@ -304,6 +307,7 @@ function createWorkflowNotFoundResult(
       values: { workflowId },
     }),
     owner: 'workflow-inputs-validation',
+    ruleId: 'targetWorkflowNotFound',
     startLineNumber: startPos.line,
     startColumn: startPos.col,
     endLineNumber: endPos.line,

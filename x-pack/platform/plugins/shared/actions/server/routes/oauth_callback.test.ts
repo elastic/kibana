@@ -22,6 +22,7 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
+import { asSpaceId } from '@kbn/core-spaces-common';
 
 const KIBANA_URL = 'https://kibana.example.com';
 
@@ -48,6 +49,10 @@ const mockOAuthStateClientInstance = {
 const mockConnectorTokenClientInstance = {
   deleteConnectorTokens: jest.fn(),
   createWithRefreshToken: jest.fn(),
+};
+
+const mockActionsClient = {
+  evictClientPool: jest.fn(),
 };
 
 const mockEncryptedSavedObjectsClient = {
@@ -100,7 +105,7 @@ const createMockContext = (
     },
   }),
   actions: Promise.resolve({
-    getActionsClient: jest.fn(),
+    getActionsClient: jest.fn().mockReturnValue(mockActionsClient),
   }),
 });
 
@@ -119,6 +124,7 @@ describe('oauthCallbackRoute', () => {
     mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
       getDecryptedAsInternalUser: jest.fn(),
     });
+    mockActionsClient.evictClientPool.mockReset();
 
     MockOAuthStateClient.mockImplementation(() => mockOAuthStateClientInstance as never);
     MockUserConnectorTokenClient.mockImplementation(
@@ -203,7 +209,7 @@ describe('oauthCallbackRoute', () => {
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -232,7 +238,7 @@ describe('oauthCallbackRoute', () => {
       state: 'some-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -293,13 +299,14 @@ describe('oauthCallbackRoute', () => {
   });
 
   it('exchanges code for tokens and redirects on success', async () => {
+    const credentialMutationOrder: string[] = [];
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -327,8 +334,17 @@ describe('oauthCallbackRoute', () => {
       expiresIn: 3600,
     });
 
-    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
-    mockConnectorTokenClientInstance.createWithRefreshToken.mockResolvedValue(undefined);
+    mockActionsClient.evictClientPool.mockImplementation(async () => {
+      credentialMutationOrder.push('evictClientPoolStarted');
+      await Promise.resolve();
+      credentialMutationOrder.push('evictClientPoolFinished');
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockImplementation(async () => {
+      credentialMutationOrder.push('deleteConnectorTokens');
+    });
+    mockConnectorTokenClientInstance.createWithRefreshToken.mockImplementation(async () => {
+      credentialMutationOrder.push('createWithRefreshToken');
+    });
 
     const [, handler] = registerRoute();
     const context = createMockContext();
@@ -355,14 +371,16 @@ describe('oauthCallbackRoute', () => {
         clientSecret: 'client-secret',
       }),
       configurationUtilities,
-      true
+      true,
+      undefined
     );
 
-    // Verify token storage
+    // Verify token storage (skipRevocation: true — new token shares the same grant)
     expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith({
       connectorId: 'connector-1',
       tokenType: 'access_token',
       profileUid: 'test-profile-uid',
+      skipRevocation: true,
     });
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -381,9 +399,16 @@ describe('oauthCallbackRoute', () => {
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=success&connector_id=connector-1',
+          'https://kibana.example.com/app/connectors?oauth_authorization=success&connector_id=connector-1&status_code=200',
       },
     });
+    expect(mockActionsClient.evictClientPool).toHaveBeenCalledWith('connector-1');
+    expect(credentialMutationOrder).toEqual([
+      'evictClientPoolStarted',
+      'evictClientPoolFinished',
+      'deleteConnectorTokens',
+      'createWithRefreshToken',
+    ]);
   });
 
   it('uses EARS token exchange when authType is set in config (not secrets)', async () => {
@@ -393,7 +418,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -431,19 +456,26 @@ describe('oauthCallbackRoute', () => {
     expect(mockRequestOAuthAuthorizationCodeToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
-        location: expect.stringContaining('oauth_authorization=success'),
+        location: expect.stringContaining(
+          'oauth_authorization=success&connector_id=connector-1&status_code=200'
+        ),
       },
     });
+    // On re-auth the old saved object is removed without revoking the provider
+    // grant (the new token shares the same grant).
+    expect(mockConnectorTokenClientInstance.deleteConnectorTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ skipRevocation: true })
+    );
   });
 
-  it('redirects with error on token exchange failure', async () => {
+  it('logs the underlying error and redirects with a generic message on token exchange failure', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -475,22 +507,23 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(mockLogger.error).toHaveBeenCalledWith('OAuth callback failed: Token exchange failed');
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&error=OAuth+authorization+failed',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
       },
     });
   });
 
-  it('redirects with error when connector is missing required OAuth config', async () => {
+  it('redirects with a generic error when connector is missing required OAuth config', async () => {
     const mockOAuthState = {
       id: 'state-id',
       state: 'valid-state',
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'test-profile-uid',
@@ -516,10 +549,15 @@ describe('oauthCallbackRoute', () => {
 
     await handler(context, req, res);
 
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'OAuth callback failed: Connector missing required OAuth configuration'
+      )
+    );
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
         location:
-          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&error=OAuth+authorization+failed',
+          'https://kibana.example.com/app/connectors?oauth_authorization=error&connector_id=connector-1&status_code=500&error=OAuth+authorization+failed',
       },
     });
   });
@@ -531,7 +569,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
       createdBy: 'different-profile-uid',
@@ -550,7 +588,9 @@ describe('oauthCallbackRoute', () => {
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
-        location: expect.stringContaining('oauth_authorization=error'),
+        location: expect.stringContaining(
+          'oauth_authorization=error&connector_id=connector-1&status_code=403'
+        ),
       },
     });
   });
@@ -562,7 +602,7 @@ describe('oauthCallbackRoute', () => {
       codeVerifier: 'test-verifier',
       connectorId: 'connector-1',
       kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
-      spaceId: 'default',
+      spaceId: asSpaceId('default'),
       createdAt: '2025-01-01T00:00:00.000Z',
       expiresAt: '2025-01-01T00:10:00.000Z',
     });
@@ -580,7 +620,246 @@ describe('oauthCallbackRoute', () => {
     expect(mockConnectorTokenClientInstance.createWithRefreshToken).not.toHaveBeenCalled();
     expect(res.redirected).toHaveBeenCalledWith({
       headers: {
+        location: expect.stringContaining(
+          'oauth_authorization=error&connector_id=connector-1&status_code=403'
+        ),
+      },
+    });
+  });
+
+  it('redirects with Boom error status code when token storage throws a Boom error', async () => {
+    const Boom = await import('@hapi/boom');
+
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: {},
+          secrets: {
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            tokenUrl: 'https://provider.example.com/token',
+          },
+        },
+      }),
+    });
+    mockRequestOAuthAuthorizationCodeToken.mockResolvedValue({
+      tokenType: 'Bearer',
+      accessToken: 'token',
+      expiresIn: 3600,
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockRejectedValue(
+      Boom.forbidden('Unable to create user_connector_token')
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(createMockContext(), req, res);
+
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('status_code=403'),
+      },
+    });
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
         location: expect.stringContaining('oauth_authorization=error'),
+      },
+    });
+  });
+
+  it('builds and passes tokenResponseOptions when secrets contain custom token paths', async () => {
+    const mockOAuthState = {
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    };
+    mockOAuthStateClientInstance.get.mockResolvedValue(mockOAuthState);
+
+    const connectorEncryptedClient = {
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: { tokenUrl: 'https://slack.com/api/oauth.v2.access' },
+          secrets: {
+            clientId: 'slack-client-id',
+            clientSecret: 'slack-client-secret',
+            tokenUrl: 'https://slack.com/api/oauth.v2.access',
+            accessTokenPath: 'authed_user.access_token',
+            tokenType: 'bearer',
+          },
+        },
+      }),
+    };
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue(connectorEncryptedClient);
+
+    mockRequestOAuthAuthorizationCodeToken.mockResolvedValue({
+      tokenType: 'bearer',
+      accessToken: 'xoxp-slack-user-token',
+      refreshToken: undefined,
+      expiresIn: undefined,
+    });
+
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockResolvedValue(undefined);
+    mockConnectorTokenClientInstance.createWithRefreshToken.mockResolvedValue(undefined);
+
+    const [, handler] = registerRoute();
+    const context = createMockContext();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'slack-auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(context, req, res);
+
+    expect(mockRequestOAuthAuthorizationCodeToken).toHaveBeenCalledWith(
+      'https://slack.com/api/oauth.v2.access',
+      mockLogger,
+      expect.objectContaining({
+        code: 'slack-auth-code',
+        clientId: 'slack-client-id',
+        clientSecret: 'slack-client-secret',
+      }),
+      configurationUtilities,
+      true,
+      {
+        accessTokenPath: 'authed_user.access_token',
+        tokenTypePath: undefined,
+        tokenType: 'bearer',
+      }
+    );
+
+    expect(mockConnectorTokenClientInstance.createWithRefreshToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accessToken: 'bearer xoxp-slack-user-token',
+      })
+    );
+
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('oauth_authorization=success'),
+      },
+    });
+  });
+
+  it('redirects with SavedObjectsClient error status code when token storage throws an SO error', async () => {
+    const { SavedObjectsErrorHelpers } = await import('@kbn/core/server');
+
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: {},
+          secrets: {
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            tokenUrl: 'https://provider.example.com/token',
+          },
+        },
+      }),
+    });
+    mockRequestOAuthAuthorizationCodeToken.mockResolvedValue({
+      tokenType: 'Bearer',
+      accessToken: 'token',
+      expiresIn: 3600,
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockRejectedValue(
+      SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Forbidden'))
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(createMockContext(), req, res);
+
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('status_code=403'),
+      },
+    });
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('oauth_authorization=error'),
+      },
+    });
+  });
+
+  it('defaults to status_code=500 when the error is a plain Error', async () => {
+    mockOAuthStateClientInstance.get.mockResolvedValue({
+      id: 'state-id',
+      state: 'valid-state',
+      codeVerifier: 'test-verifier',
+      connectorId: 'connector-1',
+      kibanaReturnUrl: 'https://kibana.example.com/app/connectors',
+      spaceId: asSpaceId('default'),
+      createdAt: '2025-01-01T00:00:00.000Z',
+      expiresAt: '2025-01-01T00:10:00.000Z',
+      createdBy: 'test-profile-uid',
+    });
+    mockEncryptedSavedObjectsClient.getClient.mockReturnValue({
+      getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+        attributes: {
+          config: {},
+          secrets: {
+            clientId: 'client-id',
+            clientSecret: 'client-secret',
+            tokenUrl: 'https://provider.example.com/token',
+          },
+        },
+      }),
+    });
+    mockRequestOAuthAuthorizationCodeToken.mockResolvedValue({
+      tokenType: 'Bearer',
+      accessToken: 'token',
+      expiresIn: 3600,
+    });
+    mockConnectorTokenClientInstance.deleteConnectorTokens.mockRejectedValue(
+      new Error('Something went wrong')
+    );
+
+    const [, handler] = registerRoute();
+    const req = httpServerMock.createKibanaRequest({
+      query: { code: 'auth-code', state: 'valid-state' },
+    });
+    const res = httpServerMock.createResponseFactory();
+
+    await handler(createMockContext(), req, res);
+
+    expect(res.redirected).toHaveBeenCalledWith({
+      headers: {
+        location: expect.stringContaining('status_code=500'),
       },
     });
   });

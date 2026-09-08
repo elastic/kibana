@@ -6,20 +6,13 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-  useEuiShadow,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
-import { borderRadiusXlStyles } from '../../../../../common.styles';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
+import { promptContainerStyles } from './prompt_container.styles';
 
 const defaultLabels = {
   title: i18n.translate('xpack.agentBuilder.confirmationPrompt.defaultTitle', {
@@ -29,10 +22,10 @@ const defaultLabels = {
     defaultMessage: 'Do you want to proceed with this action?',
   }),
   confirmText: i18n.translate('xpack.agentBuilder.confirmationPrompt.confirm', {
-    defaultMessage: 'Confirm',
+    defaultMessage: 'Approve',
   }),
   cancelText: i18n.translate('xpack.agentBuilder.confirmationPrompt.cancel', {
-    defaultMessage: 'Cancel',
+    defaultMessage: 'Deny',
   }),
 };
 
@@ -41,6 +34,9 @@ export interface ConfirmationPromptProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  isDisabled?: boolean;
+  isAnswered?: boolean;
+  answeredValue?: boolean;
 }
 
 export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
@@ -48,100 +44,95 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   onConfirm,
   onCancel,
   isLoading = false,
+  isDisabled = false,
+  isAnswered = false,
+  answeredValue,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const color = prompt.color ?? 'primary';
 
   const title = prompt.title ?? defaultLabels.title;
-  const message = prompt.message ?? defaultLabels.message;
   const confirmText = prompt.confirm_text ?? defaultLabels.confirmText;
   const cancelText = prompt.cancel_text ?? defaultLabels.cancelText;
-
-  const containerStyles = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    ${borderRadiusXlStyles}
-    border: 1px solid ${euiTheme.colors.borderStrongWarning};
-    padding: ${euiTheme.size.base};
-    ${useEuiShadow('s')};
-  `;
+  const body = prompt.message ?? defaultLabels.message;
 
   const headerStyles = css`
     padding-bottom: ${euiTheme.size.s};
-    border-bottom: 1px solid ${euiTheme.colors.lightShade};
-    margin-bottom: ${euiTheme.size.s};
   `;
 
   const titleStyles = css`
     font-weight: ${euiTheme.font.weight.semiBold};
     font-size: ${euiTheme.size.base};
     color: ${euiTheme.colors.textParagraph};
+    p {
+      margin-block: 0;
+    }
   `;
 
-  const iconContainerStyles = css`
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: ${euiTheme.colors.backgroundLightWarning};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+  const footerStyles = css`
+    margin-top: ${euiTheme.size.base};
   `;
 
   return (
     <EuiFlexGroup
       direction="column"
       responsive={false}
-      css={containerStyles}
+      css={promptContainerStyles}
       gutterSize="none"
       data-test-subj="agentBuilderConfirmationPrompt"
     >
-      {/* Header with icon and title */}
-      <EuiFlexGroup
-        direction="row"
-        alignItems="center"
-        gutterSize="m"
-        responsive={false}
-        css={headerStyles}
-      >
-        <EuiFlexItem grow={false}>
-          <div css={iconContainerStyles}>
-            <EuiIcon type="help" color="warning" size="m" />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <span css={titleStyles}>{title}</span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {/* Header */}
+      <EuiFlexItem grow={false} css={headerStyles}>
+        <EuiMarkdownFormat css={titleStyles}>{title}</EuiMarkdownFormat>
+      </EuiFlexItem>
 
-      {/* Message */}
+      {/* Body */}
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color="subdued">
-          <p style={{ margin: 0, marginBottom: euiTheme.size.m }}>{message}</p>
-        </EuiText>
+        <EuiMarkdownFormat
+          textSize="s"
+          css={css`
+            color: ${euiTheme.colors.textSubdued};
+          `}
+        >
+          {body}
+        </EuiMarkdownFormat>
       </EuiFlexItem>
 
       {/* Action buttons */}
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={footerStyles}>
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiButton
               onClick={onCancel}
-              disabled={isLoading}
+              disabled={isDisabled || isLoading || isAnswered}
               size="s"
-              color="text"
+              iconType="cross"
+              color={isAnswered && answeredValue === false ? 'danger' : 'text'}
               data-test-subj="agentBuilderConfirmationPromptCancelButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.CONFIRM_PROMPT_CANCEL,
+                detail: 'conversation',
+              })}
             >
               {cancelText}
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               onClick={onConfirm}
               isLoading={isLoading}
-              fill
+              disabled={isDisabled || isAnswered}
+              fill={!isAnswered || answeredValue === true}
               size="s"
-              color="warning"
+              iconType="check"
+              color={isAnswered && answeredValue === true ? 'success' : color}
               data-test-subj="agentBuilderConfirmationPromptConfirmButton"
+              {...getEbtProps({
+                element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                action: AGENT_BUILDER_UI_EBT.action.conversation.CONFIRM_PROMPT_CONFIRM,
+                detail: 'conversation',
+              })}
             >
               {confirmText}
             </EuiButton>

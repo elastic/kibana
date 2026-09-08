@@ -24,6 +24,7 @@ export interface BrowseIntegrationsFilter {
   status?: IntegrationStatusFilterType[];
   setupMethod?: SetupMethodFilterType[];
   signal?: SignalFilterType[];
+  showContent?: boolean;
 }
 
 export type BrowseIntegrationSortType = 'recent-old' | 'old-recent' | 'a-z' | 'z-a';

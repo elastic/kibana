@@ -5,14 +5,35 @@
  * 2.0.
  */
 
+import type { Container } from 'inversify';
 import { BehaviorSubject } from 'rxjs';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
-const servicesReady$ = new BehaviorSubject<RuleFormServices | undefined>(undefined);
+/**
+ * The subset of `PluginConfig` exposed to the browser via `exposeToBrowser` in
+ * `server/index.ts`. Declared separately from the server `PluginConfig` type
+ * since only the listed keys are actually present on the client at runtime.
+ */
+export interface AlertingV2UIConfig {
+  rules: {
+    minimumScheduleInterval: string;
+  };
+}
 
-export const untilPluginStartServicesReady = (): Promise<RuleFormServices> => {
+/** Services shared by rule UI, episodes UI, and other alerting_v2 surfaces. */
+export type AlertingV2KibanaServices = RuleFormServices & {
+  expressions: ExpressionsStart;
+  uiSettings: IUiSettingsClient;
+  container: Container;
+};
+
+const servicesReady$ = new BehaviorSubject<AlertingV2KibanaServices | undefined>(undefined);
+
+export const untilPluginStartServicesReady = (): Promise<AlertingV2KibanaServices> => {
   if (servicesReady$.value) return Promise.resolve(servicesReady$.value);
-  return new Promise<RuleFormServices>((resolve) => {
+  return new Promise<AlertingV2KibanaServices>((resolve) => {
     const sub = servicesReady$.subscribe((deps) => {
       if (deps) {
         sub.unsubscribe();
@@ -22,6 +43,6 @@ export const untilPluginStartServicesReady = (): Promise<RuleFormServices> => {
   });
 };
 
-export const setKibanaServices = (services: RuleFormServices) => {
+export const setKibanaServices = (services: AlertingV2KibanaServices) => {
   servicesReady$.next(services);
 };

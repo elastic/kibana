@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_AGGREGATION } from '@kbn/ml-anomaly-utils';
 
-import type { BucketSpanEstimatorData } from '../../../common/types/job_service';
+import type { BucketSpanEstimatorData } from '@kbn/ml-common-types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 

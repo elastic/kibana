@@ -10,19 +10,14 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class KubernetesEAFlowPage {
   page: Page;
 
-  private readonly receivedDataIndicatorKubernetes: Locator;
   private readonly kubernetesAgentExploreDataActionLink: Locator;
   private readonly codeBlock: Locator;
   private readonly copyToClipboardButton: Locator;
-  private readonly logsDataReceivedIndicator: Locator;
   private readonly exploreLogsButton: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.receivedDataIndicatorKubernetes = this.page
-      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
-      .getByText('We are monitoring your cluster');
     this.kubernetesAgentExploreDataActionLink = this.page.getByTestId(
       'observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
     );
@@ -30,11 +25,9 @@ export class KubernetesEAFlowPage {
     this.copyToClipboardButton = this.page.getByTestId(
       'observabilityOnboardingCopyToClipboardButton'
     );
-    this.logsDataReceivedIndicator = this.page
-      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
-      .getByText('We are monitoring your cluster');
-
-    this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.exploreLogsButton = this.page.getByTestId(
+      'observabilityOnboardingDataIngestStatusActionLink-logs'
+    );
   }
 
   public async assertVisibilityCodeBlock() {
@@ -47,15 +40,8 @@ export class KubernetesEAFlowPage {
 
   public async assertReceivedDataIndicatorKubernetes() {
     await expect(
-      this.receivedDataIndicatorKubernetes,
-      'Received data indicator should be visible'
-    ).toBeVisible();
-  }
-
-  public async assertLogsDataReceivedIndicator() {
-    await expect(
-      this.logsDataReceivedIndicator,
-      'Logs data received indicator should be visible'
+      this.exploreLogsButton,
+      'Explore logs action link should be visible after data is detected'
     ).toBeVisible();
   }
 

@@ -7,16 +7,13 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import { noop } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   SharingSavedObjectProps,
   LensSavedObjectAttributes,
-  CheckDuplicateTitleProps,
   LensAttributesService,
 } from '@kbn/lens-common';
 import { LensDocumentService } from './persistence';
-import { DOC_TYPE } from '../common/constants';
 
 export const savedObjectToEmbeddableAttributes = (
   savedObject: SavedObjectCommon<LensSavedObjectAttributes>
@@ -76,28 +73,8 @@ export function getLensAttributeService(http: HttpStart): LensAttributesService 
       });
       return result.savedObjectId;
     },
-    checkForDuplicateTitle: async ({
-      newTitle,
-      isTitleDuplicateConfirmed,
-      onTitleDuplicate = noop,
-      displayName = DOC_TYPE,
-      lastSavedTitle = '',
-      copyOnSave = false,
-      id,
-    }: CheckDuplicateTitleProps) => {
-      return {
-        isDuplicate: await lensDocumentService.checkForDuplicateTitle(
-          {
-            id,
-            title: newTitle,
-            isTitleDuplicateConfirmed,
-            displayName,
-            lastSavedTitle,
-            copyOnSave,
-          },
-          onTitleDuplicate
-        ),
-      };
+    hasLibraryItemWithTitle: async (title: string) => {
+      return await lensDocumentService.hasLibraryItemWithTitle(title);
     },
   };
 }

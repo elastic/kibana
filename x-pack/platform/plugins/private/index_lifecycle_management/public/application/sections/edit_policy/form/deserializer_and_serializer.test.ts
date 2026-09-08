@@ -229,8 +229,7 @@ describe('deserializer and serializer', () => {
     expect(result.phases.cold!.actions.readonly).toBeUndefined();
   });
 
-  it('allows force merge and readonly actions to be configured in hot with default rollover enabled', () => {
-    formInternal._meta.hot.isUsingDefaultRollover = true;
+  it('allows force merge and readonly actions to be configured in hot with rollover enabled', () => {
     formInternal._meta.hot.bestCompression = false;
     formInternal.phases.hot!.actions.forcemerge = undefined;
     formInternal._meta.hot.readonlyEnabled = false;
@@ -266,9 +265,6 @@ describe('deserializer and serializer', () => {
   });
 
   it('removes forcemerge, readonly, and rollover config when rollover is disabled in hot phase', () => {
-    // These two toggles jointly control whether rollover is enabled since the default is
-    // for rollover to be enabled.
-    formInternal._meta.hot.isUsingDefaultRollover = false;
     formInternal._meta.hot.customRollover.enabled = false;
 
     const result = serializer(formInternal);
@@ -280,11 +276,70 @@ describe('deserializer and serializer', () => {
 
   it('adds default rollover configuration when enabled, but previously not configured', () => {
     delete formInternal.phases.hot!.actions.rollover;
-    formInternal._meta.hot.isUsingDefaultRollover = true;
+    formInternal.phases.hot!.actions.rollover = {
+      max_age: '30',
+      max_primary_shard_size: '50',
+    };
+    formInternal._meta.hot.customRollover.triggerFields = ['max_primary_shard_size', 'max_age'];
+    formInternal._meta.hot.customRollover.maxAgeUnit = 'd';
+    formInternal._meta.hot.customRollover.maxPrimaryShardSizeUnit = 'gb';
 
     const result = serializer(formInternal);
 
     expect(result.phases.hot!.actions.rollover).toEqual(defaultRolloverAction);
+  });
+
+  it('preserves unknown rollover fields the UI does not manage', () => {
+    formInternal.phases.hot!.actions.rollover!.min_primary_shard_size = '5gb';
+    // @ts-expect-error - this is an unknown field that should be preserved by the serializer
+    formInternal.phases.hot!.actions.rollover!.unknown_setting = 123;
+
+    const result = serializer(formInternal);
+    const rollover = result.phases.hot!.actions.rollover;
+
+    expect(rollover).toEqual(
+      expect.objectContaining({
+        unknown_setting: 123,
+      })
+    );
+    expect(rollover!.min_primary_shard_size).toBeUndefined();
+    expect(rollover!.max_docs).toBe(1000);
+    expect(rollover!.max_primary_shard_docs).toBe(12);
+    expect(rollover!.max_size).toBe('10gb');
+  });
+
+  it('does not drop active rollover min_* fields on save', () => {
+    const policyWithRolloverMinFields: SerializedPolicy = {
+      name: 'policyWithRolloverMinFields',
+      phases: {
+        hot: {
+          min_age: '0ms',
+          actions: {
+            rollover: {
+              max_age: '30d',
+              max_primary_shard_size: '50gb',
+              min_age: '1d',
+              min_docs: 100,
+              min_size: '10gb',
+              min_primary_shard_size: '5gb',
+              min_primary_shard_docs: 50,
+            },
+          },
+        },
+      },
+    };
+
+    const nextSerializer = createSerializer(cloneDeep(policyWithRolloverMinFields));
+    const nextFormInternal = deserializer(cloneDeep(policyWithRolloverMinFields));
+    const result = nextSerializer(nextFormInternal);
+
+    const rollover = result.phases.hot!.actions.rollover!;
+    expect(rollover.min_age).toBe('1d');
+    expect(rollover.min_docs).toBe(100);
+    expect(rollover.min_size).toBe('10gb');
+    expect(rollover.min_primary_shard_size).toBe('5gb');
+    expect(rollover.min_primary_shard_docs).toBe(50);
+    expect(rollover).toEqual(expect.objectContaining(defaultRolloverAction));
   });
 
   it('removes snapshot_repository when it is unset', () => {
@@ -295,6 +350,51 @@ describe('deserializer and serializer', () => {
 
     expect(result.phases.hot!.actions.searchable_snapshot).toBeUndefined();
     expect(result.phases.cold!.actions.searchable_snapshot).toBeUndefined();
+  });
+
+  it('preserves searchable_snapshot.force_merge_on_clone when configured', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = true;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBe(false);
+  });
+
+  it('serializes searchable_snapshot.force_merge_on_clone when updated in the form', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
+  });
+
+  it('serializes searchable_snapshot.force_merge_index when updated in the form', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBeUndefined();
+  });
+
+  it('does not serialize searchable_snapshot.force_merge_on_clone when set to true', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = false;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = true;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBe(false);
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
+  });
+
+  it('does not serialize searchable_snapshot.force_merge_on_clone when force_merge_index is false', () => {
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_index = false;
+    formInternal.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone = false;
+
+    const result = serializer(formInternal);
+
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_index).toBe(false);
+    expect(result.phases.cold!.actions.searchable_snapshot!.force_merge_on_clone).toBeUndefined();
   });
 
   it('correctly serializes a minimal policy', () => {

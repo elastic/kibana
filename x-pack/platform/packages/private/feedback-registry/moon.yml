@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: x-pack/platform/packages/private/feedback-registry
-dependsOn: []
+dependsOn:
+  - '@kbn/ui-feedback'
 tags:
   - shared-common
   - package

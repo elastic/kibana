@@ -33,14 +33,6 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
 import type { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import type { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
-import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
 import type { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import type {
@@ -54,14 +46,29 @@ import type {
   ReadRuleExecutionResultsRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/read_rule_execution_results_route.gen';
 import type {
+  RestoreRuleFromHistoryRequestParamsInput,
+  RestoreRuleFromHistoryRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/restore_rule_from_history/restore_rule_from_history_route.gen';
+import type { ReviewRuleInstallationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_installation/review_rule_installation_route.gen';
+import type { ReviewRuleUpgradeRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route.gen';
+import type {
+  RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import type { SearchAttacksRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/search/search_route.gen';
+import type { SearchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type { SearchUnifiedAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/search/search_route.gen';
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type { SetAttacksAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_assignees/set_assignees_route.gen';
+import type { SetAttacksStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_workflow_status/set_workflow_status_route.gen';
+import type { SetAttacksTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/attacks/set_tags/set_attacks_tags_route.gen';
 import type { SetUnifiedAlertsAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_alert_assignees/set_alert_assignees_route.gen';
 import type { SetUnifiedAlertsTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_alert_tags/set_alert_tags_route.gen';
 import type { SetUnifiedAlertsWorkflowStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/set_workflow_status/set_workflow_status_route.gen';
@@ -73,13 +80,13 @@ import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
 const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
   /**
-      * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
-the migration process. A successful migration will result in both the old and new indices being present.
-As such, the old, orphaned index can (and likely should) be deleted.
+      * **DEPRECATED.** Cleanup API for old migration artifacts. Do not add new call sites.
+**WARNING:** This schedules deletions; ensure no production reads still point at the source index.
 
-While you can delete these indices manually,
-the endpoint accomplishes this task by applying a deletion policy to the relevant index, causing it to be deleted
-after 30 days. It also deletes other artifacts specific to the migration implementation.
+Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
+the migration process. A successful migration can leave both the old and new indices present, so the old
+index may be deleted. While you can delete these indices manually, the endpoint applies a deletion policy
+to the relevant index, causing it to be deleted after 30 days, and removes other migration-specific artifacts.
 
       */
   alertsMigrationCleanup(props: AlertsMigrationCleanupProps, kibanaSpace: string = 'default') {
@@ -89,18 +96,6 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
-  },
-  /**
-   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-   */
-  bootstrapPrebuiltRules(kibanaSpace: string = 'default') {
-    return supertest
-      .post(
-        getRouteUrlForSpace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
       * Creates an index for Elastic Security alerts. Calling this API is not
@@ -116,8 +111,12 @@ rules and alerts without calling this API.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * Initiate a migration of detection alerts.
-Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
+      * **DEPRECATED.** Legacy API for on-demand reindexing of old `.siem-signals-*` alert indices. Do not build new
+integrations; upgrade the Elastic Stack and rely on product-managed data lifecycle instead.
+**WARNING:** Migrations can be resource intensive and should be planned during a maintenance window.
+
+Initiate a migration of detection alerts. Migrations are initiated per index. The process is not destructive
+and should not remove existing data, but it can consume significant cluster resources. Plan capacity accordingly.
 
       */
   createAlertsMigration(props: CreateAlertsMigrationProps, kibanaSpace: string = 'default') {
@@ -193,6 +192,12 @@ For detailed information on Kibana actions and alerting, and additional API call
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
+  /**
+      * Permanently deletes the Elastic Security alerts backing index in the current space, including the alerts
+stored in it. Use with caution; prefer lifecycle policies or the UI when available.
+Call `GET /api/detection_engine/index` first to confirm the index that will be removed.
+
+      */
   deleteAlertsIndex(kibanaSpace: string = 'default') {
     return supertest
       .delete(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
@@ -226,7 +231,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
@@ -241,9 +246,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .query(props.query);
   },
   /**
-      * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
-The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
-finalize it.
+      * **DEPRECATED.** Completes a legacy alert index migration. Do not automate against this in new code.
+**WARNING:** Finalizing swaps read aliases; confirm the migration has finished successfully before calling.
+
+Finalize successful migrations of detection alerts. This replaces the original index's alias with the
+successfully migrated index's alias. The endpoint is idempotent, so you can poll until a migration
+finishes and then call this operation once.
 
       */
   finalizeAlertsMigration(props: FinalizeAlertsMigrationProps, kibanaSpace: string = 'default') {
@@ -265,35 +273,6 @@ finalize it.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .query(props.query);
   },
-  getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .put(
-        getRouteUrlForSpace(
-          replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', props.params),
-          kibanaSpace
-        )
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
-  getRuleExecutionResults(props: GetRuleExecutionResultsProps, kibanaSpace: string = 'default') {
-    return supertest
-      .put(
-        getRouteUrlForSpace(
-          replaceParams(
-            '/internal/detection_engine/rules/{ruleId}/execution/results',
-            props.params
-          ),
-          kibanaSpace
-        )
-      )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
   /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
@@ -308,7 +287,7 @@ finalize it.
 > info
 > Rule actions and connectors are included in the exported file, but sensitive information about the connector (such as authentication credentials) is not included. You must re-add missing connector details after importing detection rules.
 
-> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](https://www.elastic.co/docs/api/doc/kibana/operation/operation-exportsavedobjectsdefault) and [import](https://www.elastic.co/docs/api/doc/kibana/operation/operation-importsavedobjectsdefault) any necessary connectors before importing detection rules.
+> You can use Kibana’s [Saved Objects](https://www.elastic.co/docs/explore-analyze/find-and-organize/saved-objects) UI (Stack Management → Kibana → Saved Objects) or the Saved Objects APIs (experimental) to [export](../operation/operation-post-saved-objects-export) and [import](../operation/operation-post-saved-objects-import) any necessary connectors before importing detection rules.
 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/docs/solutions/security/detect-and-alert/create-manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
@@ -380,6 +359,12 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .send(props.body as object)
       .query(props.query);
   },
+  /**
+      * Returns the backing Elasticsearch index for Elastic Security detection alerts in the current space, and
+whether its mapping is outdated. Use this to verify that an alert index is provisioned before creating
+or running rules that write alerts to it.
+
+      */
   readAlertsIndex(kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
@@ -388,8 +373,14 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-   */
+      * **DEPRECATED.** This endpoint was used for historical `.siem-signals-*` index migration workflows. Do not use
+for new automations; there is no supported replacement in this public API.
+**WARNING:** Prefer upgrading through supported Elastic stack upgrades rather than ad-hoc index migrations.
+
+Retrieves indices that contain detection alerts of a particular age, along with migration information for
+each of those indices.
+
+      */
   readAlertsMigrationStatus(
     props: ReadAlertsMigrationStatusProps,
     kibanaSpace: string = 'default'
@@ -473,6 +464,83 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
+  /**
+      * Restore a detection rule to a specific historical snapshot.
+
+      */
+  restoreRuleFromHistory(props: RestoreRuleFromHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/detection_engine/rules/{ruleId}/history/{changeId}/_restore',
+            props.params
+          ),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Lists prebuilt detection rules that can be installed
+   */
+  reviewRuleInstallation(props: ReviewRuleInstallationProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          '/internal/detection_engine/prebuilt_rules/installation/_review',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Lists currently installed prebuilt detection rules that have newer versions available.
+   */
+  reviewRuleUpgrade(props: ReviewRuleUpgradeProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          '/internal/detection_engine/prebuilt_rules/upgrade/_review',
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+      * Retrieve a paginated list of historical revisions for a single detection rule.
+Each item contains the rule snapshot at that point in time and the snapshot of
+the immediately preceding revision in `old_values`.
+
+      */
+  ruleChangesHistory(props: RuleChangesHistoryProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/internal/detection_engine/rules/{ruleId}/history/_list', props.params),
+          kibanaSpace
+        )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+      * Simulates a detection rule using the same rule type and query logic as a persisted rule, over a short
+time window, without persisting a rule or writing alerts. Use the response to validate queries, see sample
+matching documents, and inspect execution logs. Pair `invocationCount` and `timeframeEnd` to cap run time.
+
+      */
   rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
@@ -490,6 +558,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .post(getRouteUrlForSpace('/api/detection_engine/signals/search', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+   */
+  searchAttacks(props: SearchAttacksProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  searchRules(props: SearchRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/rules/_search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
@@ -530,7 +620,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .send(props.body as object);
   },
   /**
-      * And tags to detection alerts, and remove them from alerts.
+      * Add tags to detection alerts, and remove them from alerts, by alert IDs or a query, in a single request.
 > info
 > You cannot add and remove the same alert tag in the same request.
 
@@ -538,6 +628,43 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   setAlertTags(props: SetAlertTagsProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/detection_engine/signals/tags', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+      * Assign users to attack discovery alerts, and unassign them from alerts.
+Optionally cascade the change to related detection alerts via `kibana.alert.attack_discovery.alert_ids`.
+> info
+> You cannot add and remove the same assignee in the same request.
+
+      */
+  setAttacksAssignees(props: SetAttacksAssigneesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/assignees', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
+   */
+  setAttacksStatus(props: SetAttacksStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
+   */
+  setAttacksTags(props: SetAttacksTagsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/attacks/tags', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -662,14 +789,6 @@ export interface FinalizeAlertsMigrationProps {
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
 }
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
-}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
 }
@@ -690,12 +809,32 @@ export interface ReadRuleExecutionResultsProps {
   params: ReadRuleExecutionResultsRequestParamsInput;
   body: ReadRuleExecutionResultsRequestBodyInput;
 }
+export interface RestoreRuleFromHistoryProps {
+  params: RestoreRuleFromHistoryRequestParamsInput;
+  body: RestoreRuleFromHistoryRequestBodyInput;
+}
+export interface ReviewRuleInstallationProps {
+  body: ReviewRuleInstallationRequestBodyInput;
+}
+export interface ReviewRuleUpgradeProps {
+  body: ReviewRuleUpgradeRequestBodyInput;
+}
+export interface RuleChangesHistoryProps {
+  query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
+}
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchAttacksProps {
+  body: SearchAttacksRequestBodyInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
 }
 export interface SearchUnifiedAlertsProps {
   body: SearchUnifiedAlertsRequestBodyInput;
@@ -708,6 +847,15 @@ export interface SetAlertsStatusProps {
 }
 export interface SetAlertTagsProps {
   body: SetAlertTagsRequestBodyInput;
+}
+export interface SetAttacksAssigneesProps {
+  body: SetAttacksAssigneesRequestBodyInput;
+}
+export interface SetAttacksStatusProps {
+  body: SetAttacksStatusRequestBodyInput;
+}
+export interface SetAttacksTagsProps {
+  body: SetAttacksTagsRequestBodyInput;
 }
 export interface SetUnifiedAlertsAssigneesProps {
   body: SetUnifiedAlertsAssigneesRequestBodyInput;

@@ -6,14 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser } from '@elastic/esql';
+import { isAssignment, Parser } from '@elastic/esql';
 import type { SupportedDataType } from '../types';
 import { FunctionDefinitionTypes } from '../types';
 import type { ESQLColumnData } from '../../registry/types';
-import { Location } from '../../registry/types';
-import { buildPartialMatcher, getExpressionType } from './expressions';
+import { Location, UnmappedFieldsStrategy } from '../../registry/types';
+import { buildPartialMatcher, getAssignmentExpressionRoot, getExpressionType } from './expressions';
 import { setTestFunctions } from './test_functions';
 import { TIME_SYSTEM_PARAMS } from './literals';
+import { getAutocompleteCursorContext } from '../../../language/shared/parse_for_autocomplete_query';
 
 describe('buildPartialMatcher', () => {
   it('should build a partial matcher', () => {
@@ -264,6 +265,12 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('accepts_dates("", "")'))).toBe('keyword');
     });
 
+    it('infers the COALESCE return type from a nullable CASE result', () => {
+      expect(getExpressionType(getASTForExpression('COALESCE(CASE(true, 1, NULL), 2)'))).toBe(
+        'integer'
+      );
+    });
+
     it('deals with functions that do not exist', () => {
       expect(getExpressionType(getASTForExpression('does_not_exist()'))).toBe('unknown');
     });
@@ -280,6 +287,35 @@ describe('getExpressionType', () => {
       expect(getExpressionType(getASTForExpression('CASE(true, 1, 2)'))).toBe('integer');
 
       expect(getExpressionType(getASTForExpression('CASE(true, 1., true, 1., 2.)'))).toBe('double');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1)'))).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, NULL)'))).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, NULL, NULL)'))).toBe('null');
+
+      expect(getExpressionType(getASTForExpression('CASE(false, NULL, false, NULL, 2)'))).toBe(
+        'integer'
+      );
+
+      expect(getExpressionType(getASTForExpression('CASE(true, CASE(false, 1, NULL), NULL)'))).toBe(
+        'integer'
+      );
+
+      // Without a columns map, unresolved columns fall back to the generic unknown type.
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, unmappedField)'))).toBe(
+        'unknown'
+      );
+
+      expect(
+        getExpressionType(
+          getASTForExpression('CASE(true, 1, unmappedField)'),
+          new Map<string, ESQLColumnData>(),
+          UnmappedFieldsStrategy.NULLIFY
+        )
+      ).toBe('integer');
+
+      expect(getExpressionType(getASTForExpression('CASE(true, 1, ?value)'))).toBe('param');
 
       expect(
         getExpressionType(
@@ -308,6 +344,20 @@ describe('getExpressionType', () => {
 
     it('supports COUNT(*)', () => {
       expect(getExpressionType(getASTForExpression('COUNT(*)'))).toBe<SupportedDataType>('long');
+    });
+
+    it.each(['IN', 'NOT IN'])('returns boolean for %s subquery expressions', (operator) => {
+      const { root, errors } = Parser.parse(`FROM index | WHERE field ${operator} (FROM other)`);
+
+      if (errors.length > 0) {
+        throw new Error(
+          `Failed to parse expression "field ${operator} (FROM other)": ${errors
+            .map((e) => e.message)
+            .join(', ')}`
+        );
+      }
+
+      expect(getExpressionType(root.commands[1].args[0])).toBe('boolean');
     });
 
     it('accounts for the "any" parameter type', () => {
@@ -456,5 +506,43 @@ describe('getExpressionType', () => {
         expect(getExpressionType(ast)).toBe(expectedType);
       }
     );
+  });
+});
+
+describe('getAssignmentExpressionRoot', () => {
+  it('returns undefined for an incomplete assignment after autocomplete parsing cleanup', () => {
+    const query = 'FROM employees | EVAL total = ';
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    if (astContext.type !== 'expression') {
+      throw new Error(`Expected expression context for query: ${query}`);
+    }
+
+    const assignment = astContext.command.args[astContext.command.args.length - 1];
+
+    if (!assignment || !isAssignment(assignment)) {
+      throw new Error(`Expected assignment expression for query: ${query}`);
+    }
+
+    expect(getAssignmentExpressionRoot(assignment)).toBeUndefined();
+  });
+
+  it('returns the RHS root for a complete assignment after autocomplete parsing cleanup', () => {
+    const query = 'FROM employees | EVAL total = salary';
+    const { astContext } = getAutocompleteCursorContext(query, query.length);
+
+    if (astContext.type !== 'expression') {
+      throw new Error(`Expected expression context for query: ${query}`);
+    }
+
+    const assignment = astContext.command.args[astContext.command.args.length - 1];
+
+    if (!assignment || !isAssignment(assignment)) {
+      throw new Error(`Expected assignment expression for query: ${query}`);
+    }
+
+    const root = getAssignmentExpressionRoot(assignment);
+
+    expect(root).toMatchObject({ type: 'column', name: 'salary' });
   });
 });

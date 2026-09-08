@@ -8,8 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EuiButton, EuiText } from '@elastic/eui';
+import { OBSERVABILITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
 import type { Rule } from '@kbn/alerts-ui-shared';
@@ -50,13 +50,15 @@ export function AddToCaseButton({
     alert && rule
       ? [
           {
-            alertId: alert?.fields[ALERT_UUID] || '',
-            index: alertIndex || '',
-            rule: {
-              id: rule.id,
-              name: rule.name,
+            type: OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+            attachmentId: alert?.fields[ALERT_UUID] || '',
+            metadata: {
+              index: alertIndex || '',
+              rule: {
+                id: rule.id,
+                name: rule.name,
+              },
             },
-            type: AttachmentType.alert,
           },
         ]
       : [];
@@ -67,9 +69,10 @@ export function AddToCaseButton({
   };
 
   return (
-    <EuiButton
-      fill
-      iconType="plus"
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="casesApp"
       onClick={handleAddToCase}
       data-test-subj={`add-to-cases-button-${rule?.ruleTypeId}`}
     >
@@ -78,6 +81,6 @@ export function AddToCaseButton({
           defaultMessage: 'Add to case',
         })}
       </EuiText>
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 }

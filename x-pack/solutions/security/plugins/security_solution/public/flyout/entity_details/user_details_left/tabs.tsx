@@ -7,12 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
+  getAnomaliesTab,
   getInsightsInputTab,
   getResolutionGroupTab,
   getRiskInputTab,
 } from '../../../entity_analytics/components/entity_details_flyout';
+import { useAnomalyPrivileges } from '../../../entity_analytics/api/hooks/use_anomaly_privileges';
 import { UserAssetTableType } from '../../../explore/users/store/model';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type {
@@ -23,9 +25,11 @@ import { ENTRA_TAB_TEST_ID, OKTA_TAB_TEST_ID } from './test_ids';
 import { AssetDocumentTab } from './tabs/asset_document';
 import { DocumentDetailsProvider } from '../../document_details/shared/context';
 import { EntityType } from '../../../../common/entity_analytics/types';
+import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import type { LeftPanelTabsType } from '../shared/components/left_panel/left_panel_header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../document_details/shared/utils';
+import { getGraphViewTab } from '../shared/components/left';
 
 export const useTabs = (
   managedUser: ManagedUserHits,
@@ -37,18 +41,35 @@ export const useTabs = (
   identityFields?: IdentityFields,
   entityId?: string,
   entityStoreEntityId?: string
-): LeftPanelTabsType =>
-  useMemo(() => {
+): LeftPanelTabsType => {
+  const hasEntityResolutionLicense = useHasEntityResolutionLicense();
+  const isAnomalyDetailsEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsAnomalyDetails');
+  const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
+  const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
+  const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
+
+  return useMemo(() => {
     const tabs: LeftPanelTabsType = [];
+
     const entraManagedUser = managedUser[ManagedUserDatasetKey.ENTRA];
     const oktaManagedUser = managedUser[ManagedUserDatasetKey.OKTA];
 
-    if (isRiskScoreExist) {
+    if (isRiskScoreExist || entityStoreEntityId) {
       tabs.push(
         getRiskInputTab({
           entityName: name,
           entityType: EntityType.user,
           scopeId,
+          entityId: entityStoreEntityId,
+        })
+      );
+    }
+
+    if (loadAnomalies) {
+      tabs.push(
+        getAnomaliesTab({
+          entityId: entityStoreEntityId,
+          entityType: EntityType.user,
         })
       );
     }
@@ -74,21 +95,33 @@ export const useTabs = (
     }
 
     if (entityStoreEntityId) {
-      tabs.push(getResolutionGroupTab({ entityId: entityStoreEntityId, entityType: 'user' }));
+      tabs.push(getGraphViewTab({ entityId: entityStoreEntityId, scopeId }));
+      if (hasEntityResolutionLicense) {
+        tabs.push(
+          getResolutionGroupTab({
+            entityId: entityStoreEntityId,
+            entityType: EntityType.user,
+            scopeId,
+          })
+        );
+      }
     }
 
     return tabs;
   }, [
-    entityId,
+    managedUser,
+    isRiskScoreExist,
+    entityStoreEntityId,
+    loadAnomalies,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    identityFields,
-    isRiskScoreExist,
-    managedUser,
     name,
     scopeId,
-    entityStoreEntityId,
+    entityId,
+    identityFields,
+    hasEntityResolutionLicense,
   ]);
+};
 
 const getOktaTab = (oktaManagedUser: ManagedUserHit) => ({
   id: EntityDetailsLeftPanelTab.OKTA,

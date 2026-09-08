@@ -15,7 +15,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -105,10 +104,11 @@ interface InferenceFlyoutWrapperProps {
   enforceAdaptiveAllocations?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
   inferenceEndpoint?: InferenceEndpoint;
-  enableEisPromoTour?: boolean;
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
   /** When set, only these task types will be available for selection in the form. */
   allowedTaskTypes?: InferenceTaskType[];
+  /** When set, providers matching these service keys will be hidden from the selectable list. */
+  excludeProviders?: string[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -119,9 +119,9 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   enforceAdaptiveAllocations = false,
   onSubmitSuccess,
   inferenceEndpoint,
-  enableEisPromoTour,
   focusTrapProps,
   allowedTaskTypes,
+  excludeProviders,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -175,7 +175,9 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     >
       <EuiFlyoutHeader hasBorder data-test-subj="inference-flyout-header">
         <EuiTitle size="m">
-          <h2 id={inferenceCreationFlyoutId}>{LABELS.ENDPOINT_TITLE}</h2>
+          <h2 id={inferenceCreationFlyoutId}>
+            {isEdit ? LABELS.EDIT_ENDPOINT_TITLE : LABELS.ADD_ENDPOINT_TITLE}
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
@@ -188,28 +190,10 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               enforceAdaptiveAllocations,
               isPreconfigured,
               reenterSecretsOnEdit: false,
-              enableEisPromoTour,
               allowedTaskTypes,
+              excludeProviders,
             }}
           />
-          <EuiSpacer size="m" />
-          {isPreconfigured ? null : (
-            <EuiFlexGroup justifyContent="flexStart">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  color="success"
-                  size="m"
-                  isLoading={form.isSubmitting || isLoading}
-                  disabled={(!form.isValid && form.isSubmitted) || isLoading}
-                  data-test-subj="inference-endpoint-submit-button"
-                  onClick={handleSubmit}
-                >
-                  {LABELS.SAVE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
         </Form>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -223,6 +207,21 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               {LABELS.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
+          {!isPreconfigured && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                color="primary"
+                size="m"
+                isLoading={form.isSubmitting || isLoading}
+                disabled={form.isValid === false || isLoading}
+                data-test-subj="inference-endpoint-submit-button"
+                onClick={handleSubmit}
+              >
+                {LABELS.SAVE}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
