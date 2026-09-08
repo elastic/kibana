@@ -89,23 +89,6 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeDisabled();
   });
 
-  it('exposes raw server error in a collapsed accordion', async () => {
-    mockSanitizeDashboard.mockRejectedValue(new Error('schema validation failed: missing title'));
-    renderFlyout();
-    await pickFile(VALID_FILE);
-    await waitFor(() =>
-      expect(screen.getByTestId('importDashboardJsonServerErrorDetails')).toBeInTheDocument()
-    );
-    // Details start collapsed — raw error not yet visible
-    expect(screen.queryByText(/schema validation failed/)).not.toBeInTheDocument();
-    // Expand the accordion
-    await act(async () => {
-      await userEvent.click(screen.getByText('Show details'));
-    });
-    await waitFor(() => expect(screen.getByText(/schema validation failed/)).toBeInTheDocument());
-  });
-
-
   it('calls sanitize and enables Import after a valid file is chosen', async () => {
     renderFlyout();
     await pickFile(VALID_FILE);

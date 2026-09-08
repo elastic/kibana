@@ -9,7 +9,6 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFilePicker,
@@ -21,10 +20,8 @@ import {
   EuiForm,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiLink,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -40,20 +37,12 @@ interface ImportDashboardJsonFlyoutProps {
   onImportSuccess: (id: string, title: string) => void;
 }
 
-interface ServerError {
-  friendly: string;
-  details: string;
-}
-
 export const ImportDashboardJsonFlyout = ({
   closeFlyout,
   onImportSuccess,
 }: ImportDashboardJsonFlyoutProps) => {
-  const serverErrorDetailsId = useGeneratedHtmlId({ prefix: 'importDashboardJsonServerError' });
-
   const [jsonParseError, setJsonParseError] = useState<string | null>(null);
-  const [serverError, setServerError] = useState<ServerError | null>(null);
-  const [isServerErrorExpanded, setIsServerErrorExpanded] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
   const [sanitizedState, setSanitizedState] = useState<DashboardState | null>(null);
   const [isValidating, setIsValidating] = useState(false);
@@ -62,7 +51,6 @@ export const ImportDashboardJsonFlyout = ({
   const resetState = useCallback(() => {
     setJsonParseError(null);
     setServerError(null);
-    setIsServerErrorExpanded(false);
     setWarnings([]);
     setSanitizedState(null);
   }, []);
@@ -91,11 +79,8 @@ export const ImportDashboardJsonFlyout = ({
           );
           setWarnings(sanitizeWarnings);
           setSanitizedState(data);
-        } catch (e) {
-          setServerError({
-            friendly: importDashboardJsonStrings.getServerValidationError(),
-            details: e instanceof Error ? e.message : String(e),
-          });
+        } catch {
+          setServerError(importDashboardJsonStrings.getServerValidationError());
         }
       } finally {
         setIsValidating(false);
@@ -182,24 +167,9 @@ export const ImportDashboardJsonFlyout = ({
             <EuiSpacer size="m" />
             <KbnDangerCallout
               announceOnMount
-              title={serverError.friendly}
+              title={serverError}
               data-test-subj="importDashboardJsonServerError"
-            >
-              <EuiAccordion
-                id={serverErrorDetailsId}
-                initialIsOpen={false}
-                paddingSize="s"
-                onToggle={setIsServerErrorExpanded}
-                buttonContent={
-                  isServerErrorExpanded
-                    ? importDashboardJsonStrings.getServerErrorHideDetails()
-                    : importDashboardJsonStrings.getServerErrorShowDetails()
-                }
-                data-test-subj="importDashboardJsonServerErrorDetails"
-              >
-                {isServerErrorExpanded && <EuiText size="s">{serverError.details}</EuiText>}
-              </EuiAccordion>
-            </KbnDangerCallout>
+            />
           </>
         )}
 

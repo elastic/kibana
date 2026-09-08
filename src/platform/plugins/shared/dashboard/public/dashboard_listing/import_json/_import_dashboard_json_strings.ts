@@ -20,8 +20,7 @@ export const importDashboardJsonStrings = {
     }),
   getInfoCalloutTitle: () =>
     i18n.translate('dashboard.importJson.flyout.infoCalloutTitle', {
-      defaultMessage:
-        'Only JSON files that are exported from Dashboard application are supported.',
+      defaultMessage: 'Only JSON files that are exported from Dashboard application are supported.',
     }),
   getImportButtonLabel: () =>
     i18n.translate('dashboard.importJson.flyout.importButton', {
@@ -39,14 +38,6 @@ export const importDashboardJsonStrings = {
     i18n.translate('dashboard.importJson.flyout.serverValidationError', {
       defaultMessage:
         'The file could not be imported. Make sure it was exported from the Dashboard export feature.',
-    }),
-  getServerErrorShowDetails: () =>
-    i18n.translate('dashboard.importJson.flyout.serverErrorShowDetails', {
-      defaultMessage: 'Show details',
-    }),
-  getServerErrorHideDetails: () =>
-    i18n.translate('dashboard.importJson.flyout.serverErrorHideDetails', {
-      defaultMessage: 'Hide details',
     }),
   getWarningsTitle: () =>
     i18n.translate('dashboard.importJson.flyout.warningsTitle', {
