@@ -588,5 +588,136 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
     });
+
+    describe('policy compilation', () => {
+      beforeEach(async () => {
+        await supertest
+          .post(`/api/fleet/epm/packages/${DYNAMIC_PKG}/${DYNAMIC_PKG_VERSION}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      });
+
+      it('compiles an OTel-only policy with an OTLP data output into a valid otelcol block', async () => {
+        // Create the OTLP output (gRPC)
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'otlp.example.com:4317', protocol: 'grpc' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        // Create an OTel-only agent policy using the OTLP output, no agent monitoring
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        // Add an OTel-only package policy
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        // Compile the full policy — must succeed (was throwing before this fix)
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+        const exporterKey = `otlp/${otlpOutputId}`;
+
+        // Exporter: endpoint only — protocol is stripped; no SO metadata leaks in
+        expect(fullPolicy.exporters[exporterKey]).to.eql({
+          endpoint: 'otlp.example.com:4317',
+        });
+
+        // No beatsauth or other extensions for an OTLP-only policy; extensions is omitted when empty
+        expect(fullPolicy.extensions).to.be(undefined);
+
+        // forward/ connector is always empty — it's a built-in OTel bridge with no config of its own
+        expect(fullPolicy.connectors[`forward/${otlpOutputId}`]).to.eql({});
+
+        // outputs entry: type only — no name, is_default, created_at, or other SO fields
+        expect(fullPolicy.outputs[otlpOutputId]).to.eql({ type: 'otlp' });
+      });
+
+      it('compiles an OTel-only policy with an HTTP/protobuf OTLP output using otlphttp exporter key', async () => {
+        const { body: outputBody } = await supertest
+          .post('/api/fleet/outputs')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://otlp.example.com', protocol: 'http/protobuf' },
+          })
+          .expect(200);
+        const otlpOutputId: string = outputBody.item.id;
+
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otlp-http-compile-${uuidv4()}`,
+            namespace: 'default',
+            data_output_id: otlpOutputId,
+            monitoring_enabled: [],
+          })
+          .expect(200);
+        const policyId: string = policyBody.item.id;
+
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `otel-pkg-${uuidv4()}`,
+            namespace: 'default',
+            policy_id: policyId,
+            package: { name: DYNAMIC_PKG, version: DYNAMIC_PKG_VERSION },
+            inputs: {
+              'otlpreceiver-otelcol': {
+                enabled: true,
+                streams: { 'test_otel_dynamic.otlpreceiver': { enabled: true, vars: {} } },
+              },
+            },
+          })
+          .expect(200);
+
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${policyId}/full`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const fullPolicy = body.item;
+
+        // HTTP/protobuf uses otlphttp/<id> exporter key
+        expect(fullPolicy.exporters).to.have.property(`otlphttp/${otlpOutputId}`);
+        expect(fullPolicy.exporters).not.to.have.property(`otlp/${otlpOutputId}`);
+      });
+    });
   });
 }
