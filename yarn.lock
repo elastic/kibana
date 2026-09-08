@@ -6838,10 +6838,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/evals-suite-obs-ai-assistant@link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant":
-  version "0.0.0"
-  uid ""
-
 "@kbn/evals-suite-observability-ai@link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai":
   version "0.0.0"
   uid ""
