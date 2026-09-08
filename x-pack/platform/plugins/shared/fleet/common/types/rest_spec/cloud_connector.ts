@@ -19,6 +19,8 @@ export interface CreateCloudConnectorRequest {
   vars: CloudConnectorVars;
   cloudProvider: CloudProvider;
   accountType?: AccountType;
+  iac_key?: string;
+  iac_deployment_id?: string;
 }
 
 export interface UpdateCloudConnectorRequest {
@@ -26,6 +28,8 @@ export interface UpdateCloudConnectorRequest {
   vars?: CloudConnectorVars;
   cloudProvider?: CloudProvider;
   accountType?: AccountType;
+  iac_key?: string;
+  iac_deployment_id?: string;
 }
 
 // Response interfaces following Fleet conventions

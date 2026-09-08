@@ -37,3 +37,10 @@ export const CloudConnectorSchemaV4 = CloudConnectorSchemaV3.extends({
   verification_started_at: schema.maybe(schema.string()),
   verification_failed_at: schema.maybe(schema.string()),
 });
+
+export const CloudConnectorSchemaV5 = CloudConnectorSchemaV4.extends({
+  iac_key: schema.maybe(schema.string()),
+  iac_deployment_id: schema.maybe(schema.string()),
+  iac_upgrade_status: schema.maybe(schema.string()),
+  iac_upgrade_checked_at: schema.maybe(schema.string()),
+});

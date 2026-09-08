@@ -9,6 +9,24 @@ import { schema } from '@kbn/config-schema';
 
 import { SINGLE_ACCOUNT, ORGANIZATION_ACCOUNT } from '../../../common/constants';
 
+// Upper bounds prevent unbounded-input DoS: the key is a prefixed sha256 digest, the deployment id an ARN.
+const IacRequestFieldsSchema = {
+  iac_key: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 512,
+      meta: { description: 'Opaque IaC template key returned by the IaC Provisioner.' },
+    })
+  ),
+  iac_deployment_id: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: 2048,
+      meta: { description: 'Provider deployment identity (AWS: CloudFormation stack ARN).' },
+    })
+  ),
+};
+
 export const CreateCloudConnectorRequestSchema = {
   body: schema.object({
     name: schema.string({
@@ -49,6 +67,7 @@ export const CreateCloudConnectorRequestSchema = {
         }),
       ])
     ),
+    ...IacRequestFieldsSchema,
   }),
 };
 
@@ -60,6 +79,13 @@ const VerificationFieldsSchema = {
   verification_status: schema.maybe(schema.string()),
   verification_started_at: schema.maybe(schema.string()),
   verification_failed_at: schema.maybe(schema.string()),
+};
+
+const IacResponseFieldsSchema = {
+  iac_key: schema.maybe(schema.string()),
+  iac_deployment_id: schema.maybe(schema.string()),
+  iac_upgrade_status: schema.maybe(schema.string()),
+  iac_upgrade_checked_at: schema.maybe(schema.string()),
 };
 
 export const CreateCloudConnectorResponseSchema = schema.object({
@@ -74,6 +100,7 @@ export const CreateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 
@@ -110,6 +137,7 @@ export const GetCloudConnectorsResponseSchema = schema.object({
       created_at: schema.string(),
       updated_at: schema.string(),
       ...VerificationFieldsSchema,
+      ...IacResponseFieldsSchema,
     }),
     { maxSize: 10000 }
   ),
@@ -135,6 +163,7 @@ export const GetCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 
@@ -200,6 +229,7 @@ export const UpdateCloudConnectorRequestSchema = {
         ])
       )
     ),
+    ...IacRequestFieldsSchema,
   }),
 };
 
@@ -215,6 +245,7 @@ export const UpdateCloudConnectorResponseSchema = schema.object({
     created_at: schema.string(),
     updated_at: schema.string(),
     ...VerificationFieldsSchema,
+    ...IacResponseFieldsSchema,
   }),
 });
 

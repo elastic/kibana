@@ -256,6 +256,10 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         verification_status: 'pending',
+        ...(cloudConnector.iac_key && { iac_key: cloudConnector.iac_key }),
+        ...(cloudConnector.iac_deployment_id && {
+          iac_deployment_id: cloudConnector.iac_deployment_id,
+        }),
       };
 
       const savedObject = await soClient.create<CloudConnectorSOAttributes>(
@@ -420,6 +424,14 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
 
       if (cloudConnectorUpdate.vars) {
         updateAttributes.vars = cloudConnectorUpdate.vars;
+      }
+
+      // Written only when the caller supplies a value (the schema rejects empty strings).
+      if (cloudConnectorUpdate.iac_key !== undefined) {
+        updateAttributes.iac_key = cloudConnectorUpdate.iac_key;
+      }
+      if (cloudConnectorUpdate.iac_deployment_id !== undefined) {
+        updateAttributes.iac_deployment_id = cloudConnectorUpdate.iac_deployment_id;
       }
 
       // Update the saved object
